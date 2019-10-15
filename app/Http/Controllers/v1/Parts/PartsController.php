@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulController;
+use Laravel\Lumen\Routing\Controller;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NotImplementedException;
-use Laravel\Lumen\Routing\Controller;
 
 class PartsController extends Controller implements RestfulController
 {
@@ -27,8 +27,22 @@ class PartsController extends Controller implements RestfulController
         throw new NotImplementedException();
     }
 
+    /**
+     * @OA\Get(
+     *     path="/parts",
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns json with success: true",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
     public function index(Request $request) {
-        throw new NotImplementedException();
+        return response()->json([ 'success' => true ]);
     }
 
     public function show($id) {
