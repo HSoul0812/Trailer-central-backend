@@ -1,0 +1,31 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Parts API",
+        "contact": {
+            "name": "Trailercentral",
+            "email": "olehsychupwork@gmail.com"
+        },
+        "version": "1.0"
+    },
+    "paths": {
+        "/parts": {
+            "get": {
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::index",
+                "responses": {
+                    "200": {
+                        "description": "Returns json with success: true",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        }
+    }
+}
