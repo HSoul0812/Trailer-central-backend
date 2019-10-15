@@ -11,6 +11,13 @@
 |
 */
 
-$router->get('/', function () use ($router) {
+$router->get('/', function () use ($router) {    
     return $router->app->version();
 });
+
+Route::get('parts', 'v1\Parts\PartsController@index');
+Route::put('parts', 'v1\Parts\PartsController@create');
+Route::get('parts/{id}', 'v1\Parts\PartsController@show');
+Route::post('parts/{id}', 'v1\Parts\PartsController@update');
+Route::delete('parts/{id}', 'v1\Parts\PartsController@destroy');
+
