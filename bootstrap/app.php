@@ -2,6 +2,8 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
+use Dingo\Api\Http\Request;
+
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
 ))->bootstrap();
@@ -46,6 +48,12 @@ $app->singleton(
     App\Console\Kernel::class
 );
 
+$app->singleton(Request::class, function () {
+     return Request::capture();
+});
+
+$app->alias(Request::class, 'request');
+
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -79,6 +87,11 @@ $app->singleton(
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
+
+$app->register(
+    Dingo\Api\Provider\LumenServiceProvider::class,
+    $app->bind('App\Repositories\Repository', 'App\Repositories\Parts\PartRepository')
+);
 
 /*
 |--------------------------------------------------------------------------
