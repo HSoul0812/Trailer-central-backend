@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulController;
-use App\Http\Controllers\Controller;
+use Laravel\Lumen\Routing\Controller;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NotImplementedException;
 

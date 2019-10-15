@@ -1,10 +1,10 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Parts API",
+        "title": "TC API",
         "contact": {
             "name": "Trailercentral",
-            "email": "olehsychupwork@gmail.com"
+            "email": "alberto@trailercentral.com"
         },
         "version": "1.0"
     },

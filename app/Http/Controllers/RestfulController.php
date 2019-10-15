@@ -8,7 +8,18 @@ use Illuminate\Support\Facades\Request;
  * 
  * @author Eczek
  */
-interface RestfulController {
+abstract class RestfulController {
+
+    /**
+     * @OA\Info(
+     *   title="TC API",
+     *   version="1.0",
+     *   @OA\Contact(
+     *     email="alberto@trailercentral.com",
+     *     name="Trailercentral"
+     *   )
+     * )
+     */
    
     /**
      * Displays a list of all records in the DB. 
