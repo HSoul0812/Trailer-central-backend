@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Parts;
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Exceptions\NotImplementedException;
-use App\Repositories\Repository;
+use App\Repositories\Parts\PartRepositoryInterface;
 use App\Http\Requests\Parts\CreatePartRequest;
 use App\Http\Requests\Parts\DeletePartRequest;
 use App\Transformers\Parts\PartsTransformer;
@@ -23,7 +23,7 @@ class PartsController extends RestfulController
      *
      * @return void
      */
-    public function __construct(Repository $parts)
+    public function __construct(PartRepositoryInterface $parts)
     {
         $this->parts = $parts;
     }

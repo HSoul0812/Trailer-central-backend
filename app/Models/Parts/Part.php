@@ -45,7 +45,7 @@ class Part extends Model
     protected $hidden = [
 
     ];
-    
+        
     public function brand()
     {
         return $this->belongsTo('App\Models\Parts\Brand');

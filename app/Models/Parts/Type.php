@@ -25,4 +25,9 @@ class Type extends Model
     protected $hidden = [
 
     ];
+    
+    public function parts()
+    {
+        return $this->hasMany('App\Models\Parts\Part');
+    }
 }

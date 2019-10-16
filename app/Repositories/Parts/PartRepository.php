@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
  *  
  * @author Eczek
  */
-class PartRepository implements Repository {
+class PartRepository implements PartRepositoryInterface {
     
     public function create($params) {
         $part = Part::create($params);
@@ -34,12 +34,45 @@ class PartRepository implements Repository {
         return Part::findOrFail($params['id']);
     }
 
-    public function getAll($params) {
-        if (!isset($params['page_size'])) {
-            $params['page_size'] = 15;
+    public function getAll($params) {   
+        
+        $query = Part::where('id', '>', 0);
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
         }
         
-        return Part::paginate($params['page_size']);
+        if (isset($params['type_id'])) {
+            $query = $query->whereIn('type_id', $params['type_id']);
+        }
+        
+        if (isset($params['category_id'])) {
+            $query = $query->whereIn('category_id', $params['category_id']);
+        }
+        
+        if (isset($params['manufacturer_id'])) {
+            $query = $query->whereIn('manufacturer_id', $params['manufacturer_id']);
+        }
+        
+        if (isset($params['brand_id'])) {
+            $query = $query->whereIn('brand_id', $params['brand_id']);
+        }
+        
+        if (isset($params['subcategory'])) {           
+            $query = $query->where('subcategory', 'LIKE', '%'.$params['subcategory'].'%');
+        }
+        
+        if (isset($params['sku'])) {           
+            $query = $query->where('sku', 'LIKE', '%'.$params['sku'].'%');
+        }
+        
+        if (isset($params['price_min']) && isset($params['price_max'])) {
+            $query = $query->whereBetween('price', [$params['price_min'], $params['price_max']]);
+        } else if (isset($params['price'])) {
+            $query = $query->where('price', $params['price']);
+        }         
+        
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
