@@ -4,6 +4,8 @@ namespace App\Repositories\Parts;
 
 use App\Repositories\Repository;
 use App\Models\Parts\Part;
+use App\Models\Parts\PartImage;
+use Illuminate\Support\Facades\Storage;
 
 /**
  *  
@@ -12,7 +14,15 @@ use App\Models\Parts\Part;
 class PartRepository implements Repository {
     
     public function create($params) {
-        return Part::create($params);
+        $part = Part::create($params);
+        
+        if (isset($params['images'])) {
+            foreach ($params['images'] as $imageUrl) {
+                $this->storeImage($part->id, $imageUrl);
+            }
+        }
+        
+        return $part;
     }
 
     public function delete($params) {
@@ -36,8 +46,27 @@ class PartRepository implements Repository {
         $part = Part::findOrFail($params['id']);
         $part->fill($params);
         if ($part->save()) {
+            if (isset($params['images'])) {
+                $part->images()->delete();
+                foreach($params['images'] as $imageUrl) {
+                    $this->storeImage($part->id, $imageUrl);
+                }
+            }
             return $part;
         }       
+    }
+    
+    private function storeImage($partId, $imageUrl) {
+        $explodedImage = explode('.', $imageUrl);
+        $imageExtension = $explodedImage[count($explodedImage) - 1];
+        $fileName = md5($partId)."/".uniqid().".{$imageExtension}";
+        Storage::disk('s3')->put($fileName, file_get_contents($imageUrl), 'public');
+        $s3ImageUrl = Storage::disk('s3')->url($fileName);
+
+        PartImage::create([
+            'part_id' => $partId,
+            'image_url' => $s3ImageUrl
+        ]);
     }
 
 }

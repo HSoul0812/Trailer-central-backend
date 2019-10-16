@@ -70,4 +70,9 @@ class Part extends Model
     {
         return $this->belongsTo('App\Models\Parts\Manufacturer');
     }
+    
+    public function images()
+    {
+        return $this->hasMany('App\Models\Parts\PartImage');
+    }
 }

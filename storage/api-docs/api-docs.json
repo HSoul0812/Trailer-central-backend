@@ -9,12 +9,12 @@
         "version": "1.0"
     },
     "paths": {
-        "/parts": {
+        "/api/parts": {
             "get": {
                 "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::index",
                 "responses": {
                     "200": {
-                        "description": "Returns json with success: true",
+                        "description": "Returns part data",
                         "content": {
                             "application/json": {
                                 "schema": {}

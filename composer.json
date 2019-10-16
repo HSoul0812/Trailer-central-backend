@@ -8,7 +8,8 @@
         "php": "^7.2",
         "darkaonline/swagger-lume": "6.*",
         "dingo/api": "^2.3",
-        "laravel/lumen-framework": "^6.0"
+        "laravel/lumen-framework": "^6.0",
+        "league/flysystem-aws-s3-v3": "~1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

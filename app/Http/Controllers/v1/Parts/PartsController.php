@@ -50,7 +50,7 @@ class PartsController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/parts",
+     *     path="/api/parts",
      *     @OA\Response(
      *         response="200",
      *         description="Returns part data",

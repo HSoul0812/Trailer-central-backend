@@ -15,8 +15,7 @@ class AddPartForeignKeys extends Migration
     {
         
         $pdo = DB::connection()->getPdo();
-        $pdo->query("ALTER TABLE parts_v1 MODIFY COLUMN dealer_id int(11) UNSIGNED;");
-        $pdo->query("ALTER TABLE parts_v1 MODIFY COLUMN manufacturer_id BIGINT(20) UNSIGNED;");
+        $pdo->query("ALTER TABLE parts_v1 MODIFY COLUMN dealer_id int(11) UNSIGNED NOT NULL;");
         $pdo->query("ALTER TABLE parts_v1 MODIFY COLUMN manufacturer_id BIGINT(20) UNSIGNED;");
         $pdo->query("ALTER TABLE parts_v1 MODIFY COLUMN brand_id BIGINT(20) UNSIGNED;");
         $pdo->query("ALTER TABLE parts_v1 MODIFY COLUMN type_id BIGINT(20) UNSIGNED;");
