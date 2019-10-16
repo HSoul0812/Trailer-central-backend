@@ -23,9 +23,35 @@ class TypeController extends RestfulController
         $this->types = $types;
     }
     
-    /**
-     * Displays a list of all records in the DB. 
-     * Paginated or not paginated
+     /**
+     * @OA\Get(
+     *     path="/api/types",
+     *     description="Retrieve a list of types",     
+     *     tags={"Types"},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="path",
+     *         description="Page Limit",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="dealer_id",
+     *         in="path",
+     *         description="Dealer ID",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),    
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of parts",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
      */
     public function index(Request $request) 
     {

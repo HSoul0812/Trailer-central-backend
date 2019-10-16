@@ -68,13 +68,22 @@ $api->version('v1', function ($api) {
     $api->get('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@show');
     $api->post('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@update');
     $api->delete('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@destroy');
-    
+
     /*
     |--------------------------------------------------------------------------
-    | End Parts
+    | Website
     |--------------------------------------------------------------------------
     |
     | 
     |
     */
+    
+    /**
+     * Website Part Filters
+     */
+    $api->get('website/parts/filters', 'App\Http\Controllers\v1\Website\Parts\FilterController@index');
+    $api->put('website/parts/filters', 'App\Http\Controllers\v1\Parts\FilterController@create');
+    $api->get('website/parts/filters/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\FilterController@show');
+    $api->post('website/parts/filters/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\FilterController@update');
+    $api->delete('website/parts/filters/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\FilterController@destroy');
 });

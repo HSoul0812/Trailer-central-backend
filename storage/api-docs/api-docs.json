@@ -9,19 +9,818 @@
         "version": "1.0"
     },
     "paths": {
-        "/api/parts": {
+        "/api/brands": {
             "get": {
-                "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::index",
+                "tags": [
+                    "Brands"
+                ],
+                "description": "Retrieve a list of brands",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\BrandController::index",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "path",
+                        "description": "Page Limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "dealer_id",
+                        "in": "path",
+                        "description": "Dealer ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Returns part data",
+                        "description": "Returns a list of parts",
                         "content": {
                             "application/json": {
                                 "schema": {}
                             }
                         }
                     },
-                    "400": {
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "description": "Retrieve a list of categories",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\CategoryController::index",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "path",
+                        "description": "Page Limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "dealer_id",
+                        "in": "path",
+                        "description": "Dealer ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of parts",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        },
+        "/api/manufacturers": {
+            "get": {
+                "tags": [
+                    "Manufacturers"
+                ],
+                "description": "Retrieve a list of manufacturers",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\ManufacturerController::index",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "path",
+                        "description": "Page Limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "dealer_id",
+                        "in": "path",
+                        "description": "Dealer ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of parts",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        },
+        "/api/parts/": {
+            "put": {
+                "tags": [
+                    "Parts"
+                ],
+                "description": "Create a part",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::create",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Part ID",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "name": "vendor_id",
+                        "in": "query",
+                        "description": "Vendor ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "vehicle_specific_id",
+                        "in": "query",
+                        "description": "Vehicle Specific ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "brand_id",
+                        "in": "query",
+                        "description": "Part brand",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "manufacturer_id",
+                        "in": "query",
+                        "description": "Part manufacturers",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type_id",
+                        "in": "query",
+                        "description": "Part type",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "path",
+                        "description": "Part category",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "qb_id",
+                        "in": "query",
+                        "description": "Part quickbooks id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "subcategory",
+                        "in": "query",
+                        "description": "Part subcategory",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "Part title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sku",
+                        "in": "query",
+                        "description": "Part sku",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "price",
+                        "in": "query",
+                        "description": "Part price",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "dealer_cost",
+                        "in": "query",
+                        "description": "Part dealer cost",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "msrp",
+                        "in": "query",
+                        "description": "Part msrp",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "weight",
+                        "in": "query",
+                        "description": "Part weight",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "weight_rating",
+                        "in": "query",
+                        "description": "Part weight rating",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "Part description",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "qty",
+                        "in": "query",
+                        "description": "Part qty",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "weight_rating",
+                        "in": "query",
+                        "description": "Part weight rating",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "show_on_website",
+                        "in": "query",
+                        "description": "Part show on website",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "is_vehicle_specific",
+                        "in": "query",
+                        "description": "Part vehicle specific",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "images",
+                        "in": "query",
+                        "description": "Part images",
+                        "required": false,
+                        "schema": {
+                            "property": null,
+                            "description": "Image URL array",
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of parts",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        },
+        "/api/parts/{id}": {
+            "get": {
+                "tags": [
+                    "Parts"
+                ],
+                "description": "Retrieve a part",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::show",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Part ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a part",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Parts"
+                ],
+                "description": "Update a part",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Part ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "vendor_id",
+                        "in": "query",
+                        "description": "Vendor ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "vehicle_specific_id",
+                        "in": "query",
+                        "description": "Vehicle Specific ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "brand_id",
+                        "in": "query",
+                        "description": "Part brand",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "manufacturer_id",
+                        "in": "query",
+                        "description": "Part manufacturers",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type_id",
+                        "in": "query",
+                        "description": "Part type",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "path",
+                        "description": "Part category",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "qb_id",
+                        "in": "query",
+                        "description": "Part quickbooks id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "subcategory",
+                        "in": "query",
+                        "description": "Part subcategory",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "Part title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sku",
+                        "in": "query",
+                        "description": "Part sku",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "price",
+                        "in": "query",
+                        "description": "Part price",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "dealer_cost",
+                        "in": "query",
+                        "description": "Part dealer cost",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "msrp",
+                        "in": "query",
+                        "description": "Part msrp",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "weight",
+                        "in": "query",
+                        "description": "Part weight",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "weight_rating",
+                        "in": "query",
+                        "description": "Part weight rating",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "Part description",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "qty",
+                        "in": "query",
+                        "description": "Part qty",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "weight_rating",
+                        "in": "query",
+                        "description": "Part weight rating",
+                        "required": false,
+                        "schema": {
+                            "type": "numeric"
+                        }
+                    },
+                    {
+                        "name": "show_on_website",
+                        "in": "query",
+                        "description": "Part show on website",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "is_vehicle_specific",
+                        "in": "query",
+                        "description": "Part vehicle specific",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "images",
+                        "in": "query",
+                        "description": "Part images",
+                        "required": false,
+                        "schema": {
+                            "property": null,
+                            "description": "Image URL array",
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of parts",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Parts"
+                ],
+                "description": "Delete a part",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::destroy",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Part ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Confirms part was deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        },
+        "/api/parts": {
+            "get": {
+                "tags": [
+                    "Parts"
+                ],
+                "description": "Retrieve a list of parts",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::index",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "path",
+                        "description": "Page Limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "path",
+                        "description": "Sort order can be: price,-price,relevance,title,-title,length,-length",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type_id",
+                        "in": "path",
+                        "description": "Part types",
+                        "required": false,
+                        "schema": {
+                            "property": null,
+                            "description": "Type ID arra",
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "path",
+                        "description": "Part categories",
+                        "required": false,
+                        "schema": {
+                            "property": null,
+                            "description": "Category ID array",
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        }
+                    },
+                    {
+                        "name": "manufacturer_id",
+                        "in": "path",
+                        "description": "Part manufacturers",
+                        "required": false,
+                        "schema": {
+                            "property": null,
+                            "description": "Manufacturer ID array",
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        }
+                    },
+                    {
+                        "name": "brand_id",
+                        "in": "path",
+                        "description": "Part brands",
+                        "required": false,
+                        "schema": {
+                            "property": null,
+                            "description": "Brand ID array",
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        }
+                    },
+                    {
+                        "name": "price",
+                        "in": "path",
+                        "description": "Part price can be in format: [10 TO 100], [10], [10.0 TO 100.0]",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of parts",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        },
+        "/api/types": {
+            "get": {
+                "tags": [
+                    "Types"
+                ],
+                "description": "Retrieve a list of types",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\TypeController::index",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "path",
+                        "description": "Page Limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "dealer_id",
+                        "in": "path",
+                        "description": "Dealer ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of parts",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        },
+        "/api/website/parts/filters": {
+            "get": {
+                "tags": [
+                    "Website Part Filters"
+                ],
+                "description": "Retrieve a list of filters",
+                "operationId": "App\\Http\\Controllers\\v1\\Website\\Parts\\FilterController::index",
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of parts",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
                         "description": "Error: Bad request."
                     }
                 }

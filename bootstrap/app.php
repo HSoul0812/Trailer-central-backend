@@ -105,7 +105,8 @@ $app->register(
     $app->bind('App\Repositories\Parts\BrandRepositoryInterface', 'App\Repositories\Parts\BrandRepository'),
     $app->bind('App\Repositories\Parts\CategoryRepositoryInterface', 'App\Repositories\Parts\CategoryRepository'),
     $app->bind('App\Repositories\Parts\ManufacturerRepositoryInterface', 'App\Repositories\Parts\ManufacturerRepository'),
-    $app->bind('App\Repositories\Parts\TypeRepositoryInterface', 'App\Repositories\Parts\TypeRepository')
+    $app->bind('App\Repositories\Parts\TypeRepositoryInterface', 'App\Repositories\Parts\TypeRepository'),
+    $app->bind('App\Repositories\Parts\FilterRepositoryInterface', 'App\Repositories\Parts\FilterRepository')
 );
 
 /*
