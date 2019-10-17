@@ -29,6 +29,6 @@ class AuthToken extends Model
     
     public function user()
     {
-        return $this->hasOne('App\Models\User\User');
+        return $this->hasOne('App\Models\User\User', 'dealer_id');
     }
 }
