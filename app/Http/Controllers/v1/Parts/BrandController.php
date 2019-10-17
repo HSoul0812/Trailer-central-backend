@@ -26,7 +26,7 @@ class BrandController extends RestfulController
     
     /**
      * @OA\Get(
-     *     path="/api/brands",
+     *     path="/api/parts/brands",
      *     description="Retrieve a list of brands",     
      *     tags={"Brands"},
      *     @OA\Parameter(

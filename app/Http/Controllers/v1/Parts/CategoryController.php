@@ -25,7 +25,7 @@ class CategoryController extends RestfulController
     
      /**
      * @OA\Get(
-     *     path="/api/categories",
+     *     path="/api/parts/categories",
      *     description="Retrieve a list of categories",     
      *     tags={"Categories"},
      *     @OA\Parameter(

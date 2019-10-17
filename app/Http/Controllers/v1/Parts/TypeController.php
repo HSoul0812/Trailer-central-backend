@@ -25,7 +25,7 @@ class TypeController extends RestfulController
     
      /**
      * @OA\Get(
-     *     path="/api/types",
+     *     path="/api/parts/types",
      *     description="Retrieve a list of types",     
      *     tags={"Types"},
      *     @OA\Parameter(

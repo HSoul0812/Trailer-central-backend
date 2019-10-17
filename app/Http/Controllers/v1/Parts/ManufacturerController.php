@@ -25,7 +25,7 @@ class ManufacturerController extends RestfulController
     
      /**
      * @OA\Get(
-     *     path="/api/manufacturers",
+     *     path="/api/parts/manufacturers",
      *     description="Retrieve a list of manufacturers",     
      *     tags={"Manufacturers"},
      *     @OA\Parameter(
