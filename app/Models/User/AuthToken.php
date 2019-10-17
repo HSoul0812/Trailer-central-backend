@@ -14,7 +14,6 @@ class AuthToken extends Model
      * @var array
      */
     protected $fillable = [
-        'dealer_id',
         'access_token'
     ];
 
