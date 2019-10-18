@@ -7,8 +7,13 @@ use App\Models\Parts\Manufacturer;
 
 class ManufacturerTransformer extends TransformerAbstract
 {
-    public function transform(Manufacturer $manufacturer)
+    public function transform($manufacturer)
     {                
+        
+        if (isset($manufacturer->manufacturer)) {
+            $manufacturer = $manufacturer->manufacturer;
+        }
+        
 	 return [
              'id' => (int)$manufacturer->id,
              'name' => $manufacturer->name

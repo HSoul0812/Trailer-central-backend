@@ -7,11 +7,16 @@ use App\Models\Parts\Type;
 
 class TypeTransformer extends TransformerAbstract
 {
-    public function transform(Type $type)
+    public function transform($type)
     {                
+        
+        if (isset($type->type)) {
+            $type = $type->type;
+        }
+        
 	 return [
              'id' => (int)$type->id,
              'name' => $type->name
          ];
     }
-}
+} 
