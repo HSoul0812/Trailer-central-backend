@@ -4,9 +4,9 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
 
-class User extends Model
+class AuthToken extends Model
 { 
-    protected $table = 'dealer';
+    protected $table = 'auth_token';
     
     /**
      * The attributes that are mass assignable.
@@ -14,10 +14,7 @@ class User extends Model
      * @var array
      */
     protected $fillable = [
-        'dealer_id',
-        'name',
-        'email',
-        'password'
+        'access_token'
     ];
 
     /**
@@ -28,4 +25,9 @@ class User extends Model
     protected $hidden = [
 
     ];
+    
+    public function user()
+    {
+        return $this->hasOne('App\Models\User\User', 'dealer_id', 'user_id');
+    }
 }
