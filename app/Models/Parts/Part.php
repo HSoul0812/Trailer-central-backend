@@ -3,9 +3,12 @@
 namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Part extends Model
 { 
+    
+    use Searchable;
     
     protected $table = 'parts_v1';
     
@@ -46,6 +49,26 @@ class Part extends Model
     protected $hidden = [
 
     ];
+    
+    public function searchableAs()
+    {
+        return env('PARTS_ALGOLIA_INDEX', '');
+    }
+    
+    public function toSearchableArray()
+    {
+        $array = $this->toArray();
+        
+        $array['brand'] = (string)$this->brand;
+        $array['manufacturer'] = (string)$this->manufacturer;
+        $array['category'] = (string)$this->category;
+        $array['type'] = (string)$this->type;
+        
+        $array['images'] = $this->images->toArray();
+        $array['vehicle_specific'] = $this->vehicleSpecifc;
+
+        return $array;
+    }
         
     public function brand()
     {

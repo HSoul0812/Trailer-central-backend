@@ -26,9 +26,12 @@ $app = new Laravel\Lumen\Application(
  $app->withFacades();
 
  $app->withEloquent();
+ 
+ $app->instance('path.config', app()->basePath() . DIRECTORY_SEPARATOR . 'config');
 
  $app->configure('swagger-lume');
-
+ $app->configure('scout');
+ 
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -98,6 +101,7 @@ $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(\SwaggerLume\ServiceProvider::class);
+$app->register(Laravel\Scout\ScoutServiceProvider::class);
 
 $app->register(
     Dingo\Api\Provider\LumenServiceProvider::class,

@@ -30,14 +30,14 @@ class CategoryController extends RestfulController
      *     tags={"Categories"},
      *     @OA\Parameter(
      *         name="per_page",
-     *         in="path",
+     *         in="query",
      *         description="Page Limit",
      *         required=false,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="dealer_id",
-     *         in="path",
+     *         in="query",
      *         description="Dealer ID",
      *         required=false,
      *         @OA\Schema(type="integer")

@@ -30,4 +30,8 @@ class Brand extends Model
     {
         return $this->hasMany('App\Models\Parts\Part');
     }
+    
+    public function __toString() {
+        return $this->name;
+    }
 }

@@ -286,21 +286,21 @@ class PartsController extends RestfulController
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="per_page",
-     *         in="path",
+     *         in="query",
      *         description="Page Limit",
      *         required=false,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="sort",
-     *         in="path",
+     *         in="query",
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="type_id",
-     *         in="path",
+     *         in="query",
      *         description="Part types",
      *         required=false,
      *         @OA\Property(
@@ -314,7 +314,7 @@ class PartsController extends RestfulController
      *     ),     
      *     @OA\Parameter(
      *         name="category_id",
-     *         in="path",
+     *         in="query",
      *         description="Part categories",
      *         required=false,
      *          @OA\Property(
@@ -328,7 +328,7 @@ class PartsController extends RestfulController
      *     ),
      *    @OA\Parameter(
      *         name="manufacturer_id",
-     *         in="path",
+     *         in="query",
      *         description="Part manufacturers",
      *         required=false,
      *         @OA\Property(
@@ -342,7 +342,7 @@ class PartsController extends RestfulController
      *     ),
      *     @OA\Parameter(
      *         name="brand_id",
-     *         in="path",
+     *         in="query",
      *         description="Part brands",
      *         required=false,
      *         @OA\Property(
@@ -356,7 +356,7 @@ class PartsController extends RestfulController
      *     ),
      *   @OA\Parameter(
      *         name="price",
-     *         in="path",
+     *         in="query",
      *         description="Part price can be in format: [10 TO 100], [10], [10.0 TO 100.0]",
      *         required=false,
      *         @OA\Schema(type="string")
@@ -390,7 +390,7 @@ class PartsController extends RestfulController
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
-     *         in="path",
+     *         in="query",
      *         description="Part ID",
      *         required=true,
      *         @OA\Schema(type="integer")

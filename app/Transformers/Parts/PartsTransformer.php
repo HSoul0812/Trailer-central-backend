@@ -31,7 +31,11 @@ class PartsTransformer extends TransformerAbstract
              'is_vehicle_specific' => (bool)$part->is_vehicle_specific,
              'images' => $part->images->pluck('image_url'),
              'vehicle_specific' => $part->vehicleSpecific,
-             'video_embed_code' => $part->video_embed_code
+             'video_embed_code' => $part->video_embed_code,
+             'brand' => (string)$part->brand,
+             'manufacturer' => (string)$part->manufacturer,
+             'category' => (string)$part->category,
+             'type' => (string)$part->type
          ];
     }
 }

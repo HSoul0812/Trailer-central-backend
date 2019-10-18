@@ -19,7 +19,7 @@
                 "parameters": [
                     {
                         "name": "per_page",
-                        "in": "path",
+                        "in": "query",
                         "description": "Page Limit",
                         "required": false,
                         "schema": {
@@ -28,7 +28,7 @@
                     },
                     {
                         "name": "dealer_id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Dealer ID",
                         "required": false,
                         "schema": {
@@ -282,7 +282,7 @@
                         "description": "Part weight rating",
                         "required": false,
                         "schema": {
-                            "type": "numeric"
+                            "type": "string"
                         }
                     },
                     {
@@ -301,15 +301,6 @@
                         "required": false,
                         "schema": {
                             "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "weight_rating",
-                        "in": "query",
-                        "description": "Part weight rating",
-                        "required": false,
-                        "schema": {
-                            "type": "numeric"
                         }
                     },
                     {
@@ -586,7 +577,7 @@
                         "description": "Part weight rating",
                         "required": false,
                         "schema": {
-                            "type": "numeric"
+                            "type": "string"
                         }
                     },
                     {
@@ -605,15 +596,6 @@
                         "required": false,
                         "schema": {
                             "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "weight_rating",
-                        "in": "query",
-                        "description": "Part weight rating",
-                        "required": false,
-                        "schema": {
-                            "type": "numeric"
                         }
                     },
                     {

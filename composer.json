@@ -6,10 +6,12 @@
     "type": "project",
     "require": {
         "php": "^7.2",
+        "algolia/algoliasearch-client-php": "^2.4",
         "darkaonline/swagger-lume": "6.*",
         "dingo/api": "^2.3",
         "doctrine/dbal": "^2.9",
         "laravel/lumen-framework": "^6.0",
+        "laravel/scout": "^7.2",
         "league/flysystem-aws-s3-v3": "~1.0"
     },
     "require-dev": {
