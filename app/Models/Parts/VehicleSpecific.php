@@ -4,9 +4,9 @@ namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PartImage extends Model {
-    
-    protected $table = 'part_images';
+class VehicleSpecific extends Model
+{ 
+    protected $table = 'vehicle_specific';
     
     /**
      * The attributes that are mass assignable.
@@ -14,9 +14,11 @@ class PartImage extends Model {
      * @var array
      */
     protected $fillable = [
-        'part_id',
-        'image_url',
-        'position'
+        'make',
+        'model',
+        'year_from',
+        'year_to',
+        'part_id'
     ];
 
     /**
@@ -28,7 +30,8 @@ class PartImage extends Model {
 
     ];
     
-    public function __toString() {
-        return $this->image_url;
+    public function parts()
+    {
+        return $this->belongsTo('App\Models\Parts\Part');
     }
 }

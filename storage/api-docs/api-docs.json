@@ -9,7 +9,7 @@
         "version": "1.0"
     },
     "paths": {
-        "/api/brands": {
+        "/api/parts/brands": {
             "get": {
                 "tags": [
                     "Brands"
@@ -51,7 +51,7 @@
                 }
             }
         },
-        "/api/categories": {
+        "/api/parts/categories": {
             "get": {
                 "tags": [
                     "Categories"
@@ -93,7 +93,7 @@
                 }
             }
         },
-        "/api/manufacturers": {
+        "/api/parts/manufacturers": {
             "get": {
                 "tags": [
                     "Manufacturers"
@@ -328,6 +328,51 @@
                         "required": false,
                         "schema": {
                             "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "vehicle_make",
+                        "in": "query",
+                        "description": "Part vehicle make",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "vehicle_model",
+                        "in": "query",
+                        "description": "Part vehicle model",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "vehicle_year_from",
+                        "in": "query",
+                        "description": "Part vehicle year from",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "vehicle_year_to",
+                        "in": "query",
+                        "description": "Part vehicle year to",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "video_embed_code",
+                        "in": "query",
+                        "description": "Video embed code",
+                        "required": false,
+                        "schema": {
+                            "type": "text"
                         }
                     },
                     {
@@ -590,6 +635,51 @@
                         }
                     },
                     {
+                        "name": "vehicle_make",
+                        "in": "query",
+                        "description": "Part vehicle make",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "vehicle_model",
+                        "in": "query",
+                        "description": "Part vehicle model",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "vehicle_year_from",
+                        "in": "query",
+                        "description": "Part vehicle year from",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "vehicle_year_to",
+                        "in": "query",
+                        "description": "Part vehicle year to",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "video_embed_code",
+                        "in": "query",
+                        "description": "Video embed code",
+                        "required": false,
+                        "schema": {
+                            "type": "text"
+                        }
+                    },
+                    {
                         "name": "images",
                         "in": "query",
                         "description": "Part images",
@@ -762,7 +852,7 @@
                 }
             }
         },
-        "/api/types": {
+        "/api/parts/types": {
             "get": {
                 "tags": [
                     "Types"

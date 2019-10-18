@@ -143,7 +143,7 @@ class PartsController extends RestfulController
      *         in="query",
      *         description="Part weight rating",
      *         required=false,
-     *         @OA\Schema(type="numeric")
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
      *         name="description",
@@ -160,13 +160,6 @@ class PartsController extends RestfulController
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
-     *         name="weight_rating",
-     *         in="query",
-     *         description="Part weight rating",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
      *         name="show_on_website",
      *         in="query",
      *         description="Part show on website",
@@ -179,6 +172,41 @@ class PartsController extends RestfulController
      *         description="Part vehicle specific",
      *         required=false,
      *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="vehicle_make",
+     *         in="query",
+     *         description="Part vehicle make",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="vehicle_model",
+     *         in="query",
+     *         description="Part vehicle model",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="vehicle_year_from",
+     *         in="query",
+     *         description="Part vehicle year from",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="vehicle_year_to",
+     *         in="query",
+     *         description="Part vehicle year to",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="video_embed_code",
+     *         in="query",
+     *         description="Video embed code",
+     *         required=false,
+     *         @OA\Schema(type="text")
      *     ),
      *    @OA\Parameter(
      *         name="images",
@@ -504,7 +532,7 @@ class PartsController extends RestfulController
      *         in="query",
      *         description="Part weight rating",
      *         required=false,
-     *         @OA\Schema(type="numeric")
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
      *         name="description",
@@ -521,13 +549,6 @@ class PartsController extends RestfulController
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
-     *         name="weight_rating",
-     *         in="query",
-     *         description="Part weight rating",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
      *         name="show_on_website",
      *         in="query",
      *         description="Part show on website",
@@ -540,6 +561,41 @@ class PartsController extends RestfulController
      *         description="Part vehicle specific",
      *         required=false,
      *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="vehicle_make",
+     *         in="query",
+     *         description="Part vehicle make",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="vehicle_model",
+     *         in="query",
+     *         description="Part vehicle model",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="vehicle_year_from",
+     *         in="query",
+     *         description="Part vehicle year from",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="vehicle_year_to",
+     *         in="query",
+     *         description="Part vehicle year to",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="video_embed_code",
+     *         in="query",
+     *         description="Video embed code",
+     *         required=false,
+     *         @OA\Schema(type="text")
      *     ),
      *    @OA\Parameter(
      *         name="images",
@@ -576,7 +632,7 @@ class PartsController extends RestfulController
             return $this->response->item($this->parts->update($request->all()), new PartsTransformer());
         }
         
-        throw new NotImplementedException();
+        return $this->response->errorBadRequest();
     }
 
 }

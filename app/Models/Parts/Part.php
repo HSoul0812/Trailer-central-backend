@@ -34,7 +34,8 @@ class Part extends Model
         'description',
         'qty',
         'show_on_website',
-        'is_vehicle_specific'
+        'is_vehicle_specific',
+        'video_embed_code'
     ];
 
     /**
@@ -69,6 +70,11 @@ class Part extends Model
     public function manufacturer()
     {
         return $this->belongsTo('App\Models\Parts\Manufacturer');
+    }
+    
+    public function vehicleSpecific()
+    {
+        return $this->hasOne('App\Models\Parts\VehicleSpecific');
     }
     
     public function images()

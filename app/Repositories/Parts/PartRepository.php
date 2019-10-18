@@ -6,6 +6,8 @@ use App\Repositories\Repository;
 use App\Models\Parts\Part;
 use App\Models\Parts\PartImage;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Parts\VehicleSpecific;
+use Illuminate\Support\Facades\DB;
 
 /**
  *  
@@ -16,11 +18,28 @@ class PartRepository implements PartRepositoryInterface {
     public function create($params) {
         $part = Part::create($params);
         
-        if (isset($params['images'])) {
-            foreach ($params['images'] as $imageUrl) {
-                $this->storeImage($part->id, $imageUrl);
+        DB::transaction(function() use (&$part, $params) {
+            
+            if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
+
+                VehicleSpecific::create([
+                    'make' => $params['vehicle_make'],
+                    'model' => $params['vehicle_model'],
+                    'year_from' => $params['vehicle_year_from'],
+                    'year_to' => $params['vehicle_year_to'],
+                    'part_id' => $part->id
+                ]);
+
             }
-        }
+
+            if (isset($params['images'])) {
+                foreach ($params['images'] as $image) {
+                    $this->storeImage($part->id, $image);
+                }
+            }
+            
+        });
+        
         
         return $part;
     }
@@ -77,29 +96,46 @@ class PartRepository implements PartRepositoryInterface {
 
     public function update($params) {
         $part = Part::findOrFail($params['id']);
-        $part->fill($params);
-        if ($part->save()) {
-            if (isset($params['images'])) {
-                $part->images()->delete();
-                foreach($params['images'] as $imageUrl) {
-                    $this->storeImage($part->id, $imageUrl);
+        
+        DB::transaction(function() use (&$part, $params) {
+      
+            if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
+                VehicleSpecific::updateOrCreate([
+                    'make' => $params['vehicle_make'],
+                    'model' => $params['vehicle_model'],
+                    'year_from' => $params['vehicle_year_from'],
+                    'year_to' => $params['vehicle_year_to'],
+                    'part_id' => $part->id
+                ]);
+            }            
+
+            $part->fill($params);
+            if ($part->save()) {
+                if (isset($params['images'])) {
+                    $part->images()->delete();
+                    foreach($params['images'] as $image) {
+                        $this->storeImage($part->id, $image);
+                    }
                 }
-            }
-            return $part;
-        }       
+            }            
+            
+        });
+        
+        return $part;
     }
     
-    private function storeImage($partId, $imageUrl) {
-        $explodedImage = explode('.', $imageUrl);
+    private function storeImage($partId, $image) {
+        $explodedImage = explode('.', $image['url']);
         $imageExtension = $explodedImage[count($explodedImage) - 1];
         $fileName = md5($partId)."/".uniqid().".{$imageExtension}";
-        Storage::disk('s3')->put($fileName, file_get_contents($imageUrl), 'public');
+        Storage::disk('s3')->put($fileName, file_get_contents($image['url']), 'public');
         $s3ImageUrl = Storage::disk('s3')->url($fileName);
 
         PartImage::create([
             'part_id' => $partId,
-            'image_url' => $s3ImageUrl
+            'image_url' => $s3ImageUrl,
+            'position' => $image['position']
         ]);
     }
-
+    
 }
