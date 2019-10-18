@@ -17,7 +17,9 @@ class AccessToken
      */
     public function handle($request, Closure $next)
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') return $next($request);
+        if ($request->isMethod('get')) {
+            return $next($request);
+        }
 
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();

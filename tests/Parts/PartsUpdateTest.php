@@ -8,6 +8,7 @@ use App\Models\Parts\Manufacturer;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
+use App\Models\User\AuthToken;
 
 class PartsUpdateTest extends TestCase
 {
@@ -31,6 +32,7 @@ class PartsUpdateTest extends TestCase
     {            
         $this->initializeTestData();
         $data = $this->createPartTestData();
+        $authToken = AuthToken::where('user_id', 1001)->first();
         
         $vendor = Vendor::latest()->first();
         $manufacturer = Manufacturer::latest()->first();
@@ -63,7 +65,7 @@ class PartsUpdateTest extends TestCase
             'vehicle_year_to' => 2019
         ];
         
-        $this->json('POST', '/api/parts/'.$data['part']->id, $updateData) 
+        $this->json('POST', '/api/parts/'.$data['part']->id, $updateData, ['access-token' => $authToken->access_token]) 
             ->seeJson([
                 "dealer_id" => 1002,
                 "vendor_id" => $vendor->toArray(),

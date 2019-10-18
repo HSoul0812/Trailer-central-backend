@@ -8,6 +8,7 @@ use App\Models\Parts\Manufacturer;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
+use App\Models\User\AuthToken;
 
 class PartsCreateTest extends TestCase
 {
@@ -31,8 +32,9 @@ class PartsCreateTest extends TestCase
     {            
         $this->initializeTestData();
         $data = $this->createPartTestData();
+        $authToken = AuthToken::where('user_id', 1001)->first();
         
-        $this->json('PUT', '/api/parts', $data) 
+        $this->json('PUT', '/api/parts', $data, ['access-token' => $authToken->access_token]) 
             ->seeJson([
                 'dealer_id' => 1001,
                 'vendor_id' => $this->vendor->toArray(),
@@ -59,6 +61,7 @@ class PartsCreateTest extends TestCase
     {            
         $this->initializeTestData();
         $data = $this->createPartTestData();
+        $authToken = AuthToken::where('user_id', 1001)->first();
         
         unset($data['brand_id']);
         unset($data['type_id']);
@@ -66,7 +69,7 @@ class PartsCreateTest extends TestCase
         unset($data['sku']);
         unset($data['subcategory']);
         
-        $this->json('PUT', '/api/parts', $data) 
+        $this->json('PUT', '/api/parts', $data, ['access-token' => $authToken->access_token]) 
             ->seeJson([
                 'brand_id' => [
                     'The brand id field is required.'
