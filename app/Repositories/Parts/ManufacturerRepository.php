@@ -27,7 +27,7 @@ class ManufacturerRepository implements ManufacturerRepositoryInterface {
     }
 
     public function getAll($params) {        
-        if (isset($params['dealer_id'])) {
+        if (isset($params['dealer_id'])) { 
             $query = Part::with('manufacturer');
             $query = $query->whereIn('dealer_id', $params['dealer_id'])
                     ->whereNotNull('manufacturer_id')

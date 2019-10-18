@@ -15,6 +15,25 @@ use Illuminate\Support\Facades\DB;
  */
 class PartRepository implements PartRepositoryInterface {
     
+    private $sortOrders = [
+        'title' => [
+            'field' => 'title',
+            'direction' => 'DESC'
+        ],
+        '-title' => [
+            'field' => 'title',
+            'direction' => 'ASC'
+        ],
+        'price' => [ 
+            'field' => 'price',
+            'direction' => 'DESC'
+        ],
+        '-price' => [
+            'field' => 'price',
+            'direction' => 'ASC'
+        ]
+    ];
+    
     public function create($params) {
         $part = Part::create($params);
         
@@ -55,10 +74,14 @@ class PartRepository implements PartRepositoryInterface {
 
     public function getAll($params) {   
         
-        $query = Part::where('id', '>', 0);
+        $query = Part::where('show_on_website', true);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
+        }
+        
+        if (isset($params['dealer_id'])) {
+             $query = $query->whereIn('dealer_id', $params['dealer_id']);
         }
         
         if (isset($params['type_id'])) {
@@ -90,6 +113,10 @@ class PartRepository implements PartRepositoryInterface {
         } else if (isset($params['price'])) {
             $query = $query->where('price', $params['price']);
         }         
+        
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
         
         return $query->paginate($params['per_page'])->appends($params);
     }
@@ -136,6 +163,14 @@ class PartRepository implements PartRepositoryInterface {
             'image_url' => $s3ImageUrl,
             'position' => $image['position']
         ]);
+    }
+    
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+        
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
     
 }
