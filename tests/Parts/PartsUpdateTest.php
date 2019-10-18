@@ -67,7 +67,7 @@ class PartsUpdateTest extends TestCase
         
         $this->json('POST', '/api/parts/'.$data['part']->id, $updateData, ['access-token' => $authToken->access_token]) 
             ->seeJson([
-                "dealer_id" => 1002,
+                "dealer_id" => $authToken->user_id,
                 "vendor_id" => $vendor->toArray(),
                 "manufacturer_id" => $manufacturer->toArray(),
                 "brand_id" => $brand->toArray(),
