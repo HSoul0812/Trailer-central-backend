@@ -30,6 +30,10 @@ class VendorRepository implements VendorRepositoryInterface {
             $params['per_page'] = 15;
         }
         
+        if (isset($params['name'])) {
+            $query = $query->where('name', 'like', '%'.$params['name'].'%');
+        }
+        
         return Vendor::paginate($params['per_page'])->appends($params);
     }
 

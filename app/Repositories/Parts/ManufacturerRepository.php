@@ -38,6 +38,10 @@ class ManufacturerRepository implements ManufacturerRepositoryInterface {
             });
         }
         
+        if (isset($params['name'])) {
+            $query = $query->where('name', 'like', '%'.$params['name'].'%');
+        }
+        
         return $query->paginate($params['per_page'])->appends($params);
     }
 

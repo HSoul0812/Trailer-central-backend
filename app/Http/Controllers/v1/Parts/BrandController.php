@@ -43,6 +43,13 @@ class BrandController extends RestfulController
      *         required=false,
      *         @OA\Schema(type="integer")
      *     ),    
+     *     @OA\Parameter(
+     *         name="name",
+     *         in="query",
+     *         description="Brand name to search",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),  
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of parts",
