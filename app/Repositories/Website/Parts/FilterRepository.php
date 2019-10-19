@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repositories\Parts;
+namespace App\Repositories\Website\Parts;
 
-use App\Repositories\Parts\FilterRepositoryInterface;
+use App\Repositories\Website\Parts\FilterRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Parts\Filter;
 

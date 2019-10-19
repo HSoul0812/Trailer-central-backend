@@ -36,5 +36,5 @@ class Filter extends Model
     protected $hidden = [
 
     ];
-    
+        
 }

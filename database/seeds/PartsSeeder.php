@@ -20,25 +20,52 @@ class PartsSeeder extends Seeder
     public function run()
     {
         $partsRepository = new PartRepository();
-        $i = 1;
+        $i = 3000000;
+               
+        $vendors = [];
+        $manufacturers = [];
+        $brands = [];
+        $types = [];
+        $categories = [];
+        $users = [];
+        
+        while(count($vendors) != 15) {
+            $vendors[] = Vendor::all()->random();
+        }
+        
+        while(count($manufacturers) != 15) {
+            $manufacturers[] = Manufacturer::all()->random();
+        }
+        
+        while(count($brands) != 15) {
+            $brands[] = Brand::all()->random();
+        }
+        
+        while(count($types) != 15) {
+            $types[] = Type::all()->random();
+        }
+        
+        while(count($categories) != 15) {
+            $categories[] = Category::all()->random();
+        }
+        
+        while(count($users) != 15) {
+            $users[] = User::all()->random();
+        }
+        
+        
         
         while ($i-- != 0) {            
-            echo "CREATING PART NUMBER $i ".PHP_EOL;
             
-            $vendor = Vendor::all()->random();
-            $manufacturer = Manufacturer::all()->random();
-            $brand = Brand::all()->random();
-            $type = Type::all()->random();
-            $category = Category::all()->random();
-            $user = User::all()->random();
+            $rand = rand(0, 14);
             
-            $part = $partsRepository->create([
-                "dealer_id" => $user->dealer_id,
-                "vendor_id" => $vendor->id,
-                "manufacturer_id" => $manufacturer->id,
-                "brand_id" => $brand->id,
-                "type_id" => $type->id,
-                "category_id" => $category->id,
+            $partsRepository->create([
+                "dealer_id" => $users[$rand]->dealer_id,
+                "vendor_id" => $vendors[$rand]->id,
+                "manufacturer_id" => $manufacturers[$rand]->id,
+                "brand_id" => $brands[$rand]->id,
+                "type_id" => $types[$rand]->id,
+                "category_id" => $categories[$rand]->id,
                 "subcategory" => "Test",
                 "sku" => "12345",
                 "price" => 13,

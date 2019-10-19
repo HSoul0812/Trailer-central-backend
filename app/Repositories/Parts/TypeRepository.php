@@ -33,7 +33,7 @@ class TypeRepository implements TypeRepositoryInterface {
                     ->whereNotNull('type_id')
                     ->groupBy('parts_v1.type_id');
         } else {
-            $query = Type::with('parts');
+            $query = Type::where('id', '>', 0);
         }        
 
         if (!isset($params['per_page'])) {

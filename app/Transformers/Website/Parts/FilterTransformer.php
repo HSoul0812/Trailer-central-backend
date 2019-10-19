@@ -4,32 +4,20 @@ namespace App\Transformers\Website\Parts;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Filter;
+use Illuminate\Support\Facades\Cache;
+use App\Models\Parts\Part;
 
 class FilterTransformer extends TransformerAbstract
 {
+    
+    private $attributeModelIdMapping = [
+        'type' => 'type_id',
+        'category' => 'category_id',
+        'manufacturer' => 'manufacturer_id'
+    ];
+    
     public function transform(Filter $filter)
-    {             
-//         "id": "18",
-//        "attribute": "sku",
-//        "label": "Search By SKU #",
-//        "type": "search",
-//        "is_eav": "0",
-//        "position": "-1",
-//        "sort": null,
-//        "sort_dir": null,
-//        "prefix": null,
-//        "suffix": null,
-//        "step": null,
-//        "dependancy": null,
-//        "is_visible": "1",
-//        "is_active": null,
-//        "action": "?",
-//        "state": [],
-//        "value": "",
-//        "global": true,
-//        "is_selected": false
-        
-        
+    {                           
 	 return [
              'id' => (int)$filter->id,
              'attribute' => $filter->attribute,
@@ -43,7 +31,42 @@ class FilterTransformer extends TransformerAbstract
              'suffix' => $filter->suffix,
              'step' => $filter->step,
              'dependancy' => $filter->dependancy,
-             'is_visible' => (int)$filter->is_visible
+             'is_visible' => (int)$filter->is_visible,
+             'values' => $this->getFilterValues($filter)
          ];
     }
+    
+    
+    private function getFilterValues(Filter $filter)
+    {
+        $dealerId = Cache::get(env('DEALER_ID_KEY', 'api_dealer_id'));
+        
+        if (empty($dealerId) || !isset($this->attributeModelIdMapping[$filter->attribute])) {
+            return [];
+        }
+        
+        $parts = Part::with($filter->attribute)
+                        ->whereIn('dealer_id', $dealerId)
+                        ->whereNotNull($this->attributeModelIdMapping[$filter->attribute])
+                        ->groupBy($this->attributeModelIdMapping[$filter->attribute])
+                        ->get();
+        
+        $values = [];
+          
+        foreach($parts as $part) {
+            
+            $count = Part::whereIn('dealer_id', $dealerId)->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute}->id)->count();
+            
+            $values[] = [
+                'label' => $part->{$filter->attribute}->name,
+                'value' => $part->{$filter->attribute}->name,
+                'count' => $count, // do Query
+                'base' => 0, // What is this?
+                'status' => 'selectable'
+            ];
+        }
+                
+        return $values;
+    }
+    
 }

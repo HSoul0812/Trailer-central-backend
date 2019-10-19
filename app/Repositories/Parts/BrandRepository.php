@@ -34,7 +34,7 @@ class BrandRepository implements BrandRepositoryInterface {
                     ->whereNotNull('brand_id')
                     ->groupBy('parts_v1.brand_id');
         } else {
-            $query = Brand::with('parts');
+            $query = Brand::where('id', '>', 0);
         }        
 
         if (!isset($params['per_page'])) {

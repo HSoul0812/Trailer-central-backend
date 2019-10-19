@@ -34,7 +34,7 @@ class CategoryRepository implements CategoryRepositoryInterface {
                     ->whereNotNull('category_id')
                     ->groupBy('parts_v1.category_id');
         } else {
-            $query = Category::with('parts');
+            $query = Category::where('id', '>', 0);
         }        
 
         if (!isset($params['per_page'])) {

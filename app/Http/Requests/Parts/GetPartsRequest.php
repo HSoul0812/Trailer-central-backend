@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Parts;
 
 use App\Http\Requests\Request;
-use App\Rules\TypeExists;
 
 /**
  *  
@@ -22,7 +21,9 @@ class GetPartsRequest extends Request {
         'manufacturer_id' => 'array',
         'brand_id' => 'array',
         'brand_id.*' => 'integer|brand_exists',
-        'price' => 'price_format'
+        'price' => 'price_format',
+        'dealer_id' => 'array',
+        'dealer_id.*' => 'integer'
     ];
     
     public function all($keys = null) {

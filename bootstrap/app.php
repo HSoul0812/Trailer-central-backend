@@ -31,7 +31,8 @@ $app = new Laravel\Lumen\Application(
 
  $app->configure('swagger-lume');
  $app->configure('scout');
- 
+ $app->configure('session');
+ $app->configure('database');
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -79,7 +80,8 @@ $app->singleton('filesystem', function ($app) {
 */
 
 $app->middleware([
-    App\Http\Middleware\AccessToken::class
+    App\Http\Middleware\AccessToken::class,
+    'Illuminate\Session\Middleware\StartSession'
 ]);
 
 // $app->routeMiddleware([
@@ -102,6 +104,9 @@ $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(\SwaggerLume\ServiceProvider::class);
 $app->register(Laravel\Scout\ScoutServiceProvider::class);
+$app->register(Illuminate\Session\SessionServiceProvider::class);
+$app->register(Illuminate\Redis\RedisServiceProvider::class);
+
 
 $app->register(
     Dingo\Api\Provider\LumenServiceProvider::class,
@@ -110,8 +115,12 @@ $app->register(
     $app->bind('App\Repositories\Parts\CategoryRepositoryInterface', 'App\Repositories\Parts\CategoryRepository'),
     $app->bind('App\Repositories\Parts\ManufacturerRepositoryInterface', 'App\Repositories\Parts\ManufacturerRepository'),
     $app->bind('App\Repositories\Parts\TypeRepositoryInterface', 'App\Repositories\Parts\TypeRepository'),
-    $app->bind('App\Repositories\Parts\FilterRepositoryInterface', 'App\Repositories\Parts\FilterRepository')
+    $app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository'),
+    $app->bind(Illuminate\Session\SessionManager::class, function ($app) {    
+        return $app->make('session');
+    })
 );
+
 
 /*
 |--------------------------------------------------------------------------

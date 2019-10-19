@@ -49,7 +49,7 @@ class Part extends Model
     protected $hidden = [
 
     ];
-    
+        
     public function searchableAs()
     {
         return env('PARTS_ALGOLIA_INDEX', '');

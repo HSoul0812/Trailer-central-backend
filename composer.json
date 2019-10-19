@@ -10,9 +10,11 @@
         "darkaonline/swagger-lume": "6.*",
         "dingo/api": "^2.3",
         "doctrine/dbal": "^2.9",
+        "illuminate/redis": "^6.3",
         "laravel/lumen-framework": "^6.0",
         "laravel/scout": "^7.2",
-        "league/flysystem-aws-s3-v3": "~1.0"
+        "league/flysystem-aws-s3-v3": "~1.0",
+        "predis/predis": "^1.1"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

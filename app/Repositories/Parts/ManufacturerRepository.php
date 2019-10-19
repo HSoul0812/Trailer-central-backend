@@ -33,7 +33,7 @@ class ManufacturerRepository implements ManufacturerRepositoryInterface {
                     ->whereNotNull('manufacturer_id')
                     ->groupBy('parts_v1.manufacturer_id');
         } else {
-            $query = Manufacturer::with('parts'); 
+            $query = Manufacturer::where('id', '>', 0);
         }        
 
         if (!isset($params['per_page'])) {

@@ -12,6 +12,8 @@ use App\Http\Requests\Request;
 class GetFiltersRequest extends Request {
     
     protected $rules = [
+        'dealer_id' => 'required|array',
+        'dealer_id.*' => 'integer'
     ];
     
 }

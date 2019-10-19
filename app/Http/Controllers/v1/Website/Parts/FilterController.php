@@ -4,7 +4,7 @@ namespace App\Http\Controllers\v1\Website\Parts;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
-use App\Repositories\Parts\FilterRepositoryInterface;
+use App\Repositories\Website\Parts\FilterRepositoryInterface;
 use App\Http\Requests\Website\Parts\GetFiltersRequest;
 use App\Transformers\Website\Parts\FilterTransformer;
 
