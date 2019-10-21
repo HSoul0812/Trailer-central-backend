@@ -37,11 +37,10 @@ class PartsCreateTest extends TestCase
         $this->json('PUT', '/api/parts', $data, ['access-token' => $authToken->access_token]) 
             ->seeJson([
                 'dealer_id' => 1001,
-                'vendor_id' => $this->vendor->toArray(),
-                'manufacturer_id' => $this->manufacturer->toArray(),
-                'brand_id' => $this->brand->toArray(),
-                'type_id' => $this->type->toArray(),
-                'category_id' => $this->category->toArray(),
+                'vendor' => $this->vendor->toArray(),
+                'brand' => $this->brand->toArray(),
+                'type' => $this->type->toArray(),
+                'category' => $this->category->toArray(),
                 'subcategory' => "Test",
                 'sku' => "12345",
                 'price' => 13,
@@ -112,7 +111,6 @@ class PartsCreateTest extends TestCase
         return [
             "dealer_id" => 1001,
             "vendor_id" => $this->vendor->id,
-            "manufacturer_id" => $this->manufacturer->id,
             "brand_id" => $this->brand->id,
             "type_id" => $this->type->id,
             "category_id" => $this->category->id,

@@ -68,11 +68,10 @@ class PartsUpdateTest extends TestCase
         $this->json('POST', '/api/parts/'.$data['part']->id, $updateData, ['access-token' => $authToken->access_token]) 
             ->seeJson([
                 "dealer_id" => $authToken->user_id,
-                "vendor_id" => $vendor->toArray(),
-                "manufacturer_id" => $manufacturer->toArray(),
-                "brand_id" => $brand->toArray(),
-                "type_id" => $type->toArray(),
-                "category_id" => $category->toArray(),
+                "vendor" => $vendor->toArray(),
+                "brand" => $brand->toArray(),
+                "type" => $type->toArray(),
+                "category" => $category->toArray(),
                 "subcategory" => "Testff",
                 "sku" => "asdasdsad",
                 "price" => 3,
@@ -135,7 +134,6 @@ class PartsUpdateTest extends TestCase
         $originalData = [
             "dealer_id" => 1001,
             "vendor_id" => $this->vendor->id,
-            "manufacturer_id" => $this->manufacturer->id,
             "brand_id" => $this->brand->id,
             "type_id" => $this->type->id,
             "category_id" => $this->category->id,

@@ -11,14 +11,16 @@ class FilterTransformer extends TransformerAbstract
 {
     
     private $attributeModelIdMapping = [
+        'dealer' => 'dealer_id',
         'type' => 'type_id',
         'category' => 'category_id',
-        'manufacturer' => 'manufacturer_id'
+        'manufacturer' => 'manufacturer_id',
+        'brand' => 'brand_id'
     ];
     
     public function transform(Filter $filter)
-    {                           
-	 return [
+    {                
+        return [
              'id' => (int)$filter->id,
              'attribute' => $filter->attribute,
              'label' => $filter->label,
@@ -39,34 +41,49 @@ class FilterTransformer extends TransformerAbstract
     
     private function getFilterValues(Filter $filter)
     {
-        $dealerId = Cache::get(env('DEALER_ID_KEY', 'api_dealer_id'));
         
-        if (empty($dealerId) || !isset($this->attributeModelIdMapping[$filter->attribute])) {
+        $requestData = app('request')->all();
+
+        if (empty($requestData['dealer_id']) || !isset($this->attributeModelIdMapping[$filter->attribute])) {
             return [];
         }
+
+        $query = Part::with($filter->attribute)
+                       ->where('show_on_website', 1);
         
-        $parts = Part::with($filter->attribute)
-                        ->whereIn('dealer_id', $dealerId)
-                        ->whereNotNull($this->attributeModelIdMapping[$filter->attribute])
-                        ->groupBy($this->attributeModelIdMapping[$filter->attribute])
-                        ->get();
+        $query = $this->addFiltersToQuery($query, $requestData);
         
+        $parts = $query->whereNotNull($this->attributeModelIdMapping[$filter->attribute])
+                          ->groupBy($this->attributeModelIdMapping[$filter->attribute])
+                          ->get();
+                          
         $values = [];
           
         foreach($parts as $part) {
             
-            $count = Part::whereIn('dealer_id', $dealerId)->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute}->id)->count();
-            
+            $count = Part::whereIn('dealer_id', $requestData['dealer_id'])->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute}->id)->count();
+
             $values[] = [
+                'id' => $part->{$filter->attribute}->id,
                 'label' => $part->{$filter->attribute}->name,
                 'value' => $part->{$filter->attribute}->name,
-                'count' => $count, // do Query
+                'count' => $count, 
                 'base' => 0, // What is this?
                 'status' => 'selectable'
             ];
         }
                 
         return $values;
+    }
+    
+    private function addFiltersToQuery($query, $requestData) {
+        foreach($this->attributeModelIdMapping as $value) {
+            if (isset($requestData[$value])) {
+                $query = $query->whereIn($value, $requestData[$value]);
+            }
+        }        
+        
+        return $query;
     }
     
 }

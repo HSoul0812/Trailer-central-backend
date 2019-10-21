@@ -68,6 +68,15 @@ $api->version('v1', function ($api) {
     $api->get('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@show');
     $api->post('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@update');
     $api->delete('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@destroy');
+    
+    /**
+     * Part Types
+     */
+    $api->get('parts/vendors', 'App\Http\Controllers\v1\Parts\VendorController@index');
+    $api->put('parts/vendors', 'App\Http\Controllers\v1\Parts\VendorController@create');
+    $api->get('parts/vendors/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\VendorController@show');
+    $api->post('parts/vendors/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\VendorController@update');
+    $api->delete('parts/vendors/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\VendorController@destroy');
 
     /*
     |--------------------------------------------------------------------------

@@ -4,6 +4,8 @@ namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
+use App\Models\Parts\CacheStoreTime;
+use Carbon\Carbon;
 
 class Part extends Model
 { 
@@ -49,6 +51,60 @@ class Part extends Model
     protected $hidden = [
 
     ];
+    
+    protected $cacheStores = [
+        [
+            'dealer_id' => 'dealer_id',
+            'type_id' => 'type_id',
+            'manufacturer_id' => 'manufacturer_id',
+            'category_id' => 'category_id',
+            'brand_id' => 'brand_id'
+        ],
+        [
+            'dealer_id' => 'dealer_id',
+            'type_id' => 'type_id',
+            'manufacturer_id' => 'manufacturer_id',
+            'category_id' => 'category_id',
+            'brand_id' => null
+        ],
+        [
+            'dealer_id' => 'dealer_id',
+            'type_id' => 'type_id',
+            'manufacturer_id' => 'manufacturer_id',
+            'category_id' => null,
+            'brand_id' => null
+        ],
+        [
+            'dealer_id' => 'dealer_id',
+            'type_id' => 'type_id',
+            'manufacturer_id' => null,
+            'category_id' => null,
+            'brand_id' => null
+        ],
+        [
+            'dealer_id' => 'dealer_id',
+            'type_id' => null,
+            'manufacturer_id' => null,
+            'category_id' => null,
+            'brand_id' => null
+        ]
+    ];
+    
+    public static function boot() {
+        parent::boot();
+        
+        static::created(function ($part) {
+            
+            $part->updateCacheStoreTimes();
+
+        });
+        
+        static::updated(function ($part) { 
+            
+            $part->updateCacheStoreTimes();
+
+        });
+    }
         
     public function searchableAs()
     {
@@ -68,6 +124,20 @@ class Part extends Model
         $array['vehicle_specific'] = $this->vehicleSpecifc;
 
         return $array;
+    }
+    
+    // Move to a trait
+    public function updateCacheStoreTimes() 
+    {
+        foreach($this->cacheStores as $cache) {
+            foreach($cache as $key => $value) {
+                if (!empty($value)) {
+                    $cache[$key] = $this->{$value};
+                }
+            }                
+            $cacheStoreTime = CacheStoreTime::firstOrCreate($cache);
+            $cacheStoreTime->update_time = Carbon::now();
+        }
     }
         
     public function brand()

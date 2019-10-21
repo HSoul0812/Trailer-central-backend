@@ -7,10 +7,11 @@ use Dingo\Api\Http\Request;
 use App\Repositories\Website\Parts\FilterRepositoryInterface;
 use App\Http\Requests\Website\Parts\GetFiltersRequest;
 use App\Transformers\Website\Parts\FilterTransformer;
-
+use App\Models\Traits\Parts\Cache;
 
 class FilterController extends RestfulController
 {
+    use Cache;
     
     protected $filters;
     
@@ -49,6 +50,10 @@ class FilterController extends RestfulController
         }
         
         return $this->response->errorBadRequest();
+    }
+    
+    protected function getCacheName() {
+        return 'parts_filter_cache';
     }
     
 }
