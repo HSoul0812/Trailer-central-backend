@@ -62,7 +62,17 @@ class PartsUpdateTest extends TestCase
             'vehicle_make' => 'test',
             'vehicle_model' => 'test',
             'vehicle_year_from' => 1990,
-            'vehicle_year_to' => 2019
+            'vehicle_year_to' => 2019,
+            'bins' => [
+                [
+                    'bin_id' => 4,
+                    'quantity' => 4
+                ],
+                [
+                    'bin_id' => 3,
+                    'quantity' => 4
+                ],
+            ]
         ];
         
         $this->json('POST', '/api/parts/'.$data['part']->id, $updateData, ['access-token' => $authToken->access_token]) 
@@ -163,7 +173,17 @@ class PartsUpdateTest extends TestCase
                     'position' => 2
                 ]
             ],
-            'video_embed_code' => 'zxczxczc'
+            'video_embed_code' => 'zxczxczc',
+            'bins' => [
+                [
+                    'bin_id' => 7,
+                    'quantity' => 2
+                ],
+                [
+                    'bin_id' => 2,
+                    'quantity' => 2
+                ],
+            ]
         ];  
         
         $partsRepository = new PartRepository();

@@ -222,6 +222,20 @@ class PartsController extends RestfulController
      *            description="Image URL array"
      *         )
      *     ),
+     *    @OA\Parameter(
+     *         name="bins",
+     *         in="query",
+     *         description="Part bins",
+     *         required=false,
+     *         @OA\Property(
+     *            type="array",
+     *            @OA\Items(
+     *              type="array",
+     *              @OA\Items()
+     *            ),
+     *            description="Bin array with bin_id and name"
+     *         )
+     *     ),
      * 
      *     @OA\Response(
      *         response="200",

@@ -8,6 +8,7 @@ use App\Models\Parts\PartImage;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
+use App\Models\Parts\BinQuantity;
 
 /**
  *  
@@ -54,6 +55,16 @@ class PartRepository implements PartRepositoryInterface {
             if (isset($params['images'])) {
                 foreach ($params['images'] as $image) {
                     $this->storeImage($part->id, $image);
+                }
+            }
+            
+            if (isset($params['bins'])) {
+                foreach ($params['bins'] as $bin) {
+                    BinQuantity::create([
+                        'part_id' => $part->id,
+                        'bin_id' => $bin['bin_id'],
+                        'qty' => $bin['quantity']
+                    ]);
                 }
             }
             
@@ -142,6 +153,17 @@ class PartRepository implements PartRepositoryInterface {
                     $part->images()->delete();
                     foreach($params['images'] as $image) {
                         $this->storeImage($part->id, $image);
+                    }
+                }
+                
+                if (isset($params['bins'])) {
+                    $part->bins()->delete();
+                    foreach ($params['bins'] as $bin) {
+                        BinQuantity::create([
+                            'part_id' => $part->id,
+                            'bin_id' => $bin['bin_id'],
+                            'qty' => $bin['quantity']
+                        ]);
                     }
                 }
             }            

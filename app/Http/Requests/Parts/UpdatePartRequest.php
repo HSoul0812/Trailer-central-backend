@@ -37,7 +37,8 @@ class UpdatePartRequest extends Request {
         'vehicle_year_to' => 'integer',
         'images' => 'array',
         'images.*.url' => 'url',
-        'images.*.position' => 'integer'
+        'images.*.position' => 'integer',
+        'bins' => 'array'
     ];
     
 }

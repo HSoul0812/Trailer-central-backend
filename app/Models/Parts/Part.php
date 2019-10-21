@@ -174,4 +174,9 @@ class Part extends Model
     {
         return $this->hasMany('App\Models\Parts\PartImage');
     }
+    
+    public function bins()
+    {
+        return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
+    }
 }

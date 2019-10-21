@@ -9,6 +9,7 @@ use App\Models\Parts\Brand;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
 use App\Models\User\AuthToken;
+use App\Models\Parts\BinQuantity;
 
 class PartsCreateTest extends TestCase
 {
@@ -140,7 +141,17 @@ class PartsCreateTest extends TestCase
                     'position' => 2
                 ]
             ],
-            'video_embed_code' => 'zxczxczc'
+            'video_embed_code' => 'zxczxczc',
+            'bins' => [
+                [
+                    'bin_id' => 4,
+                    'quantity' => 4
+                ],
+                [
+                    'bin_id' => 3,
+                    'quantity' => 4
+                ],
+            ]
         ];        
     }
 }
