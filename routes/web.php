@@ -69,6 +69,15 @@ $api->version('v1', function ($api) {
     $api->post('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@update');
     $api->delete('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@destroy');
     
+    /**
+     * Part Bulk
+     */
+    $api->get('parts/bulk', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@index');
+    $api->post('parts/bulk', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@create');
+    $api->get('parts/bulk/{id:[0-9]+}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@show');
+    $api->put('parts/bulk/{id:[0-9]+}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@update');
+    $api->delete('parts/bulk/{id:[0-9]+}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@destroy');
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -105,4 +114,6 @@ $api->version('v1', function ($api) {
     $api->get('vendors/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\VendorController@show');
     $api->post('vendors/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\VendorController@update');
     $api->delete('vendors/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\VendorController@destroy');
+    
+    
 });

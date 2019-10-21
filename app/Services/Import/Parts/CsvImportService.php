@@ -1,0 +1,293 @@
+<?php
+
+namespace App\Services\Import\Parts;
+
+use App\Services\Import\Parts\CsvImportServiceInterface;
+use App\Repositories\Bulk\BulkUploadRepositoryInterface;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Parts\Vendor;
+use App\Models\Parts\Brand;
+use App\Models\Parts\Category;
+use App\Models\Parts\Type;
+use App\Models\Parts\Part;
+use App\Models\Bulk\Parts\BulkUpload;
+use App\Repositories\Parts\PartRepositoryInterface;
+/**
+ * 
+ *
+ * @author Eczek
+ */
+class CsvImportService implements CsvImportServiceInterface 
+{
+    
+    const VENDOR = 'Vendor';
+    const BRAND = 'Brand';
+    const TYPE = 'Type';
+    const CATEGORY = 'Category';
+    const SUBCATEGORY = 'Subcategory';
+    const TITLE = 'Title';
+    const SKU = 'SKU';
+    const PRICE = 'Price';
+    const DEALER_COST = 'Dealer Cost';
+    const MSRP = 'MSRP';
+    const WEIGHT = 'Weight';
+    const WEIGHT_RATING = 'Weight Rating';
+    const DESCRIPTION = 'Description';
+    const SHOW_ON_WEBSITE = 'Show on website';
+    const IMAGE = 'Image';
+    const VIDEO_EMBED_CODE = 'Video Embed Code';
+    
+    protected $bulkUploadRepository; 
+    protected $partsRepository;
+    protected $bulkUpload;
+    
+    protected $allowedHeaderValues = [
+        self::VENDOR => true,
+        self::BRAND => true,
+        self::TYPE => true,
+        self::CATEGORY => true,
+        self::SUBCATEGORY => true,
+        self::TITLE => true,
+        self::SKU => true,
+        self::PRICE => true,
+        self::DEALER_COST => true,
+        self::MSRP => true,
+        self::WEIGHT => true,
+        self::WEIGHT_RATING => true,
+        self::DESCRIPTION => true,
+        self::SHOW_ON_WEBSITE => true,
+        self::IMAGE => true,
+        self::VIDEO_EMBED_CODE => true
+    ];
+
+    private $validationErrors = [];
+        
+    private $indexToheaderMapping = [];
+    
+    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, PartRepositoryInterface $partRepository)
+    {
+        $this->bulkUploadRepository = $bulkUploadRepository;
+        $this->partsRepository = $partRepository;        
+    }
+    
+    public function run() 
+    {
+        if (!$this->validate()) {
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+            return false;
+        }
+        
+        $this->import();
+        return true;
+    }
+    
+    public function setBulkUpload(BulkUpload $bulkUpload)
+    {
+        $this->bulkUpload = $bulkUpload;
+    }
+    
+    protected function import() 
+    {
+        $this->streamCsv(function($csvData, $lineNumber) {
+            if ($lineNumber === 1) {
+                return;
+            }
+            $this->partsRepository->create($this->csvToPartData($csvData));            
+        });            
+        
+        $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
+    }
+    
+    protected function validate() 
+    {
+        $this->streamCsv(function($csvData, $lineNumber) {            
+            foreach($csvData as $index => $value) {
+                if ($lineNumber === 1) {
+                    if (!$this->isAllowedHeader($value)) {                        
+                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, "Invalid Header: ".$value);
+                    } else {
+                        $this->indexToheaderMapping[$index] = $value;
+                    }                
+                } else {
+                    if ($errorMessage = $this->isDataValid($this->indexToheaderMapping[$index], $value)) {
+                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, $errorMessage);
+                    }
+                }                    
+            }                
+        });
+        
+        if (count($this->validationErrors) > 0) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private function streamCsv($callback) 
+    {
+        $adapter = Storage::disk('s3')->getAdapter();
+        $client = $adapter->getClient();
+        $client->registerStreamWrapper();
+        
+        if (!($stream = fopen("s3://{$adapter->getBucket()}/{$this->bulkUpload->import_source}", 'r'))) {
+            throw new \Exception('Could not open stream for reading file: ['.$this->bulkUpload->import_source.']');
+        }
+        
+        $lineNumber = 1;
+        while (!feof($stream)) {
+             $isEmptyRow = true;            
+             $csvData = fgetcsv($stream);
+             
+             foreach($csvData as $value) {
+                 if (!empty($value)) {
+                     $isEmptyRow = false;
+                     break;
+                 }
+             }
+             
+             if ($isEmptyRow) {
+                 continue;
+             }
+             
+             $callback($csvData, $lineNumber++);
+             flush();
+        }
+    }
+    
+    private function isAllowedHeader($val) 
+    {
+        return isset($this->allowedHeaderValues[$val]);
+    }
+    
+    private function printError($line, $column, $errorMessage) 
+    {
+        return "$errorMessage in line $line at column $column";
+    }
+    
+    private function csvToPartData($csvData) 
+    {
+        $formattedImages = [];
+        $keyToIndexMapping = [];
+        foreach($this->indexToheaderMapping as $index => $value) {
+            $keyToIndexMapping[$value] = $index;
+        }        
+        
+        $part = [];
+        $part['dealer_id'] = $this->bulkUpload->dealer_id;
+        $part['vendor_id'] = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first()->id;
+        $part['brand_id'] = Brand::where('name',  $csvData[$keyToIndexMapping[self::BRAND]])->first()->id;
+        $part['type_id'] = Type::where('name',  $csvData[$keyToIndexMapping[self::TYPE]])->first()->id;
+        $part['category_id'] = Category::where('name',  $csvData[$keyToIndexMapping[self::CATEGORY]])->first()->id;
+        $part['subcategory'] = $csvData[$keyToIndexMapping[self::CATEGORY]];
+        $part['sku'] = $csvData[$keyToIndexMapping[self::SKU]];
+        $part['price'] = empty($csvData[$keyToIndexMapping[self::PRICE]]) ? : $csvData[$keyToIndexMapping[self::PRICE]];
+        $part['dealer_cost'] = empty($csvData[$keyToIndexMapping[self::DEALER_COST]]) ? 0 : $csvData[$keyToIndexMapping[self::DEALER_COST]];        
+        $part['msrp'] = empty($csvData[$keyToIndexMapping[self::MSRP]]) ? 0 : $csvData[$keyToIndexMapping[self::MSRP]];
+        $part['weight'] = $csvData[$keyToIndexMapping[self::WEIGHT]];
+        $part['weight_rating'] = $csvData[$keyToIndexMapping[self::WEIGHT_RATING]];
+        $part['description'] = $csvData[$keyToIndexMapping[self::DESCRIPTION]];        
+        $part['show_on_website'] = $csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]];
+        $part['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
+        
+        if (isset($keyToIndexMapping[self::VIDEO_EMBED_CODE]) && isset($csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]])) {
+            $part['video_embed_code'] = $csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]];
+        }        
+        
+        if (!empty($csvData[$keyToIndexMapping[self::IMAGE]])) {
+            $images = explode(',', $csvData[$keyToIndexMapping[self::IMAGE]]);
+            foreach($images as $index => $imageUrl) {
+                $formattedImages[] = [
+                    'url' => $imageUrl,
+                    'position' => $index
+                ];
+            }
+            $part['images'] = $formattedImages;
+        }
+        
+        return $part;          
+    }
+    
+    /**
+     * Returnst true if valid or error message if invalid
+     * 
+     * @param string $type
+     * @param string $value 
+     * @return bool|string
+     */
+    private function isDataValid($type, $value) 
+    {       
+        switch($type) {
+            case self::VENDOR:
+                if (!empty($value)) {
+                    $vendor = Vendor::where('name', $value)->first();
+                    if (empty($vendor)) {
+                        return "Vendor {$value} does not exist in the system.";
+                    }
+                }
+                break;
+            case self::BRAND:
+                if (empty($value)) {
+                    return "Brand cannot be empty.";
+                }
+                
+                $brand = Brand::where('name', $value)->first();
+                if (empty($brand)) {
+                    return "Brand {$value} does not exist in the system.";
+                }
+                break;
+            case self::TYPE:
+                if (empty($value)) {
+                    return "Type cannot be empty.";
+                }
+                
+                $type = Type::where('name', $value)->first();
+                if (empty($type)) {
+                    return "Type {$value} does not exist in the system.";
+                }
+                break;
+            case self::SUBCATEGORY:
+                if (empty($value)) {
+                    return "Subcategory cannot be empty.";
+                }
+                break;
+            case self::CATEGORY:
+                if (empty($value)) {
+                    return "Category cannot be empty.";
+                }
+                
+                $category = Category::where('name', $value)->first();
+                if (empty($category)) {
+                    return "Category {$value} does not exist in the system.";
+                }
+                break;
+            case self::SKU:
+                if (empty($value)) {
+                    return "SKU cannot be empty.";
+                }
+                
+                $part = Part::where('sku', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
+                if (!empty($part)) {
+                    return "SKU {$value} already exists in the system.";
+                }
+                break;
+            case self::SHOW_ON_WEBSITE:
+                if (!empty($value)) {
+                   if (strtolower($value) != 'no' && strtolower($value) != 'yes') {
+                        return "Show on website {$value} is not valid. Needs to be yes or no.";
+                   } 
+                }                
+                break;
+            case self::IMAGE:
+                if (!empty($value)) {
+                   $imageUrls = explode(',', $value);
+                    foreach($imageUrls as $imageUrl) {
+                        if (filter_var($imageUrl, FILTER_VALIDATE_URL) === FALSE) {
+                            return "Images need to be comma separated and valid URLs";
+                        }
+                    }    
+                }                             
+                break;
+                
+        }
+    }
+}

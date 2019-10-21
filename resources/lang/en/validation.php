@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'mimes' => 'File extension is not allowed',
     'type_exists' => 'The :attribute does not exist in the DB.',
     'category_exists' => 'The :attribute does not exist in the DB.',
     'brand_exists' => 'The :attribute does not exist in the DB.',
