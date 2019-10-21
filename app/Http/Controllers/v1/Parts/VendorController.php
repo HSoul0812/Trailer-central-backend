@@ -8,6 +8,9 @@ use App\Repositories\Parts\VendorRepositoryInterface;
 use App\Transformers\Parts\VendorTransformer;
 use App\Http\Requests\Parts\GetVendorsRequest;
 
+/**
+ * @todo migrate outside Parts
+ */
 class VendorController extends RestfulController
 {
     
@@ -25,7 +28,7 @@ class VendorController extends RestfulController
     
      /**
      * @OA\Get(
-     *     path="/api/parts/vendor",
+     *     path="/api/vendors",
      *     description="Retrieve a list of vendors",     
      *     tags={"Vendor"},
      *     @OA\Parameter(
