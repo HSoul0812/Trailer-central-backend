@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
 use App\Models\Parts\BinQuantity;
+use App\Exceptions\ImageNotDownloadedException;
 
 /**
  *  
@@ -32,13 +33,54 @@ class PartRepository implements PartRepositoryInterface {
         '-price' => [
             'field' => 'price',
             'direction' => 'ASC'
+        ],
+        'sku' => [
+            'field' => 'sku',
+            'direction' => 'DESC'
+        ],
+        '-sku' => [
+            'field' => 'sku',
+            'direction' => 'ASC'
+        ],
+        'dealer_cost' => [
+            'field' => 'dealer_cost',
+            'direction' => 'DESC'
+        ],
+        '-dealer_cost' => [
+            'field' => 'dealer_cost',
+            'direction' => 'ASC'
+        ],
+        'msrp' => [
+            'field' => 'msrp',
+            'direction' => 'DESC'
+        ],
+        '-msrp' => [
+            'field' => 'msrp',
+            'direction' => 'ASC'
+        ],
+        'subcategory' => [
+            'field' => 'subcategory',
+            'direction' => 'DESC'
+        ],
+        '-subcategory' => [
+            'field' => 'subcategory',
+            'direction' => 'ASC'
+        ],
+        'created_at' => [
+            'field' => 'created_at',
+            'direction' => 'DESC'
+        ],
+        '-created_at' => [
+            'field' => 'created_at',
+            'direction' => 'ASC'
         ]
     ];
     
     public function create($params) {
-        $part = Part::create($params);
+        DB::beginTransaction();
         
-        DB::transaction(function() use (&$part, $params) {
+        try {            
+            $part = Part::create($params);
             
             if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
 
@@ -68,10 +110,17 @@ class PartRepository implements PartRepositoryInterface {
                 }
             }
             
-        });
+             DB::commit(); 
+        } catch (\ImageNotDownloadedException $ex) {
+            DB::rollBack();
+            throw new ImageNotDownloadedException($ex->getMessage());
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return false;
+        }
         
-        
-        return $part;
+       
+       return $part;
     }
 
     public function delete($params) {
@@ -82,10 +131,54 @@ class PartRepository implements PartRepositoryInterface {
     public function get($params) {
         return Part::findOrFail($params['id']);
     }
+    
+    public function getAllSearch($params) {
+        $query = Part::search($params['search_term']);
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        }
+        
+        if (isset($params['dealer_id'])) {
+             $query = $query->where('dealer_id', current($params['dealer_id']));
+        }
+        
+        if (isset($params['type_id'])) {
+            $query = $query->where('type_id', current($params['type_id']));
+        }
+        
+        if (isset($params['category_id'])) {
+            $query = $query->where('category_id', current($params['category_id']));
+        }
+        
+        if (isset($params['manufacturer_id'])) {
+            $query = $query->where('manufacturer_id', current($params['manufacturer_id']));
+        }
+        
+        if (isset($params['brand_id'])) {
+            $query = $query->where('brand_id', current($params['brand_id']));
+        }
+         
+        if (isset($params['show_on_website'])) {           
+           $query = $query->where('show_on_website', $params['show_on_website']);
+        }
+        
+        if (isset($params['price_min']) && isset($params['price_max'])) {
+            $query = $query->whereBetween('price', [$params['price_min'], $params['price_max']]);
+        } else if (isset($params['price'])) {
+            $query = $query->where('price', $params['price']);
+        }         
+        
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        } 
+        
+        return $query->paginate($params['per_page'])->appends($params);
+    }
 
     public function getAll($params) {   
         
-        $query = Part::where('show_on_website', true);
+        $query = Part::where('id', '>', 0);                      
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
@@ -111,12 +204,20 @@ class PartRepository implements PartRepositoryInterface {
             $query = $query->whereIn('brand_id', $params['brand_id']);
         }
         
+        if (isset($params['id'])) {
+             $query = $query->whereIn('id', $params['id']);
+        }
+        
         if (isset($params['subcategory'])) {           
             $query = $query->where('subcategory', 'LIKE', '%'.$params['subcategory'].'%');
         }
         
         if (isset($params['sku'])) {           
             $query = $query->where('sku', 'LIKE', '%'.$params['sku'].'%');
+        }
+        
+        if (isset($params['show_on_website'])) {           
+           $query = $query->where('show_on_website', $params['show_on_website']);
         }
         
         if (isset($params['price_min']) && isset($params['price_max'])) {
@@ -127,7 +228,7 @@ class PartRepository implements PartRepositoryInterface {
         
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
-        }
+        } 
         
         return $query->paginate($params['per_page'])->appends($params);
     }
@@ -148,7 +249,12 @@ class PartRepository implements PartRepositoryInterface {
             }            
 
             $part->fill($params);
-            if ($part->save()) {
+            
+            if (!isset($params['vendor_id'])) {
+                $part->vendor_id = null;
+            }                       
+            
+            if ($part->save()) {   
                 if (isset($params['images'])) {
                     $part->images()->delete();
                     foreach($params['images'] as $image) {
@@ -177,7 +283,14 @@ class PartRepository implements PartRepositoryInterface {
         $explodedImage = explode('.', $image['url']);
         $imageExtension = $explodedImage[count($explodedImage) - 1];
         $fileName = md5($partId)."/".uniqid().".{$imageExtension}";
-        Storage::disk('s3')->put($fileName, file_get_contents($image['url']), 'public');
+        
+        try {
+            $imageData = file_get_contents($image['url'], false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
+        } catch (\Exception $ex) {
+            throw new ImageNotDownloadedException('Image not accessible: '.$image['url']);
+        }
+        
+        Storage::disk('s3')->put($fileName, $imageData, 'public');
         $s3ImageUrl = Storage::disk('s3')->url($fileName);
 
         PartImage::create([

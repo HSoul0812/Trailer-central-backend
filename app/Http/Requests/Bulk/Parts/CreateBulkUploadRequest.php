@@ -13,7 +13,7 @@ class CreateBulkUploadRequest extends Request {
     
     protected $rules = [
         'dealer_id' => 'required|integer',
-//        'csv_file' => 'required|mimes:csv'
+        'csv_file' => 'required'
     ];
     
 }

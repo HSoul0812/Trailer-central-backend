@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Bulk\Parts\BulkUpload;
-use Illuminate\Support\Facades\Log;
 
 /**
  * 
@@ -35,10 +34,11 @@ class ProcessBulkUpload extends Job {
      */
     public function handle()
     {
+        Log::info('Starting bulk upload');
         try {
             $this->csvImportService->run();
         } catch (\Exception $ex) {
-            Log::channel('bulk-upload')->info($ex->getMessage());
+            Log::info($ex->getMessage());
         }
     }
     

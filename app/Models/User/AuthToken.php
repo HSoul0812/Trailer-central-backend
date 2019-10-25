@@ -14,6 +14,7 @@ class AuthToken extends Model
      * @var array
      */
     protected $fillable = [
+        'user_id',
         'access_token'
     ];
 

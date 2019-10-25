@@ -368,6 +368,20 @@ class PartsController extends RestfulController
      *            description="Brand ID array"
      *         )
      *     ),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="Part IDs",
+     *         required=false,
+     *         @OA\Property(
+     *            type="array",
+     *            @OA\Items(
+     *              type="array",
+     *              @OA\Items()
+     *            ),
+     *            description="Part IDs array"
+     *         )
+     *     ),
      *   @OA\Parameter(
      *         name="price",
      *         in="query",
@@ -390,7 +404,14 @@ class PartsController extends RestfulController
         $request = new GetPartsRequest($request->all());
         
         if ( $request->validate() ) {
-            return $this->response->paginator($this->parts->getAll($request->all()), new PartsTransformer());
+            
+            if ($request->has('search_term')) {
+                $parts = $this->parts->getAllSearch($request->all());
+            } else {
+                $parts = $this->parts->getAll($request->all());
+            }
+            
+            return $this->response->paginator($parts, new PartsTransformer());
         }
         
         return $this->response->errorBadRequest();

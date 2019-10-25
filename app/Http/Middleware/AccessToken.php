@@ -21,7 +21,7 @@ class AccessToken
         if ($request->has('dealer_id')) {
             Cache::put(env('DEALER_ID_KEY', 'api_dealer_id'), $request->get('dealer_id'));
         }
-        
+
         if ($request->isMethod('get')) {
             return $next($request);
         }

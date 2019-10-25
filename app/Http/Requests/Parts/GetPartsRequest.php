@@ -12,7 +12,7 @@ class GetPartsRequest extends Request {
     
     protected $rules = [
         'per_page' => 'integer',
-        'sort' => 'in:price,-price,relevance,title,-title,length,-length',
+        'sort' => 'in:price,-price,relevance,title,-title,length,-length,sku,-sku,dealer_cost,-dealer_cost,msrp,-msrp,subcategory,-subcategory,created_at,-created_at',
         'type_id' => 'array',
         'type_id.*' => 'integer|type_exists',
         'category_id' => 'array',
@@ -23,7 +23,10 @@ class GetPartsRequest extends Request {
         'brand_id.*' => 'integer|brand_exists',
         'price' => 'price_format',
         'dealer_id' => 'array',
-        'dealer_id.*' => 'integer'
+        'dealer_id.*' => 'integer',
+        'show_on_website' => 'boolean',
+        'id' => 'array',
+        'id.*' => 'integer'
     ];
     
     public function all($keys = null) {

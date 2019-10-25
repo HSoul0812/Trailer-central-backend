@@ -105,14 +105,14 @@ class Part extends Model
 
         });
     }
-        
+            
     public function searchableAs()
     {
         return env('PARTS_ALGOLIA_INDEX', '');
     }
     
     public function toSearchableArray()
-    {
+    {                        
         $array = $this->toArray();
         
         $array['brand'] = (string)$this->brand;

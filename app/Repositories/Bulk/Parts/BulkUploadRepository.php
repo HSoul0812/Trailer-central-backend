@@ -16,11 +16,8 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
     
     public function create($params) {
         $csvKey = $this->storeCsv($params['csv_file']);
-        
-        if (!isset($params['status'])) {
-            $params['status'] = BulkUpload::PROCESSING;
-        }
-        
+       
+        $params['status'] = BulkUpload::PROCESSING;
         $params['import_source'] = $csvKey;
         
         $bulkUpload = BulkUpload::create($params);
@@ -39,7 +36,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
     public function getAll($params) {
         
         if (!isset($params['per_page'])) {
-            $params['per_page'] = 15;
+            $params['per_page'] = 100;
         }
 
         return BulkUpload::where('dealer_id', $params['dealer_id'])->paginate($params['per_page'])->appends($params);

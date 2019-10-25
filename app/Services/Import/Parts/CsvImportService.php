@@ -12,6 +12,8 @@ use App\Models\Parts\Type;
 use App\Models\Parts\Part;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Repositories\Parts\PartRepositoryInterface;
+use Illuminate\Support\Facades\Log;
+
 /**
  * 
  *
@@ -72,11 +74,14 @@ class CsvImportService implements CsvImportServiceInterface
     
     public function run() 
     {
+        Log::info('Starting import for bulk upload ID: ' . $this->bulkUpload->id);
         if (!$this->validate()) {
+            Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
             return false;
         }
         
+        Log::info('Validation passed for bulk upload ID: ' . $this->bulkUpload->id . ' proceeding with import...');
         $this->import();
         return true;
     }
@@ -92,7 +97,24 @@ class CsvImportService implements CsvImportServiceInterface
             if ($lineNumber === 1) {
                 return;
             }
-            $this->partsRepository->create($this->csvToPartData($csvData));            
+            
+            Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
+                        
+            try {
+                $part = $this->partsRepository->create($this->csvToPartData($csvData)); 
+                if (!$part) {
+                    $this->validationErrors[] = "Image inaccesible";
+                    $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+                    Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
+                    throw new \Exception("Image inaccesible");
+                }
+            } catch (\Exception $ex) {
+                $this->validationErrors[] = $ex->getMessage();
+                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
+                throw new \Exception("Image inaccesible");
+            }
+                       
         });            
         
         $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
@@ -103,9 +125,10 @@ class CsvImportService implements CsvImportServiceInterface
         $this->streamCsv(function($csvData, $lineNumber) {            
             foreach($csvData as $index => $value) {
                 if ($lineNumber === 1) {
-                    if (!$this->isAllowedHeader($value)) {                        
+                    if (!$this->isAllowedHeader($value)) {  
                         $this->validationErrors[] = $this->printError($lineNumber, $index + 1, "Invalid Header: ".$value);
                     } else {
+                        $this->allowedHeaderValues[$value] = 'allowed';
                         $this->indexToheaderMapping[$index] = $value;
                     }                
                 } else {
@@ -115,6 +138,12 @@ class CsvImportService implements CsvImportServiceInterface
                 }                    
             }                
         });
+        
+        foreach($this->allowedHeaderValues as $header => $headerValue) {
+            if ($headerValue !== 'allowed') {
+                $this->validationErrors[] = $this->printError(1, $header, "Header ".$header." not present.");
+            }
+        }
         
         if (count($this->validationErrors) > 0) {
             return false;
@@ -180,13 +209,13 @@ class CsvImportService implements CsvImportServiceInterface
         $part['category_id'] = Category::where('name',  $csvData[$keyToIndexMapping[self::CATEGORY]])->first()->id;
         $part['subcategory'] = $csvData[$keyToIndexMapping[self::CATEGORY]];
         $part['sku'] = $csvData[$keyToIndexMapping[self::SKU]];
-        $part['price'] = empty($csvData[$keyToIndexMapping[self::PRICE]]) ? : $csvData[$keyToIndexMapping[self::PRICE]];
+        $part['price'] = empty($csvData[$keyToIndexMapping[self::PRICE]]) ? 0 : $csvData[$keyToIndexMapping[self::PRICE]];
         $part['dealer_cost'] = empty($csvData[$keyToIndexMapping[self::DEALER_COST]]) ? 0 : $csvData[$keyToIndexMapping[self::DEALER_COST]];        
         $part['msrp'] = empty($csvData[$keyToIndexMapping[self::MSRP]]) ? 0 : $csvData[$keyToIndexMapping[self::MSRP]];
         $part['weight'] = $csvData[$keyToIndexMapping[self::WEIGHT]];
         $part['weight_rating'] = $csvData[$keyToIndexMapping[self::WEIGHT_RATING]];
         $part['description'] = $csvData[$keyToIndexMapping[self::DESCRIPTION]];        
-        $part['show_on_website'] = $csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]];
+        $part['show_on_website'] = strtolower($csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]]) === 'yes' ? true : false;
         $part['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
         
         if (isset($keyToIndexMapping[self::VIDEO_EMBED_CODE]) && isset($csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]])) {

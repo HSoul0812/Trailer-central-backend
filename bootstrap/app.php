@@ -80,6 +80,7 @@ $app->singleton('filesystem', function ($app) {
 */
 
 $app->middleware([
+    App\Http\Middleware\CorsMiddleware::class,
     App\Http\Middleware\AccessToken::class,
     'Illuminate\Session\Middleware\StartSession'
 ]);
@@ -100,6 +101,8 @@ $app->middleware([
 */
 
 $app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\CatchAllOptionsRequestsProvider::class);
+
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(\SwaggerLume\ServiceProvider::class);

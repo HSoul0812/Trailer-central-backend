@@ -18,6 +18,7 @@ return [
             'region' => 'The phone number is not the correct format for :region',
         ],
     ],
+    'url' => 'The :attribute needs to be a URL',
     'integer' => 'The :attribute needs to be an integer.',
     'array' => 'The :attribute needs to be an array.',
     'price_format' => 'The format for :attribute is incorrect. Starting price needs to be lower than end price. Formats supported are: [10 TO 100], [10.05 TO 100], [10.05 TO 100.05], [10 TO 100.05], [10], [10.05]'
