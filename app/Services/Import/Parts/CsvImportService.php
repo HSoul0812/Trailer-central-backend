@@ -10,6 +10,7 @@ use App\Models\Parts\Brand;
 use App\Models\Parts\Category;
 use App\Models\Parts\Type;
 use App\Models\Parts\Part;
+use App\Models\Parts\Bin;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Repositories\Parts\PartRepositoryInterface;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +39,36 @@ class CsvImportService implements CsvImportServiceInterface
     const SHOW_ON_WEBSITE = 'Show on website';
     const IMAGE = 'Image';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
+    const BIN_ID_1 = 'Bin 1 ID';
+    const BIN_QTY_1 = 'Bin 1 qty';
+    const BIN_LOC_1 = 'Bin 1 location';
+    const BIN_ID_2 = 'Bin 2 ID';
+    const BIN_QTY_2 = 'Bin 2 qty';
+    const BIN_LOC_2 = 'Bin 2 location';
+    const BIN_ID_3 = 'Bin 3 ID';
+    const BIN_QTY_3 = 'Bin 3 qty';
+    const BIN_LOC_3 = 'Bin 3 location';
+    const BIN_ID_4 = 'Bin 4 ID';
+    const BIN_QTY_4 = 'Bin 4 qty';
+    const BIN_LOC_4 = 'Bin 4 location';
+    const BIN_ID_5 = 'Bin 5 ID';
+    const BIN_QTY_5 = 'Bin 5 qty';
+    const BIN_LOC_5 = 'Bin 5 location';
+    const BIN_ID_6 = 'Bin 6 ID';
+    const BIN_QTY_6 = 'Bin 6 qty';
+    const BIN_LOC_6 = 'Bin 6 location';
+    const BIN_ID_7 = 'Bin 7 ID';
+    const BIN_QTY_7 = 'Bin 7 qty';
+    const BIN_LOC_7 = 'Bin 7 location';
+    const BIN_ID_8 = 'Bin 8 ID';
+    const BIN_QTY_8 = 'Bin 8 qty';
+    const BIN_LOC_8 = 'Bin 8 location';
+    const BIN_ID_9 = 'Bin 9 ID';
+    const BIN_QTY_9 = 'Bin 9 qty';
+    const BIN_LOC_9 = 'Bin 9 location';
+    const BIN_ID_10 = 'Bin 10 ID';
+    const BIN_QTY_10 = 'Bin 10 qty';
+    const BIN_LOC_10 = 'Bin 10 location';
     
     protected $bulkUploadRepository; 
     protected $partsRepository;
@@ -59,7 +90,27 @@ class CsvImportService implements CsvImportServiceInterface
         self::DESCRIPTION => true,
         self::SHOW_ON_WEBSITE => true,
         self::IMAGE => true,
-        self::VIDEO_EMBED_CODE => true
+        self::VIDEO_EMBED_CODE => true,
+        self::BIN_ID_1 => true,
+        self::BIN_QTY_1 => true,
+        self::BIN_ID_2 => true,
+        self::BIN_QTY_2 => true,
+        self::BIN_ID_3 => true,
+        self::BIN_QTY_3 => true,
+        self::BIN_ID_4 => true,
+        self::BIN_QTY_4 => true,
+        self::BIN_ID_5 => true,
+        self::BIN_QTY_5 => true,
+        self::BIN_ID_6 => true,
+        self::BIN_QTY_6 => true,
+        self::BIN_ID_7 => true,
+        self::BIN_QTY_7 => true,
+        self::BIN_ID_8 => true,
+        self::BIN_QTY_8 => true,
+        self::BIN_ID_9 => true,
+        self::BIN_QTY_9 => true,
+        self::BIN_ID_10 => true,
+        self::BIN_QTY_10 => true
     ];
 
     private $validationErrors = [];
@@ -107,14 +158,16 @@ class CsvImportService implements CsvImportServiceInterface
             if ($lineNumber === 1) {
                 return;
             }
-            
+
             echo 'Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
             Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
-                        
+
             try {
-                echo "Importing ".json_encode($this->csvToPartData($csvData)).PHP_EOL;
-                $part = $this->partsRepository->create($this->csvToPartData($csvData));                
-                if (!$part) { 
+                // Get Part Data
+                $partData = $this->csvToPartData($csvData);
+                echo "Importing ".json_encode($partData).PHP_EOL;
+                $part = $this->partsRepository->create($partData);
+                if (!$part) {
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
                     Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
@@ -246,7 +299,36 @@ class CsvImportService implements CsvImportServiceInterface
             }
             $part['images'] = $formattedImages;
         }
-        
+
+        // Get Bins
+        $bins = array();
+        for($i = 1; $i <= 10; $i++) {
+            // Get Constants
+            $bin = constant('BIN_ID_'. $i);
+            $qty = constant('BIN_QTY_'. $i);
+            $loc = constant('BIN_LOC_'. $i);
+
+            // Get Values
+            $binName = $csvData[$keyToIndexMapping[$bin]];
+            $binQty = $csvData[$keyToIndexMapping[$qty]];
+            $binLoc = $csvData[$keyToIndexMapping[$loc]];
+            $binId = Bin::where('bin_name', $binName)->first()->id;
+
+            // At Least One Exists?
+            if(!empty($binId)) {
+                $bins[] = array(
+                    'id' => !empty($binId) ? $binId : 0,
+                    'qty' => $binQty,
+                    'loc' => $binLoc,
+                    'name' => $binName
+                );
+            }
+        }
+        if(count($bins) > 0) {
+            $part['bins'] = $bins;
+        }
+
+        // Return Part Data
         return $part;          
     }
     
