@@ -40,7 +40,7 @@ class SyncPartsCommand extends Command
     {
         $parts = new PartRepository();
         $pdo = DB::connection()->getPdo();
-        $stmt = $pdo->query("SELECT * FROM `parts` WHERE 1");
+        $stmt = $pdo->query("SELECT * FROM `parts` WHERE dealer_id = 7439 AND sku NOT IN (SELECT sku FROM parts_v1 WHERE dealer_id = 7439)");
         $getImages = $pdo->prepare("SELECT * FROM parts_image WHERE part_id = :part_id ");
         
         while($row = $stmt->fetch()) {
@@ -80,7 +80,7 @@ class SyncPartsCommand extends Command
                     ]);
 
                 } else if (empty($brand) && empty($row['brand'])) {
-                    continue;
+                    $brand = Brand::first();
                 }
 
                 if(empty($type) && !empty($row['type'])) {
@@ -90,7 +90,7 @@ class SyncPartsCommand extends Command
                     ]);
 
                 } else if (empty($type) && empty($row['type'])) {
-                    continue;
+                    $type = Type::where('name', 'Misc')->first();
                 }
 
                 if(empty($category) && !empty($row['category'])) {
@@ -100,12 +100,12 @@ class SyncPartsCommand extends Command
                     ]);
 
                 } else if (empty($category) && empty($row['category'])) {
-                    continue;
+                    $category = Category::first();
                 }              
                 
                 $parts->create([
                     'dealer_id' => $row['dealer_id'],
-                    'vendor_id' => $row['vendor_id'],
+                    'vendor_id' => empty($row['vendor_id']) ? null : $row['vendor_id'],
                     'manufacturer_id' => $manufacturer->id ?? null,
                     'brand_id' => $brand->id,
                     'title' => $row['title'],

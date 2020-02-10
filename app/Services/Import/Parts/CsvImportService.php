@@ -74,13 +74,22 @@ class CsvImportService implements CsvImportServiceInterface
     
     public function run() 
     {
+        echo "Running...".PHP_EOL;
         Log::info('Starting import for bulk upload ID: ' . $this->bulkUpload->id);
-        if (!$this->validate()) {
-            Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
+        echo "Validating...".PHP_EOL;
+        try {
+           if (!$this->validate()) {
+                Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
+                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+                return false;
+            } 
+        } catch (\Exception $ex) {
+             Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
             return false;
         }
         
+        echo "Data Valid... Importing...".PHP_EOL;
         Log::info('Validation passed for bulk upload ID: ' . $this->bulkUpload->id . ' proceeding with import...');
         $this->import();
         return true;
@@ -93,16 +102,19 @@ class CsvImportService implements CsvImportServiceInterface
     
     protected function import() 
     {
+        echo "Importing.... 123".PHP_EOL;
         $this->streamCsv(function($csvData, $lineNumber) {
             if ($lineNumber === 1) {
                 return;
             }
             
+            echo 'Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
             Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
                         
             try {
-                $part = $this->partsRepository->create($this->csvToPartData($csvData)); 
-                if (!$part) {
+                echo "Importing ".json_encode($this->csvToPartData($csvData)).PHP_EOL;
+                $part = $this->partsRepository->create($this->csvToPartData($csvData));                
+                if (!$part) { 
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
                     Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
@@ -201,9 +213,11 @@ class CsvImportService implements CsvImportServiceInterface
             $keyToIndexMapping[$value] = $index;
         }        
         
+        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first();
+        
         $part = [];
         $part['dealer_id'] = $this->bulkUpload->dealer_id;
-        $part['vendor_id'] = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first()->id;
+        $part['vendor_id'] = !empty($vendor) ? $vendor->id : null;
         $part['brand_id'] = Brand::where('name',  $csvData[$keyToIndexMapping[self::BRAND]])->first()->id;
         $part['type_id'] = Type::where('name',  $csvData[$keyToIndexMapping[self::TYPE]])->first()->id;
         $part['category_id'] = Category::where('name',  $csvData[$keyToIndexMapping[self::CATEGORY]])->first()->id;

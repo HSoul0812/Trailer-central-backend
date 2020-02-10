@@ -116,7 +116,7 @@ class PartRepository implements PartRepositoryInterface {
             throw new ImageNotDownloadedException($ex->getMessage());
         } catch (\Exception $ex) {
             DB::rollBack();
-            return false;
+            throw new \Exception($ex->getMessage());
         }
         
        
@@ -202,6 +202,10 @@ class PartRepository implements PartRepositoryInterface {
         
         if (isset($params['brand_id'])) {
             $query = $query->whereIn('brand_id', $params['brand_id']);
+        }
+        
+        if (isset($params['show_on_website'])) {  
+            $query = $query->where('show_on_website', $params['show_on_website']);
         }
         
         if (isset($params['id'])) {

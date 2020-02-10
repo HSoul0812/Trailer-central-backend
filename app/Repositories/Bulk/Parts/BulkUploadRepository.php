@@ -30,7 +30,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
     }
 
     public function get($params) {
-        return BulkUpload::where('id', $params['id'])->first();
+        return BulkUpload::where(array_key_first($params), current($params))->first();
     }
 
     public function getAll($params) {

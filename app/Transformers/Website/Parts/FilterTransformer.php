@@ -6,7 +6,9 @@ use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Filter;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Parts\Part;
-
+use App\Models\Parts\Brand;
+use App\Models\Parts\Category;
+use App\Models\Parts\Type;
 class FilterTransformer extends TransformerAbstract
 {
     
@@ -20,10 +22,12 @@ class FilterTransformer extends TransformerAbstract
         
     private $queryString = '';
     
+    private $mappedTypes = [];
+    
     public function __construct() 
     {
         $requestData = app('request')->all(); 
-        
+
         foreach($requestData as $key => $value) {
             if ($key === 'dealer_id') {
                 continue;
@@ -32,15 +36,28 @@ class FilterTransformer extends TransformerAbstract
             if (is_array($value)) {
                 foreach($value as $index => $val) {
                     if ($index === 0 && empty($this->queryString)) {
-                        $this->queryString .= "?{$key}[]=$val";
+                        $this->queryString .= "?{$key}[]=".urlencode($val);
                     } else {
-                        $this->queryString .= "&{$key}[]=$val";
+                        $this->queryString .= "&{$key}[]=".urlencode($val);
                     }
                 }
            }
            
-           
+           if (is_array($value)) {
+               foreach($value as $index => $val) {
+                   if ($key == 'type_id') {
+                       
+                       $this->mappedTypes[$key][] = Type::where('name', $val)->first()->id;
+                       
+                   } else if ($key == 'brand_id') {
+                       $this->mappedTypes[$key][] = Brand::where('name', $val)->first()->id;
+                   } else if ($key == 'category_id') {
+                       $this->mappedTypes[$key][] = Category::where('name', $val)->first()->id;
+                   }
+               }
+           }
         }
+
     }
         
     
@@ -112,8 +129,8 @@ class FilterTransformer extends TransformerAbstract
             $count = $this->getPartsCount($filter, $part);
             $status = 'selectable';
             
-            if (isset($requestData[$this->attributeModelIdMapping[$filter->attribute]])) {
-                foreach($requestData[$this->attributeModelIdMapping[$filter->attribute]] as $id) {
+            if (isset($this->mappedTypes[$this->attributeModelIdMapping[$filter->attribute]])) {
+                foreach($this->mappedTypes[$this->attributeModelIdMapping[$filter->attribute]] as $id) {
                     if ($part->{$filter->attribute}->id == $id) {
                         $status = 'selected';
                         break;
@@ -121,7 +138,7 @@ class FilterTransformer extends TransformerAbstract
                 }
             }
             
-            $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]={$part->{$filter->attribute}->name}";
+            $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute}->name);
             
             if (empty($this->queryString)) {
                 $queryString = "?$actionQuery";
@@ -157,9 +174,12 @@ class FilterTransformer extends TransformerAbstract
     }
     
     private function addFiltersToQuery($query, $requestData, $attribute) {
+        $query = $query->whereIn('dealer_id', $requestData['dealer_id']);
         foreach($this->attributeModelIdMapping as $value) {
             if (isset($requestData[$value]) && $value != $attribute) {               
-                $query = $query->whereIn($value, $requestData[$value]);
+                if ($value != 'dealer_id') {
+                    $query = $query->whereIn($value, $this->mappedTypes[$value]);
+                }
             }
         }        
         
@@ -174,7 +194,7 @@ class FilterTransformer extends TransformerAbstract
         $requestData = app('request')->only('category_id', 'type_id', 'dealer_id', 'brand_id');        
         $query = Part::whereIn('dealer_id', $requestData['dealer_id'])->where('price', '>', 0);
         
-        foreach ($requestData as $attributeName => $attributeValues) {             
+        foreach ($this->mappedTypes as $attributeName => $attributeValues) {             
             $query = $query->whereIn($attributeName, $attributeValues);
         }
         
@@ -195,7 +215,7 @@ class FilterTransformer extends TransformerAbstract
         $requestData = app('request')->only('category_id', 'type_id', 'dealer_id', 'brand_id');        
         $query = Part::whereIn('dealer_id', $requestData['dealer_id'])->where('price', '>', 0);
         
-        foreach ($requestData as $attributeName => $attributeValues) {             
+        foreach ($this->mappedTypes as $attributeName => $attributeValues) {             
             $query = $query->whereIn($attributeName, $attributeValues);
         }
         
@@ -216,7 +236,7 @@ class FilterTransformer extends TransformerAbstract
         $query = Part::whereIn('dealer_id', $dealerId)
                     ->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute}->id);
         
-        foreach ($requestData as $attributeName => $attributeValues) {
+        foreach ($this->mappedTypes as $attributeName => $attributeValues) {
             if ( ($this->attributeModelIdMapping[$filter->attribute] == $attributeName) ) {
                 continue;
             }

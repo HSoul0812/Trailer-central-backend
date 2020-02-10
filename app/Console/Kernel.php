@@ -5,6 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
+use App\Console\Commands\RunBulkUploadCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -14,7 +15,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        SyncPartsCommand::class
+        SyncPartsCommand::class,
+        RunBulkUploadCommand::class
     ];
 
     /**
@@ -25,6 +27,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //
+        $schedule->command('run:bulk')->withoutOverlapping();
     }
 }
