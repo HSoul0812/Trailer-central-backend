@@ -304,23 +304,33 @@ class CsvImportService implements CsvImportServiceInterface
         $bins = array();
         for($i = 1; $i <= 10; $i++) {
             // Get Constants
-            $bin = constant('BIN_ID_'. $i);
+            $id = constant('BIN_ID_'. $i);
             $qty = constant('BIN_QTY_'. $i);
             $loc = constant('BIN_LOC_'. $i);
 
             // Get Values
-            $binName = $csvData[$keyToIndexMapping[$bin]];
+            $binName = $csvData[$keyToIndexMapping[$id]];
             $binQty = $csvData[$keyToIndexMapping[$qty]];
             $binLoc = $csvData[$keyToIndexMapping[$loc]];
-            $binId = Bin::where('bin_name', $binName)->first()->id;
+
+            // Get Existing Bin
+            $bin = Bin::where('bin_name', $binName);
+            $bin->where('dealer_id', $part['dealer_id']);
+            $binId = $bin->first()->id;
+            if(empty($binId)) {
+                // Create New Bin as Existing One Doesn't Exist
+                $binId = Bin::create([
+                    'dealer_id' => $part['dealer_id'],
+                    'location'  => $binLoc,
+                    'bin_name'  => $binName
+                ])->id;
+            }
 
             // At Least One Exists?
             if(!empty($binId)) {
                 $bins[] = array(
-                    'id' => !empty($binId) ? $binId : 0,
-                    'qty' => $binQty,
-                    'loc' => $binLoc,
-                    'name' => $binName
+                    'bin_id' => !empty($binId) ? $binId : 0,
+                    'quantity' => $binQty
                 );
             }
         }
