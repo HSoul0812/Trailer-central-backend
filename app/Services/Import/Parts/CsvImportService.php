@@ -396,6 +396,9 @@ class CsvImportService implements CsvImportServiceInterface
                 if (empty($value) && !is_numeric($value)) {
                     return "Bin quantity cannot be empty.";
                 }
+                else if(!is_numeric($value)) {
+                    return "Bin quantity must be numeric.";
+                }
                 break;
         }
     }

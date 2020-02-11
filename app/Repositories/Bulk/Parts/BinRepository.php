@@ -26,13 +26,20 @@ class BinRepository implements BinRepositoryInterface {
             return Bin::first($params['bin_id']);
         }
 
-        // Get By Dealer ID and Name
-        if(isset($params['bin_name']) && isset($params['dealer_id'])) {
-            return Bin::where('bin_name', $params['bin_name'])->where('dealer_id', $params['dealer_id'])->first();
+        // Initialize Bin Query
+        $query = Bin::where('id', '>', 0);
+        if(isset($params['dealer_id'])) {
+            $query = $query->where('dealer_id', $params['dealer_id']);
+        }
+        if(isset($params['bin_name'])) {
+            $query = $query->where('bin_name', $params['bin_name']);
+        }
+        if(isset($params['location'])) {
+            $query = $query->where('location', $params['location']);
         }
 
-        // Invalid
-        return null;
+        // Return First Value
+        return $query->first();
     }
 
     public function getAll($params) {
