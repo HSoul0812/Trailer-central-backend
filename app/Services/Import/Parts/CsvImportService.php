@@ -296,7 +296,7 @@ class CsvImportService implements CsvImportServiceInterface
         }
 
         // Get Bins
-        $part['bins'] = $this->binRepository->getAllBins($part['dealer_id'], $csvData, $keyToIndexMapping);
+        $part['bins'] = $this->binRepository->getAllBinsCsv($part['dealer_id'], $csvData, $keyToIndexMapping);
 
         // Return Part Data
         return $part;          
@@ -393,7 +393,7 @@ class CsvImportService implements CsvImportServiceInterface
                 }
                 break;
             case (preg_match(self::BIN_QTY, $type) ? true : false) :
-                if (empty($value)) {
+                if (empty($value) && !is_numeric($value)) {
                     return "Bin quantity cannot be empty.";
                 }
                 break;

@@ -23,11 +23,16 @@ class BinRepository implements BinRepositoryInterface {
     public function get($params) {
         // Bin ID Exists?
         if(isset($params['bin_id'])) {
-            return Bin::where('id', $params['bin_id'])->first();
+            return Bin::first($params['bin_id']);
         }
 
         // Get By Dealer ID and Name
-        return Bin::where('bin_name', $params['bin_name'])->where('dealer_id', $params['dealer_id'])->first();
+        if(isset($params['bin_name']) && isset($params['dealer_id'])) {
+            return Bin::where('bin_name', $params['bin_name'])->where('dealer_id', $params['dealer_id'])->first();
+        }
+
+        // Invalid
+        return null;
     }
 
     public function getAll($params) {
@@ -43,12 +48,12 @@ class BinRepository implements BinRepositoryInterface {
     }
 
     /**
-     * Gets List of Bins and Updates Them, Returns Result
+     * Gets List of Bins from CSV, Returns Result
      * 
      * @param array $csvData
      * @return array
      */
-    public function getAllBins($dealerId, $csvData, $keyToIndexMapping) {
+    public function getAllBinsCsv($dealerId, $csvData, $keyToIndexMapping) {
         // Loop Numbers to Find Bins
         $bins = array();
         for($i = 1; $i <= 10; $i++) {
