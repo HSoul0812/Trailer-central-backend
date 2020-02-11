@@ -398,8 +398,8 @@ class CsvImportService implements CsvImportServiceInterface
                     return "Bin cannot be empty.";
                 }
                 
-                $category = Bin::where('bin_name', $value)->first();
-                if (empty($category)) {
+                $bin = Bin::where('bin_name', $value)->first();
+                if (empty($bin)) {
                     return "Bin {$value} does not exist in the system.";
                 }
                 break;
