@@ -40,28 +40,9 @@ class CsvImportService implements CsvImportServiceInterface
     const SHOW_ON_WEBSITE = 'Show on website';
     const IMAGE = 'Image';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
+
     const BIN_ID = '/Bin \d+ ID/';
     const BIN_QTY = '/Bin \d+ qty/';
-    const BIN_ID_1 = 'Bin 1 ID';
-    const BIN_QTY_1 = 'Bin 1 qty';
-    const BIN_ID_2 = 'Bin 2 ID';
-    const BIN_QTY_2 = 'Bin 2 qty';
-    const BIN_ID_3 = 'Bin 3 ID';
-    const BIN_QTY_3 = 'Bin 3 qty';
-    const BIN_ID_4 = 'Bin 4 ID';
-    const BIN_QTY_4 = 'Bin 4 qty';
-    const BIN_ID_5 = 'Bin 5 ID';
-    const BIN_QTY_5 = 'Bin 5 qty';
-    const BIN_ID_6 = 'Bin 6 ID';
-    const BIN_QTY_6 = 'Bin 6 qty';
-    const BIN_ID_7 = 'Bin 7 ID';
-    const BIN_QTY_7 = 'Bin 7 qty';
-    const BIN_ID_8 = 'Bin 8 ID';
-    const BIN_QTY_8 = 'Bin 8 qty';
-    const BIN_ID_9 = 'Bin 9 ID';
-    const BIN_QTY_9 = 'Bin 9 qty';
-    const BIN_ID_10 = 'Bin 10 ID';
-    const BIN_QTY_10 = 'Bin 10 qty';
     
     protected $bulkUploadRepository;
     protected $partsRepository;
@@ -84,27 +65,12 @@ class CsvImportService implements CsvImportServiceInterface
         self::DESCRIPTION => true,
         self::SHOW_ON_WEBSITE => true,
         self::IMAGE => true,
-        self::VIDEO_EMBED_CODE => true,
-        self::BIN_ID_1 => true,
-        self::BIN_QTY_1 => true,
-        self::BIN_ID_2 => true,
-        self::BIN_QTY_2 => true,
-        self::BIN_ID_3 => true,
-        self::BIN_QTY_3 => true,
-        self::BIN_ID_4 => true,
-        self::BIN_QTY_4 => true,
-        self::BIN_ID_5 => true,
-        self::BIN_QTY_5 => true,
-        self::BIN_ID_6 => true,
-        self::BIN_QTY_6 => true,
-        self::BIN_ID_7 => true,
-        self::BIN_QTY_7 => true,
-        self::BIN_ID_8 => true,
-        self::BIN_QTY_8 => true,
-        self::BIN_ID_9 => true,
-        self::BIN_QTY_9 => true,
-        self::BIN_ID_10 => true,
-        self::BIN_QTY_10 => true
+        self::VIDEO_EMBED_CODE => true
+    ];
+
+    protected $optionalHeaderValues = [
+        self::BIN_ID => true,
+        self::BIN_QTY => true
     ];
 
     private $validationErrors = [];
@@ -185,7 +151,10 @@ class CsvImportService implements CsvImportServiceInterface
         $this->streamCsv(function($csvData, $lineNumber) {            
             foreach($csvData as $index => $value) {
                 if ($lineNumber === 1) {
-                    if (!$this->isAllowedHeader($value)) {  
+                    if($this->isOptionalHeader($value)) {
+                        $this->allowedHeaderValues[$value] = 'allowed';
+                        $this->indexToheaderMapping[$index] = $value;
+                    } elseif (!$this->isAllowedHeader($value)) {
                         $this->validationErrors[] = $this->printError($lineNumber, $index + 1, "Invalid Header: ".$value);
                     } else {
                         $this->allowedHeaderValues[$value] = 'allowed';
@@ -246,6 +215,23 @@ class CsvImportService implements CsvImportServiceInterface
     private function isAllowedHeader($val) 
     {
         return isset($this->allowedHeaderValues[$val]);
+    }
+    
+    private function isOptionalHeader($val) 
+    {
+        // In Optional Headers?
+        if(isset($this->optionalHeaderValues[$val])) {
+            return true;
+        }
+
+        // Loop Optional Headers
+        foreach($this->optionalHeaderValues as $regex) {
+            // Pattern is Regex?
+            if(@preg_match($regex, null) !== false){
+                return preg_match($regex, $val) ? true : false;
+            }
+        }
+        return false;
     }
     
     private function printError($line, $column, $errorMessage) 
