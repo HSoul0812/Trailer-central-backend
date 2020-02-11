@@ -40,6 +40,36 @@ class CsvImportService implements CsvImportServiceInterface
     const SHOW_ON_WEBSITE = 'Show on website';
     const IMAGE = 'Image';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
+    const BIN_ID_1 = 'Bin 1 ID';
+    const BIN_QTY_1 = 'Bin 1 qty';
+    const BIN_LOC_1 = 'Bin 1 location';
+    const BIN_ID_2 = 'Bin 2 ID';
+    const BIN_QTY_2 = 'Bin 2 qty';
+    const BIN_LOC_2 = 'Bin 2 location';
+    const BIN_ID_3 = 'Bin 3 ID';
+    const BIN_QTY_3 = 'Bin 3 qty';
+    const BIN_LOC_3 = 'Bin 3 location';
+    const BIN_ID_4 = 'Bin 4 ID';
+    const BIN_QTY_4 = 'Bin 4 qty';
+    const BIN_LOC_4 = 'Bin 4 location';
+    const BIN_ID_5 = 'Bin 5 ID';
+    const BIN_QTY_5 = 'Bin 5 qty';
+    const BIN_LOC_5 = 'Bin 5 location';
+    const BIN_ID_6 = 'Bin 6 ID';
+    const BIN_QTY_6 = 'Bin 6 qty';
+    const BIN_LOC_6 = 'Bin 6 location';
+    const BIN_ID_7 = 'Bin 7 ID';
+    const BIN_QTY_7 = 'Bin 7 qty';
+    const BIN_LOC_7 = 'Bin 7 location';
+    const BIN_ID_8 = 'Bin 8 ID';
+    const BIN_QTY_8 = 'Bin 8 qty';
+    const BIN_LOC_8 = 'Bin 8 location';
+    const BIN_ID_9 = 'Bin 9 ID';
+    const BIN_QTY_9 = 'Bin 9 qty';
+    const BIN_LOC_9 = 'Bin 9 location';
+    const BIN_ID_10 = 'Bin 10 ID';
+    const BIN_QTY_10 = 'Bin 10 qty';
+    const BIN_LOC_10 = 'Bin 10 location';
     
     protected $bulkUploadRepository;
     protected $partsRepository;
@@ -274,40 +304,7 @@ class CsvImportService implements CsvImportServiceInterface
         }
 
         // Get Bins
-        $bins = array();
-        for($i = 1; $i <= 10; $i++) {
-            // Get Constants
-            $id = constant('BIN_ID_'. $i);
-            $qty = constant('BIN_QTY_'. $i);
-            $loc = constant('BIN_LOC_'. $i);
-
-            // Get Values
-            $binName = $csvData[$keyToIndexMapping[$id]];
-            $binQty = $csvData[$keyToIndexMapping[$qty]];
-            $binLoc = $csvData[$keyToIndexMapping[$loc]];
-
-            // Get Existing Bin
-            $bin = Bin::where('bin_name', $binName);
-            $bin->where('dealer_id', $part['dealer_id']);
-            $binId = $bin->first()->id;
-            if(empty($binId)) {
-                // Create New Bin as Existing One Doesn't Exist
-                $binId = Bin::create([
-                    'dealer_id' => $part['dealer_id'],
-                    'location'  => $binLoc,
-                    'bin_name'  => $binName
-                ])->id;
-            }
-
-            // At Least One Exists?
-            if(!empty($binId)) {
-                $bins[] = array(
-                    'bin_id' => !empty($binId) ? $binId : 0,
-                    'quantity' => $binQty
-                );
-            }
-        }
-        $part['bins'] = $bins;
+        $part['bins'] = $this->binRepository->getAllBins($part['dealer_id'], $csvData, $keyToIndexMapping);
 
         // Return Part Data
         return $part;          
@@ -381,7 +378,7 @@ class CsvImportService implements CsvImportServiceInterface
                    if (strtolower($value) != 'no' && strtolower($value) != 'yes') {
                         return "Show on website {$value} is not valid. Needs to be yes or no.";
                    } 
-                }                
+                }
                 break;
             case self::IMAGE:
                 if (!empty($value)) {
@@ -391,7 +388,7 @@ class CsvImportService implements CsvImportServiceInterface
                             return "Images need to be comma separated and valid URLs";
                         }
                     }    
-                }                             
+                }
                 break;
                 
         }

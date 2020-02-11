@@ -122,6 +122,7 @@ $app->register(
     $app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository'),    
     $app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService'), 
     $app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository'), 
+    $app->bind('App\Repositories\Bulk\BinRepositoryInterface', 'App\Repositories\Bulk\Parts\BinRepository'), 
     $app->bind(Illuminate\Session\SessionManager::class, function ($app) {    
         return $app->make('session');
     })
