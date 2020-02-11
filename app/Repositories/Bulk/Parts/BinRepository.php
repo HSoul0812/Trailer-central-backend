@@ -25,7 +25,7 @@ class BinRepository implements BinRepositoryInterface {
     }
 
     public function get($params) {
-        return Bin::firstOrCreate($params);
+        throw new NotImplementedException;
     }
 
     public function getAll($params) {
@@ -34,6 +34,10 @@ class BinRepository implements BinRepositoryInterface {
 
     public function update($params) {
         throw new NotImplementedException;
+    }
+    
+    public function getOrCreate($params) {
+        return Bin::firstOrCreate($params);
     }
 
     /**
@@ -52,7 +56,7 @@ class BinRepository implements BinRepositoryInterface {
             $loc = str_replace('XXXX', $i, BIN_LOC_ID);
 
             // Get Values
-            $binId = $this->get(array(
+            $binId = $this->getOrCreate(array(
                 'dealer_id' => $dealerId,
                 'bin_name' => $csvData[$keyToIndexMapping[$id]],
                 'location' => $csvData[$keyToIndexMapping[$loc]],
