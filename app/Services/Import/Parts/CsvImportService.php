@@ -13,6 +13,7 @@ use App\Models\Parts\Part;
 use App\Models\Parts\Bin;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Repositories\Parts\PartRepositoryInterface;
+use App\Repositories\Parts\BinRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -39,39 +40,10 @@ class CsvImportService implements CsvImportServiceInterface
     const SHOW_ON_WEBSITE = 'Show on website';
     const IMAGE = 'Image';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
-    const BIN_ID_1 = 'Bin 1 ID';
-    const BIN_QTY_1 = 'Bin 1 qty';
-    const BIN_LOC_1 = 'Bin 1 location';
-    const BIN_ID_2 = 'Bin 2 ID';
-    const BIN_QTY_2 = 'Bin 2 qty';
-    const BIN_LOC_2 = 'Bin 2 location';
-    const BIN_ID_3 = 'Bin 3 ID';
-    const BIN_QTY_3 = 'Bin 3 qty';
-    const BIN_LOC_3 = 'Bin 3 location';
-    const BIN_ID_4 = 'Bin 4 ID';
-    const BIN_QTY_4 = 'Bin 4 qty';
-    const BIN_LOC_4 = 'Bin 4 location';
-    const BIN_ID_5 = 'Bin 5 ID';
-    const BIN_QTY_5 = 'Bin 5 qty';
-    const BIN_LOC_5 = 'Bin 5 location';
-    const BIN_ID_6 = 'Bin 6 ID';
-    const BIN_QTY_6 = 'Bin 6 qty';
-    const BIN_LOC_6 = 'Bin 6 location';
-    const BIN_ID_7 = 'Bin 7 ID';
-    const BIN_QTY_7 = 'Bin 7 qty';
-    const BIN_LOC_7 = 'Bin 7 location';
-    const BIN_ID_8 = 'Bin 8 ID';
-    const BIN_QTY_8 = 'Bin 8 qty';
-    const BIN_LOC_8 = 'Bin 8 location';
-    const BIN_ID_9 = 'Bin 9 ID';
-    const BIN_QTY_9 = 'Bin 9 qty';
-    const BIN_LOC_9 = 'Bin 9 location';
-    const BIN_ID_10 = 'Bin 10 ID';
-    const BIN_QTY_10 = 'Bin 10 qty';
-    const BIN_LOC_10 = 'Bin 10 location';
     
-    protected $bulkUploadRepository; 
+    protected $bulkUploadRepository;
     protected $partsRepository;
+    protected $binRepository;
     protected $bulkUpload;
     
     protected $allowedHeaderValues = [
@@ -117,10 +89,11 @@ class CsvImportService implements CsvImportServiceInterface
         
     private $indexToheaderMapping = [];
     
-    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, PartRepositoryInterface $partRepository)
+    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, PartRepositoryInterface $partRepository, BinRepositoryInterface $binRepository)
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
-        $this->partsRepository = $partRepository;        
+        $this->partsRepository = $partRepository;
+        $this->binRepository = $binRepository;
     }
     
     public function run() 
@@ -334,9 +307,7 @@ class CsvImportService implements CsvImportServiceInterface
                 );
             }
         }
-        if(count($bins) > 0) {
-            $part['bins'] = $bins;
-        }
+        $part['bins'] = $bins;
 
         // Return Part Data
         return $part;          
