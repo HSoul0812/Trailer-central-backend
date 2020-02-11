@@ -21,7 +21,13 @@ class BinRepository implements BinRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        // Bin ID Exists?
+        if(isset($params['bin_id'])) {
+            return Bin::where('id', $params['bin_id'])->first();
+        }
+
+        // Get By Dealer ID and Name
+        return Bin::where('bin_name', $params['bin_name'])->where('dealer_id', $params['dealer_id'])->first();
     }
 
     public function getAll($params) {
@@ -49,13 +55,11 @@ class BinRepository implements BinRepositoryInterface {
             // Get Keys
             $id  = 'Bin ' . $i . ' ID';
             $qty = 'Bin ' . $i . ' qty';
-            $loc = 'Bin ' . $i . ' location';
 
             // Get Values
-            $binId = $this->getOrCreate(array(
+            $binId = $this->get(array(
                 'dealer_id' => $dealerId,
                 'bin_name' => $csvData[$keyToIndexMapping[$id]],
-                'location' => $csvData[$keyToIndexMapping[$loc]],
             ))->id;
 
             // Return Bin Array
