@@ -4,6 +4,7 @@ namespace App\Services\Import\Parts;
 
 use App\Services\Import\Parts\CsvImportServiceInterface;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
+use App\Repositories\Bulk\BinRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\Vendor;
 use App\Models\Parts\Brand;
@@ -13,7 +14,6 @@ use App\Models\Parts\Part;
 use App\Models\Parts\Bin;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Repositories\Parts\PartRepositoryInterface;
-use App\Repositories\Parts\BinRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 /**
