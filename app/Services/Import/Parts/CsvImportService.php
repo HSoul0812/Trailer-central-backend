@@ -13,6 +13,7 @@ use App\Models\Parts\Part;
 use App\Models\Parts\Bin;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Repositories\Parts\PartRepositoryInterface;
+use App\Repositories\Parts\BinRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -39,6 +40,9 @@ class CsvImportService implements CsvImportServiceInterface
     const SHOW_ON_WEBSITE = 'Show on website';
     const IMAGE = 'Image';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
+    const BIN_ID = '/Bin \d+ ID/';
+    const BIN_QTY = '/Bin \d+ qty/';
+    const BIN_LOC = '/Bin \d+ location/';
     const BIN_ID_1 = 'Bin 1 ID';
     const BIN_QTY_1 = 'Bin 1 qty';
     const BIN_LOC_1 = 'Bin 1 location';
@@ -70,8 +74,9 @@ class CsvImportService implements CsvImportServiceInterface
     const BIN_QTY_10 = 'Bin 10 qty';
     const BIN_LOC_10 = 'Bin 10 location';
     
-    protected $bulkUploadRepository; 
+    protected $bulkUploadRepository;
     protected $partsRepository;
+    protected $binRepository;
     protected $bulkUpload;
     
     protected $allowedHeaderValues = [
@@ -117,10 +122,11 @@ class CsvImportService implements CsvImportServiceInterface
         
     private $indexToheaderMapping = [];
     
-    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, PartRepositoryInterface $partRepository)
+    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, PartRepositoryInterface $partRepository, BinRepositoryInterface $binRepository)
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
-        $this->partsRepository = $partRepository;        
+        $this->partsRepository = $partRepository;
+        $this->binRepository = $binRepository;
     }
     
     public function run() 
@@ -301,42 +307,7 @@ class CsvImportService implements CsvImportServiceInterface
         }
 
         // Get Bins
-        $bins = array();
-        for($i = 1; $i <= 10; $i++) {
-            // Get Constants
-            $id = constant('BIN_ID_'. $i);
-            $qty = constant('BIN_QTY_'. $i);
-            $loc = constant('BIN_LOC_'. $i);
-
-            // Get Values
-            $binName = $csvData[$keyToIndexMapping[$id]];
-            $binQty = $csvData[$keyToIndexMapping[$qty]];
-            $binLoc = $csvData[$keyToIndexMapping[$loc]];
-
-            // Get Existing Bin
-            $bin = Bin::where('bin_name', $binName);
-            $bin->where('dealer_id', $part['dealer_id']);
-            $binId = $bin->first()->id;
-            if(empty($binId)) {
-                // Create New Bin as Existing One Doesn't Exist
-                $binId = Bin::create([
-                    'dealer_id' => $part['dealer_id'],
-                    'location'  => $binLoc,
-                    'bin_name'  => $binName
-                ])->id;
-            }
-
-            // At Least One Exists?
-            if(!empty($binId)) {
-                $bins[] = array(
-                    'bin_id' => !empty($binId) ? $binId : 0,
-                    'quantity' => $binQty
-                );
-            }
-        }
-        if(count($bins) > 0) {
-            $part['bins'] = $bins;
-        }
+        $part['bins'] = $this->binRepository->getAllBins($part['dealer_id'], $csvData, $keyToIndexMapping);
 
         // Return Part Data
         return $part;          
@@ -410,7 +381,7 @@ class CsvImportService implements CsvImportServiceInterface
                    if (strtolower($value) != 'no' && strtolower($value) != 'yes') {
                         return "Show on website {$value} is not valid. Needs to be yes or no.";
                    } 
-                }                
+                }
                 break;
             case self::IMAGE:
                 if (!empty($value)) {
@@ -420,9 +391,23 @@ class CsvImportService implements CsvImportServiceInterface
                             return "Images need to be comma separated and valid URLs";
                         }
                     }    
-                }                             
+                }
                 break;
+            case (preg_match(self::BIN_ID, $type) ? true : false) :
+                if (empty($value)) {
+                    return "Bin cannot be empty.";
+                }
                 
+                $category = Bin::where('bin_name', $value)->first();
+                if (empty($category)) {
+                    return "Bin {$value} does not exist in the system.";
+                }
+                break;
+            case (preg_match(self::BIN_QTY, $type) ? true : false) :
+                if (empty($value)) {
+                    return "Bin quantity cannot be empty.";
+                }
+                break;
         }
     }
 }
