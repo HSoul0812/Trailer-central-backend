@@ -10,8 +10,10 @@ use App\Models\Parts\Brand;
 use App\Models\Parts\Category;
 use App\Models\Parts\Type;
 use App\Models\Parts\Part;
+use App\Models\Parts\Bin;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Repositories\Parts\PartRepositoryInterface;
+use App\Repositories\Parts\BinRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -38,9 +40,32 @@ class CsvImportService implements CsvImportServiceInterface
     const SHOW_ON_WEBSITE = 'Show on website';
     const IMAGE = 'Image';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
+    const BIN_ID = '/Bin \d+ ID/';
+    const BIN_QTY = '/Bin \d+ qty/';
+    const BIN_ID_1 = 'Bin 1 ID';
+    const BIN_QTY_1 = 'Bin 1 qty';
+    const BIN_ID_2 = 'Bin 2 ID';
+    const BIN_QTY_2 = 'Bin 2 qty';
+    const BIN_ID_3 = 'Bin 3 ID';
+    const BIN_QTY_3 = 'Bin 3 qty';
+    const BIN_ID_4 = 'Bin 4 ID';
+    const BIN_QTY_4 = 'Bin 4 qty';
+    const BIN_ID_5 = 'Bin 5 ID';
+    const BIN_QTY_5 = 'Bin 5 qty';
+    const BIN_ID_6 = 'Bin 6 ID';
+    const BIN_QTY_6 = 'Bin 6 qty';
+    const BIN_ID_7 = 'Bin 7 ID';
+    const BIN_QTY_7 = 'Bin 7 qty';
+    const BIN_ID_8 = 'Bin 8 ID';
+    const BIN_QTY_8 = 'Bin 8 qty';
+    const BIN_ID_9 = 'Bin 9 ID';
+    const BIN_QTY_9 = 'Bin 9 qty';
+    const BIN_ID_10 = 'Bin 10 ID';
+    const BIN_QTY_10 = 'Bin 10 qty';
     
-    protected $bulkUploadRepository; 
+    protected $bulkUploadRepository;
     protected $partsRepository;
+    protected $binRepository;
     protected $bulkUpload;
     
     protected $allowedHeaderValues = [
@@ -59,17 +84,38 @@ class CsvImportService implements CsvImportServiceInterface
         self::DESCRIPTION => true,
         self::SHOW_ON_WEBSITE => true,
         self::IMAGE => true,
-        self::VIDEO_EMBED_CODE => true
+        self::VIDEO_EMBED_CODE => true,
+        self::BIN_ID_1 => true,
+        self::BIN_QTY_1 => true,
+        self::BIN_ID_2 => true,
+        self::BIN_QTY_2 => true,
+        self::BIN_ID_3 => true,
+        self::BIN_QTY_3 => true,
+        self::BIN_ID_4 => true,
+        self::BIN_QTY_4 => true,
+        self::BIN_ID_5 => true,
+        self::BIN_QTY_5 => true,
+        self::BIN_ID_6 => true,
+        self::BIN_QTY_6 => true,
+        self::BIN_ID_7 => true,
+        self::BIN_QTY_7 => true,
+        self::BIN_ID_8 => true,
+        self::BIN_QTY_8 => true,
+        self::BIN_ID_9 => true,
+        self::BIN_QTY_9 => true,
+        self::BIN_ID_10 => true,
+        self::BIN_QTY_10 => true
     ];
 
     private $validationErrors = [];
         
     private $indexToheaderMapping = [];
     
-    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, PartRepositoryInterface $partRepository)
+    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, PartRepositoryInterface $partRepository, BinRepositoryInterface $binRepository)
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
-        $this->partsRepository = $partRepository;        
+        $this->partsRepository = $partRepository;
+        $this->binRepository = $binRepository;
     }
     
     public function run() 
@@ -107,14 +153,16 @@ class CsvImportService implements CsvImportServiceInterface
             if ($lineNumber === 1) {
                 return;
             }
-            
+
             echo 'Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
             Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
-                        
+
             try {
-                echo "Importing ".json_encode($this->csvToPartData($csvData)).PHP_EOL;
-                $part = $this->partsRepository->create($this->csvToPartData($csvData));                
-                if (!$part) { 
+                // Get Part Data
+                $partData = $this->csvToPartData($csvData);
+                echo "Importing ".json_encode($partData).PHP_EOL;
+                $part = $this->partsRepository->create($partData);
+                if (!$part) {
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
                     Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
@@ -246,7 +294,11 @@ class CsvImportService implements CsvImportServiceInterface
             }
             $part['images'] = $formattedImages;
         }
-        
+
+        // Get Bins
+        $part['bins'] = $this->binRepository->getAllBinsCsv($part['dealer_id'], $csvData, $keyToIndexMapping);
+
+        // Return Part Data
         return $part;          
     }
     
@@ -318,7 +370,7 @@ class CsvImportService implements CsvImportServiceInterface
                    if (strtolower($value) != 'no' && strtolower($value) != 'yes') {
                         return "Show on website {$value} is not valid. Needs to be yes or no.";
                    } 
-                }                
+                }
                 break;
             case self::IMAGE:
                 if (!empty($value)) {
@@ -328,9 +380,26 @@ class CsvImportService implements CsvImportServiceInterface
                             return "Images need to be comma separated and valid URLs";
                         }
                     }    
-                }                             
+                }
                 break;
+            case (preg_match(self::BIN_ID, $type) ? true : false) :
+                if (empty($value)) {
+                    return "Bin cannot be empty.";
+                }
                 
+                $bin = Bin::where('bin_name', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
+                if (empty($bin)) {
+                    return "Bin {$value} does not exist in the system.";
+                }
+                break;
+            case (preg_match(self::BIN_QTY, $type) ? true : false) :
+                if (empty($value) && !is_numeric($value)) {
+                    return "Bin quantity cannot be empty.";
+                }
+                else if(!is_numeric($value)) {
+                    return "Bin quantity must be numeric.";
+                }
+                break;
         }
     }
 }
