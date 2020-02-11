@@ -114,6 +114,7 @@ $app->register(Illuminate\Redis\RedisServiceProvider::class);
 $app->register(
     Dingo\Api\Provider\LumenServiceProvider::class,
     $app->bind('App\Repositories\Parts\PartRepositoryInterface', 'App\Repositories\Parts\PartRepository'),
+    $app->bind('App\Repositories\Parts\BinRepositoryInterface', 'App\Repositories\Parts\BinRepository'),
     $app->bind('App\Repositories\Parts\BrandRepositoryInterface', 'App\Repositories\Parts\BrandRepository'),
     $app->bind('App\Repositories\Parts\CategoryRepositoryInterface', 'App\Repositories\Parts\CategoryRepository'),
     $app->bind('App\Repositories\Parts\ManufacturerRepositoryInterface', 'App\Repositories\Parts\ManufacturerRepository'),
@@ -122,7 +123,6 @@ $app->register(
     $app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository'),    
     $app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService'), 
     $app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository'), 
-    $app->bind('App\Repositories\Bulk\BinRepositoryInterface', 'App\Repositories\Bulk\Parts\BinRepository'), 
     $app->bind(Illuminate\Session\SessionManager::class, function ($app) {    
         return $app->make('session');
     })
