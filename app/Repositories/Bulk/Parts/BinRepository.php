@@ -12,10 +12,6 @@ use App\Models\Parts\Bin;
  */
 class BinRepository implements BinRepositoryInterface {
 
-    const BIN_ID = 'Bin XXXX ID';
-    const BIN_QTY = 'Bin XXXX qty';
-    const BIN_LOC = 'Bin XXXX location';
-
     public function create($params) {
         throw new NotImplementedException;
     }
@@ -51,9 +47,9 @@ class BinRepository implements BinRepositoryInterface {
         $bins = array();
         for($i = 1; $i <= 10; $i++) {
             // Get Keys
-            $id  = str_replace('XXXX', $i, BIN_ID);
-            $qty = str_replace('XXXX', $i, BIN_QTY_ID);
-            $loc = str_replace('XXXX', $i, BIN_LOC_ID);
+            $id  = 'Bin ' . $i . ' ID';
+            $qty = 'Bin ' . $i . ' qty';
+            $loc = 'Bin ' . $i . ' location';
 
             // Get Values
             $binId = $this->getOrCreate(array(
