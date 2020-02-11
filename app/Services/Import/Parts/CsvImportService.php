@@ -40,6 +40,9 @@ class CsvImportService implements CsvImportServiceInterface
     const SHOW_ON_WEBSITE = 'Show on website';
     const IMAGE = 'Image';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
+    const BIN_ID = '/Bin \d+ ID/';
+    const BIN_QTY = '/Bin \d+ qty/';
+    const BIN_LOC = '/Bin \d+ location/';
     const BIN_ID_1 = 'Bin 1 ID';
     const BIN_QTY_1 = 'Bin 1 qty';
     const BIN_LOC_1 = 'Bin 1 location';
@@ -390,7 +393,21 @@ class CsvImportService implements CsvImportServiceInterface
                     }    
                 }
                 break;
+            case (preg_match(self::BIN_ID, $type) ? true : false) :
+                if (empty($value)) {
+                    return "Bin cannot be empty.";
+                }
                 
+                $category = Bin::where('bin_name', $value)->first();
+                if (empty($category)) {
+                    return "Bin {$value} does not exist in the system.";
+                }
+                break;
+            case (preg_match(self::BIN_QTY, $type) ? true : false) :
+                if (empty($value)) {
+                    return "Bin quantity cannot be empty.";
+                }
+                break;
         }
     }
 }
