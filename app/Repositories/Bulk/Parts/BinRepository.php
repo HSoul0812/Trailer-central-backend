@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Parts;
+namespace App\Repositories\Bulk\Parts;
 
 use App\Repositories\Bulk\BinRepositoryInterface;
 use App\Exceptions\NotImplementedException;

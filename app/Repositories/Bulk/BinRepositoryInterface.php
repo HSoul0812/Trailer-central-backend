@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Parts;
+namespace App\Repositories\Bulk;
 
 use \App\Repositories\Repository;
 
