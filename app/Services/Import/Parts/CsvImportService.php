@@ -41,8 +41,8 @@ class CsvImportService implements CsvImportServiceInterface
     const IMAGE = 'Image';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
 
-    const BIN_ID = '/Bin\s+\d+\s+ID/';
-    const BIN_QTY = '/Bin\s+\d+\s+qty/';
+    const BIN_ID = '/Bin\s+\d+\s+ID/i';
+    const BIN_QTY = '/Bin\s+\d+\s+qty/i';
     
     protected $bulkUploadRepository;
     protected $partsRepository;
@@ -228,7 +228,9 @@ class CsvImportService implements CsvImportServiceInterface
         foreach($this->optionalHeaderValues as $regex => $allowed) {
             // Pattern is Regex?
             if(@preg_match($regex, null) !== false){
-                return preg_match($regex, $val) ? true : false;
+                if(preg_match($regex, $val)) {
+                    return true;
+                }
             }
         }
         return false;

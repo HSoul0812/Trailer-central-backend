@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Bulk\Parts\BulkUpload;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 
