@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Parts;
 
-use App\Repositories\Bulk\BinRepositoryInterface;
+use App\Repositories\Parts\BinRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Parts\Bin;
 
