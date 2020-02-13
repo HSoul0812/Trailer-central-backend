@@ -291,7 +291,7 @@ class CsvImportService implements CsvImportServiceInterface
     }
     
     /**
-     * Returnst true if valid or error message if invalid
+     * Returns true if valid or error message if invalid
      * 
      * @param string $type
      * @param string $value 

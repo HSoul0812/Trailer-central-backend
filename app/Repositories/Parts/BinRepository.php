@@ -63,23 +63,31 @@ class BinRepository implements BinRepositoryInterface {
     public function getAllBinsCsv($dealerId, $csvData, $keyToIndexMapping) {
         // Loop Numbers to Find Bins
         $bins = array();
-        for($i = 1; $i <= 10; $i++) {
+        $i = 1;
+        do {
             // Get Keys
             $id  = 'Bin ' . $i . ' ID';
             $qty = 'Bin ' . $i . ' qty';
 
-            // Get Values
-            $binId = $this->get(array(
-                'dealer_id' => $dealerId,
-                'bin_name' => $csvData[$keyToIndexMapping[$id]],
-            ))->id;
+            // Bin Doesn't Exist?!
+            if(isset($keyToIndexMapping[$id])) {
+                // Get Values
+                $binId = $this->get(array(
+                    'dealer_id' => $dealerId,
+                    'bin_name' => $csvData[$keyToIndexMapping[$id]],
+                ))->id;
 
-            // Return Bin Array
-            $bins[] = array(
-                'bin_id'   => $binId,
-                'quantity' => $csvData[$keyToIndexMapping[$qty]]
-            );
-        }
+                // Return Bin Array
+                $bins[] = array(
+                    'bin_id'   => $binId,
+                    'quantity' => isset($csvData[$keyToIndexMapping[$qty]]) ? $csvData[$keyToIndexMapping[$qty]] : 0
+                );
+            }
+
+            // Increment
+            $i++;
+            $id = 'Bin ' . $i . ' ID';
+        } while(count($bins) < 1 || isset($keyToIndexMapping[$id]));
 
         // Return Bins Array
         return $bins;
