@@ -20,16 +20,17 @@ class AddPartImagesTable extends Migration
                 $table->string('image_url');
                 $table->timestamps();
             });
-        }     
-        
-        Schema::table('part_images', function (Blueprint $table) {
-            $table->foreign('part_id')
-                    ->references('id')
-                    ->on('parts_v1')
-                    ->onDelete('CASCADE')
-                    ->onUpdate('CASCADE');
-        });
-        
+        }
+
+//        Schema::table('part_images', function (Blueprint $table) {
+//            $table->foreign('part_id')
+//                    ->references('id')
+//                    ->on('parts_v1')
+//                    ->onDelete('CASCADE')
+//                    ->onUpdate('CASCADE');
+//        });
+
+//
     }
 
     /**

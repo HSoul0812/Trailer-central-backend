@@ -11,7 +11,8 @@
 |
 */
 
-$router->get('/', function () use ($router) {    
+/*
+$router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
@@ -23,4 +24,9 @@ $api->version('v1', function ($api) {
     $api->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show');
     $api->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update');
     $api->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy');
+});
+*/
+
+Route::get('/', function () {
+    return view('welcome');
 });
