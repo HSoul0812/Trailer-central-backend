@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Feed\EditMapping\EditMapping;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
@@ -77,7 +78,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     public function tools()
     {
-        return [];
+        return [
+            new EditMapping()
+        ];
     }
 
     /**

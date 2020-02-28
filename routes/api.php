@@ -13,9 +13,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::middleware('auth:api')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
 
 Route::get('parts', 'App\Http\Controllers\v1\Parts\PartsController@index');
 Route::put('parts', 'App\Http\Controllers\v1\Parts\PartsController@create');

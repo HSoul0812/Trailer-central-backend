@@ -1,17 +1,26 @@
 {
     "name": "trailercentral/tc-api",
     "description": "TrailerCentral API",
-    "keywords": ["framework", "laravel", "lumen"],
+    "keywords": [
+        "framework",
+        "laravel",
+        "lumen"
+    ],
     "license": "MIT",
     "type": "project",
     "require": {
         "php": "^7.2",
+        "dingo/api": "^2.4",
+        "epartment/nova-dependency-container": "^1.2",
         "fideloper/proxy": "^4.0",
+        "inspheric/nova-defaultable": "^1.2",
         "laravel/framework": "^6.0",
         "laravel/nova": "*",
         "laravel/tinker": "^2.0",
         "league/flysystem-aws-s3-v3": "^1.0",
-        "dingo/api": "^2.4"
+        "zircote/swagger-php": "^3.0",
+        "feed/edit-mapping": "*",
+        "feed/incoming-mapping": "*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -49,6 +58,10 @@
         {
             "type": "composer",
             "url": "https://nova.laravel.com"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/EditMapping"
         }
     ],
     "minimum-stability": "dev",

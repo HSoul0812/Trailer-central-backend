@@ -2,7 +2,7 @@
 
 namespace App\Nova\Filters;
 
-use App\Models\Feed;
+use App\Models\Feed\Feed;
 use Illuminate\Http\Request;
 use Laravel\Nova\Filters\Filter;
 

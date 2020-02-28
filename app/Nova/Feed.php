@@ -2,13 +2,13 @@
 
 namespace App\Nova;
 
+use App\Models\Feed\Feed as FeedModel;
 use App\Nova\Actions\StartDealerIncomingFeed;
 use App\Nova\Actions\StartDealerOutgoingFeed;
 use App\Nova\Actions\StartFactoryFeed;
 use App\Nova\Filters\FeedType;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
-use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\KeyValue;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
@@ -21,7 +21,7 @@ class Feed extends Resource
      *
      * @var string
      */
-    public static $model = 'App\Models\Feed';
+    public static $model = 'App\Models\Feed\Feed';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -55,49 +55,77 @@ class Feed extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Send Email', 'send_email')->hideFromIndex(),
-
             Text::make('Feed Name', 'name')->sortable(),
 
-            Select::make('Feed Type', 'type')->options([
-                'dealer_outgoing_feed' => 'Dealer Outgoing Feed',
-                'dealer_incoming_feed' => 'Dealer Incoming Feed',
-                'factory_feed' => 'Factory Feed',
-            ])->displayUsingLabels(),
+            Select::make('Feed Type', 'type')
+                ->options(\App\Models\Feed\Feed::$types)
+                ->displayUsingLabels(),
 
-            DateTime::make('Last Run Date', 'last_run_at')
-                ->format('YYYY-MM-DD HH:mm')
+            Select::make('Status', 'status')
+                ->options(\App\Models\Feed\Feed::$statuses)
+                ->showOnDetail(), // status
+
+            Select::make('Frequency', 'frequency')->options([
+                '86400' => 'Daily',
+                '3600' => 'Every Hour',
+                '10800' => 'Every 3 Hours',
+                '21600' => 'Every 6 Hours',
+                '43200' => 'Every 12 Hours',
+            ])->hideFromIndex(), // status
+
+            Textarea::make('Description', 'description')
+                ->hideFromIndex(),
+
+            // show data source options only when generation is 'current'
+            Select::make('Data Source', 'data_source')
+                ->options(\App\Models\Feed\Feed::$dataSources)
+                ->showOnDetail(), // status
+
+            Select::make('Data Format', 'data_format')
+                ->options([
+                    '' => 'n/a',
+                    'csv' => 'CSV',
+                    'tsv' => 'TSV',
+                    'xml' => 'XML',
+                ])
+                ->showOnDetail(), // status
+
+            KeyValue::make('Data Source Parameters', 'data_source_params'),
+
+            Text::make('Run Status', 'module_status')
+                ->hideWhenCreating()
+                ->hideWhenUpdating(), // status
+
+            Text::make('Send Email', 'send_email')
+                ->hideFromIndex(),
+
+            Text::make('Code', 'code')
+                ->hideFromIndex(),
+
+            Text::make('Module', 'module_name')
+                ->hideFromIndex(),
+
+
+            Text::make('Domain', 'domain')
+                ->hideFromIndex(),
+
+            Text::make('Create Account URL', 'create_account_url')
+                ->hideFromIndex(),
+
+            Boolean::make('Include Sold', 'include_sold')
+                ->hideFromIndex(),
+
+            Text::make('Last Run Date', 'last_run_at')
+                ->hideWhenCreating()
+                ->hideWhenUpdating()
+                ->readonly()
                 ->sortable(), // last run
 
-            Select::make('Status', 'module_status')->options([
-                'idle' => 'Idle',
-                'about-to-run' => 'About to run',
-                'running' => 'Running',
-                'need-assistance' => 'Needs Assistance',
-            ]), // status
+            KeyValue::make('Filters', 'filters')
+                ->hideFromIndex(),
 
-            Text::make('Code', 'code')->hideFromIndex(),
-
-            Text::make('Module', 'module_name')->hideFromIndex(),
-
-            Select::make('Generation', 'module_name')->options([
-                'legacy' => 'Legacy',
-                'current' => 'Current',
-            ])->hideFromIndex(),
-
-            Textarea::make('Description', 'description')->hideFromIndex(),
-
-            Text::make('Domain', 'domain')->hideFromIndex(),
-
-            Text::make('Create Account URL', 'create_account_url')->hideFromIndex(),
-
-            Boolean::make('Is Active', 'active')->hideFromIndex(),
-
-            Boolean::make('Include Sold', 'include_sold')->hideFromIndex(),
-
-            KeyValue::make('Filters', 'filters')->hideFromIndex(),
-
-            KeyValue::make('Settings', 'settings')->hideFromIndex(),
+            KeyValue::make('Settings', 'settings')
+                ->hideFromIndex(),
 
         ];
     }
@@ -157,20 +185,21 @@ class Feed extends Resource
             $startDealerIncomingFeed
                 ->showOnDetail()
                 ->canSee(function ($request) {
-                    return optional($request->findModelQuery()->first())->type === \App\Models\Feed::TYPE_DEALER_INCOMING_FEED;
+                    return optional($request->findModelQuery()->first())->type === FeedModel::TYPE_DEALER_INCOMING_FEED;
                 }),
 
             $startDealerOutgoingFeed
                 ->showOnDetail()
                 ->canSee(function ($request) {
-                    return optional($request->findModelQuery()->first())->type === \App\Models\Feed::TYPE_DEALER_OUTGOING_FEED;
+                    return optional($request->findModelQuery()->first())->type === FeedModel::TYPE_DEALER_OUTGOING_FEED;
                 }),
 
             $startFactoryFeed
                 ->showOnDetail()
                 ->canSee(function ($request) {
-                    return optional($request->findModelQuery()->first())->type === \App\Models\Feed::TYPE_FACTORY_FEED;
+                    return optional($request->findModelQuery()->first())->type === FeedModel::TYPE_FACTORY_FEED;
                 }),
+
         ];
     }
 }

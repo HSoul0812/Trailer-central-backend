@@ -8,3 +8,4 @@ Homestead.yaml
 .vagrant/
 /nova
 auth.json
+/storage
