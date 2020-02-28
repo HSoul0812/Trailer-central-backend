@@ -2,9 +2,14 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\StartDealerIncomingFeed;
+use App\Nova\Actions\StartDealerOutgoingFeed;
+use App\Nova\Actions\StartFactoryFeed;
+use App\Nova\Filters\FeedType;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\KeyValue;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
@@ -23,7 +28,14 @@ class Feed extends Resource
      *
      * @var string
      */
-    public static $title = 'integration_id';
+    public static $title = 'id';
+
+    /**
+     * The pagination per-page options configured for this resource.
+     *
+     * @return array
+     */
+    public static $perPageOptions = [50, 100, 150];
 
     /**
      * The columns that should be searched.
@@ -31,13 +43,13 @@ class Feed extends Resource
      * @var array
      */
     public static $search = [
-        'id',
+        'name',
     ];
 
     /**
      * Get the fields displayed by the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function fields(Request $request)
@@ -83,9 +95,9 @@ class Feed extends Resource
 
             Boolean::make('Include Sold', 'include_sold')->hideFromIndex(),
 
-            Textarea::make('Filters', 'filters')->hideFromIndex(),
+            KeyValue::make('Filters', 'filters')->hideFromIndex(),
 
-            Textarea::make('Settings', 'settings')->hideFromIndex(),
+            KeyValue::make('Settings', 'settings')->hideFromIndex(),
 
         ];
     }
@@ -93,7 +105,7 @@ class Feed extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function cards(Request $request)
@@ -104,18 +116,20 @@ class Feed extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function filters(Request $request)
     {
-        return [];
+        return [
+            new FeedType()
+        ];
     }
 
     /**
      * Get the lenses available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function lenses(Request $request)
@@ -126,11 +140,37 @@ class Feed extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function actions(Request $request)
     {
-        return [];
+        $startDealerIncomingFeed = new StartDealerIncomingFeed();
+        $startDealerIncomingFeed->showOnIndex = false;
+        $startDealerOutgoingFeed = new StartDealerOutgoingFeed();
+        $startDealerOutgoingFeed->showOnIndex = false;
+        $startFactoryFeed = new StartFactoryFeed();
+        $startFactoryFeed->showOnIndex = false;
+
+        // actions on this resource
+        return [
+            $startDealerIncomingFeed
+                ->showOnDetail()
+                ->canSee(function ($request) {
+                    return optional($request->findModelQuery()->first())->type === \App\Models\Feed::TYPE_DEALER_INCOMING_FEED;
+                }),
+
+            $startDealerOutgoingFeed
+                ->showOnDetail()
+                ->canSee(function ($request) {
+                    return optional($request->findModelQuery()->first())->type === \App\Models\Feed::TYPE_DEALER_OUTGOING_FEED;
+                }),
+
+            $startFactoryFeed
+                ->showOnDetail()
+                ->canSee(function ($request) {
+                    return optional($request->findModelQuery()->first())->type === \App\Models\Feed::TYPE_FACTORY_FEED;
+                }),
+        ];
     }
 }
