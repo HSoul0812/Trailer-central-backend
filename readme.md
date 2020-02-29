@@ -47,6 +47,6 @@
     }
 ```
 - Generate swagger documentation using the command.
-`php artisan l5-swagger:generate`
+`php artisan swagger-lume:generate`
 - Run this each time you update the documentation
-- Swagger UI: `/swagger/documentation`
+- Swagger UI: `/api/documentation`
