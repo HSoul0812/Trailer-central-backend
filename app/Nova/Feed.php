@@ -79,53 +79,44 @@ class Feed extends Resource
             // show data source options only when generation is 'current'
             Select::make('Data Source', 'data_source')
                 ->options(\App\Models\Feed\Feed::$dataSources)
-                ->showOnDetail(), // status
-
-            Select::make('Data Format', 'data_format')
-                ->options([
-                    '' => 'n/a',
-                    'csv' => 'CSV',
-                    'tsv' => 'TSV',
-                    'xml' => 'XML',
-                ])
+                ->hideFromIndex()
+                ->showOnCreating()
                 ->showOnDetail(), // status
 
             KeyValue::make('Data Source Parameters', 'data_source_params'),
 
             Text::make('Run Status', 'module_status')
+                ->showOnDetail()
                 ->hideWhenCreating()
                 ->hideWhenUpdating(), // status
 
-            Text::make('Send Email', 'send_email')
+            KeyValue::make('Notify Emails', 'notify_email')
+                ->keyLabel('Email')
+                ->valueLabel('Name')
                 ->hideFromIndex(),
 
-            Text::make('Code', 'code')
+            Text::make('Module Code', 'code')
                 ->hideFromIndex(),
 
-            Text::make('Module', 'module_name')
+            Text::make('Module Class', 'module_name')
                 ->hideFromIndex(),
 
-
-            Text::make('Domain', 'domain')
+            KeyValue::make('Other Settings', 'settings')
                 ->hideFromIndex(),
 
-            Text::make('Create Account URL', 'create_account_url')
-                ->hideFromIndex(),
-
-            Boolean::make('Include Sold', 'include_sold')
-                ->hideFromIndex(),
-
-            Text::make('Last Run Date', 'last_run_at')
+            Text::make('Last Run Start', 'last_run_start')
+                ->hideFromIndex()
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
                 ->readonly()
                 ->sortable(), // last run
 
-            KeyValue::make('Filters', 'filters')
-                ->hideFromIndex(),
-
-            KeyValue::make('Settings', 'settings')
-                ->hideFromIndex(),
+            Text::make('Last Run Start', 'last_run_end')
+                ->hideFromIndex()
+                ->hideWhenCreating()
+                ->hideWhenUpdating()
+                ->readonly()
+                ->sortable(), // last run
 
         ];
     }
