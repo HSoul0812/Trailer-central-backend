@@ -8,6 +8,8 @@ use App\Models\Parts\Manufacturer;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
+use App\Models\User\AuthToken;
+use App\Models\Parts\BinQuantity;
 
 class PartsCreateTest extends TestCase
 {
@@ -31,22 +33,22 @@ class PartsCreateTest extends TestCase
     {            
         $this->initializeTestData();
         $data = $this->createPartTestData();
+        $authToken = AuthToken::where('user_id', 1001)->first();
         
-        $this->json('PUT', '/api/parts', $data) 
+        $this->json('PUT', '/api/parts', $data, ['access-token' => $authToken->access_token]) 
             ->seeJson([
                 'dealer_id' => 1001,
-                'vendor_id' => $this->vendor->toArray(),
-                'manufacturer_id' => $this->manufacturer->toArray(),
-                'brand_id' => $this->brand->toArray(),
-                'type_id' => $this->type->toArray(),
-                'category_id' => $this->category->toArray(),
+                'vendor' => $this->vendor->toArray(),
+                'brand' => $this->brand->toArray(),
+                'type' => $this->type->toArray(),
+                'category' => $this->category->toArray(),
                 'subcategory' => "Test",
                 'sku' => "12345",
                 'price' => 13,
                 'dealer_cost' => 16,
                 'msrp' => 25,
                 'weight' => 24,
-                'weight_rating' => 55,
+                'weight_rating' => "55 lb",
                 'description' => 'asdasdasd',
                 'qty' => 3,
                 'show_on_website' => true, // transformed value
@@ -59,6 +61,7 @@ class PartsCreateTest extends TestCase
     {            
         $this->initializeTestData();
         $data = $this->createPartTestData();
+        $authToken = AuthToken::where('user_id', 1001)->first();
         
         unset($data['brand_id']);
         unset($data['type_id']);
@@ -66,7 +69,7 @@ class PartsCreateTest extends TestCase
         unset($data['sku']);
         unset($data['subcategory']);
         
-        $this->json('PUT', '/api/parts', $data) 
+        $this->json('PUT', '/api/parts', $data, ['access-token' => $authToken->access_token]) 
             ->seeJson([
                 'brand_id' => [
                     'The brand id field is required.'
@@ -109,7 +112,6 @@ class PartsCreateTest extends TestCase
         return [
             "dealer_id" => 1001,
             "vendor_id" => $this->vendor->id,
-            "manufacturer_id" => $this->manufacturer->id,
             "brand_id" => $this->brand->id,
             "type_id" => $this->type->id,
             "category_id" => $this->category->id,
@@ -119,16 +121,36 @@ class PartsCreateTest extends TestCase
             "dealer_cost" => 16,
             "msrp" => 25,
             "weight" => 24,
-            "weight_rating" => 55 ,
+            "weight_rating" => "55 lb" ,
             "description" => "asdasdasd",
             "qty" => 3,
             "show_on_website" => 1,
             "is_vehicle_specific" => 0,
             "title" => "ddddd",
             "images" => [
-                "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
-                "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
-                "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg"
+                [
+                    'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                    'position' => 0
+                ],
+                [
+                    'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                    'position' => 1
+                ],
+                [
+                    'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                    'position' => 2
+                ]
+            ],
+            'video_embed_code' => 'zxczxczc',
+            'bins' => [
+                [
+                    'bin_id' => 4,
+                    'quantity' => 4
+                ],
+                [
+                    'bin_id' => 3,
+                    'quantity' => 4
+                ],
             ]
         ];        
     }

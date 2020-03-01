@@ -8,6 +8,7 @@ use App\Models\Parts\Manufacturer;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
+use App\Models\User\AuthToken;
 
 class PartsUpdateTest extends TestCase
 {
@@ -31,6 +32,7 @@ class PartsUpdateTest extends TestCase
     {            
         $this->initializeTestData();
         $data = $this->createPartTestData();
+        $authToken = AuthToken::where('user_id', 1001)->first();
         
         $vendor = Vendor::latest()->first();
         $manufacturer = Manufacturer::latest()->first();
@@ -51,29 +53,42 @@ class PartsUpdateTest extends TestCase
             "dealer_cost" => 11,
             "msrp" => 21,
             "weight" => 22,
-            "weight_rating" => 45 ,
+            "weight_rating" => "45 lb" ,
             "description" => "zxczxc",
             "qty" => 4,
             "show_on_website" => 0,
             "is_vehicle_specific" => 1,
             "title" => "ASDASD",
+            'vehicle_make' => 'test',
+            'vehicle_model' => 'test',
+            'vehicle_year_from' => 1990,
+            'vehicle_year_to' => 2019,
+            'bins' => [
+                [
+                    'bin_id' => 4,
+                    'quantity' => 4
+                ],
+                [
+                    'bin_id' => 3,
+                    'quantity' => 4
+                ],
+            ]
         ];
         
-        $this->json('POST', '/api/parts/'.$data['part']->id, $updateData) 
+        $this->json('POST', '/api/parts/'.$data['part']->id, $updateData, ['access-token' => $authToken->access_token]) 
             ->seeJson([
-                "dealer_id" => 1002,
-                "vendor_id" => $vendor->toArray(),
-                "manufacturer_id" => $manufacturer->toArray(),
-                "brand_id" => $brand->toArray(),
-                "type_id" => $type->toArray(),
-                "category_id" => $category->toArray(),
+                "dealer_id" => $authToken->user_id,
+                "vendor" => $vendor->toArray(),
+                "brand" => $brand->toArray(),
+                "type" => $type->toArray(),
+                "category" => $category->toArray(),
                 "subcategory" => "Testff",
                 "sku" => "asdasdsad",
                 "price" => 3,
                 "dealer_cost" => 11,
                 "msrp" => 21,
                 "weight" => 22,
-                "weight_rating" => 45 ,
+                "weight_rating" => "45 lb" ,
                 "description" => "zxczxc",
                 "qty" => 4,
                 "show_on_website" => false, // transformed values
@@ -89,11 +104,26 @@ class PartsUpdateTest extends TestCase
         $partsRepository = new PartRepository();
         
         $data['data']['images'] = [            
-            "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
-            "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
-            "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
-            "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
-            "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg"
+            [
+                'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                'position' => 0
+            ],
+            [
+                'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                'position' => 1
+            ],
+            [
+                'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                'position' => 2
+            ],
+            [
+                'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                'position' => 3
+            ],
+            [
+                'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                'position' => 4
+            ]
         ];
         
         $data['data']['id'] = $data['part']->id;
@@ -114,7 +144,6 @@ class PartsUpdateTest extends TestCase
         $originalData = [
             "dealer_id" => 1001,
             "vendor_id" => $this->vendor->id,
-            "manufacturer_id" => $this->manufacturer->id,
             "brand_id" => $this->brand->id,
             "type_id" => $this->type->id,
             "category_id" => $this->category->id,
@@ -124,16 +153,36 @@ class PartsUpdateTest extends TestCase
             "dealer_cost" => 16,
             "msrp" => 25,
             "weight" => 24,
-            "weight_rating" => 55 ,
+            "weight_rating" => "55 lb" ,
             "description" => "asdasdasd",
             "qty" => 3,
             "show_on_website" => 1,
             "is_vehicle_specific" => 0,
             "title" => "ddddd",
             "images" => [
-                "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
-                "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
-                "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg"
+                [
+                    'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                    'position' => 0
+                ],
+                [
+                    'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                    'position' => 1
+                ],
+                [
+                    'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
+                    'position' => 2
+                ]
+            ],
+            'video_embed_code' => 'zxczxczc',
+            'bins' => [
+                [
+                    'bin_id' => 7,
+                    'quantity' => 2
+                ],
+                [
+                    'bin_id' => 2,
+                    'quantity' => 2
+                ],
             ]
         ];  
         

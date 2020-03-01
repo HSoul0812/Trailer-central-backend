@@ -41,6 +41,11 @@ return [
             'provider' => 'users',
         ],
 
+        'nova' => [
+            'driver' => 'session',
+            'provider' => 'nova',
+        ],
+
         'api' => [
             'driver' => 'token',
             'provider' => 'users',
@@ -69,6 +74,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User\User::class,
+        ],
+
+        'nova' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User\NovaUser::class,
         ],
 
         // 'users' => [

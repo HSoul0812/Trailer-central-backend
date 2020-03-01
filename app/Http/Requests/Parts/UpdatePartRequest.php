@@ -26,11 +26,19 @@ class UpdatePartRequest extends Request {
         'dealer_cost' => 'nullable|numeric',
         'msrp' => 'nullable|numeric',
         'weight' => 'nullable|numeric',
-        'weight_rating' => 'nullable|numeric',
+        'weight_rating' => 'string',
         'description' => 'nullable',
         'qty' => 'nullable|integer',
         'show_on_website' => 'boolean',
-        'is_vehicle_specific' => 'boolean'
+        'is_vehicle_specific' => 'boolean',
+        'vehicle_make' => 'string',
+        'vehicle_model' => 'string',
+        'vehicle_year_from' => 'integer',
+        'vehicle_year_to' => 'integer',
+        'images' => 'array',
+        'images.*.url' => 'url',
+        'images.*.position' => 'integer',
+        'bins' => 'array'
     ];
     
 }

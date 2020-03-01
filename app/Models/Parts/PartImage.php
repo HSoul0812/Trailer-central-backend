@@ -15,7 +15,8 @@ class PartImage extends Model {
      */
     protected $fillable = [
         'part_id',
-        'image_url'
+        'image_url',
+        'position'
     ];
 
     /**

@@ -20,7 +20,7 @@ return [
     'alpha' => 'The :attribute may only contain letters.',
     'alpha_dash' => 'The :attribute may only contain letters, numbers, dashes and underscores.',
     'alpha_num' => 'The :attribute may only contain letters and numbers.',
-    'array' => 'The :attribute must be an array.',
+//    'array' => 'The :attribute must be an array.',
     'before' => 'The :attribute must be a date before :date.',
     'before_or_equal' => 'The :attribute must be a date before or equal to :date.',
     'between' => [
@@ -59,7 +59,7 @@ return [
     'image' => 'The :attribute must be an image.',
     'in' => 'The selected :attribute is invalid.',
     'in_array' => 'The :attribute field does not exist in :other.',
-    'integer' => 'The :attribute must be an integer.',
+//    'integer' => 'The :attribute must be an integer.',
     'ip' => 'The :attribute must be a valid IP address.',
     'ipv4' => 'The :attribute must be a valid IPv4 address.',
     'ipv6' => 'The :attribute must be a valid IPv6 address.',
@@ -82,21 +82,21 @@ return [
         'string' => 'The :attribute may not be greater than :max characters.',
         'array' => 'The :attribute may not have more than :max items.',
     ],
-    'mimes' => 'The :attribute must be a file of type: :values.',
+//    'mimes' => 'The :attribute must be a file of type: :values.',
     'mimetypes' => 'The :attribute must be a file of type: :values.',
-    'min' => [
-        'numeric' => 'The :attribute must be at least :min.',
-        'file' => 'The :attribute must be at least :min kilobytes.',
-        'string' => 'The :attribute must be at least :min characters.',
-        'array' => 'The :attribute must have at least :min items.',
-    ],
+//    'min' => [
+//        'numeric' => 'The :attribute must be at least :min.',
+//        'file' => 'The :attribute must be at least :min kilobytes.',
+//        'string' => 'The :attribute must be at least :min characters.',
+//        'array' => 'The :attribute must have at least :min items.',
+//    ],
     'not_in' => 'The selected :attribute is invalid.',
     'not_regex' => 'The :attribute format is invalid.',
     'numeric' => 'The :attribute must be a number.',
     'password' => 'The password is incorrect.',
     'present' => 'The :attribute field must be present.',
     'regex' => 'The :attribute format is invalid.',
-    'required' => 'The :attribute field is required.',
+//    'required' => 'The :attribute field is required.',
     'required_if' => 'The :attribute field is required when :other is :value.',
     'required_unless' => 'The :attribute field is required unless :other is in :values.',
     'required_with' => 'The :attribute field is required when :values is present.',
@@ -115,7 +115,7 @@ return [
     'timezone' => 'The :attribute must be a valid zone.',
     'unique' => 'The :attribute has already been taken.',
     'uploaded' => 'The :attribute failed to upload.',
-    'url' => 'The :attribute format is invalid.',
+//    'url' => 'The :attribute format is invalid.',
     'uuid' => 'The :attribute must be a valid UUID.',
 
     /*
@@ -129,11 +129,11 @@ return [
     |
     */
 
-    'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
-        ],
-    ],
+//    'custom' => [
+//        'attribute-name' => [
+//            'rule-name' => 'custom-message',
+//        ],
+//    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -148,4 +148,25 @@ return [
 
     'attributes' => [],
 
+    'mimes' => 'File extension is not allowed',
+    'type_exists' => 'The :attribute does not exist in the DB.',
+    'category_exists' => 'The :attribute does not exist in the DB.',
+    'brand_exists' => 'The :attribute does not exist in the DB.',
+    'manufacturer_exists' => 'The :attribute does not exist in the DB.',
+    'min' => [
+        'numeric' => 'The :attribute must be at least :min.',
+        'file'    => 'The :attribute must be at least :min kilobytes.',
+        'string'  => 'The :attribute must be at least :min characters.',
+        'array'   => 'The :attribute must have at least :min items.',
+    ],
+    'required' => 'The :attribute field is required.',
+    'custom' => [
+        'phone_number' => [
+            'region' => 'The phone number is not the correct format for :region',
+        ],
+    ],
+    'url' => 'The :attribute needs to be a URL',
+    'integer' => 'The :attribute needs to be an integer.',
+    'array' => 'The :attribute needs to be an array.',
+    'price_format' => 'The format for :attribute is incorrect. Starting price needs to be lower than end price. Formats supported are: [10 TO 100], [10.05 TO 100], [10.05 TO 100.05], [10 TO 100.05], [10], [10.05]'
 ];
