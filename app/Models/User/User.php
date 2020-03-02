@@ -4,10 +4,17 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class User
+ *
+ * This User class is for API users
+ *
+ * @package App\Models\User
+ */
 class User extends Model
-{ 
+{
     protected $table = 'dealer';
-    
+
     /**
      * The attributes that are mass assignable.
      *

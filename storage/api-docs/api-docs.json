@@ -34,6 +34,15 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Brand name to search",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
@@ -61,7 +70,7 @@
                 "parameters": [
                     {
                         "name": "per_page",
-                        "in": "path",
+                        "in": "query",
                         "description": "Page Limit",
                         "required": false,
                         "schema": {
@@ -70,7 +79,7 @@
                     },
                     {
                         "name": "dealer_id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Dealer ID",
                         "required": false,
                         "schema": {
@@ -103,7 +112,7 @@
                 "parameters": [
                     {
                         "name": "per_page",
-                        "in": "path",
+                        "in": "query",
                         "description": "Page Limit",
                         "required": false,
                         "schema": {
@@ -112,7 +121,7 @@
                     },
                     {
                         "name": "dealer_id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Dealer ID",
                         "required": false,
                         "schema": {
@@ -380,6 +389,21 @@
                                 "items": {}
                             }
                         }
+                    },
+                    {
+                        "name": "bins",
+                        "in": "query",
+                        "description": "Part bins",
+                        "required": false,
+                        "schema": {
+                            "property": null,
+                            "description": "Bin array with bin_id and name",
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        }
                     }
                 ],
                 "responses": {
@@ -407,7 +431,7 @@
                 "parameters": [
                     {
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Part ID",
                         "required": true,
                         "schema": {
@@ -733,7 +757,7 @@
                 "parameters": [
                     {
                         "name": "per_page",
-                        "in": "path",
+                        "in": "query",
                         "description": "Page Limit",
                         "required": false,
                         "schema": {
@@ -742,7 +766,7 @@
                     },
                     {
                         "name": "sort",
-                        "in": "path",
+                        "in": "query",
                         "description": "Sort order can be: price,-price,relevance,title,-title,length,-length",
                         "required": false,
                         "schema": {
@@ -751,7 +775,7 @@
                     },
                     {
                         "name": "type_id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Part types",
                         "required": false,
                         "schema": {
@@ -766,7 +790,7 @@
                     },
                     {
                         "name": "category_id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Part categories",
                         "required": false,
                         "schema": {
@@ -781,7 +805,7 @@
                     },
                     {
                         "name": "manufacturer_id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Part manufacturers",
                         "required": false,
                         "schema": {
@@ -796,7 +820,7 @@
                     },
                     {
                         "name": "brand_id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Part brands",
                         "required": false,
                         "schema": {
@@ -810,8 +834,23 @@
                         }
                     },
                     {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Part IDs",
+                        "required": false,
+                        "schema": {
+                            "property": null,
+                            "description": "Part IDs array",
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        }
+                    },
+                    {
                         "name": "price",
-                        "in": "path",
+                        "in": "query",
                         "description": "Part price can be in format: [10 TO 100], [10], [10.0 TO 100.0]",
                         "required": false,
                         "schema": {
@@ -844,7 +883,7 @@
                 "parameters": [
                     {
                         "name": "per_page",
-                        "in": "path",
+                        "in": "query",
                         "description": "Page Limit",
                         "required": false,
                         "schema": {
@@ -853,7 +892,7 @@
                     },
                     {
                         "name": "dealer_id",
-                        "in": "path",
+                        "in": "query",
                         "description": "Dealer ID",
                         "required": false,
                         "schema": {
@@ -864,6 +903,48 @@
                 "responses": {
                     "200": {
                         "description": "Returns a list of parts",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Bad request."
+                    }
+                }
+            }
+        },
+        "/api/vendors": {
+            "get": {
+                "tags": [
+                    "Vendor"
+                ],
+                "description": "Retrieve a list of vendors",
+                "operationId": "App\\Http\\Controllers\\v1\\Parts\\VendorController::index",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Page Limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "dealer_id",
+                        "in": "query",
+                        "description": "Dealer ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of vendors",
                         "content": {
                             "application/json": {
                                 "schema": {}

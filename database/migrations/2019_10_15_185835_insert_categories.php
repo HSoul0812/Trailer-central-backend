@@ -12,16 +12,16 @@ class InsertCategories extends Migration
      * @return void
      */
     public function up()
-    {        
+    {
         $pdo = DB::connection()->getPdo();
-        $stmt = $pdo->query("SELECT DISTINCT category FROM `parts` WHERE category IS NOT NULL AND length(category) >= 4 AND length(category) < 50");
-        $insert = $pdo->prepare("INSERT INTO part_categories (name) VALUES (:category)");
-        
-        while($row = $stmt->fetch()) {
-            $insert->execute([
-                'category' => $row['category']
-            ]);
-        }
+//        $stmt = $pdo->query("SELECT DISTINCT category FROM `parts` WHERE category IS NOT NULL AND length(category) >= 4 AND length(category) < 50");
+//        $insert = $pdo->prepare("INSERT INTO part_categories (name) VALUES (:category)");
+//
+//        while($row = $stmt->fetch()) {
+//            $insert->execute([
+//                'category' => $row['category']
+//            ]);
+//        }
     }
 
     /**

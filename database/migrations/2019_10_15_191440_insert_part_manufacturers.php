@@ -14,15 +14,15 @@ class InsertPartManufacturers extends Migration
     public function up()
     {
         $pdo = DB::connection()->getPdo();
-        $stmt = $pdo->query("SELECT DISTINCT manufacturer FROM `parts` WHERE manufacturer IS NOT NULL AND length(manufacturer) >= 4 AND length(manufacturer) < 50");
-        $insert = $pdo->prepare("INSERT INTO part_manufacturers (name) VALUES (:manufacturer)");
-        
-        while($row = $stmt->fetch()) {
-            $insert->execute([
-                'manufacturer' => $row['manufacturer']
-            ]);
-        }
-        
+//        $stmt = $pdo->query("SELECT DISTINCT manufacturer FROM `parts` WHERE manufacturer IS NOT NULL AND length(manufacturer) >= 4 AND length(manufacturer) < 50");
+//        $insert = $pdo->prepare("INSERT INTO part_manufacturers (name) VALUES (:manufacturer)");
+//
+//        while($row = $stmt->fetch()) {
+//            $insert->execute([
+//                'manufacturer' => $row['manufacturer']
+//            ]);
+//        }
+
     }
 
     /**

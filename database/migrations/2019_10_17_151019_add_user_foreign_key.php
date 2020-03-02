@@ -25,7 +25,9 @@ class AddUserForeignKey extends Migration
             if (Schema::hasColumn('auth_token', 'dealer_id')) {
                 $table->dropColumn('dealer_id');
             }
-            $table->integer('user_id')->unsigned();
+            if (!Schema::hasColumn('auth_token', 'user_id')) {
+                $table->integer('user_id')->unsigned();
+            }
             $table->foreign('user_id')->references('dealer_id')->on('dealer');
         });
     }

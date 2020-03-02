@@ -1,26 +1,38 @@
 {
-    "name": "laravel/lumen",
-    "description": "The Laravel Lumen Framework.",
-    "keywords": ["framework", "laravel", "lumen"],
+    "name": "trailercentral/tc-api",
+    "description": "TrailerCentral API",
+    "keywords": [
+        "framework",
+        "laravel",
+        "lumen"
+    ],
     "license": "MIT",
     "type": "project",
     "require": {
         "php": "^7.2",
         "algolia/algoliasearch-client-php": "^2.4",
-        "darkaonline/swagger-lume": "6.*",
-        "dingo/api": "^2.3",
+        "darkaonline/l5-swagger": "^6.0",
+        "dingo/api": "^2.4",
+        "epartment/nova-dependency-container": "^1.2",
+        "feed/edit-mapping": "*",
+        "fideloper/proxy": "^4.0",
+        "inspheric/nova-defaultable": "^1.2",
         "doctrine/dbal": "^2.9",
         "illuminate/redis": "^6.3",
-        "laravel/lumen-framework": "^6.0",
+        "laravel/framework": "^6.0",
+        "laravel/nova": "*",
+        "laravel/tinker": "^2.0",
         "laravel/scout": "^7.2",
-        "league/flysystem-aws-s3-v3": "~1.0",
+        "league/flysystem-aws-s3-v3": "^1.0",
         "predis/predis": "^1.1"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
         "laravel/homestead": "^9.2",
         "mockery/mockery": "^1.0",
-        "phpunit/phpunit": "^8.0"
+        "phpunit/phpunit": "^8.0",
+        "facade/ignition": "^1.4",
+        "nunomaduro/collision": "^3.0"
     },
     "autoload": {
         "classmap": [
@@ -46,6 +58,16 @@
         "sort-packages": true,
         "optimize-autoloader": true
     },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://nova.laravel.com"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/EditMapping"
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true
 }
