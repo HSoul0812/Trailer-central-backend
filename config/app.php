@@ -167,11 +167,6 @@ return [
          */
 
         /*
-         * 3rd party stuff
-         */
-        \L5Swagger\L5SwaggerServiceProvider::class,
-
-        /*
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
@@ -180,13 +175,19 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\CatchAllOptionsRequestsProvider::class,
 
+        /*
+         * 3rd party stuff
+         */
+        \L5Swagger\L5SwaggerServiceProvider::class,
+        \Laravel\Scout\ScoutServiceProvider::class,
+        \Dingo\Api\Provider\LaravelServiceProvider::class,
 
         /*
          * Nova stuff
          */
         \Feed\EditMapping\ToolServiceProvider::class,
-        \Dingo\Api\Provider\LaravelServiceProvider::class,
 
     ],
 

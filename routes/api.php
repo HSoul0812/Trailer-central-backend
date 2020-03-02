@@ -19,11 +19,6 @@ use Illuminate\Http\Request;
 
 $api = app('Dingo\Api\Routing\Router');
 $api->version('v1', function ($route) {
-    $route->get('parts', 'App\Http\Controllers\v1\Parts\PartsController@index');
-    $route->put('parts', 'App\Http\Controllers\v1\Parts\PartsController@create');
-    $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show');
-    $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update');
-    $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy');
 
     /*
     |--------------------------------------------------------------------------
