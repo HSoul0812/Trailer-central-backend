@@ -41,4 +41,11 @@ class BulkDownloadRepository implements BulkDownloadRepositoryInterface
         return BulkDownload::where('id', $download)->update(['status' => BulkDownload::STATUS_COMPLETED]);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function findByToken($token)
+    {
+        return BulkDownload::where('token', $token)->get()->first();
+    }
 }

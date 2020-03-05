@@ -4,14 +4,23 @@
 namespace App\Repositories\Bulk;
 
 
+use App\Models\Bulk\Parts\BulkDownload;
+
 interface BulkDownloadRepositoryInterface
 {
     /**
      * Fetch a model by $id
      * @param $id
-     * @return mixed
+     * @return BulkDownload
      */
     public function find($id);
+
+    /**
+     * Find a download by token
+     * @param $token
+     * @return BulkDownload
+     */
+    public function findByToken($token);
 
     /**
      * @param array $params Array of values for the new row
@@ -22,7 +31,7 @@ interface BulkDownloadRepositoryInterface
     /**
      * Set a row to completed status
      * @param $id
-     * @return mixed
+     * @return bool
      */
     public function setCompleted($id);
 }

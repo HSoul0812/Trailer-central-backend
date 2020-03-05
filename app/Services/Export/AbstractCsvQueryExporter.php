@@ -7,6 +7,13 @@ namespace App\Services\Export;
 use Illuminate\Database\Query\Builder;
 use League\Csv\Writer;
 
+/**
+ * Class AbstractCsvQueryExporter
+ *
+ * Can be used for any query to CSV export tasks
+ *
+ * @package App\Services\Export
+ */
 abstract class AbstractCsvQueryExporter extends AbstractQueryExporter
 {
     protected $headerWritten = false;

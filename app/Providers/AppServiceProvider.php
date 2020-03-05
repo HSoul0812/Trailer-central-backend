@@ -5,8 +5,6 @@ namespace App\Providers;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Export\Parts\CsvExportService;

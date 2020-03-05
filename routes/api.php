@@ -74,6 +74,7 @@ $api->version('v1', function ($route) {
      * Part Bulk download
      */
     $route->post('parts/bulk/download', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@create');
+    $route->get('parts/bulk/file/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@read');
 
     /**
      * Part Bulk

@@ -1,17 +1,16 @@
 <?php
 
 
-namespace App\Services\Export\Parts;
+namespace App\Services\Export;
 
 
-use App\Services\Export\AbstractCsvQueryExporter;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use League\Csv\Writer;
 
 /**
  * Class FilesystemCsvExporter
  *
- * Export CSV to a `Filesystem` object
+ * General purpose export CSV to a `Filesystem` object from query
  *
  * @package App\Services\Export\Parts
  */
