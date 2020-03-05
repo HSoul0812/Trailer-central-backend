@@ -80,7 +80,7 @@ class BulkDownload extends Model
             'Weight Rating' => $part->weight_rating,
             'Description' => $part->description,
             'Show on website' => $part->show_on_website,
-            'Image' => !empty($part->images)? implode(',', $part->images->all()): '',
+            'Image' => !empty($part->images)? implode("\n", $part->images->all()): '',
             'Video Embed Code' => $part->video_embed_code,
         ];
     }
