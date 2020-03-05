@@ -9,3 +9,4 @@ Homestead.yaml
 /nova
 auth.json
 /storage
+node_modules
