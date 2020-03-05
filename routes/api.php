@@ -71,6 +71,11 @@ $api->version('v1', function ($route) {
     $route->delete('parts/types/{id:[0-9]+}', 'App\Http\Controllers\v1\Parts\TypeController@destroy');
 
     /**
+     * Part Bulk download
+     */
+    $route->post('parts/bulk/download', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@create');
+
+    /**
      * Part Bulk
      */
     $route->get('parts/bulk', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@index');

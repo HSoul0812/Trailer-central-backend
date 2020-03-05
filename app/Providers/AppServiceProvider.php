@@ -2,8 +2,15 @@
 
 namespace App\Providers;
 
+use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkDownloadRepository;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use App\Services\Export\Parts\CsvExportService;
+use App\Services\Export\Parts\CsvExportServiceInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +46,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
+
+        // CSV exporter bindings
+        $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
+        $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);
+        $this->app->when(CsvExportService::class)
+            ->needs(Filesystem::class)
+            ->give(function () { return Storage::disk('partsCsvExport');});
+        $this->app->when(CsvExportService::class)
+            ->needs(Filesystem::class)
+            ->give(function () { return Storage::disk('partsCsvExport');});
     }
 
 }

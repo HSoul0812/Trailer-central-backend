@@ -30,7 +30,7 @@ class CreatePartsBulkDownloadTable extends Migration
 
             $table->string('export_file');
 
-            $table->integer('progress')->nullable();
+            $table->string('progress')->nullable();
 
             $table->text('result')->nullable();
 

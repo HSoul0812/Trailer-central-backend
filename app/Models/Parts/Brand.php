@@ -4,6 +4,12 @@ namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Brand
+ * 
+ * @property string $name
+ * @property Collection $parts
+ */
 class Brand extends Model
 { 
     protected $table = 'part_brands';

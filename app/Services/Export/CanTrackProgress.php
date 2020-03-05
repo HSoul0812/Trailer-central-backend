@@ -36,12 +36,13 @@ trait CanTrackProgress
      */
     public function progressIncrement()
     {
-        call_user_func([$this, 'onProgressIncrementCallable' ], $this->getProgress());
+        $callable = $this->onProgressIncrementCallable;
+        $callable($this->getProgress());
     }
 
-    public function getProgress($format = "%.1f")
+    public function getProgress($format = "%.4f")
     {
-        return sprintf($format, $this->progressCurrent / $this->progressMax);
+        return sprintf($format, ($this->progressCurrent / $this->progressMax));
     }
 
     /**

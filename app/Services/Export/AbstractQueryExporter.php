@@ -20,7 +20,6 @@ abstract class AbstractQueryExporter implements ExporterInterface
     public function __construct($query = null)
     {
         $this->query = $query;
-        $this->createFile();
     }
 
     /**

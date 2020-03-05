@@ -10,8 +10,8 @@ use League\Csv\Writer;
 abstract class AbstractCsvQueryExporter extends AbstractQueryExporter
 {
     protected $headerWritten = false;
-    private $lineMapper;
-    private $headers;
+    protected $lineMapper;
+    protected $headers;
     protected $delimiter;
 
     /**
@@ -33,31 +33,8 @@ abstract class AbstractCsvQueryExporter extends AbstractQueryExporter
         $this->lineMapper = $lineMapper;
         $this->headers = $headers;
         $this->delimiter = $delimiter;
-
-        // make a temp file use a league csv writer; fileHandle is called previously
-        // TODO see if a temp file can be skipped and data can be streamed directly to Storage::put()
-        $this->csvWriter = Writer::createFromStream($this->tmpFileHandle);
-        $this->csvWriter->setDelimiter($delimiter);
     }
 
-    /**
-     * Assembles the line to write
-     *
-     * @param array $line a line of data to write
-     * @return void
-     * @throws \League\Csv\CannotInsertRecord
-     */
-    public function write($line)
-    {
-        // for the first write add a header
-        if (!$this->headerWritten) {
-            $this->csvWriter->insertOne($this->headers);
-            $this->headerWritten = true;
-        }
-
-        // insert to csv using the supplied line mapper
-        $this->csvWriter->insertOne(call_user_func([$this, 'lineMapper'], $line));
-    }
 
     /**
      * @param Callable $lineMapper

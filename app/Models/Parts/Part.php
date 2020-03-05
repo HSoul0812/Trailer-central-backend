@@ -7,20 +7,29 @@ use Laravel\Scout\Searchable;
 use App\Models\Parts\CacheStoreTime;
 use Carbon\Carbon;
 
+/**
+ * Class Part
+ *
+ * @package App\Models\Parts
+ * @property Collection $images
+ * @property Collection $bins
+ * @property Vendor $vendor
+ * @property Brand $brand
+ */
 class Part extends Model
-{ 
-    
+{
+
     use Searchable;
-    
+
     protected $table = 'parts_v1';
-    
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'dealer_id', 
+        'dealer_id',
         'vendor_id',
         'vehicle_specific_id',
         'manufacturer_id',
@@ -51,7 +60,7 @@ class Part extends Model
     protected $hidden = [
 
     ];
-    
+
     protected $cacheStores = [
         [
             'dealer_id' => 'dealer_id',
@@ -89,92 +98,92 @@ class Part extends Model
             'brand_id' => null
         ]
     ];
-    
+
     public static function boot() {
         parent::boot();
-        
+
         static::created(function ($part) {
-            
+
             $part->updateCacheStoreTimes();
 
         });
-        
-        static::updated(function ($part) { 
-            
+
+        static::updated(function ($part) {
+
             $part->updateCacheStoreTimes();
 
         });
     }
-            
+
     public function searchableAs()
     {
         return env('PARTS_ALGOLIA_INDEX', '');
     }
-    
+
     public function toSearchableArray()
-    {                        
+    {
         $array = $this->toArray();
-        
+
         $array['brand'] = (string)$this->brand;
         $array['manufacturer'] = (string)$this->manufacturer;
         $array['category'] = (string)$this->category;
         $array['type'] = (string)$this->type;
-        
+
         $array['images'] = $this->images->toArray();
         $array['vehicle_specific'] = $this->vehicleSpecifc;
 
         return $array;
     }
-    
+
     // Move to a trait
-    public function updateCacheStoreTimes() 
+    public function updateCacheStoreTimes()
     {
         foreach($this->cacheStores as $cache) {
             foreach($cache as $key => $value) {
                 if (!empty($value)) {
                     $cache[$key] = $this->{$value};
                 }
-            }                
+            }
             $cacheStoreTime = CacheStoreTime::firstOrCreate($cache);
             $cacheStoreTime->update_time = Carbon::now();
         }
     }
-        
+
     public function brand()
     {
         return $this->belongsTo('App\Models\Parts\Brand');
     }
-    
+
     public function type()
     {
         return $this->belongsTo('App\Models\Parts\Type');
     }
-    
+
     public function vendor()
     {
         return $this->belongsTo('App\Models\Parts\Vendor');
     }
-    
+
     public function category()
     {
         return $this->belongsTo('App\Models\Parts\Category');
     }
-    
+
     public function manufacturer()
     {
         return $this->belongsTo('App\Models\Parts\Manufacturer');
     }
-    
+
     public function vehicleSpecific()
     {
         return $this->hasOne('App\Models\Parts\VehicleSpecific');
     }
-    
+
     public function images()
     {
         return $this->hasMany('App\Models\Parts\PartImage');
     }
-    
+
     public function bins()
     {
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
