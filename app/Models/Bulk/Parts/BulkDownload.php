@@ -68,8 +68,8 @@ class BulkDownload extends Model
         return [
             'Vendor' => $part->vendor ? $part->vendor->name: '',
             'Brand' => $part->brand ? $part->brand->name: '',
-            'Type' => $part->type,
-            'Category' => $part->category,
+            'Type' => $part->type? $part->type->name: '',
+            'Category' => $part->category? $part->category->name: '',
             'Subcategory' => $part->subcategory,
             'Title' => $part->title,
             'SKU' => $part->sku,
