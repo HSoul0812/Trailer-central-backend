@@ -9,6 +9,130 @@
         "version": "1.0"
     },
     "paths": {
+        "/interactions/send-email": {
+            "post": {
+                "tags": [
+                    "interactions"
+                ],
+                "summary": "Send interaction email",
+                "description": "",
+                "operationId": "sendEmail",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "lead_id": {
+                                        "description": "Lead ID.",
+                                        "type": "string"
+                                    },
+                                    "product_id": {
+                                        "description": "Product ID.",
+                                        "type": "string"
+                                    },
+                                    "message_id": {
+                                        "description": "Message ID.",
+                                        "type": "string"
+                                    },
+                                    "subject": {
+                                        "description": "Email subject.",
+                                        "type": "string"
+                                    },
+                                    "body": {
+                                        "description": "Email body.",
+                                        "type": "string"
+                                    },
+                                    "filename": {
+                                        "description": "Email attach file.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "description": "The response success",
+                                            "type": "bool"
+                                        },
+                                        "message": {
+                                            "description": "The response message",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object",
+                                    "example": {
+                                        "success": true,
+                                        "message": "Email sent successfully"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Lead not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "description": "The response success",
+                                            "type": "bool"
+                                        },
+                                        "message": {
+                                            "description": "The response message",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object",
+                                    "example": {
+                                        "error": true,
+                                        "message": "Lead not found"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Throwable message",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "description": "The response success",
+                                            "type": "bool"
+                                        },
+                                        "message": {
+                                            "description": "The response message",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object",
+                                    "example": {
+                                        "error": true,
+                                        "message": "Throwable message"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/parts": {
             "get": {
                 "operationId": "App\\Http\\Controllers\\v1\\Parts\\PartsController::index",
