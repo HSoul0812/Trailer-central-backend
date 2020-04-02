@@ -5,6 +5,9 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Models\Bulk\Parts\BulkUpload;
+use App\Models\Parts\Part;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class SyncPartsCommand

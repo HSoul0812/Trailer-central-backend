@@ -30,6 +30,7 @@ class Feed extends Model
     const TYPE_DEALER_OUTGOING_FEED = 'dealer_outgoing_feed';
     const TYPE_DEALER_INCOMING_FEED = 'dealer_incoming_feed';
     const TYPE_FACTORY_FEED = 'factory_feed';
+    
     public static $types = [
         self::TYPE_DEALER_OUTGOING_FEED => 'Dealer Outgoing Feed',
         self::TYPE_DEALER_INCOMING_FEED => 'Dealer Incoming Feed',
@@ -40,6 +41,7 @@ class Feed extends Model
     const DATA_SOURCE_FTP = 'ftp';
     const DATA_SOURCE_HTTP = 'http';
     const DATA_SOURCE_DB = 'database';
+    
     public static $dataSources = [
         self::DATA_SOURCE_FTP => 'FTP',
         self::DATA_SOURCE_HTTP => 'URL',
@@ -49,6 +51,7 @@ class Feed extends Model
     // status
     const STATUS_ACTIVE = 'active';
     const STATUS_DISABLED = 'disabled';
+    
     public static $statuses = [
         self::STATUS_ACTIVE => 'Active',
         self::STATUS_DISABLED => 'Disabled',
@@ -60,6 +63,7 @@ class Feed extends Model
     const RUN_STATUS_PAUSED = 'paused';
     const RUN_STATUS_ERROR = 'error';
     const RUN_STATUS_SUCCESS = 'success';
+    
     public static $runStatuses = [
         self::RUN_STATUS_IDLE => 'Idle',
         self::RUN_STATUS_RUNNING => 'Running',
