@@ -2,29 +2,23 @@
 
 namespace App\Models\User;
 
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Lumen\Auth\Authorizable;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class CrmUser extends Model
 {
-    use Authenticatable, Authorizable;
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'new_user';
+    protected $table = 'new_crm_user';
 
     /**
      * The primary key associated with the table.
      *
      * @var string
      */
-    protected $primaryKey = 'user_id';
+    protected $primaryKey = "id";
 
     /**
      * The attributes that are mass assignable.
@@ -32,7 +26,23 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'username', 'email',
+        "user_id",
+        "logo",
+        "first_name",
+        "last_name",
+        "display_name",
+        "state",
+        "dealer_name",
+        "active",
+        "price_per_mile",
+        "email_signature",
+        "timezone",
+        "enable_hot_potato",
+        "disable_daily_digest",
+        "enable_assign_notification",
+        "enable_due_notification",
+        "enable_past_notification",
+        "is_factory",
     ];
 
     /**
@@ -47,10 +57,5 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function dealer()
     {
         return $this->hasOne(Dealer::class, 'user_id', 'user_id');
-    }
-
-    public function crmUser()
-    {
-        return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
     }
 }

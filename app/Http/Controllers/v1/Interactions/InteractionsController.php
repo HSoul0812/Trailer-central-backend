@@ -4,16 +4,21 @@ namespace App\Http\Controllers\v1\Interactions;
 
 use App\Http\Controllers\RestfulController;
 use App\Mail\InteractionEmail;
-use App\Models\Interactions\Lead;
+use App\Models\Interactions\LeadTC;
+use App\Models\User\User;
 use App\Repositories\Repository;
+use App\Traits\CustomerHelper;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class InteractionsController extends RestfulController
 {
+    use CustomerHelper;
+
     protected $interactions;
 
     /**
@@ -46,13 +51,13 @@ class InteractionsController extends RestfulController
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 @OA\Property(
-     *                     property="lead_id",
-     *                     description="Lead ID.",
+     *                     property="user_id",
+     *                     description="User Authentication ID.",
      *                     type="string",
      *                 ),
      *                 @OA\Property(
-     *                     property="product_id",
-     *                     description="Product ID.",
+     *                     property="lead_id",
+     *                     description="Lead ID.",
      *                     type="string",
      *                 ),
      *                 @OA\Property(
@@ -109,7 +114,7 @@ class InteractionsController extends RestfulController
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Lead not found",
+     *         description="User not found | Lead not found",
      *         content={
      *             @OA\MediaType(
      *                 mediaType="application/json",
@@ -117,7 +122,7 @@ class InteractionsController extends RestfulController
      *                     @OA\Property(
      *                         property="error",
      *                         type="bool",
-     *                         description="The response success"
+     *                         description="The response error"
      *                     ),
      *                     @OA\Property(
      *                         property="message",
@@ -126,7 +131,7 @@ class InteractionsController extends RestfulController
      *                     ),
      *                     example={
      *                         "error": true,
-     *                         "message": "Lead not found",
+     *                         "message": "User not found",
      *                     }
      *                 )
      *             )
@@ -161,16 +166,36 @@ class InteractionsController extends RestfulController
      */
     public function sendEmail(Request $request)
     {
+        $userId     = $request->input('user_id');
+        $leadId     = $request->input('lead_id');
+        $messageId  = $request->input('message_id');
+        $subject    = $request->input('subject');
+        $body       = $request->input('body');
+        $files      = $request->allFiles();
+
         try {
 
-            $leadId     = $request->input('lead_id');
-            $productId  = $request->input('product_id');
-            $messageId  = $request->input('message_id');
-            $subject    = $request->input('subject');
-            $body       = $request->input('body');
-            $files      = $request->allFiles();
+            $user = User::whereUserId($userId)->first();
 
-            $lead = Lead::query()->where('identifier', $leadId)->first();
+            if (empty($user)) {
+                // TODO: 500 error is returned instead of 404 error, it's incorrect
+                // return $this->response->errorNotFound("User not found");
+                return response()->json([
+                    'error'     => true,
+                    'message'   => "User not found"
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $lead = LeadTC::whereIdentifier($leadId)->first();
+
+            if (empty($lead)) {
+                // TODO: 500 error is returned instead of 404 error, it's incorrect
+                // return $this->response->errorNotFound("Lead not found");
+                return response()->json([
+                    'error'     => true,
+                    'message'   => "Lead with identifier '{$leadId}' was not found in the database"
+                ], Response::HTTP_NOT_FOUND);
+            }
 
             $attach = [];
 
@@ -184,10 +209,14 @@ class InteractionsController extends RestfulController
                 }
             }
 
-            Mail::to('test@trailercentral.com')->send(new InteractionEmail([
+            $customer = $this->getCustomer($user, $lead, $leadId);
+
+            $emailHistory = $lead->emailHistory ?? null;
+
+            $result = Mail::to($customer["email"] ?? "")->send(new InteractionEmail([
                 'date'          => Carbon::now()->toDateTimeString(),
-                'replyToEmail'  => 'ReplyToEmail@trailercentral.com',
-                'replyToName'   => 'ReplyToEmail',
+                'replyToEmail'  => $user->email ?? "",
+                'replyToName'   => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
                 'subject'       => $subject,
                 'body'          => $body,
                 'attach'        => $attach
@@ -199,6 +228,7 @@ class InteractionsController extends RestfulController
             ], Response::HTTP_OK);
 
         } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
             return response()->json([
                 'error'     => true,
                 'message'   => $throwable->getMessage()

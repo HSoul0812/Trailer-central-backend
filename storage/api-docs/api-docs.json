@@ -23,12 +23,12 @@
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
-                                    "lead_id": {
-                                        "description": "Lead ID.",
+                                    "user_id": {
+                                        "description": "User Authentication ID.",
                                         "type": "string"
                                     },
-                                    "product_id": {
-                                        "description": "Product ID.",
+                                    "lead_id": {
+                                        "description": "Lead ID.",
                                         "type": "string"
                                     },
                                     "message_id": {
@@ -83,13 +83,13 @@
                         }
                     },
                     "404": {
-                        "description": "Lead not found",
+                        "description": "User not found | Lead not found",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "error": {
-                                            "description": "The response success",
+                                            "description": "The response error",
                                             "type": "bool"
                                         },
                                         "message": {
@@ -100,7 +100,7 @@
                                     "type": "object",
                                     "example": {
                                         "error": true,
-                                        "message": "Lead not found"
+                                        "message": "User not found"
                                     }
                                 }
                             }

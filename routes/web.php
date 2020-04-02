@@ -26,6 +26,6 @@ $api->version('v1', function ($api) {
 
     $api->group(['prefix' => 'interactions'], function($api) {
         $api->get('/', 'App\Http\Controllers\v1\Interactions\InteractionsController@index');
-        $api->post('send-email/{lead}', 'App\Http\Controllers\v1\Interactions\InteractionsController@sendEmail');
+        $api->post('send-email', 'App\Http\Controllers\v1\Interactions\InteractionsController@sendEmail');
     });
 });

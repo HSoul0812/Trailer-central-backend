@@ -4,24 +4,28 @@ namespace App\Models\Interactions;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Lead extends Model
+class LeadTC extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'crm_lead';
+    protected $table = 'website_lead';
 
     /**
      * The primary key associated with the table.
      *
      * @var string
      */
-    protected $primaryKey = 'lead_id';
+    protected $primaryKey = 'identifier';
 
-    public function customer()
+    /**
+     * Get the email history for the lead.
+     */
+    public function emailHistory()
     {
-        return $this->hasOne(Customer::class, 'customer_id', 'customer_id');
+        return $this->hasMany(EmailHistory::class, 'lead_id', 'identifier');
     }
+
 }
