@@ -144,8 +144,13 @@ class PartRepository implements PartRepositoryInterface {
     }
     
     public function getAllSearch($params) {
-//        $query = Part::where('sku', 'LIKE', '%' . $params['search_term'] . '%');;
-        $query = Part::search($params['search_term']);
+        if (isset($params['naive_search'])) {
+            $query = Part::where('sku', 'LIKE', '%' . $params['search_term'] . '%')
+                           ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                           ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%');
+        } else {
+            $query = Part::search($params['search_term']);
+        }
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;

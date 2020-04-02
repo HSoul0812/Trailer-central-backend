@@ -139,7 +139,7 @@ class Part extends Model
             $cacheStoreTime->update_time = Carbon::now();
         }
     }
-        
+      
     public function brand()
     {
         return $this->belongsTo('App\Models\Parts\Brand');
