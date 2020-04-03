@@ -53,4 +53,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
     }
+
+    public function salesPerson()
+    {
+        return $this->hasOne(SalesPerson::class, 'user_id', 'user_id');
+    }
 }

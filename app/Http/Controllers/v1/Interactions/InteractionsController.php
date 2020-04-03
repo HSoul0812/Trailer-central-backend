@@ -4,10 +4,13 @@ namespace App\Http\Controllers\v1\Interactions;
 
 use App\Http\Controllers\RestfulController;
 use App\Mail\InteractionEmail;
+use App\Models\Interactions\EmailHistory;
+use App\Models\Interactions\Interaction;
 use App\Models\Interactions\LeadTC;
 use App\Models\User\User;
 use App\Repositories\Repository;
 use App\Traits\CustomerHelper;
+use App\Traits\MailHelper;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
 use Illuminate\Http\Response;
@@ -17,7 +20,7 @@ use Throwable;
 
 class InteractionsController extends RestfulController
 {
-    use CustomerHelper;
+    use CustomerHelper, MailHelper;
 
     protected $interactions;
 
@@ -209,9 +212,19 @@ class InteractionsController extends RestfulController
                 }
             }
 
-            $customer = $this->getCustomer($user, $lead, $leadId);
+            $customer = $this->getCustomer($user, $lead);
 
-            $emailHistory = $lead->emailHistory ?? null;
+            // Set custom smtp config
+            $this->setSalesPersonSmtpConfig($user);
+
+            $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
+
+            if (! empty($emailHistory) && ! empty($emailHistory->interaction_id)) {
+                Interaction::whereInteractionId($emailHistory->interaction_id)
+                    ->update(["interaction_notes" => "E-Mail Sent: {$subject}"]);
+            }
+
+            dd($emailHistory);
 
             $result = Mail::to($customer["email"] ?? "")->send(new InteractionEmail([
                 'date'          => Carbon::now()->toDateTimeString(),

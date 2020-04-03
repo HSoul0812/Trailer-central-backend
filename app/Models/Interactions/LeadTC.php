@@ -28,4 +28,11 @@ class LeadTC extends Model
         return $this->hasMany(EmailHistory::class, 'lead_id', 'identifier');
     }
 
+    /**
+     * Get the email history for the lead.
+     */
+    public function interactions()
+    {
+        return $this->hasMany(Interaction::class, 'tc_lead_id', 'identifier');
+    }
 }

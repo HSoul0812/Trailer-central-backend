@@ -65,4 +65,18 @@ class EmailHistory extends Model
     {
         return $this->belongsTo(LeadTC::class, "interaction_id", "interaction_id");
     }
+
+    /**
+     * @param string $fromEmail
+     * @param string $leadId
+     * @return EmailHistory
+     */
+    public static function getEmailDraft(string $fromEmail, string $leadId): EmailHistory
+    {
+        return self::whereLeadId($leadId)
+            ->whereFromEmail($fromEmail)
+            ->whereNull('date_sent')
+            ->first();
+    }
+
 }

@@ -12,4 +12,11 @@ class Customer extends Model
      * @var string
      */
     protected $table = 'crm_customer';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'customer_id';
 }
