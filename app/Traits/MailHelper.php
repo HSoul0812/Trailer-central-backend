@@ -24,4 +24,21 @@ trait MailHelper
             Config::set('mail', $config);
         }
     }
+    /**
+     * @param $files - mail attachment(-s)
+     * @return bool | string
+     */
+    public function checkAttachmentsSize($files)
+    {
+        $totalSize = 0;
+        foreach ($files as $file) {
+            if ($file['size'] > 2097152) {
+                return "Single upload size must be less than 2 MB.";
+            } else if ($totalSize > 8388608) {
+                return "Total upload size must be less than 8 MB";
+            }
+            $totalSize += $file['size'];
+        }
+        return false;
+    }
 }

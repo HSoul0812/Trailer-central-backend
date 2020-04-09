@@ -14,8 +14,10 @@ use App\Traits\MailHelper;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Monolog\Logger;
 use Throwable;
 
 class InteractionsController extends RestfulController
@@ -37,8 +39,8 @@ class InteractionsController extends RestfulController
     public function index(Request $request)
     {
         return response()->json([
-            'success'   => true,
-            'message'   => "Interactions API",
+            'success' => true,
+            'message' => "Interactions API",
         ], Response::HTTP_OK);
     }
 
@@ -169,12 +171,12 @@ class InteractionsController extends RestfulController
      */
     public function sendEmail(Request $request)
     {
-        $userId     = $request->input('user_id');
-        $leadId     = $request->input('lead_id');
-        $messageId  = $request->input('message_id');
-        $subject    = $request->input('subject');
-        $body       = $request->input('body');
-        $files      = $request->allFiles();
+        $userId = $request->input('user_id');
+        $leadId = $request->input('lead_id');
+        $messageId = $request->input('message_id');
+        $subject = $request->input('subject');
+        $body = $request->input('body');
+        $files = $request->allFiles();
 
         try {
 
@@ -184,8 +186,8 @@ class InteractionsController extends RestfulController
                 // TODO: 500 error is returned instead of 404 error, it's incorrect
                 // return $this->response->errorNotFound("User not found");
                 return response()->json([
-                    'error'     => true,
-                    'message'   => "User not found"
+                    'error' => true,
+                    'message' => "User not found"
                 ], Response::HTTP_NOT_FOUND);
             }
 
@@ -195,19 +197,26 @@ class InteractionsController extends RestfulController
                 // TODO: 500 error is returned instead of 404 error, it's incorrect
                 // return $this->response->errorNotFound("Lead not found");
                 return response()->json([
-                    'error'     => true,
-                    'message'   => "Lead with identifier '{$leadId}' was not found in the database"
+                    'error' => true,
+                    'message' => "Lead with identifier '{$leadId}' was not found in the database"
                 ], Response::HTTP_NOT_FOUND);
             }
 
             $attach = [];
 
-            if (! empty($files) && is_array($files)) {
+            if (!empty($files) && is_array($files)) {
+                $message = $this->checkAttachmentsSize($files);
+                if( false !== $message ) {
+                    return response()->json([
+                        'error' => true,
+                        'message' => $message
+                    ], Response::HTTP_BAD_REQUEST);
+                }
                 foreach ($files as $file) {
                     $attach[] = [
-                        'path'  => $file->getPathname(),
-                        'as'    => $file->getClientOriginalName(),
-                        'mime'  => $file->getMimeType(),
+                        'path' => $file->getPathname(),
+                        'as' => $file->getClientOriginalName(),
+                        'mime' => $file->getMimeType(),
                     ];
                 }
             }
@@ -219,32 +228,43 @@ class InteractionsController extends RestfulController
 
             $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
 
-            if (! empty($emailHistory) && ! empty($emailHistory->interaction_id)) {
+            if ( !empty($emailHistory) && !empty($emailHistory->interaction_id)) {
                 Interaction::whereInteractionId($emailHistory->interaction_id)
                     ->update(["interaction_notes" => "E-Mail Sent: {$subject}"]);
+            } else {
+                // TODO: replace NULL in lead_product_id with necessary value
+                DB::table('crm_interaction')->insert(
+                    array(
+                        "lead_product_id"   => NULL,
+                        "tc_lead_id"        => $leadId,
+                        "user_id"           => $userId,
+                        "interaction_type"  => "EMAIL",
+                        "interaction_notes" => "E-Mail Sent: {$subject}",
+                        "interaction_time"  => Carbon::now()->toDateTimeString(),
+
+                    )
+                );
             }
 
-            dd($emailHistory);
-
             $result = Mail::to($customer["email"] ?? "")->send(new InteractionEmail([
-                'date'          => Carbon::now()->toDateTimeString(),
-                'replyToEmail'  => $user->email ?? "",
-                'replyToName'   => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
-                'subject'       => $subject,
-                'body'          => $body,
-                'attach'        => $attach
+                'date' => Carbon::now()->toDateTimeString(),
+                'replyToEmail' => $user->email ?? "",
+                'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
+                'subject' => $subject,
+                'body' => $body,
+                'attach' => $attach
             ]));
 
             return response()->json([
-                'success'   => true,
-                'message'   => "Email sent successfully",
+                'success' => true,
+                'message' => "Email sent successfully",
             ], Response::HTTP_OK);
 
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
             return response()->json([
-                'error'     => true,
-                'message'   => $throwable->getMessage()
+                'error' => true,
+                'message' => $throwable->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

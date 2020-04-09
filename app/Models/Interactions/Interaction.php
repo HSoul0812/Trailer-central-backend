@@ -35,6 +35,13 @@ class Interaction extends Model
     ];
 
     /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * Get the email history for the interaction.
      */
     public function emailHistory()
