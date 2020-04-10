@@ -3,10 +3,12 @@
 namespace App\Traits;
 
 use App\Models\User\Dealer;
+use App\Models\User\Upload;
 use Aws\S3\S3Client;
-use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Config;
 use App\Traits\CompactHelper;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 interface UploadConst {
     const UPLOAD_TYPE_WEBSITE_MEDIA = 'website/media';
@@ -18,6 +20,7 @@ interface UploadConst {
     const UPLOAD_PATH = "/var/www/vhosts/trailercentral.com/html";
 
     const DS = "/";
+    const API_VERSION = 'v1.1';
 }
 
 trait UploadHelper
@@ -38,14 +41,14 @@ trait UploadHelper
 
         // append images to existing inventory
         $responseData = array();
-        $logger = new Logger;
-        $logger->getLogger('resources')->info("DEALER UPLOADS POST: dealer {$dealerIdentifier}", $this);
+        $code = 0;
+        Log::info("DEALER UPLOADS POST: dealer {$dealerIdentifier}", $this);
 
-        $dealerModel = Dealer::dealerByIdentifier($dealerIdentifier);
+        $dealerModel = Dealer::findOrFail($dealerIdentifier);
 
         if($dealerModel) {
 
-            $filepath = self::getUploadDirectory(UploadConst::UPLOAD_TYPE_CSV, array( $dealerModel->getId() ));
+            $filepath = self::getUploadDirectory(UploadConst::UPLOAD_TYPE_CSV, array( $dealerIdentifier ));
 
             // create directory, if it doesn't already exist
             self::createDirectory($filepath, 0775);
@@ -68,9 +71,9 @@ trait UploadHelper
 
                     curl_close($ch);
                 } catch(Exception $e) {
-                    $logger->getLogger('resources')->error("Could not download file from '{$url}'. Reason: " . $e->getMessage(), $this);
+                    Log::error("Could not download file from '{$url}'. Reason: " . $e->getMessage(), $this);
 
-                    $code = Tonic_Response::PRECONDITIONFAILED;
+                    $code = HTTP::PRECONDITIONFAILED;
 
                     $errors           = array();
                     $errorDescription = "Could not download file from '{$url}'.";
@@ -96,9 +99,9 @@ trait UploadHelper
                         ));
                         //file_put_contents($filename, $filecontents);
                     } catch(Exception $e) {
-                        $logger->getLogger('resources')->error("Could not save file to '{$filename}'. Reason: " . $e->getMessage(), $this);
+                        Log::error("Could not save file to '{$filename}'. Reason: " . $e->getMessage(), $this);
 
-                        $code = Tonic_Response::INTERNALSERVERERROR;
+                        $code = HTTP::INTERNALSERVERERROR;
 
                         $errors           = array();
                         $errorDescription = "An unknown error occured.";
@@ -120,10 +123,10 @@ trait UploadHelper
                     try {
                         $result = rename($currentFilename, $filename);
                         if($result) {
-                            $logger->getLogger('resources')->info("File '{$currentFilename}' renamed to '{$filename}'.", $this);
+                            Log::info("File '{$currentFilename}' renamed to '{$filename}'.", $this);
 
                         } else {
-                            $logger->getLogger('resources')->error("File '{$currentFilename}' could not be moved to '{$filename}'.", $this);
+                            Log::error("File '{$currentFilename}' could not be moved to '{$filename}'.", $this);
 
                             $code = HTTP::INTERNALSERVERERROR;
 
@@ -138,7 +141,7 @@ trait UploadHelper
                             $responseData['errors'] = $errors;
                         }
                     } catch(Exception $e) {
-                        $logger->getLogger('resources')->error("File '{$currentFilename}' could not be moved to '{$filename}'. Reason: " . $e->getMessage(), $this);
+                        Log::error("File '{$currentFilename}' could not be moved to '{$filename}'. Reason: " . $e->getMessage(), $this);
 
                         $code = HTTP::INTERNALSERVERERROR;
 
@@ -153,7 +156,7 @@ trait UploadHelper
                         $responseData['errors'] = $errors;
                     }
                 } else {
-                    $logger->getLogger('resources')->error("Uploaded file '{$currentFilename}' could not be found.", $this);
+                    Log::error("Uploaded file '{$currentFilename}' could not be found.", $this);
 
                     $code = Tonic_Response::PRECONDITIONFAILED;
 
@@ -168,7 +171,7 @@ trait UploadHelper
                     $responseData['errors'] = $errors;
                 }
             } else {
-                $logger->getLogger('requests')->error('No URL or FILENAME specified for uploaded file.', $this);
+                Log::error('No URL or FILENAME specified for uploaded file.', $this);
 
                 $code = Tonic_Response::PRECONDITIONFAILED;
 
@@ -184,7 +187,7 @@ trait UploadHelper
             }
 
             if(!file_exists($filename)) {
-                $logger->getLogger('resources')->error("Uploaded file '{$filename}' could not be found.", $this);
+                Log::error("Uploaded file '{$filename}' could not be found.", $this);
 
                 $code = HTTP::INTERNALSERVERERROR;
 
@@ -198,61 +201,66 @@ trait UploadHelper
                 $responseData['status'] = "error";
                 $responseData['errors'] = $errors;
             } else {
-                $logger->getLogger('resources')->debug("Uploaded file '{$filename}' found.", $this);
+                Log::debug("Uploaded file '{$filename}' found.", $this);
             }
 
 
             // TODO: implement Upload Model and DealerUpload model to finish this code block
-//            if(file_exists($filename)) {
-//                try {
-//                    // add entry in the database
-//                    $uploadModel = new Model_Upload();
-//                    $uploadModel->setData('filename', $filename);
-//                    $uploadModel->setData('title', $title);
-//                    $uploadModel->setData('hash', sha1_file($filename));
-//                    $uploadModel->save();
-//
-//                    $uploadId = $uploadModel->getId();
-//
-//                    // rename the file to include correct extension
-//                    $newfilename = $filepath . UploadConst::DS . Helper_Compact::hash($uploadId) . ".csv";
-//                    rename($filename, $newfilename);
-//                    $uploadModel->setData('filename', $newfilename);
-//                    $uploadModel->save();
-//
-//                    $uploadDealerModel = new Model_Dealer_Upload();
-//                    $uploadDealerModel->setData('dealer_id', $dealerModel->getId());
-//                    $uploadDealerModel->setData('upload_id', $uploadId);
-//                    $uploadDealerModel->setData('is_parts_upload', '1');
-//                    $uploadDealerModel->save();
-//                    $uploadIdentifier = Helper_Compact::shorten($uploadModel->getId());
-//
-//                    $uploadData = array();
-//
-//                    $uploadData[] = array(
-//                        'identifier'     => $uploadIdentifier,
-//                        'created_at'     => $uploadModel->getData('created_at'),
-//                        'title'          => $uploadModel->getData('title'),
-//                        'url'            => Helper_Url::getSiteFileUrl($uploadModel->getData('filename')),
-//                        'last_run_at'    => null,
-//                        'last_run_state' => 'not run'
-//                    );
-//
-//                    $responseData['status'] = "success";
-//                    $responseData['upload'] = $uploadData;
-//                    $code         = Tonic_Response::CREATED;
-//
-//                    $logger->getLogger('resources')->info("Added upload '{$uploadIdentifier}' to dealer '{$dealerIdentifier}'", $this);
-//                } catch(Exception $e) {
-//                    $logger->getLogger('resources')->error($e, $this);
-//
-//                    $code = Tonic_Response::INTERNALSERVERERROR;
-//                }
-//            }
+            if(file_exists($filename)) {
+                try {
+                    // add entry in the database
+                    $uploadModel = new Upload();
+                    $uploadModel->filename = $filename;
+                    $uploadModel->title = $title;
+                    $uploadModel->hash = sha1_file($filename);
+                    $uploadModel->save();
+
+                    // rename the file to include correct extension
+                    $newfilename = $filepath . UploadConst::DS . CompactHelper::hash($uploadModel->id) . ".csv";
+                    rename($filename, $newfilename);
+                    $uploadModel->setData('filename', $newfilename);
+                    $uploadModel->save();
+
+                    $uploadDealerModel = new Model_Dealer_Upload();
+                    $uploadDealerModel->dealer_id = $dealerIdentifier;
+                    $uploadDealerModel->upload_id = $uploadModel->id;
+                    $uploadDealerModel->is_parts_upload = '1';
+                    $uploadDealerModel->save();
+                    $uploadIdentifier = CompactHelper::shorten($uploadModel->id);
+
+                    $uploadData = array();
+
+                    $uploadData[] = array(
+                        'identifier'     => $uploadIdentifier,
+                        'created_at'     => $uploadModel->created_at,
+                        'title'          => $uploadModel->title,
+                        'url'            => UrlHelper::getSiteFileUrl($uploadModel->filename),
+                        'last_run_at'    => null,
+                        'last_run_state' => 'not run'
+                    );
+
+                    $responseData['status'] = "success";
+                    $responseData['upload'] = $uploadData;
+                    $code         = HTTP::CREATED;
+
+                    Log::info("Added upload '{$uploadIdentifier}' to dealer '{$dealerIdentifier}'", $this);
+                } catch(Exception $e) {
+                    Log::error($e, $this);
+
+                    $code = HTTP::INTERNALSERVERERROR;
+                }
+            }
         } else {
-            $logger->getLogger('resources')->warn("Dealer '{$dealerIdentifier}' not found in DB.", $this);
-        // TODO define constants
-//            $link = BASE_URL . '/' . API_VERSION . HTTP::ERROR_LINK;
+            Log::warning("Dealer '{$dealerIdentifier}' not found in DB.", $this);
+            $errors           = array();
+            $errorDescription = "Dealer '{$dealerIdentifier}' not found in DB.";
+            $errors[]         = array(
+                'code'        => HTTP::PRECONDITIONFAILED,
+                'description' => $errorDescription
+            );
+
+            $responseData['status'] = "error";
+            $responseData['errors'] = $errors;
             $code = HTTP::PRECONDITIONFAILED;
         }
 
@@ -346,7 +354,6 @@ trait UploadHelper
         $directory = str_replace(UploadConst::UPLOAD_PATH, '', $directory);
         $directory = ltrim($directory, UploadConst::DS);
         $path = explode(UploadConst::DS, $directory);
-        $logger = new Logger;
 
         $currentpath = UploadConst::UPLOAD_PATH . UploadConst::DS;
         foreach($path as $pathpart) {
@@ -360,7 +367,7 @@ trait UploadHelper
                         throw new Exception("Could not create directory '{$pathpart}' in '{$currentpath}'.");
                     }
                 } catch(Exception $e) {
-                    $logger->getLogger('resources')->error("Could not create directory '{$pathpart}' in '{$currentpath}'. Reason: " . $e->getMessage(), $this);
+                    Log::error("Could not create directory '{$pathpart}' in '{$currentpath}'. Reason: " . $e->getMessage(), $this);
                 }
             }
             $currentpath .= $pathpart . UploadConst::DS;
@@ -369,12 +376,11 @@ trait UploadHelper
 
     public function makeWriteable($file, $chmod = 0755) {
         $fileowner = fileowner(UploadConst::UPLOAD_PATH);
-        $logger = new Logger;
         try {
             chmod($file, $chmod);
             chown($file, $fileowner);
         } catch(Exception $e) {
-            $logger->getLogger('resources')->error("Could not set rights to '{$file}'. Reason: " . $e->getMessage(), $this);
+            Log::error("Could not set rights to '{$file}'. Reason: " . $e->getMessage(), $this);
         }
     }
 }

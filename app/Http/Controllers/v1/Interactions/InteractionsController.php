@@ -17,7 +17,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Monolog\Logger;
 use Throwable;
 
 class InteractionsController extends RestfulController
