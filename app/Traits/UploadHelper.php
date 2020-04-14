@@ -2,8 +2,10 @@
 
 namespace App\Traits;
 
+use App\Models\Interactions\DealerUpload;
+use App\Models\Upload\Image;
 use App\Models\User\Dealer;
-use App\Models\User\Upload;
+use App\Models\Upload\Upload;
 use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Config;
 use App\Traits\CompactHelper;
@@ -25,7 +27,7 @@ interface UploadConst {
 
 trait UploadHelper
 {
-    public function uploadImage($file, $dealerIdentifier) {
+    public static function uploadImage($file, $dealerIdentifier, $mimeType) {
 
         $bucket = env('AWS_BUCKET');
 
@@ -42,7 +44,6 @@ trait UploadHelper
         // append images to existing inventory
         $responseData = array();
         $code = 0;
-        Log::info("DEALER UPLOADS POST: dealer {$dealerIdentifier}", $this);
 
         $dealerModel = Dealer::findOrFail($dealerIdentifier);
 
@@ -158,7 +159,7 @@ trait UploadHelper
                 } else {
                     Log::error("Uploaded file '{$currentFilename}' could not be found.", $this);
 
-                    $code = Tonic_Response::PRECONDITIONFAILED;
+                    $code = HTTP::PRECONDITIONFAILED;
 
                     $errors           = array();
                     $errorDescription = "Uploaded file '{$currentFilename}' could not be found.";
@@ -173,7 +174,7 @@ trait UploadHelper
             } else {
                 Log::error('No URL or FILENAME specified for uploaded file.', $this);
 
-                $code = Tonic_Response::PRECONDITIONFAILED;
+                $code = HTTP::PRECONDITIONFAILED;
 
                 $errors           = array();
                 $errorDescription = "URL or FILENAME not specified for uploaded file.";
@@ -204,8 +205,6 @@ trait UploadHelper
                 Log::debug("Uploaded file '{$filename}' found.", $this);
             }
 
-
-            // TODO: implement Upload Model and DealerUpload model to finish this code block
             if(file_exists($filename)) {
                 try {
                     // add entry in the database
@@ -218,10 +217,10 @@ trait UploadHelper
                     // rename the file to include correct extension
                     $newfilename = $filepath . UploadConst::DS . CompactHelper::hash($uploadModel->id) . ".csv";
                     rename($filename, $newfilename);
-                    $uploadModel->setData('filename', $newfilename);
+                    $uploadModel->filename = $newfilename;
                     $uploadModel->save();
 
-                    $uploadDealerModel = new Model_Dealer_Upload();
+                    $uploadDealerModel = new DealerUpload();
                     $uploadDealerModel->dealer_id = $dealerIdentifier;
                     $uploadDealerModel->upload_id = $uploadModel->id;
                     $uploadDealerModel->is_parts_upload = '1';
@@ -242,6 +241,10 @@ trait UploadHelper
                     $responseData['status'] = "success";
                     $responseData['upload'] = $uploadData;
                     $code         = HTTP::CREATED;
+
+                    $path = Helper_Upload::getS3Path($newfilename, array($dealerIdentifier, $inventoryId));
+                    $result = Helper_Upload::putImageToS3($filename, $path, $mimeType);
+                    unlink($filename);
 
                     Log::info("Added upload '{$uploadIdentifier}' to dealer '{$dealerIdentifier}'", $this);
                 } catch(Exception $e) {
@@ -320,7 +323,6 @@ trait UploadHelper
         return $path;
 
     }
-
     public function putImageToS3($sourcePath, $path, $imageType) {
 
         $bucket = env('AWS_BUCKET');
@@ -328,7 +330,6 @@ trait UploadHelper
         return S3Helper::putFile($sourcePath, $bucket, $path, 'public-read', $imageType);
 
     }
-
     public function moveFile($from = null, $to = null) {
 
         if(empty($from) || empty($to)) {
@@ -348,7 +349,6 @@ trait UploadHelper
         return $result;
 
     }
-
     public function createDirectory($directory, $chmod = 0755) {
         // recursively create the directories until
         $directory = str_replace(UploadConst::UPLOAD_PATH, '', $directory);
@@ -373,7 +373,6 @@ trait UploadHelper
             $currentpath .= $pathpart . UploadConst::DS;
         }
     }
-
     public function makeWriteable($file, $chmod = 0755) {
         $fileowner = fileowner(UploadConst::UPLOAD_PATH);
         try {
@@ -382,5 +381,88 @@ trait UploadHelper
         } catch(Exception $e) {
             Log::error("Could not set rights to '{$file}'. Reason: " . $e->getMessage(), $this);
         }
+    }
+
+    static function uploadImages($images, $dealerId, $inventoryId, $inventoryTitle) {
+        if(empty($images)) {
+            return;
+        }
+        $filepath = self::getUploadDirectory(UploadConst::UPLOAD_TYPE_IMAGE, array(
+            $dealerId,
+            $inventoryId
+        ));
+        // create directory, if it doesn't already exist
+        self::createDirectory($filepath, 0775);
+        $tempname = CompactHelper::hash(time()) . base_convert(rand(1, getrandmax()), 10, 36);
+        $filename = $filepath . DS . $tempname . ".tmp";
+        $extension = "";
+        foreach($images as $url) {
+            Log::debug("ATTEMPTING IMAGE: $url");
+
+            $filecontents = '';
+            try {
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYSTATUS, false);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                $filecontents = curl_exec($ch);
+                curl_close($ch);
+            } catch(Exception $e) {
+
+            }
+            if(!empty($filecontents) && $filecontents !== false) {
+                try {
+                    // save the file
+                    file_put_contents($filename, $filecontents);
+                } catch(Exception $e) {
+                }
+            }
+            if(file_exists($filename)) {
+                $imageinfo = getimagesize($filename);
+                $mimetype = $imageinfo['mime'];
+                $extension = "";
+                switch($mimetype) {
+                    case "image/gif":
+                        $extension = "gif";
+                        break;
+                    case "image/jpeg":
+                        $extension = "jpg";
+                        break;
+                    case "image/png":
+                        $extension = "png";
+                        break;
+                    default:
+                        $extension = "";
+                        break;
+                }
+                if($extension != "") {
+                    // add entry in the database
+                    $imageModel = new Image();
+                    $imageModel->filename = $filename;
+                    $imageModel->hash = sha1_file($filename);
+                    $imageId = $imageModel->save();
+                    $inventoryFilenameTitle = $inventoryTitle . "_" . CompactHelper::hash($imageId) . ".{$extension})";
+                    $newfilename = preg_replace(array('/\s/', '/\.[\.]+/', '/[^\w_\.\-]/'), array(
+                        '_',
+                        '.',
+                        ''
+                    ), $inventoryFilenameTitle);
+                    Helper_Image::resize($filename, 800, 800, true, $filename);
+                    $path = self::getS3Path($newfilename, array($dealerId, $inventoryId));
+                    $result = self::putImageToS3($filename, $path, $mimetype);
+                    unlink($filename);
+                    $imageModel->setData('filename', '/' . $path);
+                    $imageModel->save();
+                    $imageInventoryModel = new Model_Inventory_Image();
+                    $imageInventoryModel->setData('inventory_id', $inventoryId);
+                    $imageInventoryModel->setData('image_id', $imageId);
+                    $imageInventoryModel->save();
+                }
+            }
+        }
+
     }
 }

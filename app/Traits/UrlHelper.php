@@ -49,7 +49,7 @@ trait UrlHelper
         return 'http://distillery-trailercentral.s3.amazonaws.com' . $file;
     }
 
-    public function getSiteFileUrl($file)
+    public static function getSiteFileUrl($file)
     {
         return 'http://www.trailercentral.com/' . str_replace('/var/www/vhosts/trailercentral.com/html/', '', $file);
     }

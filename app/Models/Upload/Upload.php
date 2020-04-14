@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Models\User;
+namespace App\Models\Upload;
 
+use App\Models\Interactions\DealerUpload;
+use App\Models\User\Dealer;
 use App\Traits\CompactHelper;
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Lumen\Auth\Authorizable;
 
 class Upload extends Model
 {
@@ -40,9 +38,9 @@ class Upload extends Model
         'last_run_state'
     ];
 
-    public function dealer()
+    public function dealerUpload()
     {
-        return $this->hasOne(Dealer::class, 'user_id', 'upload_id');
+        return $this->hasOne(DealerUpload::class, 'user_id', 'upload_id');
     }
 
     public function setFilename($filename = '') {
@@ -52,5 +50,9 @@ class Upload extends Model
     public function getIdentifier()
     {
         return CompactHelper::shorten($this->getId());
+    }
+
+    public function dealer() {
+        return $this->belongsToMany(Dealer::class, 'dealer_upload', 'upload_id', 'upload_id');
     }
 }

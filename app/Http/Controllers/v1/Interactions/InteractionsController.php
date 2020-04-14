@@ -11,6 +11,7 @@ use App\Models\User\User;
 use App\Repositories\Repository;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
+use App\Traits\UploadHelper;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
 use Illuminate\Http\Response;
@@ -182,8 +183,6 @@ class InteractionsController extends RestfulController
             $user = User::whereUserId($userId)->first();
 
             if (empty($user)) {
-                // TODO: 500 error is returned instead of 404 error, it's incorrect
-                // return $this->response->errorNotFound("User not found");
                 return response()->json([
                     'error' => true,
                     'message' => "User not found"
@@ -193,8 +192,6 @@ class InteractionsController extends RestfulController
             $lead = LeadTC::whereIdentifier($leadId)->first();
 
             if (empty($lead)) {
-                // TODO: 500 error is returned instead of 404 error, it's incorrect
-                // return $this->response->errorNotFound("Lead not found");
                 return response()->json([
                     'error' => true,
                     'message' => "Lead with identifier '{$leadId}' was not found in the database"
@@ -212,6 +209,8 @@ class InteractionsController extends RestfulController
                     ], Response::HTTP_BAD_REQUEST);
                 }
                 foreach ($files as $file) {
+                    $result = UploadHelper::uploadImage($file);
+
                     $attach[] = [
                         'path' => $file->getPathname(),
                         'as' => $file->getClientOriginalName(),

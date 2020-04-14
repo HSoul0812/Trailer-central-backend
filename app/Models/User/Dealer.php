@@ -3,6 +3,7 @@
 namespace App\Models\User;
 
 use App\Models\Interactions\DealerLocation;
+use App\Models\Upload\Upload;
 use Illuminate\Database\Eloquent\Model;
 
 class Dealer extends Model
@@ -31,6 +32,10 @@ class Dealer extends Model
 
     public function location()
     {
-        return $this->hasOne(DealerLocation::class, 'dealer_id', 'id');
+        return $this->hasOne(DealerLocation::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function uploads() {
+        return $this->belongsToMany(Upload::class, 'dealer_upload', 'dealer_id', 'dealer_id');
     }
 }
