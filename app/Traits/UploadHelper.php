@@ -72,7 +72,7 @@ trait UploadHelper
 
                     curl_close($ch);
                 } catch(Exception $e) {
-                    Log::error("Could not download file from '{$url}'. Reason: " . $e->getMessage(), $this);
+                    Log::error("Could not download file from '{$url}'. Reason: " . $e->getMessage());
 
                     $code = HTTP::PRECONDITIONFAILED;
 
@@ -100,7 +100,7 @@ trait UploadHelper
                         ));
                         //file_put_contents($filename, $filecontents);
                     } catch(Exception $e) {
-                        Log::error("Could not save file to '{$filename}'. Reason: " . $e->getMessage(), $this);
+                        Log::error("Could not save file to '{$filename}'. Reason: " . $e->getMessage());
 
                         $code = HTTP::INTERNALSERVERERROR;
 
@@ -124,10 +124,10 @@ trait UploadHelper
                     try {
                         $result = rename($currentFilename, $filename);
                         if($result) {
-                            Log::info("File '{$currentFilename}' renamed to '{$filename}'.", $this);
+                            Log::info("File '{$currentFilename}' renamed to '{$filename}'.");
 
                         } else {
-                            Log::error("File '{$currentFilename}' could not be moved to '{$filename}'.", $this);
+                            Log::error("File '{$currentFilename}' could not be moved to '{$filename}'.");
 
                             $code = HTTP::INTERNALSERVERERROR;
 
@@ -142,7 +142,7 @@ trait UploadHelper
                             $responseData['errors'] = $errors;
                         }
                     } catch(Exception $e) {
-                        Log::error("File '{$currentFilename}' could not be moved to '{$filename}'. Reason: " . $e->getMessage(), $this);
+                        Log::error("File '{$currentFilename}' could not be moved to '{$filename}'. Reason: " . $e->getMessage());
 
                         $code = HTTP::INTERNALSERVERERROR;
 
@@ -157,7 +157,7 @@ trait UploadHelper
                         $responseData['errors'] = $errors;
                     }
                 } else {
-                    Log::error("Uploaded file '{$currentFilename}' could not be found.", $this);
+                    Log::error("Uploaded file '{$currentFilename}' could not be found.");
 
                     $code = HTTP::PRECONDITIONFAILED;
 
@@ -172,7 +172,7 @@ trait UploadHelper
                     $responseData['errors'] = $errors;
                 }
             } else {
-                Log::error('No URL or FILENAME specified for uploaded file.', $this);
+                Log::error('No URL or FILENAME specified for uploaded file.');
 
                 $code = HTTP::PRECONDITIONFAILED;
 
@@ -188,7 +188,7 @@ trait UploadHelper
             }
 
             if(!file_exists($filename)) {
-                Log::error("Uploaded file '{$filename}' could not be found.", $this);
+                Log::error("Uploaded file '{$filename}' could not be found.");
 
                 $code = HTTP::INTERNALSERVERERROR;
 
@@ -202,7 +202,7 @@ trait UploadHelper
                 $responseData['status'] = "error";
                 $responseData['errors'] = $errors;
             } else {
-                Log::debug("Uploaded file '{$filename}' found.", $this);
+                Log::debug("Uploaded file '{$filename}' found.");
             }
 
             if(file_exists($filename)) {
@@ -246,15 +246,15 @@ trait UploadHelper
                     $result = Helper_Upload::putImageToS3($filename, $path, $mimeType);
                     unlink($filename);
 
-                    Log::info("Added upload '{$uploadIdentifier}' to dealer '{$dealerIdentifier}'", $this);
+                    Log::info("Added upload '{$uploadIdentifier}' to dealer '{$dealerIdentifier}'");
                 } catch(Exception $e) {
-                    Log::error($e, $this);
+                    Log::error($e);
 
                     $code = HTTP::INTERNALSERVERERROR;
                 }
             }
         } else {
-            Log::warning("Dealer '{$dealerIdentifier}' not found in DB.", $this);
+            Log::warning("Dealer '{$dealerIdentifier}' not found in DB.");
             $errors           = array();
             $errorDescription = "Dealer '{$dealerIdentifier}' not found in DB.";
             $errors[]         = array(
@@ -367,7 +367,7 @@ trait UploadHelper
                         throw new Exception("Could not create directory '{$pathpart}' in '{$currentpath}'.");
                     }
                 } catch(Exception $e) {
-                    Log::error("Could not create directory '{$pathpart}' in '{$currentpath}'. Reason: " . $e->getMessage(), $this);
+                    Log::error("Could not create directory '{$pathpart}' in '{$currentpath}'. Reason: " . $e->getMessage());
                 }
             }
             $currentpath .= $pathpart . UploadConst::DS;
@@ -379,7 +379,7 @@ trait UploadHelper
             chmod($file, $chmod);
             chown($file, $fileowner);
         } catch(Exception $e) {
-            Log::error("Could not set rights to '{$file}'. Reason: " . $e->getMessage(), $this);
+            Log::error("Could not set rights to '{$file}'. Reason: " . $e->getMessage());
         }
     }
 
