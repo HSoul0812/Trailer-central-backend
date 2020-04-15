@@ -116,4 +116,16 @@ $api->version('v1', function ($route) {
     $route->post('vendors/{id}', 'App\Http\Controllers\v1\Parts\VendorController@update')->where('id', '[0-9]+');
     $route->delete('vendors/{id}', 'App\Http\Controllers\v1\Parts\VendorController@destroy')->where('id', '[0-9]+');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Feeds
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    // upload feed data
+    $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
+
 });
