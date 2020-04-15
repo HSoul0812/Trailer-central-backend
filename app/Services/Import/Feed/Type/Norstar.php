@@ -5,7 +5,15 @@ namespace App\Services\Import\Feed\Type;
 
 
 use App\Repositories\Feed\FeedApiUploadsRepository;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Class Norstar
+ *
+ * Feed uploader for Norstar-specific format
+ *
+ * @package App\Services\Import\Feed\Type
+ */
 class Norstar implements FeedImporterInterface
 {
     const FEED_CODE = 'norstar';
@@ -39,13 +47,36 @@ class Norstar implements FeedImporterInterface
         $completed = 0;
         foreach ($json['transactions'] as $transaction) {
             // if transaction action type is add
-            if (isset($transaction['parameters'])) {
-                $this->repository->create([
-                    'code' => $this->feedCode(),
-                    'type' => 'add',
-                    'data' => json_encode($transaction['parameters']),
-                ]);
-                $completed++;
+            if (isset($transaction['action']) && isset($transaction['parameters'])) {
+                switch ($transaction['action']) {
+
+                    // add inventory unit
+                    case 'addInventory':
+                        Log::info("Norstar Import: adding inventory: {$transaction['parameters']['vin']}");
+                        $this->repository->createOrUpdate([
+                            'code' => $this->feedCode(),
+                            'key' => $transaction['parameters']['vin'],
+                            'type' => 'inventory',
+                            'data' => json_encode($transaction['parameters']),
+                        ], $this->feedCode(), $transaction['parameters']['vin']);
+                        $completed++;
+                        break;
+
+                    // add dealer
+                    case 'addDealer':
+                        Log::info("Norstar Import: storing");
+                        $this->repository->createOrUpdate([
+                            'code' => $this->feedCode(),
+                            'key' => $transaction['parameters']['dealerId'],
+                            'type' => 'dealer',
+                            'data' => json_encode($transaction['parameters']),
+                        ], $this->feedCode(), $transaction['parameters']['dealerId']);
+                        $completed++;
+                        break;
+
+                    default:
+                        Log::warning("Norstar Import: invalid action {$transaction['action']}");
+                }
             }
         }
     }

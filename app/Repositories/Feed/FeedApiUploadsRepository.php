@@ -32,7 +32,20 @@ class FeedApiUploadsRepository implements FeedApiUploadsRepositoryInterface, Gen
     public function create($data)
     {
         $model = $this->model->newInstance($data);
+
         return $model->save();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function createOrUpdate($data, $code, $key) {
+        $builder = $this->model->newQuery();
+
+        return $builder->updateOrCreate([
+            'code' => $code,
+            'key' => $key,
+        ], $data);
     }
 
 }

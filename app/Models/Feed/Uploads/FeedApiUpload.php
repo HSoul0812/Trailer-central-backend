@@ -17,5 +17,5 @@ class FeedApiUpload extends Model
 {
     protected $table = 'feed_api_uploads';
 
-    protected $fillable = ['code', 'type', 'data'];
+    protected $fillable = ['code', 'key', 'type', 'data'];
 }
