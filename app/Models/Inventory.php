@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Parts;
+namespace App\Models;
 
 use App\Models\Upload\Image;
 use App\Traits\CompactHelper;
@@ -758,7 +758,7 @@ class Inventory extends Model
             // Valid Extension? Finish Saving File
             if ($extension != "") {
                 // Get Filename
-                $inventoryFilenameTitle = $this->getData('title') . "_clapp1" . ".{$extension}";
+                $inventoryFilenameTitle = $this->title . "_clapp1" . ".{$extension}";
 
                 $newfilename = preg_replace(array('/\s/', '/\.[\.]+/', '/[^\w_\.\-]/'), array(
                     '_',
@@ -812,8 +812,6 @@ class Inventory extends Model
 
     static function inventoryByStockAndDealer($stock, $dealerId)
     {
-        $inventory = new Inventory();
-
         if (!!$stock && !!$dealerId) {
             return DB::table(self::getTable())->where([['stock', $stock], ['dealer_id', $dealerId]])->get();
         } else {
@@ -833,8 +831,6 @@ class Inventory extends Model
 
     static function inventoryCountForStockAndDealer($stock, $dealerId)
     {
-        $inventory = new Inventory();
-
         if (!!$stock && !!$dealerId) {
             return DB::table(self::getTable())->where([['stock', $stock], ['dealer_id', $dealerId]])->count()->get();
         }
@@ -842,7 +838,7 @@ class Inventory extends Model
 
     public function getLatitude()
     {
-        if ($this->geolocation) {
+        if (!!$this->geolocation) {
             $data = GeospatialHelper::FromWKB($this->geolocation);
 
             return $data['lat'];

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Upload;
+namespace App\Models;
 
 use App\Models\Interactions\DealerUpload;
 use App\Models\User\Dealer;
@@ -36,4 +36,8 @@ class Image extends Model
         "hash",
         "program"
     ];
+
+    public function getIdentifier() {
+        return CompactHelper::shorten($this->getId());
+    }
 }

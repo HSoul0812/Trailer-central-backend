@@ -301,7 +301,7 @@ trait UploadHelper
 
         return $path;
     }
-    public function getS3Path($filename, $identifiers) {
+    public static function getS3Path($filename, $identifiers) {
 
         $path = '';
 
@@ -323,7 +323,7 @@ trait UploadHelper
         return $path;
 
     }
-    public function putImageToS3($sourcePath, $path, $imageType) {
+    public static function putImageToS3($sourcePath, $path, $imageType) {
 
         $bucket = env('AWS_BUCKET');
 
