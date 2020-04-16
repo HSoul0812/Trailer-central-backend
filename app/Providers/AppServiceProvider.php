@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Export\Parts\CsvExportService;
 use App\Services\Export\Parts\CsvExportServiceInterface;
+use Illuminate\Database\Eloquent\Builder;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,14 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('brand_exists', 'App\Rules\Parts\BrandExists@passes');
         \Validator::extend('manufacturer_exists', 'App\Rules\Parts\ManufacturerExists@passes');
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
+
+        Builder::macro('whereLike', function($attributes, string $searchTerm) {
+            foreach(array_wrap($attributes) as $attribute) {
+               $this->orWhere($attribute, 'LIKE', "%{$searchTerm}%");
+            }
+
+            return $this;
+        });
     }
 
     /**

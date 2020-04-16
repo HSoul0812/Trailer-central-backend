@@ -137,7 +137,7 @@ class CsvImportService implements CsvImportServiceInterface
                 // Get Part Data
                 $partData = $this->csvToPartData($csvData);
                 echo "Importing ".json_encode($partData).PHP_EOL;
-                $part = $this->partsRepository->create($partData);
+                $part = $this->partsRepository->createOrUpdate($partData);
                 if (!$part) {
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
@@ -145,10 +145,10 @@ class CsvImportService implements CsvImportServiceInterface
                     throw new \Exception("Image inaccesible");
                 }
             } catch (\Exception $ex) {
-                $this->validationErrors[] = $ex->getMessage();
+//                $this->validationErrors[] = $ex->getMessage();
                 $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
                 Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
-                throw new \Exception("Image inaccesible");
+//                throw new \Exception("Image inaccesible");
             }
 
         });

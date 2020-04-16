@@ -124,6 +124,17 @@ class PartRepository implements PartRepositoryInterface {
        return $part;
     }
 
+    public function createOrUpdate($params) {
+        // Part is unique if the SKU is unique for the dealer id
+        $part = Part::where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
+
+        if ($part) {
+            return $this->update($params);
+        }
+
+        return $this->create($params);
+    }
+
     public function delete($params) {
         $part = Part::findOrFail($params['id']);
         return $part->delete();
@@ -134,7 +145,13 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function getAllSearch($params) {
-        $query = Part::search($params['search_term']);
+        if (isset($params['naive_search'])) {
+            $query = Part::where('sku', 'LIKE', '%' . $params['search_term'] . '%')
+                           ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                           ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%');
+        } else {
+            $query = Part::search($params['search_term']);
+        }
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
