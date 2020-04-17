@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Interactions;
+namespace App\Models\Dealer;
 
 use App\Models\User\Dealer;
 use Illuminate\Database\Eloquent\Model;

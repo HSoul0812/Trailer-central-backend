@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Interactions;
+namespace App\Models\CRM\Interactions;
 
 use Illuminate\Database\Eloquent\Model;
 

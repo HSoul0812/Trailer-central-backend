@@ -242,8 +242,8 @@ trait UploadHelper
                     $responseData['upload'] = $uploadData;
                     $code         = HTTP::CREATED;
 
-                    $path = Helper_Upload::getS3Path($newfilename, array($dealerIdentifier, $inventoryId));
-                    $result = Helper_Upload::putImageToS3($filename, $path, $mimeType);
+                    $path = UploadHelper::getS3Path($newfilename, array($dealerIdentifier, $inventoryId));
+                    $result = UploadHelper::putImageToS3($filename, $path, $mimeType);
                     unlink($filename);
 
                     Log::info("Added upload '{$uploadIdentifier}' to dealer '{$dealerIdentifier}'");
