@@ -21,7 +21,7 @@ class CreatePartRequest extends Request {
         'qb_id' => 'nullable|integer',
         'subcategory' => 'nullable|string',
         'title' => 'nullable|string',
-        'alternative_number' => 'nullable|string',
+        'alternative_part_number' => 'nullable|string',
         'sku' => 'required|string',
         'price' => 'numeric',
         'dealer_cost' => 'nullable|numeric',

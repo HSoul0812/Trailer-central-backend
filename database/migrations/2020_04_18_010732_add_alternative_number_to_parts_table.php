@@ -14,7 +14,7 @@ class AddAlternativeNumberToPartsTable extends Migration
     public function up()
     {
         Schema::table('parts_v1', function (Blueprint $table) {
-            $table->string('alternative_number')->nullable();
+            $table->string('alternative_part_number')->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ class AddAlternativeNumberToPartsTable extends Migration
     public function down()
     {
         Schema::table('parts_v1', function (Blueprint $table) {
-            $table->dropColumn('alternative_number');
+            $table->dropColumn('alternative_part_number');
         });
     }
 }

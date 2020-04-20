@@ -104,9 +104,9 @@ class PartsController extends RestfulController
      *         @OA\Schema(type="string")
      *     ),
      *   @OA\Parameter(
-     *         name="alternative_number",
+     *         name="alternative_part_number",
      *         in="query",
-     *         description="Alternative Number",
+     *         description="Alternative Part Number",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
@@ -535,9 +535,9 @@ class PartsController extends RestfulController
      *         @OA\Schema(type="string")
      *     ),
      *   @OA\Parameter(
-     *         name="alternative_number",
+     *         name="alternative_part_number",
      *         in="query",
-     *         description="Alternative Number",
+     *         description="Alternative Part Number",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),

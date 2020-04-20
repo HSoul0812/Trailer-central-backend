@@ -21,7 +21,7 @@ class PartsTransformer extends TransformerAbstract
              'stock' => $part->sku,
              'subcategory' => $part->subcategory,
              'title' => $part->title,
-             'alternative_number' => $part->alternative_number,
+             'alternative_part_number' => $part->alternative_part_number,
              'price' => (double)$part->price,
              'dealer_cost' => (double)$part->dealer_cost,
              'msrp' => (double)$part->msrp,

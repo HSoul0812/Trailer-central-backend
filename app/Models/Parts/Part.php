@@ -30,7 +30,7 @@ class Part extends Model
         'qb_id',
         'subcategory',
         'title',
-        'alternative_number',
+        'alternative_part_number',
         'sku',
         'price',
         'dealer_cost',

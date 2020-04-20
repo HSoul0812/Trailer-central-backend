@@ -73,7 +73,7 @@ class PartsUpdateTest extends TestCase
                     'quantity' => 4
                 ],
             ],
-            "alternative_number" => 'Test Alternative Part Number',
+            "alternative_part_number" => 'Test Alternative Part Number',
         ];
         
         $this->json('POST', '/api/parts/'.$data['part']->id, $updateData, ['access-token' => $authToken->access_token]) 
@@ -95,7 +95,7 @@ class PartsUpdateTest extends TestCase
                 "show_on_website" => false, // transformed values
                 "is_vehicle_specific" => true, // transformed values
                 "title" => "ASDASD",
-                "alternative_number" => 'Test Alternative Part Number',
+                "alternative_part_number" => 'Test Alternative Part Number',
             ]);             
     }
     
@@ -161,7 +161,7 @@ class PartsUpdateTest extends TestCase
             "show_on_website" => 1,
             "is_vehicle_specific" => 0,
             "title" => "ddddd",
-            "alternative_number" => 'Test Alternative Part Number',
+            "alternative_part_number" => 'Test Alternative Part Number',
             "images" => [
                 [
                     'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",

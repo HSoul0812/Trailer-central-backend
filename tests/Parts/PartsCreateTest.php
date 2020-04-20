@@ -54,7 +54,7 @@ class PartsCreateTest extends TestCase
                 'show_on_website' => true, // transformed value
                 'is_vehicle_specific' => false, // transformed value
                 'title' => 'ddddd',
-                'alternative_number' => null
+                'alternative_part_number' => null
             ]);             
     }
     
@@ -128,7 +128,7 @@ class PartsCreateTest extends TestCase
             "show_on_website" => 1,
             "is_vehicle_specific" => 0,
             "title" => "ddddd",
-            'alternative_number' => 'test alternative part number',
+            'alternative_part_number' => 'test alternative part number',
             "images" => [
                 [
                     'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
