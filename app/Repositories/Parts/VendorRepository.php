@@ -40,6 +40,23 @@ class VendorRepository implements VendorRepositoryInterface {
             $params['per_page'] = 15;
         }
         
+        if (isset($params['show_on_part'])) {
+            $query = $query->whereHas('vendor', function($q) use ($params) {
+                $q->where('show_on_part', $params['show_on_part']);
+            });
+        }
+        
+        if (isset($params['show_on_inventory'])) {
+            $query = $query->whereHas('vendor', function($q) use ($params) {
+                $q->where('show_on_inventory', $params['show_on_inventory']);
+            });
+        }
+        
+        if (isset($params['show_on_floorplan'])) {
+            $query = $query->whereHas('vendor', function($q) use ($params) {
+                $q->where('show_on_floorplan', $params['show_on_floorplan']);
+            });
+        }
                 
         if (isset($params['name']) && !isset($params['dealer_id'])) {
             $query = $query->where('name', 'like', '%'.$params['name'].'%');

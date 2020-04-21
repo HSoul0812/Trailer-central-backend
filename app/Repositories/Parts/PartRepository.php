@@ -145,9 +145,11 @@ class PartRepository implements PartRepositoryInterface {
     
     public function getAllSearch($params) {
         if (isset($params['naive_search'])) {
-            $query = Part::where('sku', 'LIKE', '%' . $params['search_term'] . '%')
-                           ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
-                           ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%');
+            $query = Part::where(function($q) use ($params) {
+                $q->where('sku', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%');
+            });
         } else {
             $query = Part::search($params['search_term']);
         }
@@ -156,7 +158,7 @@ class PartRepository implements PartRepositoryInterface {
             $params['per_page'] = 15;
         }
         
-        if (isset($params['dealer_id'])) {
+        if (isset($params['dealer_id'])) {           
              $query = $query->where('dealer_id', current($params['dealer_id']));
         }
         

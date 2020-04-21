@@ -17,7 +17,8 @@ class FilterTransformer extends TransformerAbstract
         'type' => 'type_id',
         'category' => 'category_id',
         'manufacturer' => 'manufacturer_id',
-        'brand' => 'brand_id'
+        'brand' => 'brand_id',
+        'subcategory' => 'subcategory'
     ];
         
     private $queryString = '';
@@ -112,9 +113,13 @@ class FilterTransformer extends TransformerAbstract
         if (empty($requestData['dealer_id']) || !isset($this->attributeModelIdMapping[$filter->attribute])) {
             return [];
         }
-
-        $query = Part::with($filter->attribute)
+        
+        if ($filter->attribute == 'subcategory') {
+            $query = Part::where('show_on_website', 1);
+        } else {
+            $query = Part::with($filter->attribute)
                        ->where('show_on_website', 1);
+        }        
         
         $query = $this->addFiltersToQuery($query, $requestData, $this->attributeModelIdMapping[$filter->attribute]);
         
@@ -138,8 +143,12 @@ class FilterTransformer extends TransformerAbstract
                 }
             }
             
-            $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute}->name);
-            
+            if ($filter->attribute == 'subcategory') {
+                $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute});
+            } else {
+                $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute}->name);
+            }
+                        
             if (empty($this->queryString)) {
                 $queryString = "?$actionQuery";
             } else {
@@ -153,17 +162,28 @@ class FilterTransformer extends TransformerAbstract
                 }                
             }
             
+            if ($filter->attribute == 'subcategory') {
+                $values[] = [
+                    'id' => 0,
+                    'label' => $part->{$filter->attribute},
+                    'value' => $part->{$filter->attribute},
+                    'count' => $count, 
+                    'base' => 0, // What is this?
+                    'status' => $status,                        
+                    'action' => $queryString
+                ];
+            } else {
+                $values[] = [
+                    'id' => $part->{$filter->attribute}->id,
+                    'label' => $part->{$filter->attribute}->name,
+                    'value' => $part->{$filter->attribute}->name,
+                    'count' => $count, 
+                    'base' => 0, // What is this?
+                    'status' => $status,                        
+                    'action' => $queryString
+                ];
+            }
             
-            $values[] = [
-                'id' => $part->{$filter->attribute}->id,
-                'label' => $part->{$filter->attribute}->name,
-                'value' => $part->{$filter->attribute}->name,
-                'count' => $count, 
-                'base' => 0, // What is this?
-                'status' => $status,                        
-                'action' => $queryString
-            ];
-                
         }
     
         return $values;
@@ -233,8 +253,13 @@ class FilterTransformer extends TransformerAbstract
         $requestData = app('request')->only('category_id', 'type_id', 'dealer_id', 'brand_id');
         $dealerId = $requestData['dealer_id'];        
         
-        $query = Part::whereIn('dealer_id', $dealerId)
+        if ($filter->attribute == 'subcategory') {
+            $query = Part::whereIn('dealer_id', $dealerId)
+                    ->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute});
+        } else {
+            $query = Part::whereIn('dealer_id', $dealerId)
                     ->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute}->id);
+        }
         
         foreach ($this->mappedTypes as $attributeName => $attributeValues) {
             if ( ($this->attributeModelIdMapping[$filter->attribute] == $attributeName) ) {
