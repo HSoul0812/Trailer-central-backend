@@ -4,20 +4,22 @@ namespace App\Http\Controllers\v1\Interactions;
 
 use App\Http\Controllers\RestfulController;
 use App\Mail\InteractionEmail;
-use App\Models\Interactions\EmailHistory;
-use App\Models\Interactions\Interaction;
+use App\Models\CRM\Email\Attachment;
+use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\Interactions\LeadTC;
+use App\Models\User\Dealer;
 use App\Models\User\User;
 use App\Repositories\Repository;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
-use App\Traits\UploadHelper;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class InteractionsController extends RestfulController
@@ -42,6 +44,79 @@ class InteractionsController extends RestfulController
             'success' => true,
             'message' => "Interactions API",
         ], Response::HTTP_OK);
+    }
+
+    /**
+     * @param $files - mail attachment(-s)
+     * @return bool | string
+     */
+    public function checkAttachmentsSize($files)
+    {
+        $totalSize = 0;
+        foreach ($files as $file) {
+            if ($file['size'] > 2097152) {
+                throw new Exception("Single upload size must be less than 2 MB.");
+            } else if ($totalSize > 8388608) {
+                throw new Exception("Total upload size must be less than 8 MB");
+            }
+            $totalSize += $file['size'];
+        }
+    }
+
+    public function uploadAttachments($files, $dealer, $uniqueId) {
+        $messageDir = str_replace(">", "", str_replace("<", "", $uniqueId));
+
+        if (!empty($files) && is_array($files)) {
+            $message = $this->checkAttachmentsSize($files);
+            if( false !== $message ) {
+                return response()->json([
+                    'error' => true,
+                    'message' => $message
+                ], Response::HTTP_BAD_REQUEST);
+            }
+            foreach ($files as $file) {
+                $path_parts = pathinfo( $file->getPathname() );
+                $filePath = 'https://email-trailercentral.s3.amazonaws.com/' . 'crm/'
+                    . $dealer->id . "/" . $messageDir
+                    . "/attachments/{$path_parts['filename']}." . $path_parts['extension'];
+                Storage::disk('s3')->put($filePath, file_get_contents($file));
+                Attachment::create(['message_id' => $uniqueId, 'filename' => $filePath, 'original_filename' => time() . $file->getClientOriginalName()]);
+            }
+        }
+    }
+
+    public function createOrUpdateEmailHistory($insert = [], $history) {
+        $reportFields = [
+            'date_sent',
+            'date_delivered',
+            'date_bounced',
+            'date_complained',
+            'date_unsubscribed',
+            'date_opened',
+            'date_clicked',
+            'invalid_email',
+            'was_skipped'
+        ];
+
+        foreach ($insert as $key => $value) {
+            if (in_array($key, $reportFields)) {
+                if ($key === 'invalid_email' || $key === 'was_skipped') {
+                    if (!empty($value))
+                        $insert[$key] = 1;
+                } else if (!empty($value)) {
+                    if ($value === 1) {
+                        $insert[$key] = date("Y-m-d H:i:s");
+                    } else {
+                        $insert[$key] = $value;
+                    }
+                }
+            }
+        }
+        if(!!$history) {
+            $history->update($insert);
+        } else {
+            EmailHistory::create($insert);
+        }
     }
 
     /**
@@ -171,46 +246,24 @@ class InteractionsController extends RestfulController
      */
     public function sendEmail(Request $request)
     {
-        $userId = $request->input('user_id');
-        $leadId = $request->input('lead_id');
-        $messageId = $request->input('message_id');
-        $subject = $request->input('subject');
-        $body = $request->input('body');
-        $files = $request->allFiles();
-
         try {
-
-            $user = User::whereUserId($userId)->first();
-
-            if (empty($user)) {
-                return response()->json([
-                    'error' => true,
-                    'message' => "User not found"
-                ], Response::HTTP_NOT_FOUND);
-            }
-
-            $lead = LeadTC::whereIdentifier($leadId)->first();
-
-            if (empty($lead)) {
-                return response()->json([
-                    'error' => true,
-                    'message' => "Lead with identifier '{$leadId}' was not found in the database"
-                ], Response::HTTP_NOT_FOUND);
-            }
-
+            $user = User::findOrFail($request->input('user_id'));
+            $lead = LeadTC::findOrFail($request->input('lead_id'));
+            $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
+            $dealer = $user->dealer();
+            $leadProduct = $lead->leadProduct();
+            $leadProductId = $leadProduct->id ?? 0;
+            $subject = $request->input('subject');
+            $body = $request->input('body');
+            $uniqueId = $emailHistory->message_id ?? sprintf('<%s@%s>', $this->generateId(), $this->serverHostname());
+            $files = $request->allFiles();
             $attach = [];
+            $this->setSalesPersonSmtpConfig($user);
+            $this->checkAttachmentsSize($files);
+            $customer = $this->getCustomer($user, $lead);
 
             if (!empty($files) && is_array($files)) {
-                $message = $this->checkAttachmentsSize($files);
-                if( false !== $message ) {
-                    return response()->json([
-                        'error' => true,
-                        'message' => $message
-                    ], Response::HTTP_BAD_REQUEST);
-                }
                 foreach ($files as $file) {
-                    $result = UploadHelper::uploadImage($file);
-
                     $attach[] = [
                         'path' => $file->getPathname(),
                         'as' => $file->getClientOriginalName(),
@@ -219,39 +272,51 @@ class InteractionsController extends RestfulController
                 }
             }
 
-            $customer = $this->getCustomer($user, $lead);
-
-            // Set custom smtp config
-            $this->setSalesPersonSmtpConfig($user);
-
-            $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
-
             if ( !empty($emailHistory) && !empty($emailHistory->interaction_id)) {
-                Interaction::whereInteractionId($emailHistory->interaction_id)
+                Interaction::find($emailHistory->interaction_id)
                     ->update(["interaction_notes" => "E-Mail Sent: {$subject}"]);
             } else {
-                // TODO: replace NULL in lead_product_id with necessary value
-                DB::table('crm_interaction')->insert(
+                $emailHistory->interaction_id = Interaction::create(
                     array(
-                        "lead_product_id"   => NULL,
-                        "tc_lead_id"        => $leadId,
-                        "user_id"           => $userId,
+                        "lead_product_id"   => $leadProductId,
+                        "tc_lead_id"        => $lead->identifier,
+                        "user_id"           => $user->user_id,
                         "interaction_type"  => "EMAIL",
                         "interaction_notes" => "E-Mail Sent: {$subject}",
                         "interaction_time"  => Carbon::now()->toDateTimeString(),
-
                     )
                 );
             }
 
-            $result = Mail::to($customer["email"] ?? "")->send(new InteractionEmail([
-                'date' => Carbon::now()->toDateTimeString(),
-                'replyToEmail' => $user->email ?? "",
-                'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
-                'subject' => $subject,
-                'body' => $body,
-                'attach' => $attach
-            ]));
+            Mail::to($customer["email"] ?? "" )->send(
+                new InteractionEmail([
+                    'date' => Carbon::now()->toDateTimeString(),
+                    'replyToEmail' => $user->email ?? "",
+                    'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
+                    'subject' => $subject,
+                    'body' => $body,
+                    'attach' => $attach,
+                    'id' => $uniqueId
+                ])
+            );
+
+            $insert = [
+                'interaction_id'    => $emailHistory->interaction_id,
+                'message_id'        => $uniqueId,
+                'lead_id'           => $lead->identifier,
+                'to_name'           => $customer['name'],
+                'to_email'          => $customer['email'],
+                'from_email'        => $user->email,
+                'from_name'         => $user->username,
+                'subject'           => $request->input('subject'),
+                'body'              => $request->input('body'),
+                'use_html'          => true,
+                'root_message_id'   => 0,
+                'parent_message_id'   => 0,
+            ];
+
+            $this->uploadAttachments($files, $dealer, $uniqueId);
+            $this->createOrUpdateEmailHistory($insert, $emailHistory);
 
             return response()->json([
                 'success' => true,

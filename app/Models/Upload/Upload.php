@@ -6,6 +6,7 @@ use App\Models\Interactions\DealerUpload;
 use App\Models\User\Dealer;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Upload extends Model
 {
@@ -50,6 +51,21 @@ class Upload extends Model
     public function getIdentifier()
     {
         return CompactHelper::shorten($this->getId());
+    }
+
+    public function getUrlAttribute()
+    {
+        return Storage::disk('s3')->url($this->filename);
+    }
+
+    public function getSizeInKbAttribute($size = 0)
+    {
+        return round($size / 1024, 2);
+    }
+
+    public function getUploadedTimeAttribute()
+    {
+        return $this->created_at->diffForHumans();
     }
 
     public function dealer() {

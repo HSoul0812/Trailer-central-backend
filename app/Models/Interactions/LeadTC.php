@@ -2,6 +2,9 @@
 
 namespace App\Models\Interactions;
 
+use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Leads\LeadProduct;
 use Illuminate\Database\Eloquent\Model;
 
 class LeadTC extends Model
@@ -34,5 +37,13 @@ class LeadTC extends Model
     public function interactions()
     {
         return $this->hasMany(Interaction::class, 'tc_lead_id', 'identifier');
+    }
+
+    /**
+     * Get the email history for the lead.
+     */
+    public function leadProduct()
+    {
+        return $this->hasOne(LeadProduct::class, 'lead_id', 'identifier');
     }
 }

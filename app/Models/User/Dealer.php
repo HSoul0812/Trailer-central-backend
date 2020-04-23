@@ -16,6 +16,37 @@ class Dealer extends Model
     protected $table = "new_dealer_user";
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'default_description',
+        'use_description_in_feed',
+        'auto_website',
+        'salt',
+        'type',
+        'stripe_id',
+        'stripe_response',
+        'state',
+        'showroom',
+        'showroom_dealers',
+        'import_config',
+        'auto_import_hide',
+        'auto_msrp',
+        'auto_msrp_percent',
+        'autoresponder_enable',
+        'autoresponder_text',
+        'is_utc_inactive',
+        'feature_parts',
+        'deleted',
+        'newsletter_enabled',
+        'crm_login',
+        'parts_payout_id'
+    ];
+
+    /**
      * The primary key associated with the table.
      *
      * @var string
@@ -36,6 +67,6 @@ class Dealer extends Model
     }
 
     public function uploads() {
-        return $this->belongsToMany(Upload::class, 'dealer_upload', 'dealer_id', 'dealer_id');
+        return $this->hasMany(Upload::class, 'dealer_upload', 'dealer_id');
     }
 }
