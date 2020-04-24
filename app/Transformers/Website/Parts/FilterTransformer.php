@@ -109,6 +109,7 @@ class FilterTransformer extends TransformerAbstract
     {        
     
         $requestData = app('request')->all();
+        $hiddenFilters = $this->parseHiddenFilters($requestData['hidden_filter']);     
 
         if (empty($requestData['dealer_id']) || !isset($this->attributeModelIdMapping[$filter->attribute])) {
             return [];
@@ -160,9 +161,15 @@ class FilterTransformer extends TransformerAbstract
                 } else {
                     $queryString = $this->queryString."&$actionQuery";
                 }                
-            }
+            }                        
             
             if ($filter->attribute == 'subcategory') {
+//                if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
+//                    if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}])) {
+//                        continue;
+//                    }
+//                }
+                
                 $values[] = [
                     'id' => 0,
                     'label' => $part->{$filter->attribute},
@@ -173,6 +180,12 @@ class FilterTransformer extends TransformerAbstract
                     'action' => $queryString
                 ];
             } else {
+//                if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
+//                    if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}->name])) {
+//                        continue;
+//                    }
+//                }
+                
                 $values[] = [
                     'id' => $part->{$filter->attribute}->id,
                     'label' => $part->{$filter->attribute}->name,
@@ -270,6 +283,24 @@ class FilterTransformer extends TransformerAbstract
         }
                 
         return $query->count();
+    }
+    
+    private function parseHiddenFilters($hiddenFilters) {
+        $filters = [];
+        foreach($hiddenFilters as $filter) {
+            if (empty($filter)) {
+                continue;
+            }
+            $explodedFilter = explode('|', $filter);
+            
+            if (isset($filters[$explodedFilter[0]])) {
+                $filters[$explodedFilter[0]][$explodedFilter[1]] = true;
+            } else {
+                $filters[$explodedFilter[0]] = [];
+                $filters[$explodedFilter[0]][$explodedFilter[1]] = true;
+            }
+        }
+        return $filters;
     }
     
     
