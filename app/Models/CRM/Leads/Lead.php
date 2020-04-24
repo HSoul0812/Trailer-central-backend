@@ -2,6 +2,9 @@
 
 namespace App\Models\CRM\Leads;
 
+use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Leads\LeadProduct;
 use Illuminate\Database\Eloquent\Model;
 
 class Lead extends Model
@@ -11,17 +14,36 @@ class Lead extends Model
      *
      * @var string
      */
-    protected $table = 'crm_lead';
+    protected $table = 'website_lead';
 
     /**
      * The primary key associated with the table.
      *
      * @var string
      */
-    protected $primaryKey = 'lead_id';
+    protected $primaryKey = 'identifier';
 
-    public function customer()
+    /**
+     * Get the email history for the lead.
+     */
+    public function emailHistory()
     {
-        return $this->hasOne(Customer::class, 'customer_id', 'customer_id');
+        return $this->hasMany(EmailHistory::class, 'lead_id', 'identifier');
+    }
+
+    /**
+     * Get the email history for the lead.
+     */
+    public function interactions()
+    {
+        return $this->hasMany(Interaction::class, 'tc_lead_id', 'identifier');
+    }
+
+    /**
+     * Get the email history for the lead.
+     */
+    public function leadProduct()
+    {
+        return $this->hasOne(LeadProduct::class, 'lead_id', 'identifier');
     }
 }

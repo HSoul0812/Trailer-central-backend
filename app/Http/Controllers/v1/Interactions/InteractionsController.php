@@ -7,7 +7,7 @@ use App\Mail\InteractionEmail;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
-use App\Models\Interactions\LeadTC;
+use App\Models\Interactions\Lead;
 use App\Models\User\Dealer;
 use App\Models\User\User;
 use App\Repositories\Repository;
@@ -248,7 +248,7 @@ class InteractionsController extends RestfulController
     {
         try {
             $user = User::findOrFail($request->input('user_id'));
-            $lead = LeadTC::findOrFail($request->input('lead_id'));
+            $lead = Lead::findOrFail($request->input('lead_id'));
             $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
             $dealer = $user->dealer();
             $leadProduct = $lead->leadProduct();

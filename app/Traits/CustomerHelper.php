@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use App\Models\Interactions\Lead;
-use App\Models\Interactions\LeadTC;
 use App\Models\User\User;
 
 trait CustomerHelper
@@ -12,15 +11,15 @@ trait CustomerHelper
      * Customer Object Data Fetch
      *
      * @param User $user
-     * @param LeadTC $leadTC
+     * @param Lead $lead
      * @return array
      */
-    public function getCustomer(User $user, LeadTC $leadTC): array
+    public function getCustomer(User $user, Lead $lead): array
     {
-        if (! empty($user->dealer) && !empty($leadTC)) {
+        if (! empty($user->dealer) && !empty($lead)) {
             return [
-                'name'  => "{$leadTC->first_name} {$leadTC->last_name}",
-                'email' => $leadTC->email_address ?? ''
+                'name'  => "{$lead->first_name} {$lead->last_name}",
+                'email' => $lead->email_address ?? ''
             ];
         } else {
             return [
