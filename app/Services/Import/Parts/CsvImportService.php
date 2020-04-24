@@ -392,8 +392,10 @@ class CsvImportService implements CsvImportServiceInterface
                 break;
             case self::STOCK_MIN:
             case self::STOCK_MAX:
-                if (!is_numeric($value) || $value < 0) {
-                    return "Stock Min/Max should be a positive number";
+                if (!empty($value)) {
+                    if (!is_numeric($value) || $value < 0) {
+                        return "Stock Min/Max should be a positive number";
+                    }
                 }
                 break;
         }
