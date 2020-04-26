@@ -47,12 +47,14 @@ class Norstar implements FeedImporterInterface
         $completed = 0;
         foreach ($json['transactions'] as $transaction) {
             // if transaction action type is add
-            if (isset($transaction['action']) && isset($transaction['parameters'])) {
+            if (isset($transaction['action']) && isset($transaction['parameters']) && is_array($transaction['parameters'])) {
                 switch ($transaction['action']) {
 
                     // add inventory unit
                     case 'addInventory':
-                        Log::info("Norstar Import: adding inventory: {$transaction['parameters']['vin']}");
+                        Log::info("Norstar Import: adding inventory", [
+                            'inventory' => $transaction['parameters']
+                        ]);
                         $this->repository->createOrUpdate([
                             'code' => $this->feedCode(),
                             'key' => $transaction['parameters']['vin'],
@@ -64,7 +66,9 @@ class Norstar implements FeedImporterInterface
 
                     // add dealer
                     case 'addDealer':
-                        Log::info("Norstar Import: storing");
+                        Log::info("Norstar Import: adding dealer", [
+                            'dealer' => $transaction['parameters']
+                        ]);
                         $this->repository->createOrUpdate([
                             'code' => $this->feedCode(),
                             'key' => $transaction['parameters']['dealerId'],
@@ -77,6 +81,8 @@ class Norstar implements FeedImporterInterface
                     default:
                         Log::warning("Norstar Import: invalid action {$transaction['action']}");
                 }
+            } else {
+                Log::warning("Norstar importer uploader error: transaction row not valid");
             }
         }
     }

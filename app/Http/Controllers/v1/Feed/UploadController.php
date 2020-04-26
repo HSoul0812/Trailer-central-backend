@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\Feed;
 
 
 use App\Http\Controllers\RestfulController;
+use App\Jobs\Import\Feed\DealerFeedImporterJob;
 use App\Services\Import\Feed\DealerFeedUploaderService;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
@@ -44,15 +45,17 @@ class UploadController extends RestfulController
         $json = $request->all();
 
         try {
-            $result = $feedUploader->run($json, $code);
+            // queue the data for processing; processing involves breaking up the data into
+            //   individual transactions (addInventory, addDealer) and one object per row
+            //   then a collector then later processes each row/object for importing
+            $job = new DealerFeedImporterJob($json, $code, $feedUploader);
 
-            // return status
-//            return $this->response->item([
-//                'result' => $result,
-//            ]);
+            Log::info('Dispatching a DealerFeedImporterJob', ['code' => $code]);
+            $this->dispatch($job);
 
             return new Response([
-                'result' => $result,
+                'message' => 'Data has been received and is queued for processing.',
+                'result' => true,
             ]);
 
         } catch (\Exception $e) {
@@ -61,7 +64,7 @@ class UploadController extends RestfulController
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return $this->response->errorBadRequest($e->getMessage());
+            $this->response->errorBadRequest($e->getMessage());
         }
     }
 }
