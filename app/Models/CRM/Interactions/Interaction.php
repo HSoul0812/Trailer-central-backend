@@ -54,6 +54,6 @@ class Interaction extends Model
      */
     public function lead()
     {
-        return $this->belongsTo(LeadTC::class, 'tc_lead_id', 'identifier');
+        return $this->belongsTo(Lead::class, 'tc_lead_id', 'identifier');
     }
 }

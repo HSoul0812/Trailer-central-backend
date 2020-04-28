@@ -36,6 +36,6 @@ class Attachment extends Model
      */
     public function message()
     {
-        return $this->belongsTo(LeadTC::class, "lead_id", "identifier");
+        return $this->belongsTo(Lead::class, "lead_id", "identifier");
     }
 }

@@ -62,7 +62,7 @@ class EmailHistory extends Model
      */
     public function lead()
     {
-        return $this->belongsTo(LeadTC::class, "lead_id", "identifier");
+        return $this->belongsTo(Lead::class, "lead_id", "identifier");
     }
 
     /**
@@ -70,7 +70,7 @@ class EmailHistory extends Model
      */
     public function interaction()
     {
-        return $this->belongsTo(LeadTC::class, "interaction_id", "interaction_id");
+        return $this->belongsTo(Lead::class, "interaction_id", "interaction_id");
     }
 
     /**
