@@ -4,9 +4,16 @@
 namespace App\Repositories\Feed;
 
 
-use App\Repositories\Repository;
+use App\Repositories\CrudRepository;
 
-class FeedRepository implements Repository
+/**
+ * Class FeedRepository
+ *
+ * Repository for feed objects
+ *
+ * @package App\Repositories\Feed
+ */
+class FeedRepository implements CrudRepository
 {
 
     /**
