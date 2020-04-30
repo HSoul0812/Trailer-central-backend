@@ -4,21 +4,21 @@ namespace App\Models\CRM\Leads;
 
 use Illuminate\Database\Eloquent\Model;
 
-class LeadProduct extends Model
+class Product extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'crm_lead_product';
+    protected $table = 'crm_product';
 
     /**
      * The primary key associated with the table.
      *
      * @var string
      */
-    protected $primaryKey = 'lead_product_id';
+    protected $primaryKey = 'product_id';
 
     /**
      * The attributes that are mass assignable.
@@ -29,4 +29,10 @@ class LeadProduct extends Model
         "lead_id",
         "product_id",
     ];
+
+    public function lead() {
+        return $this->belongsTo(Lead::class, 'product_id', 'product_id', 'crm_lead_product');
+    }
+
+
 }
