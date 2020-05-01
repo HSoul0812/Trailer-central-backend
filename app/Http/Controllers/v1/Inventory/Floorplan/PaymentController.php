@@ -34,7 +34,7 @@ class PaymentController extends RestfulController
      *         name="dealer_id",
      *         in="query",
      *         description="Dealer Id",
-     *         required=true,
+     *         required=false,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(

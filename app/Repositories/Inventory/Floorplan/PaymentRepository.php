@@ -60,10 +60,14 @@ class PaymentRepository implements PaymentRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Payment::with('inventory')
-            ->whereHas('inventory', function($q) use($params) {
-                $q->where('dealer_id', '=', $params['dealer_id']);
-            });
+        if (isset($params['dealer_id'])) {
+            $query = Payment::with('inventory')
+                ->whereHas('inventory', function($q) use($params) {
+                    $q->where('dealer_id', '=', $params['dealer_id']);
+                });
+        } else {
+            $query = Payment::where('id', '>', 0);  
+        }
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('type', 'LIKE', '%' . $params['search_term'] . '%')
