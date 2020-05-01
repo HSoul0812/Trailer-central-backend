@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Repositories\Inventory;
+namespace App\Repositories\Inventory\Floorplan;
 
 use App\Exceptions\NotImplementedException;
-use App\Models\Inventory\FloorplanPayment;
+use App\Models\Inventory\Floorplan\Payment;
 use App\Repositories\Repository;
 
 /**
  *  
  * @author Marcel
  */
-class FloorplanPaymentRepository implements FloorplanPaymentRepositoryInterface {
+class PaymentRepository implements PaymentRepositoryInterface {
 
     private $sortOrders = [
         'type' => [ 
@@ -59,23 +59,21 @@ class FloorplanPaymentRepository implements FloorplanPaymentRepositoryInterface 
         throw new NotImplementedException;
     }
 
-    public function getAllSearch($params) {
-        if (isset($params['naive_search'])) {
-            $query = FloorplanPayment::with('inventory')
-                ->whereHas('inventory', function($q) use($params) {
-                    $q->where('dealer_id', '=', $params['dealer_id']);
-                })
-                ->where(function($q) use($params) {
-                    $q->where('type', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('payment_type', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('amount', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhereHas('inventory', function($q) use($params) {
-                            $q->where('title', 'LIKE', '%' . $params['search_term'] . '%');
-                        });
-                });
-        } else {
-            $query = FloorplanPayment::search($params['search_term']);
+    public function getAll($params) {
+        $query = Payment::with('inventory')
+            ->whereHas('inventory', function($q) use($params) {
+                $q->where('dealer_id', '=', $params['dealer_id']);
+            });
+        if (isset($params['search_term'])) {
+            $query = $query->where(function($q) use($params) {
+                $q->where('type', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('payment_type', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('amount', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhereHas('inventory', function($q) use($params) {
+                        $q->where('title', 'LIKE', '%' . $params['search_term'] . '%');
+                    });
+            });
         }
         
         if (!isset($params['per_page'])) {
@@ -85,23 +83,6 @@ class FloorplanPaymentRepository implements FloorplanPaymentRepositoryInterface 
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         } 
-        
-        return $query->paginate($params['per_page'])->appends($params);
-    }
-
-    public function getAll($params) {
-        $query = FloorplanPayment::with('inventory')
-            ->whereHas('inventory', function($q) use($params) {
-                $q->where('dealer_id', '=', $params['dealer_id']);
-            });
-        
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 15;
-        }
-       
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
-        }
         
         return $query->paginate($params['per_page'])->appends($params);
     }

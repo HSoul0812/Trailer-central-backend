@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Inventory;
+namespace App\Http\Requests\Inventory\Floorplan;
 
 use App\Http\Requests\Request;
 
@@ -8,7 +8,7 @@ use App\Http\Requests\Request;
  *  
  * @author Marcel
  */
-class GetFloorplanPaymentRequest extends Request {
+class GetPaymentRequest extends Request {
 
     protected $rules = [
         'per_page' => 'integer',

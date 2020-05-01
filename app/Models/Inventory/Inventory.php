@@ -28,7 +28,7 @@ class Inventory extends Model
     
     public function floorplanPayments()
     {
-        return $this->hasMany('App\Models\Inventory\FloorplanPayment');
+        return $this->hasMany('App\Models\Inventory\Floorplan\Payment');
     }
     
     public function __toString() {

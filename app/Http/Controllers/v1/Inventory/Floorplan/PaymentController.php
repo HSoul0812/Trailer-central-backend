@@ -1,26 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\v1\Inventory;
+namespace App\Http\Controllers\v1\Inventory\Floorplan;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
-use App\Repositories\Inventory\FloorplanPaymentRepositoryInterface;
-use App\Transformers\Inventory\FloorplanPaymentTransformer;
-use App\Http\Requests\Inventory\GetFloorplanPaymentRequest;
+use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
+use App\Transformers\Inventory\Floorplan\PaymentTransformer;
+use App\Http\Requests\Inventory\Floorplan\GetPaymentRequest;
 
-class FloorplanPaymentController extends RestfulController
+class PaymentController extends RestfulController
 {
     
-    protected $floorplanPayment;
+    protected $payment;
     
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(FloorplanPaymentRepositoryInterface $floorplanPayment)
+    public function __construct(PaymentRepositoryInterface $payment)
     {
-        $this->floorplanPayment = $floorplanPayment;
+        $this->payment = $payment;
     }
    
 
@@ -70,16 +70,11 @@ class FloorplanPaymentController extends RestfulController
      * )
      */
     public function index(Request $request) {
-        $request = new GetFloorplanPaymentRequest($request->all());
+        $request = new GetPaymentRequest($request->all());
         
         if ( $request->validate() ) {
-            if ($request->has('search_term')) {
-                $floorplanPayments = $this->floorplanPayment->getAllSearch($request->all());
-            } else {
-                $floorplanPayments = $this->floorplanPayment->getAll($request->all());
-            }
-            
-            return $this->response->paginator($floorplanPayments, new FloorplanPaymentTransformer());
+            $payments = $this->payment->getAll($request->all());
+            return $this->response->paginator($payments, new PaymentTransformer());
         }
         
         return $this->response->errorBadRequest();
