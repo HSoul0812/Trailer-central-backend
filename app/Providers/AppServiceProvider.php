@@ -48,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
+        $this->app->bind('App\Repositories\Inventory\FloorplanPaymentRepositoryInterface', 'App\Repositories\Inventory\FloorplanPaymentRepository');
     }
 
 }
