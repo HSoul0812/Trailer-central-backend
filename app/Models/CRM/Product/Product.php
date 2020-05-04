@@ -33,6 +33,4 @@ class Product extends Model
     public function lead() {
         return $this->belongsTo(Lead::class, 'product_id', 'product_id', 'crm_lead_product');
     }
-
-
 }

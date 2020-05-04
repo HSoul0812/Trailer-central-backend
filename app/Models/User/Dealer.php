@@ -2,7 +2,7 @@
 
 namespace App\Models\User;
 
-use App\Models\Interactions\DealerLocation;
+use App\Models\CRM\Dealer\DealerLocation;
 use App\Models\Upload\Upload;
 use Illuminate\Database\Eloquent\Model;
 

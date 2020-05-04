@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models\Dealer;
+namespace App\Models\CRM\Dealer;
 
+use App\Models\CRM\Product\Inventory;
 use App\Models\User\Dealer;
 use Illuminate\Database\Eloquent\Model;
 
@@ -40,5 +41,10 @@ class DealerLocation extends Model
     public function dealer()
     {
         return $this->belongsTo(Dealer::class, 'dealer_id', 'id');
+    }
+
+    public function inventory()
+    {
+        return $this->hasOne(Inventory::class, 'dealer_location_id', 'dealer_location_id');
     }
 }
