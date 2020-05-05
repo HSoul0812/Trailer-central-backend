@@ -61,6 +61,11 @@ class BulkDownloadController extends Controller
         // dispatch job to queue
         $this->dispatch($job);
 
+        // if requested, wait for file assembly then download it now. no need for separate api call
+        if ($request->input('wait')) {
+            return $this->waitForFile($download->token, $repository);
+        }
+
         return response()->json([
             'token' => $download->token
         ], 202);
@@ -72,7 +77,7 @@ class BulkDownloadController extends Controller
      * @param string $token The token returned by the create service
      * @param Request $request
      * @param BulkDownloadRepository $repository
-     * @return mixed
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
      *
      * @OA\Get(
      *     path="/api/parts/bulk/file/{token}",
@@ -108,6 +113,39 @@ class BulkDownloadController extends Controller
             }, $download->export_file);
         }
 
+        return response()->json([
+            'message' => 'Error: unknown status',
+        ], 500);
+    }
+
+    /**
+     * Wait for file assembly then return the file
+     * @param $token
+     * @param BulkDownloadRepository $repository
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    private function waitForFile($token, BulkDownloadRepository $repository)
+    {
+        $timeStart = time();
+
+        while (true) {
+            $result = $this->read($token, $repository);
+
+            if (time() - $timeStart > 180) { // 3 minutes
+                break;
+            }
+
+            if ($result->getStatusCode() == 202) {
+                sleep(10);
+                continue;
+            }
+
+            return $result;
+        }
+
+        return response()->json([
+            'message' => 'Error: unknown status',
+        ], 500);
     }
 
 }

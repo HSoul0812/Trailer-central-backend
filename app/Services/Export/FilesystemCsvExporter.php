@@ -37,7 +37,7 @@ class FilesystemCsvExporter extends AbstractCsvQueryExporter
      */
     function createFile()
     {
-        $this->tmpFileName = '/tmp/part-csv-' . date('Y-m-d')  . '-'. uniqid() . '.csv';
+        $this->tmpFileName = env('APP_TMP_DIR', '/tmp') . '/part-csv-' . date('Y-m-d')  . '-'. uniqid() . '.csv';
         $this->tmpFileHandle = fopen($this->tmpFileName, 'w+');
 
         // make a temp file use a league csv writer; fileHandle is called previously
