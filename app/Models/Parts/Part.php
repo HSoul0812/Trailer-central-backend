@@ -42,6 +42,7 @@ class Part extends Model
         'qb_id',
         'subcategory',
         'title',
+        'alternative_part_number',
         'sku',
         'price',
         'dealer_cost',
@@ -52,7 +53,9 @@ class Part extends Model
         'qty',
         'show_on_website',
         'is_vehicle_specific',
-        'video_embed_code'
+        'video_embed_code',
+        'stock_min',
+        'stock_max',
     ];
 
     /**

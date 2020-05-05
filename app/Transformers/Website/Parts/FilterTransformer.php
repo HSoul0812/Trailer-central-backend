@@ -17,7 +17,8 @@ class FilterTransformer extends TransformerAbstract
         'type' => 'type_id',
         'category' => 'category_id',
         'manufacturer' => 'manufacturer_id',
-        'brand' => 'brand_id'
+        'brand' => 'brand_id',
+        'subcategory' => 'subcategory'
     ];
         
     private $queryString = '';
@@ -108,13 +109,18 @@ class FilterTransformer extends TransformerAbstract
     {        
     
         $requestData = app('request')->all();
+        $hiddenFilters = $this->parseHiddenFilters($requestData['hidden_filter']);     
 
         if (empty($requestData['dealer_id']) || !isset($this->attributeModelIdMapping[$filter->attribute])) {
             return [];
         }
-
-        $query = Part::with($filter->attribute)
+        
+        if ($filter->attribute == 'subcategory') {
+            $query = Part::where('show_on_website', 1);
+        } else {
+            $query = Part::with($filter->attribute)
                        ->where('show_on_website', 1);
+        }        
         
         $query = $this->addFiltersToQuery($query, $requestData, $this->attributeModelIdMapping[$filter->attribute]);
         
@@ -138,8 +144,12 @@ class FilterTransformer extends TransformerAbstract
                 }
             }
             
-            $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute}->name);
-            
+            if ($filter->attribute == 'subcategory') {
+                $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute});
+            } else {
+                $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute}->name);
+            }
+                        
             if (empty($this->queryString)) {
                 $queryString = "?$actionQuery";
             } else {
@@ -151,19 +161,42 @@ class FilterTransformer extends TransformerAbstract
                 } else {
                     $queryString = $this->queryString."&$actionQuery";
                 }                
+            }                        
+            
+            if ($filter->attribute == 'subcategory') {
+//                if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
+//                    if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}])) {
+//                        continue;
+//                    }
+//                }
+                
+                $values[] = [
+                    'id' => 0,
+                    'label' => $part->{$filter->attribute},
+                    'value' => $part->{$filter->attribute},
+                    'count' => $count, 
+                    'base' => 0, // What is this?
+                    'status' => $status,                        
+                    'action' => $queryString
+                ];
+            } else {
+//                if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
+//                    if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}->name])) {
+//                        continue;
+//                    }
+//                }
+                
+                $values[] = [
+                    'id' => $part->{$filter->attribute}->id,
+                    'label' => $part->{$filter->attribute}->name,
+                    'value' => $part->{$filter->attribute}->name,
+                    'count' => $count, 
+                    'base' => 0, // What is this?
+                    'status' => $status,                        
+                    'action' => $queryString
+                ];
             }
             
-            
-            $values[] = [
-                'id' => $part->{$filter->attribute}->id,
-                'label' => $part->{$filter->attribute}->name,
-                'value' => $part->{$filter->attribute}->name,
-                'count' => $count, 
-                'base' => 0, // What is this?
-                'status' => $status,                        
-                'action' => $queryString
-            ];
-                
         }
     
         return $values;
@@ -233,8 +266,13 @@ class FilterTransformer extends TransformerAbstract
         $requestData = app('request')->only('category_id', 'type_id', 'dealer_id', 'brand_id');
         $dealerId = $requestData['dealer_id'];        
         
-        $query = Part::whereIn('dealer_id', $dealerId)
+        if ($filter->attribute == 'subcategory') {
+            $query = Part::whereIn('dealer_id', $dealerId)
+                    ->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute});
+        } else {
+            $query = Part::whereIn('dealer_id', $dealerId)
                     ->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute}->id);
+        }
         
         foreach ($this->mappedTypes as $attributeName => $attributeValues) {
             if ( ($this->attributeModelIdMapping[$filter->attribute] == $attributeName) ) {
@@ -245,6 +283,24 @@ class FilterTransformer extends TransformerAbstract
         }
                 
         return $query->count();
+    }
+    
+    private function parseHiddenFilters($hiddenFilters) {
+        $filters = [];
+        foreach($hiddenFilters as $filter) {
+            if (empty($filter)) {
+                continue;
+            }
+            $explodedFilter = explode('|', $filter);
+            
+            if (isset($filters[$explodedFilter[0]])) {
+                $filters[$explodedFilter[0]][$explodedFilter[1]] = true;
+            } else {
+                $filters[$explodedFilter[0]] = [];
+                $filters[$explodedFilter[0]][$explodedFilter[1]] = true;
+            }
+        }
+        return $filters;
     }
     
     

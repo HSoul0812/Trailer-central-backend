@@ -22,6 +22,20 @@ $api->version('v1', function ($route) {
 
     /*
     |--------------------------------------------------------------------------
+    | Inventory
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    /**
+     * Floorplan Payments
+     */
+    $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
+
+    /*
+    |--------------------------------------------------------------------------
     | Parts
     |--------------------------------------------------------------------------
     |
@@ -121,5 +135,17 @@ $api->version('v1', function ($route) {
     $route->get('vendors/{id}', 'App\Http\Controllers\v1\Parts\VendorController@show')->where('id', '[0-9]+');
     $route->post('vendors/{id}', 'App\Http\Controllers\v1\Parts\VendorController@update')->where('id', '[0-9]+');
     $route->delete('vendors/{id}', 'App\Http\Controllers\v1\Parts\VendorController@destroy')->where('id', '[0-9]+');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Feeds
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    // upload feed data
+    $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
 
 });

@@ -22,16 +22,16 @@ class AccessToken
             Cache::put(env('DEALER_ID_KEY', 'api_dealer_id'), $request->get('dealer_id'));
         }
 
-        if ($request->isMethod('get')) {
-            return $next($request);
-        }
-
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
             if ($accessToken && $accessToken->user) {
                 $request['dealer_id'] = $accessToken->user->dealer_id;
                 return $next($request);
             }
+        }
+
+        if ($request->isMethod('get')) {
+            return $next($request);
         }
         
         if (strpos($request->url(), 'admin') === false && strpos($request->url(), 'nova-api') === false) {

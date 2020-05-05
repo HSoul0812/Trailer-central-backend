@@ -10,3 +10,4 @@ Homestead.yaml
 auth.json
 /storage
 node_modules
+.vscode/

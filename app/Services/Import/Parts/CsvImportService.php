@@ -2,6 +2,7 @@
 
 namespace App\Services\Import\Parts;
 
+use App\Services\Import\Parts\CsvImportServiceInterface;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\Vendor;
@@ -38,6 +39,8 @@ class CsvImportService implements CsvImportServiceInterface
     const DESCRIPTION = 'Description';
     const SHOW_ON_WEBSITE = 'Show on website';
     const IMAGE = 'Image';
+    const STOCK_MIN = 'Stock Minimum';
+    const STOCK_MAX = 'Stock Maximum';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
 
     const BIN_ID = '/Bin\s+\d+\s+ID/i';
@@ -64,6 +67,8 @@ class CsvImportService implements CsvImportServiceInterface
         self::DESCRIPTION => true,
         self::SHOW_ON_WEBSITE => true,
         self::IMAGE => true,
+        self::STOCK_MIN => true,
+        self::STOCK_MAX => true,
         self::VIDEO_EMBED_CODE => true
     ];
 
@@ -289,7 +294,6 @@ class CsvImportService implements CsvImportServiceInterface
             $keyToIndexMapping[$value] = $index;
         }
 
-
         $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first();
 
         $part = [];
@@ -308,6 +312,8 @@ class CsvImportService implements CsvImportServiceInterface
         $part['description'] = $csvData[$keyToIndexMapping[self::DESCRIPTION]];
         $part['show_on_website'] = strtolower($csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]]) === 'yes' ? true : false;
         $part['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
+        $part['stock_min'] = $csvData[$keyToIndexMapping[self::STOCK_MIN]];
+        $part['stock_max'] = $csvData[$keyToIndexMapping[self::STOCK_MAX]];
 
         if (isset($keyToIndexMapping[self::VIDEO_EMBED_CODE]) && isset($csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]])) {
             $part['video_embed_code'] = $csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]];
@@ -427,6 +433,14 @@ class CsvImportService implements CsvImportServiceInterface
                 }
                 else if(!is_numeric($value)) {
                     return "Bin quantity must be numeric.";
+                }
+                break;
+            case self::STOCK_MIN:
+            case self::STOCK_MAX:
+                if (!empty($value)) {
+                    if (!is_numeric($value) || $value < 0) {
+                        return "Stock Min/Max should be a positive number";
+                    }
                 }
                 break;
         }

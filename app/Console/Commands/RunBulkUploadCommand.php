@@ -27,12 +27,12 @@ class RunBulkUploadCommand extends Command
      * @return mixed
      */
     public function handle()
-    {
+    { 
         $bulkUploadRepo = new BulkUploadRepository;
         $bulk = $bulkUploadRepo->get(['status' => BulkUpload::PROCESSING]);
         if (empty($bulk)) {
             return;
-        }
+        }        
         $service = app('App\Services\Import\Parts\CsvImportServiceInterface');
         $service->setBulkUpload($bulk);
         $service->run();

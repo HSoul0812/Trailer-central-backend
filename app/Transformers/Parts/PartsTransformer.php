@@ -8,7 +8,7 @@ use App\Models\Parts\Part;
 class PartsTransformer extends TransformerAbstract
 {
     public function transform(Part $part)
-    {                
+    {
 	 return [
              'id' => (int)$part->id,
              'dealer_id' => (int)$part->dealer_id,
@@ -21,6 +21,7 @@ class PartsTransformer extends TransformerAbstract
              'stock' => $part->sku,
              'subcategory' => $part->subcategory,
              'title' => $part->title,
+             'alternative_part_number' => $part->alternative_part_number,
              'price' => (double)$part->price,
              'dealer_cost' => (double)$part->dealer_cost,
              'msrp' => (double)$part->msrp,
@@ -33,6 +34,8 @@ class PartsTransformer extends TransformerAbstract
              'images' => $part->images->pluck('image_url'),
              'vehicle_specific' => $part->vehicleSpecific,
              'video_embed_code' => $part->video_embed_code,
+             'stock_min' => $part->stock_min,
+             'stock_max' => $part->stock_max,
              'bins' => $part->bins
          ];
     }
