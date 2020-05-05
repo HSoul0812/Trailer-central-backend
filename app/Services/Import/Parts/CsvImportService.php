@@ -77,8 +77,14 @@ class CsvImportService implements CsvImportServiceInterface
         self::BIN_QTY => true
     ];
 
+    /**
+     * @var array Array of validation errors per row
+     */
     private $validationErrors = [];
 
+    /**
+     * @var array Array of CSV headers. Of the form `array[index] = value` where index is the position and value is the header
+     */
     private $indexToheaderMapping = [];
 
     public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, PartRepositoryInterface $partRepository, BinRepositoryInterface $binRepository)
@@ -116,6 +122,11 @@ class CsvImportService implements CsvImportServiceInterface
         $this->bulkUpload = $bulkUpload;
     }
 
+    /**
+     * Execute the import process
+     *
+     * @throws \Exception
+     */
     protected function import()
     {
         echo "Importing.... 123".PHP_EOL;
@@ -150,20 +161,35 @@ class CsvImportService implements CsvImportServiceInterface
         $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
     }
 
+    /**
+     * Validate the csv file, its headers and content
+     *
+     * @return bool
+     * @throws \Exception
+     */
     protected function validate()
     {
         $this->streamCsv(function($csvData, $lineNumber) {
+            // for each column
             foreach($csvData as $index => $value) {
+                // for the header line
                 if ($lineNumber === 1) {
+                    // if column header is optional
                     if($this->isOptionalHeader($value)) {
                         $this->allowedHeaderValues[$value] = 'allowed';
                         $this->indexToheaderMapping[$index] = $value;
+
+                    // if column header is not in default $this->allowedHeaderValues
                     } elseif (!$this->isAllowedHeader($value)) {
                         $this->validationErrors[] = $this->printError($lineNumber, $index + 1, "Invalid Header: ".$value);
+
+                    // else, the column header is allowed
                     } else {
                         $this->allowedHeaderValues[$value] = 'allowed';
                         $this->indexToheaderMapping[$index] = $value;
                     }
+
+                // for lines > 1
                 } else {
                     if ($errorMessage = $this->isDataValid($this->indexToheaderMapping[$index], $value)) {
                         $this->validationErrors[] = $this->printError($lineNumber, $index + 1, $errorMessage);
@@ -172,6 +198,7 @@ class CsvImportService implements CsvImportServiceInterface
             }
         });
 
+        // see if any headers are flagged, return false if so
         foreach($this->allowedHeaderValues as $header => $headerValue) {
             if ($headerValue !== 'allowed') {
                 $this->validationErrors[] = $this->printError(1, $header, "Header ".$header." not present.");
@@ -185,21 +212,31 @@ class CsvImportService implements CsvImportServiceInterface
         return true;
     }
 
+    /**
+     * Applies `$callback($row, $lineNumber)` to each line of the csv
+     *
+     * @param $callback
+     * @throws \Exception
+     */
     private function streamCsv($callback)
     {
         $adapter = Storage::disk('s3')->getAdapter();
         $client = $adapter->getClient();
         $client->registerStreamWrapper();
 
+        // open the file from s3
         if (!($stream = fopen("s3://{$adapter->getBucket()}/{$this->bulkUpload->import_source}", 'r'))) {
             throw new \Exception('Could not open stream for reading file: ['.$this->bulkUpload->import_source.']');
         }
 
+        // iterate through all lines
         $lineNumber = 1;
         while (!feof($stream)) {
              $isEmptyRow = true;
              $csvData = fgetcsv($stream);
 
+             // see if the row is empty,
+             // one value is enough to indicate non empty row
              foreach($csvData as $value) {
                  if (!empty($value)) {
                      $isEmptyRow = false;
@@ -207,10 +244,12 @@ class CsvImportService implements CsvImportServiceInterface
                  }
              }
 
+             // skip empty rows
              if ($isEmptyRow) {
                  continue;
              }
 
+             // apply $callback to the row
              $callback($csvData, $lineNumber++);
              flush();
         }
@@ -248,6 +287,8 @@ class CsvImportService implements CsvImportServiceInterface
     private function csvToPartData($csvData)
     {
         $formattedImages = [];
+
+        // $keyToIndexMapping[header] basically points to nth column given a column header name
         $keyToIndexMapping = [];
         foreach($this->indexToheaderMapping as $index => $value) {
             $keyToIndexMapping[$value] = $index;
@@ -354,6 +395,10 @@ class CsvImportService implements CsvImportServiceInterface
                     return "SKU cannot be empty.";
                 }
 
+                $part = Part::where('sku', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
+                if (!empty($part)) {
+                    return "SKU {$value} already exists in the system.";
+                }
                 break;
             case self::SHOW_ON_WEBSITE:
                 if (!empty($value)) {
