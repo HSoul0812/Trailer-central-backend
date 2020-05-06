@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Models\CRM\Leads;
+namespace App\Models\CRM\Product;
 
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadProduct;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -31,6 +33,6 @@ class Product extends Model
     ];
 
     public function lead() {
-        return $this->belongsTo(Lead::class, 'product_id', 'product_id', 'crm_lead_product');
+        return $this->belongsTo(Lead::class, 'product_id', 'product_id', LeadProduct::class);
     }
 }

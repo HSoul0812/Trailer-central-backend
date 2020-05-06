@@ -7,16 +7,15 @@ use App\Mail\InteractionEmail;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
-use App\Models\Interactions\Lead;
-use App\Models\User\Dealer;
+use App\Models\CRM\Leads\Lead;
 use App\Models\User\User;
 use App\Repositories\Repository;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
+use Exception;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -61,6 +60,8 @@ class InteractionsController extends RestfulController
             }
             $totalSize += $file['size'];
         }
+
+        return true;
     }
 
     public function uploadAttachments($files, $dealer, $uniqueId) {
@@ -251,7 +252,7 @@ class InteractionsController extends RestfulController
             $lead = Lead::findOrFail($request->input('lead_id'));
             $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
             $dealer = $user->dealer();
-            $leadProduct = $lead->leadProduct();
+            $leadProduct = $lead->product();
             $leadProductId = $leadProduct->id ?? 0;
             $subject = $request->input('subject');
             $body = $request->input('body');
@@ -287,7 +288,7 @@ class InteractionsController extends RestfulController
                     )
                 );
             }
-
+            $customer['email'] = '5206997905-ceda07@inbox.mailtrap.io';
             Mail::to($customer["email"] ?? "" )->send(
                 new InteractionEmail([
                     'date' => Carbon::now()->toDateTimeString(),

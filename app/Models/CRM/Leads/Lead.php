@@ -7,8 +7,10 @@ use App\Models\CRM\Dms\Website;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
-use App\Models\CRM\Leads\Product;
 use App\Models\CRM\Product\Inventory;
+use App\Models\CRM\Product\Product;
+use App\Models\CRM\Leads\LeadProduct;
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class Lead extends Model
@@ -48,7 +50,7 @@ class Lead extends Model
      */
     public function product()
     {
-        return $this->hasManyThrough(Product::class, 'crm_lead_product', 'lead_id', 'identifier');
+        return $this->hasManyThrough(Product::class, LeadProduct::class, 'lead_id', 'identifier');
     }
 
     /**
@@ -56,7 +58,7 @@ class Lead extends Model
      */
     public function inventory()
     {
-        return $this->hasManyThrough(Inventory::class, 'crm_inventory_lead', 'website_lead_id', 'identifier');
+        return $this->hasManyThrough(Inventory::class, InventoryLead::class, 'website_lead_id', 'identifier');
     }
 
     /**
@@ -89,7 +91,7 @@ class Lead extends Model
      * @return array
      */
     public function getId() {
-        return $this->processProperty(Utility::expand($this->identifier));
+        return $this->processProperty(CompactHelper::expand($this->identifier));
     }
 
     public function getProductIds() {

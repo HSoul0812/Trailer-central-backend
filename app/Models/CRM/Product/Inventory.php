@@ -4,6 +4,7 @@
 namespace App\Models\CRM\Product;
 
 use App\Models\CRM\Dealer\DealerLocation;
+use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,7 +26,7 @@ class Inventory extends Model
 
     public function lead()
     {
-        return $this->belongsTo(Lead::class, 'inventory_id', 'inventory_id', 'crm_inventory_lead');
+        return $this->belongsTo(Lead::class, 'inventory_id', 'inventory_id', InventoryLead::class);
     }
 
     public function attribute()

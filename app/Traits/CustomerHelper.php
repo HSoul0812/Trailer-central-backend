@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Models\Interactions\Lead;
+use App\Models\CRM\Leads\Lead;
 use App\Models\User\User;
 
 trait CustomerHelper
