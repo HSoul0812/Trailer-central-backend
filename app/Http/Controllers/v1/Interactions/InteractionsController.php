@@ -39,85 +39,10 @@ class InteractionsController extends RestfulController
 
     public function index(Request $request)
     {
-        return response()->json([
+        return $this->response->array([
             'success' => true,
             'message' => "Interactions API",
-        ], Response::HTTP_OK);
-    }
-
-    /**
-     * @param $files - mail attachment(-s)
-     * @return bool | string
-     */
-    public function checkAttachmentsSize($files)
-    {
-        $totalSize = 0;
-        foreach ($files as $file) {
-            if ($file['size'] > 2097152) {
-                throw new Exception("Single upload size must be less than 2 MB.");
-            } else if ($totalSize > 8388608) {
-                throw new Exception("Total upload size must be less than 8 MB");
-            }
-            $totalSize += $file['size'];
-        }
-
-        return true;
-    }
-
-    public function uploadAttachments($files, $dealer, $uniqueId) {
-        $messageDir = str_replace(">", "", str_replace("<", "", $uniqueId));
-
-        if (!empty($files) && is_array($files)) {
-            $message = $this->checkAttachmentsSize($files);
-            if( false !== $message ) {
-                return response()->json([
-                    'error' => true,
-                    'message' => $message
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            foreach ($files as $file) {
-                $path_parts = pathinfo( $file->getPathname() );
-                $filePath = 'https://email-trailercentral.s3.amazonaws.com/' . 'crm/'
-                    . $dealer->id . "/" . $messageDir
-                    . "/attachments/{$path_parts['filename']}." . $path_parts['extension'];
-                Storage::disk('s3')->put($filePath, file_get_contents($file));
-                Attachment::create(['message_id' => $uniqueId, 'filename' => $filePath, 'original_filename' => time() . $file->getClientOriginalName()]);
-            }
-        }
-    }
-
-    public function createOrUpdateEmailHistory($insert = [], $history) {
-        $reportFields = [
-            'date_sent',
-            'date_delivered',
-            'date_bounced',
-            'date_complained',
-            'date_unsubscribed',
-            'date_opened',
-            'date_clicked',
-            'invalid_email',
-            'was_skipped'
-        ];
-
-        foreach ($insert as $key => $value) {
-            if (in_array($key, $reportFields)) {
-                if ($key === 'invalid_email' || $key === 'was_skipped') {
-                    if (!empty($value))
-                        $insert[$key] = 1;
-                } else if (!empty($value)) {
-                    if ($value === 1) {
-                        $insert[$key] = date("Y-m-d H:i:s");
-                    } else {
-                        $insert[$key] = $value;
-                    }
-                }
-            }
-        }
-        if(!!$history) {
-            $history->update($insert);
-        } else {
-            EmailHistory::create($insert);
-        }
+        ]);
     }
 
     /**
@@ -251,6 +176,7 @@ class InteractionsController extends RestfulController
             $user = User::findOrFail($request->input('user_id'));
             $lead = Lead::findOrFail($request->input('lead_id'));
             $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
+            $attachment = new Attachment();
             $dealer = $user->dealer();
             $leadProduct = $lead->product();
             $leadProductId = $leadProduct->id ?? 0;
@@ -316,20 +242,20 @@ class InteractionsController extends RestfulController
                 'parent_message_id'   => 0,
             ];
 
-            $this->uploadAttachments($files, $dealer, $uniqueId);
-            $this->createOrUpdateEmailHistory($insert, $emailHistory);
+            $attachment->uploadAttachments($files, $dealer, $uniqueId);
+            $emailHistory->createOrUpdateEmailHistory($emailHistory, $insert);
 
-            return response()->json([
+            return $this->response->array([
                 'success' => true,
                 'message' => "Email sent successfully",
-            ], Response::HTTP_OK);
+            ]);
 
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
-            return response()->json([
+            return $this->response->array([
                 'error' => true,
                 'message' => $throwable->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            ])->setStatusCode(500);
         }
     }
 }

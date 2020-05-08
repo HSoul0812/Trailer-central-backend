@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Dealer;
+namespace App\Models\CRM\Dealer;
 
 use App\Models\User\Dealer;
 use App\Models\Upload\Upload;
@@ -26,13 +26,13 @@ class DealerUpload extends Model
         "is_parts_upload"
     ];
 
-//    public function dealer()
-//    {
-//        return $this->belongsTo(Dealer::class, 'dealer_id', 'dealer_id');
-//    }
-//
-//    public function upload()
-//    {
-//        return $this->belongsTo(Upload::class, 'upload_id', 'upload_id');
-//    }
+    public function dealer()
+    {
+        return $this->belongsTo(Dealer::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function upload()
+    {
+        return $this->belongsTo(Upload::class, 'upload_id', 'upload_id');
+    }
 }

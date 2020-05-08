@@ -2,7 +2,7 @@
 
 namespace App\Models\Upload;
 
-use App\Models\Interactions\DealerUpload;
+use App\Models\CRM\Dealer\DealerUpload;
 use App\Models\User\Dealer;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
@@ -42,10 +42,6 @@ class Upload extends Model
     public function dealerUpload()
     {
         return $this->hasOne(DealerUpload::class, 'user_id', 'upload_id');
-    }
-
-    public function setFilename($filename = '') {
-
     }
 
     public function getIdentifier()

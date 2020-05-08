@@ -7,9 +7,9 @@ use App\Models\CRM\Dms\Website;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
-use App\Models\CRM\Product\Inventory;
 use App\Models\CRM\Product\Product;
 use App\Models\CRM\Leads\LeadProduct;
+use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 

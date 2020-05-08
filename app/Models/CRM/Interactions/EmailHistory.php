@@ -86,4 +86,38 @@ class EmailHistory extends Model
             ->first();
     }
 
+    public function createOrUpdateEmailHistory($history, $insert = []) {
+        $reportFields = [
+            'date_sent',
+            'date_delivered',
+            'date_bounced',
+            'date_complained',
+            'date_unsubscribed',
+            'date_opened',
+            'date_clicked',
+            'invalid_email',
+            'was_skipped'
+        ];
+
+        foreach ($insert as $key => $value) {
+            if (in_array($key, $reportFields)) {
+                if ($key === 'invalid_email' || $key === 'was_skipped') {
+                    if (!empty($value))
+                        $insert[$key] = 1;
+                } else if (!empty($value)) {
+                    if ($value === 1) {
+                        $insert[$key] = date("Y-m-d H:i:s");
+                    } else {
+                        $insert[$key] = $value;
+                    }
+                }
+            }
+        }
+        if(!!$history) {
+            $history->update($insert);
+        } else {
+            EmailHistory::create($insert);
+        }
+    }
+
 }

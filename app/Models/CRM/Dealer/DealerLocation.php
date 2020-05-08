@@ -2,7 +2,7 @@
 
 namespace App\Models\CRM\Dealer;
 
-use App\Models\CRM\Product\Inventory;
+use App\Models\Inventory\Inventory;
 use App\Models\User\Dealer;
 use Illuminate\Database\Eloquent\Model;
 

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Models\CRM\Product;
+namespace App\Models\Inventory;
 
 use App\Models\CRM\Dealer\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;

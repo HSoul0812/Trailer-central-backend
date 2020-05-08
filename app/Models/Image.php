@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Interactions\DealerUpload;
-use App\Models\User\Dealer;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 
