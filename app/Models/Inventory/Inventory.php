@@ -38,4 +38,13 @@ class Inventory extends Model
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
     }
+
+    public function floorplanPayments()
+    {
+        return $this->hasMany('App\Models\Inventory\Floorplan\Payment');
+    }
+
+    public function __toString() {
+        return $this->title;
+    }
 }

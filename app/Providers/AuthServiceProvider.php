@@ -2,24 +2,24 @@
 
 namespace App\Providers;
 
-use App\User;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\ServiceProvider;
+use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
+use App\Policies\DealerIncomingPendingMappingPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * The policy mappings for the application.
      *
-     * @return void
+     * @var array
      */
-    public function register()
-    {
-        //
-    }
+    protected $policies = [
+        DealerIncomingPendingMapping::class => DealerIncomingPendingMappingPolicy::class,
+    ];
 
     /**
-     * Boot the authentication services for the application.
+     * Register any authentication / authorization services.
      *
      * @return void
      */

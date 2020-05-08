@@ -2,23 +2,24 @@
 
 namespace App\Models\User;
 
-use App\Models\CRM\User\SalesPerson;
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Lumen\Auth\Authorizable;
+use App\Models\CRM\User\SalesPerson;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+/**
+ * Class User
+ *
+ * This User class is for API users
+ *
+ * @package App\Models\User
+ */
+class User extends Model
 {
-    use Authenticatable, Authorizable;
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'new_user';
+    protected $table = 'dealer';
 
     /**
      * The primary key associated with the table.
@@ -33,7 +34,10 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'username', 'email',
+        'dealer_id',
+        'name',
+        'email',
+        'password'
     ];
 
     /**
@@ -42,7 +46,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $hidden = [
-        'password',
+
     ];
 
     public function dealer()

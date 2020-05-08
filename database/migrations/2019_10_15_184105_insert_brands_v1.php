@@ -13,14 +13,14 @@ class InsertBrandsV1 extends Migration
     public function up()
     {
         $pdo = DB::connection()->getPdo();
-        $stmt = $pdo->query("SELECT DISTINCT brand FROM `parts` WHERE brand IS NOT NULL AND length(brand) >= 4;");
-        $insert = $pdo->prepare("INSERT INTO part_brands (name) VALUES (:brand)");
-        
-        while($row = $stmt->fetch()) {
-            $insert->execute([
-                'brand' => $row['brand']
-            ]);
-        }
+//        $stmt = $pdo->query("SELECT DISTINCT brand FROM `parts` WHERE brand IS NOT NULL AND length(brand) >= 4;");
+//        $insert = $pdo->prepare("INSERT INTO part_brands (name) VALUES (:brand)");
+//
+//        while($row = $stmt->fetch()) {
+//            $insert->execute([
+//                'brand' => $row['brand']
+//            ]);
+//        }
     }
 
     /**

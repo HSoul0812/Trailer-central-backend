@@ -6,3 +6,8 @@ Homestead.yaml
 /nbproject/private/
 /nbproject
 .vagrant/
+/nova
+auth.json
+/storage
+node_modules
+.vscode/

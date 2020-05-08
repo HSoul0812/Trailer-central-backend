@@ -45,4 +45,9 @@ class Vendor extends Model
     protected $hidden = [
 
     ];
+    
+    public function parts()
+    {
+        return $this->hasMany('App\Models\Parts\Part');
+    }
 }
