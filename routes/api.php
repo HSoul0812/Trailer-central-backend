@@ -22,6 +22,20 @@ $api->version('v1', function ($route) {
 
     /*
     |--------------------------------------------------------------------------
+    | Inventory
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    /**
+     * Floorplan Payments
+     */
+    $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
+
+    /*
+    |--------------------------------------------------------------------------
     | Parts
     |--------------------------------------------------------------------------
     |
@@ -69,6 +83,12 @@ $api->version('v1', function ($route) {
     $route->get('parts/types/{id}', 'App\Http\Controllers\v1\Parts\TypeController@show')->where('id', '[0-9]+');
     $route->post('parts/types/{id}', 'App\Http\Controllers\v1\Parts\TypeController@update')->where('id', '[0-9]+');
     $route->delete('parts/types/{id}', 'App\Http\Controllers\v1\Parts\TypeController@destroy')->where('id', '[0-9]+');
+
+    /**
+     * Part Bulk download
+     */
+    $route->post('parts/bulk/download', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@create');
+    $route->get('parts/bulk/file/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@read');
 
     /**
      * Part Bulk

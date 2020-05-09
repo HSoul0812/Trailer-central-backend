@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Schema;
+use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkDownloadRepository;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use App\Services\Export\Parts\CsvExportService;
+use App\Services\Export\Parts\CsvExportServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('brand_exists', 'App\Rules\Parts\BrandExists@passes');
         \Validator::extend('manufacturer_exists', 'App\Rules\Parts\ManufacturerExists@passes');
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
-        
+
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
                $this->orWhere($attribute, 'LIKE', "%{$searchTerm}%");
@@ -48,6 +53,17 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
+        $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
+
+        // CSV exporter bindings
+        $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
+        $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);
+        $this->app->when(CsvExportService::class)
+            ->needs(Filesystem::class)
+            ->give(function () { return Storage::disk('partsCsvExport');});
+        $this->app->when(CsvExportService::class)
+            ->needs(Filesystem::class)
+            ->give(function () { return Storage::disk('partsCsvExport');});
     }
 
 }

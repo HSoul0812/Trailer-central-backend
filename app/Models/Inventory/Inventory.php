@@ -1,18 +1,12 @@
 <?php
 
-namespace App\Models\Parts;
+namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class Brand
- * 
- * @property string $name
- * @property Collection $parts
- */
-class Brand extends Model
+class Inventory extends Model
 { 
-    protected $table = 'part_brands';
+    protected $table = 'inventory';
     
     /**
      * The attributes that are mass assignable.
@@ -20,7 +14,7 @@ class Brand extends Model
      * @var array
      */
     protected $fillable = [
-        'name'
+
     ];
 
     /**
@@ -32,12 +26,12 @@ class Brand extends Model
 
     ];
     
-    public function parts()
+    public function floorplanPayments()
     {
-        return $this->hasMany('App\Models\Parts\Part');
+        return $this->hasMany('App\Models\Inventory\Floorplan\Payment');
     }
     
     public function __toString() {
-        return $this->name;
+        return $this->title;
     }
 }

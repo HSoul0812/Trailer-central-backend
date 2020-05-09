@@ -2,11 +2,23 @@
 
 namespace App\Models\Parts;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
 use App\Models\Parts\CacheStoreTime;
 use Carbon\Carbon;
 
+/**
+ * Class Part
+ *
+ * @package App\Models\Parts
+ * @property Collection $images
+ * @property Collection $bins
+ * @property Vendor $vendor
+ * @property Brand $brand
+ * @property Category $category
+ * @property Type $type
+ */
 class Part extends Model
 {
 

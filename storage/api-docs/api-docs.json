@@ -997,5 +997,19 @@
                 }
             }
         }
+    },
+    "components": {
+        "schemas": {
+            "parts/bulkdownload": {
+                "description": "Represents a parts bulk download file job",
+                "properties": {
+                    "dealer_id": {},
+                    "status": {},
+                    "token": {},
+                    "expoert_file": {}
+                },
+                "type": "object"
+            }
+        }
     }
 }
