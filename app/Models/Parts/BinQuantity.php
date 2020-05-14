@@ -30,6 +30,6 @@ class BinQuantity extends Model {
 
     public function bin()
     {
-        return $this->hasOne('App\Models\Parts\Bin');
+        return $this->hasOne('App\Models\Parts\Bin', 'id', 'bin_id');
     }
 }
