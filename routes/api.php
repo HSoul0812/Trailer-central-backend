@@ -49,6 +49,11 @@ $api->version('v1', function ($route) {
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
 
     /**
+     * Part bins
+     */
+    $route->get('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@index');
+
+    /**
      * Part brands
      */
     $route->get('parts/brands', 'App\Http\Controllers\v1\Parts\BrandController@index');

@@ -376,6 +376,20 @@ class PartsController extends RestfulController
      *         )
      *     ),
      *     @OA\Parameter(
+     *         name="bin_id",
+     *         in="query",
+     *         description="Part Bins",
+     *         required=false,
+     *         @OA\Property(
+     *            type="array",
+     *            @OA\Items(
+     *              type="array",
+     *              @OA\Items()
+     *            ),
+     *            description="An array of bin IDs"
+     *         )
+     *     ),
+     *     @OA\Parameter(
      *         name="id",
      *         in="query",
      *         description="Part IDs",
