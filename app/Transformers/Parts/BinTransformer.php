@@ -9,7 +9,6 @@ class BinTransformer extends TransformerAbstract
 {
     public function transform($bin)
     {                
-        
         if (isset($bin->bin)) {
             $bin = $bin->bin;
         }
@@ -17,7 +16,8 @@ class BinTransformer extends TransformerAbstract
 	    return [
              'id' => (int)$bin->id,
              'dealer_id' => (int) $bin->dealer_id,
-             'name' => $bin->bin_name
+             'name' => $bin->bin_name,
+             'uncompletedCycleCounts' => $bin->uncompletedCycleCounts
          ];
     }
 }

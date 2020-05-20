@@ -72,6 +72,14 @@ $api->version('v1', function ($route) {
     $route->delete('parts/categories/{id}', 'App\Http\Controllers\v1\Parts\CategoryController@destroy')->where('id', '[0-9]+');
 
     /**
+     * Part Cycle Counts
+     */
+    $route->get('parts/cycle-counts', 'App\Http\Controllers\v1\Parts\CycleCountController@index');
+    $route->put('parts/cycle-counts', 'App\Http\Controllers\v1\Parts\CycleCountController@create');
+    $route->post('parts/cycle-counts/{id}', 'App\Http\Controllers\v1\Parts\CycleCountController@update')->where('id', '[0-9]+');
+    $route->delete('parts/cycle-counts/{id}', 'App\Http\Controllers\v1\Parts\CycleCountController@destroy')->where('id', '[0-9]+');
+
+    /**
      * Part Manufacturers
      */
     $route->get('parts/manufacturers', 'App\Http\Controllers\v1\Parts\ManufacturerController@index');

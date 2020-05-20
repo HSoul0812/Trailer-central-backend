@@ -4,9 +4,14 @@ namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Bin extends Model {
+/**
+ * @author Marcel
+ */
+class CycleCount extends Model {
     
-    protected $table = 'dms_settings_part_bin';
+    protected $table = 'parts_cycle_count';
+
+    public $timestamps = false;
     
     /**
      * The attributes that are mass assignable.
@@ -15,8 +20,10 @@ class Bin extends Model {
      */
     protected $fillable = [
         'dealer_id',
-        'location',
-        'bin_name'
+        'bin_id',
+        'count_date',
+        'is_completed',
+        'is_balanced'
     ];
 
     /**
@@ -28,9 +35,9 @@ class Bin extends Model {
 
     ];
 
-    public function uncompletedCycleCounts()
+    public function parts()
     {
-        return $this->hasMany('App\Models\Parts\CycleCount')->where('is_completed', 0)->with('parts');
+        return $this->hasMany('App\Models\Parts\CycleCountHistory');
     }
 
 }
