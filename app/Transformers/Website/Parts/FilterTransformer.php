@@ -109,7 +109,10 @@ class FilterTransformer extends TransformerAbstract
     {        
     
         $requestData = app('request')->all();
-        $hiddenFilters = $this->parseHiddenFilters($requestData['hidden_filter']);     
+        $hiddenFilters = [];
+        if (isset($requestData['hidden_filter'])) {
+            $hiddenFilters = $this->parseHiddenFilters($requestData['hidden_filter']);
+        }             
 
         if (empty($requestData['dealer_id']) || !isset($this->attributeModelIdMapping[$filter->attribute])) {
             return [];
@@ -164,11 +167,11 @@ class FilterTransformer extends TransformerAbstract
             }                        
             
             if ($filter->attribute == 'subcategory') {
-//                if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
-//                    if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}])) {
-//                        continue;
-//                    }
-//                }
+                if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
+                    if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}])) {
+                        continue;
+                    }
+                }
                 
                 $values[] = [
                     'id' => 0,
@@ -180,11 +183,11 @@ class FilterTransformer extends TransformerAbstract
                     'action' => $queryString
                 ];
             } else {
-//                if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
-//                    if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}->name])) {
-//                        continue;
-//                    }
-//                }
+                if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
+                    if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}->name])) {
+                        continue;
+                    }
+                }
                 
                 $values[] = [
                     'id' => $part->{$filter->attribute}->id,

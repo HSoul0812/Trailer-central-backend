@@ -36,6 +36,8 @@ class UpdatePartRequest extends Request {
         'vehicle_model' => 'string',
         'vehicle_year_from' => 'integer',
         'vehicle_year_to' => 'integer',
+        'stock_max' => 'integer|nullable', 
+        'stock_min' => 'integer|nullable',
         'images' => 'array',
         'images.*.url' => 'url',
         'images.*.position' => 'integer',

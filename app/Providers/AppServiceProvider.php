@@ -10,6 +10,10 @@ use Illuminate\Support\ServiceProvider;
 use App\Services\Export\Parts\CsvExportService;
 use App\Services\Export\Parts\CsvExportServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
+use App\Repositories\Showroom\ShowroomRepositoryInterface;
+use App\Repositories\Showroom\ShowroomRepository;
+use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
+use App\Repositories\Website\PaymentCalculator\SettingsRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,7 +59,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
-
+        $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
+        $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+        
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
         $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);
