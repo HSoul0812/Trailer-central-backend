@@ -87,7 +87,7 @@ class PostRepository implements PostRepositoryInterface {
         }
 
         if (isset($params['website_id'])) {
-            $query = $query->whereIn('website_id', $params['website_id']);
+            $query = $query->where('website_id', $params['website_id']);
         }
 
         if (isset($params['id'])) {
