@@ -13,9 +13,7 @@ class GetPostsRequest extends Request {
     
     protected $rules = [
         'per_page' => 'integer',
-        'sort' => 'in:relevance,title,-title,length,-length,date_created,-date_created,date_modified,-date_modified,date_published,-date_published',
-        'dealer_id' => 'array',
-        'dealer_id.*' => 'integer',
+        'sort' => 'in:title,-title,date_created,-date_created,date_modified,-date_modified,date_published,-date_published',
         'status' => 'in:private,published,scheduled',
         'id' => 'array',
         'id.*' => 'integer'

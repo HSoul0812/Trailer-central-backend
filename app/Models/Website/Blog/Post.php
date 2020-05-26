@@ -83,44 +83,4 @@ class Post extends Model
 
         return $array;
     }
-
-    public function brand()
-    {
-        return $this->belongsTo('App\Models\Parts\Brand');
-    }
-
-    public function type()
-    {
-        return $this->belongsTo('App\Models\Parts\Type');
-    }
-
-    public function vendor()
-    {
-        return $this->belongsTo('App\Models\Parts\Vendor');
-    }
-
-    public function category()
-    {
-        return $this->belongsTo('App\Models\Parts\Category');
-    }
-
-    public function manufacturer()
-    {
-        return $this->belongsTo('App\Models\Parts\Manufacturer');
-    }
-
-    public function vehicleSpecific()
-    {
-        return $this->hasOne('App\Models\Parts\VehicleSpecific');
-    }
-
-    public function images()
-    {
-        return $this->hasMany('App\Models\Parts\PartImage');
-    }
-
-    public function bins()
-    {
-        return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
-    }
 }
