@@ -221,7 +221,7 @@ class PostController extends RestfulController
         $request = new GetPostsRequest($request->all());
         
         if ( $request->validate() ) {
-            $posts = $this->posts->getAllSearch($request->all());
+            $posts = $this->posts->getAll($request->all());
             return $this->response->paginator($posts, new PostTransformer());
         }
         
