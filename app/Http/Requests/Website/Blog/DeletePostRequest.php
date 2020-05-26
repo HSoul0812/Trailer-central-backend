@@ -12,7 +12,8 @@ use App\Http\Requests\Request;
 class DeletePostRequest extends Request {
     
     protected $rules = [
-        'id' => 'required|integer'
+        'id' => 'array',
+        'id.*' => 'integer'
     ];
     
 }

@@ -6,246 +6,57 @@ use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Exceptions\NotImplementedException;
 use App\Repositories\Website\Blog\PostRepositoryInterface;
-use App\Http\Requests\Website\Blog\GetPostRequest;
+use App\Http\Requests\Website\Blog\GetPostsRequest;
 use App\Http\Requests\Website\Blog\CreatePostRequest;
 use App\Http\Requests\Website\Blog\UpdatePostRequest;
 use App\Http\Requests\Website\Blog\DeletePostRequest;
-use App\Transformers\Website\Blog\PartsTransformer;
+use App\Transformers\Website\Blog\PostTransformer;
 
 class PostController extends RestfulController
 {
     
-    protected $parts;
+    protected $posts;
     
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(PostRepositoryInterface $parts)
+    public function __construct(PostRepositoryInterface $posts)
     {
-        $this->parts = $parts;
+        $this->posts = $posts;
     }
     
     /**
      * @OA\Put(
-     *     path="/api/parts/",
-     *     description="Create a part",
-     *     tags={"Parts"},
+     *     path="/api/website/{websiteId}/blog/posts",
+     *     description="Create a post",
+     *     tags={"Post"},
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
-     *         description="Part ID",
+     *         description="Post ID",
      *         required=true,
      *         @OA\Schema(@OA\Schema(type="integer"))
      *     ),
      *     @OA\Parameter(
-     *         name="vendor_id",
-     *         in="query",
-     *         description="Vendor ID",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_specific_id",
-     *         in="query",
-     *         description="Vehicle Specific ID",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),     * 
-     *     @OA\Parameter(
-     *         name="brand_id",
-     *         in="query",
-     *         description="Part brand",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),          
-     *    @OA\Parameter(
-     *         name="manufacturer_id",
-     *         in="query",
-     *         description="Part manufacturers",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="type_id",
-     *         in="query",
-     *         description="Part type",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *   @OA\Parameter(
-     *         name="category_id",
-     *         in="path",
-     *         description="Part category",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *    @OA\Parameter(
-     *         name="qb_id",
-     *         in="query",
-     *         description="Part quickbooks id",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="subcategory",
-     *         in="query",
-     *         description="Part subcategory",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *   @OA\Parameter(
      *         name="title",
      *         in="query",
-     *         description="Part title",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *   @OA\Parameter(
-     *         name="alternative_part_number",
-     *         in="query",
-     *         description="Alternative Part Number",
+     *         description="Post title",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
-     *         name="sku",
+     *         name="post_content",
      *         in="query",
-     *         description="Part sku",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="price",
-     *         in="query",
-     *         description="Part price",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
-     *         name="dealer_cost",
-     *         in="query",
-     *         description="Part dealer cost",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
-     *         name="msrp",
-     *         in="query",
-     *         description="Part msrp",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
-     *         name="weight",
-     *         in="query",
-     *         description="Part weight",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
-     *         name="weight_rating",
-     *         in="query",
-     *         description="Part weight rating",
+     *         description="Post content",
      *         required=false,
      *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="description",
-     *         in="query",
-     *         description="Part description",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="qty",
-     *         in="query",
-     *         description="Part qty",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="show_on_website",
-     *         in="query",
-     *         description="Part show on website",
-     *         required=false,
-     *         @OA\Schema(type="boolean")
-     *     ),
-     *     @OA\Parameter(
-     *         name="is_vehicle_specific",
-     *         in="query",
-     *         description="Part vehicle specific",
-     *         required=false,
-     *         @OA\Schema(type="boolean")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_make",
-     *         in="query",
-     *         description="Part vehicle make",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_model",
-     *         in="query",
-     *         description="Part vehicle model",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_year_from",
-     *         in="query",
-     *         description="Part vehicle year from",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_year_to",
-     *         in="query",
-     *         description="Part vehicle year to",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="video_embed_code",
-     *         in="query",
-     *         description="Video embed code",
-     *         required=false,
-     *         @OA\Schema(type="text")
-     *     ),
-     *    @OA\Parameter(
-     *         name="images",
-     *         in="query",
-     *         description="Part images",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Image URL array"
-     *         )
-     *     ),
-     *    @OA\Parameter(
-     *         name="bins",
-     *         in="query",
-     *         description="Part bins",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Bin array with bin_id and name"
-     *         )
      *     ),
      * 
      *     @OA\Response(
      *         response="200",
-     *         description="Returns a list of parts",
+     *         description="Returns a list of posts",
      *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
@@ -255,10 +66,10 @@ class PostController extends RestfulController
      * )
      */
     public function create(Request $request) {
-        $request = new CreatePartRequest($request->all());
+        $request = new CreatePostRequest($request->all());
         
         if ( $request->validate() ) {
-            return $this->response->item($this->parts->create($request->all()), new PartsTransformer());
+            return $this->response->item($this->posts->create($request->all()), new PostTransformer());
         }  
         
         return $this->response->errorBadRequest();
@@ -266,19 +77,19 @@ class PostController extends RestfulController
 
     /**
      * @OA\Delete(
-     *     path="/api/parts/{id}",
-     *     description="Delete a part",     
-     *     tags={"Parts"},
+     *     path="/api/website/{websiteId}/blog/posts{id}",
+     *     description="Delete a post",     
+     *     tags={"Post"},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="Part ID",
+     *         description="Post ID",
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
      *         response="200",
-     *         description="Confirms part was deleted",
+     *         description="Confirms post was deleted",
      *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
@@ -288,9 +99,9 @@ class PostController extends RestfulController
      * )
      */
     public function destroy(int $id) {
-        $request = new DeletePartRequest(['id' => $id]);
+        $request = new DeletePostRequest(['id' => $id]);
         
-        if ( $request->validate() && $this->parts->delete(['id' => $id])) {
+        if ( $request->validate() && $this->posts->delete(['id' => $id])) {
             return $this->response->noContent();
         }
         
@@ -300,10 +111,10 @@ class PostController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/parts",
-     *     description="Retrieve a list of parts",
+     *     path="/api/posts",
+     *     description="Retrieve a list of posts",
      
-     *     tags={"Parts"},
+     *     tags={"Post"},
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -321,7 +132,7 @@ class PostController extends RestfulController
      *     @OA\Parameter(
      *         name="type_id",
      *         in="query",
-     *         description="Part types",
+     *         description="Post types",
      *         required=false,
      *         @OA\Property(
      *            type="array",
@@ -335,7 +146,7 @@ class PostController extends RestfulController
      *     @OA\Parameter(
      *         name="category_id",
      *         in="query",
-     *         description="Part categories",
+     *         description="Post categories",
      *         required=false,
      *          @OA\Property(
      *            type="array",
@@ -349,7 +160,7 @@ class PostController extends RestfulController
      *    @OA\Parameter(
      *         name="manufacturer_id",
      *         in="query",
-     *         description="Part manufacturers",
+     *         description="Post manufacturers",
      *         required=false,
      *         @OA\Property(
      *            type="array",
@@ -363,7 +174,7 @@ class PostController extends RestfulController
      *     @OA\Parameter(
      *         name="brand_id",
      *         in="query",
-     *         description="Part brands",
+     *         description="Post brands",
      *         required=false,
      *         @OA\Property(
      *            type="array",
@@ -377,7 +188,7 @@ class PostController extends RestfulController
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
-     *         description="Part IDs",
+     *         description="Post IDs",
      *         required=false,
      *         @OA\Property(
      *            type="array",
@@ -385,19 +196,19 @@ class PostController extends RestfulController
      *              type="array",
      *              @OA\Items()
      *            ),
-     *            description="Part IDs array"
+     *            description="Post IDs array"
      *         )
      *     ),
      *   @OA\Parameter(
      *         name="price",
      *         in="query",
-     *         description="Part price can be in format: [10 TO 100], [10], [10.0 TO 100.0]",
+     *         description="Post price can be in format: [10 TO 100], [10], [10.0 TO 100.0]",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
      *         response="200",
-     *         description="Returns a list of parts",
+     *         description="Returns a list of posts",
      *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
@@ -407,17 +218,17 @@ class PostController extends RestfulController
      * )
      */
     public function index(Request $request) {
-        $request = new GetPartsRequest($request->all());
+        $request = new GetPostsRequest($request->all());
         
         if ( $request->validate() ) {
             
             if ($request->has('search_term')) {
-                $parts = $this->parts->getAllSearch($request->all());
+                $posts = $this->posts->getAllSearch($request->all());
             } else {
-                $parts = $this->parts->getAll($request->all());
+                $posts = $this->posts->getAll($request->all());
             }
             
-            return $this->response->paginator($parts, new PartsTransformer());
+            return $this->response->paginator($posts, new PostTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -425,20 +236,20 @@ class PostController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/parts/{id}",
-     *     description="Retrieve a part",
+     *     path="/api/website/{websiteId}/blog/posts{id}",
+     *     description="Retrieve a post",
      
-     *     tags={"Parts"},
+     *     tags={"Post"},
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
-     *         description="Part ID",
+     *         description="Post ID",
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
      *         response="200",
-     *         description="Returns a part",
+     *         description="Returns a post",
      *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
@@ -448,10 +259,10 @@ class PostController extends RestfulController
      * )
      */
     public function show(int $id) {
-        $request = new ShowPartRequest(['id' => $id]);
+        $request = new ShowPostRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->parts->get(['id' => $id]), new PartsTransformer());
+            return $this->response->item($this->posts->get(['id' => $id]), new PostTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -459,210 +270,34 @@ class PostController extends RestfulController
     
     /**
      * @OA\Post(
-     *     path="/api/parts/{id}",
-     *     description="Update a part",
-     
-     *     tags={"Parts"},
+     *     path="/api/website/{websiteId}/blog/posts{id}",
+     *     description="Update a post",
+     * 
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
-     *         description="Part ID",
+     *         description="Post ID",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(@OA\Schema(type="integer"))
      *     ),
      *     @OA\Parameter(
-     *         name="vendor_id",
-     *         in="query",
-     *         description="Vendor ID",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_specific_id",
-     *         in="query",
-     *         description="Vehicle Specific ID",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),     * 
-     *     @OA\Parameter(
-     *         name="brand_id",
-     *         in="query",
-     *         description="Part brand",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),          
-     *    @OA\Parameter(
-     *         name="manufacturer_id",
-     *         in="query",
-     *         description="Part manufacturers",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="type_id",
-     *         in="query",
-     *         description="Part type",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *   @OA\Parameter(
-     *         name="category_id",
-     *         in="path",
-     *         description="Part category",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *    @OA\Parameter(
-     *         name="qb_id",
-     *         in="query",
-     *         description="Part quickbooks id",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="subcategory",
-     *         in="query",
-     *         description="Part subcategory",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *   @OA\Parameter(
      *         name="title",
      *         in="query",
-     *         description="Part title",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *   @OA\Parameter(
-     *         name="alternative_part_number",
-     *         in="query",
-     *         description="Alternative Part Number",
+     *         description="Post title",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
-     *         name="sku",
+     *         name="post_content",
      *         in="query",
-     *         description="Part sku",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="price",
-     *         in="query",
-     *         description="Part price",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
-     *         name="dealer_cost",
-     *         in="query",
-     *         description="Part dealer cost",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
-     *         name="msrp",
-     *         in="query",
-     *         description="Part msrp",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
-     *         name="weight",
-     *         in="query",
-     *         description="Part weight",
-     *         required=false,
-     *         @OA\Schema(type="numeric")
-     *     ),
-     *     @OA\Parameter(
-     *         name="weight_rating",
-     *         in="query",
-     *         description="Part weight rating",
+     *         description="Post content",
      *         required=false,
      *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="description",
-     *         in="query",
-     *         description="Part description",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="qty",
-     *         in="query",
-     *         description="Part qty",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="show_on_website",
-     *         in="query",
-     *         description="Part show on website",
-     *         required=false,
-     *         @OA\Schema(type="boolean")
-     *     ),
-     *     @OA\Parameter(
-     *         name="is_vehicle_specific",
-     *         in="query",
-     *         description="Part vehicle specific",
-     *         required=false,
-     *         @OA\Schema(type="boolean")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_make",
-     *         in="query",
-     *         description="Part vehicle make",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_model",
-     *         in="query",
-     *         description="Part vehicle model",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_year_from",
-     *         in="query",
-     *         description="Part vehicle year from",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_year_to",
-     *         in="query",
-     *         description="Part vehicle year to",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="video_embed_code",
-     *         in="query",
-     *         description="Video embed code",
-     *         required=false,
-     *         @OA\Schema(type="text")
-     *     ),
-     *    @OA\Parameter(
-     *         name="images",
-     *         in="query",
-     *         description="Part images",
-     *         required=false,
-     *          @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Image URL array"
-     *         )
      *     ),
      * 
      *     @OA\Response(
      *         response="200",
-     *         description="Returns a list of parts",
+     *         description="Returns a list of posts",
      *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
@@ -674,10 +309,10 @@ class PostController extends RestfulController
     public function update(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
-        $request = new UpdatePartRequest($requestData);
+        $request = new UpdatePostRequest($requestData);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->parts->update($request->all()), new PartsTransformer());
+            return $this->response->item($this->posts->update($request->all()), new PostTransformer());
         }
         
         return $this->response->errorBadRequest();
