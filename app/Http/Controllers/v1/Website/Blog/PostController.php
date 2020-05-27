@@ -101,8 +101,9 @@ class PostController extends RestfulController
     public function destroy(int $id) {
         $request = new DeletePostRequest(['id' => $id]);
         
-        if ( $request->validate() && $this->posts->delete(['id' => $id])) {
-            return $this->response->noContent();
+        if ( $request->validate()) {
+            // Create Post
+            return $this->response->item($this->posts->delete(['id' => $id]), new PostTransformer());
         }
         
         return $this->response->errorBadRequest();
