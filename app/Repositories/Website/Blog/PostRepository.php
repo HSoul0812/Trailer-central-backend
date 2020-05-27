@@ -89,7 +89,7 @@ class PostRepository implements PostRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Post::where('id', '>', 0);
+        $query = Post::where('id', '>', 0)->where('deleted', '=', 0);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
