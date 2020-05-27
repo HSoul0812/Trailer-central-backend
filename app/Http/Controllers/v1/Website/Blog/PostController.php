@@ -29,7 +29,7 @@ class PostController extends RestfulController
     
     /**
      * @OA\Put(
-     *     path="/api/website/{websiteId}/blog/posts",
+     *     path="/api/website/blog/posts",
      *     description="Create a post",
      *     tags={"Post"},
      *     @OA\Parameter(
@@ -77,7 +77,7 @@ class PostController extends RestfulController
 
     /**
      * @OA\Delete(
-     *     path="/api/website/{websiteId}/blog/posts/{id}",
+     *     path="/api/website/blog/posts/{id}",
      *     description="Delete a post",     
      *     tags={"Post"},
      *     @OA\Parameter(
@@ -230,7 +230,7 @@ class PostController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/website/{websiteId}/blog/posts{id}",
+     *     path="/api/website/blog/posts{id}",
      *     description="Retrieve a post",
      
      *     tags={"Post"},
@@ -264,7 +264,7 @@ class PostController extends RestfulController
     
     /**
      * @OA\Post(
-     *     path="/api/website/{websiteId}/blog/posts{id}",
+     *     path="/api/website/blog/posts{id}",
      *     description="Update a post",
      * 
      *     @OA\Parameter(

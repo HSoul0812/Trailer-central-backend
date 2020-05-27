@@ -12,7 +12,6 @@ class WebsiteValidate extends ValidRoute {
     
     const WEBSITE_ID_PARAM = 'websiteId';
     const ID_PARAM = 'id';
-    const BLOG_ID_PARAM = 'blogId';
     protected $params = [
         self::WEBSITE_ID_PARAM => [
             'optional' => false,
@@ -21,17 +20,12 @@ class WebsiteValidate extends ValidRoute {
         self::ID_PARAM => [
             'optional' => true,
             'message' => 'Settings does not exist.'
-        ],
-        self::BLOG_ID_PARAM => [
-            'optional' => true,
-            'message' => 'Blog post does not exist.'
         ]
     ];
     
     protected $appendParams = [
         self::WEBSITE_ID_PARAM => 'website_id',
-        self::ID_PARAM => self::ID_PARAM,
-        self::BLOG_ID_PARAM => self::BLOG_ID_PARAM
+        self::ID_PARAM => self::ID_PARAM
     ];
        
     protected $validator = [];
@@ -47,14 +41,6 @@ class WebsiteValidate extends ValidRoute {
         
         $this->validator[self::ID_PARAM] = function ($data) {
             if (empty(Settings::find($data))) {
-                return false;
-            }
-            
-            return true;
-        };
-        
-        $this->validator[self::BLOG_ID_PARAM] = function ($data) {
-            if (empty(Post::find($data))) {
                 return false;
             }
             
