@@ -132,14 +132,12 @@ $api->version('v1', function ($route) {
     /**
      * Website Blog Posts
      */
-    $route->group(['middleware' => 'website.validate'], function ($route) {
-        $route->get('website/{websiteId}/blog/posts', 'App\Http\Controllers\v1\Website\Blog\PostController@index')->where('websiteId', '[0-9]+');
-        $route->put('website/{websiteId}/blog/posts', 'App\Http\Controllers\v1\Website\Blog\PostController@create')->where('websiteId', '[0-9]+');
-        $route->get('website/{websiteId}/blog/posts/{blogId}', 'App\Http\Controllers\v1\Website\Blog\PostController@show')->where('websiteId', '[0-9]+')->where('blogId', '[0-9]+');
-        $route->post('website/{websiteId}/blog/posts/{blogId}', 'App\Http\Controllers\v1\Website\Blog\PostController@update')->where('websiteId', '[0-9]+')->where('blogId', '[0-9]+');
-        $route->delete('website/{websiteId}/blog/posts/{blogId}', 'App\Http\Controllers\v1\Website\Blog\PostController@destroy')->where('websiteId', '[0-9]+')->where('blogId', '[0-9]+');
-    });
-
+    $route->get('website/blog/posts', 'App\Http\Controllers\v1\Website\Blog\PostController@index');
+    $route->put('website/blog/posts', 'App\Http\Controllers\v1\Website\Blog\PostController@create');
+    $route->get('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@show')->where('id', '[0-9]+');
+    $route->post('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@update')->where('id', '[0-9]+');
+    $route->delete('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@destroy')->where('id', '[0-9]+');
+    
 
     /*
     |--------------------------------------------------------------------------
