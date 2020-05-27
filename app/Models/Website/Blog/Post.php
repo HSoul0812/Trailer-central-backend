@@ -61,7 +61,7 @@ class Post extends Model
      *
      * @var string
      */
-    const UPDATED_AT = 'date_updated';
+    const UPDATED_AT = 'date_modified';
 
     public static function boot() {
         parent::boot();
