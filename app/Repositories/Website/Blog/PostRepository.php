@@ -70,10 +70,9 @@ class PostRepository implements PostRepositoryInterface {
     }
 
     public function delete($params) {
-        $post = Post::findOrFail($params['blogId']);
+        $post = Post::findOrFail($params['id']);
 
         DB::transaction(function() use (&$post, $params) {
-            $params['id'] = $params['blogId'];
             $params['deleted'] = '1';
 
             $post->fill($params)->save();
@@ -83,7 +82,7 @@ class PostRepository implements PostRepositoryInterface {
     }
 
     public function get($params) {
-        return Post::findOrFail($params['blogId']);
+        return Post::findOrFail($params['id']);
     }
 
     public function getAll($params) {
@@ -97,8 +96,8 @@ class PostRepository implements PostRepositoryInterface {
             $query = $query->where('website_id', $params['website_id']);
         }
 
-        if (isset($params['blogId'])) {
-            $query = $query->whereIn('id', $params['blogId']);
+        if (isset($params['id'])) {
+            $query = $query->whereIn('id', $params['id']);
         }
 
         if (isset($params['sort'])) {
@@ -109,11 +108,9 @@ class PostRepository implements PostRepositoryInterface {
     }
 
     public function update($params) {
-        $post = Post::findOrFail($params['blogId']);
+        $post = Post::findOrFail($params['id']);
 
         DB::transaction(function() use (&$post, $params) {
-            $params['id'] = $params['blogId'];
-
             // Set Published?
             if(empty($post['date_published']) && $params['status'] !== 'private') {
                 $params['date_published'] = date('Y-m-d H:i:s');
