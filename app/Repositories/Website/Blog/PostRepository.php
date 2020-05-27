@@ -70,18 +70,15 @@ class PostRepository implements PostRepositoryInterface {
     }
 
     public function delete($params) {
-        DB::beginTransaction();
+        $post = Post::findOrFail($params['id']);
 
-        try {
-            $deleted = Post::delete($params);
+        DB::transaction(function() use (&$post, $params) {
+            $params['deleted'] = '1';
 
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            throw new \Exception($ex->getMessage());
-        }
-        
-        return $deleted;
+            $post->fill($params)->save();
+        });
+
+        return $post;
     }
 
     public function get($params) {
@@ -111,12 +108,9 @@ class PostRepository implements PostRepositoryInterface {
     }
 
     public function update($params) {
-        DB::beginTransaction();
+        $post = Post::findOrFail($params['id']);
 
-        try {
-            // Get Existing Item!
-            $post = $this->get(['id' => $params['id']]);
-
+        DB::transaction(function() use (&$post, $params) {
             // Set Published?
             if(empty($post['date_published']) && $params['status'] !== 'private') {
                 $params['date_published'] = date('Y-m-d H:i:s');
@@ -132,15 +126,10 @@ class PostRepository implements PostRepositoryInterface {
                 $params['url_path'] = Post::makeUrlPath($title);
             }
 
-            // Update Post
-            $post = Post::update($params);
+            // Fill Post Details
+            $post->fill($params)->save();
+        });
 
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            throw new \Exception($ex->getMessage());
-        }
-        
         return $post;
     }
 
