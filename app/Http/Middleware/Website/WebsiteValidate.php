@@ -31,7 +31,7 @@ class WebsiteValidate extends ValidRoute {
     protected $appendParams = [
         self::WEBSITE_ID_PARAM => 'website_id',
         self::ID_PARAM => self::ID_PARAM,
-        self::BLOG_ID_PARAM => self::ID_PARAM
+        self::BLOG_ID_PARAM => self::BLOG_ID_PARAM
     ];
        
     protected $validator = [];
