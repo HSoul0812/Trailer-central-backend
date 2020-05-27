@@ -135,9 +135,9 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'website.validate'], function ($route) {
         $route->get('website/{websiteId}/blog/posts', 'App\Http\Controllers\v1\Website\Blog\PostController@index')->where('websiteId', '[0-9]+');
         $route->put('website/{websiteId}/blog/posts', 'App\Http\Controllers\v1\Website\Blog\PostController@create')->where('websiteId', '[0-9]+');
-        $route->get('website/{websiteId}/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@show')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('website/{websiteId}/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@update')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('website/{websiteId}/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@destroy')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('website/{websiteId}/blog/posts/{pid}', 'App\Http\Controllers\v1\Website\Blog\PostController@show')->where('websiteId', '[0-9]+')->where('pid', '[0-9]+');
+        $route->post('website/{websiteId}/blog/posts/{pid}', 'App\Http\Controllers\v1\Website\Blog\PostController@update')->where('websiteId', '[0-9]+')->where('pid', '[0-9]+');
+        $route->delete('website/{websiteId}/blog/posts/{pid}', 'App\Http\Controllers\v1\Website\Blog\PostController@destroy')->where('websiteId', '[0-9]+')->where('pid', '[0-9]+');
     });
     
 

@@ -77,7 +77,7 @@ class PostController extends RestfulController
 
     /**
      * @OA\Delete(
-     *     path="/api/website/{websiteId}/blog/posts{id}",
+     *     path="/api/website/{websiteId}/blog/posts/{id}",
      *     description="Delete a post",     
      *     tags={"Post"},
      *     @OA\Parameter(
