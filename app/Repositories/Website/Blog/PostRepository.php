@@ -49,6 +49,15 @@ class PostRepository implements PostRepositoryInterface {
         DB::beginTransaction();
 
         try {
+            // Set Published?
+            if($params['status'] !== 'private') {
+                $params['date_published'] = date('Y-m-d H:i:s');
+            }
+
+            // Add URL Path
+            $params['url_path'] = Post::makeUrlPath($params['title']);
+
+            // Create Post
             $post = Post::create($params);
 
             DB::commit();
@@ -105,6 +114,25 @@ class PostRepository implements PostRepositoryInterface {
         DB::beginTransaction();
 
         try {
+            // Get Existing Item!
+            $post = $this->get(['id' => $params['id']]);
+
+            // Set Published?
+            if(empty($post['date_published']) && $params['status'] !== 'private') {
+                $params['date_published'] = date('Y-m-d H:i:s');
+            }
+
+            // Set URL Path?
+            if(empty($post['url_path'])) {
+                // Add URL Path
+                $title = $params['title'];
+                if(empty($title)) {
+                    $title = $post['title'];
+                }
+                $params['url_path'] = Post::makeUrlPath($title);
+            }
+
+            // Update Post
             $post = Post::update($params);
 
             DB::commit();
