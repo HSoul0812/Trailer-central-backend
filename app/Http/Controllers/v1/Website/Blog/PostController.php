@@ -67,7 +67,8 @@ class PostController extends RestfulController
      */
     public function create(Request $request) {
         $request = new CreatePostRequest($request->all());
-        
+        var_dump($request->validate());
+        var_dump($request->all());
         if ( $request->validate() ) {
             return $this->response->item($this->posts->create($request->all()), new PostTransformer());
         }  
