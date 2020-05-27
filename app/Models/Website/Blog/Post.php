@@ -4,7 +4,6 @@ namespace App\Models\Website\Blog;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
 use Carbon\Carbon;
 
 /**
@@ -14,9 +13,6 @@ use Carbon\Carbon;
  */
 class Post extends Model
 {
-
-    use Searchable;
-
     protected $table = 'website_blog';
 
     /**
