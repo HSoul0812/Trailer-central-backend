@@ -8,6 +8,7 @@ use App\Exceptions\NotImplementedException;
 use App\Repositories\Website\Blog\PostRepositoryInterface;
 use App\Http\Requests\Website\Blog\GetPostsRequest;
 use App\Http\Requests\Website\Blog\CreatePostRequest;
+use App\Http\Requests\Website\Blog\ShowPostRequest;
 use App\Http\Requests\Website\Blog\UpdatePostRequest;
 use App\Http\Requests\Website\Blog\DeletePostRequest;
 use App\Transformers\Website\Blog\PostTransformer;
