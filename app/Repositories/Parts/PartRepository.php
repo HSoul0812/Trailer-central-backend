@@ -142,7 +142,7 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function get($params) {
-        return Part::findOrFail($params['id']);
+        return Part::findOrFail($params['id'])->load('bins.bin');
     }
 
     public function getAllSearch($params) {
