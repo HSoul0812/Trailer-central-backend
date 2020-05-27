@@ -67,11 +67,17 @@ class PostController extends RestfulController
      */
     public function create(Request $request) {
         $request = new CreatePostRequest($request->all());
-        var_dump($request->validate());
-        var_dump($request->all());
-        die;
         if ( $request->validate() ) {
-            return $this->response->item($this->posts->create($request->all()), new PostTransformer());
+            // Get Params
+            $params = $request->all();
+
+            // Set Published?
+            if($params['status'] !== 'private') {
+                $params['date_published'] = date('Y-m-d H:i:s');
+            }
+
+            // Create Post
+            return $this->response->item($this->posts->create($params), new PostTransformer());
         }  
         
         return $this->response->errorBadRequest();
