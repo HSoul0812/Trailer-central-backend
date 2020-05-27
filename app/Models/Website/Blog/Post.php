@@ -66,16 +66,4 @@ class Post extends Model
     public static function boot() {
         parent::boot();
     }
-
-    public function searchableAs()
-    {
-        return env('PARTS_ALGOLIA_INDEX', '');
-    }
-
-    public function toSearchableArray()
-    {
-        $array = $this->toArray();
-
-        return $array;
-    }
 }
