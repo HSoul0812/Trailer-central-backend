@@ -42,7 +42,8 @@ class Post extends Model
      */
     protected $hidden = [
         'is_active',
-        'form-submit'
+        'form-submit',
+        'delete'
     ];
 
     /**
