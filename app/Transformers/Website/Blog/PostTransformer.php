@@ -13,7 +13,7 @@ class PostTransformer extends TransformerAbstract
              'id' => (int)$post->id,
              'website_id' => (int)$post->website_id,
              'post_content' => $post->post_content,
-             'meta_keyword' => $post->meta_keyword,
+             'meta_keyword' => $post->meta_keywords,
              'meta_description' => $post->meta_description,
              'title' => $post->title,
              'url_path' => $post->url_path,
