@@ -12,7 +12,6 @@ use App\Http\Requests\Request;
 class GetPostsRequest extends Request {
     
     protected $rules = [
-        'website_id' => 'required|integer',
         'per_page' => 'integer',
         'sort' => 'in:title,-title,date_created,-date_created,date_modified,-date_modified,date_published,-date_published',
         'status' => 'in:private,published,scheduled',

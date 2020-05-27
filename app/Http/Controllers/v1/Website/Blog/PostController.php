@@ -99,7 +99,7 @@ class PostController extends RestfulController
      *     ),
      * )
      */
-    public function destroy(int $id) {
+    public function destroy(int $websiteId, int $id) {
         $request = new DeletePostRequest(['id' => $id]);
         
         if ( $request->validate()) {
@@ -254,7 +254,7 @@ class PostController extends RestfulController
      *     ),
      * )
      */
-    public function show(int $id) {
+    public function show(int $websiteId, int $id) {
         $request = new ShowPostRequest(['id' => $id]);
         
         if ( $request->validate() ) {
@@ -302,7 +302,7 @@ class PostController extends RestfulController
      *     ),
      * )
      */
-    public function update(int $id, Request $request) {
+    public function update(int $websiteId, int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdatePostRequest($requestData);
