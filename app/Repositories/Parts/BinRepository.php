@@ -72,10 +72,16 @@ class BinRepository implements BinRepositoryInterface {
             // Bin Doesn't Exist?!
             if(isset($keyToIndexMapping[$id])) {
                 // Get Values
-                $binId = $this->get(array(
+                $bin = $this->get(array(
                     'dealer_id' => $dealerId,
                     'bin_name' => $csvData[$keyToIndexMapping[$id]],
-                ))->id;
+                ));
+                
+                if (empty($bin)) {
+                    break;
+                }
+                
+                $binId = $bin->id;
 
                 // Return Bin Array
                 $bins[] = array(

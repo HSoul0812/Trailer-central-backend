@@ -129,6 +129,7 @@ class PartRepository implements PartRepositoryInterface {
         $part = Part::where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
 
         if ($part) {
+            $params['id'] = $part->id;
             return $this->update($params);
         }
 

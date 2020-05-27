@@ -16,7 +16,9 @@ class SettingsTransformer extends TransformerAbstract
              'months' => $settings->months,
              'entity_type_id' => $settings->entity_type_id,
              'operator' => $settings->operator,
-             'inventory_price' => $settings->inventory_price
+             'inventory_price' => $settings->inventory_price,
+             'condition' => $settings->inventory_condition,
+             'financing' => $settings->financing
          ];
     }
 }
