@@ -33,7 +33,7 @@ class Post extends Model
         'url_path',
         'entity_config',
         'date_created',
-        'date_updated',
+        'date_modified',
         'date_published',
         'status',
         'deleted',

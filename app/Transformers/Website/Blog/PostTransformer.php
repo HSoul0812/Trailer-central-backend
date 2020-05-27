@@ -19,7 +19,7 @@ class PostTransformer extends TransformerAbstract
              'url_path' => $post->url_path,
              'entity_config' => $post->entity_config,
              'date_created' => $post->date_created,
-             'date_updated' => $post->date_updated,
+             'date_modified' => $post->date_modified,
              'date_published' => $post->date_published,
              'status' => $post->status,
              'deleted' => $post->deleted,
