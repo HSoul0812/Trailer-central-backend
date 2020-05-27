@@ -49,14 +49,11 @@ class PostRepository implements PostRepositoryInterface {
         DB::beginTransaction();
 
         try {
-            var_dump($params);
             $post = Post::create($params);
-            var_dump($post);
 
             DB::commit();
         } catch (\Exception $ex) {
             DB::rollBack();
-            echo $ex->getTraceAsString();
             throw new \Exception($ex->getMessage());
         }
         

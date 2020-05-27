@@ -62,4 +62,49 @@ class Post extends Model
     public static function boot() {
         parent::boot();
     }
+
+    public function create($params = [], $options = []) {
+        // Set Published?
+        if($params['status'] !== 'private') {
+            $params['date_published'] = date('Y-m-d H:i:s');
+        }
+
+        // Add URL Path
+        $params['url_path'] = $this->makeUrlPath($title);
+
+        // Handle Parent
+        return parent::create($params, $options);
+    }
+
+    public function update($params = [], $options = []) {
+        // Get Existing Item!
+        $post = $this->get(['id' => $params['id']]);
+
+        // Set Published?
+        if(empty($post['date_published']) && $params['status'] !== 'private') {
+            $params['date_published'] = date('Y-m-d H:i:s');
+        }
+
+        // Set URL Path?
+        if(empty($post['url_path'])) {
+            // Add URL Path
+            $params['url_path'] = $this->makeUrlPath($title);
+        }
+
+        // Handle Parent
+        return parent::update($params, $options);
+    }
+
+    // Make Url Path
+    public function makeUrlPath($url) {
+        // Clean Up URL Path
+        $url = preg_replace("`\[.*\]`U", "", $url);
+        $url = preg_replace('`&(amp;)?#?[a-z0-9]+;`i', '-', $url);
+        $url = htmlentities($url, ENT_COMPAT, 'utf-8');
+        $url = preg_replace("`&([a-z])(acute|uml|circ|grave|ring|cedil|slash|tilde|caron|lig|quot|rsquo);`i", "\\1", $url);
+        $url = preg_replace(array("`[^a-z0-9]`i", "`[-]+`"), "-", $url);
+
+        // Insert Hyphens
+        return strtolower(trim($url, '-'));
+    }
 }
