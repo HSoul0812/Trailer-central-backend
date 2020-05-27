@@ -73,9 +73,7 @@ class PostRepository implements PostRepositoryInterface {
         DB::beginTransaction();
 
         try {
-            // Update Post
-            $params['deleted'] = '1';
-            $deleted = Post::update($params);
+            $deleted = Post::delete($params);
 
             DB::commit();
         } catch (\Exception $ex) {
