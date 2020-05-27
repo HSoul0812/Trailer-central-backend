@@ -70,6 +70,8 @@ class PostRepository implements PostRepositoryInterface {
     }
 
     public function delete($params) {
+        var_dump($params);
+        die;
         $post = Post::findOrFail($params['id']);
 
         DB::transaction(function() use (&$post, $params) {
