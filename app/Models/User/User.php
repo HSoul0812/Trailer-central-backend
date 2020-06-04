@@ -3,6 +3,7 @@
 namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\User\SalesPerson;
 
 /**
  * Class User
@@ -13,7 +14,19 @@ use Illuminate\Database\Eloquent\Model;
  */
 class User extends Model
 {
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'dealer';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'user_id';
 
     /**
      * The attributes that are mass assignable.
@@ -35,4 +48,19 @@ class User extends Model
     protected $hidden = [
 
     ];
+
+    public function dealer()
+    {
+        return $this->hasOne(Dealer::class, 'user_id', 'user_id');
+    }
+
+    public function crmUser()
+    {
+        return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
+    }
+
+    public function salesPerson()
+    {
+        return $this->hasOne(SalesPerson::class, 'user_id', 'user_id');
+    }
 }
