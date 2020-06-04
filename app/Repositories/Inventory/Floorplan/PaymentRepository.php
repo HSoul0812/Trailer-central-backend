@@ -63,7 +63,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
         if (isset($params['dealer_id'])) {
             $query = Payment::with('inventory')
                 ->whereHas('inventory', function($q) use($params) {
-                    $q->where('dealer_id', '=', $params['dealer_id']);
+                    $q->whereIn('dealer_id', $params['dealer_id']);
                 });
         } else {
             $query = Payment::where('id', '>', 0);  

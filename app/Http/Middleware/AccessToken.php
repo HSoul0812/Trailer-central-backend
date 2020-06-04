@@ -25,7 +25,7 @@ class AccessToken
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
             if ($accessToken && $accessToken->user) {
-                $request['dealer_id'] = $accessToken->user->dealer_id;
+                $request['dealer_id'] = [$accessToken->user->dealer_id];
                 return $next($request);
             }
         }
