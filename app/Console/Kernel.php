@@ -6,7 +6,8 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
 use App\Console\Commands\RunBulkUploadCommand;
-
+use App\Console\Commands\ReplaceYoutubeEmbeds;
+ 
 class Kernel extends ConsoleKernel
 {
     /**
@@ -15,6 +16,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
+        ReplaceYoutubeEmbeds::class,
         SyncPartsCommand::class,
         RunBulkUploadCommand::class
     ];
