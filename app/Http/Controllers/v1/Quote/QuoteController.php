@@ -58,7 +58,8 @@ class QuoteController extends RestfulController
      */
     public function index(Request $request) 
     {
-        $request = new GetQuotesRequest($request->all());
+        try {
+            $request = new GetQuotesRequest($request->all());
         
         
         if ($request->validate()) {
@@ -66,6 +67,9 @@ class QuoteController extends RestfulController
         }
         
         return $this->response->errorBadRequest();
+        } catch (\Exception $exception) {
+            var_dump($exception); exit;
+        }
     }
     
 }

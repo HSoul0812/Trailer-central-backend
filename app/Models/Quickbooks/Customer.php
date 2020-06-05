@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Customer;
+namespace App\Models\Quickbooks;
 
 use Illuminate\Database\Eloquent\Model;
 
