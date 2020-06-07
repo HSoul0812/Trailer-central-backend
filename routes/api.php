@@ -1,7 +1,6 @@
 <?php
 
 use Dingo\Api\Routing\Router;
-use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -177,6 +176,6 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    $route->get('quotes', 'App\Http\Controllers\v1\Quote\QuoteController@index');
+    $route->get('quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
 
 });

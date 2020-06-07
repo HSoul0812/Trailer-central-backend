@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Repositories\Quote;
+namespace App\Repositories\Dms;
 
 use Illuminate\Support\Facades\DB;
-use App\Repositories\Quote\QuoteRepositoryInterface;
+use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Models\Quote\Quote;
-use App\Models\Quote\QuoteStatus;
+use App\Models\CRM\Dms\UnitSale;
+use App\Models\CRM\Dms\QuoteStatus;
 
 /**
  * @author Marcel
@@ -28,9 +28,9 @@ class QuoteRepository implements QuoteRepositoryInterface {
 
     public function getAll($params) {
         if (isset($params['dealer_id'])) {
-            $query = Quote::whereIn('dealer_id', $params['dealer_id']);
+            $query = UnitSale::whereIn('dealer_id', $params['dealer_id']);
         } else {
-            $query = Quote::where('id', '>', 0);  
+            $query = UnitSale::where('id', '>', 0);  
         }
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {

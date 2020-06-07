@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Transformers\Quote;
+namespace App\Transformers\Dms;
 
 use League\Fractal\TransformerAbstract;
-use App\Models\Quote\Quote;
+use App\Models\CRM\Dms\UnitSale;
 
 class QuoteTransformer extends TransformerAbstract
 {
 
-    private function getQuoteStatus(Quote $quote) {
+    private function getQuoteStatus(UnitSale $quote) {
         if (!empty($quote->is_archived)) {
             return 'Archived';
         }

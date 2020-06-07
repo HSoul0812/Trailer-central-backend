@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Quote;
+namespace App\Http\Requests\Dms;
 
 use App\Http\Requests\Request;
 

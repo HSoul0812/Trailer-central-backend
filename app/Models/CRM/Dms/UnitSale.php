@@ -1,12 +1,16 @@
 <?php
 
-
 namespace App\Models\CRM\Dms;
 
-
-use App\Models\CRM\Account\Invoice;
-use App\Models\CRM\Leads\Lead;
 use Illuminate\Database\Eloquent\Model;
+
+class QuoteStatus
+{
+    const OPEN = 'open';
+    const DEAL = 'deal';
+    const COMPLETED = 'completed_deal';
+    const ARCHIVED = 'archived';
+}
 
 class UnitSale extends Model
 {
@@ -17,20 +21,32 @@ class UnitSale extends Model
      */
     protected $table = 'dms_unit_sale';
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
+    protected $appends = ['paid_amount'];
+
+    const UPDATED_AT = null;
+
+    public function customer()
+    {
+        return $this->belongsTo('App\Models\CRM\User\Customer', 'buyer_id');
+    }
 
     public function lead()
     {
-        return $this->hasMany(Lead::class, 'identifier', 'lead_id');
+        return $this->belongsTo('App\Models\CRM\Leads\Lead', 'identifier', 'lead_id');
     }
 
-    public function invoices()
+    public function invoice()
     {
-        return $this->hasMany(Invoice::class, 'unit_sale_id', 'id');
+        return $this->hasOne('App\Models\CRM\Account\Invoice', 'unit_sale_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasManyThrough('App\Models\CRM\Account\Payment', 'App\Models\CRM\Account\Invoice', 'unit_sale_id');
+    }
+
+    public function getPaidAmountAttribute()
+    {
+        return $this->hasManyThrough('App\Models\CRM\Account\Payment', 'App\Models\CRM\Account\Invoice', 'unit_sale_id')->sum('amount');
     }
 }

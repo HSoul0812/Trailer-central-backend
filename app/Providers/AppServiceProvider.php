@@ -59,7 +59,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
-        $this->app->bind('App\Repositories\Quote\QuoteRepositoryInterface', 'App\Repositories\Quote\QuoteRepository');
+        $this->app->bind('App\Repositories\Dms\QuoteRepositoryInterface', 'App\Repositories\Dms\QuoteRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         

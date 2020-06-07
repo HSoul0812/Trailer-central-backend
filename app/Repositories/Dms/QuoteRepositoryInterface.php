@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Quote;
+namespace App\Repositories\Dms;
 
 use \App\Repositories\Repository;
 

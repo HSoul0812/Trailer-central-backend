@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\v1\Quote;
+namespace App\Http\Controllers\v1\Dms;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
-use App\Repositories\Quote\QuoteRepositoryInterface;
-use App\Transformers\Quote\QuoteTransformer;
-use App\Http\Requests\Quote\GetQuotesRequest;
+use App\Repositories\Dms\QuoteRepositoryInterface;
+use App\Transformers\Dms\QuoteTransformer;
+use App\Http\Requests\Dms\GetQuotesRequest;
 
 /**
  * @author Marcel
  */
-class QuoteController extends RestfulController
+class UnitSaleController extends RestfulController
 {
     
     protected $quotes;
@@ -44,7 +44,14 @@ class QuoteController extends RestfulController
      *         description="Dealer ID",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     ),    
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Status of quote",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of quotes",
@@ -58,18 +65,13 @@ class QuoteController extends RestfulController
      */
     public function index(Request $request) 
     {
-        try {
-            $request = new GetQuotesRequest($request->all());
-        
+        $request = new GetQuotesRequest($request->all());
         
         if ($request->validate()) {
             return $this->response->paginator($this->quotes->getAll($request->all()), new QuoteTransformer);
         }
         
         return $this->response->errorBadRequest();
-        } catch (\Exception $exception) {
-            var_dump($exception); exit;
-        }
     }
     
 }
