@@ -13,6 +13,33 @@ use App\Models\CRM\Dms\QuoteStatus;
  */
 class QuoteRepository implements QuoteRepositoryInterface {
 
+    private $sortOrders = [
+        'title' => [ 
+            'field' => 'title',
+            'direction' => 'DESC'
+        ],
+        '-title' => [
+            'field' => 'title',
+            'direction' => 'ASC'
+        ],
+        'created_at' => [
+            'field' => 'created_at',
+            'direction' => 'DESC'
+        ],
+        '-created_at' => [
+            'field' => 'created_at',
+            'direction' => 'ASC'
+        ],
+        'total_price' => [
+            'field' => 'total_price',
+            'direction' => 'DESC'
+        ],
+        '-total_price' => [
+            'field' => 'total_price',
+            'direction' => 'ASC'
+        ],
+    ];
+
 
     public function create($params) {
         throw new NotImplementedException;
