@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
+use App\Repositories\Inventory\InventoryRepository;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\Website\WebsiteRepository;
+use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
@@ -66,7 +70,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
-        $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
+        $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);        
+        $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
+        $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
