@@ -6,7 +6,7 @@ namespace App\Models\CRM\Dms;
 use App\Models\CRM\Leads\Lead;
 use Illuminate\Database\Eloquent\Model;
 
-class Website extends Model
+class TcLeadStatus extends Model
 {
     /**
      * The table associated with the model.

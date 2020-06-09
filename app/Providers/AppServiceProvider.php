@@ -14,6 +14,10 @@ use App\Repositories\Showroom\ShowroomRepositoryInterface;
 use App\Repositories\Showroom\ShowroomRepository;
 use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 use App\Repositories\Website\PaymentCalculator\SettingsRepository;
+use App\Repositories\CRM\Leads\LeadRepository;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\Website\RedirectRepository;
+use App\Repositories\Website\RedirectRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -61,6 +65,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+        $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
+        $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
