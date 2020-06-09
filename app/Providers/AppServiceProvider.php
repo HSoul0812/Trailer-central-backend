@@ -22,6 +22,10 @@ use App\Repositories\CRM\Leads\LeadRepository;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Website\RedirectRepository;
 use App\Repositories\Website\RedirectRepositoryInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepository;
+use App\Repositories\Website\EntityRepository;
+use App\Repositories\Website\EntityRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -73,6 +77,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);        
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
+        $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);

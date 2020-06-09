@@ -69,7 +69,7 @@ class WebsiteRepository implements WebsiteRepositoryInterface
 
         if ($withDefault) {
             $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
-        }
+}
 
         if (!isset($params['config']) || !is_array($params['config'])) {
             throw new RepositoryInvalidArgumentException('Missed config key');
