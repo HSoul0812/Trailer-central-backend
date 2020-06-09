@@ -38,7 +38,8 @@
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "aws/aws-sdk-php": "^3.0",
         "illuminate/mail": "6.18.3",
-        "laravel/lumen-framework": "^6.0"
+        "laravel/lumen-framework": "^6.0",
+        "spatie/laravel-sitemap": "^5.7"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
