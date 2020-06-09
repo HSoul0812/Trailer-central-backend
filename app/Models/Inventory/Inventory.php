@@ -3,9 +3,11 @@
 
 namespace App\Models\Inventory;
 
+use App\Helpers\StringHelper;
 use App\Models\CRM\Dealer\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class Inventory extends Model
@@ -46,5 +48,19 @@ class Inventory extends Model
 
     public function __toString() {
         return $this->title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        $url = '/';
+        $url .= StringHelper::superSanitize($this->title, '-');
+        $url .= '-' . CompactHelper::shorten($this->inventory_id);
+
+        $url .= '.html';
+
+        return $url;
     }
 }
