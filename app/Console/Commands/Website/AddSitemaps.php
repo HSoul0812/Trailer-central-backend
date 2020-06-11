@@ -1,67 +1,63 @@
 <?php
 
-namespace App\Console\Website\Commands;
+namespace App\Console\Commands\Website;
 
 use App\Models\Website\Config\WebsiteConfigDefault;
+use App\Models\Website\Website;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
-use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\EntityRepositoryInterface;
+use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 
 /**
- * Class AddSitemapsWithArchivingInventory
+ * Class AddSitemaps
  * @package App\Console\Commands
  */
-class AddSitemapsWithArchivingInventory extends Command
+class AddSitemaps extends Command
 {
     private const FILENAME_TEMPLATE = '%s_sitemap.xml';
     private const FILEPATH_TEMPLATE = 'sitemaps/%s';
+    private const LOCAL_FILENAME_TEMPLATE = 'sitemaps-%s-%s.xml';
 
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $signature = "add:sitemaps_with_archiving_inventory";
-
-    /**
-     * @var App\Repositories\Website\Config\WebsiteConfigRepositoryInterface
-     */
-    protected $websiteConfigRepository;
+    protected $signature = "add:sitemaps";
 
     /**
      * @var InventoryRepositoryInterface
      */
     protected $inventoryRepository;
-    
+
     /**
-     * @var App\Repositories\Website\EntityRepositoryInterface
+     * @var EntityRepositoryInterface
      */
     protected $websiteEntityRepository;
 
     /**
-     * @var string
+     * @var WebsiteRepositoryInterface
      */
-    protected $filenameTemplate;
+    protected $websiteRepository;
 
     /**
-     * AddSitemapsWithArchivingInventory constructor.
+     * AddSitemaps constructor.
      * @param WebsiteRepositoryInterface $websiteRepository
      * @param InventoryRepositoryInterface $inventoryRepository
+     * @param EntityRepositoryInterface $websiteEntityRepository
      */
-    public function __construct(WebsiteConfigRepositoryInterface $websiteConfigRepository, InventoryRepositoryInterface $inventoryRepository, EntityRepositoryInterface $websiteEntityRepository)
+    public function __construct(WebsiteRepositoryInterface $websiteRepository, InventoryRepositoryInterface $inventoryRepository, EntityRepositoryInterface $websiteEntityRepository)
     {
         parent::__construct();
 
-        $this->websiteConfigRepository = $websiteConfigRepository;
         $this->inventoryRepository = $inventoryRepository;
         $this->websiteEntityRepository = $websiteEntityRepository;
-        
-        $this->filenameTemplate = 'archived_inventory-%s-' . date('Y-m-d')  . '.xml';
+        $this->websiteRepository = $websiteRepository;
     }
 
     /**
@@ -71,36 +67,40 @@ class AddSitemapsWithArchivingInventory extends Command
      */
     public function handle()
     {
-        $websiteConfigs = $this->websiteConfigRepository->getAll([
-            'key' => WebsiteConfigDefault::CONFIG_INCLUDE_ARCHIVING_INVENTORY,
-            'value' => 1
+        $websites = $this->websiteRepository->getAll([
+            Repository::CONDITION_AND_WHERE => [
+                ['type', '!=', Website::WEBSITE_TYPE_CLASSIFIED]
+            ]
         ]);
-        
-        foreach ($websiteConfigs as $config) {
-            $website = $config->website;
-            
-            // May need to support multiple dealer_id as website do
-            $inventories = $this->inventoryRepository->getAll([
-                Repository::CONDITION_AND_WHERE =>[
-                    ['dealer_id', '=', $website->dealer_id]
-                ]
-            ], false);
 
-            $tmpFile = storage_path('app/sitemaps') . '/' . sprintf($this->filenameTemplate, $website->dealer_id);
+        foreach ($websites as $website) {
+            $tmpFile = env('APP_TMP_DIR') . '/' . sprintf(self::LOCAL_FILENAME_TEMPLATE, $website->dealer_id, date('Y-m-d_H-i-s'));
             $domain = 'https://www.' . $website->domain;
 
             resolve('url')->forceRootUrl($domain);
             $sitemap = Sitemap::create();
-            
+
+            $includeArchiving = $website->websiteConfigByKey(WebsiteConfigDefault::CONFIG_INCLUDE_ARCHIVING_INVENTORY);
+
+            $withDefault = !$includeArchiving;
+
+            $sitemap->add(Url::create("/"));
+
             $pages = $this->websiteEntityRepository->getAllPages($website->id);
 
-            foreach ($inventories as $inventory) {                
-                $sitemap->add(Url::create($inventory->getUrl()));
-            }
-            
             foreach ($pages as $page) {
                 $sitemap->add(Url::create("/{$page->url_path}"));
-            } 
+            }
+
+            $inventories = $this->inventoryRepository->getAll([
+                Repository::CONDITION_AND_WHERE =>[
+                    ['dealer_id', '=', $website->dealer_id]
+                ]
+            ], $withDefault);
+
+            foreach ($inventories as $inventory) {
+                $sitemap->add(Url::create($inventory->getUrl()));
+            }
 
             $filename = sprintf(self::FILENAME_TEMPLATE, $website->id);
 
@@ -115,7 +115,6 @@ class AddSitemapsWithArchivingInventory extends Command
     }
 
     /**
-     * @param string $domain
      * @param string $filename
      * @param string $tmpFile
      * @return bool
@@ -123,9 +122,9 @@ class AddSitemapsWithArchivingInventory extends Command
     private function putToS3(string $filename, string $tmpFile)
     {
         $filePath = sprintf(self::FILEPATH_TEMPLATE, $filename);
-        
+
         echo $filePath . PHP_EOL;
-        
+
         return Storage::disk('s3')->put($filePath, file_get_contents($tmpFile), 'public');
     }
 }
