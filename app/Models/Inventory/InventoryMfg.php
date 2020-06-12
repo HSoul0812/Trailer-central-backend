@@ -12,5 +12,5 @@ class InventoryMfg extends Model {
      */
     protected $table = 'inventory_mfg';
 
-    
+    public $timestamps = false;
 }
