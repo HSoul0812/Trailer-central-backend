@@ -16,19 +16,19 @@ class UpdateHomesteaderManufacturer extends Migration
     public function up()
     {
         // Get Inventory With Homesteader MFG
-        $query = Inventory::select('*')
-                    ->where('manufacturer', 'Homesteader')
-                    ->orWhere('manufacturer', 'Homesteader Inc.');
-        $query->get()->update(['manufacturer' => 'Homesteader Trailers']);
+        Inventory::select('*')
+            ->where('manufacturer', 'Homesteader')
+            ->orWhere('manufacturer', 'Homesteader Inc.')
+            ->update(['manufacturer' => 'Homesteader Trailers']);
 
         // Update Inventory MFG Homesteader Entry
         InventoryMfg::select('*')
-            ->where('manufacturer', 'Homesteader')
-            ->update(['manufacturer' => 'Homesteader Trailers']);
+            ->where('name', 'Homesteader')
+            ->update(['name' => 'Homesteader Trailers', 'label' => 'Homesteader Trailers']);
 
         // Delete Inventory MFG Homesteader Inc. Entry
         InventoryMfg::select('*')
-            ->where('manufacturer', 'Homesteader Inc.')
+            ->where('name', 'Homesteader Inc.')
             ->delete();
     }
 
