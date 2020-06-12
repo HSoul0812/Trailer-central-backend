@@ -109,8 +109,6 @@ class PostRepository implements PostRepositoryInterface {
 
         if (isset($params['status'])) {
             $query = $query->where('status', $params['status']);
-        } else {
-            $query = $query->where('status', 'published');
         }
 
         return $query->paginate($params['per_page'])->appends($params);
