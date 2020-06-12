@@ -108,7 +108,14 @@ class PostRepository implements PostRepositoryInterface {
         }
 
         if (isset($params['status'])) {
-            $query = $query->where('status', $params['status']);
+            if($params['status'] === 'private') {
+                $query = $query->where(function($q) use ($params) {
+                    $q->whereNull('status')
+                      ->orWhere('status', $params['status']);
+                });
+            } else {
+                $query = $query->where('status', $params['status']);
+            }
         }
 
         return $query->paginate($params['per_page'])->appends($params);
