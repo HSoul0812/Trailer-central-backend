@@ -50,7 +50,10 @@ class PostRepository implements PostRepositoryInterface {
 
         try {
             // Set Published?
-            if($params['status'] !== 'private') {
+            if(empty($params['status'])) {
+                $params['status'] = 'private';
+            }
+            if($params['status'] === 'published') {
                 $params['date_published'] = date('Y-m-d H:i:s');
             }
 
@@ -112,7 +115,10 @@ class PostRepository implements PostRepositoryInterface {
 
         DB::transaction(function() use (&$post, $params) {
             // Set Published?
-            if(empty($post['date_published']) && $params['status'] !== 'private') {
+            if(empty($params['status'])) {
+                $params['status'] = 'private';
+            }
+            if(empty($post['date_published']) && $params['status'] === 'published') {
                 $params['date_published'] = date('Y-m-d H:i:s');
             }
 
