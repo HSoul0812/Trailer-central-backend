@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Account;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Dms\UnitSale;
 
 class Invoice extends Model
 {
@@ -17,7 +18,7 @@ class Invoice extends Model
 
     public function unitSale()
     {
-        return $this->hasOne('App\Models\CRM\Dms\UnitSale', 'id', 'unit_sale_id');
+        return $this->hasOne(UnitSale::class, 'id', 'unit_sale_id');
     }
 
     public function payments()

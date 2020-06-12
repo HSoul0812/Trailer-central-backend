@@ -5,6 +5,7 @@ namespace App\Models\CRM\Account;
 
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Quickbooks\PaymentMethod;
 
 class Payment extends Model
 {
@@ -25,6 +26,6 @@ class Payment extends Model
 
     public function paymentMethod()
     {
-        return $this->belongsTo('App\Models\CRM\Quickbooks\PaymentMethod');
+        return $this->belongsTo(PaymentMethod::class);
     }
 }

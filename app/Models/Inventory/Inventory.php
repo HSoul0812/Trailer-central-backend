@@ -1,12 +1,14 @@
 <?php
-
-
 namespace App\Models\Inventory;
 
+use App\Helpers\StringHelper;
 use App\Models\CRM\Dealer\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Inventory\InventoryImage;
+use App\Models\Inventory\Image;
 
 class Inventory extends Model
 {
@@ -43,8 +45,27 @@ class Inventory extends Model
     {
         return $this->hasMany('App\Models\Inventory\Floorplan\Payment');
     }
+    
+    public function images()
+    {
+        return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id');
+    }
 
     public function __toString() {
         return $this->title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        $url = '/';
+        $url .= StringHelper::superSanitize($this->title, '-');
+        $url .= '-' . CompactHelper::shorten($this->inventory_id);
+
+        $url .= '.html';
+
+        return $url;
     }
 }

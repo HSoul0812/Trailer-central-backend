@@ -10,8 +10,7 @@ use App\Http\Requests\Request;
 class GetQuotesRequest extends Request {
 
     protected $rules = [
-        'dealer_id' => 'array',
-        'dealer_id.*' => 'integer',
+        'dealer_id' => 'integer',
         'status' => 'string'
     ];
     

@@ -1,21 +1,22 @@
 <?php
-namespace App\Models\CRM\Leads;
+
+namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Model;
 
-class InventoryLead extends Model
-{
+class Image extends Model {
+    
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'crm_inventory_lead';
+    protected $table = 'image';
 
     /**
      * The primary key associated with the table.
      *
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'image_id';
 }

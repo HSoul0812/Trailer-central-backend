@@ -3,7 +3,6 @@
 namespace App\Models\CRM\Leads;
 
 use App\Models\CRM\Dms\UnitSale;
-use App\Models\CRM\Dms\Website;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
@@ -12,6 +11,7 @@ use App\Models\CRM\Leads\LeadProduct;
 use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Leads\InventoryLead;
 
 class Lead extends Model
 {
@@ -28,6 +28,22 @@ class Lead extends Model
      * @var string
      */
     protected $primaryKey = 'identifier';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'website_id',
+        'lead_type',
+        'inventory_id',
+        'referral',
+        'first_name',
+        'title',
+        'last_name',
+        'phone_number'
+    ];
 
     /**
      * Get the email history for the lead.
@@ -58,7 +74,7 @@ class Lead extends Model
      */
     public function inventory()
     {
-        return $this->hasManyThrough(Inventory::class, InventoryLead::class, 'website_lead_id', 'identifier');
+        return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id');
     }
 
     /**
@@ -107,28 +123,9 @@ class Lead extends Model
      *
      * @return string
      */
-    public function status() {
+    public function leadStatus() {
         return $this->hasOne(LeadStatus::class, 'tc_lead_identifier', 'identifier');
     }
-
-    /**
-     * Retrieves lead website
-     *
-     * @return string
-     */
-    public function website() {
-        return $this->belongsTo(Website::class, 'id', 'website_id');
-    }
-
-    public function getStatus($id) {
-        if(!empty($id)) {
-            $status = $this->findOrFail($id)->status()->pluck('status')->toArray();
-        } else {
-            $status = $this->status()->pluck('status')->toArray();
-        }
-        return $status['status'];
-    }
-
 
     public function getDateSubmitted() {
         return $this->processProperty($this->date_submitted);
@@ -177,11 +174,11 @@ class Lead extends Model
     /**
      * @return string(phone number) number in format (XXX) NNN-NNNN
      */
-    public function getPhoneNumberAttribute() {
+    public function getPrettyPhoneNumberAttribute() {        
         if(  preg_match( '/^(\d{3})(\d{3})(\d{4})$/', $this->phone_number,  $matches ) ) {
             return '(' . $matches[1] . ')' . ' ' .$matches[2] . '-' . $matches[3];
         } else {
-            return '(---) -------';
+            return null;
         }
     }
 
@@ -195,18 +192,18 @@ class Lead extends Model
         return empty($property) ? null : $property;
     }
 
-    public function loadFromArray($arr) {
-        foreach($arr as $key => $value) {
-            if($key === 'status') {
-                $value = Lead::getStatus((int)$value);
-            } elseif($key === 'lead_type') {
-                if(is_array($value)) {
-                    $value = reset($value);
-                }
-            }
-            $this->$key = $value;
-        }
-    }
+//    public function loadFromArray($arr) {
+//        foreach($arr as $key => $value) {
+//            if($key === 'status') {
+//                $value = Lead::getStatus((int)$value);
+//            } elseif($key === 'lead_type') {
+//                if(is_array($value)) {
+//                    $value = reset($value);
+//                }
+//            }
+//            $this->$key = $value;
+//        }
+//    }
 
     /**
      * Get Purchases for Lead

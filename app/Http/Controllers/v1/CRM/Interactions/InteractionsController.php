@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\v1\Interactions;
+namespace App\Http\Controllers\v1\CRM\Interactions;
 
 use App\Http\Controllers\RestfulController;
-use App\Mail\InteractionEmail;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
@@ -14,12 +13,9 @@ use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
-use Exception;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Throwable;
+
 
 class InteractionsController extends RestfulController
 {

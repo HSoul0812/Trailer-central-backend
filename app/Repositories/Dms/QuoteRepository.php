@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\DB;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\UnitSale;
-use App\Models\CRM\Dms\QuoteStatus;
 
 /**
  * @author Marcel
@@ -55,7 +54,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
 
     public function getAll($params) {
         if (isset($params['dealer_id'])) {
-            $query = UnitSale::whereIn('dealer_id', $params['dealer_id']);
+            $query = UnitSale::where('dealer_id', '=', $params['dealer_id']);
         } else {
             $query = UnitSale::where('id', '>', 0);  
         }
@@ -74,15 +73,15 @@ class QuoteRepository implements QuoteRepositoryInterface {
         }
         if (isset($params['status'])) {
             switch ($params['status']) {
-                case QuoteStatus::ARCHIVED:
+                case UnitSale::QuoteStatus['ARCHIVED']:
                     $query = $query->where('is_archived', '=', 1);
                     break;
-                case QuoteStatus::OPEN:
+                case UnitSale::QuoteStatus['OPEN']:
                     $query = $query
                         ->where('is_archived', '=', 0)
                         ->doesntHave('payments');
                     break;
-                case QuoteStatus::DEAL:
+                case UnitSale::QuoteStatus['DEAL']:
                     $query = $query
                         ->where('is_archived', '=', 0)
                         ->whereHas('payments', function($query) {
@@ -91,7 +90,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
                                 ->havingRaw('paid_amount < dms_unit_sale.total_price');
                         });
                     break;
-                case QuoteStatus::COMPLETED:
+                case UnitSale::QuoteStatus['COMPLETED']:
                     $query = $query
                         ->where('is_archived', '=', 0)
                         ->whereHas('payments', function($query) {
