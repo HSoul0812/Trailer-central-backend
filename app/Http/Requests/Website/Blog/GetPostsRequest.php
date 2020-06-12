@@ -21,15 +21,6 @@ class GetPostsRequest extends Request {
     ];
     
     public function all($keys = null) {
-        // Set Default Status!
-        var_dump($keys);
-        if($keys === null) {
-            $keys = array('status' => 'published');
-        } elseif(empty($keys['status'])) {
-            $keys['status'] = 'published';
-        }
-        var_dump($keys);
-
         // Return Result
         $all = parent::all($keys);
         return $all;
