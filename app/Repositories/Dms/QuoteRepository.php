@@ -73,15 +73,15 @@ class QuoteRepository implements QuoteRepositoryInterface {
         }
         if (isset($params['status'])) {
             switch ($params['status']) {
-                case UnitSale::QuoteStatus['ARCHIVED']:
+                case UnitSale::QUOTE_STATUS_ARCHIVED:
                     $query = $query->where('is_archived', '=', 1);
                     break;
-                case UnitSale::QuoteStatus['OPEN']:
+                case UnitSale::QUOTE_STATUS_OPEN:
                     $query = $query
                         ->where('is_archived', '=', 0)
                         ->doesntHave('payments');
                     break;
-                case UnitSale::QuoteStatus['DEAL']:
+                case UnitSale::QUOTE_STATUS_DEAL:
                     $query = $query
                         ->where('is_archived', '=', 0)
                         ->whereHas('payments', function($query) {
@@ -90,7 +90,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
                                 ->havingRaw('paid_amount < dms_unit_sale.total_price');
                         });
                     break;
-                case UnitSale::QuoteStatus['COMPLETED']:
+                case UnitSale::QUOTE_STATUS_COMPLETED:
                     $query = $query
                         ->where('is_archived', '=', 0)
                         ->whereHas('payments', function($query) {

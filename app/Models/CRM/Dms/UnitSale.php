@@ -12,12 +12,10 @@ use App\Models\CRM\User\Customer;
 class UnitSale extends Model
 {
 
-    const QuoteStatus = [
-        'OPEN' => 'open',
-        'DEAL' => 'deal',
-        'COMPLETED' => 'completed_deal',
-        'ARCHIVED' => 'archived',
-    ];
+    const QUOTE_STATUS_OPEN = 'open';
+    const QUOTE_STATUS_DEAL = 'deal';
+    const QUOTE_STATUS_COMPLETED = 'completed_deal';
+    const QUOTE_STATUS_ARCHIVED = 'archived';
 
     /**
      * The table associated with the model.
