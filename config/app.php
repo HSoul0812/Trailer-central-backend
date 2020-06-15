@@ -183,12 +183,12 @@ return [
         \L5Swagger\L5SwaggerServiceProvider::class,
         \Laravel\Scout\ScoutServiceProvider::class,
         \Dingo\Api\Provider\LaravelServiceProvider::class,
+        Spatie\Sitemap\SitemapServiceProvider::class,
 
         /*
          * Nova stuff
          */
         \Feed\EditMapping\ToolServiceProvider::class,
-
     ],
 
     /*

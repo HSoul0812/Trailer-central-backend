@@ -13,7 +13,10 @@ class UpdateCycleCountRequest extends Request {
         'id' => 'required|integer',
         'is_completed' => 'boolean',
         'is_balanced' => 'boolean',
-        'parts' => 'required|array'
+        'parts' => 'required|array',
+        'parts.*.part_id' => 'required|integer',
+        'parts.*.count_on_hand' => 'required|integer',
+        'parts.*.starting_qty' => 'required|integer',
     ];
     
 }

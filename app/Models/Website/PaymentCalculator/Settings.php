@@ -9,6 +9,12 @@ class Settings extends Model {
     const CONDITION_USED = 0;
     const CONDITION_NEW = 1;
     
+    const FINANCING = 'financing';
+    const NO_FINANCING = 'no_financing';
+    
+    const OPERATOR_LESS_THAN = 'less_than';
+    const OPERATOR_OVER = 'over';
+    
     protected $table = 'website_payment_calculator_settings';
     
     public $timestamps = false;
@@ -26,7 +32,9 @@ class Settings extends Model {
         'apr',
         'down',
         'operator',
-        'inventory_price'
+        'inventory_price',
+        'inventory_condition',
+        'financing'
     ];
     
 }

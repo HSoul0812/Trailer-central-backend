@@ -4,7 +4,6 @@ namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
-use App\Exceptions\NotImplementedException;
 use App\Repositories\Parts\BinRepositoryInterface;
 use App\Http\Requests\Parts\GetBinsRequest;
 use App\Transformers\Parts\BinTransformer;

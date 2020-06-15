@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
-use App\Exceptions\NotImplementedException;
 use App\Repositories\Parts\CycleCountRepositoryInterface;
+use App\Http\Requests\Parts\GetCycleCountsRequest;
 use App\Http\Requests\Parts\CreateCycleCountRequest;
 use App\Http\Requests\Parts\DeleteCycleCountRequest;
 use App\Http\Requests\Parts\UpdateCycleCountRequest;

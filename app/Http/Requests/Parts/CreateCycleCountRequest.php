@@ -14,7 +14,10 @@ class CreateCycleCountRequest extends Request {
         'dealer_id' => 'integer',
         'is_completed' => 'boolean',
         'is_balanced' => 'boolean',
-        'parts' => 'array|required'
+        'parts' => 'required|array',
+        'parts.*.part_id' => 'required|integer',
+        'parts.*.count_on_hand' => 'required|integer',
+        'parts.*.starting_qty' => 'required|integer',
     ];
     
 }

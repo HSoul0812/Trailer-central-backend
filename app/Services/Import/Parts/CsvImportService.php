@@ -138,19 +138,19 @@ class CsvImportService implements CsvImportServiceInterface
             echo 'Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
             Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
 
-            try {                
+            try {      
                 // Get Part Data
                 $partData = $this->csvToPartData($csvData);
+                
                 echo "Importing ".json_encode($partData).PHP_EOL;                
-                $part = $this->partsRepository->createOrUpdate($partData);                
+                $part = $this->partsRepository->createOrUpdate($partData);
                 if (!$part) {
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
                     Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
                     throw new \Exception("Image inaccesible");
                 }
-            } catch (\Exception $ex) {
-                die($ex->getMessage());
+            } catch (\Exception $ex) {  
                 $this->validationErrors[] = $ex->getMessage();
                 $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
                 Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
@@ -292,7 +292,7 @@ class CsvImportService implements CsvImportServiceInterface
         }
 
         $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first();
-
+       
         $part = [];
         $part['dealer_id'] = $this->bulkUpload->dealer_id;
         $part['vendor_id'] = !empty($vendor) ? $vendor->id : null;

@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
+use App\Repositories\Inventory\InventoryRepository;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\Website\WebsiteRepository;
+use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
@@ -14,6 +18,14 @@ use App\Repositories\Showroom\ShowroomRepositoryInterface;
 use App\Repositories\Showroom\ShowroomRepository;
 use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 use App\Repositories\Website\PaymentCalculator\SettingsRepository;
+use App\Repositories\CRM\Leads\LeadRepository;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\Website\RedirectRepository;
+use App\Repositories\Website\RedirectRepositoryInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepository;
+use App\Repositories\Website\EntityRepository;
+use App\Repositories\Website\EntityRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -56,11 +68,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Parts\TypeRepositoryInterface', 'App\Repositories\Parts\TypeRepository');
         $this->app->bind('App\Repositories\Parts\VendorRepositoryInterface', 'App\Repositories\Parts\VendorRepository');
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
+        $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+        $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
+        $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);        
+        $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
+        $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
+        $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);

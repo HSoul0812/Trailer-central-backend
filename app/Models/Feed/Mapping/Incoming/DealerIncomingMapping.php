@@ -19,6 +19,8 @@ class DealerIncomingMapping extends Model {
     const NOSE_TYPE = 'nose_type';
     const CONSTRUCTION = 'construction';
     const FUEL_TYPE = 'fuel_type';
+    const BRAND = 'brand';
+    const LOCATION = 'dealer_location';
     
     public static $types = [
         self::MAKE => 'Manufacturer',
@@ -29,7 +31,9 @@ class DealerIncomingMapping extends Model {
         self::PULL_TYPE => 'Pull Type',
         self::NOSE_TYPE => 'Nose Type',
         self::CONSTRUCTION => 'Construction',
-        self::FUEL_TYPE => 'Fuel Type'                
+        self::FUEL_TYPE => 'Fuel Type',
+        self::BRAND => 'Brand',
+        self::LOCATION => 'Dealer Location'
     ];
     
     protected $fillable = [

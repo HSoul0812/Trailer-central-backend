@@ -5,6 +5,7 @@ namespace App\Http\Middleware\Website;
 use Closure;
 use App\Http\Middleware\ValidRoute;
 use App\Models\Website\Website;
+use App\Models\Website\Blog\Post;
 use App\Models\Website\PaymentCalculator\Settings;
 
 class WebsiteValidate extends ValidRoute {

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
 use App\Http\Middleware\Website\WebsiteValidate;
+use App\Http\Middleware\ValidAccessToken;
 
 class Kernel extends HttpKernel
 {
@@ -67,7 +68,8 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'cors' => CorsMiddleware::class,
-        'website.validate' => WebsiteValidate::class
+        'website.validate' => WebsiteValidate::class,
+        'accesstoken.validate' => ValidAccessToken::class
     ];
 
     /**

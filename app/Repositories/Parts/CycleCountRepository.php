@@ -4,7 +4,6 @@ namespace App\Repositories\Parts;
 
 use Illuminate\Support\Facades\DB;
 
-use App\Exceptions\NotImplementedException;
 use App\Models\Parts\BinQuantity;
 use App\Models\Parts\CycleCount;
 use App\Models\Parts\CycleCountHistory;
