@@ -10,7 +10,7 @@ use App\Http\Requests\Request;
 class UpdateCycleCountRequest extends Request {
     
     protected $rules = [
-        'id' => 'required|integer',
+        'id' => 'required|integer|cycle_count_exists',
         'is_completed' => 'boolean',
         'is_balanced' => 'boolean',
         'parts' => 'required|array',

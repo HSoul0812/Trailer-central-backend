@@ -10,7 +10,7 @@ use App\Http\Requests\Request;
 class DeleteCycleCountRequest extends Request {
     
     protected $rules = [
-        'id' => 'required|integer'
+        'id' => 'required|integer|cycle_count_exists'
     ];
     
 }
