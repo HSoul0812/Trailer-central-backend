@@ -3,6 +3,7 @@
 namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Parts\CycleCountHistory;
 
 /**
  * @author Marcel
@@ -37,7 +38,7 @@ class CycleCount extends Model {
 
     public function parts()
     {
-        return $this->hasMany('App\Models\Parts\CycleCountHistory');
+        return $this->hasMany(CycleCountHistory::class);
     }
 
 }

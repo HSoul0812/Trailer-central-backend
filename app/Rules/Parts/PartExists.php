@@ -17,7 +17,7 @@ class PartExists implements Rule
      */
     public function passes($attribute, $value)
     {
-        return Part::where('id', $value)->count() > 0;
+        return Part::find($value);
     }
 
     /**

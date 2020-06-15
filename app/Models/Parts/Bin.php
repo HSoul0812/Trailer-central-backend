@@ -3,6 +3,7 @@
 namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Parts\CycleCount;
 
 class Bin extends Model {
     
@@ -30,7 +31,7 @@ class Bin extends Model {
 
     public function uncompletedCycleCounts()
     {
-        return $this->hasMany('App\Models\Parts\CycleCount')->where('is_completed', 0)->with('parts');
+        return $this->hasMany(CycleCount::class)->where('is_completed', 0)->with('parts');
     }
 
 }
