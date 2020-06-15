@@ -50,7 +50,10 @@ class PostRepository implements PostRepositoryInterface {
 
         try {
             // Set Published?
-            if($params['status'] !== 'private') {
+            if(empty($params['status'])) {
+                $params['status'] = 'private';
+            }
+            if($params['status'] === 'published') {
                 $params['date_published'] = date('Y-m-d H:i:s');
             }
 
@@ -104,6 +107,17 @@ class PostRepository implements PostRepositoryInterface {
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
+        if (isset($params['status'])) {
+            if($params['status'] === 'private') {
+                $query = $query->where(function($q) use ($params) {
+                    $q->whereNull('status')
+                      ->orWhere('status', $params['status']);
+                });
+            } else {
+                $query = $query->where('status', $params['status']);
+            }
+        }
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
@@ -112,7 +126,10 @@ class PostRepository implements PostRepositoryInterface {
 
         DB::transaction(function() use (&$post, $params) {
             // Set Published?
-            if(empty($post['date_published']) && $params['status'] !== 'private') {
+            if(empty($params['status'])) {
+                $params['status'] = 'private';
+            }
+            if(empty($post['date_published']) && $params['status'] === 'published') {
                 $params['date_published'] = date('Y-m-d H:i:s');
             }
 
