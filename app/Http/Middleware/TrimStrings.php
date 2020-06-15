@@ -15,4 +15,15 @@ class TrimStrings extends Middleware
         'password',
         'password_confirmation',
     ];
+
+    protected function transform($key, $value)
+    {
+        if ($value === 'true' || $value === 'TRUE') {
+            return true;
+        }
+        if ($value === 'false' || $value === 'FALSE') {
+            return false;
+        }
+        return $value;
+    }
 }

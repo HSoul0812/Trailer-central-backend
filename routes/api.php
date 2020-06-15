@@ -34,14 +34,20 @@ $api->version('v1', function ($route) {
      */
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
     
-    /*
-    |--------------------------------------------------------------------------
-    | Parts
-    |--------------------------------------------------------------------------
-    |
-    |
-    |
-    */
+    /**
+     * Part bins
+     */
+    $route->get('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@index');
+
+    /**
+     * Part brands
+     */
+    $route->get('parts/brands', 'App\Http\Controllers\v1\Parts\BrandController@index');
+    $route->put('parts/brands', 'App\Http\Controllers\v1\Parts\BrandController@create');
+    $route->get('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@show')->where('id', '[0-9]+');
+    $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
+    $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
+
     
     /**
      * Part Categories
@@ -51,6 +57,14 @@ $api->version('v1', function ($route) {
     $route->get('parts/categories/{id}', 'App\Http\Controllers\v1\Parts\CategoryController@show')->where('id', '[0-9]+');
     $route->post('parts/categories/{id}', 'App\Http\Controllers\v1\Parts\CategoryController@update')->where('id', '[0-9]+');
     $route->delete('parts/categories/{id}', 'App\Http\Controllers\v1\Parts\CategoryController@destroy')->where('id', '[0-9]+');
+
+    /**
+     * Part Cycle Counts
+     */
+    $route->get('parts/cycle-counts', 'App\Http\Controllers\v1\Parts\CycleCountController@index');
+    $route->put('parts/cycle-counts', 'App\Http\Controllers\v1\Parts\CycleCountController@create');
+    $route->post('parts/cycle-counts/{id}', 'App\Http\Controllers\v1\Parts\CycleCountController@update')->where('id', '[0-9]+');
+    $route->delete('parts/cycle-counts/{id}', 'App\Http\Controllers\v1\Parts\CycleCountController@destroy')->where('id', '[0-9]+');
 
     /**
      * Part Manufacturers
