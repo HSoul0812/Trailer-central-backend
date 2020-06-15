@@ -10,7 +10,7 @@ use App\Http\Requests\Request;
 class CreateCycleCountRequest extends Request {
     
     protected $rules = [
-        'bin_id' => 'integer',
+        'bin_id' => 'integer|bin_exists',
         'dealer_id' => 'integer',
         'is_completed' => 'boolean',
         'is_balanced' => 'boolean',

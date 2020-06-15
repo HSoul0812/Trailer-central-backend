@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        \Validator::extend('bin_exists', 'App\Rules\Parts\BinExists@passes');
         \Validator::extend('type_exists', 'App\Rules\Parts\TypeExists@passes');
         \Validator::extend('category_exists', 'App\Rules\Parts\CategoryExists@passes');
         \Validator::extend('brand_exists', 'App\Rules\Parts\BrandExists@passes');
