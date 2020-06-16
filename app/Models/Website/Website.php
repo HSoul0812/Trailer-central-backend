@@ -5,12 +5,26 @@ namespace App\Models\Website;
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Database\Eloquent\Model;
 
-class Website extends Model {
+class Website extends Model
+{
+    const WEBSITE_TYPE_CLASSIFIED = 'classified';
 
     protected $table = 'website';
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function websiteConfigs()
     {
         return $this->hasMany(WebsiteConfig::class, 'website_id', 'id');
+    }
+
+    /**
+     * @param string $key
+     * @return array
+     */
+    public function websiteConfigByKey(string $key)
+    {
+        return $this->websiteConfigs()->where('key', $key)->take(1)->value('value');
     }
 }
