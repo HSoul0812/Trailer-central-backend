@@ -74,7 +74,7 @@ class AddSitemaps extends Command
         ]);
 
         foreach ($websites as $website) {
-            $tmpFile = env('APP_TMP_DIR') . '/' . sprintf(self::LOCAL_FILENAME_TEMPLATE, $website->dealer_id, date('Y-m-d_H-i-s'));
+            $tmpFile = storage_path('app/sitemaps') . '/' . sprintf(self::LOCAL_FILENAME_TEMPLATE, $website->dealer_id, date('Y-m-d_H-i-s'));
             $domain = 'https://www.' . $website->domain;
 
             resolve('url')->forceRootUrl($domain);
