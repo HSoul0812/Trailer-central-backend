@@ -26,6 +26,8 @@ use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
+use App\Repositories\Parts\CostModifierRepository;
+use App\Repositories\Parts\CostModifierRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -83,6 +85,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
+        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class); 
         
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);

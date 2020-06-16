@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
 use App\Models\Parts\CacheStoreTime;
+use App\Repositories\Parts\CostModifierRepositoryInterface;
 use Carbon\Carbon;
 
 /**
@@ -193,5 +194,22 @@ class Part extends Model
     public function bins()
     {
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
+    } 
+    
+    /**
+     * Inspects the price CostModifier model and determines what the part
+     * price should actually be
+     */
+    public function getModifiedCostAttribute()
+    {
+        $costModifiedRepo = app(CostModifierRepositoryInterface::class);
+        $costModifier = $costModifiedRepo->getByDealerId($this->dealer_id);
+        
+        if ($costModifier) {
+            $newCost = $this->dealer_cost + ($this->dealer_cost * ( $costModifier->modifier / 100 ));
+            return $newCost > 0 ? $newCost : $this->price;
+        }
+        
+        return $this->price;
     }
 }
