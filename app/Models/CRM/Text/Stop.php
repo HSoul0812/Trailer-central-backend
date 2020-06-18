@@ -5,13 +5,13 @@ namespace App\Models\CRM\Text;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Text Template
+ * Class Text Stop
  *
  * @package App\Models\CRM\Text
  */
-class Template extends Model
+class Stop extends Model
 {
-    protected $table = 'crm_text_template';
+    protected $table = 'crm_text_stop';
 
     /**
      * The attributes that are mass assignable.
@@ -19,9 +19,9 @@ class Template extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id',
-        'name',
-        'template',
-        'deleted',
+        'lead_id',
+        'text_id',
+        'response_id',
+        'text_number'
     ];
 }

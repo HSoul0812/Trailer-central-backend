@@ -13,32 +13,32 @@ class CreateCrmTextCampaigns extends Migration
      */
     public function up()
     {
-        Schema::create('crm_text_templates', function (Blueprint $table) {
+        Schema::create('crm_text_template', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
         });
 
-        Schema::create('crm_text_campaigns', function (Blueprint $table) {
+        Schema::create('crm_text_campaign', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
         });
 
-        Schema::create('crm_text_campaigns_sent', function (Blueprint $table) {
+        Schema::create('crm_text_campaign_sent', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
         });
 
-        Schema::create('crm_text_blasts', function (Blueprint $table) {
+        Schema::create('crm_text_blast', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
         });
 
-        Schema::create('crm_text_blasts_sent', function (Blueprint $table) {
+        Schema::create('crm_text_blast_sent', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
         });
 
-        Schema::create('crm_text_status', function (Blueprint $table) {
+        Schema::create('crm_text_stop', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
         });
@@ -51,16 +51,16 @@ class CreateCrmTextCampaigns extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('crm_text_templates');
+        Schema::dropIfExists('crm_text_template');
 
-        Schema::dropIfExists('crm_text_campaigns');
+        Schema::dropIfExists('crm_text_campaign');
 
-        Schema::dropIfExists('crm_text_campaigns_sent');
+        Schema::dropIfExists('crm_text_campaign_sent');
 
-        Schema::dropIfExists('crm_text_blasts');
+        Schema::dropIfExists('crm_text_blast');
 
-        Schema::dropIfExists('crm_text_blasts_sent');
+        Schema::dropIfExists('crm_text_blast_sent');
 
-        Schema::dropIfExists('crm_text_status');
+        Schema::dropIfExists('crm_text_stop');
     }
 }
