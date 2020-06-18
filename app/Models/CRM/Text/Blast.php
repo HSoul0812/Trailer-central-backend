@@ -13,6 +13,18 @@ class Blast extends Model
 {
     protected $table = 'crm_text_blast';
 
+    // Define Constants to Make it Easier to Autocomplete
+    const STATUS_ACTIONS = [
+        'inquired',
+        'purchased'
+    ];
+
+    const STATUS_ARCHIVED = [
+        '0',
+        '-1',
+        '1'
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
