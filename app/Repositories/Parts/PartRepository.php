@@ -11,6 +11,7 @@ use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
 use App\Models\Parts\BinQuantity;
 use App\Exceptions\ImageNotDownloadedException;
+use App\Repositories\Traits\SortTrait;
 
 /**
  *
@@ -18,6 +19,8 @@ use App\Exceptions\ImageNotDownloadedException;
  */
 class PartRepository implements PartRepositoryInterface {
 
+    use SortTrait;
+    
     private $sortOrders = [
         'title' => [
             'field' => 'title',
@@ -335,13 +338,9 @@ class PartRepository implements PartRepositoryInterface {
             'position' => $image['position']
         ]);
     }
-
-    private function addSortQuery($query, $sort) {
-        if (!isset($this->sortOrders[$sort])) {
-            return;
-        }
-
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    
+    protected function getSortOrders() {
+        return $this->sortOrders;
     }
 
 }

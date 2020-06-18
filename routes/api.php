@@ -117,6 +117,24 @@ $api->version('v1', function ($route) {
     $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show')->where('id', '[0-9]+');
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Inventory
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    
+    /**
+     * Inventory
+     */
+    $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
+    $route->put('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@create');
+    $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
+    $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');
+    $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
 
 
     /*

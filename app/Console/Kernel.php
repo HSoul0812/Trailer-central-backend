@@ -8,6 +8,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
 use App\Console\Commands\RunBulkUploadCommand;
 use App\Console\Commands\ReplaceYoutubeEmbeds;
+use App\Console\Commands\AdjustFeetAndInches;
 
 class Kernel extends ConsoleKernel
 {
@@ -21,6 +22,7 @@ class Kernel extends ConsoleKernel
         SyncPartsCommand::class,
         RunBulkUploadCommand::class,
         AddSitemaps::class,
+        AdjustFeetAndInches::class
     ];
 
     /**
