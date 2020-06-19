@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Http\Middleware\CRM\Text;
+
+use Closure;
+use App\Http\Middleware\ValidRoute;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Text\Text;
+
+class TextValidate extends ValidRoute {
+
+    const LEAD_ID_PARAM = 'leadId';
+    const ID_PARAM = 'id';
+    protected $params = [
+        self::LEAD_ID_PARAM => [
+            'optional' => false,
+            'message' => 'CRM Lead does not exist.'
+        ],
+        self::ID_PARAM => [
+            'optional' => true,
+            'message' => 'Text does not exist.'
+        ]
+    ];
+    
+    protected $appendParams = [
+        self::LEAD_ID_PARAM => 'lead_id',
+        self::ID_PARAM => self::ID_PARAM
+    ];
+       
+    protected $validator = [];
+    
+    public function __construct() {
+        $this->validator[self::LEAD_ID_PARAM] = function($data) {            
+            if (empty(Lead::find($data))) {
+                return false;
+            }
+            
+            return true;
+        };
+        
+        $this->validator[self::ID_PARAM] = function ($data) {
+            if (empty(Text::find($data))) {
+                return false;
+            }
+            
+            return true;
+        };
+    }
+}
