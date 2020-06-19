@@ -18,4 +18,6 @@ interface WebsiteRepositoryInterface extends Repository
     ];
 
     public function getAllByConfigParams($params, bool $withDefault = true);
+
+    public function getAll($params, bool $withDefault = true);
 }

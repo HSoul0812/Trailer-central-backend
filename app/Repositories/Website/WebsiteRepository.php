@@ -51,11 +51,22 @@ class WebsiteRepository implements WebsiteRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @param bool $withDefault
+     * @return Collection
      */
-    public function getAll($params)
+    public function getAll($params, bool $withDefault = true): Collection
     {
-        throw new NotImplementedException;
+        $query = Website::select('*');
+
+        if ($withDefault) {
+            $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+
+        return $query->get();
     }
 
     /**
@@ -67,12 +78,16 @@ class WebsiteRepository implements WebsiteRepositoryInterface
     {
         $query = Website::select('*');
 
-        if ($withDefault) {
-            $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
-}
-
         if (!isset($params['config']) || !is_array($params['config'])) {
             throw new RepositoryInvalidArgumentException('Missed config key');
+        }
+
+        if ($withDefault) {
+            $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query->where($params[self::CONDITION_AND_WHERE]);
         }
 
         $query->whereHas('websiteConfigs', function($query) use ($params) {

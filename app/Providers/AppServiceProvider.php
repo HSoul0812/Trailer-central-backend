@@ -26,6 +26,8 @@ use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
+use App\Repositories\Parts\CostModifierRepository;
+use App\Repositories\Parts\CostModifierRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,9 +38,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        \Validator::extend('bin_exists', 'App\Rules\Parts\BinExists@passes');
         \Validator::extend('type_exists', 'App\Rules\Parts\TypeExists@passes');
         \Validator::extend('category_exists', 'App\Rules\Parts\CategoryExists@passes');
         \Validator::extend('brand_exists', 'App\Rules\Parts\BrandExists@passes');
+        \Validator::extend('part_exists', 'App\Rules\Parts\PartExists@passes');
+        \Validator::extend('cycle_count_exists', 'App\Rules\Parts\CycleCountExists@passes');
         \Validator::extend('manufacturer_exists', 'App\Rules\Parts\ManufacturerExists@passes');
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
 
@@ -61,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
         //
         $this->app->bind('App\Repositories\Parts\PartRepositoryInterface', 'App\Repositories\Parts\PartRepository');
         $this->app->bind('App\Repositories\Parts\BinRepositoryInterface', 'App\Repositories\Parts\BinRepository');
+        $this->app->bind('App\Repositories\Parts\CycleCountRepositoryInterface', 'App\Repositories\Parts\CycleCountRepository');
         $this->app->bind('App\Repositories\Parts\BrandRepositoryInterface', 'App\Repositories\Parts\BrandRepository');
         $this->app->bind('App\Repositories\Parts\CategoryRepositoryInterface', 'App\Repositories\Parts\CategoryRepository');
         $this->app->bind('App\Repositories\Parts\ManufacturerRepositoryInterface', 'App\Repositories\Parts\ManufacturerRepository');
@@ -80,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
+        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class); 
         
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);

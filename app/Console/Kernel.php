@@ -2,12 +2,13 @@
 
 namespace App\Console;
 
-use App\Console\Website\Commands\AddSitemapsWithArchivingInventory;
+use App\Console\Commands\Website\AddSitemaps;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
 use App\Console\Commands\RunBulkUploadCommand;
 use App\Console\Commands\ReplaceYoutubeEmbeds;
+use App\Console\Commands\AdjustFeetAndInches;
 
 class Kernel extends ConsoleKernel
 {
@@ -20,7 +21,8 @@ class Kernel extends ConsoleKernel
         ReplaceYoutubeEmbeds::class,
         SyncPartsCommand::class,
         RunBulkUploadCommand::class,
-        AddSitemapsWithArchivingInventory::class,
+        AddSitemaps::class,
+        AdjustFeetAndInches::class
     ];
 
     /**
@@ -32,7 +34,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('run:bulk')->withoutOverlapping();
-        $schedule->command('add:sitemaps_with_archiving_inventory')->daily();
+        $schedule->command('add:sitemaps')->daily();
         // $schedule->command('inspire')
         //          ->hourly();
     }

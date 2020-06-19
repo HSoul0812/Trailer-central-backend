@@ -15,8 +15,8 @@ class LeadTransformer extends TransformerAbstract {
              'name' => $lead->full_name,
              'inventory' => $lead->inventory,
              'interactions' => $lead->interactions,
-             'status' => $lead->leadStatus->status,
-             'next_contact_date' => $lead->leadStatus->next_contact_date,
+             'status' => ($lead->leadStatus) ? $lead->leadStatus->status : null,
+             'next_contact_date' => ($lead->leadStatus) ? $lead->leadStatus->next_contact_date : null,
              'created_at' => $lead->date_submitted
          ];
          
