@@ -62,6 +62,8 @@ class CreateCrmTextCampaigns extends Migration
         Schema::create('crm_text_campaign_sent', function (Blueprint $table) {
             $table->bigIncrements('id');
 
+            $table->integer('text_campaign_id');
+
             $table->integer('lead_id');
 
             $table->integer('text_id');
@@ -84,7 +86,7 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->string('from_email_address');
 
-            $table->enum('action', Campaign::STATUS_ACTIONS);
+            $table->enum('action', Blast::STATUS_ACTIONS);
 
             $table->integer('location_id');
 
@@ -92,7 +94,7 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('unit_category');
 
-            $table->enum('include_archived', Campaign::STATUS_ARCHIVED);
+            $table->enum('include_archived', Blast::STATUS_ARCHIVED);
 
             $table->tinyInteger('is_delivered');
 
@@ -105,6 +107,8 @@ class CreateCrmTextCampaigns extends Migration
 
         Schema::create('crm_text_blast_sent', function (Blueprint $table) {
             $table->bigIncrements('id');
+
+            $table->integer('text_blast_id');
 
             $table->integer('lead_id');
 

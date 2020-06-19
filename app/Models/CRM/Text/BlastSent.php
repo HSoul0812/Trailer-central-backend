@@ -19,6 +19,7 @@ class BlastSent extends Model
      * @var array
      */
     protected $fillable = [
+        'text_blast_id',
         'lead_id',
         'text_id'
     ];
