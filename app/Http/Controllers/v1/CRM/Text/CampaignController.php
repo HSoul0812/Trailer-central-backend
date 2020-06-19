@@ -1,35 +1,36 @@
 <?php
 
-namespace App\Http\Controllers\v1\CRM\Texts;
+namespace App\Http\Controllers\v1\CRM\Text;
 
 use App\Http\Controllers\RestfulController;
-use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\CRM\Text\GetTextsRequest;
-use App\Http\Requests\CRM\Text\CreateTextRequest;
-use App\Http\Requests\CRM\Text\ShowTextRequest;
-use App\Http\Requests\CRM\Text\UpdateTextRequest;
-use App\Http\Requests\CRM\Text\DeleteTextRequest;
-use App\Transformers\CRM\Text\TextTransformer;
+use App\Http\Requests\CRM\Text\GetCampaignsRequest;
+use App\Http\Requests\CRM\Text\CreateCampaignRequest;
+use App\Http\Requests\CRM\Text\ShowCampaignRequest;
+use App\Http\Requests\CRM\Text\UpdateCampaignRequest;
+use App\Http\Requests\CRM\Text\DeleteCampaignRequest;
+use App\Http\Requests\CRM\Text\CreateCampaignSentRequest;
+use App\Transformers\CRM\Text\CampaignTransformer;
 
-class TextController extends RestfulController
+class CampaignController extends RestfulController
 {
-    protected $texts;
+    protected $campaigns;
 
     /**
      * Create a new controller instance.
      *
-     * @param Repository $texts
+     * @param Repository $campaigns
      */
-    public function __construct(TextRepositoryInterface $texts)
+    public function __construct(CampaignRepositoryInterface $campaigns)
     {
-        $this->texts = $texts;
+        $this->campaigns = $campaigns;
     }
 
 
     /**
      * @OA\Get(
-     *     path="/api/crm/{leadId}/texts",
+     *     path="/api/crm/{userId}/texts/campaign",
      *     description="Retrieve a list of texts by lead id",
      *     tags={"Text"},
      *     @OA\Parameter(
@@ -58,10 +59,10 @@ class TextController extends RestfulController
      * )
      */
     public function index(Request $request) {
-        $request = new GetTextsRequest($request->all());
+        $request = new GetCampaignsRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->texts->getAll($request->all()), new TextTransformer);
+            return $this->response->paginator($this->campaigns->getAll($request->all()), new CampaignTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -69,8 +70,8 @@ class TextController extends RestfulController
     
     /**
      * @OA\Put(
-     *     path="/api/crm/{leadId}/texts",
-     *     description="Create a text",
+     *     path="/api/crm/{userId}/texts/campaign",
+     *     description="Create a campaign",
      *     tags={"Text"},
      *     @OA\Parameter(
      *         name="id",
@@ -106,10 +107,10 @@ class TextController extends RestfulController
      * )
      */
     public function create(Request $request) {
-        $request = new CreateTextRequest($request->all());
+        $request = new CreateCampaignRequest($request->all());
         if ( $request->validate() ) {
             // Create Text
-            return $this->response->item($this->texts->create($request->all()), new TextTransformer());
+            return $this->response->item($this->campaigns->create($request->all()), new CampaignTransformer());
         }  
         
         return $this->response->errorBadRequest();
@@ -117,8 +118,8 @@ class TextController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/crm/{leadId}/texts/{id}",
-     *     description="Retrieve a text",
+     *     path="/api/crm/{userId}/texts/campaign/{id}",
+     *     description="Retrieve a campaign",
      
      *     tags={"Post"},
      *     @OA\Parameter(
@@ -140,10 +141,10 @@ class TextController extends RestfulController
      * )
      */
     public function show(int $id) {
-        $request = new ShowTextRequest(['id' => $id]);
+        $request = new ShowCampaignRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->posts->get(['id' => $id]), new TextTransformer());
+            return $this->response->item($this->posts->get(['id' => $id]), new CampaignTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -151,8 +152,8 @@ class TextController extends RestfulController
     
     /**
      * @OA\Text(
-     *     path="/api/crm/{leadId}/texts/{id}",
-     *     description="Update a text",
+     *     path="/api/crm/{userId}/texts/campaign/{id}",
+     *     description="Update a campaign",
      * 
      *     @OA\Parameter(
      *         name="id",
@@ -190,10 +191,10 @@ class TextController extends RestfulController
     public function update(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
-        $request = new UpdateTextRequest($requestData);
+        $request = new UpdateCampaignRequest($requestData);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->texts->update($request->all()), new TextTransformer());
+            return $this->response->item($this->campaigns->update($request->all()), new CampaignTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -201,8 +202,8 @@ class TextController extends RestfulController
 
     /**
      * @OA\Delete(
-     *     path="/api/crm/{leadId}/texts/{id}",
-     *     description="Delete a text",     
+     *     path="/api/crm/{userId}/texts/campaign/{id}",
+     *     description="Delete a campaign",
      *     tags={"Text"},
      *     @OA\Parameter(
      *         name="id",
@@ -223,11 +224,45 @@ class TextController extends RestfulController
      * )
      */
     public function destroy(int $id) {
-        $request = new DeleteTextRequest(['id' => $id]);
+        $request = new DeleteCampaignRequest(['id' => $id]);
         
         if ( $request->validate()) {
             // Create Text
-            return $this->response->item($this->texts->delete(['id' => $id]), new TextTransformer());
+            return $this->response->item($this->campaigns->delete(['id' => $id]), new CampaignTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Sent(
+     *     path="/api/crm/{userId}/texts/campaign/{id}/sent",
+     *     description="Mark campaign and sent to lead",
+     *     tags={"Text"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Text ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Confirms text was deleted",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function sent(int $id) {
+        $request = new SentCampaignRequest(['id' => $id]);
+        
+        if ( $request->validate()) {
+            // Create Text
+            return $this->response->item($this->campaigns->sent(['id' => $id]), new CampaignTransformer());
         }
         
         return $this->response->errorBadRequest();

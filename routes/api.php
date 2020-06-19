@@ -183,35 +183,35 @@ $api->version('v1', function ($route) {
      * Texts Template
      */
     $route->group(['middleware' => 'text.template.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Texts\TextTemplateController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Texts\TextTemplateController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextTemplateController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextTemplateController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextTemplateController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Texts\TemplateController@index')->where('userId', '[0-9]+');
+        $route->put('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Texts\TemplateController@create')->where('userId', '[0-9]+');
+        $route->get('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Texts\TemplateController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Texts\TemplateController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Texts\TemplateController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
      * Texts Campaign
      */
     $route->group(['middleware' => 'text.campaign.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Texts\TextCampaignController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Texts\TextCampaignController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextCampaignController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextCampaignController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextCampaignController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/campaign/{id}/sent', 'App\Http\Controllers\v1\CRM\Texts\TextCampaignController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Texts\CampaignController@index')->where('userId', '[0-9]+');
+        $route->put('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Texts\CampaignController@create')->where('userId', '[0-9]+');
+        $route->get('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Texts\CampaignController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Texts\CampaignController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Texts\CampaignController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/campaign/{id}/sent', 'App\Http\Controllers\v1\CRM\Texts\CampaignController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
      * Texts Blast
      */
     $route->group(['middleware' => 'text.blast.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Texts\TextBlastController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Texts\TextBlastController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextBlastController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextBlastController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Texts\TextBlastController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/blast/{id}/sent', 'App\Http\Controllers\v1\CRM\Texts\TextBlastController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Texts\BlastController@index')->where('userId', '[0-9]+');
+        $route->put('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Texts\BlastController@create')->where('userId', '[0-9]+');
+        $route->get('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Texts\BlastController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Texts\BlastController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Texts\BlastController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/blast/{id}/sent', 'App\Http\Controllers\v1\CRM\Texts\BlastController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
     });
 
 

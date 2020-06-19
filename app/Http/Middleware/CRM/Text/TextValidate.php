@@ -5,7 +5,7 @@ namespace App\Http\Middleware\CRM\Text;
 use Closure;
 use App\Http\Middleware\ValidRoute;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Text\Text;
+use App\Models\CRM\Interactions\TextLog;
 
 class TextValidate extends ValidRoute {
 
@@ -39,7 +39,7 @@ class TextValidate extends ValidRoute {
         };
         
         $this->validator[self::ID_PARAM] = function ($data) {
-            if (empty(Text::find($data))) {
+            if (empty(TextLog::find($data))) {
                 return false;
             }
             

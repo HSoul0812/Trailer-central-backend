@@ -3,11 +3,11 @@
 namespace App\Transformers\CRM\Text;
 
 use League\Fractal\TransformerAbstract;
-use App\Models\CRM\Text\Text;
+use App\Models\CRM\Interactions\TextLog;
 
 class TextTransformer extends TransformerAbstract
 {
-    public function transform(Text $text)
+    public function transform(TextLog $text)
     {
 	 return [
              'id' => (int)$text->id,
