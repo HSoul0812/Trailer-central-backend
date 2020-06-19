@@ -60,11 +60,11 @@ class CreateCrmTextCampaigns extends Migration
         });
 
         Schema::create('crm_text_campaign_sent', function (Blueprint $table) {
-            $table->bigIncrements('id');
-
             $table->integer('text_campaign_id');
 
             $table->integer('lead_id');
+
+            $table->primary(['text_campaign_id', 'lead_id']);
 
             $table->integer('text_id');
 
@@ -106,11 +106,11 @@ class CreateCrmTextCampaigns extends Migration
         });
 
         Schema::create('crm_text_blast_sent', function (Blueprint $table) {
-            $table->bigIncrements('id');
-
             $table->integer('text_blast_id');
 
             $table->integer('lead_id');
+
+            $table->primary(['text_blast_id', 'lead_id']);
 
             $table->integer('text_id');
 
