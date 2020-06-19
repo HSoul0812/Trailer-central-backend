@@ -5,17 +5,16 @@ namespace App\Http\Requests\CRM\Text;
 use App\Http\Requests\Request;
 
 /**
- * Get Texts Request
+ * Get Templates Request
  * 
  * @author David A Conway Jr.
  */
-class GetTextsRequest extends Request {
+class GetTemplatesRequest extends Request {
     
     protected $rules = [
-        'from_number' => 'string',
-        'to_number' => 'string',
+        'name' => 'string',
         'per_page' => 'integer',
-        'sort' => 'in:from_number,-from_number,to_number,-to_number,date_sent,-date_sent',
+        'sort' => 'in:name,-name,created_at,-created_at,updated_at,-updated_at',
         'id' => 'array',
         'id.*' => 'integer'
     ];

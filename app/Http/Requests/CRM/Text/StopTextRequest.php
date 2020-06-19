@@ -5,14 +5,15 @@ namespace App\Http\Requests\CRM\Text;
 use App\Http\Requests\Request;
 
 /**
- * Delete Campaign Request
- *
+ * Show Text Request
+ * 
  * @author David A Conway Jr.
  */
-class DeleteCampaignRequest extends Request {
+class StopTextRequest extends Request {
     
     protected $rules = [
-        'id' => 'integer'
+        'response_id' => 'nullable|integer',
+        'text_number' => 'required|string'
     ];
     
 }

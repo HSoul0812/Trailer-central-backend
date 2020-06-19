@@ -5,17 +5,16 @@ namespace App\Http\Requests\CRM\Text;
 use App\Http\Requests\Request;
 
 /**
- * Get Texts Request
+ * Get Blasts Request
  * 
  * @author David A Conway Jr.
  */
-class GetTextsRequest extends Request {
+class GetBlastsRequest extends Request {
     
     protected $rules = [
-        'from_number' => 'string',
-        'to_number' => 'string',
+        'campaign_name' => 'required|string',
         'per_page' => 'integer',
-        'sort' => 'in:from_number,-from_number,to_number,-to_number,date_sent,-date_sent',
+        'sort' => 'in:campaign_name,-campaign_name,campaign_subject,-campaign_subject,email_address,-email_address,created_at,-created_at,updated_at,-updated_at',
         'id' => 'array',
         'id.*' => 'integer'
     ];

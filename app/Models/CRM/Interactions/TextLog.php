@@ -22,8 +22,21 @@ class TextLog extends Model
      */
     protected $primaryKey = 'id';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'lead_id',
+        'log_message',
+        'from_number',
+        'to_number',
+        'date_sent'
+    ];
+
     public function lead()
     {
-        return $this->belongsTo(Lead::class, 'identifier', 'id');
+        return $this->belongsTo(Lead::class, 'identifier', 'lead_id');
     }
 }

@@ -10,7 +10,7 @@ use App\Http\Requests\CRM\Text\CreateCampaignRequest;
 use App\Http\Requests\CRM\Text\ShowCampaignRequest;
 use App\Http\Requests\CRM\Text\UpdateCampaignRequest;
 use App\Http\Requests\CRM\Text\DeleteCampaignRequest;
-use App\Http\Requests\CRM\Text\CreateCampaignSentRequest;
+use App\Http\Requests\CRM\Text\SentCampaignRequest;
 use App\Transformers\CRM\Text\CampaignTransformer;
 
 class CampaignController extends RestfulController
