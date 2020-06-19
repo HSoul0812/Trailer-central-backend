@@ -3,8 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Models\User\AuthToken;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use App\Models\User\AuthToken;
 
 class AccessToken
 {
@@ -24,7 +25,7 @@ class AccessToken
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
             if ($accessToken && $accessToken->user) {
-                $request['dealer_id'] = [$accessToken->user->dealer_id];
+                Auth::setUser($accessToken->user);
                 return $next($request);
             }
         }

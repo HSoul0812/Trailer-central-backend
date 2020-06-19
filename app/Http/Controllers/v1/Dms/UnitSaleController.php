@@ -23,6 +23,7 @@ class UnitSaleController extends RestfulController
      */
     public function __construct(QuoteRepositoryInterface $quotes)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->quotes = $quotes;
     }
     

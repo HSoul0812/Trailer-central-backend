@@ -20,6 +20,7 @@ class BulkUploadController extends RestfulController
      */
     public function __construct()
     {
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->bulkUploads = \app('App\Repositories\Bulk\Parts\BulkUploadRepository');
     }
     

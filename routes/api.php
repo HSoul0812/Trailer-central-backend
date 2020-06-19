@@ -112,6 +112,7 @@ $api->version('v1', function ($route) {
      * Parts
      */
     $route->get('parts', 'App\Http\Controllers\v1\Parts\PartsController@index');
+    $route->put('parts', 'App\Http\Controllers\v1\Parts\PartsController@create');
     $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show')->where('id', '[0-9]+');
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
@@ -207,8 +208,6 @@ $api->version('v1', function ($route) {
     
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
-
-        $route->put('user/parts', 'App\Http\Controllers\v1\Parts\PartsController@create');
 
         /*
         |--------------------------------------------------------------------------
