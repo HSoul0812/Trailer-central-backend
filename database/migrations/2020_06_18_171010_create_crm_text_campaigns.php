@@ -17,11 +17,11 @@ class CreateCrmTextCampaigns extends Migration
     {
         // Create CRM Text Template
         Schema::create('crm_text_template', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id')->unsigned();
 
-            $table->integer('user_id');
+            $table->integer('user_id')->unsigned();
 
-            $table->string('name');
+            $table->string('name')->unsigned();
 
             $table->string('template');
 
@@ -33,17 +33,19 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->foreign('user_id')
                     ->references('user_id')
-                    ->on('new_user');
+                    ->on('new_user')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
         });
 
 
         // Create CRM Text Campaign
         Schema::create('crm_text_campaign', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id')->unsigned();
 
-            $table->integer('user_id');
+            $table->integer('user_id')->unsigned();
 
-            $table->integer('template_id')->index();
+            $table->integer('template_id')->unsigned()->index();
 
             $table->string('campain_name');
 
@@ -71,7 +73,9 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->foreign('user_id')
                     ->references('user_id')
-                    ->on('new_user');
+                    ->on('new_user')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
 
             $table->foreign('template_id')
                     ->references('id')
@@ -81,11 +85,11 @@ class CreateCrmTextCampaigns extends Migration
 
         // Create CRM Text Campaign Sent
         Schema::create('crm_text_campaign_sent', function (Blueprint $table) {
-            $table->integer('text_campaign_id');
+            $table->integer('text_campaign_id')->unsigned();
 
-            $table->integer('lead_id');
+            $table->integer('lead_id')->unsigned();
 
-            $table->integer('text_id')->index();
+            $table->integer('text_id')->unsigned()->index();
 
             $table->timestamps();
 
@@ -109,11 +113,11 @@ class CreateCrmTextCampaigns extends Migration
 
         // Create CRM Text Blast
         Schema::create('crm_text_blast', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id')->unsigned();
 
-            $table->integer('user_id');
+            $table->integer('user_id')->unsigned();
 
-            $table->integer('template_id')->index();
+            $table->integer('template_id')->unsigned()->index();
 
             $table->string('campain_name');
 
@@ -143,7 +147,9 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->foreign('user_id')
                     ->references('user_id')
-                    ->on('new_user');
+                    ->on('new_user')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
 
             $table->foreign('template_id')
                     ->references('id')
@@ -153,11 +159,11 @@ class CreateCrmTextCampaigns extends Migration
 
         // CRM Text Blast Sent
         Schema::create('crm_text_blast_sent', function (Blueprint $table) {
-            $table->integer('text_blast_id');
+            $table->integer('text_blast_id')->unsigned();
 
-            $table->integer('lead_id');
+            $table->integer('lead_id')->unsigned();
 
-            $table->integer('text_id')->index();
+            $table->integer('text_id')->unsigned()->index();
 
             $table->timestamps();
 
@@ -181,13 +187,13 @@ class CreateCrmTextCampaigns extends Migration
 
         // CRM Text Stop
         Schema::create('crm_text_stop', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id')->unsigned();
 
-            $table->integer('lead_id');
+            $table->integer('lead_id')->unsigned();
 
-            $table->integer('text_id');
+            $table->integer('text_id')->unsigned();
 
-            $table->integer('response_id');
+            $table->integer('response_id')->unsigned();
 
             $table->tinyInteger('deleted')->default(0)->index();
 
