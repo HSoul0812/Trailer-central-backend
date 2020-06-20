@@ -79,7 +79,7 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->foreign('template_id')
                     ->references('id')
-                    ->on('crm_website_template');
+                    ->on('crm_text_template');
         });
 
 
