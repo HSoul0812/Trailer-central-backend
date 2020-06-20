@@ -89,7 +89,7 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('lead_id')->unsigned();
 
-            $table->integer('text_id')->unsigned()->index();
+            $table->integer('text_id')->index();
 
             $table->timestamps();
 
@@ -163,7 +163,7 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('lead_id')->unsigned();
 
-            $table->integer('text_id')->unsigned()->index();
+            $table->integer('text_id')->index();
 
             $table->timestamps();
 
@@ -191,9 +191,9 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('lead_id')->unsigned();
 
-            $table->integer('text_id')->unsigned();
+            $table->integer('text_id');
 
-            $table->integer('response_id')->unsigned();
+            $table->integer('response_id');
 
             $table->tinyInteger('deleted')->default(0)->index();
 
