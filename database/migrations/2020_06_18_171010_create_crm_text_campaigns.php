@@ -26,7 +26,15 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->timestamps();
 
-            $table->tinyInteger('deleted');
+            $table->tinyInteger('deleted')->default(0)->index();
+
+            $table->index(['user_id', 'name']);
+            
+            $table->foreign('user_id')
+                    ->references('user_id')
+                    ->on('new_user')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
         });
 
         Schema::create('crm_text_campaign', function (Blueprint $table) {
@@ -34,29 +42,41 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('user_id');
 
-            $table->integer('template_id');
+            $table->integer('template_id')->index();
 
             $table->string('campain_name');
 
             $table->string('campain_subject');
 
-            $table->string('from_email_address');
+            $table->string('from_email_address')->index();
 
-            $table->enum('action', Campaign::STATUS_ACTIONS);
+            $table->enum('action', Campaign::STATUS_ACTIONS)->nullable();
 
-            $table->integer('location_id');
+            $table->integer('location_id')->nullable();
 
-            $table->integer('send_after_days');
+            $table->integer('send_after_days')->nullable();
 
-            $table->integer('unit_category');
+            $table->integer('unit_category')->nullable();
 
-            $table->enum('include_archived', Campaign::STATUS_ARCHIVED);
+            $table->enum('include_archived', Campaign::STATUS_ARCHIVED)->default('0');
 
-            $table->tinyInteger('is_enabled');
+            $table->tinyInteger('is_enabled')->default(1)->index();
 
             $table->timestamps();
 
-            $table->tinyInteger('deleted');
+            $table->tinyInteger('deleted')->default(0)->index();
+
+            $table->unique(['user_id', 'campaign_name']);
+
+            $table->foreign('user_id')
+                    ->references('user_id')
+                    ->on('new_user')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
+
+            $table->foreign('template_id')
+                    ->references('id')
+                    ->on('crm_website_template');
         });
 
         Schema::create('crm_text_campaign_sent', function (Blueprint $table) {
@@ -64,13 +84,21 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('lead_id');
 
-            $table->primary(['text_campaign_id', 'lead_id']);
-
-            $table->integer('text_id');
+            $table->integer('text_id')->index();
 
             $table->timestamps();
 
-            $table->tinyInteger('deleted');
+            $table->tinyInteger('deleted')->default(0)->index();
+
+            $table->primary(['text_campaign_id', 'lead_id']);
+
+            $table->foreign('lead_id')
+                    ->references('identifier')
+                    ->on('website_lead');
+
+            $table->foreign('text_id')
+                    ->references('id')
+                    ->on('dealer_texts_log');
         });
 
         Schema::create('crm_text_blast', function (Blueprint $table) {
@@ -78,31 +106,43 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('user_id');
 
-            $table->integer('template_id');
+            $table->integer('template_id')->index();
 
             $table->string('campain_name');
 
             $table->string('campain_subject');
 
-            $table->string('from_email_address');
+            $table->string('from_email_address')->index();
 
-            $table->enum('action', Blast::STATUS_ACTIONS);
+            $table->enum('action', Blast::STATUS_ACTIONS)->nullable();
 
-            $table->integer('location_id');
+            $table->integer('location_id')->nullable();
 
-            $table->integer('send_after_days');
+            $table->integer('send_after_days')->nullable();
 
-            $table->integer('unit_category');
+            $table->integer('unit_category')->nullable();
 
-            $table->enum('include_archived', Blast::STATUS_ARCHIVED);
+            $table->enum('include_archived', Blast::STATUS_ARCHIVED)->default('0');
 
-            $table->tinyInteger('is_delivered');
+            $table->tinyInteger('is_delivered')->default(0)->index();
 
-            $table->tinyInteger('is_cancelled');
+            $table->tinyInteger('is_cancelled')->default(0)->index();
 
             $table->timestamps();
 
-            $table->tinyInteger('deleted');
+            $table->tinyInteger('deleted')->default(0)->index();
+
+            $table->unique(['user_id', 'campaign_name']);
+
+            $table->foreign('user_id')
+                    ->references('user_id')
+                    ->on('new_user')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
+
+            $table->foreign('template_id')
+                    ->references('id')
+                    ->on('crm_text_template');
         });
 
         Schema::create('crm_text_blast_sent', function (Blueprint $table) {
@@ -110,13 +150,21 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('lead_id');
 
-            $table->primary(['text_blast_id', 'lead_id']);
-
-            $table->integer('text_id');
+            $table->integer('text_id')->index();
 
             $table->timestamps();
 
-            $table->tinyInteger('deleted');
+            $table->tinyInteger('deleted')->default(0)->index();
+
+            $table->primary(['text_blast_id', 'lead_id']);
+
+            $table->foreign('lead_id')
+                    ->references('identifier')
+                    ->on('website_lead');
+
+            $table->foreign('text_id')
+                    ->references('id')
+                    ->on('dealer_texts_log');
         });
 
         Schema::create('crm_text_stop', function (Blueprint $table) {
@@ -128,9 +176,21 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('response_id');
 
-            $table->string('text_number');
+            $table->tinyInteger('deleted')->default(0)->index();
 
             $table->timestamps();
+
+            $table->foreign('lead_id')
+                    ->references('identifier')
+                    ->on('website_lead');
+
+            $table->foreign('text_id')
+                    ->references('id')
+                    ->on('dealer_texts_log');
+
+            $table->foreign('response_id')
+                    ->references('id')
+                    ->on('dealer_texts_log');
         });
     }
 
