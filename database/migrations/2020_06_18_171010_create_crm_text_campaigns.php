@@ -47,9 +47,9 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('template_id')->unsigned()->index();
 
-            $table->string('campain_name');
+            $table->string('campaign_name');
 
-            $table->string('campain_subject');
+            $table->string('campaign_subject');
 
             $table->string('from_email_address')->index();
 
@@ -119,9 +119,9 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('template_id')->unsigned()->index();
 
-            $table->string('campain_name');
+            $table->string('campaign_name');
 
-            $table->string('campain_subject');
+            $table->string('campaign_subject');
 
             $table->string('from_email_address')->index();
 
