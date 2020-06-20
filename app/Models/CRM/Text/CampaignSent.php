@@ -19,6 +19,7 @@ class CampaignSent extends Model
      * @var array
      */
     protected $fillable = [
+        'text_campaign_id',
         'lead_id',
         'text_id'
     ];
