@@ -30,14 +30,10 @@ class CreateCrmTextCampaigns extends Migration
             $table->tinyInteger('deleted')->default(0)->index();
 
             $table->index(['user_id', 'name']);
-        });
 
-        Schema::table('crm_text_template', function (Blueprint $table) {
             $table->foreign('user_id')
                     ->references('user_id')
-                    ->on('new_user')
-                    ->onDelete('CASCADE')
-                    ->onUpdate('CASCADE');
+                    ->on('new_user');
         });
 
 
@@ -72,14 +68,10 @@ class CreateCrmTextCampaigns extends Migration
             $table->tinyInteger('deleted')->default(0)->index();
 
             $table->unique(['user_id', 'campaign_name']);
-        });
 
-        Schema::table('crm_text_campaign', function (Blueprint $table) {
             $table->foreign('user_id')
                     ->references('user_id')
-                    ->on('new_user')
-                    ->onDelete('CASCADE')
-                    ->onUpdate('CASCADE');
+                    ->on('new_user');
 
             $table->foreign('template_id')
                     ->references('id')
@@ -100,9 +92,7 @@ class CreateCrmTextCampaigns extends Migration
             $table->tinyInteger('deleted')->default(0)->index();
 
             $table->primary(['text_campaign_id', 'lead_id']);
-        });
 
-        Schema::table('crm_text_campaign_sent', function (Blueprint $table) {
             $table->foreign('text_campaign_id')
                     ->references('id')
                     ->on('crm_text_campaign');
@@ -150,14 +140,10 @@ class CreateCrmTextCampaigns extends Migration
             $table->tinyInteger('deleted')->default(0)->index();
 
             $table->unique(['user_id', 'campaign_name']);
-        });
 
-        Schema::table('crm_text_blast', function (Blueprint $table) {
             $table->foreign('user_id')
                     ->references('user_id')
-                    ->on('new_user')
-                    ->onDelete('CASCADE')
-                    ->onUpdate('CASCADE');
+                    ->on('new_user');
 
             $table->foreign('template_id')
                     ->references('id')
@@ -178,9 +164,7 @@ class CreateCrmTextCampaigns extends Migration
             $table->tinyInteger('deleted')->default(0)->index();
 
             $table->primary(['text_blast_id', 'lead_id']);
-        });
 
-        Schema::table('crm_text_blast_sent', function (Blueprint $table) {
             $table->foreign('text_blast_id')
                     ->references('id')
                     ->on('crm_text_blast');
@@ -208,9 +192,7 @@ class CreateCrmTextCampaigns extends Migration
             $table->tinyInteger('deleted')->default(0)->index();
 
             $table->timestamps();
-        });
 
-        Schema::table('crm_text_stop', function (Blueprint $table) {
             $table->foreign('lead_id')
                     ->references('identifier')
                     ->on('website_lead');
