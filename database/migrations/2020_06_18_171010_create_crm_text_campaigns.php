@@ -220,16 +220,16 @@ class CreateCrmTextCampaigns extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('crm_text_template');
-
-        Schema::dropIfExists('crm_text_campaign');
-
-        Schema::dropIfExists('crm_text_campaign_sent');
-
-        Schema::dropIfExists('crm_text_blast');
+        Schema::dropIfExists('crm_text_stop');
 
         Schema::dropIfExists('crm_text_blast_sent');
 
-        Schema::dropIfExists('crm_text_stop');
+        Schema::dropIfExists('crm_text_blast');
+
+        Schema::dropIfExists('crm_text_campaign_sent');
+
+        Schema::dropIfExists('crm_text_campaign');
+
+        Schema::dropIfExists('crm_text_template');
     }
 }
