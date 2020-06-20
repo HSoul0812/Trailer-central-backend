@@ -21,7 +21,7 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('user_id')->unsigned();
 
-            $table->string('name')->unsigned();
+            $table->string('name');
 
             $table->string('template');
 
