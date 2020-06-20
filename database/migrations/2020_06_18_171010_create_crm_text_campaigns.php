@@ -92,6 +92,10 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->primary(['text_campaign_id', 'lead_id']);
 
+            $table->foreign('text_campaign_id')
+                    ->references('id')
+                    ->on('crm_text_campaign');
+
             $table->foreign('lead_id')
                     ->references('identifier')
                     ->on('website_lead');
@@ -157,6 +161,10 @@ class CreateCrmTextCampaigns extends Migration
             $table->tinyInteger('deleted')->default(0)->index();
 
             $table->primary(['text_blast_id', 'lead_id']);
+
+            $table->foreign('text_blast_id')
+                    ->references('id')
+                    ->on('crm_text_blast');
 
             $table->foreign('lead_id')
                     ->references('identifier')
