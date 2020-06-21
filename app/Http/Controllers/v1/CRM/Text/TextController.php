@@ -11,6 +11,7 @@ use App\Http\Requests\CRM\Text\ShowTextRequest;
 use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
+use Twilio\Rest\Client;
 
 class TextController extends RestfulController
 {
@@ -374,74 +375,39 @@ class TextController extends RestfulController
      */
     public function sendText(Request $request)
     {
-        try {
-            $user = User::findOrFail($request->input('user_id'));
+        $request = new SendTextRequest($request->all());
+        
+        if ( $request->validate()) {
+            // Get Params
+            $params = $request->all();
+            $phone = $params['phone'];
+
+            // Initialize Twilio Client
+            $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+            // Find Lead ID
             $lead = Lead::findOrFail($request->input('lead_id'));
-            $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
-            $dealer = $user->dealer();
-            $leadProduct = $lead->product();
-            $leadProductId = $leadProduct->id ?? 0;
-            $subject = $request->input('subject');
-            $body = $request->input('body');
-            $customer = $this->getCustomer($user, $lead);
+            $locationId = $lead->dealer_location_id;
+            $dealer = $lead->dealer();
 
-            if ( !empty($emailHistory) && !empty($emailHistory->interaction_id)) {
-                Interaction::find($emailHistory->interaction_id)
-                    ->update(["interaction_notes" => "E-Mail Sent: {$subject}"]);
-            } else {
-                $emailHistory->interaction_id = Interaction::create(
-                    array(
-                        "lead_product_id"   => $leadProductId,
-                        "tc_lead_id"        => $lead->identifier,
-                        "user_id"           => $user->user_id,
-                        "interaction_type"  => "EMAIL",
-                        "interaction_notes" => "E-Mail Sent: {$subject}",
-                        "interaction_time"  => Carbon::now()->toDateTimeString(),
-                    )
-                );
+            // Initialize Text Form
+            $to_number = '+' . ((strlen($phone) === 11) ? $phone : '1' . $phone);
+            $phoneRouter = new \Interactions\PhoneRouter($lead->dealer_id, $locationId, $db, $to_number, '', $client);
+            $from_number = $phoneRouter->getDealerNumber();
+
+            // Look Up To Number
+            $carrier = $client->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
+            if (empty($carrier['mobile_country_code'])) {
+                return response()->json([
+                    'status' => 'landline',
+                    'message' => 'Error: The number provided is a landline and cannot receive texts!'
+                ], 500);
             }
-            $customer['email'] = '5206997905-ceda07@inbox.mailtrap.io';
-            Mail::to($customer["email"] ?? "" )->send(
-                new InteractionEmail([
-                    'date' => Carbon::now()->toDateTimeString(),
-                    'replyToEmail' => $user->email ?? "",
-                    'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
-                    'subject' => $subject,
-                    'body' => $body,
-                    'attach' => $attach,
-                    'id' => $uniqueId
-                ])
-            );
 
-            $insert = [
-                'interaction_id'    => $emailHistory->interaction_id,
-                'message_id'        => $uniqueId,
-                'lead_id'           => $lead->identifier,
-                'to_name'           => $customer['name'],
-                'to_email'          => $customer['email'],
-                'from_email'        => $user->email,
-                'from_name'         => $user->username,
-                'subject'           => $request->input('subject'),
-                'body'              => $request->input('body'),
-                'use_html'          => true,
-                'root_message_id'   => 0,
-                'parent_message_id'   => 0,
-            ];
-
-            $attachment->uploadAttachments($files, $dealer, $uniqueId);
-            $emailHistory->createOrUpdateEmailHistory($emailHistory, $insert);
-
-            return $this->response->array([
-                'success' => true,
-                'message' => "Email sent successfully",
-            ]);
-
-        } catch (Throwable $throwable) {
-            Log::error($throwable->getMessage());
-            return $this->response->array([
-                'error' => true,
-                'message' => $throwable->getMessage()
-            ])->setStatusCode(500);
+            // Send Text
+            return $this->response->item($this->texts->create($request->all()), new TextTransformer());
         }
+        
+        return $this->response->errorBadRequest();
     }
 }
