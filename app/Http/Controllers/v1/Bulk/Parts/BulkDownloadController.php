@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Http\Controllers\v1\Bulk\Parts;
-
 
 use App\Http\Controllers\Controller;
 use App\Jobs\Bulk\Parts\CsvExportJob;
@@ -15,6 +13,12 @@ use Illuminate\Support\Facades\Storage;
 
 class BulkDownloadController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
+    }
+
     /**
      * Create a bulk csv file download request
      *

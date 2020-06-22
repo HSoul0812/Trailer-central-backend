@@ -1,11 +1,9 @@
 <?php
 
-
 namespace App\Models\CRM\Account;
 
-
-use App\Models\CRM\Dms\UnitSale;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Dms\UnitSale;
 
 class Invoice extends Model
 {
@@ -16,20 +14,15 @@ class Invoice extends Model
      */
     protected $table = 'qb_invoices';
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
+    public $timestamps = false;
 
     public function unitSale()
     {
-        return $this->hasMany(UnitSale::class, 'id', 'unit_sale_id');
+        return $this->hasOne(UnitSale::class, 'id', 'unit_sale_id');
     }
 
-    public function payment()
+    public function payments()
     {
-        return $this->hasMany(Payment::class, 'invoice_id', 'id');
+        return $this->hasMany(Payment::class);
     }
 }
