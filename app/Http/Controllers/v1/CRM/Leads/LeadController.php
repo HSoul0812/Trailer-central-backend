@@ -19,6 +19,7 @@ class LeadController extends RestfulController
      */
     public function __construct(LeadRepositoryInterface $leads)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->leads = $leads;
     }
 

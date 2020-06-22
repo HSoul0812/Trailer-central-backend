@@ -4,7 +4,6 @@ namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
-use App\Exceptions\NotImplementedException;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Http\Requests\Parts\CreatePartRequest;
 use App\Http\Requests\Parts\DeletePartRequest;
@@ -25,6 +24,7 @@ class PartsController extends RestfulController
      */
     public function __construct(PartRepositoryInterface $parts)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->parts = $parts;
     }
     

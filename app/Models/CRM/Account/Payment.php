@@ -5,6 +5,7 @@ namespace App\Models\CRM\Account;
 
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Quickbooks\PaymentMethod;
 
 class Payment extends Model
 {
@@ -15,15 +16,16 @@ class Payment extends Model
      */
     protected $table = 'qb_payment';
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
+    public $timestamps = false;
+
 
     public function invoices()
     {
         return $this->hasMany(Invoice::class, 'id', 'invoice_id');
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
     }
 }

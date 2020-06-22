@@ -1,7 +1,6 @@
 <?php
 
 use Dingo\Api\Routing\Router;
-use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -209,6 +208,16 @@ $api->version('v1', function ($route) {
     
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Quotes
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
     });
 
 });

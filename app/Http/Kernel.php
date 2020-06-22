@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
 use App\Http\Middleware\Website\WebsiteValidate;
+use App\Http\Middleware\SetDealerIdOnRequest;
 use App\Http\Middleware\ValidAccessToken;
 
 class Kernel extends HttpKernel
@@ -69,6 +70,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'cors' => CorsMiddleware::class,
         'website.validate' => WebsiteValidate::class,
+        'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
         'accesstoken.validate' => ValidAccessToken::class
     ];
 
