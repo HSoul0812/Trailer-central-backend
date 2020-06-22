@@ -4,6 +4,7 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\Leads\Lead;
 
 /**
  * Class User
@@ -26,7 +27,7 @@ class User extends Model
      *
      * @var string
      */
-    protected $primaryKey = 'user_id';
+    protected $primaryKey = 'dealer_id';
 
     /**
      * The attributes that are mass assignable.
@@ -62,5 +63,10 @@ class User extends Model
     public function salesPerson()
     {
         return $this->hasOne(SalesPerson::class, 'user_id', 'user_id');
+    }
+    
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
     }
 }

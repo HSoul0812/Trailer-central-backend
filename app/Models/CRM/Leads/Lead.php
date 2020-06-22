@@ -12,15 +12,29 @@ use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
+use App\Models\Traits\TableAware;
 
 class Lead extends Model
 {
+    use TableAware;
+    
+    const STATUS_WON = 'Closed';
+    const STATUS_WON_CLOSED = 'Closed (Won)';    
+    const STATUS_LOST = 'Closed (Lost)';
+    const STATUS_HOT = 'Hot';
+    
+    const LEAD_NOT_ARCHIVED = 0;
+    const LEAD_ARCHIVED = 1;
+    
+    const TABLE_NAME = 'website_lead';
+    
+    
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'website_lead';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
@@ -257,5 +271,9 @@ class Lead extends Model
             return number_format(round($this->lifetime_sales, 2), 2);
         }
         return 0;
+    }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
     }
 }

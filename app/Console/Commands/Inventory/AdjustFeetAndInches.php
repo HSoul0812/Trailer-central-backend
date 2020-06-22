@@ -35,12 +35,8 @@ class AdjustFeetAndInches extends Command {
      */
     public function handle()
     {
-        $inventory = $this->inventoryRepository->getAll([
-            Repository::CONDITION_AND_WHERE =>[
-                ['dealer_id', '=', 6786]
-            ]
-        ], true);
-        
+        $inventory = $this->inventoryRepository->getAll([], true);
+         
         foreach($inventory as $item) {
             
             if ($item->length && empty($item->length_inches)) {
