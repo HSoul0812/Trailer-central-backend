@@ -27,7 +27,7 @@ class LeadController extends RestfulController
         $request = new GetLeadsRequest($request->all());
         $requestData = $request->all();
         
-        if ($request->validate()) {             ;
+        if ($request->validate()) {             
             return $this->response->paginator($this->leads->getAll($requestData), new LeadTransformer)->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id']));
         }
         
