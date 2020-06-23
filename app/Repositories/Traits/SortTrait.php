@@ -79,7 +79,7 @@ trait SortTrait {
         
     protected function addSortQuery($query, $sort) {
         if (!isset($this->getSortOrders()[$sort])) {
-            return;
+            return $query;
         }
 
         return $query->orderBy($this->getSortOrders()[$sort]['field'], $this->getSortOrders()[$sort]['direction']);

@@ -34,7 +34,7 @@ class AccessToken
             return $next($request);
         }
         
-        if (strpos($request->url(), 'admin') === false && strpos($request->url(), 'nova-api') === false) {
+        if (strpos($request->url(), 'admin') === false && strpos($request->url(), 'nova-api') === false && strpos($request->url(), 'api/user/login') === false) {
             return response('Invalid access token.', 403);
         }
         
