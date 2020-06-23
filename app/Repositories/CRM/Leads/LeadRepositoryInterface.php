@@ -17,8 +17,38 @@ interface LeadRepositoryInterface extends Repository {
      * ]
      * 
      * @param int $dealerId 
+     * @param array $params optional filters
      * @return array
      */
-    public function getLeadStatusCountByDealer($dealerId);
+    public function getLeadStatusCountByDealer($dealerId, $params = []);
+    
+    /**
+     * Returns customers based on leads
+     * 
+     * @param array $params optional filters
+     * @return Collection
+     */
+    public function getCustomers($params = []);
+    
+    /**
+     * Returns lead types
+     * 
+     * @return array
+     */
+    public function getTypes();
+    
+    /**
+     * Returns lead statuses
+     * 
+     * @return array
+     */
+    public function getStatuses();
+    
+    /**
+     * Returns list of available sort fields
+     * 
+     * @return array
+     */
+    public function getLeadsSortFields();
     
 }

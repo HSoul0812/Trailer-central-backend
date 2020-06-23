@@ -28,6 +28,14 @@ use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\UserRepository;
+use App\Repositories\CRM\User\SalesPersonRepository;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Repositories\User\DealerLocationRepository;
+use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\CRM\Interactions\InteractionsRepository;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,7 +54,10 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('cycle_count_exists', 'App\Rules\Parts\CycleCountExists@passes');
         \Validator::extend('manufacturer_exists', 'App\Rules\Parts\ManufacturerExists@passes');
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
-
+        \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
+        \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
+        \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
+        
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
                $this->orWhere($attribute, 'LIKE', "%{$searchTerm}%");
@@ -87,6 +98,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class); 
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(SalesPersonRepositoryInterface::class, SalesPersonRepository::class);
+        $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
+        $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
         
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);

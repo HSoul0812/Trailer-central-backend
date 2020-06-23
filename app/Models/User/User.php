@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\Lead;
+use App\Models\User\AuthToken;
 
 /**
  * Class User
@@ -97,6 +98,12 @@ class User extends Model implements Authenticatable
      * @return string
      */
     public function getRememberTokenName() {}
+    
+    public function getAccessTokenAttribute()
+    {
+        $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
+        return $authToken->access_token;
+    }
 
     public function dealer()
     {
@@ -116,5 +123,5 @@ class User extends Model implements Authenticatable
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
-    }
+    }    
 }

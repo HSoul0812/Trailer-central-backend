@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Models\CRM\Dealer;
+namespace App\Models\User;
 
 use App\Models\Inventory\Inventory;
-use App\Models\User\Dealer;
+use App\Models\User\NewDealerUser;
 use Illuminate\Database\Eloquent\Model;
 
 class DealerLocation extends Model
@@ -40,7 +40,7 @@ class DealerLocation extends Model
 
     public function dealer()
     {
-        return $this->belongsTo(Dealer::class, 'dealer_id', 'id');
+        return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
     }
 
     public function inventory()

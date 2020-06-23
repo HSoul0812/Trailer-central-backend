@@ -2,11 +2,11 @@
 
 namespace App\Models\User;
 
-use App\Models\CRM\Dealer\DealerLocation;
+use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
 use Illuminate\Database\Eloquent\Model;
 
-class Dealer extends Model
+class NewDealerUser extends Model
 {
     /**
      * The table associated with the model.

@@ -2,7 +2,7 @@
 namespace App\Models\Inventory;
 
 use App\Helpers\StringHelper;
-use App\Models\CRM\Dealer\DealerLocation;
+use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
 use App\Traits\CompactHelper;
@@ -10,11 +10,15 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Inventory\InventoryImage;
 use App\Models\Inventory\Image;
 use App\Models\User\User;
+use App\Models\Traits\TableAware;
 
 class Inventory extends Model
-{
+{    
+    use TableAware;
     
     const COLOR_ATTRIBUTE_ID = 11;
+    
+    const TABLE_NAME = 'inventory';
     
     /**
      * The table associated with the model.
@@ -105,5 +109,9 @@ class Inventory extends Model
         $url .= '.html';
 
         return $url;
+    }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
     }
 }

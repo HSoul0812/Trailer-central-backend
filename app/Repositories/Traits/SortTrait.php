@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Traits;
 
+use App\Exceptions\NotImplementedException;
+
 trait SortTrait {
     
     private $sorts = [
@@ -62,6 +64,18 @@ trait SortTrait {
             'direction' => 'ASC'
         ]
     ];
+    
+    public function getSortFields()
+    {
+        $data = [];
+        foreach($this->sortOrders as $sort => $val) {
+            $data[] = [
+                'param' => $sort,
+                'front_name' => $this->getSortOrderNames()[$sort]['name']
+            ];
+        }        
+        return $data;
+    }
         
     protected function addSortQuery($query, $sort) {
         if (!isset($this->getSortOrders()[$sort])) {
@@ -69,6 +83,10 @@ trait SortTrait {
         }
 
         return $query->orderBy($this->getSortOrders()[$sort]['field'], $this->getSortOrders()[$sort]['direction']);
+    }
+    
+    protected function getSortOrderNames() {
+        throw new NotImplementedException;
     }
     
     protected function getSortOrders() {

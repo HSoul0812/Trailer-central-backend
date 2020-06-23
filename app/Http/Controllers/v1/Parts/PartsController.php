@@ -24,7 +24,7 @@ class PartsController extends RestfulController
      */
     public function __construct(PartRepositoryInterface $parts)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['create']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
         $this->parts = $parts;
     }
     

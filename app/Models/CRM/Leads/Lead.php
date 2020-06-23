@@ -22,8 +22,12 @@ class Lead extends Model
     const STATUS_WON_CLOSED = 'Closed (Won)';    
     const STATUS_LOST = 'Closed (Lost)';
     const STATUS_HOT = 'Hot';
+    const STATUS_COLD = 'Cold';
+    const STATUS_MEDIUM = 'Medium';
+    const STATUS_UNCONTACTED = 'Uncontacted';
+    const STATUS_NEW_INQUIRY = 'New Inquiry';
     
-    const LEAD_NOT_ARCHIVED = 0;
+    const NOT_ARCHIVED = 0; 
     const LEAD_ARCHIVED = 1;
     
     const TABLE_NAME = 'website_lead';
@@ -205,19 +209,6 @@ class Lead extends Model
     private function processProperty($property) {
         return empty($property) ? null : $property;
     }
-
-//    public function loadFromArray($arr) {
-//        foreach($arr as $key => $value) {
-//            if($key === 'status') {
-//                $value = Lead::getStatus((int)$value);
-//            } elseif($key === 'lead_type') {
-//                if(is_array($value)) {
-//                    $value = reset($value);
-//                }
-//            }
-//            $this->$key = $value;
-//        }
-//    }
 
     /**
      * Get Purchases for Lead

@@ -205,9 +205,52 @@ $api->version('v1', function ($route) {
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
     
+    /*
+    |--------------------------------------------------------------------------
+    | User
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    
+    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Leads
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    
+    $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
+    $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
+    $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Interactions
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('user/interactions/tasks/sort-fields', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@sortFields');
     
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        /*
+        |--------------------------------------------------------------------------
+        | Leads
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
+        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
 
         /*
         |--------------------------------------------------------------------------
@@ -218,6 +261,48 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Sales People
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/sales-people', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Sales People
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Customers
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\CustomerController@index');
+        
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Interactions
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
+        
     });
 
 });

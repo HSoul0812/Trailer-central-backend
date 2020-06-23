@@ -17,7 +17,8 @@ class LeadTransformer extends TransformerAbstract {
              'interactions' => $lead->interactions,
              'status' => ($lead->leadStatus) ? $lead->leadStatus->status : null,
              'next_contact_date' => ($lead->leadStatus) ? $lead->leadStatus->next_contact_date : null,
-             'created_at' => $lead->date_submitted
+             'created_at' => $lead->date_submitted,
+             'contact_type' => ($lead->leadStatus) ? $lead->leadStatus->contact_type : null
          ];
          
          if (!empty($lead->pretty_phone_number)) {
