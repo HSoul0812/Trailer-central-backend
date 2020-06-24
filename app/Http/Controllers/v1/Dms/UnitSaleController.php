@@ -69,7 +69,13 @@ class UnitSaleController extends RestfulController
         $request = new GetQuotesRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->quotes->getAll($request->all()), new QuoteTransformer);
+            if (empty($request->input('include_group_data'))) {
+                return $this->response->paginator($this->quotes->getAll($request->all()), new QuoteTransformer);
+            } else {
+                return $this->response
+                    ->paginator($this->quotes->getAll($request->except(['include_group_data'])), new QuoteTransformer)
+                    ->addMeta('groupData', $this->quotes->getAll($request->all()));
+            }
         }
         
         return $this->response->errorBadRequest();
