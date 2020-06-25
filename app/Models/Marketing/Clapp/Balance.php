@@ -18,7 +18,8 @@ class Balance extends Model {
      * @var string
      */
     protected $primaryKey = 'dealer_id';
-    
+    public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      *
