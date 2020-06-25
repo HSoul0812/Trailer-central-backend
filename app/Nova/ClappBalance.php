@@ -40,7 +40,7 @@ class ClappBalance extends Resource
     public function fields(Request $request)
     {
         return [
-            ID::make()->sortable(),
+            ID::make('Dealer ID')->sortable(),
 
             Text::make('Balance')
                 ->sortable(),
