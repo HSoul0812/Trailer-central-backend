@@ -41,9 +41,7 @@ class ClappBalance extends Resource
     {
         return [
             Text::make('Dealer ID')
-                ->showOnCreating()
-                ->showOnUpdating()
-                ->readonly()
+                ->hideWhenUpdating()
                 ->sortable(),
 
             Text::make('Balance')
