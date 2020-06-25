@@ -4,14 +4,14 @@ namespace App\Transformers\Dms;
 
 use League\Fractal\TransformerAbstract;
 
-class QuoteGroupTransformer extends TransformerAbstract
+class QuoteTotalsTransformer extends TransformerAbstract
 {
 
-    public function transform($group)
+    public function transform($totals)
     {   
         $transformData = [];
 
-        foreach ($group as $item) {
+        foreach ($totals as $item) {
             if ($item['deal'] === 0) {
                 $status = 'quotes';
             } else if ($item['completed_deal'] === 0) {
@@ -25,6 +25,6 @@ class QuoteGroupTransformer extends TransformerAbstract
             ];
         }
         
-        return ['totals' => $transformData];
+        return $transformData;
     }
 } 

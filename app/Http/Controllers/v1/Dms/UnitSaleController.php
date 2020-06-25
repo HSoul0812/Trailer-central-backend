@@ -6,7 +6,7 @@ use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Transformers\Dms\QuoteTransformer;
-use App\Transformers\Dms\QuoteGroupTransformer;
+use App\Transformers\Dms\QuoteTotalsTransformer;
 use App\Http\Requests\Dms\GetQuotesRequest;
 
 /**
@@ -87,10 +87,10 @@ class UnitSaleController extends RestfulController
             if ($request->input('include_group_data') !== null && empty($request->input('include_group_data'))) {
                 return $this->response->paginator($this->quotes->getAll($request->all()), new QuoteTransformer);
             } else {
-                $groupData = (new QuoteGroupTransformer)->transform($this->quotes->group($request->all()));
+                $groupData = (new QuoteTotalsTransformer)->transform($this->quotes->getTotals($request->all()));
                 return $this->response
                     ->paginator($this->quotes->getAll($request->all()), new QuoteTransformer)
-                    ->addMeta('groupData', $groupData);
+                    ->addMeta('totals', $groupData);
             }
         }
         

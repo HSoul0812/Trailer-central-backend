@@ -109,7 +109,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
-    public function group($params)
+    public function getTotals($params)
     {
         if (isset($params['dealer_id'])) {
             $query = UnitSale::where('dms_unit_sale.dealer_id', '=', $params['dealer_id']);
