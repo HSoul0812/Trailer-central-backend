@@ -42,7 +42,7 @@ class ClappBalance extends Resource
         return [
             ID::make('Dealer ID')
                 ->showOnDetail()
-                ->showOnUpdating(),
+                ->showOnUpdating()
                 ->readonly()
                 ->sortable(),
 
