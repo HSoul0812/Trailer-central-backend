@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 
 class ClappBalance extends Resource
@@ -39,6 +40,8 @@ class ClappBalance extends Resource
     public function fields(Request $request)
     {
         return [
+            ID::make()->sortable(),
+
             Text::make('Balance')
                 ->sortable(),
         ];
