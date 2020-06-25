@@ -29,7 +29,20 @@ class Balance extends Model {
         'balance'
     ];
     
-    public $timestamps = false;
+
+    /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = null;
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = 'last_updated';
 
     /**
      * The attributes excluded from the model's JSON form.
