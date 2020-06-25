@@ -48,4 +48,11 @@ interface Repository {
      * @param array $params
      */
     public function getAll($params);
+
+    /**
+     * Get group info of records filtered by $params
+     *
+     * @param array $params
+     */
+    public function group($params);
 }
