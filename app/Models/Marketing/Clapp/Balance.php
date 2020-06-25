@@ -25,8 +25,7 @@ class Balance extends Model {
      * @var array
      */
     protected $fillable = [
-        'balance',
-        'last_updated'
+        'balance'
     ];
     
     public $timestamps = false;
