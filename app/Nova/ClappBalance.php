@@ -46,7 +46,8 @@ class ClappBalance extends Resource
                 ->sortable(),
 
             Text::make('Last Updated')
-                ->sortable(),
+                ->sortable()
+                ->hideWhenUpdating(),
         ];
     }
 
