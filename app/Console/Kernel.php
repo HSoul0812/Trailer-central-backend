@@ -9,6 +9,7 @@ use App\Console\Commands\SyncPartsCommand;
 use App\Console\Commands\RunBulkUploadCommand;
 use App\Console\Commands\ReplaceYoutubeEmbeds;
 use App\Console\Commands\AdjustFeetAndInches;
+use App\Console\Commands\User\CreateAccessToken;
 
 class Kernel extends ConsoleKernel
 {
@@ -22,7 +23,8 @@ class Kernel extends ConsoleKernel
         SyncPartsCommand::class,
         RunBulkUploadCommand::class,
         AddSitemaps::class,
-        AdjustFeetAndInches::class
+        AdjustFeetAndInches::class,
+        CreateAccessToken::class
     ];
 
     /**
@@ -35,6 +37,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('run:bulk')->withoutOverlapping();
         $schedule->command('add:sitemaps')->daily();
+        $schedule->command('user:create-access-token')->daily();
         // $schedule->command('inspire')
         //          ->hourly();
     }

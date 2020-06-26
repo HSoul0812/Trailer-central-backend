@@ -5,6 +5,7 @@ namespace App\Models\User;
 use App\Models\Inventory\Inventory;
 use App\Models\User\NewDealerUser;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User\DealerLocationSalesTax;
 
 class DealerLocation extends Model
 {
@@ -46,5 +47,10 @@ class DealerLocation extends Model
     public function inventory()
     {
         return $this->hasOne(Inventory::class, 'dealer_location_id', 'dealer_location_id');
+    }
+    
+    public function salesTax()
+    {
+        return $this->hasOne(DealerLocationSalesTax::class, 'dealer_location_id', 'dealer_location_id');
     }
 }
