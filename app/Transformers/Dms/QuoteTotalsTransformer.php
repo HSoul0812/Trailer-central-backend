@@ -9,7 +9,20 @@ class QuoteTotalsTransformer extends TransformerAbstract
 
     public function transform($totals)
     {   
-        $transformData = [];
+        $transformData = [
+            'quotes' => [
+                'front_gross' => 0,
+                'qty' => 0
+            ],
+            'deals' => [
+                'front_gross' => 0,
+                'qty' => 0
+            ],
+            'completed_deals' => [
+                'front_gross' => 0,
+                'qty' => 0
+            ]
+        ];
 
         foreach ($totals as $item) {
             if ($item['deal'] === 0) {
