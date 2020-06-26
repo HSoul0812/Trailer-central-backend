@@ -6,6 +6,7 @@ use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Transformers\Dms\QuoteTransformer;
+use App\Transformers\Dms\QuoteTotalsTransformer;
 use App\Http\Requests\Dms\GetQuotesRequest;
 
 /**
@@ -27,7 +28,7 @@ class UnitSaleController extends RestfulController
         $this->quotes = $quotes;
     }
     
-     /**
+    /**
      * @OA\Get(
      *     path="/api/quotes",
      *     description="Retrieve a list of quotes",     
@@ -53,6 +54,20 @@ class UnitSaleController extends RestfulController
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
+     *     @OA\Parameter(
+     *         name="search_term",
+     *         in="query",
+     *         description="Search term",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="include_group_data",
+     *         in="query",
+     *         description="Flag whether group info is included. If not provided, it pass group info by default.",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of quotes",
@@ -69,7 +84,14 @@ class UnitSaleController extends RestfulController
         $request = new GetQuotesRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->quotes->getAll($request->all()), new QuoteTransformer);
+            if ($request->input('include_group_data') !== null && empty($request->input('include_group_data'))) {
+                return $this->response->paginator($this->quotes->getAll($request->all()), new QuoteTransformer);
+            } else {
+                $groupData = (new QuoteTotalsTransformer)->transform($this->quotes->getTotals($request->all()));
+                return $this->response
+                    ->paginator($this->quotes->getAll($request->all()), new QuoteTransformer)
+                    ->addMeta('totals', $groupData);
+            }
         }
         
         return $this->response->errorBadRequest();
