@@ -11,7 +11,8 @@ class GetQuotesRequest extends Request {
 
     protected $rules = [
         'dealer_id' => 'integer',
-        'status' => 'string'
+        'status' => 'string',
+        'include_group_data' => 'boolean'
     ];
     
 }
