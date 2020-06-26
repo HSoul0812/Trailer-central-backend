@@ -76,7 +76,7 @@ class Inventory extends Model
     
     public function images()
     {
-        return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id');
+        return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
     }
     
     public function getColorAttribute()

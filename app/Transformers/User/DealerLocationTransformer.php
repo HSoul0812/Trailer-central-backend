@@ -11,7 +11,11 @@ class DealerLocationTransformer extends TransformerAbstract
     {
 	return [
             'id' => $dealerLocation->dealer_location_id,
-            'name' => $dealerLocation->name
+            'name' => $dealerLocation->name,
+            'county' => $dealerLocation->county,
+            'phone' => $dealerLocation->phone,
+            'federal_id' => $dealerLocation->federal_id,
+            'sales_tax' => $dealerLocation->salesTax
         ];
     }
 }
