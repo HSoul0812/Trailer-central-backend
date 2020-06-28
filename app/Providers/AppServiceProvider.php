@@ -88,6 +88,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
+        $this->app->bind(TextRepositoryInterface::class, TextRepository::class);
+        $this->app->bind(TemplateRepositoryInterface::class, TemplateRepository::class);
+        $this->app->bind(CampaignRepositoryInterface::class, CampaignRepository::class);
+        $this->app->bind(BlastRepositoryInterface::class, BlastRepository::class);
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);        
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
