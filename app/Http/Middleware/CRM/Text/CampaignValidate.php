@@ -7,7 +7,7 @@ use App\Http\Middleware\ValidRoute;
 use App\Models\CRM\Users\User;
 use App\Models\CRM\Text\Template;
 
-class TemplateValidate extends ValidRoute {
+class CampaignValidate extends ValidRoute {
 
     const USER_ID_PARAM = 'userId';
     const ID_PARAM = 'id';
