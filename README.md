@@ -86,7 +86,7 @@
 4. Put search parameters, page limits, offsets, sort specs in query string (GET)
 5. Put object parameters in the request body as JSON
 6. Pass a valid `access-token` header on all APIs.
-7. Add swagger annotations to your controller methods. 
+7. Add swagger annotations to your controller methods that are exposed as APIs. 
 
 ## Code Guidelines: Architecture
 
@@ -94,6 +94,6 @@
     * Avoid queries in controllers.
     * Minimize logic
 2. Define entities in `Models`.
-3. Define processes/business logic in `Services`.
+3. Define processes/business logic in `Services`. This way you can reuse code in controllers, jobs, events, etc. 
 4. Define asynchronous tasks/long-running tasks in `Jobs`. Even better, in `Services` wrapped in `Jobs`. 
 5. Define data operations in `Repositories`. `Repositories` may contain more than just CRUD operations.
