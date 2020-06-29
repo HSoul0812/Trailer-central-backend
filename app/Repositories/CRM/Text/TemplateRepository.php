@@ -68,7 +68,7 @@ class TemplateRepository implements TemplateRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Template::where('identifier', '>', 0);
+        $query = Template::where('id', '>', 0);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;

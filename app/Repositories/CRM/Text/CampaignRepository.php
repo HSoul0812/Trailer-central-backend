@@ -77,7 +77,11 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Campaign::where('identifier', '>', 0);
+        $query = Template::where('id', '>', 0);
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
 
         if (isset($params['user_id'])) {
             $query = $query->where('user_id', $params['user_id']);
