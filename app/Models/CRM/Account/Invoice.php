@@ -2,9 +2,17 @@
 
 namespace App\Models\CRM\Account;
 
+use App\Models\CRM\Dms\Refund;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
 
+/**
+ * Class Invoice
+ * @package App\Models\CRM\Account
+ * @property UnitSale $unitSale
+ * @property Payment[] $payments
+ * @property InvoiceItem[] $items
+ */
 class Invoice extends Model
 {
     /**
@@ -25,4 +33,10 @@ class Invoice extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function items()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
 }
