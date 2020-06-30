@@ -77,7 +77,7 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Template::where('id', '>', 0);
+        $query = Blast::where('id', '>', 0);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
