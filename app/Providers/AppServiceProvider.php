@@ -4,8 +4,14 @@ namespace App\Providers;
 
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
+use App\Repositories\CRM\Invoice\InvoiceRepository;
+use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
+use App\Repositories\CRM\Payment\PaymentRepository;
+use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\Pos\SaleRepository;
+use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Website\WebsiteRepository;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Filesystem\Filesystem;
@@ -57,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
         \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
-        
+
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
                $this->orWhere($attribute, 'LIKE', "%{$searchTerm}%");
@@ -92,17 +98,21 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
-        $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);        
+        $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
-        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class); 
+        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(SalesPersonRepositoryInterface::class, SalesPersonRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
-        
+        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
+        $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
+        $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
+
+
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
         $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);

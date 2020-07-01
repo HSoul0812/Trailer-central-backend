@@ -5,10 +5,9 @@ namespace App\Http\Controllers\v1\Dms;
 
 
 use App\Http\Controllers\RestfulControllerV2;
-use App\Models\CRM\Account\Invoice;
-use App\Utilities\JsonApi\JsonApiRequest;
-use App\Utilities\JsonApi\QueryBuilder;
+use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use Dingo\Api\Http\Request;
+use OpenApi\Annotations as OA;
 
 /**
  * Class InvoiceController
@@ -16,17 +15,83 @@ use Dingo\Api\Http\Request;
  */
 class InvoiceController extends RestfulControllerV2
 {
-    public function show($id, Request $request, QueryBuilder $builder)
+    /**
+     * @param $id
+     * @param Request $request
+     * @param InvoiceRepositoryInterface $repository
+     * @return \Dingo\Api\Http\Response
+     *
+     * @OA\Get(
+     *     path="/invoices",
+     *     @OA\Parameter(
+     *          name="with",
+     *          description="model relations to load"
+     *          in="query"
+     *     ),
+     *     @OA\Parameter(
+     *          name="filter",
+     *          description="filters to apply, like where clauses"
+     *          in="query"
+     *     ),
+     *     @OA\Parameter(
+     *          name="sort",
+     *          description="sort specs"
+     *          in="query"
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of invoices",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function index(Request $request, InvoiceRepositoryInterface $repository)
     {
-        // instantiate a model query builder
-        $eloquent = Invoice::query();
+        return $this->response->array([
+            'data' => $repository
 
-        // build the query
-        $query = $builder
-            ->withRequest($request)
-            ->withQuery($eloquent)
-            ->build();
+                // optionally, pass jsonapi request queries onto this queryable repo
+                // to avoid the need to write boilerplate where, sort, limit in the repo
+                ->withRequest($request)
 
-        return response()->json(['data' => $query->findOrFail($id)]);
+                // get the resulting model collection/array
+                ->get([])
+        ]);
+    }
+
+    /**
+     * @param $id
+     * @param Request $request
+     * @param InvoiceRepositoryInterface $repository
+     * @return \Dingo\Api\Http\Response
+     *
+     * @OA\Get(
+     *     path="/invoice/{$id}",
+     *     @OA\Parameter(
+     *          name="id",
+     *          in="path"
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a single invoice record",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function show($id, Request $request, InvoiceRepositoryInterface $repository)
+    {
+        return $this->response->array([
+            'data' => $repository
+                ->withRequest($request) // pass jsonapi request queries onto this queryable repo
+                ->find($id)
+        ]);
     }
 }

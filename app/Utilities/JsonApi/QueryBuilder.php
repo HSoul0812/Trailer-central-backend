@@ -14,18 +14,21 @@ use Illuminate\Http\Request;
  * A standardized way of building queries based on Requests; you can extend this class to suit your needs
  * Based loosely on the jsonapi spec.
  *
+ * Note: this is basically a bridge between http requests and the data layer
+ *
  * GET parameters:
- * 1. with - comma separated; indicate what relationships to load
+ * 1. with - comma separated; indicate what relationships to load (eager loading)
  * 2. filter - apply where clauses
  * 3. sort - comma separated, `column` to sort by `column asc`, `-column` to sort desc
  * 4. limit
  * 5. offset
  *
- * Sample usage:
+ * Sample usages:
+ *
  * ```
  * public function index(MyRequest $request, RequestQueryBuilder $queryBuilder)
  * {
- *      $query = $queryBuild
+ *      $query = $queryBuilder
  *          ->request($request)
  *          ->query(MyModel::query())
  *          ->build();
@@ -34,6 +37,17 @@ use Illuminate\Http\Request;
  * }
  * ```
  *
+ * ```
+ * public function index(MyRequest $request, MyQueryableRepository $repository)
+ * {
+ *      $query = $repository
+ *          ->withRequest($request)
+ *          ->myRepositoryMethod();
+ *
+ *      return $query->get();
+ * }
+ * ```
+
  * Sample query string:
  * ```
  * /api/people?with=friends,addresses&filter[age][gt]=18&sort=name,-age
@@ -42,7 +56,7 @@ use Illuminate\Http\Request;
  * @package App\Utilities
  * @todo Add paginator
  */
-class QueryBuilder
+class QueryBuilder implements QueryBuilderInterface
 {
     /**
      * @var callable
@@ -61,10 +75,10 @@ class QueryBuilder
 
     /**
      * RequestQueryBuilder constructor.
-     * @param Request|null $request Http request
+     * @param Request|null $request
      * @param Builder|null $query
      */
-    public function __construct(?Request $request, ?Builder $query)
+    public function __construct(Request $request = null, Builder $query = null)
     {
         $this->request = $request;
         $this->query = $query;
@@ -130,7 +144,7 @@ class QueryBuilder
             return $this;
         }
 
-            $relations = explode(',', $with);
+        $relations = explode(',', $with);
         foreach ($relations as $relation) {
             $this->query->with($relation);
         }
@@ -144,6 +158,7 @@ class QueryBuilder
      * @return $this
      * @throws GenericClientException
      * @todo implement relation whitelist filtering
+     * @todo implement filtering on relations
      */
     private function buildFilter()
     {
@@ -198,6 +213,7 @@ class QueryBuilder
     {
         $limitQuery = $this->request->input('limit');
         if (!$limitQuery) {
+            $this->query->limit(env('JSON_API_LIMIT_DEFAULT', 100));
             return $this;
         }
 

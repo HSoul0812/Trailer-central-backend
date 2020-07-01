@@ -32,7 +32,7 @@ $api->version('v1', function ($route) {
      * Floorplan Payments
      */
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
-    
+
     /**
      * Part bins
      */
@@ -47,7 +47,7 @@ $api->version('v1', function ($route) {
     $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
 
-    
+
     /**
      * Part Categories
      */
@@ -89,7 +89,7 @@ $api->version('v1', function ($route) {
     $route->get('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@show')->where('id', '[0-9]+');
     $route->put('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@update')->where('id', '[0-9]+');
     $route->delete('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@destroy')->where('id', '[0-9]+');
-    
+
     /**
      * Part Types
      */
@@ -98,7 +98,7 @@ $api->version('v1', function ($route) {
     $route->get('parts/types/{id}', 'App\Http\Controllers\v1\Parts\TypeController@show')->where('id', '[0-9]+');
     $route->post('parts/types/{id}', 'App\Http\Controllers\v1\Parts\TypeController@update')->where('id', '[0-9]+');
     $route->delete('parts/types/{id}', 'App\Http\Controllers\v1\Parts\TypeController@destroy')->where('id', '[0-9]+');
-    
+
     /**
      * Part brands
      */
@@ -107,7 +107,7 @@ $api->version('v1', function ($route) {
     $route->get('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@show')->where('id', '[0-9]+');
     $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
-    
+
     /**
      * Parts
      */
@@ -116,7 +116,7 @@ $api->version('v1', function ($route) {
     $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show')->where('id', '[0-9]+');
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
-    
+
     /*
     |--------------------------------------------------------------------------
     | Inventory
@@ -125,7 +125,7 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    
+
     /**
      * Inventory
      */
@@ -153,7 +153,7 @@ $api->version('v1', function ($route) {
     $route->get('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@show')->where('id', '[0-9]+');
     $route->post('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@update')->where('id', '[0-9]+');
     $route->delete('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@destroy')->where('id', '[0-9]+');
-    
+
     /**
      * Website Blog Posts
      */
@@ -204,7 +204,7 @@ $api->version('v1', function ($route) {
 
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
-    
+
     /*
     |--------------------------------------------------------------------------
     | User
@@ -213,9 +213,9 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    
+
     $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
-    
+
     /*
     |--------------------------------------------------------------------------
     | Leads
@@ -224,11 +224,11 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    
+
     $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
-    
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
@@ -238,7 +238,7 @@ $api->version('v1', function ($route) {
     |
     */
     $route->get('user/interactions/tasks/sort-fields', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@sortFields');
-    
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------
@@ -248,7 +248,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        
+
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
 
@@ -261,7 +261,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
-        
+
         /*
         |--------------------------------------------------------------------------
         | Sales People
@@ -271,7 +271,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/sales-people', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
-        
+
         /*
         |--------------------------------------------------------------------------
         | Sales People
@@ -281,7 +281,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
-        
+
         /*
         |--------------------------------------------------------------------------
         | Customers
@@ -291,8 +291,8 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/customers', 'App\Http\Controllers\v1\Dms\CustomerController@index');
-        
-        
+
+
         /*
         |--------------------------------------------------------------------------
         | Interactions
@@ -302,7 +302,39 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
-        
+
+        /*
+        |--------------------------------------------------------------------------
+        | POS
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
+        $route->get('pos/sale/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Invoices
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('invoices', 'App\Http\Controllers\v1\Dms\InvoiceController@index');
+        $route->get('invoice/{id}', 'App\Http\Controllers\v1\Dms\InvoiceController@show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Payments
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('payment/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
+
     });
 
 });

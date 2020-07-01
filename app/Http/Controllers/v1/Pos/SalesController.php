@@ -4,9 +4,8 @@
 namespace App\Http\Controllers\v1\Pos;
 
 
-use App\Utilities\JsonApi\QueryBuilder;
 use App\Http\Controllers\RestfulControllerV2;
-use App\Models\Pos\Sale;
+use App\Repositories\Pos\SaleRepositoryInterface;
 use Dingo\Api\Http\Request;
 use OpenApi\Annotations as OA;
 
@@ -23,26 +22,18 @@ class SalesController extends RestfulControllerV2
      * List/browse all pos-based queries
      *
      * @param Request $request
-     * @param \App\Utilities\JsonApi\QueryBuilder $builder
      *
+     * @param SaleRepositoryInterface $repository
+     * @return \Dingo\Api\Http\Response
      * @OA\Get(
      *     path="/pos/sales"
      * )
      */
-    public function index(Request $request, QueryBuilder $builder)
+    public function index(Request $request, SaleRepositoryInterface $repository)
     {
-        // instantiate a model query builder
-        $eloquent = Sale::query();
-
-        // do other stuff with the model here
-
-        // build the query
-        $query = $builder
-            ->withRequest($request)
-            ->withQuery($eloquent)
-            ->build();
-
-        return $query->get();
+        return $this->response->array([
+            'data' => $repository->withRequest($request)->get([])
+        ]);
     }
 
     /**
@@ -50,8 +41,8 @@ class SalesController extends RestfulControllerV2
      * @param $id
      *
      * @param Request $request
-     * @param \App\Utilities\JsonApi\QueryBuilder $builder
-     * @return \Illuminate\Http\JsonResponse
+     * @param SaleRepositoryInterface $repository
+     * @return \Dingo\Api\Http\Response
      *
      * @OA\Get(
      *     path="/pos/sale/{id}",
@@ -65,17 +56,14 @@ class SalesController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function show($id, Request $request, QueryBuilder $builder)
+    public function show($id, Request $request, SaleRepositoryInterface $repository)
     {
-        // instantiate a model query builder
-        $eloquent = Sale::query();
-
-        // build the query
-        $query = $builder
-            ->withRequest($request)
-            ->withQuery($eloquent)
-            ->build();
-
-        return response()->json(['data' => $query->findOrFail($id)]);
+        return $this->response->array([
+            'data' => $repository
+                ->withRequest($request) // pass jsonapi request queries onto this queryable repo
+                ->find($id)
+        ]);
     }
+
+
 }
