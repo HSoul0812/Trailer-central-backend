@@ -222,7 +222,8 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function destroy(int $id) {
+    public function destroy(int $id, Request $request) {
+        var_dump($id);
         $request = new DeleteTemplateRequest(['id' => $id]);
         
         if ( $request->validate()) {
