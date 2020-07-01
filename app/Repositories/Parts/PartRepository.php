@@ -162,6 +162,10 @@ class PartRepository implements PartRepositoryInterface {
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
+        
+        if (isset($params['sku'])) {
+            $query = $query->whereLike('sku', $params['sku']);
+        }
 
         if (isset($params['dealer_id'])) {
              $query = $query->where('dealer_id', current($params['dealer_id']));

@@ -6,7 +6,7 @@ use League\Fractal\TransformerAbstract;
 
 class QuoteTotalsTransformer extends TransformerAbstract
 {
-
+ 
     public function transform($totals)
     {   
         $transformData = [

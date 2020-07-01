@@ -37,7 +37,7 @@ class WebsiteRepository implements WebsiteRepositoryInterface
      */
     public function get($params)
     {
-        throw new NotImplementedException;
+        return Website::findOrFail($params['id']); 
     }
 
     /**
