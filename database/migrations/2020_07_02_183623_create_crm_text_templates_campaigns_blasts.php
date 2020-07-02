@@ -115,7 +115,7 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->integer('text_campaign_id')->unsigned()->index();
 
-            $table->integer('brand')->unsigned();
+            $table->string('brand')->unsigned();
 
             $table->timestamps();
 
@@ -130,7 +130,7 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->integer('text_campaign_id')->unsigned()->index();
 
-            $table->integer('category')->unsigned();
+            $table->string('category')->unsigned();
 
             $table->timestamps();
 
@@ -218,7 +218,7 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->integer('text_blast_id')->unsigned()->index();
 
-            $table->integer('brand')->unsigned();
+            $table->string('brand')->unsigned();
 
             $table->timestamps();
 
@@ -233,7 +233,7 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->integer('text_blast_id')->unsigned()->index();
 
-            $table->integer('category')->unsigned();
+            $table->string('category')->unsigned();
 
             $table->timestamps();
 
