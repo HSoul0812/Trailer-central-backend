@@ -3,6 +3,11 @@
 use Dingo\Api\Routing\Router;
 use Illuminate\Http\Request;
 
+use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Repositories\CRM\Text\TemplateRepositoryInterface;
+use App\Repositories\CRM\Text\BlastRepositoryInterface;
+use App\Repositories\CRM\Text\CampaignRepositoryInterface;
+
 use App\Http\Controllers\v1\CRM\Text\TextController;
 use App\Http\Controllers\v1\CRM\Text\TemplateController;
 use App\Http\Controllers\v1\CRM\Text\BlastController;
@@ -203,15 +208,15 @@ $api->version('v1', function ($route) {
         $route->get('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@index')->where('userId', '[0-9]+');
         $route->put('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@create')->where('userId', '[0-9]+');
         $route->get('crm/{userId}/texts/template/{id}', function($leadId, $id) {
-            $controller = new TemplateController();
+            $controller = new TemplateController(new TemplateRepositoryInterface());
             return $controller->show($id);
         })->where('userId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('crm/{userId}/texts/template/{id}', function($leadId, $id) {
-            $controller = new TemplateController();
+            $controller = new TemplateController(new TemplateRepositoryInterface());
             return $controller->update($id);
         })->where('userId', '[0-9]+')->where('id', '[0-9]+');
         $route->delete('crm/{userId}/texts/template/{id}', function($leadId, $id) {
-            $controller = new TemplateController();
+            $controller = new TemplateController(new TemplateRepositoryInterface());
             return $controller->destroy($id);
         })->where('userId', '[0-9]+')->where('id', '[0-9]+');
     });
