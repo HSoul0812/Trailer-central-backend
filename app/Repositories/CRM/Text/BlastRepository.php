@@ -49,8 +49,20 @@ class BlastRepository implements BlastRepositoryInterface {
         DB::beginTransaction();
 
         try {
+            // Get Brands/Categories
+            $categories = $params['category'];
+            $brands = $params['brand'];
+            unset($params['category']);
+            unset($params['brand']);
+
             // Create Blast
             $blast = Blast::create($params);
+
+            // Update Blasts
+            $this->updateBrands($blast->id, $brands);
+
+            // Update Categories
+            $this->updateCategories($blast->id, $categories);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -103,19 +115,23 @@ class BlastRepository implements BlastRepositoryInterface {
         $blast = Blast::findOrFail($params['id']);
 
         DB::transaction(function() use (&$blast, $params) {
+            // Get Brands/Categories
+            $categories = $params['category'];
+            $brands = $params['brand'];
+            unset($params['category']);
+            unset($params['brand']);
+
+            // Update Blasts
+            $this->updateBrands($blast->id, $brands);
+
+            // Update Categories
+            $this->updateCategories($blast->id, $categories);
+
             // Fill Text Details
             $blast->fill($params)->save();
         });
 
         return $blast;
-    }
-
-    private function addSortQuery($query, $sort) {
-        if (!isset($this->sortOrders[$sort])) {
-            return;
-        }
-
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
     public function sent($params) {
@@ -132,6 +148,65 @@ class BlastRepository implements BlastRepositoryInterface {
         }
         
         return $stop;
+    }
+
+    /**
+     * Add Sort Query
+     * 
+     * @param type $query
+     * @param type $sort
+     * @return type
+     */
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    /**
+     * Update Blast Brands
+     * 
+     * @param int $blastId
+     * @param array $brands
+     */
+    private function updateBrands($blastId, $brands) {
+        // Delete Old Blast Brands
+        BlastBrand::findByBlast($blastId)->delete();
+
+        // Create Blast Brand
+        if(count($brands) > 0) {
+            foreach($brands as $brand) {
+                // Create Brand for Blast ID
+                BlastBrand::create([
+                    'text_blast_id' => $blastId,
+                    'brand' => $brand
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Update Blast Categories
+     * 
+     * @param int $blastId
+     * @param array $categories
+     */
+    private function updateCategories($blastId, $categories) {
+        // Delete Old Blast Categories
+        BlastCategory::findByBlast($blastId)->delete();
+
+        // Create Blast Category
+        if(count($categories) > 0) {
+            foreach($categories as $category) {
+                // Create Category for Blast ID
+                BlastCategory::create([
+                    'text_blast_id' => $blastId,
+                    'category' => $category
+                ]);
+            }
+        }
     }
 
 }

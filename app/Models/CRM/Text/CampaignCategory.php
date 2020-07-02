@@ -22,4 +22,13 @@ class CampaignCategory extends Model
         'text_campaign_id',
         'category'
     ];
+
+    /**
+     * @param int $campaignId
+     * @return array
+     */
+    public static function findByCampaign(int $campaignId): array
+    {
+        return self::whereTextCampaignId($campaignId);
+    }
 }

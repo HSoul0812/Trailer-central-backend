@@ -22,4 +22,13 @@ class BlastCategory extends Model
         'text_blast_id',
         'category'
     ];
+
+    /**
+     * @param int $blastId
+     * @return array
+     */
+    public static function findByBlast(int $blastId): array
+    {
+        return self::whereTextBlastId($blastId);
+    }
 }

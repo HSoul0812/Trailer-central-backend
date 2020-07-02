@@ -49,8 +49,20 @@ class CampaignRepository implements CampaignRepositoryInterface {
         DB::beginTransaction();
 
         try {
+            // Get Brands/Categories
+            $categories = $params['category'];
+            $brands = $params['brand'];
+            unset($params['category']);
+            unset($params['brand']);
+
             // Create Campaign
             $campaign = Campaign::create($params);
+
+            // Update Blasts
+            $this->updateBrands($campaign->id, $brands);
+
+            // Update Categories
+            $this->updateCategories($campaign->id, $categories);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -100,22 +112,27 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function update($params) {
+        // Find Campaign or Die
         $campaign = Campaign::findOrFail($params['id']);
 
         DB::transaction(function() use (&$campaign, $params) {
+            // Get Brands/Categories
+            $categories = $params['category'];
+            $brands = $params['brand'];
+            unset($params['category']);
+            unset($params['brand']);
+
+            // Update Blasts
+            $this->updateBrands($campaign->id, $brands);
+
+            // Update Categories
+            $this->updateCategories($campaign->id, $categories);
+
             // Fill Text Details
             $campaign->fill($params)->save();
         });
 
         return $campaign;
-    }
-
-    private function addSortQuery($query, $sort) {
-        if (!isset($this->sortOrders[$sort])) {
-            return;
-        }
-
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
     public function sent($params) {
@@ -134,4 +151,63 @@ class CampaignRepository implements CampaignRepositoryInterface {
         return $stop;
     }
 
+
+    /**
+     * Add Sort Query
+     * 
+     * @param type $query
+     * @param type $sort
+     * @return type
+     */
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    /**
+     * Update Blast Brands
+     * 
+     * @param int $campaignId
+     * @param array $brands
+     */
+    private function updateBrands($campaignId, $brands) {
+        // Delete Old Blast Brands
+        BlastBrand::findByBlast($campaignId)->delete();
+
+        // Create Blast Brand
+        if(count($brands) > 0) {
+            foreach($brands as $brand) {
+                // Create Brand for Blast ID
+                BlastBrand::create([
+                    'text_blast_id' => $campaignId,
+                    'brand' => $brand
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Update Blast Categories
+     * 
+     * @param int $campaignId
+     * @param array $categories
+     */
+    private function updateCategories($campaignId, $categories) {
+        // Delete Old Blast Categories
+        BlastCategory::findByBlast($campaignId)->delete();
+
+        // Create Blast Category
+        if(count($categories) > 0) {
+            foreach($categories as $category) {
+                // Create Category for Blast ID
+                BlastCategory::create([
+                    'text_blast_id' => $campaignId,
+                    'category' => $category
+                ]);
+            }
+        }
+    }
 }

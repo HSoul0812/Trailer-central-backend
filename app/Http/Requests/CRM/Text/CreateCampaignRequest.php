@@ -12,10 +12,10 @@ use App\Http\Requests\Request;
 class CreateCampaignRequest extends Request {
 
     protected $rules = [
-        'template_id' => 'required|integer',
-        'campaign_name' => 'required|string',
-        'campaign_subject' => 'required|string',
-        'from_sms_number' => 'required|string',
+        'template_id' => 'integer',
+        'campaign_name' => 'string',
+        'campaign_subject' => 'string',
+        'from_sms_number' => 'string',
         'action' => 'in:inquired,purchased',
         'location_id' => 'nullable|integer',
         'send_after_days' => 'nullable|integer',
