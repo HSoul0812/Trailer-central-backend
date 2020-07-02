@@ -87,6 +87,7 @@
 5. Put object parameters in the request body as JSON
 6. Pass a valid `access-token` header on all APIs.
 7. Add swagger annotations to your controller methods that are exposed as APIs. 
+8. Put DMS resources under the DMS routes. Look for the `dms` group in `routes/api.php`.
 
 ## Code Guidelines: Architecture
 
