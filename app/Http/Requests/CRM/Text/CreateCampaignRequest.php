@@ -12,7 +12,7 @@ use App\Http\Requests\Request;
 class CreateCampaignRequest extends Request {
 
     protected $rules = [
-        'text_template_id' => 'required|integer',
+        'template_id' => 'required|integer',
         'campaign_name' => 'required|string',
         'campaign_subject' => 'required|string',
         'from_sms_number' => 'required|string',
