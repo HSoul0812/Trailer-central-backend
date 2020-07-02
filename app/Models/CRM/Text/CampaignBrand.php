@@ -27,7 +27,7 @@ class CampaignBrand extends Model
      * @param int $campaignId
      * @return array
      */
-    public static function findByCampaign(int $campaignId): array
+    public static function findByCampaign(int $campaignId): CampaignBrand
     {
         return self::whereTextCampaignId($campaignId);
     }

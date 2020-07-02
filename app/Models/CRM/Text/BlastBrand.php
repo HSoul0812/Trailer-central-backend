@@ -27,7 +27,7 @@ class BlastBrand extends Model
      * @param int $blastId
      * @return array
      */
-    public static function findByBlast(int $blastId): array
+    public static function findByBlast(int $blastId): BlastBrand
     {
         return self::whereTextBlastId($blastId);
     }

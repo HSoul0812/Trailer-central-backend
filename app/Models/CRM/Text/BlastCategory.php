@@ -27,7 +27,7 @@ class BlastCategory extends Model
      * @param int $blastId
      * @return array
      */
-    public static function findByBlast(int $blastId): array
+    public static function findByBlast(int $blastId): BlastCategory
     {
         return self::whereTextBlastId($blastId);
     }
