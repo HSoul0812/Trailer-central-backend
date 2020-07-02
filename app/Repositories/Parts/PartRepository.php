@@ -279,8 +279,8 @@ class PartRepository implements PartRepositoryInterface {
     public function update($params) {
         $part = Part::findOrFail($params['id']);
 
-        DB::transaction(function() use (&$part, $params) {
-
+        DB::transaction(function() use (&$part, $params) {            
+            
             if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
                 VehicleSpecific::updateOrCreate([
                     'make' => $params['vehicle_make'],
