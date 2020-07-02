@@ -3,6 +3,11 @@
 use Dingo\Api\Routing\Router;
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\v1\CRM\Text\TextController;
+use App\Http\Controllers\v1\CRM\Text\TemplateController;
+use App\Http\Controllers\v1\CRM\Text\BlastController;
+use App\Http\Controllers\v1\CRM\Text\CampaignController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -173,10 +178,22 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'text.validate'], function ($route) {
         $route->get('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@create')->where('leadId', '[0-9]+');
-        $route->get('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@destroy')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('leads/{leadId}/texts/{id}/stop', 'App\Http\Controllers\v1\CRM\Text\TextController@stop')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('leads/{leadId}/texts/{id}', function($leadId, $id) {
+            $controller = new TextController();
+            return $controller->show($id);
+        })->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('leads/{leadId}/texts/{id}', function($leadId, $id) {
+            $controller = new TextController();
+            return $controller->update($id);
+        })->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('leads/{leadId}/texts/{id}', function($leadId, $id) {
+            $controller = new TextController();
+            return $controller->destroy($id);
+        })->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('leads/{leadId}/texts/{id}/stop', function($leadId, $id) {
+            $controller = new TextController();
+            return $controller->stop($id);
+        })->where('leadId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
