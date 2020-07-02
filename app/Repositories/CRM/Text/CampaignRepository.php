@@ -7,6 +7,8 @@ use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
+use App\Models\CRM\Text\CampaignBrand;
+use App\Models\CRM\Text\CampaignCategory;
 
 class CampaignRepository implements CampaignRepositoryInterface {
 
@@ -66,7 +68,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
             // Create Campaign
             $campaign = Campaign::create($params);
 
-            // Update Blasts
+            // Update Brands
             $this->updateBrands($campaign->id, $brands);
 
             // Update Categories
@@ -124,13 +126,21 @@ class CampaignRepository implements CampaignRepositoryInterface {
         $campaign = Campaign::findOrFail($params['id']);
 
         DB::transaction(function() use (&$campaign, $params) {
-            // Get Brands/Categories
-            $categories = $params['category'];
-            $brands = $params['brand'];
-            unset($params['category']);
-            unset($params['brand']);
+            // Get Categories
+            $categories = array();
+            if(isset($params['category'])) {
+                $categories = $params['category'];
+                unset($params['category']);
+            }
 
-            // Update Blasts
+            // Get Brands
+            $brands = array();
+            if(isset($params['brand'])) {
+                $brands = $params['brand'];
+                unset($params['brand']);
+            }
+
+            // Update Brands
             $this->updateBrands($campaign->id, $brands);
 
             // Update Categories
@@ -176,21 +186,21 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     /**
-     * Update Blast Brands
+     * Update Campaign Brands
      * 
      * @param int $campaignId
      * @param array $brands
      */
     private function updateBrands($campaignId, $brands) {
-        // Delete Old Blast Brands
-        BlastBrand::findByBlast($campaignId)->delete();
+        // Delete Old Campaign Brands
+        CampaignBrand::findByCampaign($campaignId)->delete();
 
-        // Create Blast Brand
+        // Create Campaign Brand
         if(count($brands) > 0) {
             foreach($brands as $brand) {
-                // Create Brand for Blast ID
-                BlastBrand::create([
-                    'text_blast_id' => $campaignId,
+                // Create Brand for Campaign ID
+                CampaignBrand::create([
+                    'text_campaign_id' => $campaignId,
                     'brand' => $brand
                 ]);
             }
@@ -198,21 +208,21 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     /**
-     * Update Blast Categories
+     * Update Campaign Categories
      * 
      * @param int $campaignId
      * @param array $categories
      */
     private function updateCategories($campaignId, $categories) {
-        // Delete Old Blast Categories
-        BlastCategory::findByBlast($campaignId)->delete();
+        // Delete Old Campaign Categories
+        CampaignCategory::findByCampaign($campaignId)->delete();
 
-        // Create Blast Category
+        // Create Campaign Category
         if(count($categories) > 0) {
             foreach($categories as $category) {
-                // Create Category for Blast ID
-                BlastCategory::create([
-                    'text_blast_id' => $campaignId,
+                // Create Category for Campaign ID
+                CampaignCategory::create([
+                    'text_campaign_id' => $campaignId,
                     'category' => $category
                 ]);
             }

@@ -7,6 +7,8 @@ use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
+use App\Models\CRM\Text\BlastBrand;
+use App\Models\CRM\Text\BlastCategory;
 
 class BlastRepository implements BlastRepositoryInterface {
 
@@ -123,11 +125,19 @@ class BlastRepository implements BlastRepositoryInterface {
         $blast = Blast::findOrFail($params['id']);
 
         DB::transaction(function() use (&$blast, $params) {
-            // Get Brands/Categories
-            $categories = $params['category'];
-            $brands = $params['brand'];
-            unset($params['category']);
-            unset($params['brand']);
+            // Get Categories
+            $categories = array();
+            if(isset($params['category'])) {
+                $categories = $params['category'];
+                unset($params['category']);
+            }
+
+            // Get Brands
+            $brands = array();
+            if(isset($params['brand'])) {
+                $brands = $params['brand'];
+                unset($params['brand']);
+            }
 
             // Update Blasts
             $this->updateBrands($blast->id, $brands);
