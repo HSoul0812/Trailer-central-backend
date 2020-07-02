@@ -191,7 +191,7 @@ class BlastRepository implements BlastRepositoryInterface {
      */
     private function updateBrands($blastId, $brands) {
         // Delete Old Blast Brands
-        BlastBrand::findByBlast($blastId)->delete();
+        BlastBrand::deleteByBlast($blastId);
 
         // Create Blast Brand
         if(count($brands) > 0) {
@@ -213,7 +213,7 @@ class BlastRepository implements BlastRepositoryInterface {
      */
     private function updateCategories($blastId, $categories) {
         // Delete Old Blast Categories
-        BlastCategory::findByBlast($blastId)->delete();
+        BlastCategory::deleteByBlast($blastId);
 
         // Create Blast Category
         if(count($categories) > 0) {

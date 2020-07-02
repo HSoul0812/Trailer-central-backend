@@ -193,7 +193,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
      */
     private function updateBrands($campaignId, $brands) {
         // Delete Old Campaign Brands
-        CampaignBrand::findByCampaign($campaignId)->delete();
+        CampaignBrand::deleteByCampaign($campaignId);
 
         // Create Campaign Brand
         if(count($brands) > 0) {
@@ -215,7 +215,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
      */
     private function updateCategories($campaignId, $categories) {
         // Delete Old Campaign Categories
-        CampaignCategory::findByCampaign($campaignId)->delete();
+        CampaignCategory::deleteByCampaign($campaignId);
 
         // Create Campaign Category
         if(count($categories) > 0) {
