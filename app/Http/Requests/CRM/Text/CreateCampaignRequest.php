@@ -19,8 +19,10 @@ class CreateCampaignRequest extends Request {
         'action' => 'in:inquired,purchased',
         'location_id' => 'nullable|integer',
         'send_after_days' => 'nullable|integer',
-        'category' => 'nullable|string',
-        'brand' => 'nullable|string',
+        'category' => 'array',
+        'category.*' => 'string',
+        'brand' => 'array',
+        'brand.*' => 'string',
         'include_archived' => 'in:0,-1,1',
         'is_enabled' => 'integer',
     ];
