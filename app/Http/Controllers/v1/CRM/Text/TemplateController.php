@@ -139,7 +139,8 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function show(int $id) {
+    public function show(int $userId, Request $request) {
+        $id = $request->route('id');
         $request = new ShowTemplateRequest(['id' => $id]);
         
         if ( $request->validate() ) {
@@ -187,7 +188,8 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function update(int $id, Request $request) {
+    public function update(int $userId, Request $request) {
+        $id = $request->route('id');
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateTemplateRequest($requestData);
@@ -222,7 +224,8 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function destroy(int $id) {
+    public function destroy(int $userId, Request $request) {
+        $id = $request->route('id');
         $request = new DeleteTemplateRequest(['id' => $id]);
         
         if ( $request->validate()) {

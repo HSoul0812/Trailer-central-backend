@@ -3,16 +3,6 @@
 use Dingo\Api\Routing\Router;
 use Illuminate\Http\Request;
 
-use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\CRM\Text\TemplateRepositoryInterface;
-use App\Repositories\CRM\Text\BlastRepositoryInterface;
-use App\Repositories\CRM\Text\CampaignRepositoryInterface;
-
-use App\Http\Controllers\v1\CRM\Text\TextController;
-use App\Http\Controllers\v1\CRM\Text\TemplateController;
-use App\Http\Controllers\v1\CRM\Text\BlastController;
-use App\Http\Controllers\v1\CRM\Text\CampaignController;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -183,22 +173,10 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'text.validate'], function ($route) {
         $route->get('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@create')->where('leadId', '[0-9]+');
-        $route->get('leads/{leadId}/texts/{id}', function($leadId, $id) {
-            $controller = new TextController();
-            return $controller->show($id);
-        })->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('leads/{leadId}/texts/{id}', function($leadId, $id) {
-            $controller = new TextController();
-            return $controller->update($id);
-        })->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('leads/{leadId}/texts/{id}', function($leadId, $id) {
-            $controller = new TextController();
-            return $controller->destroy($id);
-        })->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('leads/{leadId}/texts/{id}/stop', function($leadId, $id) {
-            $controller = new TextController();
-            return $controller->stop($id);
-        })->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@destroy')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('leads/{leadId}/texts/{id}/stop', 'App\Http\Controllers\v1\CRM\Text\TextController@stop')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
@@ -207,18 +185,9 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'text.template.validate'], function ($route) {
         $route->get('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@index')->where('userId', '[0-9]+');
         $route->put('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/template/{id}', function($leadId, $id) {
-            $controller = new TemplateController(new TemplateRepositoryInterface());
-            return $controller->show($id);
-        })->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/template/{id}', function($leadId, $id) {
-            $controller = new TemplateController(new TemplateRepositoryInterface());
-            return $controller->update($id);
-        })->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/template/{id}', function($leadId, $id) {
-            $controller = new TemplateController(new TemplateRepositoryInterface());
-            return $controller->destroy($id);
-        })->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
