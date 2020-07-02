@@ -49,11 +49,19 @@ class BlastRepository implements BlastRepositoryInterface {
         DB::beginTransaction();
 
         try {
-            // Get Brands/Categories
-            $categories = $params['category'];
-            $brands = $params['brand'];
-            unset($params['category']);
-            unset($params['brand']);
+            // Get Categories
+            $categories = array();
+            if(isset($params['category'])) {
+                $categories = $params['category'];
+                unset($params['category']);
+            }
+
+            // Get Brands
+            $brands = array();
+            if(isset($params['brand'])) {
+                $brands = $params['brand'];
+                unset($params['brand']);
+            }
 
             // Create Blast
             $blast = Blast::create($params);
