@@ -146,7 +146,7 @@ class TextController extends Controller
         $request = new ShowTextRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->posts->get(['id' => $id]), new TextTransformer());
+            return $this->response->item($this->texts->get(['id' => $id]), new TextTransformer());
         }
         
         return $this->response->errorBadRequest();

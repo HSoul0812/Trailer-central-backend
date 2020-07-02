@@ -147,7 +147,7 @@ class BlastController extends Controller
         $request = new ShowBlastRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->posts->get(['id' => $id]), new BlastTransformer());
+            return $this->response->item($this->blasts->get(['id' => $id]), new BlastTransformer());
         }
         
         return $this->response->errorBadRequest();

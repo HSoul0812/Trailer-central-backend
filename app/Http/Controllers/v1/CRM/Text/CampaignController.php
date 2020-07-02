@@ -147,7 +147,7 @@ class CampaignController extends Controller
         $request = new ShowCampaignRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->posts->get(['id' => $id]), new CampaignTransformer());
+            return $this->response->item($this->campaigns->get(['id' => $id]), new CampaignTransformer());
         }
         
         return $this->response->errorBadRequest();

@@ -146,7 +146,7 @@ class TemplateController extends Controller
         $request = new ShowTemplateRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->posts->get(['id' => $id]), new TemplateTransformer());
+            return $this->response->item($this->templates->get(['id' => $id]), new TemplateTransformer());
         }
         
         return $this->response->errorBadRequest();
