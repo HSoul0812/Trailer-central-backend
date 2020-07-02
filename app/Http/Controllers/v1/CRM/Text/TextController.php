@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\CRM\Text;
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetTextsRequest;
 use App\Http\Requests\CRM\Text\CreateTextRequest;
 use App\Http\Requests\CRM\Text\ShowTextRequest;
@@ -14,6 +15,8 @@ use App\Transformers\CRM\Text\TextTransformer;
 
 class TextController extends RestfulController
 {
+    use Helpers;
+
     protected $texts;
 
     /**
@@ -139,7 +142,7 @@ class TextController extends RestfulController
      *     ),
      * )
      */
-    public function show(int $id) {
+    public function show(int $leadId, int $id) {
         $request = new ShowTextRequest(['id' => $id]);
         
         if ( $request->validate() ) {
@@ -187,7 +190,7 @@ class TextController extends RestfulController
      *     ),
      * )
      */
-    public function update(int $id, Request $request) {
+    public function update(int $leadId, int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateTextRequest($requestData);
@@ -222,7 +225,7 @@ class TextController extends RestfulController
      *     ),
      * )
      */
-    public function destroy(int $id) {
+    public function destroy(int $leadId, int $id) {
         $request = new DeleteTextRequest(['id' => $id]);
         
         if ( $request->validate()) {
@@ -256,7 +259,7 @@ class TextController extends RestfulController
      *     ),
      * )
      */
-    public function Stop(int $id) {
+    public function Stop(int $leadId, int $id) {
         $request = new StopTextRequest(['id' => $id]);
         
         if ( $request->validate()) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\CRM\Text;
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetCampaignsRequest;
 use App\Http\Requests\CRM\Text\CreateCampaignRequest;
 use App\Http\Requests\CRM\Text\ShowCampaignRequest;
@@ -15,6 +16,8 @@ use App\Transformers\CRM\Text\CampaignTransformer;
 
 class CampaignController extends RestfulController
 {
+    use Helpers;
+
     protected $campaigns;
 
     /**
@@ -140,7 +143,7 @@ class CampaignController extends RestfulController
      *     ),
      * )
      */
-    public function show(int $id) {
+    public function show(int $userId, int $id) {
         $request = new ShowCampaignRequest(['id' => $id]);
         
         if ( $request->validate() ) {
@@ -188,7 +191,7 @@ class CampaignController extends RestfulController
      *     ),
      * )
      */
-    public function update(int $id, Request $request) {
+    public function update(int $userId, int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateCampaignRequest($requestData);
@@ -223,7 +226,7 @@ class CampaignController extends RestfulController
      *     ),
      * )
      */
-    public function destroy(int $id) {
+    public function destroy(int $userId, int $id) {
         $request = new DeleteCampaignRequest(['id' => $id]);
         
         if ( $request->validate()) {
@@ -257,7 +260,7 @@ class CampaignController extends RestfulController
      *     ),
      * )
      */
-    public function sent(int $id) {
+    public function sent(int $userId, int $id) {
         $request = new SentCampaignRequest(['id' => $id]);
         
         if ( $request->validate()) {
