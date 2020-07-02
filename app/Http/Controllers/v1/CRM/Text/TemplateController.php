@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\Controller;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Text\GetTemplatesRequest;
@@ -12,7 +12,7 @@ use App\Http\Requests\CRM\Text\UpdateTemplateRequest;
 use App\Http\Requests\CRM\Text\DeleteTemplateRequest;
 use App\Transformers\CRM\Text\TemplateTransformer;
 
-class TemplateController extends RestfulController
+class TemplateController extends Controller
 {
     protected $templates;
 
@@ -139,9 +139,7 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function show(int $userId) {
-        $request = new Request();
-        $id = $request->route('id');
+    public function show(int $userId, int $id) {
         $request = new ShowTemplateRequest(['id' => $id]);
         
         if ( $request->validate() ) {
@@ -189,8 +187,7 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function update(int $userId, Request $request) {
-        $id = $request->route('id');
+    public function update(int $userId, int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateTemplateRequest($requestData);
