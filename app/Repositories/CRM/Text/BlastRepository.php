@@ -78,7 +78,7 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Blast::where('delete', '=', 0);
+        $query = Blast::where('deleted', '=', 0);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;

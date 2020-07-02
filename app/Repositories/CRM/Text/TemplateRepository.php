@@ -69,7 +69,7 @@ class TemplateRepository implements TemplateRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Template::where('delete', '=', 0);
+        $query = Template::where('deleted', '=', 0);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;

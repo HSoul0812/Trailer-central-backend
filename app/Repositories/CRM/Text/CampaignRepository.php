@@ -78,7 +78,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Campaign::where('delete', '=', 0);
+        $query = Campaign::where('deleted', '=', 0);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
