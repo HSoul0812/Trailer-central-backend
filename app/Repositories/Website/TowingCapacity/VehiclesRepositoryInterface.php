@@ -11,5 +11,7 @@ use App\Repositories\Repository;
  */
 interface VehiclesRepositoryInterface extends Repository
 {
+    public function getModels(int $year, int $makeId);
+
     public function deleteAll();
 }

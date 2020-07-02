@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
  */
 class VehiclesRepository implements VehiclesRepositoryInterface
 {
-
     /**
      * @param array $params
      * @return mixed
@@ -22,9 +21,42 @@ class VehiclesRepository implements VehiclesRepositoryInterface
         return Vehicle::insert($params);
     }
 
+    /**
+     * @param int $year
+     * @param string $makeId
+     * @return mixed
+     */
+    public function getModels(int $year, int $makeId)
+    {
+        return Vehicle::select('model')
+            ->distinct()
+            ->where('year', $year)
+            ->where('make_id', $makeId)
+            ->orderBy('model')
+            ->get();
+    }
+
+    /**
+     * @param array $params
+     * @return mixed
+     */
     public function getAll($params)
     {
-        // TODO: Implement getAll() method.
+        $query = Vehicle::select('*');
+
+        if (isset($params['year'])) {
+            $query = $query->where('year', $params['year']);
+        }
+
+        if (isset($params['makeId'])) {
+            $query = $query->where('make_id', $params['makeId']);
+        }
+
+        if (isset($params['model'])) {
+            $query = $query->where('model', $params['model']);
+        }
+
+        return $query->get();
     }
 
     /**

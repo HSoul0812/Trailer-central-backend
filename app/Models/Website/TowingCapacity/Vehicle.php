@@ -21,7 +21,7 @@ class Vehicle extends Model
      */
     protected $fillable = [
         'year',
-        'towing_capacity_make_id',
+        'make_id',
         'model',
         'sub_model',
         'drive_train',

@@ -13,20 +13,33 @@ use Illuminate\Support\Facades\DB;
 class MakesRepository implements MakesRepositoryInterface
 {
     /**
-     * @param string $year
-     */
-    public function getByYear(string $year)
-    {
-
-    }
-
-    /**
      * @param array $params
      * @throws NotImplementedException
      */
     public function getAll($params)
     {
-        return Make::all();
+        $query = Make::select('*');
+
+        $query = $query->orderBy('name');
+
+        return $query->get();
+    }
+
+    /**
+     * @param string $year
+     * @return mixed|void
+     */
+    public function getByYear(string $year)
+    {
+        $query = Make::select('*');
+
+        $query = $query->whereHas('vehicles', function($q) use ($year) {
+            $q->where('year', '=', $year);
+        });
+
+        $query = $query->orderBy('name');
+
+        return $query->get();
     }
 
     /**

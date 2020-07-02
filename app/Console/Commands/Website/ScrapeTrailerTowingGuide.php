@@ -130,7 +130,7 @@ class ScrapeTrailerTowingGuide extends Command
         }
 
         foreach ($vehicles as &$vehicle) {
-            $vehicle['towing_capacity_make_id'] = $makesNameId[$vehicle['make']];
+            $vehicle['make_id'] = $makesNameId[$vehicle['make']];
             unset($vehicle['make']);
         }
 

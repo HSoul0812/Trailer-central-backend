@@ -16,7 +16,7 @@ class CreateVehicleTowingCapacityTable extends Migration
         Schema::create('towing_capacity_vehicles', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->year('year');
-            $table->unsignedInteger('towing_capacity_make_id');
+            $table->unsignedInteger('make_id');
             $table->string('model');
             $table->string('sub_model');
             $table->string('drive_train');
@@ -25,10 +25,11 @@ class CreateVehicleTowingCapacityTable extends Migration
         });
 
         Schema::table('towing_capacity_vehicles', function (Blueprint $table) {
-            $table->foreign('towing_capacity_make_id')->references('id')->on('towing_capacity_makes');
+            $table->foreign('make_id')->references('id')->on('towing_capacity_makes');
 
             $table->index('year');
-            $table->index(['year', 'towing_capacity_make_id', 'model'], 'towing_capacity_vehicles_year_make_model_index');
+            $table->index(['year', 'make_id'], 'towing_capacity_vehicles_year_make_index');
+            $table->index(['year', 'make_id', 'model'], 'towing_capacity_vehicles_year_make_model_index');
         });
     }
 
