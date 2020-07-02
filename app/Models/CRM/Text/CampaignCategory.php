@@ -27,8 +27,8 @@ class CampaignCategory extends Model
      * @param int $campaignId
      * @return array
      */
-    public static function findByCampaign(int $campaignId): CampaignCategory
+    public static function deleteByCampaign(int $campaignId)
     {
-        return self::whereTextCampaignId($campaignId);
+        return self::whereTextCampaignId($campaignId)->delete();
     }
 }

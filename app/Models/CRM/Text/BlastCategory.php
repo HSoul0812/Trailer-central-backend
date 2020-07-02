@@ -27,8 +27,8 @@ class BlastCategory extends Model
      * @param int $blastId
      * @return array
      */
-    public static function findByBlast(int $blastId): BlastCategory
+    public static function deleteByBlast(int $blastId)
     {
-        return self::whereTextBlastId($blastId);
+        return self::whereTextBlastId($blastId)->delete();
     }
 }
