@@ -2,10 +2,18 @@
 
 namespace App\Models\CRM\Account;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
+use App\Utilities\JsonApi\Filterable;
+use Illuminate\Database\Eloquent\Model;
 
-class Invoice extends Model
+/**
+ * Class Invoice
+ * @package App\Models\CRM\Account
+ * @property UnitSale $unitSale
+ * @property Payment[] $payments
+ * @property InvoiceItem[] $items
+ */
+class Invoice extends Model implements Filterable
 {
     /**
      * The table associated with the model.
@@ -24,5 +32,15 @@ class Invoice extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function jsonApiFilterableColumns(): ?array
+    {
+        return ['*'];
     }
 }
