@@ -12,7 +12,7 @@ use App\Http\Requests\Request;
 class GetCampaignsRequest extends Request {
     
     protected $rules = [
-        'campaign_name' => 'required|string',
+        'campaign_name' => 'string',
         'per_page' => 'integer',
         'sort' => 'in:campaign_name,-campaign_name,campaign_subject,-campaign_subject,email_address,-email_address,created_at,-created_at,updated_at,-updated_at',
         'id' => 'array',

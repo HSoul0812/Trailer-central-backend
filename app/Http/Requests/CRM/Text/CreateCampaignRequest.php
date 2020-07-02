@@ -15,7 +15,7 @@ class CreateCampaignRequest extends Request {
         'template_id' => 'required|integer',
         'campaign_name' => 'required|string',
         'campaign_subject' => 'required|string',
-        'text_number' => 'required|string',
+        'from_sms_number' => 'required|string',
         'action' => 'in:inquired,purchased',
         'location_id' => 'nullable|integer',
         'send_after_days' => 'nullable|integer',
