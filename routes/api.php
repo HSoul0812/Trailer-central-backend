@@ -202,9 +202,18 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'text.template.validate'], function ($route) {
         $route->get('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@index')->where('userId', '[0-9]+');
         $route->put('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/template/{id}', function($leadId, $id) {
+            $controller = new TemplateController();
+            return $controller->show($id);
+        })->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/template/{id}', function($leadId, $id) {
+            $controller = new TemplateController();
+            return $controller->update($id);
+        })->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('crm/{userId}/texts/template/{id}', function($leadId, $id) {
+            $controller = new TemplateController();
+            return $controller->destroy($id);
+        })->where('userId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
