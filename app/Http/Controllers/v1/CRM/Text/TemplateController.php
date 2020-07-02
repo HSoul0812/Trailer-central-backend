@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\CRM\Text;
 use App\Http\Controllers\Controller;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetTemplatesRequest;
 use App\Http\Requests\CRM\Text\CreateTemplateRequest;
 use App\Http\Requests\CRM\Text\ShowTemplateRequest;
@@ -14,6 +15,8 @@ use App\Transformers\CRM\Text\TemplateTransformer;
 
 class TemplateController extends Controller
 {
+    use Helpers;
+
     protected $templates;
 
     /**
