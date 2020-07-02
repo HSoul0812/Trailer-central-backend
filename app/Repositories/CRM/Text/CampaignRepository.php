@@ -50,6 +50,8 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
         try {
             // Get Brands/Categories
+            var_dump($params);
+            die;
             $categories = $params['category'];
             $brands = $params['brand'];
             unset($params['category']);
