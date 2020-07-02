@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\Controller;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Routing\Helpers;
@@ -13,7 +13,7 @@ use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
 
-class TextController extends RestfulController
+class TextController extends Controller
 {
     use Helpers;
 

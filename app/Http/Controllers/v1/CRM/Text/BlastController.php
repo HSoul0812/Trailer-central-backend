@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\Controller;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Routing\Helpers;
@@ -14,7 +14,7 @@ use App\Http\Requests\CRM\Text\DeleteBlastRequest;
 use App\Http\Requests\CRM\Text\SentBlastRequest;
 use App\Transformers\CRM\Text\BlastTransformer;
 
-class BlastController extends RestfulController
+class BlastController extends Controller
 {
     use Helpers;
 
