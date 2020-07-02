@@ -24,6 +24,10 @@ class Payment extends Model
      */
     protected $table = 'qb_payment';
 
+    protected $guarded = [
+        'related_payment_intent'
+    ];
+
     public $timestamps = false;
 
     // qb_payment has qb_payment.invoice_id but qb_invoices does not have qb_invoices.payment_id so i'm not sure if this is correct

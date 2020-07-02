@@ -17,4 +17,5 @@ interface RequestQueryable
 {
     public function withRequest($request);
     public function withQuery(Builder $query);
+    public function getPaginator();
 }

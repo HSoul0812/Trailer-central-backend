@@ -68,5 +68,9 @@ trait WithRequestQueryable
         return $this->requestQueryableBuilder;
     }
 
+    public function getPaginator()
+    {
+        return $this->queryBuilder()->paginator();
+    }
 
 }

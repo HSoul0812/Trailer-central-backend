@@ -6,7 +6,13 @@ namespace App\Http\Controllers\v1\Dms;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
+use App\Transformers\Dms\InvoiceTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
+use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 use OpenApi\Annotations as OA;
 
 /**
@@ -15,6 +21,32 @@ use OpenApi\Annotations as OA;
  */
 class InvoiceController extends RestfulControllerV2
 {
+
+    /**
+     * @var InvoiceRepositoryInterface
+     */
+    private $invoiceRepository;
+    /**
+     * @var InvoiceTransformer
+     */
+    private $invoiceTransformer;
+    /**
+     * @var Manager
+     */
+    private $fractal;
+
+    public function __construct(
+        InvoiceRepositoryInterface $invoiceRepository,
+        InvoiceTransformer $invoiceTransformer,
+        Manager $fractal
+    ) {
+        $this->invoiceRepository = $invoiceRepository;
+        $this->invoiceTransformer = $invoiceTransformer;
+        $this->fractal = $fractal;
+
+        $this->fractal->setSerializer(new NoDataArraySerializer());
+    }
+
     /**
      * @param $id
      * @param Request $request
@@ -49,18 +81,21 @@ class InvoiceController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function index(Request $request, InvoiceRepositoryInterface $repository)
+    public function index(Request $request)
     {
+        $this->fractal->parseIncludes($request->query('with', ''));
+
+        $sale = $this->invoiceRepository
+            ->withRequest($request) // pass jsonapi request queries onto this queryable repo
+            ->get([]);
+
+        $data = new Collection($sale, $this->invoiceTransformer);
+        $data->setPaginator(new IlluminatePaginatorAdapter($this->invoiceRepository->getPaginator()));
+
         return $this->response->array([
-            'data' => $repository
-
-                // optionally, pass jsonapi request queries onto this queryable repo
-                // to avoid the need to write boilerplate where, sort, limit in the repo
-                ->withRequest($request)
-
-                // get the resulting model collection/array
-                ->get([])
+            'data' => $this->fractal->createData($data)->toArray()
         ]);
+
     }
 
     /**
@@ -86,12 +121,17 @@ class InvoiceController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function show($id, Request $request, InvoiceRepositoryInterface $repository)
+    public function show($id, Request $request)
     {
+        $this->fractal->parseIncludes($request->query('with', ''));
+
+        $invoice = $this->invoiceRepository
+            ->withRequest($request) // pass jsonapi request queries onto this queryable repo
+            ->find($id);
+        $data = new Item($invoice, $this->invoiceTransformer);
+
         return $this->response->array([
-            'data' => $repository
-                ->withRequest($request) // pass jsonapi request queries onto this queryable repo
-                ->find($id)
+            'data' => $this->fractal->createData($data)->toArray()
         ]);
     }
 }

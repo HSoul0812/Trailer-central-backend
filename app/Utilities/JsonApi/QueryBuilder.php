@@ -7,6 +7,7 @@ namespace App\Utilities\JsonApi;
 use App\Exceptions\GenericClientException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use phpDocumentor\Reflection\Types\This;
 
 /**
  * Class RequestQueryBuilder
@@ -72,6 +73,10 @@ class QueryBuilder implements QueryBuilderInterface
      * @var Builder
      */
     private $query;
+    /**
+     * @var \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    private $paginator;
 
     /**
      * RequestQueryBuilder constructor.
@@ -91,11 +96,12 @@ class QueryBuilder implements QueryBuilderInterface
     public function build()
     {
         // build all query clauses
-        $this->buildRelations()
+        $this
+            //->buildRelations()
             ->buildSearch()
+            ->buildPagination()
             ->buildFilter()
             ->buildLimit()
-            ->buildOffset()
             ->buildSort();
 
         return $this->query;
@@ -147,6 +153,24 @@ class QueryBuilder implements QueryBuilderInterface
         $relations = explode(',', $with);
         foreach ($relations as $relation) {
             $this->query->with($relation);
+        }
+
+        return $this;
+    }
+
+    private function buildPagination()
+    {
+        // if limit and offset are specified, skip this
+        if ($this->request->input('limit', null) &&
+            $this->request->input('offset', null))
+        {
+            return $this;
+        }
+
+        $perPage = $this->request->input('per_page', env('JSON_API_DEFAULT_PER_PAGE', 20));
+
+        if ($perPage > 0) {
+            $this->paginator = $this->query->paginate($perPage);
         }
 
         return $this;
@@ -212,15 +236,19 @@ class QueryBuilder implements QueryBuilderInterface
     private function buildLimit()
     {
         $limitQuery = $this->request->input('limit');
-        if (!$limitQuery) {
-            $this->query->limit(env('JSON_API_LIMIT_DEFAULT', 100));
-            return $this;
+        $offsetQuery = $this->request->input('offset');
+
+        if ($limitQuery && $offsetQuery) {
+            $this->query->limit($limitQuery);
+            $this->query->offset($offsetQuery);
         }
 
-        $this->query->limit($limitQuery);
         return $this;
     }
 
+    /**
+     * @deprecated
+     */
     private function buildOffset()
     {
         $offsetQuery = $this->request->input('offset');
@@ -290,5 +318,10 @@ class QueryBuilder implements QueryBuilderInterface
     {
         $this->operatorFunctions[$operator] = $function;
         return $this;
+    }
+
+    public function paginator()
+    {
+        return $this->paginator;
     }
 }

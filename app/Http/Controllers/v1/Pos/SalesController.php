@@ -6,7 +6,13 @@ namespace App\Http\Controllers\v1\Pos;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Pos\SaleRepositoryInterface;
+use App\Transformers\Pos\SaleTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
+use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 use OpenApi\Annotations as OA;
 
 /**
@@ -19,20 +25,53 @@ use OpenApi\Annotations as OA;
 class SalesController extends RestfulControllerV2
 {
     /**
+     * @var SaleRepositoryInterface
+     */
+    private $saleRepository;
+    /**
+     * @var SaleTransformer
+     */
+    private $saleTransformer;
+    /**
+     * @var Manager
+     */
+    private $fractal;
+
+    public function __construct(
+        SaleRepositoryInterface $saleRepository,
+        SaleTransformer $saleTransformer,
+        Manager $fractal
+    ) {
+        $this->saleRepository = $saleRepository;
+        $this->saleTransformer = $saleTransformer;
+        $this->fractal = $fractal;
+
+        $this->fractal->setSerializer(new NoDataArraySerializer());
+    }
+
+    /**
      * List/browse all pos-based queries
      *
      * @param Request $request
      *
-     * @param SaleRepositoryInterface $repository
      * @return \Dingo\Api\Http\Response
      * @OA\Get(
      *     path="/pos/sales"
      * )
      */
-    public function index(Request $request, SaleRepositoryInterface $repository)
+    public function index(Request $request)
     {
+        $this->fractal->parseIncludes($request->query('with', ''));
+
+        $sale = $this->saleRepository
+            ->withRequest($request) // pass jsonapi request queries onto this queryable repo
+            ->get([]);
+
+        $data = new Collection($sale, $this->saleTransformer);
+        $data->setPaginator(new IlluminatePaginatorAdapter($this->saleRepository->getPaginator()));
+
         return $this->response->array([
-            'data' => $repository->withRequest($request)->get([])
+            'data' => $this->fractal->createData($data)->toArray()
         ]);
     }
 
@@ -41,7 +80,6 @@ class SalesController extends RestfulControllerV2
      * @param $id
      *
      * @param Request $request
-     * @param SaleRepositoryInterface $repository
      * @return \Dingo\Api\Http\Response
      *
      * @OA\Get(
@@ -56,12 +94,17 @@ class SalesController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function show($id, Request $request, SaleRepositoryInterface $repository)
+    public function show($id, Request $request)
     {
+        $this->fractal->parseIncludes($request->query('with', ''));
+
+        $sale = $this->saleRepository
+            ->withRequest($request) // pass jsonapi request queries onto this queryable repo
+            ->find($id);
+        $data = new Item($sale, $this->saleTransformer);
+
         return $this->response->array([
-            'data' => $repository
-                ->withRequest($request) // pass jsonapi request queries onto this queryable repo
-                ->find($id)
+            'data' => $this->fractal->createData($data)->toArray()
         ]);
     }
 

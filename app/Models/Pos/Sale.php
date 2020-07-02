@@ -21,12 +21,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property Customer $customer
  * @property SalesPerson $salesPerson
  * @property PaymentMethod $paymentMethod
- * @property SaleProducts[] $products
+ * @property SaleProduct[] $products
  * @property Refund[] $refunds
  */
 class Sale extends Model implements JsonApi\Filterable
 {
     protected $table = "crm_pos_sales";
+
+    protected $guarded = [
+        'related_payment_intent'
+    ];
 
     protected $filterableColumns = ['*'];
 
@@ -44,7 +48,7 @@ class Sale extends Model implements JsonApi\Filterable
      */
     public function products()
     {
-        return $this->hasMany(SaleProducts::class, 'sale_id');
+        return $this->hasMany(SaleProduct::class, 'sale_id');
     }
 
     public function customer()

@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property Sale $sale
  * @property Item $item
  */
-class SaleProducts extends Model
+class SaleProduct extends Model
 {
     protected $table = "crm_pos_sale_products";
 
