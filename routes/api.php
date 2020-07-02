@@ -303,6 +303,21 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
 
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DMS routes
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'dms',
+        'middleware' => 'accesstoken.validate',
+    ], function ($route) {
         /*
         |--------------------------------------------------------------------------
         | POS
@@ -311,8 +326,8 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
-        $route->get('pos/sale/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
+        $route->get('sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
+        $route->get('sale/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
 
         /*
         |--------------------------------------------------------------------------

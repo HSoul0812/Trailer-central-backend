@@ -5,18 +5,19 @@ namespace App\Repositories\CRM\Payment;
 
 
 use App\Models\CRM\Account\Payment;
+use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
-class PaymentRepository implements PaymentRepositoryInterface
+class PaymentRepository extends RepositoryAbstract implements PaymentRepositoryInterface
 {
     use WithRequestQueryable;
 
     public function __construct()
     {
         // assign the initial model to the query builder
-        $this->withQuery(Payment::query());
+        $this->withQuery(Payment::query()); // todo may need to be injected here some other way
     }
 
     /**
@@ -37,39 +38,6 @@ class PaymentRepository implements PaymentRepositoryInterface
     public function find($id)
     {
         return $this->query()->where('id', $id)->first();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function create($params)
-    {
-        // TODO: Implement create() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function update($params)
-    {
-        // TODO: Implement update() method.
-    }
-
-
-    /**
-     * @inheritDoc
-     */
-    public function delete($params)
-    {
-        // TODO: Implement delete() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAll($params)
-    {
-        // TODO: Implement getAll() method.
     }
 
 }

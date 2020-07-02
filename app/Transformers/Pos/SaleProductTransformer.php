@@ -28,12 +28,3 @@ class SaleProductTransformer extends TransformerAbstract
         return $this->item($saleProduct->item, new ItemTransformer());
     }
 }
-
-// CREATE TABLE `crm_pos_sale_products` (
-//  `id` int(11) NOT NULL AUTO_INCREMENT,
-//  `sale_id` int(11) NOT NULL,
-//  `item_id` int(11) NOT NULL,
-//  `qty` int(11) NOT NULL,
-//  `price` decimal(10,2) DEFAULT NULL,
-//  PRIMARY KEY (`id`)
-//) ENGINE=InnoDB AUTO_INCREMENT=1065 DEFAULT CHARSET=utf8;

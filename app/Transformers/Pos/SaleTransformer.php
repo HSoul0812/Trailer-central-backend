@@ -20,7 +20,7 @@ class SaleTransformer extends TransformerAbstract
     {
         return [
             'id' => (int)$sale->id,
-            //'register_id' => (int)$sale->register_id, // express as include
+            //'register_id' => (int)$sale->register_id, // express as include, uncomment if needed
             //'customer_id' => (int)$sale->customer_id, // express as include
             //'sales_person_id' => (int)$sale->sales_person_id,
             //'payment_method_id' => (int)$sale->payment_method_id,

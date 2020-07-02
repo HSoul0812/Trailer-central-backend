@@ -4,13 +4,15 @@
 namespace App\Repositories\Pos;
 
 
+use App\Exceptions\NotImplementedException;
 use App\Models\Pos\Sale;
+use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
 use App\Utilities\JsonApi\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
-class SaleRepository implements SaleRepositoryInterface
+class SaleRepository extends RepositoryAbstract implements SaleRepositoryInterface
 {
     use WithRequestQueryable;
 
@@ -19,10 +21,10 @@ class SaleRepository implements SaleRepositoryInterface
      */
     private $queryBuilder;
 
-    public function __construct(QueryBuilder $queryBuilder)
+    public function __construct()
     {
         // assign the initial model to the query builder
-        $this->withQuery(Sale::query());
+        $this->withQuery(Sale::query()); // todo may need to be injected here some other way
     }
 
     /**
@@ -44,24 +46,4 @@ class SaleRepository implements SaleRepositoryInterface
     {
         return $this->query()->where('id', $id)->first();
     }
-    public function create($params)
-    {
-        // TODO: Implement create() method.
-    }
-
-    public function update($params)
-    {
-        // TODO: Implement update() method.
-    }
-
-    public function delete($params)
-    {
-        // TODO: Implement delete() method.
-    }
-
-    public function getAll($params)
-    {
-        // TODO: Implement getAll() method.
-    }
-
 }
