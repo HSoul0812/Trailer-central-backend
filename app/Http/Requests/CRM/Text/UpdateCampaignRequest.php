@@ -20,7 +20,8 @@ class UpdateCampaignRequest extends Request {
         'action' => 'in:inquired,purchased',
         'location_id' => 'nullable|integer',
         'send_after_days' => 'nullable|integer',
-        'unit_category' => 'nullable|string',
+        'category' => 'nullable|string',
+        'brand' => 'nullable|string',
         'include_archived' => 'in:0,-1,1',
         'is_enabled' => 'integer',
     ];
