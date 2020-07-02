@@ -6,6 +6,10 @@ use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\Website\TowingCapacity\MakesRepository;
+use App\Repositories\Website\TowingCapacity\MakesRepositoryInterface;
+use App\Repositories\Website\TowingCapacity\VehiclesRepository;
+use App\Repositories\Website\TowingCapacity\VehiclesRepositoryInterface;
 use App\Repositories\Website\WebsiteRepository;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Filesystem\Filesystem;
@@ -80,13 +84,15 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
-        $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);        
+        $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
-        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class); 
-        
+        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
+        $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
+        $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
+
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
         $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);
