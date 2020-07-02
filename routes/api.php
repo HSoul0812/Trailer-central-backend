@@ -326,8 +326,8 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
-        $route->get('sale/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
+        $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
+        $route->get('pos/sales/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
 
         /*
         |--------------------------------------------------------------------------
@@ -338,7 +338,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('invoices', 'App\Http\Controllers\v1\Dms\InvoiceController@index');
-        $route->get('invoice/{id}', 'App\Http\Controllers\v1\Dms\InvoiceController@show');
+        $route->get('invoices/{id}', 'App\Http\Controllers\v1\Dms\InvoiceController@show');
 
         /*
         |--------------------------------------------------------------------------
@@ -348,7 +348,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('payment/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
+        $route->get('payments/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
 
     });
 
