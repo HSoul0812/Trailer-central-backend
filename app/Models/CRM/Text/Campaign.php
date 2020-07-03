@@ -48,6 +48,14 @@ class Campaign extends Model
     /**
      * @return type
      */
+    public function template()
+    {
+        return $this->belongsTo(Template::class);
+    }
+
+    /**
+     * @return type
+     */
     public function brands()
     {
         return $this->hasMany(CampaignBrand::class, 'text_campaign_id');

@@ -13,6 +13,7 @@ class BlastTransformer extends TransformerAbstract
              'id' => (int)$blast->id,
              'user_id' => (int)$blast->user_id,
              'template_id' => (int)$blast->template_id,
+             'template' => $blast->template,
              'campaign_name' => $blast->campaign_name,
              'campaign_subject' => $blast->campaign_subject,
              'from_sms_number' => $blast->from_sms_number,

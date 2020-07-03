@@ -49,6 +49,14 @@ class Blast extends Model
     /**
      * @return type
      */
+    public function template()
+    {
+        return $this->belongsTo(Template::class);
+    }
+
+    /**
+     * @return type
+     */
     public function brands()
     {
         return $this->hasMany(BlastBrand::class, 'text_blast_id');
