@@ -16,7 +16,7 @@ class UpdateBlastRequest extends Request {
         'template_id' => 'integer',
         'campaign_name' => 'string',
         'campaign_subject' => 'string',
-        'sent_date' => 'string',
+        'send_date' => 'string',
         'from_sms_number' => 'nullable|string',
         'action' => 'in:inquired,purchased',
         'location_id' => 'nullable|integer',
