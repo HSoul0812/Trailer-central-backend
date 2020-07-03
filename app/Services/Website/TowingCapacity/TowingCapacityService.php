@@ -66,4 +66,12 @@ class TowingCapacityService
 
         return $this->vehicleRepository->getAll($params);
     }
+
+    /**
+     * @return mixed
+     */
+    public function getYears()
+    {
+        return $this->vehicleRepository->getYears();
+    }
 }

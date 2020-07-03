@@ -8,6 +8,7 @@ use App\Http\Requests\Website\TowingCapacity\VehiclesRequest;
 use App\Services\Website\TowingCapacity\TowingCapacityService;
 use App\Transformers\Website\TowingCapacity\ModelTransformer;
 use App\Transformers\Website\TowingCapacity\VehiclesTransformer;
+use App\Transformers\Website\TowingCapacity\YearsTransformer;
 
 class VehicleController extends RestfulController
 {
@@ -128,5 +129,24 @@ class VehicleController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/website/towing-capacity/vehicles/years",
+     *     description="Retrieve a list of years of vehicles",
+     *     tags={"Towing capasity years"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of makes",
+     *         @OA\JsonContent()
+     *     ),
+     * )
+     *
+     * @return \Dingo\Api\Http\Response
+     */
+    public function getYears()
+    {
+        return $this->response->collection($this->service->getYears(), new YearsTransformer());
     }
 }

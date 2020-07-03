@@ -22,6 +22,17 @@ class VehiclesRepository implements VehiclesRepositoryInterface
     }
 
     /**
+     * @return mixed
+     */
+    public function getYears()
+    {
+        return Vehicle::select('year')
+            ->distinct()
+            ->orderBy('year', 'DESC')
+            ->get();
+    }
+
+    /**
      * @param int $year
      * @param string $makeId
      * @return mixed
