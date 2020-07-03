@@ -51,7 +51,7 @@ class Blast extends Model
      */
     public function brands()
     {
-        return $this->hasMany(BlastBrand::class, 'id', 'text_blast_id');
+        return $this->hasMany(BlastBrand::class, 'text_blast_id');
     }
 
     /**
@@ -59,7 +59,7 @@ class Blast extends Model
      */
     public function categories()
     {
-        return $this->hasMany(BlastCategory::class, 'id', 'text_blast_id');
+        return $this->hasMany(BlastCategory::class, 'text_blast_id');
     }
 
     /**
@@ -67,6 +67,6 @@ class Blast extends Model
      */
     public function sent()
     {
-        return $this->hasOne(BlastSent::class, 'id', 'text_blast_id');
+        return $this->hasOne(BlastSent::class, 'text_blast_id');
     }
 }

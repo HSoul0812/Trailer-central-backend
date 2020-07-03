@@ -50,7 +50,7 @@ class Campaign extends Model
      */
     public function brands()
     {
-        return $this->hasMany(CampaignBrand::class, 'id', 'text_campaign_id');
+        return $this->hasMany(CampaignBrand::class, 'text_campaign_id');
     }
 
     /**
@@ -58,7 +58,7 @@ class Campaign extends Model
      */
     public function categories()
     {
-        return $this->hasMany(CampaignCategory::class, 'id', 'text_campaign_id');
+        return $this->hasMany(CampaignCategory::class, 'text_campaign_id');
     }
 
     /**
@@ -66,6 +66,6 @@ class Campaign extends Model
      */
     public function sent()
     {
-        return $this->hasOne(CampaignSent::class, 'id', 'text_campaign_id');
+        return $this->hasOne(CampaignSent::class, 'text_campaign_id');
     }
 }
