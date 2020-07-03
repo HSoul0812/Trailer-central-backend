@@ -18,12 +18,12 @@ class CreateCampaignRequest extends Request {
         'from_sms_number' => 'nullable|string',
         'action' => 'required|in:inquired,purchased',
         'location_id' => 'nullable|integer',
-        'send_after_days' => 'nullable|integer',
-        'category' => 'array',
-        'category.*' => 'string',
-        'brand' => 'array',
-        'brand.*' => 'string',
+        'send_after_days' => 'required|integer',
+        'category' => 'nullable|array',
+        'category.*' => 'nullable|string',
+        'brand' => 'nullable|array',
+        'brand.*' => 'nullable|string',
         'include_archived' => 'in:0,-1,1',
-        'is_enabled' => 'integer',
+        'is_enabled' => 'nullable|integer',
     ];
 }
