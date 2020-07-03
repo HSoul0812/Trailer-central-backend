@@ -232,12 +232,12 @@ class ScrapeTrailerTowingGuide extends Command
                     foreach ($driveTrains as $driveTrain) {
                         foreach ($towLimits as $towLimit) {
                             $items[] = [
-                                'make' => $make,
-                                'model' => $model,
-                                'sub_model' => $subModel,
-                                'engine' => $engine,
-                                'drive_train' => $driveTrain,
-                                'tow_limit' => $towLimit
+                                'make' => trim($make),
+                                'model' => trim($model),
+                                'sub_model' => trim($subModel),
+                                'engine' => trim($engine),
+                                'drive_train' => trim($driveTrain),
+                                'tow_limit' => trim($towLimit)
                             ];
                         }
                     }
