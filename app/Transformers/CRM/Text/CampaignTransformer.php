@@ -15,7 +15,7 @@ class CampaignTransformer extends TransformerAbstract
              'template_id' => (int)$campaign->template_id,
              'campaign_name' => $campaign->campaign_name,
              'campaign_subject' => $campaign->campaign_subject,
-             'from_email_address' => $campaign->from_email_address,
+             'from_sms_number' => $campaign->from_sms_number,
              'action' => $campaign->action,
              'location_id' => (int)$campaign->location_id,
              'send_after_days' => (int)$campaign->send_after_days,
