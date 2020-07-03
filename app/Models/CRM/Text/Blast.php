@@ -45,4 +45,28 @@ class Blast extends Model
         'is_cancelled',
         'deleted',
     ];
+
+    /**
+     * @return type
+     */
+    public function brands()
+    {
+        return $this->hasMany(BlastBrand::class, 'id', 'text_blast_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function categories()
+    {
+        return $this->hasMany(BlastCategory::class, 'id', 'text_blast_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function sent()
+    {
+        return $this->hasOne(BlastSent::class, 'id', 'text_blast_id');
+    }
 }

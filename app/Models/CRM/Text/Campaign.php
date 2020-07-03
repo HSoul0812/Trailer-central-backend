@@ -44,4 +44,28 @@ class Campaign extends Model
         'is_enabled',
         'deleted',
     ];
+
+    /**
+     * @return type
+     */
+    public function brands()
+    {
+        return $this->hasMany(CampaignBrand::class, 'id', 'text_campaign_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function categories()
+    {
+        return $this->hasMany(CampaignCategory::class, 'id', 'text_campaign_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function sent()
+    {
+        return $this->hasOne(CampaignSent::class, 'id', 'text_campaign_id');
+    }
 }
