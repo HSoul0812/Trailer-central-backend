@@ -25,6 +25,7 @@ class BlastTransformer extends TransformerAbstract
              'include_archived' => (int)$blast->include_archived,
              'is_delivered' => (int)$blast->is_delivered,
              'is_cancelled' => (int)$blast->is_cancelled,
+             'send_date' => $blast->send_date,
              'created_at' => $blast->created_at,
              'updated_at' => $blast->updated_at,
              'deleted' => (int)$blast->deleted,
