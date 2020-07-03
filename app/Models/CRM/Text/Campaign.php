@@ -35,7 +35,7 @@ class Campaign extends Model
         'template_id',
         'campaign_name',
         'campaign_subject',
-        'from_email_address',
+        'from_sms_number',
         'action',
         'location_id',
         'send_after_days',

@@ -59,8 +59,6 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->integer('send_after_days')->nullable();
 
-            $table->integer('unit_category')->nullable();
-
             $table->enum('include_archived', Campaign::STATUS_ARCHIVED)->default('0');
 
             $table->tinyInteger('is_enabled')->default(1)->index();
@@ -159,8 +157,6 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
             $table->integer('location_id')->nullable();
 
             $table->integer('send_after_days')->nullable();
-
-            $table->integer('unit_category')->nullable();
 
             $table->enum('include_archived', Blast::STATUS_ARCHIVED)->default('0');
 
