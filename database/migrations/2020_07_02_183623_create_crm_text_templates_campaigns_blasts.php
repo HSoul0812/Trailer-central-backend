@@ -51,7 +51,7 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->string('campaign_subject');
 
-            $table->string('from_sms_number')->index();
+            $table->string('from_sms_number')->index()->nullable();
 
             $table->enum('action', Campaign::STATUS_ACTIONS)->nullable();
 
@@ -150,7 +150,7 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->string('campaign_subject');
 
-            $table->string('from_sms_number')->index();
+            $table->string('from_sms_number')->index()->nullable();
 
             $table->enum('action', Blast::STATUS_ACTIONS)->nullable();
 
