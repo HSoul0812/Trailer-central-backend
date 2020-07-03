@@ -4,10 +4,10 @@ namespace App\Http\Middleware\CRM\Text;
 
 use Closure;
 use App\Http\Middleware\ValidRoute;
-use App\Models\CRM\Users\User;
-use App\Models\CRM\Text\Template;
+use App\Models\CRM\User\User;
+use App\Models\CRM\Text\Campaign;
 
-class TemplateValidate extends ValidRoute {
+class CampaignValidate extends ValidRoute {
 
     const USER_ID_PARAM = 'userId';
     const ID_PARAM = 'id';
@@ -39,7 +39,7 @@ class TemplateValidate extends ValidRoute {
         };
         
         $this->validator[self::ID_PARAM] = function ($data) {
-            if (empty(Template::find($data))) {
+            if (empty(Campaign::find($data))) {
                 return false;
             }
             

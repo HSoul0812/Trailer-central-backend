@@ -4,7 +4,7 @@ namespace App\Http\Middleware\CRM\Text;
 
 use Closure;
 use App\Http\Middleware\ValidRoute;
-use App\Models\CRM\Users\User;
+use App\Models\CRM\User\User;
 use App\Models\CRM\Text\Template;
 
 class TemplateValidate extends ValidRoute {

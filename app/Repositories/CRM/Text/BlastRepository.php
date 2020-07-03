@@ -2,10 +2,13 @@
 
 namespace App\Repositories\CRM\Text;
 
+use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
+use App\Models\CRM\Text\BlastBrand;
+use App\Models\CRM\Text\BlastCategory;
 
 class BlastRepository implements BlastRepositoryInterface {
 
@@ -48,8 +51,28 @@ class BlastRepository implements BlastRepositoryInterface {
         DB::beginTransaction();
 
         try {
+            // Get Categories
+            $categories = array();
+            if(isset($params['category'])) {
+                $categories = $params['category'];
+                unset($params['category']);
+            }
+
+            // Get Brands
+            $brands = array();
+            if(isset($params['brand'])) {
+                $brands = $params['brand'];
+                unset($params['brand']);
+            }
+
             // Create Blast
             $blast = Blast::create($params);
+
+            // Update Blasts
+            $this->updateBrands($blast->id, $brands);
+
+            // Update Categories
+            $this->updateCategories($blast->id, $categories);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -77,7 +100,11 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Blast::where('identifier', '>', 0);
+        $query = Blast::where('deleted', '=', 0);
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
 
         if (isset($params['user_id'])) {
             $query = $query->where('user_id', $params['user_id']);
@@ -98,19 +125,31 @@ class BlastRepository implements BlastRepositoryInterface {
         $blast = Blast::findOrFail($params['id']);
 
         DB::transaction(function() use (&$blast, $params) {
+            // Get Categories
+            $categories = array();
+            if(isset($params['category'])) {
+                $categories = $params['category'];
+                unset($params['category']);
+            }
+
+            // Get Brands
+            $brands = array();
+            if(isset($params['brand'])) {
+                $brands = $params['brand'];
+                unset($params['brand']);
+            }
+
+            // Update Blasts
+            $this->updateBrands($blast->id, $brands);
+
+            // Update Categories
+            $this->updateCategories($blast->id, $categories);
+
             // Fill Text Details
             $blast->fill($params)->save();
         });
 
         return $blast;
-    }
-
-    private function addSortQuery($query, $sort) {
-        if (!isset($this->sortOrders[$sort])) {
-            return;
-        }
-
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
     public function sent($params) {
@@ -127,6 +166,65 @@ class BlastRepository implements BlastRepositoryInterface {
         }
         
         return $stop;
+    }
+
+    /**
+     * Add Sort Query
+     * 
+     * @param type $query
+     * @param type $sort
+     * @return type
+     */
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    /**
+     * Update Blast Brands
+     * 
+     * @param int $blastId
+     * @param array $brands
+     */
+    private function updateBrands($blastId, $brands) {
+        // Delete Old Blast Brands
+        BlastBrand::deleteByBlast($blastId);
+
+        // Create Blast Brand
+        if(count($brands) > 0) {
+            foreach($brands as $brand) {
+                // Create Brand for Blast ID
+                BlastBrand::create([
+                    'text_blast_id' => $blastId,
+                    'brand' => $brand
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Update Blast Categories
+     * 
+     * @param int $blastId
+     * @param array $categories
+     */
+    private function updateCategories($blastId, $categories) {
+        // Delete Old Blast Categories
+        BlastCategory::deleteByBlast($blastId);
+
+        // Create Blast Category
+        if(count($categories) > 0) {
+            foreach($categories as $category) {
+                // Create Category for Blast ID
+                BlastCategory::create([
+                    'text_blast_id' => $blastId,
+                    'category' => $category
+                ]);
+            }
+        }
     }
 
 }

@@ -35,14 +35,46 @@ class Blast extends Model
         'template_id',
         'campaign_name',
         'campaign_subject',
-        'from_email_address',
+        'from_sms_number',
         'action',
         'location_id',
         'send_after_days',
-        'unit_category',
         'include_archived',
         'is_delivered',
         'is_cancelled',
+        'send_date',
         'deleted',
     ];
+
+    /**
+     * @return type
+     */
+    public function template()
+    {
+        return $this->belongsTo(Template::class);
+    }
+
+    /**
+     * @return type
+     */
+    public function brands()
+    {
+        return $this->hasMany(BlastBrand::class, 'text_blast_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function categories()
+    {
+        return $this->hasMany(BlastCategory::class, 'text_blast_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function sent()
+    {
+        return $this->hasOne(BlastSent::class, 'text_blast_id');
+    }
 }

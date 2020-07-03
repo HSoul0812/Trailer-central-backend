@@ -16,14 +16,18 @@ class UpdateBlastRequest extends Request {
         'template_id' => 'integer',
         'campaign_name' => 'string',
         'campaign_subject' => 'string',
-        'from_email_address' => 'string',
+        'send_date' => 'string',
+        'from_sms_number' => 'nullable|string',
         'action' => 'in:inquired,purchased',
         'location_id' => 'nullable|integer',
-        'send_after_days' => 'nullable|integer',
-        'unit_category' => 'nullable|string',
+        'send_after_days' => 'integer',
+        'category' => 'nullable|array',
+        'category.*' => 'nullable|string',
+        'brand' => 'nullable|array',
+        'brand.*' => 'nullable|string',
         'include_archived' => 'in:0,-1,1',
-        'is_delivered' => 'integer',
-        'is_cancelled' => 'integer',
+        'is_delivered' => 'nullable|integer',
+        'is_cancelled' => 'nullable|integer',
     ];
     
 }
