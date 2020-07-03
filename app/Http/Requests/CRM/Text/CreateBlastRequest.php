@@ -15,6 +15,7 @@ class CreateBlastRequest extends Request {
         'template_id' => 'required|integer',
         'campaign_name' => 'required|string',
         'campaign_subject' => 'required|string',
+        'sent_date' => 'required|string',
         'from_sms_number' => 'nullable|string',
         'action' => 'required|in:inquired,purchased',
         'location_id' => 'nullable|integer',

@@ -39,10 +39,10 @@ class Blast extends Model
         'action',
         'location_id',
         'send_after_days',
-        'unit_category',
         'include_archived',
         'is_delivered',
         'is_cancelled',
+        'send_date',
         'deleted',
     ];
 

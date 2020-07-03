@@ -39,7 +39,6 @@ class Campaign extends Model
         'action',
         'location_id',
         'send_after_days',
-        'unit_category',
         'include_archived',
         'is_enabled',
         'deleted',

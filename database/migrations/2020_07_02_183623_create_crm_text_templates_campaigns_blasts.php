@@ -119,7 +119,9 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->foreign('text_campaign_id')
                     ->references('id')
-                    ->on('crm_text_campaign');
+                    ->on('crm_text_campaign')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
         });
 
         // Create CRM Text Campaign Category
@@ -134,7 +136,9 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->foreign('text_campaign_id')
                     ->references('id')
-                    ->on('crm_text_campaign');
+                    ->on('crm_text_campaign')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
         });
 
 
@@ -163,6 +167,8 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
             $table->tinyInteger('is_delivered')->default(0)->index();
 
             $table->tinyInteger('is_cancelled')->default(0)->index();
+
+            $table->timestamp('send_date')->index();
 
             $table->timestamps();
 
@@ -220,7 +226,9 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->foreign('text_blast_id')
                     ->references('id')
-                    ->on('crm_text_blast');
+                    ->on('crm_text_blast')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
         });
 
         // Create CRM Text Blast Category
@@ -235,7 +243,9 @@ class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 
             $table->foreign('text_blast_id')
                     ->references('id')
-                    ->on('crm_text_blast');
+                    ->on('crm_text_blast')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
         });
 
 
