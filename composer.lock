@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d6a714722c93c40bd51696a3684d3138",
+    "content-hash": "e5fba7b0579441338e6503018342216c",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -1213,7 +1213,7 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-feature/DS-218",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
@@ -4352,7 +4352,7 @@
         },
         {
             "name": "symfony/css-selector",
-            "version": "v5.1.0",
+            "version": "v5.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
@@ -4462,7 +4462,7 @@
         },
         {
             "name": "symfony/dom-crawler",
-            "version": "v5.1.0",
+            "version": "v5.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dom-crawler.git",

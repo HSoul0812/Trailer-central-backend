@@ -12,6 +12,7 @@ use App\Http\Requests\Request;
 class CreatePartRequest extends Request {
     
     protected $rules = [
+        'dealer_id' => 'integer|required',
         'vendor_id' => 'nullable|integer',
         'vehicle_specific_id' => 'nullable|integer',
         'manufacturer_id' => 'integer',

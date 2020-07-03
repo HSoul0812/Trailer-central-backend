@@ -3,7 +3,7 @@
 namespace App\Models\Upload;
 
 use App\Models\CRM\Dealer\DealerUpload;
-use App\Models\User\Dealer;
+use App\Models\User\NewDealerUser;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -65,6 +65,6 @@ class Upload extends Model
     }
 
     public function dealer() {
-        return $this->belongsToMany(Dealer::class, 'dealer_upload', 'upload_id', 'upload_id');
+        return $this->belongsToMany(NewDealerUser::class, 'dealer_upload', 'upload_id', 'upload_id');
     }
 }

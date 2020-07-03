@@ -4,12 +4,18 @@ namespace App\Providers;
 
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
+use App\Repositories\CRM\Invoice\InvoiceRepository;
+use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
+use App\Repositories\CRM\Payment\PaymentRepository;
+use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
 use App\Repositories\Website\TowingCapacity\MakesRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\VehiclesRepository;
 use App\Repositories\Website\TowingCapacity\VehiclesRepositoryInterface;
+use App\Repositories\Pos\SaleRepository;
+use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Website\WebsiteRepository;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Filesystem\Filesystem;
@@ -32,6 +38,14 @@ use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\UserRepository;
+use App\Repositories\CRM\User\SalesPersonRepository;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Repositories\User\DealerLocationRepository;
+use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\CRM\Interactions\InteractionsRepository;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -50,6 +64,9 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('cycle_count_exists', 'App\Rules\Parts\CycleCountExists@passes');
         \Validator::extend('manufacturer_exists', 'App\Rules\Parts\ManufacturerExists@passes');
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
+        \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
+        \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
+        \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -81,6 +98,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
+        $this->app->bind('App\Repositories\Dms\QuoteRepositoryInterface', 'App\Repositories\Dms\QuoteRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
@@ -89,6 +107,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
+        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(SalesPersonRepositoryInterface::class, SalesPersonRepository::class);
+        $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
+        $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
+        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
+        $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
+        $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
+
+
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);

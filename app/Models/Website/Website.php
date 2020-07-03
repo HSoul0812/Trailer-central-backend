@@ -4,6 +4,7 @@ namespace App\Models\Website;
 
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Website\Blog\Post;
 
 class Website extends Model
 {
@@ -17,6 +18,11 @@ class Website extends Model
     public function websiteConfigs()
     {
         return $this->hasMany(WebsiteConfig::class, 'website_id', 'id');
+    }
+    
+    public function blogPosts()
+    {
+        return $this->hasMany(Post::class, 'website_id', 'id');
     }
 
     /**

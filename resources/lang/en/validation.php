@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\CRM\Leads\LeadType;
+use App\Models\CRM\Leads\Lead;
+
 return [
 
     /*
@@ -168,5 +171,27 @@ return [
     'url' => 'The :attribute needs to be a URL',
     'integer' => 'The :attribute needs to be an integer.',
     'array' => 'The :attribute needs to be an array.',
-    'price_format' => 'The format for :attribute is incorrect. Starting price needs to be lower than end price. Formats supported are: [10 TO 100], [10.05 TO 100], [10.05 TO 100.05], [10 TO 100.05], [10], [10.05]'
+    'price_format' => 'The format for :attribute is incorrect. Starting price needs to be lower than end price. Formats supported are: [10 TO 100], [10.05 TO 100], [10.05 TO 100.05], [10 TO 100.05], [10], [10.05]',
+    'lead_type_valid' => 'Lead type status needs to be: '.
+                            LeadType::TYPE_BUILD . ', ' .
+                            LeadType::TYPE_CALL . ', ' .  
+                            LeadType::TYPE_GENERAL . ', ' .
+                            LeadType::TYPE_CRAIGSLIST . ', ' .
+                            LeadType::TYPE_INVENTORY . ', ' .
+                            LeadType::TYPE_TEXT . ', ' .
+                            LeadType::TYPE_SHOWROOM_MODEL . ', ' .
+                            LeadType::TYPE_JOTFORM . ', ' .
+                            LeadType::TYPE_RENTALS . ', ' .
+                            LeadType::TYPE_FINANCING . ', ' .
+                            LeadType::TYPE_SERVICE,
+    'lead_status_valid' => 'Lead status needs to be: '.
+                            Lead::STATUS_HOT . ', ' .
+                            Lead::STATUS_COLD . ',' .  
+                            Lead::STATUS_LOST . ',' .
+                            Lead::STATUS_MEDIUM . ',' .
+                            Lead::STATUS_NEW_INQUIRY . ',' .
+                            Lead::STATUS_UNCONTACTED . ',' .
+                            Lead::STATUS_WON . ',' .
+                            Lead::STATUS_WON_CLOSED . ',',
+    'sales_person_valid' => 'Sales person ID must exist or be 0'
 ];

@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User\AuthToken;
-use Illuminate\Support\Facades\Cache;
 
 class ValidAccessToken
 {
@@ -20,7 +20,7 @@ class ValidAccessToken
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
             if ($accessToken && $accessToken->user) {
-                $request['dealer_id'] = $accessToken->user->dealer_id;
+                Auth::setUser($accessToken->user);
                 return $next($request);
             }
         }

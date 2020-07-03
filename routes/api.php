@@ -1,7 +1,6 @@
 <?php
 
 use Dingo\Api\Routing\Router;
-use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,6 +117,24 @@ $api->version('v1', function ($route) {
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Inventory
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    /**
+     * Inventory
+     */
+    $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
+    $route->put('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@create');
+    $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
+    $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');
+    $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -196,9 +213,151 @@ $api->version('v1', function ($route) {
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
 
+    /*
+    |--------------------------------------------------------------------------
+    | User
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Leads
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
+    $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
+    $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Interactions
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('user/interactions/tasks/sort-fields', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@sortFields');
 
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        /*
+        |--------------------------------------------------------------------------
+        | Leads
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
+        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Quotes
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sales People
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/sales-people', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sales People
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Customers
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\CustomerController@index');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Interactions
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DMS routes
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'dms',
+        'middleware' => 'accesstoken.validate',
+    ], function ($route) {
+        /*
+        |--------------------------------------------------------------------------
+        | POS
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
+        $route->get('pos/sales/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Invoices
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('invoices', 'App\Http\Controllers\v1\Dms\InvoiceController@index');
+        $route->get('invoices/{id}', 'App\Http\Controllers\v1\Dms\InvoiceController@show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Payments
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('payments/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
+
     });
 
 });

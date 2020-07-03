@@ -48,4 +48,5 @@ interface Repository {
      * @param array $params
      */
     public function getAll($params);
+
 }
