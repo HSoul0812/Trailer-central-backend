@@ -5,7 +5,7 @@ namespace App\Http\Middleware\CRM\Text;
 use Closure;
 use App\Http\Middleware\ValidRoute;
 use App\Models\CRM\User\User;
-use App\Models\CRM\Text\Template;
+use App\Models\CRM\Text\Campaign;
 
 class CampaignValidate extends ValidRoute {
 
@@ -39,7 +39,7 @@ class CampaignValidate extends ValidRoute {
         };
         
         $this->validator[self::ID_PARAM] = function ($data) {
-            if (empty(Template::find($data))) {
+            if (empty(Campaign::find($data))) {
                 return false;
             }
             
