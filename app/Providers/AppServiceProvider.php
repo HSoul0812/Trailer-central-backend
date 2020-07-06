@@ -10,6 +10,10 @@ use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\Website\TowingCapacity\MakesRepository;
+use App\Repositories\Website\TowingCapacity\MakesRepositoryInterface;
+use App\Repositories\Website\TowingCapacity\VehiclesRepository;
+use App\Repositories\Website\TowingCapacity\VehiclesRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Website\WebsiteRepository;
@@ -103,7 +107,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
-        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(SalesPersonRepositoryInterface::class, SalesPersonRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
@@ -112,6 +115,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
 
+
+        $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
+        $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
+        $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
 
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);

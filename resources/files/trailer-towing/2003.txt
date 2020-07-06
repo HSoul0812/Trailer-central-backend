@@ -1,0 +1,1058 @@
+Acura
+Acura RL 3.5L V-6 2,000
+Acura MDX 3.5L V-6 4,500 a,b
+
+
+BMW
+BMW X5 4.6is 4.6L V-8 6,000 a,b,c
+BMW X5 4.4L V-8 6,000 a,b,c
+BMW X5 3.0L I-6 6,000 a,b
+
+
+Buick
+Rendezvous 3.4L V-6 3,500 a
+
+
+Cadillac
+Escalade 2WD 5.3L V-8 7,300
+Escalade AWD 6.0L V-8 7,800
+Escalade ESV 6.0L V-8 7,400
+Escalade EXT 6.0L V-8 7,400
+
+
+Chevrolet/GMC
+Astro/Safari
+Astro/Safari RWD CV 4.3L V-6 5,300 a
+Astro/Safari RWD CV 4.3L V-6 5,800 b
+Astro/Safari RWD PV 4.3L V-6 4,900 a
+Astro/Safari RWD PV 4.3L V-6 5,400 b
+Astro/Safari AWD CV 4.3L V-6 5,100 a
+Astro/Safari AWD CV 4.3L V-6 5,600 b
+Astro/Safari AWD PV 4.3L V-6 4,600 a
+Astro/Safari AWD PV 4.3L V-6 5,100 b
+
+Venture 3.4L V-6 3,500 d
+
+Express/Savana
+G1500 CV 4.3L V-6 4,400 a
+G1500 CV 5.3L V-8 6,400 a/b
+G1500 CV AWD 5.3L V-8 6,600 a/b
+G1500 PV 4.3L V-6 4,000 a
+G1500 PV 5.3L V-8 6,400 a/b
+G1500 PV AWD 5.3L V-8 6,200 a/b
+G2500 CV 4.3L V-6 4,700 b
+G2500 CV 4.8L V-8 6,300 b
+G2500 CV 4.8L V-8 7,300 c
+G2500 CV 5.3L V-8 6,600 b
+G2500 CV 6.0L V-8 8,300 b
+G2500 CV 6.0L V-8 10,000 c
+G2500 CV AWD 5.3L V-8 6,400 b
+G2500 CV LWB 4.3L V-6 4,500 b
+G2500 CV LWB 4.8L V-8 6,100 b
+G2500 CV LWB 4.8L V-8 7,100 c
+G2500 CV LWB 5.3L V-8 6,400 b
+G2500 CV LWB 6.0L V-8 8,100 b
+G2500 CV LWB 6.0L V-8 10,000 c
+G2500 PV 6.0L V-8 7,900 b
+G2500 PV 6.0L V-8 9,900 c
+G2500 PV LWB 6.0L V-8 7,600 b
+G2500 PV LWB 6.0L V-8 9,600 c
+G3500 CV 6.0L V-8 8,300 b
+G3500 CV 6.0L V-8 10,000 c
+G3500 CV LWB 6.0L V-8 8,100 b
+G3500 CV LWB 6.0L V-8 10,000 c
+G3500 PV 6.0L V-8 7,700 b
+G3500 PV 6.0L V-8 9,700 c
+G3500 PV LWB 6.0L V-8 7,400 b
+G3500 PV LWB 6.0L V-8 9,400 c
+
+Blazer/Jimmy
+Blazer/Jimmy 2-Door 2WD 4.3L V-6 5,700 a,d
+Blazer/Jimmy 2-Door 2WD 4.3L V-6 4,200 b,d
+Blazer Xtreme 2-Door 2WD 4.3L V-6 2,000 a/b,d
+Blazer/Jimmy 4-Door 2WD 4.3L V-6 5,500 a,d
+Blazer/Jimmy 2-Door 4WD 4.3L V-6 3,900 b,d
+Blazer/Jimmy 2-Door 4WD 4.3L V-6 5,400 a,d/e
+Blazer ZR2 4.3L V-6 4,700 a,e
+Blazer ZR2 4.3L V-6 4,200 b,e
+Blazer/Jimmy 4-Door 4WD 4.3L V-6 5,000 a,d/e
+
+S-10/Sonoma
+S-10/Sonoma Regular Cab 2.2L I-4 3,100 a,f
+S-10/Sonoma Regular Cab 4.3L V-6 3,900 b,c
+S-10/Sonoma Regular Cab 4.3L V-6 5,900 a,d
+S-10/Sonoma Regular Cab LB 4.3L V-6 3,900 b,c
+S-10/Sonoma Regular Cab LB 4.3L V-6 5,900 a,d
+S-10/Sonoma Extended Cab 2.2L I-4 2,000 b,f
+S-10/Sonoma Extended Cab 2.2L I-4 3,000 a,f
+S-10/Sonoma Extended Cab 4.3L V-6 3,800 b,c
+S-10/Sonoma Extended Cab 4.3L V-6 5,600 a,d
+S-10/Sonoma Extended Cab 4WD 4.3L V-6 4,000 b,d
+S-10/Sonoma Extended Cab 4WD 4.3L V-6 5,500 a,d/e
+S-10 ZR2 4.3L V-6 4,200 b,e
+S-10 ZR2 4.3L V-6 4,700 a,e
+S-10/Sonoma Crew Cab 4WD 4.3L V-6 5,200 a,d/e
+
+Avalanche 1500/2500
+1500 5.3L V-8 7,200 d
+1500 5.3L V-8 8,200 e
+2500 8.1L V-8 10,200 d
+2500 8.1L V-8 12,000 e
+1500 4WD 5.3L V-8 7,000 d
+1500 4WD 5.3L V-8 7,900 e
+2500 4WD 8.1L V-8 9,900 d
+2500 4WD 8.1L V-8 11,900 e
+
+Sierra/Silverado Light Duty, Automatic Transmission, Conventional/Fifth-Wheel Towing
+1500 4.3L V-6 4,500 a/NA
+1500 4.3L V-6 5,000 c/NA
+1500 4.8L V-8 6,400 c
+1500 4.8L V-8 7,400 d
+1500 5.3L V-8 7,400 c
+1500 5.3L V-8 8,400 d
+1500 LB 4.3L V-6 4,400 a/NA
+1500 LB 4.3L V-6 4,900 c/NA
+1500 LB 4.8L V-8 6,300 c
+1500 LB 4.8L V-8 7,300 d
+1500 LB 5.3L V-8 7,300 c
+1500 LB 5.3L V-8 8,300 d
+1500EC 4.3L V-6 4,700 c/NA
+1500EC 4.3L V-6 5,200 d/NA
+1500EC 4.8L V-8 6,100 c
+1500EC 4.8L V-8 7,100 d
+1500EC 5.3L V-8 7,100 c
+1500EC 5.3L V-8 8,100 d/8,000 d
+Silverado SS 6.0L V-8 7,500
+1500 EC AWS 5.3L V-8 7,600 d/7,500 d
+1500 EC AWS 5.3L V-8 8,600 e/7,500 e
+1500 LB EC 4.8L V-8 5,900 c
+1500 LB EC 4.8L V-8 6,900 d
+1500 LB EC 5.3L V-8 6,900 c
+1500 LB EC 5.3L V-8 7,900 d
+1500 CC 6.0L V-8 8,200 d
+1500 CC 6.0L V-8 10,200 e
+1500 CC AWS 6.0L V-8 7,900 d
+1500 CC AWS 6.0L V-8 9,900 e
+2500 LB* 6.0L V-8 8,700 d
+2500 LB* 6.0L V-8 10,700 e
+1500 4WD 4.3L V-6 4,700 c/NA
+1500 4WD 4.3L V-6 5,200 d/NA
+1500 4WD 4.8L V-8 7,100 d
+1500 4WD 4.8L V-8 8,100 e/7,900 e
+1500 4WD 5.3L V-8 8,100 d/7,900 d
+1500 4WD 5.3L V-8 9,100 e/7,900 e
+1500 4WD EC 4.8L V-8 6,800 d
+1500 4WD EC 4.8L V-8 7,800 e/7,700 e
+1500 4WD EC 5.3L V-8 7,800 d/7,700 d
+1500 4WD EC 5.3L V-8 8,800 e/7,700 e
+1500 4WD EC AWS 5.3L V-8 7,400 d
+1500 4WD EC AWS 5.3L V-8 8,400 e/8,000 e
+Sierra Denali 6.0L V-8 10,000 e/9,200 e
+1500 4WD CC 6.0L V-8 7,900 d
+1500 4WD CC 6.0L V-8 9,900 e
+1500 4WD LB 4.3L V-6 4,600 c/NA
+1500 4WD LB 4.3L V-6 5,100 d/NA
+1500 4WD LB 4.8L V-8 7,000 d
+1500 4WD LB 4.8L V-8 8,000 e
+1500 4WD LB 5.3L V-8 8,000 d
+1500 4WD LB 5.3L V-8 9,000 e/8,900 e
+1500 4WD LB EC 4.8L V-8 6,700 d
+1500 4WD LB EC 4.8L V-8 7,700 e/6,800 e
+1500 4WD LB EC 5.3L V-8 7,700 d/6,800 d
+1500 4WD LB EC 5.3L V-8 8,700 e/6,800 e
+2500 4WD EC* 6.0L V-8 8,200 d
+2500 4WD EC* 6.0L V-8 10,200 e
+
+Sierra/Silverado Light Duty, Manual Transmission, Conventional Towing
+1500 4.3L V-6 3,500 a
+1500 4.3L V-6 4,000 c
+1500 4.8L V-8 4,400 c
+1500 4.8L V-8 5,400 d
+1500 EC 4.3L V-6 3,700 c
+1500EC 4.8L V-8 4,100 c
+1500EC 4.8L V-8 5,100 d
+1500 LB 4.3L V-6 3,400 a
+1500 LB 4.3L V-6 3,900 c
+1500 LB 4.8L V-8 4,300 c
+1500 LB 4.8L V-8 5,300 d
+1500 LB EC 4.8L V-8 3,900 c
+1500 LB EC 4.8L V-8 4,900 d
+2500 LB* 6.0L V-8 8,700 d
+2500 LB* 6.0L V-8 10,700 e
+1500 4WD 4.3L V-6 3,700 c
+1500 4WD 4.3L V-6 4,200 d
+1500 4WD 4.8L V-8 5,100 d
+1500 4WD 4.8L V-8 6,100 e
+1500 4WD EC 4.8L V-8 4,800 d
+1500 4WD EC 4.8L V-8 5,800 e
+1500 4WD LB 4.3L V-6 3,600 c
+1500 4WD LB 4.3L V-6 4,100 d
+1500 4WD LB 4.8L V-8 5,000 d
+1500 4WD LB 4.8L V-8 6,000 e
+1500 4WD LB EC 4.8L V-8 4,700 d
+1500 4WD LB EC 4.8L V-8 5,700 e
+2500 4WD EC* 6.0L V-8 8,200 d
+2500 4WD EC* 6.0L V-8 10,200 e
+
+Sierra/Silverado Heavy Duty, Automatic or Manual Transmission, Conventional/Fifth-Wheel Towing
+2500 EC 6.0L V-8 10,300 e
+2500 EC 8.1L V-8 12,000 d-e/13,800 d 15,800 e
+2500 EC 6.6L TD 12,000 d/15,700 d
+2500 CC 6.0L V-8 10,100 e
+2500 CC 8.1L V-8 12,000 d-e/13,600d
+2500 CC 8.1L V-8 15,600e
+2500 CC 6.6L TD 12,000 d/15,400 d
+2500 LB 6.0L V-8 10,600 e
+2500 LB 8.1L V-8 12,000 d-e/14,100 d
+2500 LB 8.1L V-8 16,100e
+2500 LB 6.6L V-8 12,000 d/16,000 d
+2500 LB EC 6.0L V-8 10,200 e
+2500 LB EC 8.1L V-8 12,000 d-e/3,700 d
+2500 LB EC 8.1L V-8 15,700 e
+2500 LB EC 6.6L TD 12,000 d/15,500 d
+2500 LB CC 6.0L V-8 9,900 e
+2500 LB CC 8.1L V-8 12,000 d-e/13,500 d
+2500 LB CC 8.1L V-8 15,500e
+2500 LB CC 6.6L V-8 12,000 d/15,200 d
+3500 LB EC 6.0L V-8 9,800 e
+3500 LB EC 8.1L V-8 12,000 e/15,400 e
+3500 LB EC 6.6L TD 12,000 d/15,200 d
+3500 LB CC 6.0L V-8 9,500 e
+3500 LB CC 8.1L V-8 12,000 e/15,100 e
+3500 LB CC 6.6L TD 12,000 d/15,000 d
+2500 4WD EC 6.0L V-8 10,100 e
+2500 4WD EC 8.1L V-8 12,000 d-e/13,600 d
+2500 4WD EC 8.1L V-8 15,600 e
+2500 4WD EC 6.6L TD 12,000 d/15,400 d
+2500 4WD CC 6.0L V-8 9,800 e
+2500 4WD CC 8.1L V-8 12,000 d-e/13,300 d
+2500 4WD CC 8.1L V-8 15,300 e
+2500 4WD CC 6.6L TD 12,000 d/14,700 d
+2500 4WD LB 6.0L V-8 10,300 e
+2500 4WD LB 8.1L V-8 12,000 d-e/13,800 d
+2500 4WD LB 8.1L V-8 15,800 e
+2500 4WD LB 6.6L TD 12,000 d/15,700 d
+2500 4WD LB EC 6.0L V-8 9,900 e
+2500 4WD LB EC 8.1L V-8 12,000 d-e/13,400 d
+2500 4WD LB EC 8.1L V-8 15,400 e
+2500 4WD LB EC 6.6L TD 12,000 d/15,300 d
+2500 4WD LB CC 6.0L V-8 9,600 e
+2500 4WD LB CC 8.1L V-8 12,000 d-e/13,200 d
+2500 4WD LB CC 8.1L V-8 14,700 e
+2500 4WD LB CC 6.6L TD 12,000 d/13,700 d
+3500 4WD LB 6.0L V-8 9,900 e
+3500 4WD LB 8.1L V-8 12,000 e/15,500 e
+3500 4WD LB 6.6L TD 12,000 d/15,400 d
+3500 4WD LB EC 6.0L V-8 9,500 e
+3500 4WD LB EC 8.1L V-8 12,000 e/15,100 e
+3500 4WD LB EC 6.6L TD 12,000 d/14,900 d
+3500 4WD LB CC 6.0L V-8 9,200 e
+3500 4WD LB CC 8.1L V-8 12,000 e/14,800 e
+3500 4WD LB CC 6.6L TD 12,000 d/14,700 d
+
+Tahoe/Yukon/Suburban/Yukon XL
+Tahoe/Yukon 1500 4.8L V-8 5,700 c
+Tahoe/Yukon 1500 4.8L V-8 6,700 d
+Tahoe/Yukon 1500 5.3L V-8 6,700 c
+Tahoe/Yukon 1500 5.3L V-8 7,700 d
+Suburban/Yukon XL 1500 5.3L V-8 7,400 d
+Suburban/Yukon XL 1500 5.3L V-8 8,400 e
+Tahoe/Yukon 1500 4WD 4.8L V-8 6,400 d
+Tahoe/Yukon 1500 4WD 4.8L V-8 7,400 e
+Tahoe/Yukon 1500 4WD 5.3L V-8 7,400 d-e
+Yukon Denali 1500 AWD 6.0L V-8 8,000 d
+Suburban/Yukon XL 1500 4WD 5.3L V-8 7,100 d
+Suburban/Yukon XL 1500 4WD 5.3L V-8 8,100 e
+Yukon XL Denali 1500 AWD 6.0L V-8 7,800 d
+Suburban/Yukon XL 2500 6.0L V-8 7,900 d
+Suburban/Yukon XL 2500 6.0L V-8 9,900 e
+Suburban/Yukon XL 2500 8.1L V-8 10,400 d
+Suburban/Yukon XL 2500 8.1L V-8 12,000 e
+Suburban/Yukon XL 2500 AWS 6.0L V-8 7,600 d
+Suburban/Yukon XL 2500 AWS 6.0L V-8 9,600 e
+Suburban/Yukon XL 2500 4WD 6.0L V-8 7,600 d
+Suburban/Yukon XL 2500 4WD 6.0L V-8 9,600 e
+Suburban/Yukon XL 2500 4WD 8.1L V-8 10,100 d
+Suburban/Yukon XL 2500 4WD 8.1L V-8 12,000 e
+Suburban/Yukon XL 2500 4WD AWS 6.0L V-8 7,300 d
+Suburban/Yukon XL 2500 4WD AWS 6.0L V-8 9,300 e
+
+SSR
+1500 2WD 5.3L V-8 2,500 d
+
+Trailblazer/Envoy
+Trailblazer/Envoy 2WD 4.2L I-6 5,300 a
+Trailblazer/Envoy 2WD 4.2L I-6 5,800 b
+Trailblazer/Envoy 2WD 4.2L I-6 6,300 c
+Trailblazer/Envoy 4WD/AWD 4.2L I-6 5,200 a
+Trailblazer/Envoy 4WD/AWD 4.2L I-6 5,700 b
+Trailblazer/Envoy 4WD/AWD 4.2L I-6 6,200 c
+
+Trailblazer EXT/Envoy XL
+Trailblazer EXT/Envoy XL 2WD 4.2L I-6 4,900 a
+Trailblazer EXT/Envoy XL 2WD 4.2L I-6 5,400 b
+Trailblazer EXT/Envoy XL 2WD 4.2L I-6 5,900 c
+Trailblazer EXT/Envoy XL 2WD 5.3L V-8 5,800 a
+Trailblazer EXT/Envoy XL 2WD 5.3L V-8 7,200 b
+Trailblazer EXT/Envoy XL 4WD/AWD 4.2L I-6 4,800 a
+Trailblazer EXT/Envoy XL 4WD/AWD 4.2L I-6 5,300 b
+Trailblazer EXT/Envoy XL 4WD/AWD 4.2L I-6 5,800 c
+Trailblazer EXT/Envoy XL 4WD/AWD 5.3L V-8 5,700 a
+Trailblazer EXT/Envoy XL 4WD/AWD 5.3L V-8 7,000 b
+
+
+Chrysler
+Town & Country 3.3L, 3.8L V-6 3,800 j
+Town & Country (AWD) 3.8L V-6 3,500
+Voyager 3.3L V-6 2,000
+
+
+Dodge
+Dodge Caravan 3.3L, 3.8L V-6 3,800 j
+Dodge Caravan (AWD) 3.8L V-6 3,500
+
+Dakota
+Dakota 3.9L V-6 3,650 a,e
+Dakota 3.9L V-6 3,550 a,e*
+Dakota 3.9L V-6 4,150 a,f
+Dakota 3.9L V-6 4,050 a,f*
+Dakota 3.9L V-6 4,950 d,f
+Dakota 3.9L V-6 5,350 d,h
+Dakota 4.7L V-8 5,300 a,f
+Dakota 4.7L V-8 5,600 a,f*
+Dakota 4.7L V-8 6,300 a,h
+Dakota 4.7L V-8 6,600 a,h*
+Dakota 4.7L V-8 5,300 d,f
+Dakota 4.7L V-8 6,600 d,h
+Dakota 4.7L V-8 6,300 d,h*
+Dakota 4WD 3.9L V-6 3,950 a,f
+Dakota 4WD 3.9L V-6 3,850 a,f*
+Dakota 4WD 3.9L V-6 4,750 a,h
+Dakota 4WD 3.9L V-6 4,650 a,h*
+Dakota 4WD 3.9L V-6 5,100 d,h
+Dakota 4WD 3.9L V-6 5,050 d,h*
+Dakota 4WD 4.7L V-8 5,400 a,f
+Dakota 4WD 4.7L V-8 5,300 a,f*
+Dakota 4WD 4.7L V-8 6,400 a,h
+Dakota 4WD 4.7L V-8 6,300 a,h*
+Dakota 4WD 4.7L V-8 5,000 d,f
+Dakota 4WD 4.7L V-8 4,950 d,f*
+Dakota 4WD 4.7L V-8 6,300 d,h
+Dakota 4WD 4.7L V-8 6,250 d,h*
+Dakota Club Cab 3.9L V-6 3,500 a,e
+Dakota Club Cab 3.9L V-6 4,000 a,f
+Dakota Club Cab 3.9L V-6 3,900 a,f*
+Dakota Club Cab 3.9L V-6 4,700 d,f
+Dakota Club Cab 3.9L V-6 5,100 d,h
+Dakota Club Cab 3.9L V-6 5,050 d,h*
+Dakota Club Cab 4.7L V-8 5,300 a,f
+Dakota Club Cab 4.7L V-8 6,300 a,h
+Dakota Club Cab 4.7L V-8 5,000 d,f
+Dakota Club Cab 4.7L V-8 6,300 d,h
+Dakota Club Cab 4WD 3.9L V-6 3,600 a,f
+Dakota Club Cab 4WD 3.9L V-6 4,400 a,h
+Dakota Club Cab 4WD 3.9L V-6 4,800 d,h
+Dakota Club Cab 4WD 4.7L V-8 5,050 a,f
+Dakota Club Cab 4WD 4.7L V-8 6,050 a,h
+Dakota Club Cab 4WD 4.7L V-8 4,750 d,f
+Dakota Club Cab 4WD 4.7L V-8 6,050 d,h
+Dakota Quad Cab 3.9L V-6 3,600 a,f
+Dakota Quad Cab 3.9L V-6 4,400 a,h
+Dakota Quad Cab 3.9L V-6 4,400 d,f
+Dakota Quad Cab 3.9L V-6 4,800 d,h
+Dakota Quad Cab 4.7L V-8 5,050 a,f
+Dakota Quad Cab 4.7L V-8 6,050 a,h
+Dakota Quad Cab 4.7L V-8 4,750 d,f
+Dakota Quad Cab 4.7L V-8 6,050 d,h
+Dakota Quad Cab 5.9L V-8 4,350 d,f
+Dakota Quad Cab 5.9L V-8 5,950 d,h
+Dakota Quad Cab 4WD 3.9L V-6 3,400 a,f
+Dakota Quad Cab 4WD 3.9L V-6 4,200 a,h
+Dakota Quad Cab 4WD 3.9L V-6 4,200 d,f
+Dakota Quad Cab 4WD 3.9L V-6 4,600 d,h
+Dakota Quad Cab 4WD 4.7L V-8 4,800 a,f
+Dakota Quad Cab 4WD 4.7L V-8 5,800 a,h
+Dakota Quad Cab 4WD 4.7L V-8 4,500 d,f
+Dakota Quad Cab 4WD 4.7L V-8 5,800 d,h
+Dakota Quad Cab 4WD 5.9L V-8 4,350 d,f
+Dakota Quad Cab 4WD 5.9L V-8 5,950 d,h
+
+Durango
+Durango 4.7L V-8 4,650 f
+Durango 4.7L V-8 5,950 h
+Durango 5.9L V-8 5,850 f
+Durango 5.9L V-8 7,550 h
+Durango 4WD 4.7L V-8 4,400 f
+Durango 4WD 4.7L V-8 5,700 h
+Durango 4WD 5.9L V-8 5,600 f
+Durango 4WD 5.9L V-8 7,300 h
+
+
+RAM
+Van 1500
+Van 1500 109" Wheelbase 3.9L V-6 4,450 c,f
+Van 1500 109" Wheelbase 5.2L V-8 5,450 d,h
+Van 1500 109" Wheelbase 5.2L V-8 5,950 d,i
+Van 1500 127" Wheelbase 3.9L V-6 4,250 c,f
+Van 1500 127" Wheelbase 5.2L V-8 6,750 d,f
+Van 1500 127" Wheelbase 5.2L V-8 7,750 d,h
+Van 1500 127" Wheelbase 5.9L V-8 7,200 d,f
+Van 1500 127" Wheelbase 5.9L V-8 8,200 d,h
+Van 1500 127" Wheelbase Maxi 3.9L V-6 4,150 c,f
+Van 1500 127" Wheelbase Maxi 5.2L V-8 6,650 d,f
+Van 1500 127" Wheelbase Maxi 5.2L V-8 7,650 d,h
+Van 1500 127" Wheelbase Maxi 5.9L V-8 7,100 d,f
+Van 1500 127" Wheelbase Maxi 5.9L V-8 8,100 d,h
+
+Van 2500
+Van 2500 127" Wheelbase 3.9L V-6 4,050 c,h
+Van 2500 127" Wheelbase 5.2L V-8 7,600 d,f
+Van 2500 127" Wheelbase 5.2L V-8 8,100 d,h
+Van 2500 127" Wheelbase 5.9L V-8 8,100 d,h
+Van 2500 127" Wheelbase 5.9L V-8 8,600 d,i
+Van 2500 127" Wheelbase Maxi 5.2L V-8 7,450 d,h
+Van 2500 127" Wheelbase Maxi 5.2L V-8 7,950 d,i
+Van 2500 127" Wheelbase Maxi 5.9L V-8 7,900 d,h
+Van 2500 127" Wheelbase Maxi 5.9L V-8 8,400 d,i
+
+Van 3500
+Van 3500 127" Wheelbase 5.2L V-8 7,550 d,h
+Van 3500 127" Wheelbase 5.2L V-8 8,050 d,i
+Van 3500 127" Wheelbase 5.9L V-8 8,050 d,h
+Van 3500 127" Wheelbase 5.9L V-8 8,550 d,i
+Van 3500 127" Wheelbase Maxi 5.2L V-8 7,400 d,h
+Van 3500 127" Wheelbase Maxi 5.2L V-8 7,900 d,i
+Van 3500 127" Wheelbase Maxi 5.9L V-8 7,900 d,h
+Van 3500 127" Wheelbase Maxi 5.9L V-8 8,400 d,i
+
+Ram Truck 1500, Regular Cab 2WD**
+1500 3.7L V-6 3,350 a,f/h
+1500 3.7L V-6 3,750 d,f/h
+1500 4.7L V-8 4,800 a,f
+1500 4.7L V-8 5,800 a,h
+1500 4.7L V-8 4,700 a,h*
+1500 4.7L V-8 6,700 d,f
+1500 4.7L V-8 7,700 d,h
+1500 4.7L V-8 6,650 d,h*
+1500 5.9L V-8 7,650 d,f
+1500 5.9L V-8 8,650 d,h
+1500 5.9L V-8 7,600 d,h*
+
+Ram Truck 1500 Quad Cab**
+1500 Quad Cab 3.7L V-6 3,050 a,f/g
+1500 Quad Cab 3.7L V-6 3,500 d,f/g
+1500 Quad Cab 4.7L V-8 4,450 a,f
+1500 Quad Cab 4.7L V-8 5,450 a,h
+1500 Quad Cab 4.7L V-8 4,400 a,h*
+1500 Quad Cab 4.7L V-8 6,400 d,f
+1500 Quad Cab 4.7L V-8 7,400 d,h
+1500 Quad Cab 4.7L V-8 6,350 d,h*
+1500 Quad Cab 5.9L V-8 7,350 d,f
+1500 Quad Cab 5.9L V-8 8,350 d,h
+1500 Quad Cab 5.9L V-8 7,300 d,h*
+
+Ram Truck 2500 Regular Cab, Long Bed 2WD**
+2500 5.7L V-8 9,550 a,g
+2500 5.7L V-8 11,550 a,i
+2500 5.7L V-8 9,600 d,g
+2500 5.7L V-8 11,600 d,i
+2500 8.0L V-10 11,100 a,g
+2500 8.0L V-10 13,100 a,i
+2500 8.0L V-10 11,150 d,g
+2500 8.0L V-10 13,150 d,i
+2500 5.9L TD 12,800 a,g
+2500 5.9L TD* 11,800 a,g
+2500 5.9L TD 13,800 a,i
+2500 5.9L TD 11,850 d,g
+2500 5.9L TD* 10,850 d,g
+2500 5.9L TD 13,850 d,i
+2500 5.9L TD* 12,850 d,i
+2500 5.9L TD HO 13,650 b,g/i
+
+2500 Quad Cab Shortbed, 2WD
+2500 Quad Cab 5.7L V-8 9,350 a,g
+2500 Quad Cab 5.7L V-8 11,350 a,i
+2500 Quad Cab 5.7L V-8 9,400 d,g
+2500 Quad Cab 5.7L V-8 11,400 d,i
+2500 Quad Cab 8.0L V-10 10,900 a,g
+2500 Quad Cab 8.0L V-10 12,900 a,i
+2500 Quad Cab 8.0L V-10 10,950 d,g
+2500 Quad Cab 8.0L V-10 12,950 d,i
+2500 Quad Cab 5.9L TD 12,600 a,g
+2500 Quad Cab 5.9L TD* 11,600 a,g
+2500 Quad Cab 5.9L TD 13,600 a,i
+2500 Quad Cab 5.9L TD 11,650 d,g
+2500 Quad Cab 5.9L TD* 10,650 d,g
+2500 Quad Cab 5.9L TD 13,650 d,i
+2500 Quad Cab 5.9L TD* 12,650 d,i
+2500 Quad Cab 5.9L TD HO 13,450 b,g/i
+
+Ram Truck 3500 Regular Cab Longbed, Dual Rear Wheels**
+3500 5.7L V-8 11,000 a,i
+3500 5.7L V-8 11,050 d,i
+3500 8.0L V-10 10,650 a,g
+3500 8.0L V-10 12,650 a,i
+3500 8.0L V-10 10,700 d,g
+3500 8.0L V-10 12,700 d,i
+3500 5.9L TD 12,350 a,g
+3500 5.9L TD* 11,350 a,g
+3500 5.9L TD 14,350 a,i
+3500 5.9L TD* 13,350 a,i
+3500 5.9L TD 11,450 d,g
+3500 5.9L TD* 10,450 d,g
+3500 5.9L TD 13,450 d,i
+3500 5.9L TD* 12,450 d,i
+3500 5.9L TD HO 14,200 b,g
+3500 5.9L TD HO 16,200 b,i
+
+3500 Quad Cab 2WD Shortbed, Single Rear Wheels**
+3500 Quad Cab 5.9L TD 12,450 a,g
+3500 Quad Cab 5.9L TD* 11,450 a,g
+3500 Quad Cab 5.9L TD 14,450 a,i
+3500 Quad Cab 5.9L TD* 13,450 a,i
+3500 Quad Cab 5.9L TD 11,500 d,g
+3500 Quad Cab 5.9L TD* 10,500 d,g
+3500 Quad Cab 5.9L TD 13,500 d,i
+3500 Quad Cab 5.9L TD* 12,500 d,i
+3500 Quad Cab 5.9L TD HO 14,300 b,g
+3500 Quad Cab 5.9L TD HO 16,300 b,i
+
+3500 Quad Cab Longbed 2WD, Dual Rear Wheels
+3500 Quad Cab LB 5.7L V-8 10,600 a,i
+3500 Quad Cab LB 5.7L V-8 10,650 d,i
+3500 Quad Cab LB 8.0L V-10 10,250 a,g
+3500 Quad Cab LB 8.0L V-10 12,250 a,i
+3500 Quad Cab LB 8.0L V-10 10,300 d,g
+3500 Quad Cab LB 8.0L V-10 12,300 d,i
+3500 Quad Cab LB 5.9L TD 12,000 a,g
+3500 Quad Cab LB 5.9L TD* 11,000 a,g
+3500 Quad Cab LB 5.9L TD 14,000 a,i
+3500 Quad Cab LB 5.9L TD* 13,000 a,i
+3500 Quad Cab LB 5.9L TD 11,050 d,g
+3500 Quad Cab LB 5.9L TD* 10,050 d,g
+3500 Quad Cab LB 5.9L TD 13,050 d,i
+3500 Quad Cab LB 5.9L TD* 12,050 d,i
+3500 Quad Cab LB 5.9L TD HO 13,850 b,g
+3500 Quad Cab LB 5.9L TD HO 15,850 b,i
+
+
+Ford
+Econoline Van/Wagon
+E-150 4.2L V-6 5,000 c/4,700 c
+E-150 4.6L V-8 6,400 c/6,100 c
+E-150 5.4L V-8 6,800 c/6,500 c
+E-250 4.2L V-6 5,100 d/NA
+E-250 4.2L V-6 5,600 e/NA
+E-250 4.6L V-8 6,100 d/NA
+E-250 4.6L V-8 6,000 e/NA
+E-250 5.4L V-8 7,500 d/NA
+E-250 NGV 5.4L V-8 6,900 d/NA
+E-250 Ext 4.2L V-6 5,000 d/NA
+E-250 Ext 4.2L V-6 5,400 e/NA
+E-250 Ext 4.6L V-8 5,900 d/NA
+E-250 Ext 4.6L V-8 5,800 e/NA
+E-250 Ext 5.4L V-8 7,300 d/NA
+E-250 NGV Ext 5.4L V-8 7,300 d/NA
+E-350 5.4L V-8 6,300 c/NA
+E-350 5.4L V-8 7,300 e/6,900 d-e
+E-350 NGV 5.4L V-8 6,700 e/6,300 e
+E-350 6.8L V-10 9,200 d/8,800 d
+E-350 6.8L V-10 10,000 e
+E-350 7.3L TD 9,700 c/9,400 c
+E-350 7.3L TD 10,000 e
+E-350 Ext 5.4L V-8 6,200 c/5,600 c
+E-350 Ext 5.4L V-8 7,200 e/6,600 d-e
+E-350 NGV Ext 5.4L V-8 6,600 e/6,000 e
+E-350 Ext. 6.8L V-10 9,000 d/8,500 d
+E-350 Ext. 6.8L V-10 10,000 e
+E-350 Ext 7.3L TD 9,600 c/9,100 c
+E-350 Ext 7.3L TD 10,000 e
+
+Excursion
+Excursion 5.4L V-8 6,100 d
+Excursion 5.4L V-8 7,600 e
+Excursion 6.8L V-10 10,000 d
+Excursion 6.8L V-10 11,000 f
+Excursion 6.0L TD† 11,000 d
+Excursion 4WD 5.4L V-8 7,200 e
+Excursion 4WD 6.8L V-10 9,600 d
+Excursion 4WD 6.8L V-10 11,000 f
+Excursion 4WD 6.0L TD† 11,000 d
+
+Expedition
+Expedition 4.6L V-8 6,050 d
+Expedition 5.4L V-8 8,900 d
+Expedition 4WD 4.6L V-8 5,750 d
+Expedition 4WD 5.4L V-8 8,650 d
+
+Explorer Sport (2dr) and Sport Trac, Manual Transmission
+Explorer Sport 4.0L V-6 2,940
+Explorer Sport 4WD 4.0L V-6 2,760
+Explorer Sport Trac 4.0L V-6 2,700
+Explorer Sport Trac 4WD 4.0L V-6 2,480
+
+Explorer Sport (2dr) and Sport Trac, Automatic Transmission
+Explorer Sport 4.0L V-6 5,000
+Explorer Sport 4WD 4.0L V-6 4,820
+Explorer Sport Trac 4.0L V-6 5,260
+Explorer Sport Trac 4WD 4.0L V-6 5,060
+
+Explorer 4 Door, Automatic Transmission
+Explorer 4.0L V-6 3,280c
+Explorer 4.0L V-6 5,560d
+Explorer 4.0L V-6 5,800d
+Explorer 4.6L V-8 3,280c
+Explorer 4.6L V-8 7,160d *
+Explorer 4WD 4.0L V-6 3,400c
+Explorer 4WD 4.0L V-6 5,400d
+Explorer 4WD 4.0L V-6 5,380d
+Explorer 4WD 4.6L V-8 3,420c
+Explorer 4WD 4.6L V-8 7,000d *
+
+F-150, Manual Transmission, Conventional Towing
+Regular Cab 4.2L V-6 2,000 a
+Regular Cab 4.2L V-6 3,500 c
+Regular Cab 4.6L V-8 2,000 a
+Regular Cab 4.6L V-8 2,900 b
+Regular Cab 4.6L V-8 3,500 c
+Regular Cab 4WD 4.2L V-6 2,500 b
+Regular Cab 4WD 4.2L V-6 3,200 c
+Regular Cab 4WD 4.6L V-8 2,500 b
+Regular Cab 4WD 4.6L V-8 3,100 c
+SuperCab 4.2L V-6 2,000 a
+SuperCab 4.2L V-6 3,300 c
+SuperCab 4.6L V-8 2,000 a
+SuperCab 4.6L V-8 2,600 b
+SuperCab 4.6L V-8 3,200 c
+SuperCab 4WD 4.6L V-8 2,300 b
+SuperCab 4WD 4.6L V-8 2,900 c
+
+F-150, Automatic Transmission, Conventional/Fifth-Wheel Towing
+Regular Cab 4.2L V-6 4,600 b/NA
+Regular Cab 4.2L V-6 5,700 c
+Regular Cab 4.6L V-8 2,000 a/NA
+Regular Cab 4.6L V-8 6,100 b/NA
+Regular Cab 4.6L V-8 7,100 c
+Regular Cab 5.4L V-8 7,500 b/NA
+Regular Cab 5.4L V-8 8,500 c/NA
+Regular Cab 5.4L V-8 8,800 d,j
+Regular Cab 5.4L V-8 8,800 e,k
+Regular Cab NGV 5.4L V-8 5,900 d/NA
+Regular Cab 4WD 4.2L V-6 5,300 c
+Regular Cab 4WD 4.6L V-8 5,800 b/NA
+Regular Cab 4WD 4.6L V-8 6,800 c,m
+Regular Cab 4WD 4.6L V-8 6,300 c,n
+Regular Cab 4WD 5.4L V-8 7,500 b/NA
+Regular Cab 4WD 5.4L V-8 8,500 c
+Regular Cab 4WD 5.4L V-8 8,800 d,j
+Regular Cab 4WD 5.4L V-8 8,800 e,k
+SuperCab 4.2L V-6 4,400 b/NA
+SuperCab 4.2L V-6 5,400 c
+Super Cab 4.6L V-8 2,000 a/NA
+Super Cab 4.6L V-8 5,800 b/NA
+Super Cab 4.6L V-8 6,800 c
+SuperCab 5.4L V-8 7,200 b/NA
+SuperCab 5.4L V-8 8,200 c
+SuperCab 5.4L V-8 8,500 d,j
+SuperCab 5.4L V-8 8,500 e,k
+SuperCab 4WD 4.6L V-8 5,500 b/NA
+SuperCab 4WD 4.6L V-8 6,500 c,m
+SuperCab 4WD 4.6L V-8 6,000 c,n
+SuperCab 4WD 5.4L V-8 6,900 b/NA
+SuperCab 4WD 5.4L V-8 7,900 c,m
+SuperCab 4WD 5.4L V-8 7,400 c,n
+SuperCab 4WD 5.4L V-8 8,200 d,j
+Super Crew 4.6L V-8 6,500 c,m/NA
+SuperCrew 5.4L V-8 7,900 c,m/NA
+Super Crew 4WD 4.6L V-8 6,200 c/NA
+Super Crew 4WD 4.6L V-8 6,100 d/NA
+SuperCrew 4WD 5.4L V-8 7,600 c,m/NA
+SuperCrew 4WD 5.4L V-8 7,100 c,n/NA
+SuperCrew 4WD 5.4L V-8 7,100 d/NA
+
+Super Duty F-250/F-350, Manual Transmission, Conventional/Fifth-Wheel Towing
+Regular Cab 5.4L V-8 7,800 d
+Regular Cab 5.4L V-8 9,300 e
+Regular Cab 6.8L V-10 10,600 d
+Regular Cab 6.8L V-10 12,500 f/14,100 f
+Regular Cab 6.0L TD 12,500 d/13,600 d
+Regular Cab 4WD 5.4L V-8 7,400 d
+Regular Cab 4WD 5.4L V-8 8,900 e
+Regular Cab 4WD 6.8L V-10 10,200 d
+Regular Cab 4WD 6.8L V-10 12,500 f/13,700 f
+Regular Cab 4WD 6.0L TD† 12,500 d/13,300 d
+SuperCab 5.4L V-8 7,400 d
+SuperCab 5.4L V-8 8,900 e
+SuperCab 6.8L V-10 10,300 d
+SuperCab 6.8L V-10 12,500 f/13,800 f
+SuperCab 6.0L TD† 12,500 d/13,300 d
+SuperCab 4WD 5.4L V-8 7,100 d
+SuperCab 4WD 5.4L V-8 8,600 e
+SuperCab 4WD 6.8L V-10 9,900 d
+SuperCab 4WD 6.8L V-10 12,500 f/13,400 f
+SuperCab 4WD 6.0L TD† 12,500 d/12,900 d**
+Crew Cab 5.4L V-8 7,200 d
+Crew Cab 5.4L V-8 8,700 e
+Crew Cab 6.8L V-10 10,100 d
+Crew Cab 6.8L V-10 12,500 f/13,600 f
+Crew Cab 6.0L TD† 12,500 d/12,900 d
+Crew Cab 4WD 5.4L V-8 6,800 d
+Crew Cab 4WD 5.4L V-8 8,300 e
+Crew Cab 4WD 6.8L V-10 9,700 d
+Crew Cab 4WD 6.8L V-10 12,500 f/13,200 f
+Crew Cab 4WD 6.0L TD† 12,500 d/12,700 d**
+F-350 DRW 5.4L V-8 7,500 d
+F-350 DRW 5.4L V-8 9,000 e
+F-350 DRW 6.8L V-10 10,300 d
+F-350 DRW 6.8L V-10 12,500 f/13,800 f
+F-350 DRW 6.8L V-10 13,800 f,o
+F-350 DRW 6.0L TD† 13,300 d/e
+F-350 4WD DRW 5.4L V-8 7,100 d
+F-350 4WD DRW 5.4L V-8 8,600 e
+F-350 4WD DRW 6.8L V-10 9,900 d
+F-350 4WD DRW 6.8L V-10 12,500 f/13,400 f
+F-350 4WD DRW 6.8L V-10 13,400 f,o
+F-350 4WD DRW 6.0L TD† 12,900 d,e
+F-350 SuperCab DRW 5.4L V-8 7,200 d
+F-350 SuperCab DRW 5.4L V-8 8,700 e
+F-350 SuperCab DRW 6.8L V-10 10,000 d
+F-350 SuperCab DRW 6.8L V-10 12,500 f/13,500 f
+F-350 SuperCab DRW 6.8L V-10 13,500 f,o
+F-350 SuperCab DRW 6.0L TD† 13,000 d-e
+F-350 SuperCab 4WD DRW 5.4L V-8 6,800 d
+F-350 SuperCab 4WD DRW 5.4L V-8 8,300 e
+F-350 SuperCab 4WD DRW 6.8L V-10 9,600 d
+F-350 SuperCab 4WD DRW 6.8L V-10 12,500 f/13,100 f
+F-350 SuperCab 4WD DRW 6.8L V-10 13,100 f,o
+F-350 SuperCab 4WD DRW 6.0L TD† 12,600 d-e
+F-350 Crew Cab DRW 6.8L V-10 9,800 d
+F-350 Crew Cab DRW 6.8L V-10 12,500 f/13,300 f
+F-350 Crew Cab DRW 6.8L V-10 13,300 f,o
+F-350 Crew Cab DRW 6.0L TD† 12,800 d-e
+F-350 Crew Cab 4WD DRW 6.8L V-10 9,400 d
+F-350 Crew Cab 4WD DRW 6.8L V-10 12,500 f/12,900 f
+F-350 Crew Cab 4WD DRW 6.8L V-10 12,900 f,o
+F-350 Crew Cab 4WD DRW 6.0L TD† 12,400 d-e
+
+Super Duty F-250/F-350,Automatic Transmission, Conventional/Fifth-Wheel Towing
+Regular Cab 5.4L V-8 7,800 d
+Regular Cab 5.4L V-8 9,300 e
+Regular Cab 6.8L V-10 11,200 d
+Regular Cab 6.8L V-10 12,500 f/14,200 f
+Regular Cab 6.0L TD† 12,500 d/13,700 d
+Regular Cab 4WD 5.4L V-8 7,400 d
+Regular Cab 4WD 5.4L V-8 8,900 e
+Regular Cab 4WD 6.8L V-10 10,800 d
+Regular Cab 4WD 6.8L V-10 12,500 f/13,800 f
+Regular Cab 4WD 6.0L TD† 12,500 d/13,300 d
+SuperCab 5.4L V-8 7,500 d
+SuperCab 5.4L V-8 9,000 e
+SuperCab 6.8L V-10 10,800 d
+SuperCab 6.8L V-10 12,500 f/13,800 f
+SuperCab 6.0L TD† 12,500 d/13,300 d
+SuperCab 4WD 5.4L V-8 7,100 d
+SuperCab 4WD 5.4L V-8 8,600 e
+SuperCab 4WD 6.8L V-10 10,400 d
+SuperCab 4WD 6.8L V-10 12,500 f/13,400 f
+SuperCab 4WD 6.0L TD† 12,500 d/13,000 d*
+Crew Cab 5.4L V-8 7,200 d
+Crew Cab 5.4L V-8 8,700 d
+Crew Cab 6.8L V-10 10,600 d
+Crew Cab 6.8L V-10 12,500 f/13,600 f
+Crew Cab 6.0L TD† 12,500 d/13,100 d
+Crew Cab 4WD 5.4L V-8 6,900 d
+Crew Cab 4WD 5.4L V-8 8,400 d
+Crew Cab 4WD 6.8L V-10 10,200 d
+Crew Cab 4WD 6.8L V-10 12,500 f/13,200 f
+Crew Cab 4WD 6.0L TD† 12,500 d/12,700 d*
+F-350 DRW 5.4L V-8 7,600 d
+F-350 DRW 5.4L V-8 9,100 e
+F-350 DRW 6.8L V-10 10,900 d
+F-350 DRW 6.8L V-10 12,500 f/13,900 f
+F-350 DRW 6.8L V-10 13,900 f,o
+F-350 DRW 6.0L TD† 13,400 d-e
+F-350 4WD DRW 5.4L V-8 7,200 d
+F-350 4WD DRW 5.4L V-8 8,700 e
+F-350 4WD DRW 6.8L V-10 10,400 d
+F-350 4WD DRW 6.8L V-10 12,500 f/13,400 f
+F-350 4WD DRW 6.8L V-10 13,400 f,o
+F-350 4WD DRW 6.0L TD† 13,000 d-e
+F-350 SuperCab DRW 5.4L V-8 7,200 d
+F-350 SuperCab DRW 5.4L V-8 8,700 e
+F-350 SuperCab DRW 6.8L V-10 10,500 d
+F-350 SuperCab DRW 6.8L V-10 12,500 f/13,500 f
+F-350 SuperCab DRW 6.8L V-10 13,500 f,o
+F-350 SuperCab DRW 6.0L TD† 13,000 d-e
+F-350 SuperCab 4WD DRW 5.4L V-8 6,800 d
+F-350 SuperCab 4WD DRW 5.4L V-8 8,300 e
+F-350 SuperCab DRW 6.8L V-10 10,100 d
+F-350 SuperCab DRW 6.8L V-10 12,500 f/13,100 f
+F-350 SuperCab DRW 6.8L V-10 13,100 f,o
+F-350 SuperCab 4WD DRW 6.0L TD† 12,600 d-e
+F-350 Crew Cab DRW 6.8L V-10 10,300 d
+F-350 Crew Cab DRW 6.8L V-10 12,500 f/13,300 f
+F-350 Crew Cab DRW 6.8L V-10 13,300 f,o
+F-350 Crew Cab DRW 6.0L TD† 12,800 d-e
+F-350 Crew Cab 4WD DRW 6.8L V-10 9,900 d
+F-350 Crew Cab 4WD DRW 6.8L V-10 12,500 f/12,900 f
+F-350 Crew Cab 4WD DRW 6.8L V-10 12,900 f,o
+F-350 Crew Cab 4WD DRW 6.0L TD† 12,400 d-e
+
+F-350 Chassis Cab Fifth-Wheel Towing
+F-350 5.4L V-8 7,200 d/7,300 d
+F-350 5.4L V-8 8,700 e/8,800 e
+F-350 6.8L V-10 10,100 d/10,600
+F-350 6.0L TD† 13,100 d
+F-350 4WD 5.4L V-8 6,800 d
+F-350 4WD 5.4L V-8 8,300 e
+F-350 4WD 6.8L V-10 9,700 d/10,200 d
+F-350 4WD 6.0L TD† 12,700 d
+F-350 DRW 5.4L V-8 6,900 d/7,000 d
+F-350 DRW 5.4L V-8 8,400 e/8,500 e
+F-350 DRW 6.8L V-10 9,700 d/10,300 d
+F-350 DRW 6.8L V-10 13,200 f/13,300 f
+F-350 DRW 6.0L TD† 12,700 d/e
+F-350 4WD DRW 5.4L V-8 6,400 d
+F-350 4WD DRW 5.4L V-8 7,900 e/8,000 e
+F-350 4WD DRW 6.8L V-10 9,200 d/9,800 d
+F-350 4WD DRW 6.8L V-10 12,700 f/12,800 f
+F-350 4WD DRW 6.0L TD† 12,200 d/e
+F-350 SCC 5.4L V-8 6,900 d
+F-350 SCC 5.4L V-8 8,400 e
+F-350 SCC 6.8L V-10 9,700 d/10,300 d
+F-350 SCC 6.0L TD† 12,700 d/12,800 d
+F-350 4WD SCC 5.4L V-8 6,400 d/6,500 d
+F-350 4WD SCC 5.4L V-8 7,900 e/8,000 e
+F-350 4WD SCC 6.8L V-10 9,300 d/9,800 d
+F-350 4WD SCC 6.0L TD† 12,300 d
+F-350 SCC DRW 6.8L V-10 9,400 d/9,900 d
+F-350 SCC DRW 6.8L V-10 12,900 f
+F-350 SCC DRW 6.0L TD† 12,400 d-e/12,500 d-e
+F-350 SCC 4WD DRW 6.8L V-10 9,000 d/9,500 d
+F-350 SCC 4WD DRW 6.8L V-10 12,500 f
+F-350 SCC 4WD DRW 6.0L TD† 12,000 d-e/12,100 d-e
+F-350 CCC 5.4L V-8 6,700 d
+F-350 CCC 5.4L V-8 8,200 e
+F-350 CCC 6.8L V-10 9,500 d/10,000 d
+F-350 CCC 6.0L TD† 12,500 d/12,600 d
+F-350 CCC 4WD 5.4L V-8 6,200 d/6,300 d
+F-350 CCC 4WD 5.4L V-8 7,700 e/7,800 e
+F-350 CCC 4WD 6.8L V-10 9,100 d/9,600 d
+F-350 CCC 4WD 6.0L TD† 12,100 d/12,200 d
+F-350 CCC DRW 6.8L V-10 9,200 d/9,700 d
+F-350 CCC DRW 6.8L V-10 12,700 f
+F-350 CCC DRW 6.0L TD† 12,200 d-e/12,300 d-e
+F-350 CCC 4WD DRW 6.8L V-10 8,700 d/9,300 d
+F-350 CCC 4WD DRW 6.8L V-10 12,200 f/12,300 f
+F-350 CCC 4WD DRW 6.0L TD† 11,700 d-e/11,800 d-e
+
+F-450 Chassis Cab Fifth-Wheel Towing
+F-450 DRW 6.8L V-10 14,500 g-h/16,600 g-h
+F-450 DRW 6.0L TD† 18,000 f-g/18,100 f-g
+F-450 4WD DRW 6.8L V-10 14,200 g-h/16,300 g-h
+F-450 4WD DRW 6.0L TD† 17,700 f-g/17,800 f-g
+F-450 SCC DRW 6.8L V-10 14,200 g-h/16,200 g-h
+F-450 SCC DRW 6.0L TD† 17,700 f-g
+F-450 SCC 4WD DRW 6.8L V-10 13,800 g-h/15,800 g-h
+F-450 SCC 4WD DRW 6.0L TD† 17,300 f-g
+F-450 CCC DRW 6.8L V-10 14,000 g-h/16,000 g-h
+F-450 CCC DRW 6.0L TD† 17,500 f-g
+F-450 CCC 4WD DRW 6.8L V-10 13,700 g-h/15,700 g-h
+F-450 CCC 4WD DRW 6.0L TD† 17,200 f-g
+
+F-550 Chassis Cab Fifth-Wheel Towing
+F-550 DRW 6.8L V-10 14,500 g-h/16,500 g-h
+F-550 DRW 6.0L TD† 18,000 g
+F-550 4WD DRW 6.8L V-10 14,100 g-h/16,200 g-h
+F-550 4WD DRW 6.0L TD† 17,700 g/17,600 g
+F-550 SCC DRW 6.8L V-10 14,100 g-h/16,200 g-h
+F-550 SCC DRW 6.0L TD† 17,600g/17,700g
+F-550 SCC 4WD DRW 6.8L V-10 13,700 g-h/15,700 g-h
+F-550 SCC 4WD DRW 6.0L TD† 17,200 g
+F-550 CCC DRW 6.8L V-10 13,900 g-h/15,900 g-h
+F-550 CCC DRW 6.0L TD† 17,400 g/21,400 g*
+F-550 CCC 4WD DRW 6.8L V-10 13,600 g,h/15,600 g,h
+F-550 CCC 4WD DRW 6.0L TD† 17,000 g/17,100 g
+
+Ranger, Manual/Automatic Transmission
+Ranger SB 2.3L I-4 0,000/2,240 e
+Ranger SB 3.0L V-6 2,640 d/4,100 d
+Ranger SB 3.0L V-6 2,540 e/4,000 e
+Ranger SB 4WD 3.0L V-6 2,360 e/3,820 e
+Ranger LB 3.0L V-6 2,580 d/4,040 d
+Ranger SuperCab 3.0L V-6 2,480 d/3,940 d
+Ranger SuperCab 3.0L V-6 2,340 e/3,800 e
+Ranger SuperCab 4.0L V-6 3,280 c/5,860 c
+Ranger SuperCab 4.0L V-6 0,000/5,740
+Ranger SuperCab 4WD 4.0L V-6 3,120 e/5,580 d-e
+
+Windstar
+Windstar Van 3.8L V-6 2,000
+Windstar Wagon 3.8L V-6 2,000
+Windstar Wagon 3.8L V-6 3,500*
+
+
+Honda
+Odyssey 24-valve 3.5L V-6 3,500 a,b
+Pilot 3.5L V-6 3,500 a,b
+
+
+Hummer
+Hummer H1 4dr Open Top 6.5L TD 8,050
+Hummer H1 Station Wagon 6.5L TD 7,710
+Hummer H2 6.0L V-8 6,700
+
+
+Hyundai
+Santa Fe 2WD 2.7L V-6 2,700 a
+Santa Fe 4WD 2.7L V-6 2,200 a
+
+
+Infinity
+QX4 3.5L V-6 5,000
+
+
+Isuzu
+Rodeo/Rodeo Sport 2.2L 2,500
+Rodeo Sport 3.2L V-6 4,500 a
+Rodeo 3.2L V-6 4,500 a
+Ascender 4.2L I-6 5,300
+Ascender 5.3L V-8 7,000
+Axiom 3.5L V-6 4,500 a
+
+
+Jeep
+Grand Cherokee 4.0L I-6 5,000 b
+Grand Cherokee 4.7L V-8 6,500 b
+Liberty 2.4L I-4 2,000
+Liberty 3.7L V-6 5,000 a,b
+Wrangler 2.5L I-4 2,000 a
+Wrangler 4.0L I-6 2,000
+
+
+Kia
+Sedona 3.5L V-6 3,500
+Sorento 3.5L V-6 3,500
+
+
+Land Rover
+Discovery 4.6L All 5,500
+Range Rover 4.4L V-8 7,700
+Freelander 2.5L V-6 2,500 a
+
+
+Lexus
+GX 470 4.7L V-8 5,000
+LX 470 4.7L V-8 5,000
+RX 300 3.0L V-6 5,000
+
+
+Lincoln
+Aviator 2WD/AWD 4.6L V-8 7,300/7,100
+Navigator 2WD/4WD 5.4L V-8 8,500 a/8,300 a
+
+
+Mazda
+B2300 2.3L I-4 2,240 a*
+B3000 Reg. Cab 3.0L V-6 2,540 m
+B3000 Reg. Cab 3.0L V-6 4,000 a
+B3000 Cab Plus 3.0L V-6 2,340 m**
+B3000 Cab Plus 3.0L V-6 3,800 a**
+B3000 Cab Plus 4WD 3.0L V-6 2,160 m**
+B3000 Cab Plus 4WD 3.0L V-6 3,620 a**
+B4000 4.0L V-6 3,280 m
+B4000 4.0L V-6 5,740 a
+B4000 4WD 4.0L V-6 3,040 m
+B4000 4WD 4.0L V-6 5,500 a
+Tribute 3.0L V-6 3,500
+
+
+Mercedes-Benz
+G500 5.0L V-8 7,000
+G55AMG 5.5L V-8 7,000
+ML320 3.2L V-6 5,000
+ML500 5.0L V-8 5,000
+ML55AMG 5.5L V-8 5,000
+
+
+Mercury
+Mountaineer 4×2 4.0L V-6 3,160 a
+Mountaineer 4×2 4.0L V-6 5,680 b
+Mountaineer 4×2 4.6L V-8 3,160 a
+Mountaineer 4×2 4.6L V-8 7,040 b
+Mountaineer AWD 4.0L V-6 3,300 a
+Mountaineer AWD 4.0L V-6 5,280 b
+Mountaineer AWD 4.6L V-8 3,300 a
+Mountaineer AWD 4.6L V-8 6,880 b
+
+
+Mitsubishi
+Montero All 5,000 a
+
+
+Nissan
+Frontier 2.4L I-4 3,000 a,c
+Frontier 3.3L V-6 2,000 b,c
+Frontier 4WD 3.3L V-6 SC 5,000 b,c *
+Murano 3.5L V-6 0,000
+Pathfinder 3.5L V-6 5,000 b,c
+Pathfinder 3.5L V-6 3,500 a,c
+Xterra 2.4L I-4 3,500 a,c
+Xterra 3.3L V-6 5,000 b,c
+Xterra 3.3L V-6 SC 3,500 a,c
+
+
+Oldsmobile
+Bravada 2WD 4.2L I-6 5,300 a
+Bravada 2WD 4.2L I-6 5,800 b
+Bravada 2WD 4.2L I-6 6,300 c
+Bravada 4WD/AWD 4.2L I-6 5,200 a
+Bravada 4WD/AWD 4.2L I-6 5,700 b
+Bravada 4WD/AWD 4.2L I-6 6,200 c
+Silhouette 3.4L V-6 3,500 d
+
+
+Pontiac
+Aztek 3.4L V-6 3,500 a
+Montana 3.4L V-6 3,500 a
+
+
+Porsche
+Cayenne 4.5L V-8 7,700
+
+
+Saturn
+VUE AWD 3.0L V-6 2,500
+
+
+Subaru
+Baja 2.5L Flat 4 2,400
+Legacy/Outback/Forester 2.5L Flat 4 2,000 a
+
+
+Toyota
+4Runner 3.4L V-6 5,000
+Camry/Avalon All 2,000
+Land Cruiser 4.7L V-8 6,500
+Sienna 3.0L V-6 3,500*
+Tacoma All I-4 3,500
+Tacoma 3.4L V-6 5,000*
+S-Runner 3.4L V-6 3,500
+Sequoia 4.7L V-8 6,500
+Sequoia 4WD 4.7L V-8 6,200
+Highlander All I-4 3,000*
+Highlander 3.0L V-6 3,500*
+Tundra 4×2 B-Cab 3.4L V-6 5,000
+Tundra 4×2 C-Cab 3.4L V-6 4,800
+Tundra 4WD C-Cab 3.4L V-6 4,800
+Tundra 4×2 C-Cab (SR5, LTD) 4.7L V-8 7,100*
+Tundra 4WD B-Cab 4.7L V-8 7,200*
+Tundra 4WD C-Cab (SR5, LTD) 4.7L V-8 6,900*
+
+
+Volkswagen
+Eurovan 2.8L V-6 4,400 a
+
+
+Volvo
+XC90 2.5L I-5/2.9L I-6 5,000
