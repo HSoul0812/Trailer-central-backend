@@ -3,9 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Models\User\User;
-use App\Models\User\AuthToken;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use App\Models\User\AuthToken;
 
 class AccessToken
 {
@@ -25,7 +25,7 @@ class AccessToken
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
             if ($accessToken && $accessToken->user) {
-                $request['dealer_id'] = $accessToken->user->dealer_id;
+                Auth::setUser($accessToken->user);
                 return $next($request);
             }
         }
@@ -34,7 +34,7 @@ class AccessToken
             return $next($request);
         }
         
-        if (strpos($request->url(), 'admin') === false && strpos($request->url(), 'nova-api') === false) {
+        if (strpos($request->url(), 'admin') === false && strpos($request->url(), 'nova-api') === false && strpos($request->url(), 'api/user/login') === false) {
             return response('Invalid access token.', 403);
         }
         

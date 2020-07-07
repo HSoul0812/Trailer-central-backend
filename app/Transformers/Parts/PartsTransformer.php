@@ -22,7 +22,7 @@ class PartsTransformer extends TransformerAbstract
              'subcategory' => $part->subcategory,
              'title' => $part->title,
              'alternative_part_number' => $part->alternative_part_number,
-             'price' => (double)number_format($part->modified_cost, 2),
+             'price' => number_format((double)$part->modified_cost, 2, '.', ''),
              'dealer_cost' => (double)$part->dealer_cost,
              'msrp' => (double)$part->msrp,
              'weight' => (double)$part->weight,

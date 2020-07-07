@@ -6,17 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'crm_customer';
+    protected $table = 'dms_customer';
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'customer_id';
+    public $timestamps = false;
+
 }

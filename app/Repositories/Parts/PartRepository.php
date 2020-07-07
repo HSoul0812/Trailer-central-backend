@@ -11,6 +11,7 @@ use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
 use App\Models\Parts\BinQuantity;
 use App\Exceptions\ImageNotDownloadedException;
+use App\Repositories\Traits\SortTrait;
 
 /**
  *
@@ -18,6 +19,8 @@ use App\Exceptions\ImageNotDownloadedException;
  */
 class PartRepository implements PartRepositoryInterface {
 
+    use SortTrait;
+    
     private $sortOrders = [
         'title' => [
             'field' => 'title',
@@ -159,6 +162,10 @@ class PartRepository implements PartRepositoryInterface {
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
+        
+        if (isset($params['sku'])) {
+            $query = $query->whereLike('sku', $params['sku']);
+        }
 
         if (isset($params['dealer_id'])) {
              $query = $query->where('dealer_id', current($params['dealer_id']));
@@ -272,8 +279,8 @@ class PartRepository implements PartRepositoryInterface {
     public function update($params) {
         $part = Part::findOrFail($params['id']);
 
-        DB::transaction(function() use (&$part, $params) {
-
+        DB::transaction(function() use (&$part, $params) {            
+            
             if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
                 VehicleSpecific::updateOrCreate([
                     'make' => $params['vehicle_make'],
@@ -335,13 +342,9 @@ class PartRepository implements PartRepositoryInterface {
             'position' => $image['position']
         ]);
     }
-
-    private function addSortQuery($query, $sort) {
-        if (!isset($this->sortOrders[$sort])) {
-            return;
-        }
-
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    
+    protected function getSortOrders() {
+        return $this->sortOrders;
     }
 
 }
