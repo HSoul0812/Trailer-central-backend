@@ -5,8 +5,11 @@ namespace App\Repositories\CRM\Text;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Models\CRM\Dealer\DealerLocation;
+use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Text\Stop;
+use Twilio\Rest\Client;
 
 class TextRepository implements TextRepositoryInterface {
 
@@ -108,6 +111,39 @@ class TextRepository implements TextRepositoryInterface {
         }
         
         return $stop;
+    }
+
+    /**
+     * Send Text
+     * 
+     * @param type $params
+     * @return type
+     */
+    public function sendText($params) {
+        // Initialize Twilio Client
+        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+        // Find Lead ID
+        $lead = Lead::findOrFail($params['lead_id']);
+        $dealerId = $lead->location->dealer_id;
+        $locationId = $lead->dealer_location_id;
+
+        // Get From/To Numbers
+        $phone = $params['phone'];
+        $to_number = '+' . ((strlen($phone) === 11) ? $phone : '1' . $phone);
+        $from_number = DealerLocation::findDealerNumber($dealerId, $locationId);
+
+        // Look Up To Number
+        $carrier = $client->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
+        if (empty($carrier['mobile_country_code'])) {
+            return [
+                'error' => true,
+                'status' => 'landline',
+                'message' => 'Error: The number provided is a landline and cannot receive texts!'
+            ];
+        }
+
+        // Resume Process
     }
 
 }

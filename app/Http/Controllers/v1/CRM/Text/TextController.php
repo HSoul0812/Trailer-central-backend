@@ -12,7 +12,6 @@ use App\Http\Requests\CRM\Text\ShowTextRequest;
 use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
-use Twilio\Rest\Client;
 
 class TextController extends Controller
 {
@@ -260,7 +259,7 @@ class TextController extends Controller
      *     ),
      * )
      */
-    public function Stop(int $leadId, int $id) {
+    public function stop(int $leadId, int $id) {
         $request = new StopTextRequest(['id' => $id]);
         
         if ( $request->validate()) {
@@ -381,34 +380,14 @@ class TextController extends Controller
         $request = new SendTextRequest($request->all());
         
         if ( $request->validate()) {
-            // Get Params
-            $params = $request->all();
-            $phone = $params['phone'];
-
-            // Initialize Twilio Client
-            $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
-
-            // Find Lead ID
-            $lead = Lead::findOrFail($request->input('lead_id'));
-            $locationId = $lead->dealer_location_id;
-            $dealer = $lead->dealer();
-
-            // Initialize Text Form
-            $to_number = '+' . ((strlen($phone) === 11) ? $phone : '1' . $phone);
-            $phoneRouter = new \Interactions\PhoneRouter($lead->dealer_id, $locationId, $db, $to_number, '', $client);
-            $from_number = $phoneRouter->getDealerNumber();
-
-            // Look Up To Number
-            $carrier = $client->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
-            if (empty($carrier['mobile_country_code'])) {
-                return response()->json([
-                    'status' => 'landline',
-                    'message' => 'Error: The number provided is a landline and cannot receive texts!'
-                ], 500);
+            // Get Results
+            $result = $this->texts->sendText($request->all());
+            if(isset($result['error'])) {
+                return $this->response->errorBadRequest($result);
             }
 
             // Send Text
-            return $this->response->item($this->texts->create($request->all()), new TextTransformer());
+            return $this->response->item($result, new TextTransformer());
         }
         
         return $this->response->errorBadRequest();
