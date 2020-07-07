@@ -2,7 +2,7 @@
 
 namespace App\Models\CRM\Dealer;
 
-use App\Models\User\Dealer;
+use App\Models\User\NewDealerUser;
 use App\Models\Upload\Upload;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,7 +28,7 @@ class DealerUpload extends Model
 
     public function dealer()
     {
-        return $this->belongsTo(Dealer::class, 'dealer_id', 'dealer_id');
+        return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'dealer_id');
     }
 
     public function upload()

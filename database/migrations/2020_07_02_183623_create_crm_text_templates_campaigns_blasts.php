@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCrmTextCampaigns extends Migration
+class CreateCrmTextTemplatesCampaignsBlasts extends Migration
 {
     /**
      * Run the migrations.
@@ -51,15 +51,13 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->string('campaign_subject');
 
-            $table->string('from_email_address')->index();
+            $table->string('from_sms_number')->index()->nullable();
 
             $table->enum('action', Campaign::STATUS_ACTIONS)->nullable();
 
             $table->integer('location_id')->nullable();
 
             $table->integer('send_after_days')->nullable();
-
-            $table->integer('unit_category')->nullable();
 
             $table->enum('include_archived', Campaign::STATUS_ARCHIVED)->default('0');
 
@@ -81,7 +79,6 @@ class CreateCrmTextCampaigns extends Migration
                     ->references('id')
                     ->on('crm_text_template');
         });
-
 
         // Create CRM Text Campaign Sent
         Schema::create('crm_text_campaign_sent', function (Blueprint $table) {
@@ -110,6 +107,40 @@ class CreateCrmTextCampaigns extends Migration
                     ->on('dealer_texts_log');
         });
 
+        // Create CRM Text Campaign Brand
+        Schema::create('crm_text_campaign_brand', function (Blueprint $table) {
+            $table->increments('id')->unsigned();
+
+            $table->integer('text_campaign_id')->unsigned()->index();
+
+            $table->string('brand');
+
+            $table->timestamps();
+
+            $table->foreign('text_campaign_id')
+                    ->references('id')
+                    ->on('crm_text_campaign')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
+        });
+
+        // Create CRM Text Campaign Category
+        Schema::create('crm_text_campaign_category', function (Blueprint $table) {
+            $table->increments('id')->unsigned();
+
+            $table->integer('text_campaign_id')->unsigned()->index();
+
+            $table->string('category');
+
+            $table->timestamps();
+
+            $table->foreign('text_campaign_id')
+                    ->references('id')
+                    ->on('crm_text_campaign')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
+        });
+
 
         // Create CRM Text Blast
         Schema::create('crm_text_blast', function (Blueprint $table) {
@@ -123,7 +154,7 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->string('campaign_subject');
 
-            $table->string('from_email_address')->index();
+            $table->string('from_sms_number')->index()->nullable();
 
             $table->enum('action', Blast::STATUS_ACTIONS)->nullable();
 
@@ -131,13 +162,13 @@ class CreateCrmTextCampaigns extends Migration
 
             $table->integer('send_after_days')->nullable();
 
-            $table->integer('unit_category')->nullable();
-
             $table->enum('include_archived', Blast::STATUS_ARCHIVED)->default('0');
 
             $table->tinyInteger('is_delivered')->default(0)->index();
 
             $table->tinyInteger('is_cancelled')->default(0)->index();
+
+            $table->timestamp('send_date')->index();
 
             $table->timestamps();
 
@@ -155,7 +186,6 @@ class CreateCrmTextCampaigns extends Migration
                     ->references('id')
                     ->on('crm_text_template');
         });
-
 
         // CRM Text Blast Sent
         Schema::create('crm_text_blast_sent', function (Blueprint $table) {
@@ -182,6 +212,40 @@ class CreateCrmTextCampaigns extends Migration
             $table->foreign('text_id')
                     ->references('id')
                     ->on('dealer_texts_log');
+        });
+
+        // Create CRM Text Blast Brand
+        Schema::create('crm_text_blast_brand', function (Blueprint $table) {
+            $table->increments('id')->unsigned();
+
+            $table->integer('text_blast_id')->unsigned()->index();
+
+            $table->string('brand');
+
+            $table->timestamps();
+
+            $table->foreign('text_blast_id')
+                    ->references('id')
+                    ->on('crm_text_blast')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
+        });
+
+        // Create CRM Text Blast Category
+        Schema::create('crm_text_blast_category', function (Blueprint $table) {
+            $table->increments('id')->unsigned();
+
+            $table->integer('text_blast_id')->unsigned()->index();
+
+            $table->string('category');
+
+            $table->timestamps();
+
+            $table->foreign('text_blast_id')
+                    ->references('id')
+                    ->on('crm_text_blast')
+                    ->onDelete('CASCADE')
+                    ->onUpdate('CASCADE');
         });
 
 
@@ -222,9 +286,17 @@ class CreateCrmTextCampaigns extends Migration
     {
         Schema::dropIfExists('crm_text_stop');
 
+        Schema::dropIfExists('crm_text_blast_brand');
+
+        Schema::dropIfExists('crm_text_blast_category');
+
         Schema::dropIfExists('crm_text_blast_sent');
 
         Schema::dropIfExists('crm_text_blast');
+
+        Schema::dropIfExists('crm_text_campaign_brand');
+
+        Schema::dropIfExists('crm_text_campaign_category');
 
         Schema::dropIfExists('crm_text_campaign_sent');
 

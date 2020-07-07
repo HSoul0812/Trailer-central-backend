@@ -5,11 +5,11 @@ namespace App\Http\Requests\CRM\Text;
 use App\Http\Requests\Request;
 
 /**
- * Sent Campaign Request
+ * Sent Blast Request
  * 
  * @author David A Conway Jr.
  */
-class SentCampaignRequest extends Request {
+class SentBlastRequest extends Request {
 
     protected $rules = [];
 }

@@ -2,10 +2,13 @@
 
 namespace App\Repositories\CRM\Text;
 
+use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
+use App\Models\CRM\Text\CampaignBrand;
+use App\Models\CRM\Text\CampaignCategory;
 
 class CampaignRepository implements CampaignRepositoryInterface {
 
@@ -48,8 +51,28 @@ class CampaignRepository implements CampaignRepositoryInterface {
         DB::beginTransaction();
 
         try {
+            // Get Categories
+            $categories = array();
+            if(isset($params['category'])) {
+                $categories = $params['category'];
+                unset($params['category']);
+            }
+
+            // Get Brands
+            $brands = array();
+            if(isset($params['brand'])) {
+                $brands = $params['brand'];
+                unset($params['brand']);
+            }
+
             // Create Campaign
             $campaign = Campaign::create($params);
+
+            // Update Brands
+            $this->updateBrands($campaign->id, $brands);
+
+            // Update Categories
+            $this->updateCategories($campaign->id, $categories);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -77,7 +100,11 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Campaign::where('identifier', '>', 0);
+        $query = Campaign::where('deleted', '=', 0);
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
 
         if (isset($params['user_id'])) {
             $query = $query->where('user_id', $params['user_id']);
@@ -95,22 +122,35 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function update($params) {
+        // Find Campaign or Die
         $campaign = Campaign::findOrFail($params['id']);
 
         DB::transaction(function() use (&$campaign, $params) {
+            // Get Categories
+            $categories = array();
+            if(isset($params['category'])) {
+                $categories = $params['category'];
+                unset($params['category']);
+            }
+
+            // Get Brands
+            $brands = array();
+            if(isset($params['brand'])) {
+                $brands = $params['brand'];
+                unset($params['brand']);
+            }
+
+            // Update Brands
+            $this->updateBrands($campaign->id, $brands);
+
+            // Update Categories
+            $this->updateCategories($campaign->id, $categories);
+
             // Fill Text Details
             $campaign->fill($params)->save();
         });
 
         return $campaign;
-    }
-
-    private function addSortQuery($query, $sort) {
-        if (!isset($this->sortOrders[$sort])) {
-            return;
-        }
-
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
     public function sent($params) {
@@ -129,4 +169,63 @@ class CampaignRepository implements CampaignRepositoryInterface {
         return $stop;
     }
 
+
+    /**
+     * Add Sort Query
+     * 
+     * @param type $query
+     * @param type $sort
+     * @return type
+     */
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    /**
+     * Update Campaign Brands
+     * 
+     * @param int $campaignId
+     * @param array $brands
+     */
+    private function updateBrands($campaignId, $brands) {
+        // Delete Old Campaign Brands
+        CampaignBrand::deleteByCampaign($campaignId);
+
+        // Create Campaign Brand
+        if(count($brands) > 0) {
+            foreach($brands as $brand) {
+                // Create Brand for Campaign ID
+                CampaignBrand::create([
+                    'text_campaign_id' => $campaignId,
+                    'brand' => $brand
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Update Campaign Categories
+     * 
+     * @param int $campaignId
+     * @param array $categories
+     */
+    private function updateCategories($campaignId, $categories) {
+        // Delete Old Campaign Categories
+        CampaignCategory::deleteByCampaign($campaignId);
+
+        // Create Campaign Category
+        if(count($categories) > 0) {
+            foreach($categories as $category) {
+                // Create Category for Campaign ID
+                CampaignCategory::create([
+                    'text_campaign_id' => $campaignId,
+                    'category' => $category
+                ]);
+            }
+        }
+    }
 }

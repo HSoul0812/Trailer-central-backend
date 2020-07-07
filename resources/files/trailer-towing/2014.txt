@@ -1,0 +1,843 @@
+ACURA
+MDX 3.7L V-6 5,000
+
+
+AUDI
+Q5 All 4,000
+Q7 All 5,500*
+Q7 3.6L V-6 6,600 (t)
+
+
+BMW
+X3 2.8i 2.0L I-4 TC 3,500
+X3 3.5i 3.0L I-6 TC 3,500
+X5 3.5i 3.0L I-6 TC 6,000
+X535d 3.0L I-6 TD 6,000
+X55.0i 4.4L V-8 TC 6,000
+X5M 4.4L V-8 TC 6,000
+X635i 3.0L I-6 TC 6,000
+X650i 4.4L V-8 TC 6,000
+X6M 4.4L V-8 TC 6,000
+
+
+BUICK
+Enclave FWD 3.6L V-6 2,000
+Enclave FWD 3.6L V-6 4,500 (t)
+Enclave AWD 3.6L V-6 2,000
+Enclave AWD 3.6L V-6 4,500 (t)
+
+
+CADILLAC
+Escalade 2WD 6.2L V-8 8,300
+Escalade AWD 6.2L V-8 8,100
+Escalade ESV 2WD 6.2L V-8 8,000
+Escalade ESV AWD 6.2L V-8 7,700
+SRX FWD 3.6L V-6 2,500
+SRX FWD 3.6L V-6 3,500 (t)
+SRX AWD 3.6L V-6 2,500
+SRX AWD 3.6L V-6 3,500 (t)
+
+
+CHEVROLET/GMC
+Traverse/Acadia FWD 3.6L V-6 2,000
+Traverse/Acadia FWD 3.6L V-6 5,200 (t)
+Traverse/Acadia AWD 3.6L V-6 2,000
+Traverse/Acadia AWD 3.6L V-6 5,200 (t)
+Equinox/Terrain FWD/AWD 3.6L V-6 3,500 (t)
+Captiva Sport FWD/AWD 3.0L V-6 3,500 (t)
+Express/Savana 1500 SWB CV 2WD 4.3L V-6 4,300 (g)
+Express/Savana 1500 SWB CV 2WD 5.3L V-8 6,700 (g/i)
+Express/Savana 1500 SWB CV AWD 5.3L V-8 6,500 (g)
+Express/Savana 1500 SWB PV 2WD 5.3L V-8 6,200 (g/i)
+Express/Savana 1500 SWB PV AWD 5.3L V-8 6,000 (g/i)
+Express/Savana 2500 SWB CV 2WD 4.8L V-8 7,400 (g)
+Express/Savana 2500 SWB CV 2WD 6.0L V-8 10,000 (g)
+Express/Savana 2500 SWB CV 2WD 6.6L V-8 TD 10,000
+Express/Savana 2500 SWB PV 2WD 6.0L V-8 6,700 (g)
+Express/Savana 2500 SWB PV 2WD 6.0L V-8 9,800 (g)
+Express/Savana 2500 LWB CV 2WD 4.8L V-8 7,200 (g)
+Express/Savana 2500 LWB CV 2WD 6.0L V-8 10,000 (g)
+Express/Savana 2500 LWB CV 2WD 6.6L V-8 TD 10,000
+Express/Savana 3500 SWB CV 2WD 4.8L V-8 7,400 (g)
+Express/Savana 3500 SWB CV 2WD 6.0L V-8 10,000 (g)
+Express/Savana 3500 SWB CV 2WD 6.6L V-8 TD 10,000
+Express/Savana 3500 SWB PV 2WD 6.0L V-8 9,700
+Express/Savana 3500 SWB PV 2WD 6.6L V-8 TD 10,000
+Express/Savana 3500 LWB CV 2WD 4.8L V-8 7,100
+Express/Savana 3500 LWB CV 2WD 6.0L V-8 10,000 (g)
+Express/Savana 3500 LWB CV 2WD 6.6L V-8 TD 10,000
+Express/Savana 3500 LWB PV 2WD 6.0L V-8 9,300 (g)
+Express/Savana 3500 LWB PV 2WD 6.6L V-8 TD 9,700
+
+SILVERADO/SIERRA 1500 REGULAR CAB
+1500 Reg Cab Std Bed 2WD 4.3L V-6 6,400 (e)
+1500 Reg Cab Std Bed 2WD 5.3L V-8 9,300 (g)
+1500 Reg Cab Std Bed 4WD 4.3L V-6 7,200 (g)
+1500 Reg Cab Std Bed 4WD 5.3L V-8 9,100 (g)
+1500 Reg Cab LB 2WD 4.3L V-6 6,300 (e)
+1500 Reg Cab LB 2WD 5.3L V-8 10,200 (g)
+1500 Reg Cab LB 4WD 4.3L V-6 7,000 (g)
+1500 Reg Cab LB 4WD 5.3L V-8 9,900 (g)
+
+SILVERADO/SIERRA DOUBLE CAB
+1500 Double Cab 2WD 4.3L V-6 6,000 (e)
+1500 Double Cab 2WD 5.3L V-8 9,900 (g)
+1500 Double Cab 2WD 5.3L V-8 11,500 (i,t)
+1500 Double Cab 2WD 6.2L V-8 9,800 (g)
+1500 Double Cab 2WD 6.2L V-8 12,000 (i,p)
+1500 Double Cab 4WD 4.3L V-6 6,700 (g)
+1500 Double Cab 4WD 5.3L V-8 9,600 (g)
+1500 Double Cab 4WD 5.3L V-8 11,200 (i,t)
+1500 Double Cab 4WD 6.2L V-8 9,500 (g)
+1500 Double Cab 4WD 6.2L V-8 11,800 (i,p)
+
+SILVERADO/SIERRA 1500 SHORTBED/STANDARD BED
+1500 CC SB 2WD 4.3L V-6 5,900 (e)
+1500 CC SB 2WD 5.3L V-8 9,800 (g)
+1500 CC SB 2WD 5.3L V-8 11,400 (i,t)
+1500 CC SB 2WD 6.2L V-8 9,700 (g)
+1500 CC SB 2WD 6.2L V-8 12,000 (i,t)
+1500 CC SB 4WD 4.3L V-6 6,700 (g)
+1500 CC SB 4WD 5.3L V-8 9,600 (g)
+1500 CC SB 4WD 5.3L V-8 11,200 (i,t)
+1500 CC SB 4WD 6.2L V-8 9,500 (g)
+1500 CC SB 4WD 6.2L V-8 11,800 (i,t)
+1500 CC Std Bed 2WD 4.3L V-6 5,800 (e)
+1500 CC Std Bed 2WD 5.3L V-8 9,700 (g)
+1500 CC Std Bed 2WD 5.3L V-8 11,300 (i,t)
+1500 CC Std Bed 2WD 6.2L V-8 9,600 (g)
+1500 CC Std Bed 2WD 6.2L V-8 12,000 (i,t)
+1500 CC Std Bed 4WD 4.3L V-6 6,600 (g)
+1500 CC Std Bed 4WD 5.3L V-8 9,500 (g)
+1500 CC Std Bed 4WD 5.3L V-8 11,100 (i,t)
+1500 CC Std Bed 4WD 6.2L V-8 9,400 (g)
+1500 CC Std Bed 4WD 6.2L V-8 11,700 (i,t)
+
+SIERRA DENALI CC SHORTBED, 1500 2WD AND AWD
+Sierra Denali CC SB 2WD 6.2L V-8 9,600
+Sierra Denali CC SB AWD 6.2L V-8 9,400
+
+SILVERADO/SIERRA TWO-MODE HYBRID
+Two-mode hybrid 2WD 6.0L V-8 6,100
+Two-mode hybrid 4WD 6.0L V-8 5,900
+
+SILVERADO/SIERRA 2500 CONVENTIONAL/FIFTHWHEEL TOWING REG CAB LONGBED
+2500 Reg Cab LB 2WD 6.0L V-8 13,000/14,700 (k)
+2500 Reg Cab LB 2WD 6.6L V-8 TD 13,000/17,800 (i)
+2500 Reg Cab LB 4WD 6.0L V-8 13,000/14,400 (k)
+2500 Reg Cab LB 4WD 6.6L V-8 TD 13,000/17,500 (i)
+
+SILVERADO/SIERRA 2500 CC STD BED
+2500 CC Std Bed 2WD 6.0L V-8 13,000/14,200 (k)
+2500 CC Std Bed 2WD 6.6L V-8 TD 13,000/17,400 (i)
+Sierra Denali 2500 2WD 6.0L V-8 13,000/14,000 (k)
+Sierra Denali 2500 2WD 6.6L V-8 TD 13,000/16,500 (i)
+2500 CC Std Bed 4WD 6.0L V-8 13,000/13,900 (k)
+2500 CC Std Bed 4WD 6.6L V-8 TD 13,000/15,800 (i)
+Sierra Denali 2500 4WD 6.0L V-8 13,000/13,700 (k)
+Sierra Denali 2500 4WD 6.6L V-8 TD 13,000/14,700 (k)
+
+SILVERADO/SIERRA 2500 CC LONGBED
+2500 CC LB 2WD 6.0L V-8 13,000/14,200 (k)
+2500 CC LB 2WD 6.6L V-8 TD 13,000/16,700
+2500 CC LB 4WD 6.0L V-8 13,000/13,800
+2500 CC LB 4WD 6.6L V-8 TD 13,000/14,700
+
+SILVERADO/SIERRA 3500 CONVENTIONAL/FIFTHWHEEL TOWING REG CAB, LONG BOX
+3500 Reg Cab SRW 2WD 6.0L V-8 13,000/14,500 (k)
+3500 Reg Cab DRW 2WD 6.0L V-8 14,100/14,200 (k)
+3500 Reg Cab SRW 4WD 6.0L V-8 13,000/14,200 (k)
+3500 Reg Cab SRW 4WD 6.6L V-8 TD 13,000/17,400 (i)
+3500 Reg Cab DRW 4WD 6.0L V-8 13,800 (k)
+3500 Reg Cab DRW 4WD 6.6L V-8 TD 16,000/23,100 (i)
+
+SILVERADO/SIERRA 3500 CONVENTIONAL/FIFTHWHEEL TOWING CREW CAB, STD BED
+3500 CC Std Bed SRW 2WD 6.0L V-8 13,000/14,000 (k)
+3500 CC Std Bed SRW 2WD 6.6L V-8 TD 13,000/17,200 (i)
+3500 CC Std Bed SRW 2WD Denali 6.0L V-8 13,000/13,800 (k)
+3500 CC Std Bed SRW 2WD Denali 6.6L V-8 TD 13,000/17,100 (i)
+3500 CC Std Bed SRW 4WD 6.0L V-8 13,000/13,700 (k)
+3500 CC Std Bed SRW 4WD 6.6L V-8 TD 13,000/17,000 (i)
+3500 CC Std Bed SRW 4WD Denali 6.0L V-8 13,000/13,600 (k)
+3500 CC Std Bed SRW 4WD Denali 6.6L V-8 TD 13,000/16,800 (i)
+3500 CC LB SRW 2WD 6.0L V-8 13,000/13,900 (k)
+3500 CC LB SRW 2WD 6.6L V-8 TD 13,000/17,300 (i)
+3500 CC LB DRW 2WD 6.0L V-8 13,500 (k)
+3500 CC LB DRW 2WD 6.6L V-8 TD 16,500/22,800 (i)
+3500 CC LB DRW 2WD Denali 6.0L V-8 13,400 (k)
+3500 CC LB DRW 2WD Denali 6.6L V-8 TD 16,500/22,600 (i)
+3500 CC LB SRW 4WD 6.0L V-8 13,000/13,600 (k)
+3500 CC LB SRW 4WD 6.6L V-8 TD 13,000/16,800 (i)
+3500 CC LB DRW 4WD 6.0L V-8 13,200 (k)
+3500 CC LB DRW 4WD 6.6L V-8 TD 18,000/22,500 (i)
+3500 CC LB DRW 4WD Denali 6.0L V-8 13,000/13,100
+3500 CC LB DRW 4WD Denali 6.6L V-8 TD 18,000/22,300 (i)
+
+CHEVY TAHOE AND SUBURBAN, GMC YUKON, YUKON XL, YUKON AND YUKON XL DENALI 1500 SERIES
+Tahoe/Yukon 2WD 5.3L V-8 5,500 (b)
+Tahoe/Yukon 2WD 5.3L V-8 6,000 (g)
+Tahoe/Yukon 2WD 5.3L V-8 8,500 (g,p)
+Tahoe/Yukon 4WD 5.3L V-8 5,200 (b)
+Tahoe/Yukon 4WD 5.3L V-8 5,700 (g)
+Tahoe/Yukon 4WD 5.3L V-8 8,200 (g,p)
+Suburban/Yukon XL 2WD 5.3L V-8 5,100 (b)
+Suburban/Yukon XL 2WD 5.3L V-8 5,600 (g)
+Suburban/Yukon XL 2WD 5.3L V-8 8,100 (g,p)
+Suburban/Yukon XL 4WD 5.3L V-8 5,000 (b)
+Suburban/Yukon XL 4WD 5.3L V-8 5,500 (g)
+Suburban/Yukon XL 4WD 5.3L V-8 8,000 (g,p)
+Yukon Denali 2WD 6.2L V-8 8,300
+Yukon Denali AWD 6.2L V-8 8,100
+Yukon XL Denali 2WD 6.2L V-8 7,900
+Yukon XL Denali AWD 6.2L V-8 7,800
+
+
+CHRYSLER
+Chrysler Town & Country 3.6L V-6 3,600 (t)
+
+
+DODGE
+Dodge Grand Caravan 3.6L V-6 3,600 (t)
+Dodge Journey FWD and AWD 3.6L V-6 2,500 (t)
+Dodge Durango RWD 3.6L V-6 6,200
+Dodge Durango RWD 5.7L V-8 7,400
+Dodge Durango AWD 3.6L V-6 6,200
+Dodge Durango AWD 5.7L V-8 7,200
+
+
+RAM
+RAM 1500 REGULAR CAB SHORTBED
+1500 Reg Cab SB 2WD 3.6L V-6 4,800 (a8,d)
+1500 Reg Cab SB 2WD 3.6L V-6 7,300 (a8,h)
+1500 Reg Cab SB 2WD 5.7L V-8 8,550 (a8,d)
+1500 Reg Cab SB 2WD 5.7L V-8 9,150 (a8,h)
+1500 Reg Cab SB 4WD 3.6L V-6 4,550 (a8,d)
+1500 Reg Cab SB 4WD 3.6L V-6 7,050 (a8,h)
+1500 Reg Cab SB 4WD 5.7L V-8 8,350 (a8,d)
+1500 Reg Cab SB 4WD 5.7L V-8 8,950 (a8,j)
+
+RAM 1500 REGULAR CAB LONGBED
+1500 Reg Cab LB 2WD 3.6L V-6 4,600 (a8,d)
+1500 Reg Cab LB 2WD 3.6L V-6 7,300 (a8,h)
+1500 Reg Cab LB 2WD 3.0L V-6 TD 8,200 (a8,h)
+1500 Reg Cab LB 2WD 3.0L V-6 TD 9,200 (a8,j)
+1500 Reg Cab LB 2WD 5.7L V-8 8,400 (a8,d)
+1500 Reg Cab LB 2WD 5.7L V-8 10,450 (a8,j)
+1500 Reg Cab LB 4WD 3.6L V-6 4,400 (a8,d)
+1500 Reg Cab LB 4WD 3.6L V-6 7,100 (a8,h)
+1500 Reg Cab LB 4WD 3.0L V-6 TD 7,950 (a8,h)
+1500 Reg Cab LB 4WD 3.0L V-6 TD 8,950 (a8,j)
+1500 Reg Cab LB 4WD 5.7L V-8 8,200 (a8,d)
+1500 Reg Cab LB 4WD 5.7L V-8 10,350 (a8,j)
+
+RAM 1500 QUAD CAB
+Ram 1500 Quad Cab 2WD 3.6L V-6 4,400 (a8,d)
+Ram 1500 Quad Cab 2WD 3.6L V-6 7,400 (a8,h)
+Ram 1500 Quad Cab 2WD 3.0L V-6 TD 7,950 (a8,h)
+Ram 1500 Quad Cab 2WD 3.0L V-6 TD 8,950 (a8,j)
+Ram 1500 Quad Cab 2WD 5.7L V-8 8,200 (a8,d)
+Ram 1500 Quad Cab 2WD 5.7L V-8 10,350 (a8,j)
+Ram 1500 Quad Cab 4WD 3.6L V-6 4,200 (a8,d)
+Ram 1500 Quad Cab 4WD 3.6L V-6 7,200 (a8h)
+Ram 1500 Quad Cab 4WD 3.0L V-6 TD 7,750 (a8,h)
+Ram 1500 Quad Cab 4WD 3.0L V-6 TD 8,750 (a8,j)
+Ram 1500 Quad Cab 4WD 5.7L V-8 8,000 (a8,d)
+Ram 1500 Quad Cab 4WD 5.7L V-8 10,150 (a8,j)
+
+RAM 1500 CREW CAB, 5’7” BED
+Ram 1500 CC 2WD 3.6L V-6 4,350 (a8,d)
+Ram 1500 CC 2WD 3.6L V-6 7,350 (a8,h)
+Ram 1500 CC 2WD 3.0L V-6 TD 7,900 (a8,h)
+Ram 1500 CC 2WD 3.0L V-6 TD 8,900 (a8,j)
+Ram 1500 CC 2WD 5.7L V-8 8,150 (a8,d)
+Ram 1500 CC 2WD 5.7L V-8 10,300 (a8,j)
+Ram 1500 CC 4WD 3.6L V-6 4,150 (a8,d)
+Ram 1500 CC 4WD 3.6L V-6 7,150 (a8,h)
+Ram 1500 CC 4WD 3.0L V-6 TD 7,650 (a8,h)
+Ram 1500 CC 4WD 3.0L V-6 TD 8,650 (a8,j)
+Ram 1500 CC 4WD 5.7L V-8 7,900 (a8,d)
+Ram 1500 CC 4WD 5.7L V-8 10,050 (a8,j)
+
+RAM 1500 CREW CAB 6’4” BED
+Ram 1500 CC 2WD 3.0L V-6 TD 7,850 (a8,h)
+Ram 1500 CC 2WD 3.0L V-6 TD 8,850 (a8,j)
+Ram 1500 CC 2WD 5.7L V-8 8,100 (a8,d)
+Ram 1500 CC 2WD 5.7L V-8 10,250 (a8,j)
+Ram 1500 CC 4WD 3.0L V-6 TD 7,600 (a8,h)
+Ram 1500 CC 4WD 3.0L V-6 TD 8,600 (a8,j)
+Ram 1500 CC 4WD 5.7L V-8 7,900 (a8,d)
+Ram 1500 CC 4WD 5.7L V-8 10,050 (a8,j)
+
+RAM 2500 REGULAR CAB LONGBED
+Ram 2500 LB 2WD 5.7L V-8 11,770 (a6,i)
+Ram 2500 LB 2WD 5.7L V-8 13,770 (a6,k)
+Ram 2500 LB 2WD 6.4L V-8 13,230 (a6,i)
+Ram 2500 LB 2WD 6.4L V-8 16,230 (a6,k)
+Ram 2500 LB 2WD 6.7L I-6 TD 16,710 (m6,g)
+Ram 2500 LB 2WD 6.7L I-6 TD 17,810 (m6,g)
+Ram 2500 LB 4WD 5.7L V-8 11,430 (a6,i)
+Ram 2500 LB 4WD 5.7L V-8 13,430 (a6,k)
+Ram 2500 LB 4WD 6.4L V-8 12,830 (a6,i)
+Ram 2500 LB 4WD 6.4L V-8 15,830 (a6,k)
+Ram 2500 LB 4WD 6.7L I-6 TD 16,360 (m6,g)
+Ram 2500 LB 4WD 6.7L I-6 TD 17,440 (a6,g)
+
+RAM 2500 CREW CAB SHORTBED
+Ram 2500 Crew Cab SB 2WD 5.7L V-8 11,420 (a6,i)
+Ram 2500 Crew Cab SB 2WD 5.7L V-8 13,420 (a6,k)
+Ram 2500 Crew Cab SB 2WD 6.4L V-8 12,860 (a6,i)
+Ram 2500 Crew Cab SB 2WD 6.4L V-8 15,860 (a6,k)
+Ram 2500 Crew Cab SB 2WD 6.7L I-6 TD 16,390 (m6,g)
+Ram 2500 Crew Cab SB 2WD 6.7L I-6 TD 17,450 (a6,g)
+Ram 2500 Crew Cab SB 4WD 5.7L V-8 11,060 (a6,i)
+Ram 2500 Crew Cab SB 4WD 5.7L V-8 13,060 (a6,k)
+Ram 2500 Crew Cab SB 4WD 6.4L V-8 12,500 (a6,i)
+Ram 2500 Crew Cab SB 4WD 6.4L V-8 15,500 (a6,k)
+Ram 2500 Crew Cab SB 4WD 6.7L I-6 TD 16,050 (m6,g)
+Ram 2500 Crew Cab SB 4WD 6.7L I-6 TD 17,120 (a6,g)
+
+RAM 2500 CREW CAB LONGBED
+Ram 2500 Crew Cab LB 2WD 5.7L V-8 11,220 (a6,i)
+Ram 2500 Crew Cab LB 2WD 5.7L V-8 13,220 (a6,k)
+Ram 2500 Crew Cab LB 2WD 6.4L V-8 12,700 (a6,i)
+Ram 2500 Crew Cab LB 2WD 6.4L V-8 15,700 (a6,k)
+Ram 2500 Crew Cab LB 2WD 6.7L I-6 TD 16,250 (m6,g)
+Ram 2500 Crew Cab LB 2WD 6.7L I-6 TD 17,320 (a6,g)
+Ram 2500 Crew Cab LB 4WD 5.7L V-8 10,840 (a6,i)
+Ram 2500 Crew Cab LB 4WD 5.7L V-8 12,840 (a6,k)
+Ram 2500 Crew Cab LB 4WD 6.4L V-8 12,300 (a6,i)
+Ram 2500 Crew Cab LB 4WD 6.4L V-8 15,300 (a6,k)
+Ram 2500 Crew Cab LB 4WD 6.7L I-6 TD 15,910 (m6,g)
+Ram 2500 Crew Cab LB 4WD 6.7L I-6 TD 16,980 (a6,g)
+
+RAM 2500 MEGA CAB
+Ram 2500 Mega Cab 2WD 5.7L V-8 11,040 (a6,i)
+Ram 2500 Mega Cab 2WD 5.7L V-8 13,040 (a6,k)
+Ram 2500 Mega Cab 2WD 6.4L V-8 12,480 (a6,i)
+Ram 2500 Mega Cab 2WD 6.4L V-8 15,480 (a6,k)
+Ram 2500 Mega Cab 2WD 6.7L I-6 TD 16,090 (m6,g)
+Ram 2500 Mega Cab 2WD 6.7L I-6 TD 17,150 (a6,g)
+Ram 2500 Mega Cab 4WD 5.7L V-8 10,750 (a6,i)
+Ram 2500 Mega Cab 4WD 5.7L V-8 12,750 (a6,k)
+Ram 2500 Mega Cab 4WD 6.4L V-8 12,220 (a6,i)
+Ram 2500 Mega Cab 4WD 6.4L V-8 15,220 (a6,k)
+Ram 2500 Mega Cab 4WD 6.7L I-6 TD 15,720 (m6,g)
+Ram 2500 Mega Cab 4WD 6.7L I-6 TD 16,790 (a6,g)
+
+RAM 3500 REGULAR CAB LONGBED
+Ram 3500 Reg Cab LB SRW 2WD 5.7L V-8 11,810 (a6,i)
+Ram 3500 Reg Cab LB SRW 2WD 5.7L V-8 13,810 (a6,k)
+Ram 3500 Reg Cab LB SRW 2WD 6.4L V-8 13,270 (a6,i)
+Ram 3500 Reg Cab LB SRW 2WD 6.4L V-8 16,270 (a6,k)
+Ram 3500 Reg Cab LB SRW 2WD 6.7L I-6 TD 16,850 (m6,g)
+Ram 3500 Reg Cab LB SRW 2WD 6.7L I-6 TD 17,890 (a6,g)
+Ram 3500 Reg Cab LB SRW 2WD 6.7L I-6 TD 17,740 (a6,g)*
+Ram 3500 Reg Cab LB DRW 4WD 5.7L V-8 11,460 (a6,i)
+Ram 3500 Reg Cab LB DRW 4WD 5.7L V-8 13,460 (a6,k)
+Ram 3500 Reg Cab LB DRW 4WD 6.4L V-8 12,920 (a6,i)
+Ram 3500 Reg Cab LB DRW 4WD 6.4L V-8 15,920 (a6,k)
+Ram 3500 Reg Cab LB DRW 4WD 6.7L I-6 TD 16,490 (m6,g)
+Ram 3500 Reg Cab LB DRW 4WD 6.7L I-6 TD 17,540 (a6,g)
+Ram 3500 Reg Cab LB DRW 4WD 6.7L I-6 TD 17,380 (a6,g)*
+
+RAM 3500 CREW CAB SHORTBED
+Ram 3500 Crew Cab SB SRW 2WD 5.7L V-8 11,390 (a6,i)
+Ram 3500 Crew Cab SB SRW 2WD 5.7L V-8 13,390 (a6,k)
+Ram 3500 Crew Cab SB SRW 2WD 6.4L V-8 12,850 (a6,i)
+Ram 3500 Crew Cab SB SRW 2WD 6.4L V-8 15,850 (a6k)
+Ram 3500 Crew Cab SB SRW 2WD 6.7L I-6 TD 16,430 (m6,g)
+Ram 3500 Crew Cab SB SRW 2WD 6.7L I-6 TD 17,470 (a6,g)
+Ram 3500 Crew Cab SB SRW 2WD 6.7L I-6 TD 17,320 (a6,g)*
+Ram 3500 Crew Cab SB SRW 4WD 5.7L V-8 11,130 (a6,i)
+Ram 3500 Crew Cab SB SRW 4WD 5.7L V-8 13,130 (a6,k)
+Ram 3500 Crew Cab SB SRW 4WD 6.4L V-8 12,590 (a6,i)
+Ram 3500 Crew Cab SB SRW 4WD 6.4L V-8 15,590 (a6,k)
+Ram 3500 Crew Cab SB SRW 4WD 6.7L I-6 TD 16,110 (m6,g)
+Ram 3500 Crew Cab SB SRW 4WD 6.7L I-6 TD 17,150 (a6,g)
+Ram 3500 Crew Cab SB SRW 4WD 6.7L I-6 TD 17,000 (a6,g)*
+
+RAM 3500 CREW CAB LONGBED
+Ram 3500 Crew Cab LB SRW 2WD 5.7L V-8 11,270 (a6,i)
+Ram 3500 Crew Cab LB SRW 2WD 5.7L V-8 13,270 (a6,k)
+Ram 3500 Crew Cab LB SRW 2WD 6.4L V-8 12,730 (a6,i)
+Ram 3500 Crew Cab LB SRW 2WD 6.4L V-8 15,730 (a6,k)
+Ram 3500 Crew Cab LB SRW 2WD 6.7L I-6 TD 16,270 (m6,g)
+Ram 3500 Crew Cab LB SRW 2WD 6.7L I-6 TD 17,310 (a6,g)
+Ram 3500 Crew Cab LB SRW 2WD 6.7L I-6 TD 17,160 (a6,g)*
+Ram 3500 Crew Cab LB DRW 2WD 6.4L V-8 12,360 (a6,i)
+Ram 3500 Crew Cab LB DRW 2WD 6.4L V-8 15,860 (a6,k)
+Ram 3500 Crew Cab LB DRW 2WD 6.7L I-6 TD 15,880 (m6,g)
+Ram 3500 Crew Cab LB DRW 2WD 6.7L I-6 TD 17,880 (m6,i)
+Ram 3500 Crew Cab LB DRW 2WD 6.7L I-6 TD 16,930 (a6,g)
+Ram 3500 Crew Cab LB DRW 2WD 6.7L I-6 TD 18,930 (a6,i)
+Ram 3500 Crew Cab LB DRW 2WD 6.7L I-6 TD 21,930 (a6,k)
+Ram 3500 Crew Cab LB DRW 2WD 6.7L I-6 TD 20,870 (a6,g)*
+Ram 3500 Crew Cab LB DRW 2WD 6.7L I-6 TD 23,780 (a6,i)*
+Ram 3500 Crew Cab LB DRW 2WD 6.7L I-6 TD 29,280 (a6,k)*
+Ram 3500 Crew Cab LB SRW 4WD 5.7L V-8 10,960 (a6,i)
+Ram 3500 Crew Cab LB SRW 4WD 5.7L V-8 12,960 (a6,k)
+Ram 3500 Crew Cab LB SRW 4WD 6.4L V-8 12,420 (a6,i)
+Ram 3500 Crew Cab LB SRW 4WD 6.4L V-8 15,420 (a6,k)
+Ram 3500 Crew Cab LB SRW 4WD 6.7L I-6 TD 15,930 (m6,g)
+Ram 3500 Crew Cab LB SRW 4WD 6.7L I-6 TD 16,970 (a6,g)
+Ram 3500 Crew Cab LB SRW 4WD 6.7L I-6 TD 16,820 (a6,g)*
+Ram 3500 Crew Cab LB DRW 4WD 6.4L V-8 12,020 (a6,i)
+Ram 3500 Crew Cab LB DRW 4WD 6.4L V-8 15,520 (a6,k)
+Ram 3500 Crew Cab LB DRW 4WD 6.7L I-6 TD 15,530 (m6,g)
+Ram 3500 Crew Cab LB DRW 4WD 6.7L I-6 TD 17,530 (m6,i)
+Ram 3500 Crew Cab LB DRW 4WD 6.7L I-6 TD 16,580 (a6,g)
+Ram 3500 Crew Cab LB DRW 4WD 6.7L I-6 TD 18,580 (a6,i)
+Ram 3500 Crew Cab LB DRW 4WD 6.7L I-6 TD 21,580 (a6,k)
+Ram 3500 Crew Cab LB DRW 4WD 6.7L I-6 TD 20,430 (a6,g)*
+Ram 3500 Crew Cab LB DRW 4WD 6.7L I-6 TD 23,430 (a6,i)*
+Ram 3500 Crew Cab LB DRW 4WD 6.7L I-6 TD 29,930 (a6,k)*
+
+RAM 3500 MEGA CAB
+Ram 3500 Mega Cab SRW 2WD 5.7L V-8 11,220 (a6,i)
+Ram 3500 Mega Cab SRW 2WD 5.7L V-8 13,220 (a6,k)
+Ram 3500 Mega Cab SRW 2WD 6.4L V-8 12,680 (a6,i)
+Ram 3500 Mega Cab SRW 2WD 6.4L V-8 15,680 (a6,k)
+Ram 3500 Mega Cab SRW 2WD 6.7L I-6 TD 16,150 (m6,g)
+Ram 3500 Mega Cab SRW 2WD 6.7L I-6 TD 17,200 (a6,g)
+Ram 3500 Mega Cab SRW 2WD 6.7L I-6 TD 17,050 (a6,g)*
+Ram 3500 Mega Cab DRW 2WD 6.4L V-8 12,300 (a6,i)
+Ram 3500 Mega Cab DRW 2WD 6.4L V-8 15,800 (a6,k)
+Ram 3500 Mega Cab DRW 2WD 6.7L I-6 TD 15,770 (m6,g)
+Ram 3500 Mega Cab DRW 2WD 6.7L I-6 TD 17,770 (m6,i)
+Ram 3500 Mega Cab DRW 2WD 6.7L I-6 TD 16,820 (a6,g)
+Ram 3500 Mega Cab DRW 2WD 6.7L I-6 TD 18,820 (a6,i)
+Ram 3500 Mega Cab DRW 2WD 6.7L I-6 TD 21,820 (a6,k)
+Ram 3500 Mega Cab DRW 2WD 6.7L I-6 TD 20,670 (a6,g)*
+Ram 3500 Mega Cab DRW 2WD 6.7L I-6 TD 23,670 (a6,i)*
+Ram 3500 Mega Cab DRW 2WD 6.7L I-6 TD 29,170 (a6,k)*
+Ram 3500 Mega Cab SRW 4WD 5.7L V-8 10,960 (a6,i)
+Ram 3500 Mega Cab SRW 4WD 5.7L V-8 12,960 (a6,k)
+Ram 3500 Mega Cab SRW 4WD 6.4L V-8 12,420 (a6,i)
+Ram 3500 Mega Cab SRW 4WD 6.4L V-8 15,420 (a6,k)
+Ram 3500 Mega Cab SRW 4WD 6.7L I-6 TD 15,830 (m6,g)
+Ram 3500 Mega Cab SRW 4WD 6.7L I-6 TD 16,880 (a6,g)
+Ram 3500 Mega Cab SRW 4WD 6.7L I-6 TD 16,720 (a6,g)
+Ram 3500 Mega Cab DRW 4WD 6.4L V-8 12,010 (a6,i)
+Ram 3500 Mega Cab DRW 4WD 6.4L V-8 15,510 (a6,k)
+Ram 3500 Mega Cab DRW 4WD 6.7L I-6 TD 15,430 (m6,g)
+Ram 3500 Mega Cab DRW 4WD 6.7L I-6 TD 17,430 (m6,i)
+Ram 3500 Mega Cab DRW 4WD 6.7L I-6 TD 16,480 (a6,g)
+Ram 3500 Mega Cab DRW 4WD 6.7L I-6 TD 18,480 (a6,i)
+Ram 3500 Mega Cab DRW 4WD 6.7L I-6 TD 21,480 (a6,k)
+Ram 3500 Mega Cab DRW 4WD 6.7L I-6 TD 20,320 (a6,g)*
+Ram 3500 Mega Cab DRW 4WD 6.7L I-6 TD 23,320 (a6,i)*
+Ram 3500 Mega Cab DRW 4WD 6.7L I-6 TD 28,820 (a6,k)*
+
+RAM PROMASTER VAN
+Ram ProMaster Van All 5,100
+
+
+FORD
+E-SERIES VAN/WAGON
+E-150 Van 4.6L V-8 6,000 (i)
+E-150 Van 4.6L V-8 6,500 (k)
+E-150 Van 5.4L V-8 7,500 (i/k)
+E-150 Extended Van 4.6L V-8 5,900 (i)
+E-150 Extended Van 4.6L V-8 6,400 (k)
+E-150 Extended Van 5.4L V-8 7,300 (i/k)
+E-250 Van 4.6L V-8 6,000 (i)
+E-250 Van 4.6L V-8 6,500 (k)
+E-250 Van 5.4L V-8 7,400 (i/k)
+E-250 Extended Van 4.6L V-8 5,900 (i)
+E-250 Extended Van 4.6L V-8 6,400 (k)
+E-250 Extended Van 5.4L V-8 7,300 (i/k)
+E-350 Super Duty Van 5.4L V-8 7,400 (i/k)
+E-350 Super Duty Van 6.8L V-10 9,100 (i)
+E-350 Super Duty Van 6.8L V-10 10,000 (k)
+E-350 Super Duty Extended Van 5.4L V-8 7,200 (i/k)
+E-350 Super Duty Extended Van 6.8L V-10 9,000 (i)
+E-350 Super Duty Extended Van 6.8L V-10 10,000 (k)
+E-150 Wagon 4.6L V-8 5,600 (i)
+E-150 Wagon 4.6L V-8 6,100 (k)
+E-150 Wagon 5.4L V-8 7,000 (i/k)
+E-350 Super Duty Wagon 5.4L V-8 6,700 i/k
+E-350 Super Duty Wagon 6.8L V-10 8,500 (i)
+E-350 Super Duty Wagon 6.8L V-10 10,000 (k)
+E-350 Super Duty Ext. Wagon 5.4L V-8 6,500 (i/k)
+E-350 Super Duty Ext. Wagon 6.8L V-10 8,300 (i)
+E-350 Super Duty Ext. Wagon 6.8L V-10 10,000 (k)
+
+EDGE, ESCAPE, EXPLORER, EXPEDITION, FLEX
+Edge 3.5L V-6 3,500 (t)
+Edge 3.7L V-6 2,000*
+Escape 1.6L I-4 TC 2,000
+Escape 2.0L I-4 TC 3,500 (t)
+Explorer 2.0L I-4 TC 2,000
+Explorer 3.5L V-6 2,000
+Explorer 3.5L V-6 5,000 (t)
+Expedition 2WD 5.4L V-8 6,000
+Expedition 2WD 5.4L V-8 9,200 (t)
+Expedition 4WD 5.4L V-8 6,000
+Expedition 4WD 5.4L V-8 9,000 (t)
+Expedition EL 2WD 5.4L V-8 6,000
+Expedition EL 2WD 5.4L V-8 8,900 (t)
+Expedition EL 4WD 5.4L V-8 6,000
+Expedition EL 4WD 5.4L V-8 8,700 (t)
+Flex 3.5L V-6 4,500 (t)
+
+F-150
+F-150 Reg Cab SB 2WD 3.7L V-6 5,500 (h)
+F-150 Reg Cab SB 2WD 3.7L V-6 6,600 (i)
+F-150 Reg Cab SB 2WD 3.7L V-6 7,900 (i)
+F-150 Reg Cab SB 2WD 5.0L V-8 8,300 (h)
+F-150 Reg Cab LB 2WD 3.7L V-6 5,600 (h)
+F-150 Reg Cab LB 2WD 3.7L V-6 6,700 (i)
+F-150 Reg Cab LB 2WD 5.0L V-8 8,400 (f)
+F-150 Reg Cab LB 2WD 5.0L V-8 9,800 (h)
+F-150 Reg Cab LB 2WD 5.0L V-8 10,000 (i)*
+F-150 Reg Cab LB 2WD 6.2L V-8 8,800 (i)
+F-150 Reg Cab LB 2WD 3.5L V-6 TC 9,700 (c)
+F-150 Reg Cab LB 2WD 3.5L V-6 TC 9,800 (h)
+F-150 Reg Cab LB 2WD 3.5L V-6 TC 11,300 (i/k,t)*
+F-150 Reg Cab SB 4WD 3.7L V-6 6,300 (i)
+F-150 Reg Cab SB 4WD 5.0L V-8 7,600 (h)
+F-150 Reg Cab SB 4WD 5.0L V-8 8,000 (i)
+F-150 Reg Cab LB 4WD 3.7L V-6 6,500 (i)
+F-150 Reg Cab LB 4WD 5.0L V-8 8,100 (h)
+F-150 Reg Cab LB 4WD 5.0L V-8 9,700 (i)
+F-150 Reg Cab LB 4WD 3.5L V-6 TC 9,600 (f)
+F-150 Reg Cab LB 4WD 3.5L V-6 TC 9,700 (h/i)
+F-150 Reg Cab LB 4WD 3.5L V-6 TC 11,300 (i/k,t)*
+F-150 SuperCab Std Bed 2WD 3.7L V-6 6,400 (i)
+F-150 SuperCab Std Bed 2WD 5.0L V-8 8,100 (f)
+F-150 SuperCab Std Bed 2WD 5.0L V-8 9,500 (h)
+F-150 SuperCab Std Bed 2WD 5.0L V-8 9,800 (i)
+F-150 SuperCab Std Bed 2WD 6.2L V-8 11,300 (i)
+F-150 SuperCab Std Bed 2WD 3.5L V-6 TC 9,500 (c)
+F-150 SuperCab Std Bed 2WD 3.5L V-6 TC 9,800 (h)
+F-150 SuperCab Std Bed 2WD 3.5L V-6 TC 11,300 (i/k,t)
+F-150 SuperCab LB 2WD 5.0L V-8 7,900 (f)
+F-150 SuperCab LB 2WD 5.0L V-8 9,300 (h)
+F-150 SuperCab LB 2WD 5.0L V-8 9,600 (i)*
+F-150 SuperCab LB 2WD 6.2L V-8 8,400 (i)
+F-150 SuperCab LB 2WD 3.5L V-6 TC 9,300 (f)
+F-150 SuperCab LB 2WD 3.5L V-6 TC 9,600 (h)
+F-150 SuperCab LB 2WD 3.5L V-6 TC 11,300 (i/k,t)*
+F-150 SuperCab SB 4WD (Raptor) 6.2L V-8 6,000 (k)
+F-150 SuperCab Std Bed 4WD 3.7L V-6 6,100 (i)
+F-150 SuperCab Std Bed 4WD 5.0L V-8 7,800 (h)
+F-150 SuperCab Std Bed 4WD 5.0L V-8 9,400 (i)
+F-150 SuperCab Std Bed 4WD 6.2L V-8 9,700 (h)
+F-150 SuperCab Std Bed 4WD 6.2L V-8 11,200 (i)
+F-150 SuperCab Std Bed 4WD 3.5L V-6 TC 9,400 (f)
+F-150 SuperCab Std Bed 4WD 3.5L V-6 TC 9,700 (h/i)
+F-150 SuperCab Std Bed 4WD 3.5L V-6 TC 11,300 (i/k,t)
+F-150 SuperCab LB 4WD 5.0L V-8 7,600 (h)
+F-150 SuperCab LB 4WD 5.0L V-8 9,200 (i)
+F-150 SuperCab LB 4WD 5.0L V-8 9,300 (i)*
+F-150 SuperCab LB 4WD 3.5L V-6 TC 9,300 (f)
+F-150 SuperCab LB 4WD 3.5L V-6 TC 9,600 (h/i)
+F-150 SuperCab LB 4WD 3.5L V-6 TC 11,100 (i/kt)*
+F-150 SuperCrew Cab SB 2WD 3.7L V-6 6,300 (i)
+F-150 SuperCrew Cab SB 2WD 5.0L V-8 8,000 (f/h)
+F-150 SuperCrew Cab SB 2WD 5.0L V-8 9,400 (i)
+F-150 SuperCrew Cab SB 2WD 6.2L V-8 9,800 (h)
+F-150 SuperCrew Cab SB 2WD 6.2L V-8 11,300 (i)
+F-150 SuperCrew Cab SB 2WD 3.5L V-6 TC 9,400 (c)
+F-150 SuperCrew Cab SB 2WD 3.5L V-6 TC 9,800 (h/i)
+F-150 SuperCrew Cab SB 2WD 3.5L V-6 TC 11,300 (i/k,t)
+F-150 SuperCrew Cab Std Bed 2WD 5.0L V-8 7,900 (f/h)
+F-150 SuperCrew Cab Std Bed 2WD 5.0L V-8 9,300 (i)
+F-150 SuperCrew Cab Std Bed 2WD 5.0L V-8 9,500 (i)*
+F-150 SuperCrew Cab Std Bed 2WD 6.2L V-8 9,700 (h)
+F-150 SuperCrew Cab Std Bed 2WD 6.2L V-8 11,200 (i)
+F-150 SuperCrew Cab Std Bed 2WD 3.5L V-6 TC 8,400 (c)
+F-150 SuperCrew Cab Std Bed 2WD 3.5L V-6 TC 9,300 (f)
+F-150 SuperCrew Cab Std Bed 2WD 3.5L V-6 TC 9,700 (h/i)
+F-150 SuperCrew Cab Std Bed 2WD 3.5L V-6 TC 11,300 (i/k,t)
+F-150 SuperCrew Cab SB 4WD 5.0L V-8 7,700 (h)
+F-150 SuperCrew Cab SB 4WD 5.0L V-8 9,300 (i)
+F-150 SuperCrew Cab SB 4WD 6.2L V-8 9,600 (h)
+F-150 SuperCrew Cab SB 4WD 6.2L V-8 11,100 (i)
+F-150 SuperCrew Cab SB 4WD 3.5L V-6 TC 9,200 (f)
+F-150 SuperCrew Cab SB 4WD 3.5L V-6 TC 9,600 (h/i/k)
+F-150 SuperCrew Cab SB 4WD 3.5L V-6 TC 11,200 (i/k,t)
+F-150 Super Crew Cab SB 4WD (Raptor) 6.2L V-8 8,000 (k)
+F-150 SuperCrew Cab Std Bed 4WD 5.0L V-8 7,500 (h)
+F-150 SuperCrew Cab Std Bed 4WD 5.0L V-8 9,100 (i)
+F-150 SuperCrew Cab Std Bed 4WD 5.0L V-8 9,200 (i)*
+F-150 SuperCrew Cab Std Bed 4WD 6.2L V-8 9,500 (h)
+F-150 SuperCrew Cab Std Bed 4WD 6.2L V-8 11,000 (i)
+F-150 SuperCrew Cab Std Bed 4WD 3.5L V-6 TC 9,100 (f)
+F-150 SuperCrew Cab Std Bed 4WD 3.5L V-6 TC 9,500 (h/i)
+F-150 SuperCrew Cab Std Bed 4WD 3.5L V-6 TC 11,100 (i/k,t)*
+
+F-250/F-350/F-450 SUPER DUTY, CONVENTIONAL TOWING
+F-250/350 Reg Cab SRW 2WD 6.2L V-8 12,500 (All)
+F-250/350 Reg Cab SRW 2WD 6.7L V-8 TD 12,500 (All)
+F-250/350 Reg Cab SRW 4WD 6.2L V-8 12,500 (All)
+F-250/350 Reg Cab SRW 4WD 6.7L V-8 TD 12,500 (All)
+F-350 Reg Cab DRW 2WD 6.2L V-8 13,100 (i)
+F-350 Reg Cab DRW 2WD 6.2L V-8 15,000 (l)
+F-350 Reg Cab DRW 2WD 6.7L V-8 TD 15,000 (All)
+F-350 Reg Cab DRW 4WD 6.2L V-8 12,700 (i)
+F-350 Reg Cab DRW 4WD 6.2L V-8 15,000 (l)
+F-350 Reg Cab DRW 4WD 6.7L V-8 TD 15,000 (All)
+F-250/F350 SC SRW 2WD 6.2L V-8 12,500 (All)
+F-250/F350 SC SRW 2WD 6.7L V-8 TD 14,000 (All)
+F-250 SC SRW 4WD 6.2L V-8 12,400 (i)
+F-250 SC SRW 4WD 6.2L V-8 12,500 (l)
+F-250 SC SRW 4WD 6.7L V-8 TD 14,000 (All)
+F-350 SC SRW 4WD 6.2L V-8 12,300 (i)
+F-350 SC SRW 4WD 6.2L V-8 12,500 (l)
+F-350 SC SRW 4WD 6.7L V-8 TD 14,000 (All)
+F-350 SC DRW 2WD 6.2L V-8 12,700 (i)
+F-350 SC DRW 2WD 6.2L V-8 15,000 (l)
+F-350 SC DRW 2WD 6.7L V-8 TD 15,000 (All)
+F-350 SC DRW 4WD 6.2L V-8 12,300 (i)
+F-350 SC DRW 4WD 6.2L V-8 15,000 (l)
+F-350 SC DRW 4WD 6.7L V-8 TD 15,000 (All)
+F-250/350 CC SRW 2WD 6.2L V-8 12,500 (All)
+F-250/350 CC SRW 2WD 6.7L V-8 TD 14,000 (All)
+F-250 CC SRW 4WD 6.2L V-8 12,200 (i)
+F-250 CC SRW 4WD 6.2L V-8 12,500 (l)
+F-250 CC SRW 4WD 6.7L V-8 TD 14,000 (All)
+F-350 CC SRW 4WD 6.2L V-8 12,100 (i)
+F-350 CC SRW 4WD 6.2L V-8 12,500 (l)
+F-350 CC SRW 4WD 6.7L V-8 TD 14,000 (All)
+F-350 CC DRW 2WD 6.2L V-8 12,500 (i)
+F-350 CC DRW 2WD 6.2L V-8 15,000 (l)
+F-350 CC DRW 2WD 6.7L V-8 TD 18,500 (All)
+F-350 CC DRW 4WD 6.2L V-8 12,100 (i)
+F-350 CC DRW 4WD 6.2L V-8 15,000 (l)
+F-350 CC DRW 4WD 6.7L V-8 TD 18,500 (All)
+F-450 DRW 4WD 6.7L V-8 TD 18,500 (All)
+
+F-250/F-350/F-450 SUPER DUTY, FIFTH-WHEEL TOWING
+F-250/350 Reg Cab SRW 2WD 6.2L V-8 12,900 (i)
+F-250/350 Reg Cab SRW 2WD 6.2L V-8 15,900 (l)
+F-250/350 Reg Cab SRW 2WD 6.7L V-8 TD 16,800 (f/h)
+F-250/350 Reg Cab SRW 4WD 6.2L V-8 12,500 (i)
+F-250/350 Reg Cab SRW 4WD 6.2L V-8 15,500 (l)
+F-250/350 Reg Cab SRW 4WD 6.7L V-8 TD 16,400 (f/h)
+F-350 Reg Cab DRW 2WD 6.2L V-8 13,000 (i)
+F-350 Reg Cab DRW 2WD 6.2L V-8 16,000 (l)
+F-350 Reg Cab DRW 2WD 6.7L V-8 TD 23,200 (i)
+F-350 Reg Cab DRW 4WD 6.2L V-8 12,600 (i)
+F-350 Reg Cab DRW 4WD 6.2L V-8 15,600 (l)
+F-350 Reg Cab DRW 4WD 6.7L V-8 TD 22,900 (i)
+F-250/F-350 SC SRW 2WD 6.2L V-8 12,700/12,600 (i)
+F-250/F-350 SC SRW 2WD 6.2L V-8 15,700/15,600 (l)
+F-250/F-350 SC SRW 2WD 6.7L V-8 TD 16,500/16,400 (f/h)
+F-250 SC SRW 4WD 6.2L V-8 12,300 (i)
+F-250 SC SRW 4WD 6.2L V-8 15,300 (l)
+F-250 SC SRW 4WD 6.7L V-8 TD 16,100 (f/h)
+F-350 SC SRW 4WD 6.2L V-8 12,200 (i)
+F-350 SC SRW 4WD 6.2L V-8 15,200 (l)
+F-350 SC SRW 4WD 6.7L V-8 TD 16,100 (f/h)
+F-350 SC DRW 2WD 6.2L V-8 12,600 (i)
+F-350 SC DRW 2WD 6.2L V-8 15,600 (l)
+F-350 SC DRW 2WD 6.7L V-8 TD 22,800 (i)
+F-350 SC DRW 4WD 6.2L V-8 12,200 (i)
+F-350 SC DRW 4WD 6.2L V-8 15,200 (l)
+F-350 SC DRW 4WD 6.7L V-8 TD 22,400 (i)
+F-250/F-350 CC SRW 2WD 6.2L V-8 12,400 (i)
+F-250/F-350 CC SRW 2WD 6.2L V-8 15,400 (l)
+F-250/F-350 CC SRW 2WD 6.7L V-8 TD 16,300 (f/h)
+F-250 CC SRW 4WD 6.2L V-8 12,100 (i)
+F-250 CC SRW 4WD 6.2L V-8 15,100 (l)
+F-250 CC SRW 4WD 6.7L V-8 TD 15,900 (f/h)
+F-350 CC SRW 4WD 6.2L V-8 12,000 (i)
+F-350 CC SRW 4WD 6.2L V-8 15,000 (l)
+F-350 CC SRW 4WD 6.7L V-8 TD 15,900 (f/h)
+F-350 CC DRW 2WD 6.2L V-8 12,400 (i)
+F-350 CC DRW 2WD 6.2L V-8 15,400 (l)
+F-350 CC DRW 2WD 6.7L V-8 TD 22,600 (i)
+F-350 CC DRW 4WD 6.2L V-8 12,100 (i)
+F-350 CC DRW 4WD 6.2L V-8 15,000 (l)
+F-350 CC DRW 4WD 6.7L V-8 TD 22,800 (i)
+F-450 CC DRW 4WD 6.7L V-8 TD 24,700
+
+
+HONDA
+Odyssey 3.5L V-6 3,500
+Pilot 2WD 3.5L V-6 2,000
+Pilot 4WD 3.5L V-6 4,500
+Ridgeline 3.5L V-6 5,000
+
+
+HYUNDAI
+Santa Fe 3.3L V-6 5,000
+Tucson All 2,000
+
+
+INFINITI
+QX50 3.7L V-6 2,000
+QX70 3.7L V-6 2,000
+QX70 5.0L V-8 3,500
+QX60 3.5L V-6 5,000
+QX80 5.6L V-8 8,500
+
+
+JEEP
+Cherokee 2.4L I-4 2,000
+Cherokee 3.2L V-6 4,500 (t)
+Grand Cherokee 2WD/4WD 3.6L V-6 6,200
+Grand Cherokee 2WD 5.7L V-8 7,400
+Grand Cherokee 4WD 5.7L V -8 7,200
+Grand Cherokee 2WD 3.0L V-6 TD 7,400
+Grand Cherokee 4WD 3.0L V-6 TD 7,200
+Wrangler (All) 3.6L V-6 2,000
+
+
+KIA
+Sorrento 3.5L V-6 3,500
+Sportage All 2,000
+
+
+LAND ROVER
+Land Rover LR2 2.0L I-4 TC 3,500
+Land Rover LR4 5.0L V-8 7,716
+Range Rover 5.0L V-8 7,716
+Range Rover Sport All 7,716
+Range Rover Evoq 2.0L I-4 TC 3,500
+
+
+LEXUS
+RX 350 3.5L V-6 3,500
+RX 450h AWD (hybrid) 3.5L V-6 3,500
+GX 470 4.6L V-8 6,500
+LX 570 5.7L V-8 7,000
+
+
+LINCOLN
+MKT 3.7L V-6 2,000
+MKT 3.5L V-6 TC 4,500
+MKX 3.7L V-6 3,500
+Navigator 2WD 5.4L V-8 6,000
+Navigator 2WD 5.4L V-8 9,000 (t)
+Navigator L 2WD 5.4L V-8 6,000
+Navigator L 2WD 5.4L V-8 8,700 (t)
+Navigator 4WD 5.4L V-8 6,000
+Navigator 4WD 5.4L V-8 8,700 (t)
+Navigator L 4WD 5.4L V-8 6,000
+Navigator L 4WD 5.4L V-8 8,500 (t)
+
+
+MAZDA
+CX-5 2.0L I-4 2,000
+CX-5 2.5L I-4 2,000
+CX-9 (All) 3.7L V-6 3,500
+
+
+MERCEDES-BENZ
+G550 5.5L V-8 7,716
+G63 AMG 5.5L V-8 TC 7,716
+GLK350 3.5L V-6 3,500
+GLK250 BlueTEC 2.5L I-4 TD 3,500
+GL350 BlueTEC 3.0L I-4 TD 7,500
+GL450 4.6L V-8 TC 7,500
+GL550 4.6L V-8 TC 7,500
+GL63 AMG 5.5L V8 TC 7,500
+ML350 BlueTEC 3.0L TD V-6 7,200
+ML350 3.5L V-6 6,600
+ML350 4WD 3.5L V-6 7,200
+ML550 4.6L V-8 TC 7,200
+ML63 AMG 5.5L V-8 TC 7,200
+
+
+MITSUBISHI
+Outlander 2WD/4WD 3.0L V-6 3,500
+
+
+NISSAN
+Armada 2WD 5.6L V-8 8,200
+Armada 4WD 5.6L V-8 9,000
+Frontier KC 2WD 2.5L I-4 3,500
+Frontier KC 2WD 4.0L V-6 6,300
+Frontier KC 4WD 4.0L V-6 6,100
+Frontier CC 2WD 4.0L V-6 6,300
+Frontier CC 4WD 4.0L V-6 6,100
+Murano 3.5L V-6 3,500
+Pathfinder 3.5L V-6 5,000
+Quest 3.5L V-6 3,500
+Titan KC 2WD SB S 5.6L V-8 7,400
+Titan KC 4WD SB S 5.6L V-8 7,400
+Titan KC 2WD SB SV 5.6L V-8 9,500
+Titan KC 4WD SB SV 5.6L V-8 9,400
+Titan KC 4WD SB PRO 4X 5.6L V-8 9,300
+Titan CC 2WD S 5.6L V-8 7,400
+Titan CC 4WD S 5.6L V-8 7,300
+Titan CC 2WD SV 5.6L V-8 9,400
+Titan CC 4WD SV 5.6L V-8 9,300
+Titan CC 4WD PRO 4X 5.6L V-8 9,300
+Titan CC 4WD SL 5.6L V-8 9,200
+Titan CC 4WD SL 5.6L V-8 9,100
+Titan LB CC 2WD 5.6L V-8 9,300
+Titan LB CC 4WD 5.6L V-8 9,100
+Xterra 4.0L V-6 5,000
+
+
+PORSCHE
+Cayenne All 7,716
+
+
+SUBARU
+Tribeca 3.6L H6 2,000
+Tribeca 3.6L H6 3,500 (t)
+Outback 2.5L H4 2,700
+Outback 3.6L H6 3,000
+
+
+TOYOTA
+4Runner (All) 4.0L V-6 4,700
+FJ Cruiser 4.0L V-6 4,700
+Highlander 3.5L V-6 2,000
+Highlander 3.5L V-6 5,000 (t)
+Highlander Hybrid 3.5L V-6 3,500
+Land Cruiser 5.7L V-8 8,500
+Sienna 3.5L V-6 3,500 (t)
+Sequoia 2WD SR5 5.7L V-8 7,400
+Sequoia 4WD SR5 5.7L V-8 7,100
+Sequoia 2WD Ltd 5.7L V-8 7,300
+Sequoia 4WD Ltd 5.7L V-8 7,100
+Sequoia 2WD Platinum 5.7L V-8 7,200
+Sequoia 4WD Platinum 5.7L V-8 7,000
+Tacoma Reg Cab 2.7L I-4 3,500
+Tacoma Access Cab 2.7L I-4 3,500
+Tacoma Access Cab 2WD/4WD 4.0L V-6 3,500
+Tacoma Access Cab 2WD/4WD 4.0L V-6 6,500 (t)
+Tacoma Double Cab 2WD/4WD 2.7L I-4 3,400
+Tacoma Double Cab PreRunner 2.7L I-4 3,500
+Tacoma Double Cab 2WD/4WD 4.0L V-6 3,500
+Tacoma Double Cab 2WD/4WD SB 4.0L V-6 6,500 (t)
+Tacoma Double Cab 2WD/4WD LB 4.0L V-6 6,400 (t)
+Tundra Reg Cab LB 2WD 4.0L V-6 4,500
+Tundra Reg Cab LB 2WD 5.7L V-8 8,500
+Tundra Reg Cab LB 2WD 5.7L V-8 10,500 (t)
+Tundra Reg Cab LB 4WD 5.7L V-8 8,200
+Tundra Reg Cab LB 4WD 5.7L V-8 10,200 (t)
+Tundra Double Cab Std Bed 2WD 4.0L V-6 4,500
+Tundra Double Cab Std Bed 2WD 4.6L V-8 6,800
+Tundra Double Cab Std Bed 2WD 5.7L V-8 8,200
+Tundra Double Cab Std Bed 2WD 5.7L V-8 10,200 (t)
+Tundra Double Cab Std Bed 4WD 4.6L V-8 6,500
+Tundra Double Cab Std Bed 4WD 5.7L V-8 7,800
+Tundra Double Cab Std Bed 4WD 5.7L V-8 9,900 (t)
+Tundra Double Cab LB 2WD 5.7L V-8 8,100
+Tundra Double Cab LB 2WD 5.7L V-8 10,100 (t)
+Tundra Double Cab LB 4WD 5.7L V-8 9,800
+Tundra CrewMax 2WD 4.6L V-8 6,600
+Tundra CrewMax 2WD 5.7L V-8 8,100
+Tundra CrewMax 2WD 5.7L V-8 10,100 (t)
+Tundra CrewMax 4WD 4.6L V-8 6,300
+Tundra CrewMax 4WD 5.7L V-8 7,800
+Tundra CrewMax 4WD 5.7L V-8 9,800 (t)
+
+
+VOLKSWAGEN
+Tiguan 2.0L I-4TC 2,200
+Touareg All 7,716
+
+
+VOLVO
+S60 All 3,300
+S80 All 3,300
+XC60 All 3,300
+XC70 All 3,300
+XC90 All 3,970

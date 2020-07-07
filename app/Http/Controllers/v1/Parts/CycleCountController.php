@@ -26,6 +26,7 @@ class CycleCountController extends RestfulController
      */
     public function __construct(CycleCountRepositoryInterface $cycleCounts)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->cycleCounts = $cycleCounts;
     }
     

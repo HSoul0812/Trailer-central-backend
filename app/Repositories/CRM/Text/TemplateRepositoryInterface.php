@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\CRM\Template;
+namespace App\Repositories\CRM\Text;
 
 use App\Repositories\Repository;
 

@@ -51,7 +51,7 @@ class UploadController extends RestfulController
             $job = new DealerFeedImporterJob($json, $code, $feedUploader);
 
             Log::info('Dispatching a DealerFeedImporterJob', ['code' => $code]);
-            $this->dispatch($job);
+            $this->dispatch($job->onQueue('factory-feeds'));
 
             return new Response([
                 'message' => 'Data has been received and is queued for processing.',

@@ -12,7 +12,7 @@ use App\Http\Requests\Request;
 class CreateTemplateRequest extends Request {
 
     protected $rules = [
-        'name' => 'required|string',
-        'template' => 'required|string',
+        'name' => 'string',
+        'template' => 'string',
     ];
 }

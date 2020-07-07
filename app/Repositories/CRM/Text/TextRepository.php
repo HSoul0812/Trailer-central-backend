@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Text;
 
+use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Interactions\TextLog;
@@ -53,7 +54,11 @@ class TextRepository implements TextRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = TextLog::where('identifier', '>', 0);
+        $query = Template::where('id', '>', 0);
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
 
         if (isset($params['lead_id'])) {
             $query = $query->where('lead_id', $params['lead_id']);

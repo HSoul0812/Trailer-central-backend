@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\Controller;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetBlastsRequest;
 use App\Http\Requests\CRM\Text\CreateBlastRequest;
 use App\Http\Requests\CRM\Text\ShowBlastRequest;
@@ -13,8 +14,10 @@ use App\Http\Requests\CRM\Text\DeleteBlastRequest;
 use App\Http\Requests\CRM\Text\SentBlastRequest;
 use App\Transformers\CRM\Text\BlastTransformer;
 
-class BlastController extends RestfulController
+class BlastController extends Controller
 {
+    use Helpers;
+
     protected $blasts;
 
     /**
@@ -140,11 +143,11 @@ class BlastController extends RestfulController
      *     ),
      * )
      */
-    public function show(int $id) {
+    public function show(int $userId, int $id) {
         $request = new ShowBlastRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->posts->get(['id' => $id]), new BlastTransformer());
+            return $this->response->item($this->blasts->get(['id' => $id]), new BlastTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -188,7 +191,7 @@ class BlastController extends RestfulController
      *     ),
      * )
      */
-    public function update(int $id, Request $request) {
+    public function update(int $userId, int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateBlastRequest($requestData);
@@ -223,7 +226,7 @@ class BlastController extends RestfulController
      *     ),
      * )
      */
-    public function destroy(int $id) {
+    public function destroy(int $userId, int $id) {
         $request = new DeleteBlastRequest(['id' => $id]);
         
         if ( $request->validate()) {
@@ -257,7 +260,7 @@ class BlastController extends RestfulController
      *     ),
      * )
      */
-    public function sent(int $id) {
+    public function sent(int $userId, int $id) {
         $request = new SentBlastRequest(['id' => $id]);
         
         if ( $request->validate()) {

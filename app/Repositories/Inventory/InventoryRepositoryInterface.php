@@ -13,5 +13,5 @@ interface InventoryRepositoryInterface extends Repository
         ]
     ];
 
-    public function getAll($params, bool $withDefault = true);
+    public function getAll($params, bool $withDefault = true, bool $paginated = false);
 }

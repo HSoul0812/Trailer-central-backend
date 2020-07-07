@@ -3,15 +3,23 @@
 namespace App\Models\CRM\Interactions;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\TableAware;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\Leads\LeadStatus;
 
 class Interaction extends Model
 {
+    use TableAware;
+    
+    const TABLE_NAME = 'crm_interaction';
+    
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'crm_interaction';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
@@ -55,5 +63,14 @@ class Interaction extends Model
     public function lead()
     {
         return $this->belongsTo(Lead::class, 'tc_lead_id', 'identifier');
+    }
+    
+    public function leadStatus()
+    {
+        return $this->belongsTo(LeadStatus::class, 'tc_lead_id', 'tc_lead_identifier');
+    }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
     }
 }

@@ -50,3 +50,51 @@
 `php artisan swagger-lume:generate`
 - Run this each time you update the documentation
 - Swagger UI: `/api/documentation`
+
+## Pull Requests
+
+1. Describe how to test the PR: urls, environment variables and other needs.
+2. Refer to issue(s)/card(s) the PR solves.
+3. Refer back to the PR on card(s).
+4. Merge the target branch into the PR branch. Fix any conflicts that might appear.
+5. Add screenshots of the new behavior.
+6. Add a description including the context and the chosen implementation strategy.
+7. Make sure the code follows the code guidelines.
+
+## Code Guidelines: General
+
+1. Adhere to [PSR-12](https://www.php-fig.org/psr/psr-12/)
+2. Code smell: make sure you would understand your code if you read it a few months from now.
+3. DRY: Don't Repeat Yourself.
+4. [SOLID](https://en.wikipedia.org/wiki/SOLID)
+6. Write tests for your feature.
+7. Code smell: code should be self-explanatory as much as possible. Otherwise add comments to your code. 
+8. Use dependency injection as much as possible.
+9. Put configuration variables in `.env`. Do not hard code URIs.
+
+## Code Guidelines: APIs
+
+1. CRUD controllers: 1 controller per model / entity
+2. Use route name format: `api/entity-name`
+2. Use the following controller method names for CRUD operations
+    * List/search: `index()` 
+    * Read (single object): `show()`
+    * Create: `create()`
+    * Update: `update()`
+    * Delete: `destroy()`
+3. Use the mime type `application/json` for requests
+4. Put search parameters, page limits, offsets, sort specs in query string (GET)
+5. Put object parameters in the request body as JSON
+6. Pass a valid `access-token` header on all APIs.
+7. Add swagger annotations to your controller methods that are exposed as APIs. 
+8. Put DMS resources under the DMS routes. Look for the `dms` group in `routes/api.php`.
+
+## Code Guidelines: Architecture
+
+1. Avoid fat controllers. 
+    * Avoid queries in controllers.
+    * Minimize logic
+2. Define entities in `Models`.
+3. Define processes/business logic in `Services`. This way you can reuse code in controllers, jobs, events, etc. 
+4. Define asynchronous tasks/long-running tasks in `Jobs`. Even better, in `Services` wrapped in `Jobs`. 
+5. Define data operations in `Repositories`. `Repositories` may contain more than just CRUD operations.

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\Controller;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetTemplatesRequest;
 use App\Http\Requests\CRM\Text\CreateTemplateRequest;
 use App\Http\Requests\CRM\Text\ShowTemplateRequest;
@@ -12,8 +13,10 @@ use App\Http\Requests\CRM\Text\UpdateTemplateRequest;
 use App\Http\Requests\CRM\Text\DeleteTemplateRequest;
 use App\Transformers\CRM\Text\TemplateTransformer;
 
-class TemplateController extends RestfulController
+class TemplateController extends Controller
 {
+    use Helpers;
+
     protected $templates;
 
     /**
@@ -139,11 +142,11 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function show(int $id) {
+    public function show(int $userId, int $id) {
         $request = new ShowTemplateRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->posts->get(['id' => $id]), new TemplateTransformer());
+            return $this->response->item($this->templates->get(['id' => $id]), new TemplateTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -187,7 +190,7 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function update(int $id, Request $request) {
+    public function update(int $userId, int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateTemplateRequest($requestData);
@@ -222,7 +225,7 @@ class TemplateController extends RestfulController
      *     ),
      * )
      */
-    public function destroy(int $id) {
+    public function destroy(int $userId, int $id) {
         $request = new DeleteTemplateRequest(['id' => $id]);
         
         if ( $request->validate()) {

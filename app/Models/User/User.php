@@ -2,8 +2,11 @@
 
 namespace App\Models\User;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\Leads\Lead;
+use App\Models\User\AuthToken;
 
 /**
  * Class User
@@ -12,7 +15,7 @@ use App\Models\CRM\User\SalesPerson;
  *
  * @package App\Models\User
  */
-class User extends Model
+class User extends Model implements Authenticatable
 {
     /**
      * The table associated with the model.
@@ -26,7 +29,7 @@ class User extends Model
      *
      * @var string
      */
-    protected $primaryKey = 'user_id';
+    protected $primaryKey = 'dealer_id';
 
     /**
      * The attributes that are mass assignable.
@@ -49,6 +52,59 @@ class User extends Model
 
     ];
 
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName() {
+        return $this->name;
+    }
+
+    /**
+     * Get the unique identifier for the user.
+     *
+     * @return mixed
+     */
+    public function getAuthIdentifier() {
+        return $this->dealer_id;
+    }
+
+    /**
+     * Get the password for the user.
+     *
+     * @return string
+     */
+    public function getAuthPassword() {}
+
+    /**
+     * Get the token value for the "remember me" session.
+     *
+     * @return string
+     */
+    public function getRememberToken() {}
+
+    /**
+     * Set the token value for the "remember me" session.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setRememberToken($value) {}
+
+    /**
+     * Get the column name for the "remember me" token.
+     *
+     * @return string
+     */
+    public function getRememberTokenName() {}
+    
+    public function getAccessTokenAttribute()
+    {
+        $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
+        return $authToken->access_token;
+    }
+
     public function dealer()
     {
         return $this->hasOne(Dealer::class, 'user_id', 'user_id');
@@ -63,4 +119,9 @@ class User extends Model
     {
         return $this->hasOne(SalesPerson::class, 'user_id', 'user_id');
     }
+    
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
+    }    
 }
