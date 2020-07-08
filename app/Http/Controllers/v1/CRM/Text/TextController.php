@@ -10,6 +10,7 @@ use App\Http\Requests\CRM\Text\CreateTextRequest;
 use App\Http\Requests\CRM\Text\ShowTextRequest;
 use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
+use App\Http\Requests\CRM\Text\SendTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
 
 class TextController extends RestfulControllerV2
@@ -372,13 +373,13 @@ class TextController extends RestfulControllerV2
      *      ),
      * )
      */
-    public function sendText(Request $request)
+    public function send(Request $request)
     {
         $request = new SendTextRequest($request->all());
         
         if ( $request->validate()) {
             // Get Results
-            $result = $this->texts->sendText($request->all());
+            $result = $this->texts->send($request->all());
             if(isset($result['error'])) {
                 return $this->response->errorBadRequest($result['error']);
             }

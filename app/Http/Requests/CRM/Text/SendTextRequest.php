@@ -12,9 +12,8 @@ use App\Http\Requests\Request;
 class SendTextRequest extends Request {
 
     protected $rules = [
-        'message' => 'required|string',
-        'from_number' => 'required|string',
-        'to_number' => 'required|string',
-        'date_sent' => 'nullable|string'
+        'lead_id' => 'required|integer',
+        'phone' => 'required|string',
+        'log_message' => 'required|string',
     ];
 }

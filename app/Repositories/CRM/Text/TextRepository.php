@@ -121,7 +121,7 @@ class TextRepository implements TextRepositoryInterface {
      * @param type $params
      * @return type
      */
-    public function sendText($params) {
+    public function send($params) {
         // Initialize Twilio Client
         $this->twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
@@ -141,7 +141,7 @@ class TextRepository implements TextRepositoryInterface {
 
         // Send Text to Twilio
         $text = $params['text'];
-        $result = $this->sendTextToTwilio($from_number, $to_number, $text, $fullName);
+        $result = $this->sendTwilio($from_number, $to_number, $text, $fullName);
 
         // Return Error?
         if(is_array($result) && isset($result['error'])) {
@@ -171,7 +171,7 @@ class TextRepository implements TextRepositoryInterface {
      * @param string $fullName
      * @return result of $this->twilio->messages->create || array with error
      */
-    private function sendTextToTwilio($from_number, $to_number, $text, $fullName) {
+    private function sendTwilio($from_number, $to_number, $text, $fullName) {
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
