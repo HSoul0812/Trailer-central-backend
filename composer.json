@@ -37,7 +37,6 @@
         "league/flysystem-aws-s3-v3": "^1.0",
         "predis/predis": "^1.1",
         "twilio/sdk": "^5.31",
-        "ext-json": "*",
         "illuminate/container": "^6.0",
         "illuminate/contracts": "^6.0",
         "illuminate/support": "^6.0",
