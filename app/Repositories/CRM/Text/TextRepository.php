@@ -123,7 +123,7 @@ class TextRepository implements TextRepositoryInterface {
      */
     public function send($params) {
         // Initialize Twilio Client
-        $this->twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+        $this->twilio = new Client(env('TWILIO_ACCOUNT_ID'), env('TWILIO_AUTH_TOKEN'));
 
         // Get User
         $user = User::findOrFail($params['user_id']);
