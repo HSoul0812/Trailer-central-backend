@@ -123,6 +123,9 @@ class TextRepository implements TextRepositoryInterface {
      */
     public function send($params) {
         // Initialize Twilio Client
+        echo env('TWILIO_ACCOUNT_ID');
+        echo env('TWILIO_AUTH_TOKEN');
+        die;
         $this->twilio = new Client(env('TWILIO_ACCOUNT_ID'), env('TWILIO_AUTH_TOKEN'));
 
         // Get User
