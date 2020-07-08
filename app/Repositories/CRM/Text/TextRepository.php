@@ -12,6 +12,8 @@ use App\Models\CRM\Text\Stop;
 use Twilio\Rest\Client;
 
 class TextRepository implements TextRepositoryInterface {
+    
+    private $twilio;
 
     private $sortOrders = [
         'date_sent' => [
@@ -121,7 +123,11 @@ class TextRepository implements TextRepositoryInterface {
      */
     public function sendText($params) {
         // Initialize Twilio Client
-        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+        $this->twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+        // Get User
+        $user = User::findOrFail($params['user_id']);
+        $fullName = $user->first_name . ' ' . $user->last_name;
 
         // Find Lead ID
         $lead = Lead::findOrFail($params['lead_id']);
@@ -133,17 +139,139 @@ class TextRepository implements TextRepositoryInterface {
         $to_number = '+' . ((strlen($phone) === 11) ? $phone : '1' . $phone);
         $from_number = DealerLocation::findDealerNumber($dealerId, $locationId);
 
+        // Send Text to Twilio
+        $text = $params['text'];
+        $result = $this->sendTextToTwilio($from_number, $to_number, $text, $fullName);
+
+        // Return Error?
+        if(is_array($result) && isset($result['error'])) {
+            return $result;
+        }
+
+        // Save Lead Status
+        $lead->leadStatus()->setStatus(Lead::STATUS_MEDIUM);
+        $lead->leadStatus()->updateNextContactDate();
+
+        // Log SMS
+        return TextLog::create([
+            'lead_id'     => $lead_id,
+            'from_number' => $from_number,
+            'to_number'   => $to_number,
+            'text'        => $text
+        ]);
+    }
+
+
+    /**
+     * Send Text to Twilio
+     * 
+     * @param string $from_number
+     * @param string $to_number
+     * @param string $text
+     * @param string $fullName
+     * @return result of $this->twilio->messages->create || array with error
+     */
+    private function sendTextToTwilio($from_number, $to_number, $text, $fullName) {
         // Look Up To Number
-        $carrier = $client->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
+        $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
             return [
-                'error' => true,
-                'status' => 'landline',
-                'message' => 'Error: The number provided is a landline and cannot receive texts!'
+                'error' => 'Error: The number provided is a landline and cannot receive texts!'
             ];
         }
 
-        // Resume Process
+        // Get Twilio Number
+        $twilioNumber = Number::getActiveTwilioNumber($from_number, $to_number);
+
+        // Twilio Number Doesn't Exist?
+        if (!$twilioNumber) {
+            $fromPhone = $this->getNextAvailableNumber();
+            if (!$fromPhone) {
+                // Return Error!
+                return [
+                    'error' => 'An error has happened! Please try again later'
+                ];
+            }
+
+            // Set Phone as Used
+            Number::setPhoneAsUsed($fromPhone, $to_number, $fullName);
+        } else {
+            $fromPhone = $twilioNumber;
+        }
+
+        // Initialize Phones
+        $phonesTried = [];
+        $tries = 0;
+        while (true) {
+            try {
+                // Create/Send Text Message
+                $sent = $this->twilio->messages->create(
+                    $to_number,
+                    array(
+                        'from' => $fromPhone,
+                        'body' => $text
+                    )
+                );
+            } catch (\Exception $ex) {
+                // Exception occurred?!
+                if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
+                    // Get Next Available Number!
+                    $fromPhone = $phoneRouter->getNextAvailableNumber();
+                    if (!$fromPhone) {
+                        return [
+                            'error' => 'An error has happened! Please try again later'
+                        ];
+                    }
+                    $phonesTried[] = $fromPhone;
+                    if (++$tries == 15) {
+                        return [
+                            'error' => 'An error has happened! Please try again later'
+                        ];
+                    }
+
+                    // Set Phone as Used!
+                    Number::setPhoneAsUsed($fromPhone, $to_number, $fullName);
+                    continue;
+                } 
+            }
+
+            break;
+        }
+
+        // TO DO: How to confirm text ACTUALLY sent?! Need to figure out what $this->twilio->messages->create returns.
+
+        // Return Successful Result
+        return $sent;
     }
 
+    /**
+     * Return next available phone number or false if no available phone numbers
+     *
+     * @return NumberTwilio || boolean false
+     */
+    public function getNextAvailableNumber() {
+        // Get Next Available Number
+        if (!empty($this->twilio)) {
+            $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
+            
+            try {
+                $phone = $this->twilio->incomingPhoneNumbers
+                                ->create(["phoneNumber" => $phoneNumber]);
+
+                $this->twilio->incomingPhoneNumbers($phone->sid)
+                                ->update([
+                                        "smsUrl" => "http://crm.trailercentral.com/twilio/reply-twilio-message"
+                                    ]
+                                );
+            } catch (\Exception $ex) {
+                return false;
+            }
+
+            // Insert New Twilio Number
+            return NumberTwilio::create(['phone_number' => $phoneNumber]);
+        }
+
+        // Return
+        return false;
+    }
 }

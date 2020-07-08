@@ -36,6 +36,20 @@ class Number extends Model
     }
 
     /**
+     * Get Active Twilio Number
+     * 
+     * @param type $dealerNo
+     * @param type $customerNo
+     * @return array
+     */
+    public static function getActiveTwilioNumber($dealerNo, $customerNo) {
+        return self::get(['twilio_number'])
+            ->whereDealerNumber($dealerNo)
+            ->whereCustomerNumber($customerNo)
+            ->first();
+    }
+
+    /**
      * Find Twilio Numbers for Dealer and Customer
      * 
      * @param type $dealerNo

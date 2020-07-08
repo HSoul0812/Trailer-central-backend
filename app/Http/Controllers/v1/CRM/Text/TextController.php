@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use Dingo\Api\Http\Request;
-use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetTextsRequest;
 use App\Http\Requests\CRM\Text\CreateTextRequest;
 use App\Http\Requests\CRM\Text\ShowTextRequest;
@@ -13,10 +12,8 @@ use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
 
-class TextController extends Controller
+class TextController extends RestfulControllerV2
 {
-    use Helpers;
-
     protected $texts;
 
     /**
@@ -383,7 +380,7 @@ class TextController extends Controller
             // Get Results
             $result = $this->texts->sendText($request->all());
             if(isset($result['error'])) {
-                return $this->response->errorBadRequest($result);
+                return $this->response->errorBadRequest($result['error']);
             }
 
             // Send Text
