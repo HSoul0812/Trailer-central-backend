@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\User\DealerLocation;
+use App\Models\CRM\Text\Number;
+use App\Models\CRM\Text\NumberTwilio;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Text\Stop;
