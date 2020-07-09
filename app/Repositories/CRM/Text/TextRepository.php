@@ -134,6 +134,7 @@ class TextRepository implements TextRepositoryInterface {
         if(empty($locationId) && !empty($lead->inventory)) {
             $locationId = $lead->inventory->dealer_location_id;
         }
+        die;
 
         // Get User
         $user = $lead->crmUser;
