@@ -358,6 +358,21 @@ $api->version('v1', function ($route) {
         */
         $route->get('payments/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Quickbooks
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        
+        /**
+         * Accounts
+         */
+        $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
+        $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
+
     });
 
 });
