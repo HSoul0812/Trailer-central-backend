@@ -130,7 +130,9 @@ class TextRepository implements TextRepositoryInterface {
         $lead = Lead::findOrFail($params['lead_id']);
         $locationId = $lead->dealer_location_id;
         $location = $lead->dealerLocation;
+        var_dump($locationId);
         var_dump($location);
+        var_dump($lead);
         die;
         $dealerId = $location->dealer_id;
 
