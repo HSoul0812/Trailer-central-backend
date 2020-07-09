@@ -122,18 +122,17 @@ class TextRepository implements TextRepositoryInterface {
      * @param type $params
      * @return type
      */
-    public function send($userId, $params) {
+    public function send($params) {
         // Initialize Twilio Client
         $this->twilio = new Client(env('TWILIO_ACCOUNT_ID'), env('TWILIO_AUTH_TOKEN'));
-
-        // Get User
-        $user = User::findOrFail($userId);
-        $fullName = $user->crmUser()->first_name . ' ' . $user->crmUser()->last_name;
 
         // Find Lead ID
         $lead = Lead::findOrFail($params['lead_id']);
         $dealerId = $lead->location->dealer_id;
         $locationId = $lead->dealer_location_id;
+
+        // Get User
+        $fullName = $lead->crmUser()->first_name . ' ' . $lead->crmUser()->last_name;
 
         // Get From/To Numbers
         $phone = $params['phone'];
