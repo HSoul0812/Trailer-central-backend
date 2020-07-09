@@ -199,7 +199,7 @@ class TextRepository implements TextRepositoryInterface {
             }
 
             // Set Phone as Used
-            Number::setPhoneAsUsed($fromPhone, $to_number, $fullName);
+            Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
         } else {
             $fromPhone = $twilioNumber;
         }
@@ -235,7 +235,7 @@ class TextRepository implements TextRepositoryInterface {
                     }
 
                     // Set Phone as Used!
-                    Number::setPhoneAsUsed($fromPhone, $to_number, $fullName);
+                    Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
                     continue;
                 } 
             }
