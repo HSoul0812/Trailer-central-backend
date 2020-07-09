@@ -46,6 +46,8 @@ use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepository;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\AccountRepository;
+use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\CRM\Customer\CustomerRepository;
 
@@ -116,6 +118,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
+        $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
+
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
