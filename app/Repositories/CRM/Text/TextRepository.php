@@ -143,7 +143,7 @@ class TextRepository implements TextRepositoryInterface {
         $from_number = DealerLocation::findDealerNumber($dealerId, $locationId);
 
         // Send Text to Twilio
-        $text = $params['text'];
+        $text = $params['log_message'];
         $result = $this->sendTwilio($from_number, $to_number, $text, $fullName);
 
         // Return Error?
