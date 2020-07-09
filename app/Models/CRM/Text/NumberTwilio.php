@@ -23,5 +23,5 @@ class NumberTwilio extends Model
     ];
 
     // No Timestamps
-    protected $timestamps = false;
+    public $timestamps = false;
 }

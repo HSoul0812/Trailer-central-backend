@@ -27,6 +27,9 @@ class Number extends Model
         'expiration_time'
     ];
 
+    // No Timestamps
+    public $timestamps = false;
+
     /**
      * @return type
      */
