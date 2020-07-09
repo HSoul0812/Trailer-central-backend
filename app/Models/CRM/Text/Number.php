@@ -74,7 +74,7 @@ class Number extends Model
     public static function getActiveTwilioNumber($dealerNo, $customerNo) {
         $result = self::get(['twilio_number'])
             ->where('dealer_number', $dealerNo)
-            ->where('customer_number', $customerNo);
+            ->orWhere('customer_number', $customerNo);
         var_dump($result);
         var_dump($dealerNo);
         var_dump($customerNo);
