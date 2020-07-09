@@ -159,7 +159,7 @@ class TextRepository implements TextRepositoryInterface {
 
         // Log SMS
         return TextLog::create([
-            'lead_id'     => $lead_id,
+            'lead_id'     => $params['lead_id'],
             'from_number' => $from_number,
             'to_number'   => $to_number,
             'text'        => $text
