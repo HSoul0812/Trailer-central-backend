@@ -203,8 +203,8 @@ class TextRepository implements TextRepositoryInterface {
         // Get Twilio Number
         var_dump($from_number);
         var_dump($to_number);
-        die;
         $twilioNumber = Number::getActiveTwilioNumber($from_number, $to_number);
+        die;
 
         // Twilio Number Doesn't Exist?
         if (!$twilioNumber) {
