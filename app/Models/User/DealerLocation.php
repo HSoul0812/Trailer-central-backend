@@ -98,6 +98,7 @@ class DealerLocation extends Model
     public static function findDealerNumber($dealerId, $locationId) {
         // Get Dealer Location
         $location = self::find($locationId);
+        var_dump($location);
 
         // Get Numbers By Dealer ID
         if(!empty($location->dealer_id)) {
@@ -105,6 +106,7 @@ class DealerLocation extends Model
         } else {
             $numbers = self::findAllDealerNumbers($dealerId);
         }
+        var_dump($numbers);
 
         // Loop Numbers
         $phoneNumber = '';
@@ -124,6 +126,7 @@ class DealerLocation extends Model
                 }
             }
         }
+        die;
 
         // Return Phone Number
         return $phoneNumber;

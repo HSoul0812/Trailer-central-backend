@@ -131,6 +131,9 @@ class TextRepository implements TextRepositoryInterface {
         $lead = Lead::findOrFail($params['lead_id']);
         $dealerId = $lead->dealer_id;
         $locationId = $lead->dealer_location_id;
+        if(empty($locationId) && !empty($lead->inventory)) {
+            $locationId = $lead->inventory->dealer_location_id;
+        }
 
         // Get User
         $user = $lead->crmUser;
@@ -147,7 +150,7 @@ class TextRepository implements TextRepositoryInterface {
         // No From Number?!
         if(empty($from_number)) {
             return [
-                'error' => 'No SMS Number found for current dealer location!'
+                'error' => 'No SMS Number found for current dealer!'
             ];
         }
 
