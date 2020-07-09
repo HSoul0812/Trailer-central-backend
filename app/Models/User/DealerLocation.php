@@ -108,6 +108,7 @@ class DealerLocation extends Model
             $numbers = self::findAllDealerNumbers($dealerId);
         }
         var_dump($numbers);
+        die;
 
         // Loop Numbers
         $phoneNumber = '';
