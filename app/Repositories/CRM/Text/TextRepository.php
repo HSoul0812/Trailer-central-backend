@@ -144,6 +144,13 @@ class TextRepository implements TextRepositoryInterface {
         $to_number = '+' . ((strlen($phone) === 11) ? $phone : '1' . $phone);
         $from_number = DealerLocation::findDealerNumber($dealerId, $locationId);
 
+        // No From Number?!
+        if(empty($from_number)) {
+            return [
+                'error' => 'No SMS Number found for current dealer location!'
+            ];
+        }
+
         // Send Text to Twilio
         $text = $params['log_message'];
         $result = $this->sendTwilio($from_number, $to_number, $text, $fullName);
@@ -162,7 +169,7 @@ class TextRepository implements TextRepositoryInterface {
             'lead_id'     => $params['lead_id'],
             'from_number' => $from_number,
             'to_number'   => $to_number,
-            'text'        => $text
+            'log_message' => $text
         ]);
     }
 
