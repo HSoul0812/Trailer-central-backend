@@ -99,6 +99,7 @@ class DealerLocation extends Model
         // Get Dealer Location
         $location = self::find($locationId);
         var_dump($location);
+        die;
 
         // Get Numbers By Dealer ID
         if(!empty($location->dealer_id)) {
