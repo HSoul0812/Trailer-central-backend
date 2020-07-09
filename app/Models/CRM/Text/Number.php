@@ -75,7 +75,7 @@ class Number extends Model
         return self::get(['twilio_number'])
             ->where('dealer_number', $dealerNo)
             ->where('customer_number', $customerNo)
-            ->first()->twilio_number;
+            ->first();
     }
 
     /**

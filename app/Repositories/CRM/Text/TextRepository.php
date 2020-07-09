@@ -216,7 +216,7 @@ class TextRepository implements TextRepositoryInterface {
             // Set Phone as Used
             Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
         } else {
-            $fromPhone = $twilioNumber;
+            $fromPhone = $twilioNumber->twilio_number;
         }
 
         // Initialize Phones
