@@ -154,7 +154,7 @@ class TextRepository implements TextRepositoryInterface {
         }
 
         // Save Lead Status
-        $lead->leadStatus()->first()->setStatus(Lead::STATUS_MEDIUM);
+        $lead->leadStatus()->first()->updateStatus(Lead::STATUS_MEDIUM);
         $lead->leadStatus()->first()->updateNextContactDate();
 
         // Log SMS
