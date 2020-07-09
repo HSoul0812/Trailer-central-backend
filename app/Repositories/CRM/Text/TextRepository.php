@@ -237,7 +237,13 @@ class TextRepository implements TextRepositoryInterface {
                     // Set Phone as Used!
                     Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
                     continue;
-                } 
+                }
+                // Return Other Error
+                else {
+                    return [
+                        'error' => $ex->getMessage() . ': ' . $ex->getTraceAsString()
+                    ];
+                }
             }
 
             break;
