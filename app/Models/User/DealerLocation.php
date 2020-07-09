@@ -98,8 +98,9 @@ class DealerLocation extends Model
     public static function findDealerNumber($dealerId, $locationId) {
         // Get Dealer Location
         $location = self::find($locationId);
-        var_dump($location);
-        die;
+        if(!empty($location->sms_phone)) {
+            return $location->sms_phone;
+        }
 
         // Get Numbers By Dealer ID
         if(!empty($location->dealer_id)) {
@@ -107,28 +108,18 @@ class DealerLocation extends Model
         } else {
             $numbers = self::findAllDealerNumbers($dealerId);
         }
-        var_dump($numbers);
-        die;
 
         // Loop Numbers
         $phoneNumber = '';
-        if(!empty($numbers) && count($numbers) > 0) {
+        if(!empty($numbers)) {
+            // Get First Valid Number!
             foreach($numbers as $number) {
-                // Set Correct Location's Phone Number
-                if($locationId == $number->dealer_location_id) {
-                    $phoneNumber = $number->sms_phone;
-                }
-            }
-
-            // Still No Valid Number?!
-            if(empty($phoneNumber)) {
-                foreach($numbers as $number) {
+                if(!empty($number->sms_phone)) {
                     $phoneNumber = $number->sms_phone;
                     break;
                 }
             }
         }
-        die;
 
         // Return Phone Number
         return $phoneNumber;
