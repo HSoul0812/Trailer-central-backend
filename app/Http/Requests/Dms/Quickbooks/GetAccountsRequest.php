@@ -11,6 +11,8 @@ class GetAccountsRequest extends Request {
 
     protected $rules = [
         'dealer_id' => 'integer',
+        'type' => 'array',
+        'type.*' => 'string',
     ];
     
 }

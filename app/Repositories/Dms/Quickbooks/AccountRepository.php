@@ -58,6 +58,9 @@ class AccountRepository implements AccountRepositoryInterface {
         } else {
             $query = Account::where('id', '>', 0);  
         }
+        if (isset($params['type'])) {
+            $query = $query->whereIn('type', $params['type']);
+        }
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('name', 'LIKE', '%' . $params['search_term'] . '%')
