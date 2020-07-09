@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Text;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Models\CRM\User\User;
 use App\Models\CRM\Dealer\DealerLocation;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
@@ -127,7 +128,7 @@ class TextRepository implements TextRepositoryInterface {
 
         // Get User
         $user = User::findOrFail($params['user_id']);
-        $fullName = $user->first_name . ' ' . $user->last_name;
+        $fullName = $user->crmUser()->first_name . ' ' . $user->crmUser()->last_name;
 
         // Find Lead ID
         $lead = Lead::findOrFail($params['lead_id']);
