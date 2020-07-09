@@ -4,6 +4,8 @@ namespace App\Http\Controllers\v1\Dms\Quickbooks;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
+use League\Fractal\TransformerAbstract;
+
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
 use App\Transformers\Dms\Quickbooks\AccountTransformer;
 use App\Http\Requests\Dms\Quickbooks\CreateAccountRequest;
@@ -16,6 +18,8 @@ class AccountController extends RestfulController
 {
     
     protected $accounts;
+
+    protected $transformer;
     
     /**
      * Create a new controller instance.
@@ -26,6 +30,7 @@ class AccountController extends RestfulController
     {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'create']);
         $this->accounts = $accounts;
+        $this->transformer = new AccountTransformer();
     }
     
     /**
@@ -70,7 +75,7 @@ class AccountController extends RestfulController
         $request = new GetAccountsRequest($request->all());
         
         if ($request->validate()) {
-          return $this->response->paginator($this->accounts->getAll($request->all()), new AccountTransformer);
+          return $this->response->paginator($this->accounts->getAll($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -124,7 +129,7 @@ class AccountController extends RestfulController
       $request = new CreateAccountRequest($request->all());
       
       if ( $request->validate() ) {
-          return $this->response->item($this->accounts->create($request->all()), new AccountTransformer());
+          return $this->response->item($this->accounts->create($request->all()), $this->transformer);
       }  
       
       return $this->response->errorBadRequest();
