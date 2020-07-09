@@ -30,7 +30,7 @@ class UnitSale extends Model
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'buyer_id');
+        return $this->belongsTo(Customer::class, 'buyer_id', 'id');
     }
 
     public function lead()

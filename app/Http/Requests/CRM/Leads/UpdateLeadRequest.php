@@ -15,6 +15,10 @@ class UpdateLeadRequest extends Request {
         'contact_type' => 'in:CONTACT,TASK'        
     ];
     
+    protected function getObject() {
+        return new Lead();
+    }
+    
     protected function getObjectIdValue() {
         return $this->id;
     }

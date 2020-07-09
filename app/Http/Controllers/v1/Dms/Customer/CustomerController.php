@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1\Dms;
+namespace App\Http\Controllers\v1\Dms\Customer;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
