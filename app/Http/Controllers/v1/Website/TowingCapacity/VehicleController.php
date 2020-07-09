@@ -9,6 +9,7 @@ use App\Services\Website\TowingCapacity\TowingCapacityService;
 use App\Transformers\Website\TowingCapacity\ModelTransformer;
 use App\Transformers\Website\TowingCapacity\VehiclesTransformer;
 use App\Transformers\Website\TowingCapacity\YearsTransformer;
+use Dingo\Api\Http\Request;
 
 class VehicleController extends RestfulController
 {
@@ -76,7 +77,7 @@ class VehicleController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/website/towing-capacity/vehicles/year/{year}/make/{makeId}/model/{model}",
+     *     path="/api/website/towing-capacity/vehicles/year/{year}/make/{makeId}?model={model}",
      *     description="Retrieve a list of vehicles",
      *     tags={"Towing capasity vehicles"},
      *   @OA\Parameter(
@@ -111,13 +112,15 @@ class VehicleController extends RestfulController
      *     ),
      * )
      *
+     * @param Request $request
      * @param int $year
      * @param int $makeId
-     * @param string $model
      * @return \Dingo\Api\Http\Response
      */
-    public function getVehicles(int $year, int $makeId, string $model)
+    public function getVehicles(Request $request, int $year, int $makeId)
     {
+        $model = $request->query('model');
+
         $request = new VehiclesRequest([
             'year' => $year,
             'makeId' => $makeId,
