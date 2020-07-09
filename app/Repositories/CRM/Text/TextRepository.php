@@ -128,11 +128,11 @@ class TextRepository implements TextRepositoryInterface {
 
         // Find Lead ID
         $lead = Lead::findOrFail($params['lead_id']);
-        $dealerId = $lead->dealerLocation->dealer_id;
+        $dealerId = $lead->dealerLocation()->dealer_id;
         $locationId = $lead->dealer_location_id;
 
         // Get User
-        $fullName = $lead->crmUser->first_name . ' ' . $lead->crmUser->last_name;
+        $fullName = $lead->crmUser()->first_name . ' ' . $lead->crmUser()->last_name;
 
         // Get From/To Numbers
         $phone = $params['phone'];
