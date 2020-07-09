@@ -373,13 +373,13 @@ class TextController extends RestfulControllerV2
      *      ),
      * )
      */
-    public function send(Request $request)
+    public function send($userId, Request $request)
     {
         $request = new SendTextRequest($request->all());
         
         if ( $request->validate()) {
             // Get Results
-            $result = $this->texts->send($request->all());
+            $result = $this->texts->send($userId, $request->all());
             if(isset($result['error'])) {
                 return $this->response->errorBadRequest($result['error']);
             }
