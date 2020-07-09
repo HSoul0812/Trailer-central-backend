@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\User\User;
-use App\Models\CRM\Dealer\DealerLocation;
+use App\Models\CRM\User\DealerLocation;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Text\Stop;
