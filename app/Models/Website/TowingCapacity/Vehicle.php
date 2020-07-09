@@ -27,6 +27,11 @@ class Vehicle extends Model
         'drive_train',
         'engine',
         'tow_limit',
+        'tow_type',
+        'transmission',
+        'gear_ratio',
+        'towing_package_required',
+        'payload_package_required',
     ];
 
     /**
