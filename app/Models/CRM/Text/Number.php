@@ -72,14 +72,10 @@ class Number extends Model
      * @return array
      */
     public static function getActiveTwilioNumber($dealerNo, $customerNo) {
-        $result = self::select('twilio_number')
+        return self::select('twilio_number')
             ->where('dealer_number', $dealerNo)
             ->where('customer_number', $customerNo)
             ->first();
-        var_dump($result);
-        var_dump($dealerNo);
-        var_dump($customerNo);
-        return $result;
     }
 
     /**
@@ -89,7 +85,7 @@ class Number extends Model
      * @param type $customerNo
      */
     public function findTwilioNumbers($dealerNo, $customerNo) {
-        return self::get(['twilio_number'])
+        return self::select('twilio_number')
             ->where('dealer_number', $dealerNo)
             ->orWhere('customer_number', $customerNo)
             ->all();
