@@ -83,7 +83,7 @@ class DealerLocation extends Model
     public static function findAllDealerNumbers($dealerId)
     {
         return self::get(['sms_phone', 'dealer_location_id'])
-            ->whereDealerId($dealerId)
+            ->where('dealer_id', $dealerId)
             ->whereNotNull('sms_phone')
             ->all();
     }
