@@ -132,6 +132,8 @@ class TextRepository implements TextRepositoryInterface {
         $dealerId = $lead->dealer_id;
         $locationId = $lead->dealer_location_id;
         if(empty($locationId) && !empty($lead->inventory)) {
+            var_dump($lead->inventory);
+            die;
             $locationId = $lead->inventory->dealer_location_id;
         }
 
