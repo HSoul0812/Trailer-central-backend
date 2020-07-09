@@ -176,7 +176,9 @@ class TextRepository implements TextRepositoryInterface {
      */
     private function sendTwilio($from_number, $to_number, $text, $fullName) {
         // Look Up To Number
+        var_dump($to_number);
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
+        var_dump($carrier);
         if (empty($carrier['mobile_country_code'])) {
             return [
                 'error' => 'Error: The number provided is a landline and cannot receive texts!'
