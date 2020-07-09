@@ -8,6 +8,7 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Product\Product;
 use App\Models\CRM\Leads\LeadProduct;
+use App\Models\User\DealerLocation;
 use App\Models\User\CrmUser;
 use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
@@ -119,6 +120,14 @@ class Lead extends Model
     public function unitSale()
     {
         return $this->hasMany(UnitSale::class, 'lead_id', 'identifier');
+    }
+
+    /**
+     * Get Dealer location
+     */
+    public function dealerLocation()
+    {
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
     }
 
     /**
