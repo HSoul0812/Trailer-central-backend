@@ -48,6 +48,8 @@ use App\Repositories\CRM\Interactions\InteractionsRepository;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\AccountRepository;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
+use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
+use App\Repositories\CRM\Customer\CustomerRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -118,6 +120,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
 
+        $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);

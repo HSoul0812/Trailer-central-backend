@@ -299,8 +299,8 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\CustomerController@index');
-
+        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
+        $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
 
         /*
         |--------------------------------------------------------------------------
