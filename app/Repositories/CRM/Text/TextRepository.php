@@ -279,7 +279,10 @@ class TextRepository implements TextRepositoryInterface {
             }
 
             // Insert New Twilio Number
-            return NumberTwilio::create(['phone_number' => $phoneNumber]);
+            NumberTwilio::create(['phone_number' => $phoneNumber]);
+
+            // Return Phone Number
+            return $phoneNumber;
         }
 
         // Return
