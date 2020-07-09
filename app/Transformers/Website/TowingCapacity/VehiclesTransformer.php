@@ -26,6 +26,11 @@ class VehiclesTransformer extends TransformerAbstract
             'drive_train' => $vehicle->drive_train,
             'engine' => $vehicle->engine,
             'tow_limit' => $vehicle->tow_limit,
+            'tow_type' => $vehicle->tow_type,
+            'transmission' => $vehicle->transmission,
+            'gear_ratio' => $vehicle->gear_ratio,
+            'towing_package_required' => $vehicle->towing_package_required,
+            'payload_package_required' => $vehicle->payload_package_required,
         ];
     }
 }

@@ -32,6 +32,7 @@ $api->version('v1', function ($route) {
      * Floorplan Payments
      */
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
+    $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
 
     /**
      * Part bins
@@ -180,7 +181,7 @@ $api->version('v1', function ($route) {
     $route->get('website/towing-capacity/makes/year/{year}', 'App\Http\Controllers\v1\Website\TowingCapacity\MakeController@index')->where('year', '[0-9]+');
     $route->get('website/towing-capacity/vehicles/years', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getYears');
     $route->get('website/towing-capacity/models/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getModels')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
-    $route->get('website/towing-capacity/vehicles/year/{year}/make/{makeId}/model/{model}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getVehicles')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
+    $route->get('website/towing-capacity/vehicles/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getVehicles')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
 
 
     /*
@@ -367,6 +368,21 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('payments/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Quickbooks
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        
+        /**
+         * Accounts
+         */
+        $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
+        $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
 
     });
 

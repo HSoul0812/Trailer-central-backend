@@ -33,6 +33,11 @@ class Inventory extends Model
      * @var string
      */
     protected $primaryKey = 'inventory_id';
+
+    protected $fillable = [
+        'fp_balance',
+        'fp_interest_paid',
+    ];
     
     protected $casts = [
         'is_archived' => 'integer',
