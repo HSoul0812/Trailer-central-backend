@@ -55,6 +55,7 @@ class Lead extends Model
      */
     protected $fillable = [
         'website_id',
+        'dealer_id',
         'lead_type',
         'inventory_id',
         'referral',
