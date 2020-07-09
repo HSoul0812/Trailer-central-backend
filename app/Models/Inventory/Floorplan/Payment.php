@@ -10,6 +10,11 @@ use App\Models\Inventory\Inventory;
 class Payment extends Model
 {
 
+    const PAYMENT_CATEGORIES = [
+        'Balance' => 'balance',
+        'Interest' => 'interest',
+    ];
+
     protected $table = 'inventory_floor_plan_payment';
 
     protected $guarded = ['qb_id'];

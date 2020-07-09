@@ -16,7 +16,7 @@ class CreatePaymentRequest extends Request {
         'account_id' => 'integer|required',
         'amount' => 'numeric|required',
         'payment_type' => 'string|required',
-        'check_number' => 'string',
+        'check_number' => 'string|nullable',
     ];
 
 }

@@ -2,9 +2,11 @@
 
 namespace App\Repositories\Inventory\Floorplan;
 
+use Illuminate\Support\Facades\DB;
+
 use App\Exceptions\NotImplementedException;
+use App\Models\Inventory\Inventory;
 use App\Models\Inventory\Floorplan\Payment;
-use App\Repositories\Repository;
 
 /**
  *  
@@ -47,8 +49,40 @@ class PaymentRepository implements PaymentRepositoryInterface {
         ]
     ];
 
+    /**
+     * If type is balance, decrease floorplan balance of the inventory
+     * If type is interest, increase interest amount of the inventory
+     */
+    private function adjustBalance(Payment $payment, array $params):void
+    {
+        $amount = (float) $params['amount'];
+        if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
+            $amount *= -1;
+        }
+        
+        if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
+            Inventory::find($params['inventory_id'])
+                ->update(['fp_balance' => (float) $payment['inventory']['fp_balance'] - (float) $params['amount']]);
+        } else {
+            Inventory::find($params['inventory_id'])
+                ->update(['fp_interest_paid' => (float) $payment['inventory']['fp_interest_paid'] + (float) $params['amount']]);
+        }
+    }
+
     public function create($params) {
-        return Payment::create($params);
+        DB::beginTransaction();
+
+        try {
+            $floorplanPayment = Payment::create($params);
+            $this->adjustBalance($floorplanPayment, $params);
+
+             DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw new \Exception($ex->getMessage());
+        }
+
+        return $floorplanPayment;
     }
 
     public function delete($params) {
