@@ -4,18 +4,26 @@ namespace App\Models\Inventory\Floorplan;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\CRM\Quickbooks\Account;
+use App\Models\Inventory\Inventory;
+
 class Payment extends Model
 {
 
     protected $table = 'inventory_floor_plan_payment';
 
-    protected $primaryKey = 'id';
+    protected $guarded = ['qb_id'];
 
-    public $timestamps = false;
+    public $updated_at = false;
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
 
     public function inventory()
     {
-        return $this->belongsTo('App\Models\Inventory\Inventory', 'inventory_id', 'inventory_id');
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
 }

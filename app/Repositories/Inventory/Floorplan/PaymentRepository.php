@@ -48,7 +48,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
     ];
 
     public function create($params) {
-        throw new NotImplementedException;
+        return Payment::create($params);
     }
 
     public function delete($params) {

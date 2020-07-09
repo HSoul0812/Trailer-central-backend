@@ -32,6 +32,7 @@ $api->version('v1', function ($route) {
      * Floorplan Payments
      */
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
+    $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
 
     /**
      * Part bins
