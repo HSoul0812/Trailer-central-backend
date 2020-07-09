@@ -97,7 +97,7 @@ class DealerLocation extends Model
      */
     public static function findDealerNumber($dealerId, $locationId) {
         // Get Dealer Location
-        $location = self::find($locationId)->first();
+        $location = self::find($locationId);
 
         // Get Numbers By Dealer ID
         if(!empty($location->dealer_id)) {
