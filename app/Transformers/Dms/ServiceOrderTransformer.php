@@ -19,7 +19,7 @@ class ServiceOrderTransformer extends TransformerAbstract
             'closed_at' => $serviceOrder->closed_at,
             'total_price' => $serviceOrder->total_price,
             'invoice' => $serviceOrder->invoice,
-            'location' => $serviceOrder->dealerLocation->name,
+            'location' => $serviceOrder->dealerLocation ? $serviceOrder->dealerLocation->name : null,
             'paid_amount' => (float) $serviceOrder->paid_amount,
             'status' => $serviceOrder->status,
             'status_name' => ServiceOrder::SERVICE_ORDER_STATUS[$serviceOrder->status],
