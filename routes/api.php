@@ -238,7 +238,7 @@ $api->version('v1', function ($route) {
         $route->post('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
         $route->delete('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('crm/{userId}/texts/campaign/{id}/sent', 'App\Http\Controllers\v1\CRM\Text\CampaignController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/campaign/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\CampaignController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/campaign/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\CampaignController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
@@ -251,7 +251,7 @@ $api->version('v1', function ($route) {
         $route->post('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
         $route->delete('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('crm/{userId}/texts/blast/{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/blast/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\BlastController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/blast/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\BlastController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
     });
 
 
