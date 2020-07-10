@@ -4,11 +4,10 @@
 namespace App\Repositories\Pos;
 
 
-use App\Exceptions\NotImplementedException;
 use App\Models\Pos\Sale;
 use App\Repositories\RepositoryAbstract;
-use App\Utilities\JsonApi\WithRequestQueryable;
 use App\Utilities\JsonApi\QueryBuilder;
+use App\Utilities\JsonApi\WithRequestQueryable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
