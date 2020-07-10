@@ -8,7 +8,7 @@ class GetManufacturersRequest extends Request {
     
     protected $rules = [
         'per_page' => 'integer',
-        'search_term' => 'string',
+        'search_term' => 'string|nullable',
     ];
     
 }

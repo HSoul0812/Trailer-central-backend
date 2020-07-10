@@ -2,10 +2,8 @@
 
 namespace App\Repositories\Inventory;
 
-use Illuminate\Database\Eloquent\Collection;
-
 use App\Exceptions\NotImplementedException;
-use App\Models\Inventory\Manufacturers\Manufacturers;
+use App\Models\Inventory\InventoryMfg;
 
 /**
  * Class InventoryRepository
@@ -54,7 +52,7 @@ class ManufacturerRepository implements ManufacturerRepositoryInterface
      */
     public function getAll($params)
     {
-        $query = Manufacturers::where('id', '>', 0);
+        $query = InventoryMfg::where('id', '>', 0);
 
         if (isset($params['search_term'])) {
             $query = $query->where('label', 'LIKE', '%' . $params['search_term'] . '%');
