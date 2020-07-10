@@ -57,7 +57,19 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
     }
 
     public function getAll($params) {
-        throw new NotImplementedException;
+        $query = Showroom::where('id', '>', 0);
+
+        if (isset($params['search_term'])) {
+            $query = $query->where('model', 'LIKE', '%' . $params['search_term'] . '%');
+        }
+        if (isset($params['manufacturer'])) {
+            $query = $query->where('manufacturer', '=', $params['manufacturer']);
+        }
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        }
+        
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {

@@ -219,6 +219,9 @@ $api->version('v1', function ($route) {
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
 
+    // Factory
+    $route->get('feed/factory/showroom', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@index');
+
     /*
     |--------------------------------------------------------------------------
     | User
