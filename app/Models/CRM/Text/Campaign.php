@@ -138,7 +138,7 @@ class Campaign extends Model
                 // Add IN
                 $query = $query->whereIn('manufacturer', $brands);
             }
-            var_dump($query);
+            echo $query->get();
             die;
 
             // Return Filtered Query
