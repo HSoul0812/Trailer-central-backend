@@ -108,10 +108,7 @@ class Campaign extends Model
         $campaign = self::findOrFail($campaignId);
 
         // Find Filtered Leads
-        return $campaign->leads()->where(function (Builder $query) use($campaign) {
-            // Join Inventory Table
-            $query = $query->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id');
-
+        return $campaign->leads()->with('inventory')->where(function (Builder $query) use($campaign) {
             // Is Archived?!
             if($campaign->included_archived !== -1) {
                 $query = $query->where('is_archived', $campaign->include_archived);
