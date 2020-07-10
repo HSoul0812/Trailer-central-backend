@@ -10,6 +10,7 @@ namespace App\Repositories;
 interface Repository {
 
     const CONDITION_AND_WHERE = 'andWhere';
+    const CONDITION_AND_WHERE_RAW = 'andWhereRaw';
 
     /**
      * Creates the record
