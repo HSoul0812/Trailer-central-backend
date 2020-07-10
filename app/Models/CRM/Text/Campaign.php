@@ -108,7 +108,10 @@ class Campaign extends Model
         $campaign = self::findOrFail($campaignId);
 
         // Find Filtered Leads
-        return $campaign->leads()->with('inventory')->where(function (Builder $query) use($campaign) {
+        return $campaign->leads()->where(function (Builder $query) use($campaign) {
+            // Join Inventory Table
+            $query = $query->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id');
+
             // Is Archived?!
             if($campaign->included_archived !== -1) {
                 $query = $query->where('is_archived', $campaign->include_archived);
@@ -135,6 +138,8 @@ class Campaign extends Model
                 // Add IN
                 $query = $query->whereIn('manufacturer', $brands);
             }
+            var_dump($query);
+            die;
 
             // Return Filtered Query
             return $query->where(function (Builder $query) use($campaign) {
