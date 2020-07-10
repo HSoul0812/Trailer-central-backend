@@ -128,6 +128,11 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Inventory Manufacturers
+     */
+    $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
