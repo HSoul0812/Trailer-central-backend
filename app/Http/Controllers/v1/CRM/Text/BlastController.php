@@ -299,11 +299,11 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function leads(int $userId, int $id, Request $request) {
+    public function leads(Request $request) {
         $request = new LeadsBlastsRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->blasts->getLeads($id), new LeadTransformer());
+            return $this->response->paginator($this->blasts->getLeads($request->all()), new LeadTransformer());
         }
         
         return $this->response->errorBadRequest();

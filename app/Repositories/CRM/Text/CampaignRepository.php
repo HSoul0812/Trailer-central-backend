@@ -129,7 +129,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
      */
     public function getLeads($params) {
         // Find Campaign Leads
-        $query = Campaign::findLeads($id);
+        $query = Campaign::findLeads($params['id']);
 
         // Return Campaign Leads
         return $query->paginate($params['per_page'])->appends($params);
