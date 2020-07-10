@@ -5,6 +5,7 @@ namespace App\Http\Requests\Dms;
 
 
 use App\Http\Requests\Request;
+use App\Models\CRM\Dms\FinancingCompany;
 
 class UpdateFinancingCompanyRequest extends Request
 {
@@ -31,4 +32,18 @@ class UpdateFinancingCompanyRequest extends Request
     ];
 
     protected $filters = [];
+
+    protected function getObject()
+    {
+        return new FinancingCompany();
+    }
+
+    protected function getObjectIdValue() {
+        return $this->input('id');
+    }
+
+    protected function validateObjectBelongsToUser() {
+        return true;
+    }
+
 }
