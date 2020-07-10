@@ -106,6 +106,9 @@ class Campaign extends Model
     {
         // Get Campaign
         $campaign = self::findOrFail($campaignId);
+        var_dump($campaign);
+        echo $campaign->send_after_days;
+        die;
 
         // Find Filtered Leads
         return $campaign->leads()->where(function (Builder $query) use($campaign) {
@@ -143,7 +146,7 @@ class Campaign extends Model
             return $query->where(function (Builder $query) use($campaign) {
                 return $query->where('website_lead.dealer_location_id', $campaign->location_id)
                         ->orWhereRaw('(dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
-            })->whereRaw('DATE_ADD(date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAYS) > NOW()');
+            })->whereRaw('DATE_ADD(date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()');
         })->get();
     }
 }
