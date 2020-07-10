@@ -11,6 +11,7 @@ use App\Http\Requests\CRM\Text\ShowBlastRequest;
 use App\Http\Requests\CRM\Text\UpdateBlastRequest;
 use App\Http\Requests\CRM\Text\DeleteBlastRequest;
 use App\Http\Requests\CRM\Text\SentBlastRequest;
+use App\Http\Requests\CRM\Text\LeadsBlastRequest;
 use App\Transformers\CRM\Text\BlastTransformer;
 
 class BlastController extends RestfulControllerV2
