@@ -106,9 +106,6 @@ class Campaign extends Model
     {
         // Get Campaign
         $campaign = self::findOrFail($campaignId);
-        var_dump($campaign);
-        echo $campaign->send_after_days;
-        die;
 
         // Find Filtered Leads
         return $campaign->leads()->where(function (Builder $query) use($campaign) {
