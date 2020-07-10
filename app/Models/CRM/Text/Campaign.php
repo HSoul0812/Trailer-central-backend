@@ -2,7 +2,10 @@
 
 namespace App\Models\CRM\Text;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Leads\Lead;
+use App\Models\User\CrmUser;
 
 /**
  * Class Text Campaign
@@ -74,5 +77,73 @@ class Campaign extends Model
     public function sent()
     {
         return $this->hasOne(CampaignSent::class, 'text_campaign_id');
+    }
+
+    /**
+     * Get CRM user.
+     */
+    public function crmUser()
+    {
+        return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function leads()
+    {
+        // Get Leads For Dealer
+        return $this->hasManyThrough(Lead::class, CrmUser::class, 'user_id', 'dealer_id', 'user_id', 'id');
+    }
+
+
+    /**
+     * Find Leads for Campaign
+     * 
+     * @return Collection of Leads
+     */
+    public static function findLeads($campaignId)
+    {
+        // Get Campaign
+        $campaign = self::findOrFail($campaignId);
+
+        // Find Filtered Leads
+        return $campaign->leads()->where(function (Builder $query) use($campaign) {
+            // Join Inventory Table
+            $query = $query->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id');
+
+            // Is Archived?!
+            if($campaign->included_archived !== -1) {
+                $query = $query->where('is_archived', $campaign->include_archived);
+            }
+
+            // Get Categories
+            if(!empty($campaign->categories)) {
+                $categories = array();
+                foreach($campaign->categories as $category) {
+                    $categories[] = $category->category;
+                }
+
+                // Add IN
+                $query = $query->whereIn('category', $categories);
+            }
+
+            // Get Brands
+            if(!empty($campaign->brands)) {
+                $brands = array();
+                foreach($campaign->brands as $brand) {
+                    $brands[] = $brand->brand;
+                }
+
+                // Add IN
+                $query = $query->whereIn('manufacturer', $brands);
+            }
+
+            // Return Filtered Query
+            return $query->where(function (Builder $query) use($campaign) {
+                return $query->where('website_lead.dealer_location_id', $campaign->location_id)
+                        ->orWhereRaw('(dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
+            })->whereRaw('DATE_ADD(date_submitted, INTERVAL +' . $campaign->send_after_days . ') > NOW()');
+        })->get();
     }
 }

@@ -267,4 +267,44 @@ class CampaignController extends RestfulControllerV2
         
         return $this->response->errorBadRequest();
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/crm/{userId}/texts/campaign/{id}/leads",
+     *     description="Retrieve a list of leads for text campaign id",
+     *     tags={"Text"},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Page Limit",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     )
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of texts",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function leads(int $userId, int $id, Request $request) {
+        $request = new LeadsCampaignRequest($request->all());
+        
+        if ($request->validate()) {
+            return $this->response->paginator($this->campaigns->getLeads($id), new LeadTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
 }
