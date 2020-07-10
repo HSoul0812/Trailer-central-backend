@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use Dingo\Api\Http\Request;
-use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetTemplatesRequest;
 use App\Http\Requests\CRM\Text\CreateTemplateRequest;
 use App\Http\Requests\CRM\Text\ShowTemplateRequest;
@@ -13,10 +12,8 @@ use App\Http\Requests\CRM\Text\UpdateTemplateRequest;
 use App\Http\Requests\CRM\Text\DeleteTemplateRequest;
 use App\Transformers\CRM\Text\TemplateTransformer;
 
-class TemplateController extends Controller
+class TemplateController extends RestfulControllerV2
 {
-    use Helpers;
-
     protected $templates;
 
     /**

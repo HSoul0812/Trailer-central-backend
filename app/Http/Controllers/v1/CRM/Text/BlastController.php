@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use Dingo\Api\Http\Request;
-use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetBlastsRequest;
 use App\Http\Requests\CRM\Text\CreateBlastRequest;
 use App\Http\Requests\CRM\Text\ShowBlastRequest;
@@ -14,10 +13,8 @@ use App\Http\Requests\CRM\Text\DeleteBlastRequest;
 use App\Http\Requests\CRM\Text\SentBlastRequest;
 use App\Transformers\CRM\Text\BlastTransformer;
 
-class BlastController extends Controller
+class BlastController extends RestfulControllerV2
 {
-    use Helpers;
-
     protected $blasts;
 
     /**

@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use Dingo\Api\Http\Request;
-use Dingo\Api\Routing\Helpers;
 use App\Http\Requests\CRM\Text\GetTextsRequest;
 use App\Http\Requests\CRM\Text\CreateTextRequest;
 use App\Http\Requests\CRM\Text\ShowTextRequest;
 use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
+use App\Http\Requests\CRM\Text\SendTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
 
-class TextController extends Controller
+class TextController extends RestfulControllerV2
 {
-    use Helpers;
-
     protected $texts;
 
     /**
@@ -259,12 +257,135 @@ class TextController extends Controller
      *     ),
      * )
      */
-    public function Stop(int $leadId, int $id) {
+    public function stop(int $leadId, int $id) {
         $request = new StopTextRequest(['id' => $id]);
         
         if ( $request->validate()) {
             // Stop Text
             return $this->response->item($this->texts->stop(['id' => $id]), new TextTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Post(path="/leads/{leadId}/texts/send",
+     *     tags={"interactions"},
+     *     summary="Send interaction text",
+     *     description="",
+     *     operationId="sendText",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="user_id",
+     *                     description="User Authentication ID.",
+     *                     type="string",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="lead_id",
+     *                     description="Lead ID.",
+     *                     type="string",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="body",
+     *                     description="Email body.",
+     *                     type="string",
+     *                 ),
+     *             ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Email sent successfully",
+     *         content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="success",
+     *                         type="bool",
+     *                         description="The response success"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="message",
+     *                         type="string",
+     *                         description="The response message"
+     *                     ),
+     *                     example={
+     *                         "success": true,
+     *                         "message": "Email sent successfully",
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found | Lead not found",
+     *         content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="error",
+     *                         type="bool",
+     *                         description="The response error"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="message",
+     *                         type="string",
+     *                         description="The response message"
+     *                     ),
+     *                     example={
+     *                         "error": true,
+     *                         "message": "User not found",
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Throwable message",
+     *         content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="error",
+     *                         type="bool",
+     *                         description="The response success"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="message",
+     *                         type="string",
+     *                         description="The response message"
+     *                     ),
+     *                     example={
+     *                         "error": true,
+     *                         "message": "Throwable message",
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *      ),
+     * )
+     */
+    public function send(Request $request)
+    {
+        $request = new SendTextRequest($request->all());
+        
+        if ( $request->validate()) {
+            // Get Results
+            $result = $this->texts->send($request->all());
+            if(isset($result['error'])) {
+                return $this->response->errorBadRequest($result['error']);
+            }
+
+            // Send Text
+            return $this->response->item($result, new TextTransformer());
         }
         
         return $this->response->errorBadRequest();

@@ -23,6 +23,20 @@ class TextLog extends Model
     protected $primaryKey = 'id';
 
     /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'date_sent';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -31,8 +45,7 @@ class TextLog extends Model
         'lead_id',
         'log_message',
         'from_number',
-        'to_number',
-        'date_sent'
+        'to_number'
     ];
 
     public function lead()

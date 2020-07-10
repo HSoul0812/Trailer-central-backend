@@ -4,6 +4,8 @@ namespace App\Models\User;
 
 use App\Models\Inventory\Inventory;
 use App\Models\User\NewDealerUser;
+use App\Models\User\Dealer;
+use App\Models\CRM\Text\Number;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\DealerLocationSalesTax;
 
@@ -39,18 +41,87 @@ class DealerLocation extends Model
         // TODO: Add fields
     ];
 
+    /**
+     * @return type
+     */
     public function dealer()
     {
         return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
     }
 
+    /**
+     * @return type
+     */
     public function inventory()
     {
         return $this->hasOne(Inventory::class, 'dealer_location_id', 'dealer_location_id');
     }
-    
+
+    /**
+     * @return type
+     */
     public function salesTax()
     {
         return $this->hasOne(DealerLocationSalesTax::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function number()
+    {
+        return $this->belongsTo(Number::class, 'sms_phone', 'dealer_number');
+    }
+
+
+    /**
+     * Get All Dealer Numbers
+     * 
+     * @param int $dealerId
+     * @return type
+     */
+    public static function findAllDealerNumbers($dealerId)
+    {
+        return self::get(['sms_phone', 'dealer_location_id'])
+            ->where('dealer_id', $dealerId)
+            ->whereNotNull('sms_phone')
+            ->all();
+    }
+
+    /**
+     * Get Dealer Number for Location or Default
+     * 
+     * @param int $dealerId
+     * @param int $locationId
+     * @return type
+     */
+    public static function findDealerNumber($dealerId, $locationId) {
+        // Get Dealer Location
+        $location = self::find($locationId);
+        if(!empty($location->sms_phone)) {
+            return $location->sms_phone;
+        }
+
+        // Get Numbers By Dealer ID
+        if(!empty($location->dealer_id)) {
+            $numbers = self::findAllDealerNumbers($location->dealer_id);
+        } else {
+            $numbers = self::findAllDealerNumbers($dealerId);
+        }
+
+        // Loop Numbers
+        $phoneNumber = '';
+        if(!empty($numbers)) {
+            // Get First Valid Number!
+            foreach($numbers as $number) {
+                if(!empty($number->sms_phone)) {
+                    $phoneNumber = $number->sms_phone;
+                    break;
+                }
+            }
+        }
+
+        // Return Phone Number
+        return $phoneNumber;
     }
 }
