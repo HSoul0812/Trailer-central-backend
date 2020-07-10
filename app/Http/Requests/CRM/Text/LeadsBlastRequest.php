@@ -12,7 +12,6 @@ use App\Http\Requests\Request;
 class LeadsCampaignRequest extends Request {
     
     protected $rules = [
-        'id' => 'required|integer',
         'per_page' => 'integer',
         'sort' => 'in:date_submitted,-date_submitted'
     ];
