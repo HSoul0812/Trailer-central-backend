@@ -12,7 +12,8 @@ class GetShowroomRequest extends Request {
     protected $rules = [
         'page' => 'integer',
         'search_term' => 'string|nullable',
-        'manufacturer' => 'string',
+        'manufacturer' => 'string|nullable',
+        'model' => 'string|nullable',
     ];
     
 }

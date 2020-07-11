@@ -14,6 +14,9 @@ class ShowroomTransformer extends TransformerAbstract
             'id' => $showroom->id,
             'manufacturer' => $showroom->manufacturer,
             'model' => $showroom->model,
+            'year' => $showroom->year,
+            'description' => $showroom->description,
+            'description_txt' => $showroom->description_txt,
         ];
     }
 } 
