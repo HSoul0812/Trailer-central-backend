@@ -379,13 +379,27 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Financing companies
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('financing-companies', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@index');
+        $route->get('financing-companies/{id}', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@show');
+        $route->post('financing-companies', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@create');
+        $route->put('financing-companies/{id}', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@update');
+        $route->delete('financing-companies/{id}', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@destroy');
+
+        /*
+        |--------------------------------------------------------------------------
         | Quickbooks
         |--------------------------------------------------------------------------
         |
         |
         |
         */
-        
+
         /**
          * Accounts
          */

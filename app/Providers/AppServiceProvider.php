@@ -8,6 +8,8 @@ use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
+use App\Repositories\Dms\FinancingCompanyRepository;
+use App\Repositories\Dms\FinancingCompanyRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
@@ -127,6 +129,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
 
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
+        $this->app->bind(FinancingCompanyRepositoryInterface::class, FinancingCompanyRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
