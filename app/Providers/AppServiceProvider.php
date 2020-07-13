@@ -21,6 +21,8 @@ use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Website\WebsiteRepository;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Export\Parts\CsvExportService;
@@ -83,6 +85,17 @@ class AppServiceProvider extends ServiceProvider
 
             return $this;
         });
+
+        // log all queries
+        if (env('APP_LOG_QUERIES')) {
+            DB::listen(function($query) {
+                Log::info(
+                    $query->sql,
+                    $query->bindings,
+                    $query->time
+                );
+            });
+        }
     }
 
     /**

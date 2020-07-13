@@ -10,7 +10,6 @@ use League\Fractal\TransformerAbstract;
 
 class SaleTransformer extends TransformerAbstract
 {
-
     protected $availableIncludes = [
         'products',
         'refunds',
