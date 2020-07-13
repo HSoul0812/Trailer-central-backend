@@ -269,7 +269,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
         // Find Filtered Leads
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->where('dealer_id', $dealerId);
+                     ->where('website_lead.dealer_id', $dealerId);
 
         // Is Archived?!
         if($campaign->included_archived !== -1 && $campaign->include_archived !== '-1') {
