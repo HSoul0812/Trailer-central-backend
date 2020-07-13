@@ -344,7 +344,7 @@ class Lead extends Model
         return $query->where(function (Builder $query) use($campaign) {
             return $query->where('website_lead.dealer_location_id', $campaign->location_id)
                     ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
-        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()')->get();
+        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()');
     }
     
     public static function getTableName() {
