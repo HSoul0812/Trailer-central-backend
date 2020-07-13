@@ -295,7 +295,7 @@ class Lead extends Model
     {
         // Get Campaign
         $campaign = Campaign::findOrFail($campaignId);
-        $crmUser = $campaign->crmUser();
+        $crmUser = $campaign->crmUser()->get();
         echo $crmUser->dealer_id;
         die;
 
