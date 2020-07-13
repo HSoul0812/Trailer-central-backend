@@ -3,8 +3,8 @@
 namespace App\Models\CRM\Text;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\CRM\Leads\Lead;
 use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
 
 /**
  * Class Text Campaign
@@ -79,10 +79,18 @@ class Campaign extends Model
     }
 
     /**
-     * Get CRM user.
+     * Get CRM User
      */
     public function crmUser()
     {
         return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get Dealer User
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
     }
 }

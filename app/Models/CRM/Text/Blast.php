@@ -3,6 +3,8 @@
 namespace App\Models\CRM\Text;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
 
 /**
  * Class Text Blast
@@ -76,5 +78,21 @@ class Blast extends Model
     public function sent()
     {
         return $this->hasOne(BlastSent::class, 'text_blast_id');
+    }
+
+    /**
+     * Get CRM User
+     */
+    public function crmUser()
+    {
+        return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get Dealer User
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
     }
 }

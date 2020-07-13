@@ -121,6 +121,32 @@ class BlastRepository implements BlastRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * Get Leads for Blast
+     * 
+     * @param int $id
+     * @return Collection
+     */
+    public function getLeads($params) {
+        // Get Blast
+        $blast = Blast::findOrFail($params['id']);
+        $crmUser = $blast->newDealerUser()->first();
+
+        // Find Blast Leads
+        $query = $this->findBlastLeads($crmUser->id, $blast);
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        // Return Blast Leads
+        return $query->paginate($params['per_page'])->appends($params);
+    }
+
     public function update($params) {
         $blast = Blast::findOrFail($params['id']);
 
@@ -225,6 +251,65 @@ class BlastRepository implements BlastRepositoryInterface {
                 ]);
             }
         }
+    }
+
+    /**
+     * Find Blast Leads
+     * 
+     * @param int $dealerId
+     * @param Blast $blast
+     * @return Collection of Leads
+     */
+    private function findBlastLeads($dealerId, $blast)
+    {
+        // Find Filtered Leads
+        $query = Lead::select('website_lead.*')
+                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                     ->where('dealer_id', $dealerId);
+
+        // Is Archived?!
+        if($blast->included_archived !== -1) {
+            $query = $query->where('website_lead.is_archived', $blast->include_archived);
+        }
+
+        // Get Categories
+        if(!empty($blast->categories)) {
+            $categories = array();
+            foreach($blast->categories as $category) {
+                $categories[] = $category->category;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.category', $categories);
+        }
+
+        // Get Categories
+        if(!empty($blast->categories)) {
+            $categories = array();
+            foreach($blast->categories as $category) {
+                $categories[] = $category->category;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.category', $categories);
+        }
+
+        // Get Brands
+        if(!empty($blast->brands)) {
+            $brands = array();
+            foreach($blast->brands as $brand) {
+                $brands[] = $brand->brand;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.manufacturer', $brands);
+        }
+
+        // Return Filtered Query
+        return $query->where(function (Builder $query) use($blast) {
+            return $query->where('website_lead.dealer_location_id', $blast->location_id)
+                    ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
+        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) > NOW()');
     }
 
 }

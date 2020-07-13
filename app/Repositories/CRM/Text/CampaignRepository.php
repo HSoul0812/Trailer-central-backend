@@ -131,10 +131,10 @@ class CampaignRepository implements CampaignRepositoryInterface {
     public function getLeads($params) {
         // Get Campaign
         $campaign = Campaign::findOrFail($params['id']);
-        $crmUser = $campaign->crmUser()->first();
+        $crmUser = $campaign->newDealerUser()->first();
 
         // Find Campaign Leads
-        $query = Lead::findLeads($crmUser->id, $campaign);
+        $query = $this->findCampaignLeads($crmUser->id, $campaign);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -254,5 +254,64 @@ class CampaignRepository implements CampaignRepositoryInterface {
                 ]);
             }
         }
+    }
+
+    /**
+     * Find Campaign Leads
+     * 
+     * @param int $dealerId
+     * @param Campaign $campaign
+     * @return Collection of Leads
+     */
+    private function findCampaignLeads($dealerId, $campaign)
+    {
+        // Find Filtered Leads
+        $query = Lead::select('website_lead.*')
+                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                     ->where('dealer_id', $dealerId);
+
+        // Is Archived?!
+        if($campaign->included_archived !== -1) {
+            $query = $query->where('website_lead.is_archived', $campaign->include_archived);
+        }
+
+        // Get Categories
+        if(!empty($campaign->categories)) {
+            $categories = array();
+            foreach($campaign->categories as $category) {
+                $categories[] = $category->category;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.category', $categories);
+        }
+
+        // Get Categories
+        if(!empty($campaign->categories)) {
+            $categories = array();
+            foreach($campaign->categories as $category) {
+                $categories[] = $category->category;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.category', $categories);
+        }
+
+        // Get Brands
+        if(!empty($campaign->brands)) {
+            $brands = array();
+            foreach($campaign->brands as $brand) {
+                $brands[] = $brand->brand;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.manufacturer', $brands);
+        }
+
+        // Return Filtered Query
+        return $query->where(function (Builder $query) use($campaign) {
+            return $query->where('website_lead.dealer_location_id', $campaign->location_id)
+                    ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
+        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()');
     }
 }
