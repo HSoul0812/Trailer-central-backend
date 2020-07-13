@@ -12,7 +12,7 @@ use App\Http\Requests\CRM\Text\UpdateCampaignRequest;
 use App\Http\Requests\CRM\Text\DeleteCampaignRequest;
 use App\Http\Requests\CRM\Text\SentCampaignRequest;
 use App\Http\Requests\CRM\Text\LeadsCampaignRequest;
-use App\Transformers\CRM\Leads\LeadTransformer;
+use App\Transformers\CRM\Leads\CampaignLeadTransformer;
 use App\Transformers\CRM\Text\CampaignTransformer;
 
 class CampaignController extends RestfulControllerV2
@@ -304,7 +304,7 @@ class CampaignController extends RestfulControllerV2
         $request = new LeadsCampaignRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->campaigns->getLeads($request->all()), new LeadTransformer());
+            return $this->response->paginator($this->campaigns->getLeads($request->all()), new CampaignLeadTransformer());
         }
         
         return $this->response->errorBadRequest();

@@ -13,7 +13,7 @@ use App\Http\Requests\CRM\Text\DeleteBlastRequest;
 use App\Http\Requests\CRM\Text\SentBlastRequest;
 use App\Http\Requests\CRM\Text\LeadsBlastRequest;
 use App\Transformers\CRM\Text\BlastTransformer;
-use App\Transformers\CRM\Leads\LeadTransformer;
+use App\Transformers\CRM\Leads\CampaignLeadTransformer;
 
 class BlastController extends RestfulControllerV2
 {
@@ -304,7 +304,7 @@ class BlastController extends RestfulControllerV2
         $request = new LeadsBlastRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->blasts->getLeads($request->all()), new LeadTransformer());
+            return $this->response->paginator($this->blasts->getLeads($request->all()), new CampaignLeadTransformer());
         }
         
         return $this->response->errorBadRequest();
