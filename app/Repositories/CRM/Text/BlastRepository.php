@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\CRM\Text\BlastBrand;
