@@ -298,11 +298,12 @@ class Lead extends Model
 
         // Find Filtered Leads
         $query = self::select('*')
-                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id');
+                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                     ->where('user_id', $campaign->user_id);
 
         // Is Archived?!
         if($campaign->included_archived !== -1) {
-            $query = $query->where('is_archived', $campaign->include_archived);
+            $query = $query->where('website_lead.is_archived', $campaign->include_archived);
         }
 
         // Get Categories
@@ -313,7 +314,7 @@ class Lead extends Model
             }
 
             // Add IN
-            $query = $query->whereIn('category', $categories);
+            $query = $query->whereIn('inventory.category', $categories);
         }
 
         // Get Categories
@@ -324,7 +325,7 @@ class Lead extends Model
             }
 
             // Add IN
-            $query = $query->whereIn('category', $categories);
+            $query = $query->whereIn('inventory.category', $categories);
         }
 
         // Get Brands
@@ -335,14 +336,14 @@ class Lead extends Model
             }
 
             // Add IN
-            $query = $query->whereIn('manufacturer', $brands);
+            $query = $query->whereIn('inventory.manufacturer', $brands);
         }
 
         // Return Filtered Query
         return $query->where(function (Builder $query) use($campaign) {
             return $query->where('website_lead.dealer_location_id', $campaign->location_id)
                     ->orWhereRaw('(dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
-        })->whereRaw('DATE_ADD(date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()')->get();
+        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()')->get();
     }
     
     public static function getTableName() {
