@@ -297,7 +297,8 @@ class CampaignRepository implements CampaignRepositoryInterface {
             // Add IN
             $query = $query->whereIn('inventory.manufacturer', $brands);
         }
-        echo $query->getQuery();
+        var_dump($query->toSql());
+        die;
 
         // Return Filtered Query
         return $query->where(function (Builder $query) use($campaign) {
