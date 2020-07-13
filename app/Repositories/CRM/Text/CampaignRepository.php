@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Text;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Exceptions\NotImplementedException;
