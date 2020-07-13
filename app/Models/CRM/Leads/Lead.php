@@ -294,7 +294,9 @@ class Lead extends Model
     public static function findCampaignLeads($campaignId)
     {
         // Get Campaign
-        $campaign = Campaign::findOrFail($campaignId)->with('crmUser');
+        $campaign = Campaign::findOrFail($campaignId);
+        var_dump($campaign);
+        die;
 
         // Find Filtered Leads
         $query = self::select('*')
