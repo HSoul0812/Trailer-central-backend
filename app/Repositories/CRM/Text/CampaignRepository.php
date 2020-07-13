@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Text;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
 use App\Models\CRM\Text\CampaignBrand;
@@ -129,7 +130,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
      */
     public function getLeads($params) {
         // Find Campaign Leads
-        $query = Campaign::findLeads($params['id']);
+        $query = Lead::findCampaignLeads($params['id']);
 
         // Return Campaign Leads
         return $query->paginate($params['per_page'])->appends($params);
