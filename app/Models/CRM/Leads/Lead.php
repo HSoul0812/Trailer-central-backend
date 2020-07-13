@@ -296,13 +296,11 @@ class Lead extends Model
         // Get Campaign
         $campaign = Campaign::findOrFail($campaignId);
         $crmUser = $campaign->crmUser()->first();
-        echo $crmUser->dealer_id;
-        die;
 
         // Find Filtered Leads
         $query = self::select('*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->where('dealer_id', $campaign->crmUser->dealer_id);
+                     ->where('dealer_id', $campaign->crmUser->id);
 
         // Is Archived?!
         if($campaign->included_archived !== -1) {
