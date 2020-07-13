@@ -21,7 +21,34 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         throw NotImplementedException;
     }
 
+    /**
+     * Get All Salespeople
+     * 
+     * @param int $params
+     * @return type
+     */
     public function getAll($params) {
+        $query = SalesPerson::select('*');
+        
+        if (isset($params['dealer_id'])) {
+            $newDealerUser = NewDealerUser::findOrFail($params['dealer_id']);
+            $query = $query->where('user_id', $newDealerUser->user_id);
+        }
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        }
+        
+        return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * Get All Dealers With Salespeople
+     * 
+     * @param int $params
+     * @return type
+     */
+    public function getAllDealers($params) {
         $query = SalesPerson::select('*');
         
         if (isset($params['dealer_id'])) {
