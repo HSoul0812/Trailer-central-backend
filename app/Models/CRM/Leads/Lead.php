@@ -287,6 +287,65 @@ class Lead extends Model
 
 
     /**
+     * Find Leads
+     * 
+     * @param int $dealerId
+     * @param Campaign/Blast $campaign
+     * @return Collection of Leads
+     */
+    public static function findLeads($dealerId, $campaign)
+    {
+        // Find Filtered Leads
+        $query = self::select('*')
+                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                     ->where('website_lead.dealer_id', $dealerId);
+
+        // Is Archived?!
+        if($campaign->included_archived !== -1) {
+            $query = $query->where('website_lead.is_archived', $campaign->include_archived);
+        }
+
+        // Get Categories
+        if(!empty($campaign->categories)) {
+            $categories = array();
+            foreach($campaign->categories as $category) {
+                $categories[] = $category->category;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.category', $categories);
+        }
+
+        // Get Categories
+        if(!empty($campaign->categories)) {
+            $categories = array();
+            foreach($campaign->categories as $category) {
+                $categories[] = $category->category;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.category', $categories);
+        }
+
+        // Get Brands
+        if(!empty($campaign->brands)) {
+            $brands = array();
+            foreach($campaign->brands as $brand) {
+                $brands[] = $brand->brand;
+            }
+
+            // Add IN
+            $query = $query->whereIn('inventory.manufacturer', $brands);
+        }
+
+        // Return Filtered Query
+        return $query->where(function (Builder $query) use($campaign) {
+            return $query->where('website_lead.dealer_location_id', $campaign->location_id)
+                    ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
+        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()');
+    }
+
+    /**
      * Find Leads for Campaign
      * 
      * @return Collection of Leads
