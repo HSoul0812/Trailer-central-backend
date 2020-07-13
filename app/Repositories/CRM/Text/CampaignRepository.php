@@ -272,7 +272,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
                      ->where('dealer_id', $dealerId);
 
         // Is Archived?!
-        if($campaign->included_archived >= 0) {
+        if($campaign->included_archived !== -1 && $campaign->include_archived !== '-1') {
             $query = $query->where('website_lead.is_archived', $campaign->include_archived);
         }
 
