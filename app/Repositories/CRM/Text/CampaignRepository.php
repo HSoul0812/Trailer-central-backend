@@ -134,7 +134,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
         $crmUser = $campaign->crmUser()->first();
 
         // Find Campaign Leads
-        $query = Lead::findLeads($params['id']);
+        $query = Lead::findLeads($crmUser->id, $campaign);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
