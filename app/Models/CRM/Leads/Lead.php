@@ -299,7 +299,7 @@ class Lead extends Model
         // Find Filtered Leads
         $query = self::select('*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->where('user_id', $campaign->user_id);
+                     ->where('user_id', $campaign->crmUser->dealer_id);
 
         // Is Archived?!
         if($campaign->included_archived !== -1) {
