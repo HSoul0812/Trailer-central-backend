@@ -281,18 +281,9 @@ class BlastRepository implements BlastRepositoryInterface {
             }
 
             // Add IN
-            $query = $query->whereIn('inventory.category', $categories);
-        }
-
-        // Get Categories
-        if(!empty($blast->categories)) {
-            $categories = array();
-            foreach($blast->categories as $category) {
-                $categories[] = $category->category;
+            if(count($categories) > 0) {
+                $query = $query->whereIn('inventory.category', $categories);
             }
-
-            // Add IN
-            $query = $query->whereIn('inventory.category', $categories);
         }
 
         // Get Brands
@@ -303,7 +294,9 @@ class BlastRepository implements BlastRepositoryInterface {
             }
 
             // Add IN
-            $query = $query->whereIn('inventory.manufacturer', $brands);
+            if(count($brands) > 0) {
+                $query = $query->whereIn('inventory.manufacturer', $brands);
+            }
         }
 
         // Return Filtered Query
