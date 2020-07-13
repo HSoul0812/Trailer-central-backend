@@ -292,48 +292,55 @@ class Lead extends Model
     public static function findCampaignLeads($campaignId)
     {
         // Get Campaign
-        $campaign = self::findOrFail($campaignId);
+        $campaign = Campaign::findOrFail($campaignId);
 
         // Find Filtered Leads
-        return $campaign->leads()->where(function (Builder $query) use($campaign) {
-            // Join Inventory Table
-            $query = $query->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id');
+        $query = self::select('*')
+                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id');
 
-            // Is Archived?!
-            if($campaign->included_archived !== -1) {
-                $query = $query->where('is_archived', $campaign->include_archived);
+        // Is Archived?!
+        if($campaign->included_archived !== -1) {
+            $query = $query->where('is_archived', $campaign->include_archived);
+        }
+
+        // Get Categories
+        if(!empty($campaign->categories)) {
+            $categories = array();
+            foreach($campaign->categories as $category) {
+                $categories[] = $category->category;
             }
 
-            // Get Categories
-            if(!empty($campaign->categories)) {
-                $categories = array();
-                foreach($campaign->categories as $category) {
-                    $categories[] = $category->category;
-                }
+            // Add IN
+            $query = $query->whereIn('category', $categories);
+        }
 
-                // Add IN
-                $query = $query->whereIn('category', $categories);
+        // Get Categories
+        if(!empty($campaign->categories)) {
+            $categories = array();
+            foreach($campaign->categories as $category) {
+                $categories[] = $category->category;
             }
 
-            // Get Brands
-            if(!empty($campaign->brands)) {
-                $brands = array();
-                foreach($campaign->brands as $brand) {
-                    $brands[] = $brand->brand;
-                }
+            // Add IN
+            $query = $query->whereIn('category', $categories);
+        }
 
-                // Add IN
-                $query = $query->whereIn('manufacturer', $brands);
+        // Get Brands
+        if(!empty($campaign->brands)) {
+            $brands = array();
+            foreach($campaign->brands as $brand) {
+                $brands[] = $brand->brand;
             }
-            echo $query->get();
-            die;
 
-            // Return Filtered Query
-            return $query->where(function (Builder $query) use($campaign) {
-                return $query->where('website_lead.dealer_location_id', $campaign->location_id)
-                        ->orWhereRaw('(dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
-            })->whereRaw('DATE_ADD(date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()');
-        })->get();
+            // Add IN
+            $query = $query->whereIn('manufacturer', $brands);
+        }
+
+        // Return Filtered Query
+        return $query->where(function (Builder $query) use($campaign) {
+            return $query->where('website_lead.dealer_location_id', $campaign->location_id)
+                    ->orWhereRaw('(dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
+        })->whereRaw('DATE_ADD(date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()')->get();
     }
     
     public static function getTableName() {
