@@ -272,7 +272,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
                      ->where('website_lead.dealer_id', $dealerId);
 
         // Is Archived?!
-        if($campaign->included_archived !== -1) {
+        if($campaign->included_archived >= 0) {
             $query = $query->where('website_lead.is_archived', $campaign->include_archived);
         }
 
@@ -303,13 +303,9 @@ class CampaignRepository implements CampaignRepositoryInterface {
         }
 
         // Return Filtered Query
-        $query = $query->where(function (Builder $query) use($campaign) {
+        return $query->where(function (Builder $query) use($campaign) {
             return $query->where('website_lead.dealer_location_id', $campaign->location_id)
                     ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
         })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()');
-
-        // Return Sql
-        var_dump($query->toSql());
-        die;
     }
 }
