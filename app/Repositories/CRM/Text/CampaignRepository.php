@@ -287,17 +287,6 @@ class CampaignRepository implements CampaignRepositoryInterface {
             $query = $query->whereIn('inventory.category', $categories);
         }
 
-        // Get Categories
-        if(!empty($campaign->categories)) {
-            $categories = array();
-            foreach($campaign->categories as $category) {
-                $categories[] = $category->category;
-            }
-
-            // Add IN
-            $query = $query->whereIn('inventory.category', $categories);
-        }
-
         // Get Brands
         if(!empty($campaign->brands)) {
             $brands = array();
