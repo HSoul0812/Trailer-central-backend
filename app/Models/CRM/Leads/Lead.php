@@ -295,9 +295,8 @@ class Lead extends Model
     {
         // Get Campaign
         $campaign = Campaign::findOrFail($campaignId);
-        var_dump($campaign);
         $crmUser = $campaign->crmUser();
-        var_dump($crmUser);
+        echo $crmUser->dealer_id;
         die;
 
         // Find Filtered Leads
