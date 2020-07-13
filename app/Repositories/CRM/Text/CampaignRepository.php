@@ -284,7 +284,9 @@ class CampaignRepository implements CampaignRepositoryInterface {
             }
 
             // Add IN
-            $query = $query->whereIn('inventory.category', $categories);
+            if(count($categories) > 0) {
+                $query = $query->whereIn('inventory.category', $categories);
+            }
         }
 
         // Get Brands
@@ -295,7 +297,9 @@ class CampaignRepository implements CampaignRepositoryInterface {
             }
 
             // Add IN
-            $query = $query->whereIn('inventory.manufacturer', $brands);
+            if(count($brands) > 0) {
+                $query = $query->whereIn('inventory.manufacturer', $brands);
+            }
         }
         var_dump($query->toSql());
         die;
