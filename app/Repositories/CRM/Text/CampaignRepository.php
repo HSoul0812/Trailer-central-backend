@@ -131,6 +131,14 @@ class CampaignRepository implements CampaignRepositoryInterface {
     public function getLeads($params) {
         // Find Campaign Leads
         $query = Lead::findCampaignLeads($params['id']);
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
 
         // Return Campaign Leads
         return $query->paginate($params['per_page'])->appends($params);
