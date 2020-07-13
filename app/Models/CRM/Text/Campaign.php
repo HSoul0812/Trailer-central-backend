@@ -2,7 +2,6 @@
 
 namespace App\Models\CRM\Text;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
 use App\Models\User\CrmUser;

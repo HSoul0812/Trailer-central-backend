@@ -13,6 +13,7 @@ use App\Models\User\DealerLocation;
 use App\Models\User\CrmUser;
 use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\Traits\TableAware;
