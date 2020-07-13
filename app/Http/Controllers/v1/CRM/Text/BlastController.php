@@ -13,6 +13,7 @@ use App\Http\Requests\CRM\Text\DeleteBlastRequest;
 use App\Http\Requests\CRM\Text\SentBlastRequest;
 use App\Http\Requests\CRM\Text\LeadsBlastRequest;
 use App\Transformers\CRM\Text\BlastTransformer;
+use App\Transformers\CRM\Leads\LeadTransformer;
 
 class BlastController extends RestfulControllerV2
 {
