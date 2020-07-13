@@ -266,7 +266,7 @@ class BlastRepository implements BlastRepositoryInterface {
         // Find Filtered Leads
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->where('dealer_id', $dealerId);
+                     ->where('website_lead.dealer_id', $dealerId);
 
         // Is Archived?!
         if($blast->included_archived !== -1) {
