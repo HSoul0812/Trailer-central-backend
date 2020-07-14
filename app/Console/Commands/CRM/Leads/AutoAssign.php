@@ -39,10 +39,8 @@ class AutoAssign extends Command
     protected $inventoryRepository;
 
     /**
-     * @var string
      * @var datetime
      */
-    protected $timezone = 'America/Indiana/Indianapolis';
     protected $datetime = null;
 
     /**
@@ -69,9 +67,9 @@ class AutoAssign extends Command
         $dealerId = $this->argument('dealer');
 
         // Initialize Time
-        date_default_timezone_set($this->timezone);
+        date_default_timezone_set(env('DB_TIMEZONE'));
         $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone($this->timezone));
+        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
 
         // Get Dealers With Valid Salespeople
         $dealers = NewDealerUser::has('salespeopleEmails')->with('crmUser')->with('salespeopleEmails')->get();
@@ -87,14 +85,15 @@ class AutoAssign extends Command
 
             // Loop Leads for Current Dealer
             foreach($leads as $lead) {
-                var_dump($lead);
-                die;
                 // Get Vars
                 $leadType = $this->salesPersonRepository->findSalesType($lead->lead_type);
                 $dealerLocationId = $lead->dealer_location_id;
 
                 // Find Next Salesperson
-                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealerId, $newestSalesPersonId, $dealerLocationId, $leadType);
+                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealerId, $dealerLocationId, $leadType, $dealer->salesPeople);
+                // Found Sales Person?!
+                var_dump($salesPerson);
+                die;
                 if(empty($salesPerson->id)) {
                     // TO DO: Log Inability to Find Salesperson, Put Off for Later!
                     continue;
@@ -106,16 +105,16 @@ class AutoAssign extends Command
                 $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone($this->timezone));
 
                 // Set Salesperson to Lead
-                $this->leadRepository->update([
+                /*$this->leadRepository->update([
                     'id' => $lead->identifier,
                     'sales_person_id' => $salesPerson->id,
                     'next_contact_date' => $nextContactDate
-                ]);
+                ]);*/
 
                 // Send Sales Email
                 if(!empty($dealer->crmUser->enable_assign_notification)) {
                     // Send Sales Email
-                    $this->sendSalesEmail($salesPerson, $lead->identifier);
+                    //$this->sendSalesEmail($salesPerson, $lead->identifier);
                 }
             }
         }

@@ -104,14 +104,18 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      * @param int $dealerId
      * @param int $dealerLocationId
      * @param string $salesType
+     * @param array $salesPeople
      * @return SalesPerson next sales person
      */
-    public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType) {
+    public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPeople = array()) {
         // Get Sales Person ID
         $newestSalesPersonId = $this->findNewestSalesPerson($dealerId, $dealerLocationId, $salesType);
 
-        // Get Sales People for Dealer ID
-        $salesPeople = $this->findSalesPeople($dealerId);
+        // Don't Already Have SalesPeople?
+        if(empty($salesPeople)) {
+            // Get Sales People for Dealer ID
+            $salesPeople = $this->findSalesPeople($dealerId);
+        }
 
         // Loop Sales People
         $validSalesPeople = [];
