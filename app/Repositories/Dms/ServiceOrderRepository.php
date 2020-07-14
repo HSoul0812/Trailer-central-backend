@@ -75,6 +75,8 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
         } else {
             $query = ServiceOrder::where('id', '>', 0);  
         }
+        // Filter out service orders which location doesn't exist
+        $query = $query->where('location', '>', 0);
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('user_defined_id', 'LIKE', '%' . $params['search_term'] . '%')
