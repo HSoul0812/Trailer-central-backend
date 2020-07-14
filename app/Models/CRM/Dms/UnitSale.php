@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Dms;
 
+use App\Models\CRM\User\SalesPerson;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
@@ -9,7 +10,13 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
 
 
-class UnitSale extends Model
+/**
+ * Class UnitSale
+ * @package App\Models\CRM\Dms
+ * @property Customer $customer
+ * @property SalesPerson $salesPerson
+ */
+class UnitSale extends Model implements GenericSaleInterface
 {
 
     const QUOTE_STATUS_OPEN = 'open';
@@ -66,5 +73,35 @@ class UnitSale extends Model
             return 'Deal';
         }
         return 'Completed Deal';
+    }
+
+    public function salesPerson()
+    {
+        return $this->hasOne(SalesPerson::class, 'id', '');
+    }
+
+    public function dealerCost()
+    {
+        // TODO: Implement dealerCost() method.
+    }
+
+    public function subtotal()
+    {
+        // TODO: Implement subtotal() method.
+    }
+
+    public function discount()
+    {
+        // TODO: Implement discount() method.
+    }
+
+    public function taxTotal()
+    {
+        // TODO: Implement taxTotal() method.
+    }
+
+    public function createdAt()
+    {
+        return $this->createdAt();
     }
 }

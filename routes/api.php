@@ -407,6 +407,15 @@ $api->version('v1', function ($route) {
         $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
         $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Various reports
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
     });
 
 });

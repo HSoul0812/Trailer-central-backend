@@ -5,10 +5,13 @@ namespace App\Models\Pos;
 
 
 use App\Models\CRM\Dms\Refund;
+use App\Models\CRM\Dms\GenericSaleInterface;
+use App\Models\CRM\Quickbooks\Item;
 use App\Models\CRM\Quickbooks\PaymentMethod;
 use App\Models\CRM\User\Customer;
 use App\Models\CRM\User\SalesPerson;
 use App\Utilities\JsonApi;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -21,10 +24,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property Customer $customer
  * @property SalesPerson $salesPerson
  * @property PaymentMethod $paymentMethod
- * @property SaleProduct[] $products
+ * @property Collection<SaleProduct> $products
  * @property Refund[] $refunds
  */
-class Sale extends Model implements JsonApi\Filterable
+class Sale extends Model implements JsonApi\Filterable, GenericSaleInterface
 {
     protected $table = "crm_pos_sales";
 
@@ -74,5 +77,42 @@ class Sale extends Model implements JsonApi\Filterable
     public function jsonApiFilterableColumns(): ?array
     {
         return $this->filterableColumns;
+    }
+
+    public function dealerCost()
+    {
+        return $this->products->reduce(function($total, SaleProduct $item) {
+            if ($item->item->type !== 'tax') {
+                return $total + $item->item->cost;
+            } else {
+                return $total;
+            }
+        });
+    }
+
+    public function subtotal()
+    {
+        return $this->subtotal;
+    }
+
+    public function discount()
+    {
+        return $this->discount;
+    }
+
+    public function taxTotal()
+    {
+        return $this->products->reduce(function($total, SaleProduct $item) {
+            if ($item->item->type === 'tax') {
+                return $total + $item->item->unit_price;
+            } else {
+                return $total;
+            }
+        });
+    }
+
+    public function createdAt()
+    {
+        return $this->created_at;
     }
 }

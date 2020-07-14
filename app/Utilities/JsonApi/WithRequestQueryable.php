@@ -4,6 +4,7 @@
 namespace App\Utilities\JsonApi;
 
 
+use Dingo\Api\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -22,6 +23,9 @@ use Illuminate\Database\Eloquent\Builder;
  */
 trait WithRequestQueryable
 {
+    /**
+     * @var Request
+     */
     protected $requestQueryableRequest;
     protected $requestQueryableQuery;
     protected $requestQueryableBuilder;
