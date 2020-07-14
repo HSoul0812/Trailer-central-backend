@@ -13,8 +13,10 @@ class ShowroomTransformer extends TransformerAbstract
         return [
             'id' => $showroom->id,
             'manufacturer' => $showroom->manufacturer,
+            'category' => $showroom->type,
             'model' => $showroom->model,
             'year' => $showroom->year,
+            'msrp' => $showroom->msrp,
             'description' => $showroom->description,
             'description_txt' => $showroom->description_txt,
         ];
