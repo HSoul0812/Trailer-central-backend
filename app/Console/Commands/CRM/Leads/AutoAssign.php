@@ -81,11 +81,11 @@ class AutoAssign extends Command
                 'per_page' => 'all',
                 'dealer_id' => $dealer->id
             ]);
-            var_dump($leads);
-            die;
 
             // Loop Leads for Current Dealer
             foreach($leads as $lead) {
+                var_dump($lead);
+                die;
                 // Get Vars
                 $leadType = $this->salesPersonRepository->findSalesType($lead->lead_type);
                 $dealerLocationId = $lead->dealer_location_id;
