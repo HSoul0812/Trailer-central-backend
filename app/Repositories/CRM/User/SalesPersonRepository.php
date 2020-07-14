@@ -80,9 +80,9 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
                             ->leftJoin(Lead::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
                             ->where(Lead::getTableName() . '.dealer_id', $dealerId)
                             ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
-                            ->where(SalesPerson::getTableName() . '.sales_person_id', '<>', 0)
-                            ->where(SalesPerson::getTableName() . '.sales_person_id', '<>', '')
-                            ->whereNotNull(SalesPerson::getTableName() . '.sales_person_id');
+                            ->where(SalesPerson::getTableName() . '.id', '<>', 0)
+                            ->where(SalesPerson::getTableName() . '.id', '<>', '')
+                            ->whereNotNull(SalesPerson::getTableName() . '.id');
 
         // Append Dealer Location
         if(!empty($dealerLocationId)) {
