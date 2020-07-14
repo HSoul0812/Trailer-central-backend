@@ -86,11 +86,11 @@ class AutoAssign extends Command
             // Loop Leads for Current Dealer
             foreach($leads as $lead) {
                 // Get Vars
-                $leadType = $this->salesPersonRepository->findSalesType($lead->lead_type);
+                $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
                 $dealerLocationId = $lead->dealer_location_id;
 
                 // Find Next Salesperson
-                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealerId, $dealerLocationId, $leadType, $dealer->salesPeople);
+                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $dealer->salesPeople);
                 // Found Sales Person?!
                 var_dump($salesPerson);
                 die;

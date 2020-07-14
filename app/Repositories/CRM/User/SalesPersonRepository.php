@@ -244,17 +244,17 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
     public function findSalesType($leadType) {
         // Set Default Lead Type
         $salesType = 'default';
-        if(in_array($salesType, SalesPerson::TYPE_DEFAULT) || empty($leadType)) {
+        if(in_array($leadType, SalesPerson::TYPES_DEFAULT) || empty($leadType)) {
             $salesType = 'default';
         }
 
         // Set Inventory Lead Type
-        if(in_array($leadType, SalesPerson::TYPE_INVENTORY)) {
+        if(in_array($leadType, SalesPerson::TYPES_INVENTORY)) {
             $salesType = 'inventory';
         }
 
         // Not a Valid Type? Set Default!
-        if(!in_array($leadType, SalesPerson::TYPE_VALID)) {
+        if(!in_array($leadType, SalesPerson::TYPES_VALID)) {
             $salesType = 'default';
         }
 
