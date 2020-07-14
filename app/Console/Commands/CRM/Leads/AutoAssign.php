@@ -74,7 +74,7 @@ class AutoAssign extends Command
         $this->datetime->setTimezone(new \DateTimeZone($this->timezone));
 
         // Get Dealers With Unassigned Leads
-        $dealers = NewDealerUser::has('leadsUnassigned')->with('crmUser')->get();
+        $dealers = NewDealerUser::has('salespeopleEmails')->with('crmUser')->get();
         var_dump($dealers);
         die;
         foreach($dealers as $dealer) {

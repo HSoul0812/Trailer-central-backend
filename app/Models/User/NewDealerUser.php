@@ -6,6 +6,7 @@ use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Models\CRM\User\SalesPerson;
 use Illuminate\Database\Eloquent\Model;
 
 class NewDealerUser extends Model
@@ -80,20 +81,22 @@ class NewDealerUser extends Model
         return $this->hasMany(Upload::class, 'dealer_upload', 'dealer_id');
     }
 
+
     /**
-     * @return type
+     * Get Salespeople
+     * 
+     * @return HasMany
      */
-    public function leadsUnassigned()
-    {
-        $hasMany = $this->hasManyThrough(LeadStatus::class, Lead::class, 'dealer_id', 'tc_lead_identifier', 'id', 'identifier')
-                    ->where(Lead::getTableName().'.is_spam', 0)
-                    ->where(Lead::getTableName().'.is_archived', 0)
-                    ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY')
-                    ->where(function($query) {
-                        $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
-                              ->orWhere(LeadStatus::getTableName().'.sales_person_id', 0);
-                    })->groupBy(Lead::getTableName().'.identifier');
-        echo $hasMany->toSql();
-        die;
+    public function salespeople() {
+        return $this->hasMany(SalesPerson::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get Salespeople w/Emails
+     * 
+     * @return HasMany
+     */
+    public function salespeopleEmails() {
+        return $this->salespeople()->whereNotNull('email')->where('email', '<>', '');
     }
 }
