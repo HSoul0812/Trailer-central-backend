@@ -4,6 +4,8 @@ namespace App\Models\User;
 
 use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class NewDealerUser extends Model
@@ -76,5 +78,20 @@ class NewDealerUser extends Model
 
     public function uploads() {
         return $this->hasMany(Upload::class, 'dealer_upload', 'dealer_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function leadsUnassigned()
+    {
+        return $this->hasManyThrough(LeadStatus::class, Lead::class, 'dealer_id', 'tc_lead_identifier', 'id', 'identifier')
+                    ->where(Lead::getTableName().'.is_spam', 0)
+                    ->where(Lead::getTableName().'.is_archived', 0)
+                    ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY')
+                    ->where(function($query) {
+                        $query->where(LeadStatus::getTableName().'.sales_person_id', 0)
+                            ->whereNull(LeadStatus::getTableName().'.sales_person_id');
+                    })->groupBy(Lead::getTableName().'.identifier');
     }
 }

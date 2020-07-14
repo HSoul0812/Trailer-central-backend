@@ -5,7 +5,6 @@ namespace App\Console\Commands\CRM\Leads;
 use Illuminate\Console\Command;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
-use App\Models\User\User;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\MailHelper;
@@ -75,15 +74,12 @@ class AutoAssign extends Command
         $this->datetime->setTimezone(new \DateTimeZone($this->timezone));
 
         // Get Dealers With Unassigned Leads
-        $dealers = User::has('leadsUnassigned')->get();
+        $dealers = NewDealerUser::has('leadsUnassigned')->with('crmUser')->get();
         var_dump($dealers);
         die;
-        foreach($dealers as $dealerId => $leads) {
-            // Get CRM User
-            $crmUser = NewDealerUser::findOrFail($dealerId)->crmUser()->first();
-
-            // Loop Leads
-            foreach($leads as $lead) {
+        foreach($dealers as $dealer) {
+            // Loop Leads for Current Dealer
+            foreach($dealers->leadsUnassigned as $lead) {
                 // Get Vars
                 $leadType = $this->salesPersonRepository->findSalesType($lead->lead_type);
                 $dealerLocationId = $lead->dealer_location_id;
@@ -108,7 +104,7 @@ class AutoAssign extends Command
                 ]);
 
                 // Send Sales Email
-                if(!empty($crmUser->enable_assign_notification)) {
+                if(!empty($dealer->crmUser->enable_assign_notification)) {
                     // Send Sales Email
                     $this->sendSalesEmail($salesPerson, $lead->identifier);
                 }
