@@ -75,7 +75,6 @@ class AutoAssign extends Command
 
         // Get Dealers With Unassigned Leads
         $dealers = NewDealerUser::has('leadsUnassigned')->with('crmUser')->get();
-        var_dump($dealers);
         die;
         foreach($dealers as $dealer) {
             // Loop Leads for Current Dealer
