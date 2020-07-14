@@ -61,6 +61,14 @@ class NewDealerUser extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get the crm user
+     */
+    public function crmUser()
+    {
+        return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
+    }
+
     public function location()
     {
         return $this->hasOne(DealerLocation::class, 'dealer_id', 'dealer_id');

@@ -8,6 +8,16 @@ use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 
 class SalesPersonRepository implements SalesPersonRepositoryInterface {
+
+    /**
+     * @var Array
+     */
+    private $salesPeople = [];
+
+    /**
+     * @var Array
+     */
+    private $lastSalesPeople = [];
     
     public function create($params) {
         throw NotImplementedException;
@@ -53,13 +63,13 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      * 
      * @param int $dealerId
      * @param int $dealerLocationId
-     * @param string $leadType
+     * @param string $salesType
      * @param int
      */
-    public function findNewestSalesPerson($dealerId, $dealerLocationId, $leadType) {
+    public function findNewestSalesPerson($dealerId, $dealerLocationId, $salesType) {
         // Last Sales Person Already Exists?
-        if(isset($this->lastSalesPeople[$dealerId][$dealerLocationId][$leadType])) {
-            return $this->lastSalesPeople[$dealerId][$dealerLocationId][$leadType];
+        if(isset($this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType])) {
+            return $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType];
         }
 
         // Find Newest Salesperson in DB
@@ -67,7 +77,7 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
                             ->leftJoin(SalesPerson::getTableName(), SalesPerson::getTableName() . '.id', '=', LeadStatus::getTableName() . '.sales_person_id')
                             ->leftJoin(Lead::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
                             ->where(Lead::getTableName() . '.dealer_id', $dealerId)
-                            ->where(SalesPerson::getTableName() . '.is_' . $leadType, 1)
+                            ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
                             ->where(SalesPerson::getTableName() . '.sales_person_id', '<>', 0)
                             ->where(SalesPerson::getTableName() . '.sales_person_id', '<>', '')
                             ->whereNotNull(SalesPerson::getTableName() . '.sales_person_id');
@@ -85,36 +95,45 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         }
 
         // Set Sales Person ID
-        return $this->setLastSalesPerson($dealerId, $dealerLocationId, $leadType, $salesPersonId);
+        return $this->setLastSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId);
     }
 
     /**
      * Find Next Sales Person
      * 
-     * @param array $salesPeople
-     * @param int $newestSalesPersonId
+     * @param int $dealerId
      * @param int $dealerLocationId
-     * @param string $type
-     * @return next sales person ID
+     * @param string $salesType
+     * @return SalesPerson next sales person
      */
-    private function findNextSalesPerson($salesPeople, $dealerLocationId, $type) {
+    public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType) {
+        // Get Sales Person ID
+        $newestSalesPersonId = $this->findNewestSalesPerson($dealerId, $dealerLocationId, $salesType);
+
+        // Get Sales People for Dealer ID
+        $salesPeople = $this->findSalesPeople($dealerId);
+
         // Loop Sales People
         $validSalesPeople = [];
-        $nextSalesPersonId = 0;
+        $nextSalesPerson = null;
+        $newestSalesPerson = null;
         $lastId = 0;
         foreach($salesPeople as $k => $salesPerson) {
+            // Set Newest Sales Person
+            if($salesPerson->id === $newestSalesPersonId) {
+                $newestSalesPerson = $salesPerson;
+            }
+
             // Search By Location?
-            if($dealerLocationId !== '0') {
+            if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
                 if($dealerLocationId !== $salesPerson->dealer_location_id) {
                     continue;
                 }
             }
 
             // Search by Type?
-            if($type !== NULL) {
-                if($salesPerson->{'is_' . $type} !== '1') {
-                    continue;
-                }
+            if($salesPerson->{'is_' . $salesType} !== '1') {
+                continue;
             }
 
             // Insert Valid Salespeople
@@ -128,7 +147,7 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
             foreach($validSalesPeople as $salesPerson) {
                 // Compare ID
                 if($lastId === $newestSalesPersonId || $newestSalesPersonId === 0) {
-                    $nextSalesPersonId = $salesPerson->id;
+                    $nextSalesPerson = $salesPerson;
                     break;
                 }
                 $lastId = $salesPerson->id;
@@ -137,20 +156,23 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
             // Still No Next Sales Person?
             if(empty($nextSalesPersonId)) {
                 $salesPerson = reset($validSalesPeople);
-                $nextSalesPersonId = $salesPerson->id;
+                $nextSalesPerson = $salesPerson;
             }
         } elseif(count($validSalesPeople) === 1) {
             $salesPerson = reset($validSalesPeople);
-            $nextSalesPersonId = $salesPerson->id;
+            $nextSalesPerson = $salesPerson;
         }
 
         // Still No Next Sales Person?
-        if(empty($nextSalesPersonId)) {
-            $nextSalesPersonId = $newestSalesPersonId;
+        if(empty($nextSalesPerson)) {
+            $nextSalesPerson = $newestSalesPerson;
         }
 
-        // Return Next Sales Person ID
-        return $nextSalesPersonId;
+        // Set Next Salesperson
+        $this->setLastSalesperson($dealerId, $dealerLocationId, $salesType, $nextSalesPerson->id);
+
+        // Return Next Sales Person
+        return $nextSalesPerson;
     }
 
     /**
@@ -158,11 +180,11 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      * 
      * @param int $dealerId
      * @param int $dealerLocationId
-     * @param string $leadType
+     * @param string $salesType
      * @param int $salesPersonId
      * @return int last sales person ID
      */
-    public function setLastSalesPerson($dealerId, $dealerLocationId, $leadType, $salesPersonId) {
+    public function setLastSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId) {
         // Assign to Arrays
         if(!isset($this->lastSalesPeople[$dealerId])) {
             $this->lastSalesPeople[$dealerId] = array();
@@ -170,7 +192,7 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         if(!isset($this->lastSalesPeople[$dealerId][$dealerLocationId])) {
             $this->lastSalesPeople[$dealerId][$dealerLocationId] = array();
         }
-        $this->lastSalesPeople[$dealerId][$dealerLocationId][$leadType] = $salesPersonId;
+        $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType] = $salesPersonId;
 
         // Dealer Location ID Isn't 0?!
         if(!empty($dealerLocationId)) {
@@ -178,11 +200,35 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
             if(!isset($this->lastSalesPeople[$dealerId][0])) {
                 $this->lastSalesPeople[$dealerId][0] = array();
             }
-            $this->lastSalesPeople[$dealerId][0][$leadType] = $salesPersonId;
+            $this->lastSalesPeople[$dealerId][0][$salesType] = $salesPersonId;
         }
 
         // Return Last Sales Person ID
-        return $this->lastSalesPeople[$dealerId][$dealerLocationId][$leadType];
+        return $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType];
+    }
+
+    /**
+     * Find Sales People By Dealer ID
+     * 
+     * @param type $dealerId
+     */
+    public function findSalesPeople($dealerId) {
+        // Already Exists?!
+        if(isset($this->salesPeople[$dealerId])) {
+            return $this->salesPeople[$dealerId];
+        }
+
+        // Get New Sales People By Dealer ID
+        $newDealerUser = NewDealerUser::findOrFail($dealerId);
+        $salesPeople = SalesPerson::select('*')->where('user_id', $newDealerUser->user_id)->all();
+
+        // Set Sales People
+        $this->salesPeople = array(
+            'dealerId' => $salesPeople
+        );
+
+        // Return
+        return $salesPeople;
     }
 
     /**
@@ -191,23 +237,24 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      * @param string $leadType
      * @return string
      */
-    private function findSalesType($leadType) {
+    public function findSalesType($leadType) {
         // Set Default Lead Type
-        if(in_array($leadType, SalesPerson::TYPE_DEFAULT) || empty($leadType)) {
-            $leadType = 'default';
+        $salesType = 'default';
+        if(in_array($salesType, SalesPerson::TYPE_DEFAULT) || empty($leadType)) {
+            $salesType = 'default';
         }
 
         // Set Inventory Lead Type
         if(in_array($leadType, SalesPerson::TYPE_INVENTORY)) {
-            $leadType = 'inventory';
+            $salesType = 'inventory';
         }
 
         // Not a Valid Type? Set Default!
         if(!in_array($leadType, SalesPerson::TYPE_VALID)) {
-            $leadType = 'default';
+            $salesType = 'default';
         }
 
         // Return Lead Type!
-        return $leadType;
+        return $salesType;
     }
 }

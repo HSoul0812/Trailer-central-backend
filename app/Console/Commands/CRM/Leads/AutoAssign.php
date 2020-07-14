@@ -3,11 +3,17 @@
 namespace App\Console\Commands\CRM\Leads;
 
 use Illuminate\Console\Command;
+use App\Models\CRM\User\SalesPerson;
+use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Traits\MailHelper;
+use Carbon\Carbon;
 
 class AutoAssign extends Command
 {
+    use MailHelper;
+
     /**
      * The name and signature of the console command.
      *
@@ -33,9 +39,11 @@ class AutoAssign extends Command
     protected $inventoryRepository;
 
     /**
-     * @var array
+     * @var string
+     * @var datetime
      */
-    private $lastSalesPeople = [];
+    protected $timezone = 'America/Indiana/Indianapolis';
+    protected $datetime = null;
 
     /**
      * Create a new command instance.
@@ -59,42 +67,101 @@ class AutoAssign extends Command
     {
         // Get Dealer ID
         $dealerId = $this->argument('dealer');
+
+        // Initialize Time
+        date_default_timezone_set($this->timezone);
+        $this->datetime = new \DateTime();
+        $this->datetime->setTimezone(new \DateTimeZone($this->timezone));
+
+        // Get Dealers With Unassigned Leads
+        $dealers = $this->getUnassignedDealers($dealerId);
+        foreach($dealers as $dealerId => $leads) {
+            // Get CRM User
+            $crmUser = NewDealerUser::findOrFail($dealerId)->crmUser()->first();
+
+            // Loop Leads
+            foreach($leads as $lead) {
+                // Get Vars
+                $leadType = $this->salesPersonRepository->findSalesType($lead->lead_type);
+                $dealerLocationId = $lead->dealer_location_id;
+
+                // Find Next Salesperson
+                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealerId, $newestSalesPersonId, $dealerLocationId, $leadType);
+                if(empty($salesPerson->id)) {
+                    // TO DO: Log Inability to Find Salesperson, Put Off for Later!
+                    continue;
+                }
+
+                // Initialize Next Contact Date
+                $nextDay = date("d") + 1;
+                $nextContactTime = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
+                $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone($this->timezone));
+
+                // Set Salesperson to Lead
+                $this->leadRepository->update([
+                    'id' => $lead->identifier,
+                    'sales_person_id' => $salesPerson->id,
+                    'next_contact_date' => $nextContactDate
+                ]);
+
+                // Send Sales Email
+                if(!empty($crmUser->enable_assign_notification)) {
+                    // Send Sales Email
+                    $this->sendSalesEmail($salesPerson, $lead->identifier);
+                }
+            }
+        }
+    }
+
+    private function getUnassignedDealers($dealerId = 0) {
+        // Create Parameters for Unassigned Leads
         $params = array(
-            'per_page' => 100
+            'per_page' => 'all'
         );
         if(!empty($dealerId)) {
             $params['dealer_id'] = $dealerId;
         }
 
-        // Get Dealers With Sales People
-        $dealers = $this->leadRepository->getUnassignedLeads($params);
-        if(count($dealers) > 0) {
-            foreach($dealers as $dealerId => $leads) {
-                // Find All Sales People!
-                $salesPeople = $this->salesPersonRepository->getAll([
-                    'dealer_id' => $dealerId,
-                    'per_page'  => 100
-                ]);
+        // Get Leads
+        $leads = $this->leadRepository->getAllUnassigned($params);
 
-                // Loop Leads
-                foreach($leads as $lead) {
-                    // Get Vars
-                    $leadType = $this->salesPersonRepository->findSalesType($lead->lead_type);
-                    $dealerLocationId = $lead->dealer_location_id;
-
-                    // Find Next Salesperson
-                    $salesPersonId = $this->salesPersonRepository->findNextSalesPerson($dealerId, $newestSalesPersonId, $dealerLocationId, $leadType);
-                    if(empty($salesPersonId)) {
-                        continue;
-                    }
-
-                    // Set Next Salesperson
-                    $this->setLastSalesperson($dealerId, $dealerLocationId, $leadType, $salesPersonId);
-
-                    // Set Salesperson to Lead
-                    $this->leadRepository->saveSalesPerson($lead->identifier, $salesPersonId);
+        // Initialize Dealers Array
+        $dealers = array();
+        foreach($leads as $lead) {
+            if(!empty($lead->dealer_id)) {
+                // Dealer Doesn't Exist Yet?!
+                if(!isset($dealers[$lead->dealer_id])) {
+                    $dealers[$lead->dealer_id] = array();
                 }
+
+                // Append to Array
+                $dealers[$lead->dealer_id][] = $lead;
             }
         }
+
+        // Return Dealers
+        return $dealers;
+    }
+
+    /**
+     * Send Email to Sales Person for Auto Assign
+     * 
+     * @param App\Models\CRM\User\SalesPerson $salesPerson
+     * @param type $leadId
+     */
+    private function sendSalesEmail(SalesPerson $salesPerson, $leadId) {
+
+        // Send Email
+        Mail::to($customer["email"] ?? "" )->send(
+            new AutoAssignEmail([
+                'date' => Carbon::now()->toDateTimeString(),
+                'replyToEmail' => $user->email ?? "",
+                'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
+                'subject' => $subject,
+                'body' => $body,
+                'attach' => $attach,
+                'id' => $uniqueId
+            ])
+        );
     }
 }
