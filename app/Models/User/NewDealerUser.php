@@ -93,7 +93,7 @@ class NewDealerUser extends Model
                         $query->where(LeadStatus::getTableName().'.sales_person_id', 0)
                             ->whereNull(LeadStatus::getTableName().'.sales_person_id');
                     })->groupBy(Lead::getTableName().'.identifier');
-        var_dump($hasMany->getQuery());
+        echo $hasMany->toSql();
         die;
     }
 }
