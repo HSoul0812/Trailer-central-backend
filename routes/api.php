@@ -128,6 +128,11 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Inventory Manufacturers
+     */
+    $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
@@ -213,6 +218,9 @@ $api->version('v1', function ($route) {
 
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
+
+    // Factory
+    $route->get('feed/factory/showroom', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@index');
 
     /*
     |--------------------------------------------------------------------------
