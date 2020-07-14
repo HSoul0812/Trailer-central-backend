@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\User\AuthToken;
 
 /**
@@ -105,11 +106,6 @@ class User extends Model implements Authenticatable
         return $authToken->access_token;
     }
 
-    public function dealer()
-    {
-        return $this->hasOne(Dealer::class, 'user_id', 'user_id');
-    }
-
     public function crmUser()
     {
         return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
@@ -123,5 +119,18 @@ class User extends Model implements Authenticatable
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
-    }    
+    }
+    
+    public function leadsUnassigned()
+    {
+        return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')
+                    ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                    ->where(Lead::getTableName().'.is_spam', 0)
+                    ->where(Lead::getTableName().'.is_archived', 0)
+                    ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY')
+                    ->where(function($query) {
+                        $query->where(LeadStatus::getTableName().'.sales_person_id', 0)
+                            ->whereNull(LeadStatus::getTableName().'.sales_person_id');
+                    })->groupBy(Lead::getTableName().'.identifier');
+    }
 }
