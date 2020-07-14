@@ -11,12 +11,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class NewDealerUser extends Model
 {
+    const TABLE_NAME = 'new_dealer_user';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = "new_dealer_user";
+    protected $table = self::TABLE_NAME;
 
     /**
      * The attributes that are mass assignable.

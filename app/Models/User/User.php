@@ -17,12 +17,14 @@ use App\Models\User\AuthToken;
  */
 class User extends Model implements Authenticatable
 {
+    const TABLE_NAME = 'dealer';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'dealer';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
