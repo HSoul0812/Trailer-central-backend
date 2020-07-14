@@ -81,6 +81,9 @@ class AutoAssign extends Command
                 'per_page' => 'all',
                 'dealer_id' => $dealer->id
             ]);
+            if(count($leads) < 1) {
+                continue;
+            }
 
             // Loop Leads for Current Dealer
             foreach($leads as $lead) {
