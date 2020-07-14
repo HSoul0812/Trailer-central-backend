@@ -97,7 +97,10 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         }
 
         // Set Sales Person ID
-        return $this->setLastSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId);
+        $this->setLastSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId);
+
+        // Return Sales Person
+        return $salesPerson;
     }
 
     /**
@@ -111,7 +114,11 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      */
     public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPeople = array()) {
         // Get Sales Person ID
-        $newestSalesPersonId = $this->findNewestSalesPerson($dealerId, $dealerLocationId, $salesType);
+        $newestSalesPerson = $this->findNewestSalesPerson($dealerId, $dealerLocationId, $salesType);
+        $newestSalesPersonId = 0;
+        if(!empty($newestSalesPerson->id)) {
+            $newestSalesPersonId = $newestSalesPerson->id;
+        }
 
         // Don't Already Have SalesPeople?
         if(empty($salesPeople)) {
@@ -122,14 +129,8 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         // Loop Sales People
         $validSalesPeople = [];
         $nextSalesPerson = null;
-        $newestSalesPerson = null;
         $lastId = 0;
         foreach($salesPeople as $k => $salesPerson) {
-            // Set Newest Sales Person
-            if($salesPerson->id === $newestSalesPersonId) {
-                $newestSalesPerson = $salesPerson;
-            }
-
             // Search By Location?
             if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
                 if($dealerLocationId !== $salesPerson->dealer_location_id) {
