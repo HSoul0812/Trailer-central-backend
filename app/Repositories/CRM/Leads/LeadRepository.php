@@ -128,7 +128,7 @@ class LeadRepository implements LeadRepositoryInterface {
         });
 
         // Require Sales Person ID NULL or 0
-        $query = $query->where(function($q) {
+        $query = $query->where(function($query) {
             $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
                   ->orWhere(LeadStatus::getTableName().'.sales_person_id', $salesPersonId);
         })->where(Lead::getTableName().'.is_archived', 0)
