@@ -75,7 +75,7 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         }
 
         // Find Newest Salesperson in DB
-        $query = LeadStatus::select(LeadStatus::getTableName() . '.sales_person_id')
+        $query = LeadStatus::select(SalesPerson::getTableName() . '.*')
                             ->leftJoin(SalesPerson::getTableName(), SalesPerson::getTableName() . '.id', '=', LeadStatus::getTableName() . '.sales_person_id')
                             ->leftJoin(Lead::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
                             ->where(Lead::getTableName() . '.dealer_id', $dealerId)
@@ -93,11 +93,9 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         // Get Sales Person ID
         $salesPerson = $query->first();
         $salesPersonId = 0;
-        if(!empty($salesPerson->sales_person_id)) {
-            $salesPersonId = $salesPerson->sales_person_id;
+        if(!empty($salesPerson->id)) {
+            $salesPersonId = $salesPerson->id;
         }
-        var_dump($salesPerson);
-        die;
 
         // Set Sales Person ID
         $this->setLastSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId);
