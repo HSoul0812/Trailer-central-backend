@@ -85,15 +85,13 @@ class NewDealerUser extends Model
      */
     public function leadsUnassigned()
     {
-        $hasMany = $this->hasManyThrough(LeadStatus::class, Lead::class, 'dealer_id', 'tc_lead_identifier', 'id', 'identifier')
+        return $this->hasManyThrough(LeadStatus::class, Lead::class, 'dealer_id', 'tc_lead_identifier', 'id', 'identifier')
                     ->where(Lead::getTableName().'.is_spam', 0)
                     ->where(Lead::getTableName().'.is_archived', 0)
                     ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY')
                     ->where(function($query) {
-                        $query->where(LeadStatus::getTableName().'.sales_person_id', 0)
-                            ->whereNull(LeadStatus::getTableName().'.sales_person_id');
+                        $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
+                              ->orWhere(LeadStatus::getTableName().'.sales_person_id', 0);
                     })->groupBy(Lead::getTableName().'.identifier');
-        echo $hasMany->toSql();
-        die;
     }
 }
