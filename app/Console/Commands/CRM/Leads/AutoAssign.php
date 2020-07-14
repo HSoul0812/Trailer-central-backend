@@ -3,20 +3,17 @@
 namespace App\Console\Commands\CRM\Leads;
 
 use Illuminate\Console\Command;
-use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\User\SalesPerson;
-use App\Models\User\CrmUser;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\Repository;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 
-class AutoAssignLeads extends Command
+class AutoAssign extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'leads:autoassign {dealer?}';
+    protected $signature = 'leads:assign:auto {dealer?}';
 
     /**
      * The console command description.
@@ -24,6 +21,11 @@ class AutoAssignLeads extends Command
      * @var string
      */
     protected $description = 'Auto Assign leads to SalesPeople.';
+
+    /**     
+     * @var App\Repositories\CRM\Leads\LeadRepository
+     */
+    protected $leadRepository;
 
     /**     
      * @var App\Repositories\CRM\User\SalesPersonRepository
@@ -40,10 +42,11 @@ class AutoAssignLeads extends Command
      *
      * @return void
      */
-    public function __construct(SalesPersonRepositoryInterface $salesPersonRepo)
+    public function __construct(LeadRepositoryInterface $leadRepo, SalesPersonRepositoryInterface $salesPersonRepo)
     {
         parent::__construct();
 
+        $this->leadRepository = $leadRepo;
         $this->salesPersonRepository = $salesPersonRepo;
     }
 
@@ -73,53 +76,25 @@ class AutoAssignLeads extends Command
                     'per_page'  => 100
                 ]);
 
-                // Find Newest Salesperson
-                $newestSalesPersonId = $this->salesPersonRepository->findNewestSalesPerson($dealerId, $dealerLocationId, $leadType);
-
                 // Loop Leads
                 foreach($leads as $lead) {
+                    // Get Vars
+                    $leadType = $this->salesPersonRepository->findSalesType($lead->lead_type);
+                    $dealerLocationId = $lead->dealer_location_id;
+
                     // Find Next Salesperson
-                    $salesPersonId = $this->findNextSalesperson($dealerId, $newestSalesPersonId, $dealerLocationId, $leadType);
+                    $salesPersonId = $this->salesPersonRepository->findNextSalesPerson($dealerId, $newestSalesPersonId, $dealerLocationId, $leadType);
                     if(empty($salesPersonId)) {
                         continue;
                     }
 
+                    // Set Next Salesperson
+                    $this->setLastSalesperson($dealerId, $dealerLocationId, $leadType, $salesPersonId);
+
                     // Set Salesperson to Lead
                     $this->leadRepository->saveSalesPerson($lead->identifier, $salesPersonId);
-
-                    // Set Next Salesperson
-                    $this->setLastSalesperson($dealerId, $salesPersonId, $dealerLocationId, $leadType);
                 }
             }
-        }
-    }
-
-    /**
-     * Set Last Sales Person
-     * 
-     * @param int $dealerId
-     * @param int $salesPersonId
-     * @param int $dealerLocationId
-     * @param string $type
-     * @return void
-     */
-    private function setLastSalesPerson($dealerId, $salesPersonId, $dealerLocationId, $type) {
-        // Assign to Arrays
-        if(!isset($this->lastSalesPeople[$dealerId])) {
-            $this->lastSalesPeople[$dealerId] = array();
-        }
-        if(!isset($this->lastSalesPeople[$dealerId][$dealerLocationId])) {
-            $this->lastSalesPeople[$dealerId][$dealerLocationId] = array();
-        }
-        $this->lastSalesPeople[$dealerId][$dealerLocationId][$type] = $salesPersonId;
-
-        // Dealer Location ID Isn't 0?!
-        if(!empty($dealerLocationId)) {
-            // ALSO Set for 0!
-            if(!isset($this->lastSalesPeople[$dealerId][0])) {
-                $this->lastSalesPeople[$dealerId][0] = array();
-            }
-            $this->lastSalesPeople[$dealerId][0][$type] = $salesPersonId;
         }
     }
 }

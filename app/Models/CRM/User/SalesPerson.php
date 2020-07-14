@@ -20,6 +20,21 @@ class SalesPerson extends Model
      */
     protected $primaryKey = 'id';
     
+    /**
+     * Define Type Arrays
+     *
+     * @var array
+     */
+    const TYPES_DEFAULT   = ['general', 'manual'];
+    const TYPES_INVENTORY = ['craigslist', 'inventory', 'call'];
+    const TYPES_VALID     = ['default', 'inventory', 'financing', 'trade'];
+
+
+    /**
+     * Get Full Name
+     * 
+     * @return string
+     */
     public function getFullNameAttribute()
     {
         return "{$this->first_name} {$this->last_name}";
