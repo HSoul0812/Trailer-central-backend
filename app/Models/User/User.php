@@ -119,4 +119,8 @@ class User extends Model implements Authenticatable
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
     }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }

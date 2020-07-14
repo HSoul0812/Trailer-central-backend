@@ -99,4 +99,8 @@ class NewDealerUser extends Model
     public function salespeopleEmails() {
         return $this->salespeople()->whereNotNull('email')->where('email', '<>', '');
     }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }
