@@ -90,8 +90,6 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         }
 
         // Get Sales Person ID
-        echo $query->toSql();
-        die;
         $salesPerson = $query->first();
         $salesPersonId = 0;
         if(!empty($salesPerson->sales_person_id)) {
