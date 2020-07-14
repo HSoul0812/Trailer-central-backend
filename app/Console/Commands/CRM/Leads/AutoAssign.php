@@ -90,7 +90,7 @@ class AutoAssign extends Command
                 $dealerLocationId = $lead->dealer_location_id;
 
                 // Find Next Salesperson
-                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $dealer->salesPeople);
+                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealer->id, $dealerLocationId, $salesType, $dealer->salesPeople);
                 // Found Sales Person?!
                 var_dump($salesPerson);
                 die;
@@ -118,36 +118,6 @@ class AutoAssign extends Command
                 }
             }
         }
-    }
-
-    private function getUnassignedDealers($dealerId = 0) {
-        // Create Parameters for Unassigned Leads
-        $params = array(
-            'per_page' => 'all'
-        );
-        if(!empty($dealerId)) {
-            $params['dealer_id'] = $dealerId;
-        }
-
-        // Get Leads
-        $leads = $this->leadRepository->getAllUnassigned($params);
-
-        // Initialize Dealers Array
-        $dealers = array();
-        foreach($leads as $lead) {
-            if(!empty($lead->dealer_id)) {
-                // Dealer Doesn't Exist Yet?!
-                if(!isset($dealers[$lead->dealer_id])) {
-                    $dealers[$lead->dealer_id] = array();
-                }
-
-                // Append to Array
-                $dealers[$lead->dealer_id][] = $lead;
-            }
-        }
-
-        // Return Dealers
-        return $dealers;
     }
 
     /**
