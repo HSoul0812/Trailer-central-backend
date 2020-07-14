@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Leads;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Models\CRM\Leads\LeadStatus;
