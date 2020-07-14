@@ -76,10 +76,16 @@ class AutoAssign extends Command
         // Get Dealers With Valid Salespeople
         $dealers = NewDealerUser::has('salespeopleEmails')->with('crmUser')->with('salespeopleEmails')->get();
         foreach($dealers as $dealer) {
-            var_dump($dealer);
+            // Get Unassigned Leads
+            $leads = $this->leadRepository->getAllUnassigned([
+                'per_page' => 'all',
+                'dealer_id' => $dealer->id
+            ]);
+            var_dump($leads);
             die;
+
             // Loop Leads for Current Dealer
-            foreach($dealers->leadsUnassigned as $lead) {
+            foreach($leads as $lead) {
                 // Get Vars
                 $leadType = $this->salesPersonRepository->findSalesType($lead->lead_type);
                 $dealerLocationId = $lead->dealer_location_id;

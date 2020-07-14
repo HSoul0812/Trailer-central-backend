@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Leads;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
+use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Interactions\Interaction;
@@ -118,12 +119,17 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         // Join Lead Status
-        $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');    
+        $query = $query->leftJoin(NewDealerUser::getTableName(), Lead::getTableName().'.dealer_id', '=', NewDealerUser::getTableName().'.id');
+        $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
+        $query = $query->leftJoin(SalesPerson::getTableName(), function ($join) {
+            $join->on(LeadStatus::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                 ->on(LeadStatus::getTableName().'.user_id', '=', NewDealerUser::getTableName().'.user_id');
+        });
 
         // Require Sales Person ID NULL or 0
         $query = $query->where(function($q) use ($search) {
-            $query->where(LeadStatus::getTableName().'.sales_person_id', $salesPersonId)
-                    ->whereNull(LeadStatus::getTableName().'.sales_person_id');
+            $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
+                  ->orWhere(LeadStatus::getTableName().'.sales_person_id', $salesPersonId);
         })->where(Lead::getTableName().'.is_archived', 0)
           ->where(Lead::getTableName().'.is_spam', 0)
           ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY');
