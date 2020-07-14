@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class SalesPerson extends Model
 {
+    const TABLE_NAME = 'crm_sales_person';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'crm_sales_person';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
@@ -48,5 +50,9 @@ class SalesPerson extends Model
     public function crmUser()
     {
         return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
-    }    
+    }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }
