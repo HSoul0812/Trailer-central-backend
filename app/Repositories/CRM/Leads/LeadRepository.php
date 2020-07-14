@@ -67,7 +67,36 @@ class LeadRepository implements LeadRepositoryInterface {
     
     
     public function create($params) {
-        throw new NotImplementedException;
+        $lead = Lead::create($params);
+        $leadStatus = null;
+        $leadSource = null;
+        
+        if (isset($params['next_contact_date'])) {
+            $leadStatus = $leadSource = LeadStatus::create([
+                'status' => empty($params['lead_status']) ? LeadStatus::STATUS_UNCONTACTED : $params['lead_status'],
+                'tc_lead_identifier' => $lead->identifier,
+                'next_contact_date' => $params['next_contact_date'],
+                'contact_type' => LeadStatus::TYPE_CONTACT,
+                'source' => empty($params['lead_source']) ? null : $params['lead_source']
+            ]);
+        }
+        
+        if (isset($params['lead_status']) && empty($leadStatus)) {
+            $leadStatus = $leadSource = LeadStatus::create([
+                'status' => $params['lead_status'],
+                'tc_lead_identifier' => $lead->identifier,
+                'source' => empty($params['lead_source']) ? null : $params['lead_source']
+            ]);
+        }
+        
+        if (isset($params['lead_source']) && empty($leadSource)) {
+            LeadStatus::create([
+                'source' => $params['lead_source'],
+                'tc_lead_identifier' => $lead->identifier
+            ]);
+        }
+        
+        return $lead;
     }
 
     public function delete($params) {

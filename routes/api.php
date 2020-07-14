@@ -260,6 +260,7 @@ $api->version('v1', function ($route) {
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
+        $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@create');
 
         /*
         |--------------------------------------------------------------------------

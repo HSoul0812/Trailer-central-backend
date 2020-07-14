@@ -12,10 +12,9 @@ class CreateTableDealerRefundsItems extends Migration
      * @return void
      */
     public function up()
-    {
+    { 
         Schema::create('dealer_refunds_items', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('id'); // int(11) unsigned NOT NULL AUTO_INCREMENT,
             $table->integer('dealer_refunds_id', false, true); //' int(10) unsigned NOT NULL,
             $table->integer('user_id', false, true); //' int(10) unsigned DEFAULT NULL,
             $table->integer('item_id', false, true); //' int(10) unsigned NOT NULL,
