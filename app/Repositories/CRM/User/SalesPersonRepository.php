@@ -5,6 +5,8 @@ namespace App\Repositories\CRM\User;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\User\NewDealerUser;
 
 class SalesPersonRepository implements SalesPersonRepositoryInterface {
