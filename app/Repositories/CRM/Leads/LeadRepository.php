@@ -148,7 +148,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Return By Dealer?
         if($params['per_page'] === 'all') {
-            return $query->all();
+            return $query->get();
         }
 
         // Paginate!
