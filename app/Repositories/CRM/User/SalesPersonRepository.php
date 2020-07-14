@@ -82,7 +82,8 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
                             ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
                             ->where(SalesPerson::getTableName() . '.id', '<>', 0)
                             ->where(SalesPerson::getTableName() . '.id', '<>', '')
-                            ->whereNotNull(SalesPerson::getTableName() . '.id');
+                            ->whereNotNull(SalesPerson::getTableName() . '.id')
+                            ->orderBy(Lead::getTableName() . '.date_submitted', 'DESC');
 
         // Append Dealer Location
         if(!empty($dealerLocationId)) {
@@ -90,19 +91,13 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         }
 
         // Get Sales Person ID
-        echo $query->toSql();
-        echo "<br><br>";
-        var_dump($dealerId);
-        echo "<br><br>";
-        var_dump($dealerLocationId);
-        echo "<br><br>";
-        var_dump($salesType);
-        die;
         $salesPerson = $query->first();
         $salesPersonId = 0;
         if(!empty($salesPerson->sales_person_id)) {
             $salesPersonId = $salesPerson->sales_person_id;
         }
+        var_dump($salesPerson);
+        die;
 
         // Set Sales Person ID
         $this->setLastSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId);
