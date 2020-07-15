@@ -3,8 +3,7 @@
 namespace App\Console\Commands\CRM\Leads;
 
 use Illuminate\Console\Command;
-use App\Models\CRM\Leads\LeadAssign;
-use App\Models\CRM\User\SalesPerson;
+use App\Models\User\NewUser;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
