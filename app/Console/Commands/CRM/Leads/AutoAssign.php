@@ -5,6 +5,7 @@ namespace App\Console\Commands\CRM\Leads;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Console\Command;
+use App\Models\CRM\Leads\Lead;
 use App\Models\User\NewUser;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
