@@ -80,8 +80,6 @@ class AutoAssign extends Command
                 'per_page' => 'all',
                 'dealer_id' => $dealer->id
             ]);
-            echo $dealer->id . "\n\n";
-            continue;
             if(count($leads) < 1) {
                 continue;
             }
@@ -104,6 +102,10 @@ class AutoAssign extends Command
                 $notes[] = 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead with ID ' . $lead->identifier;
 
                 // Get Dealer Location
+                if(!empty($lead->inventory)) {
+                    var_dump($lead->inventory);
+                    die;
+                }
                 $dealerLocationId = $lead->dealer_location_id;
                 if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
                     $dealerLocationId = $lead->inventory->dealer_location_id;
@@ -111,6 +113,7 @@ class AutoAssign extends Command
                 } elseif(!empty($dealerLocationId)) {
                     $notes[] = 'Got Preferred Location ID ' . $dealerLocationId . ' on Lead with ID ' . $lead->identifier;
                 } else {
+                    $dealerLocationId = 0;
                     $notes[] = 'Cannot Find Preferred Location on Lead with ID ' . $lead->identifier . ', ignoring Dealer Location in Matching';
                 }
 
