@@ -123,7 +123,6 @@ class AutoAssign extends Command
 
                 // Find Next Salesperson
                 $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
-                continue;
 
                 // Skip Entry!
                 if(empty($salesPerson->id)) {
