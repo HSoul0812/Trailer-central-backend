@@ -84,6 +84,9 @@ class AutoAssign extends Command
                 continue;
             }
 
+            // Get Dealer Credential
+            $credential = NewUser::getDealerCredential($dealer->crmUser->user_id);
+
             // Set Sales People
             $this->salesPersonRepository->setSalesPeople($dealer->id, $dealer->salespeopleEmails);
 
@@ -154,6 +157,8 @@ class AutoAssign extends Command
                         $notes[] = 'Assign Next Sales Person: ' . $newestSalesPerson->id . ' to Lead With ID: ' . $lead->identifier;
 
                         // Send Sales Email
+                        var_dump($dealer->crmUser);
+                        die;
                         if(!empty($dealer->crmUser->enable_assign_notification)) {
                             // Send Email to Sales Person
                             $status = 'mailed';
@@ -163,7 +168,7 @@ class AutoAssign extends Command
                                 new AutoAssignEmail([
                                     'date' => Carbon::now()->toDateTimeString(),
                                     'salesperson_name' => $salesPerson->getFullNameAttribute(),
-                                    'launch_url' => Lead::getLeadUrl($lead->identifier, NewUser::getDealerCredential($dealer->crmUser->user_id)),
+                                    'launch_url' => Lead::getLeadUrl($lead->identifier, $credential),
                                     'lead_name' => $lead->getFullNameAttribute(),
                                     'lead_email' => $lead->email_address,
                                     'lead_phone' => $lead->phone_number,
