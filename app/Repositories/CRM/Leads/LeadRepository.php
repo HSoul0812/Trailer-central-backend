@@ -225,6 +225,12 @@ class LeadRepository implements LeadRepositoryInterface {
         return $lead;
     }
 
+    /**
+     * Create Assign Log for Lead
+     * 
+     * @param type $params
+     * @return type
+     */
     public function assign($params) {
         // Fix Explanation!
         if(isset($params['explanation']) && is_array($params['explanation'])) {

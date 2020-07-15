@@ -90,9 +90,6 @@ class AutoAssign extends Command
             // Get Dealer Credential
             $credential = NewUser::getDealerCredential($dealer->user_id);
 
-            // Set Sales People
-            $this->salesPersonRepository->setSalesPeople($dealer->id, $dealer->salespeopleEmails);
-
             // Create Dealer Notes
             $dealerNotes = array();
             $dealerNotes[] = 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign';
@@ -129,7 +126,7 @@ class AutoAssign extends Command
                 }
 
                 // Find Next Salesperson
-                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
+                $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
 
                 // Skip Entry!
                 if(empty($salesPerson->id)) {
