@@ -132,7 +132,8 @@ class AutoAssign extends Command
                     // Initialize Next Contact Date
                     $nextDay = date("d") + 1;
                     $nextContactTime = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
-                    $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone($this->timezone));
+                    $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone(env('DB_TIMEZONE')));
+                    $notes[] = 'Setting Next Contact Date: ' . $nextContactDate . ' to Lead With ID: ' . $lead->identifier;
 
                     // Set Salesperson to Lead
                     try {
