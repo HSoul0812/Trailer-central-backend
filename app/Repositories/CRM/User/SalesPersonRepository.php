@@ -176,7 +176,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         if(!empty($salesPerson->id)) {
             $salesPersonId = $salesPerson->id;
         } else {
-            $salesPerson = new stdclass;
+            $salesPerson = new \stdclass;
             $salesPerson->id = $salesPersonId;
         }
 
