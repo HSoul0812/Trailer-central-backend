@@ -116,6 +116,7 @@ class AutoAssign extends Command
                     $dealerLocationId = 0;
                     $notes[] = 'Cannot Find Preferred Location on Lead with ID ' . $lead->identifier . ', ignoring Dealer Location in Matching';
                 }
+                continue;
 
                 // Get Sales Person ID
                 $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
