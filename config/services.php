@@ -28,6 +28,9 @@ return [
         'key' => env('MAIL_ACCESS_KEY_ID'),
         'secret' => env('MAIL_SECRET_ACCESS_KEY'),
         'region' => env('MAIL_DEFAULT_REGION', 'us-east-1'),
+        'options' => [
+            'ConfigurationSetName' => env('MAIL_CONFIG_SET'),
+        ]
     ],
 
 ];
