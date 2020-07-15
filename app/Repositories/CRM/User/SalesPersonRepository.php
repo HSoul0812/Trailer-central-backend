@@ -71,7 +71,8 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
     public function findNewestSalesPerson($dealerId, $dealerLocationId, $salesType) {
         // Last Sales Person Already Exists?
         if(isset($this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType])) {
-            return $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType];
+            $newestSalesPersonId = $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType];
+            return $this->findSalesPerson($newestSalesPersonId);
         }
 
         // Find Newest Salesperson in DB
@@ -95,6 +96,9 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         $salesPersonId = 0;
         if(!empty($salesPerson->id)) {
             $salesPersonId = $salesPerson->id;
+        } else {
+            $salesPerson = new stdclass;
+            $salesPerson->id = $salesPersonId;
         }
 
         // Set Sales Person ID
@@ -115,6 +119,12 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      * @return SalesPerson next sales person
      */
     public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson, $salesPeople = array()) {
+        // Set Newest ID
+        $newestSalesPersonId = 0;
+        if(!empty($newestSalesPerson->id)) {
+            $newestSalesPersonId = $newestSalesPerson->id;
+        }
+
         // Don't Already Have SalesPeople?
         if(empty($salesPeople)) {
             // Get Sales People for Dealer ID
@@ -210,6 +220,20 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
     }
 
     /**
+     * Set Current Sales People
+     * 
+     * @param int $dealerId
+     * @param array $salesPeople
+     */
+    public function setSalesPeople($dealerId, $salesPeople) {
+        // Set Sales People for Dealer ID
+        $this->salesPeople[$dealerId] = $salesPeople;
+
+        // Return Current Sales People Array
+        return $salesPeople;
+    }
+
+    /**
      * Find Sales People By Dealer ID
      * 
      * @param type $dealerId
@@ -233,6 +257,37 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
 
         // Return
         return $salesPeople;
+    }
+
+    /**
+     * Find Sales Person
+     * 
+     * @param int $salesPersonId
+     */
+    public function findSalesPerson($salesPersonId) {
+        // Find Existing Sales People
+        if(count($this->salesPeople) > 0) {
+            $salesPeople = reset($this->salesPeople);
+        }
+
+        // Find Sales Person in Current Array
+        $chosenSalesPerson = null;
+        if(count($salesPeople) > 0) {
+            foreach($salesPeople as $salesPerson) {
+                if($salesPerson->id === $salesPersonId) {
+                    $chosenSalesPerson = $salesPerson;
+                    break;
+                }
+            }
+        }
+
+        // Still Can't Find?!
+        if(empty($chosenSalesPerson)) {
+            $chosenSalesPerson = SalesPerson::find($salesPersonId);
+        }
+
+        // Return!
+        return $chosenSalesPerson;
     }
 
     /**

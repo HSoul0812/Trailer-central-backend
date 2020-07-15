@@ -84,6 +84,9 @@ class AutoAssign extends Command
                 continue;
             }
 
+            // Set Sales People
+            $this->salesPersonRepository->setSalesPeople($dealer->id, $dealer->salespeopleEmails);
+
             // Create Dealer Notes
             $dealerNotes = array();
             $dealerNotes[] = 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign';
@@ -118,7 +121,7 @@ class AutoAssign extends Command
                 }
 
                 // Find Next Salesperson
-                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salesPeople);
+                $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
 
                 // Skip Entry!
                 if(empty($salesPerson->id)) {
