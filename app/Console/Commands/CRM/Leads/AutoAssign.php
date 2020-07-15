@@ -101,7 +101,6 @@ class AutoAssign extends Command
             $dealerNotes[] = 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
 
             // Loop Leads for Current Dealer
-            $num = 0;
             foreach($leads as $lead) {
                 // Initialize Notes Array
                 $notes = $dealerNotes;
@@ -152,6 +151,7 @@ class AutoAssign extends Command
                 if(empty($salesPerson->id)) {
                     $notes[] = 'Couldn\'t Find Salesperson ID to Assign Lead #' . $lead->identifier . ' to, skipping temporarily!';
                     $status = 'skipped';
+                    continue;
                 }
                 // Process Auto Assign!
                 else {
@@ -221,11 +221,6 @@ class AutoAssign extends Command
                     'status' => $status,
                     'explanation' => $notes
                 ]);
-
-                $num++;
-                if($num > 2) {
-                    die;
-                }
             }
         }
     }
