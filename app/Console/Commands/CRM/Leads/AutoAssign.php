@@ -102,7 +102,7 @@ class AutoAssign extends Command
                 $notes[] = 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead with ID ' . $lead->identifier;
 
                 // Get Dealer Location
-                if(!empty($lead->inventory)) {
+                if(!empty($lead->inventory) && count($lead->inventory) > 0) {
                     var_dump($lead->inventory);
                     die;
                 }
