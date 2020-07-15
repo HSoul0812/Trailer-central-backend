@@ -15,9 +15,9 @@ class ChangeTypeEnumToDealerIncomingMappingsTable extends Migration
     public function up()
     {
         DB::statement("ALTER TABLE
-                      `website_entity`
+                      `dealer_incoming_mappings`
                    MODIFY COLUMN
-                      `entity_type` enum('manufacturer','category','entity_type','condition','status','color','pull_type','nose_type','construction','fuel_type','brand','manufacturer_brand') NOT NULL;"
+                      `type` enum('manufacturer','category','entity_type','condition','status','color','pull_type','nose_type','construction','fuel_type','brand','manufacturer_brand') NOT NULL;"
         );
     }
 
@@ -29,9 +29,9 @@ class ChangeTypeEnumToDealerIncomingMappingsTable extends Migration
     public function down()
     {
         DB::statement("ALTER TABLE
-                      `website_entity`
+                      `dealer_incoming_mappings`
                    MODIFY COLUMN
-                      `entity_type` enum('manufacturer','category','entity_type','condition','status','color','pull_type','nose_type','construction','fuel_type','brand') NOT NULL;"
+                      `type` enum('manufacturer','category','entity_type','condition','status','color','pull_type','nose_type','construction','fuel_type','brand') NOT NULL;"
         );
     }
 }
