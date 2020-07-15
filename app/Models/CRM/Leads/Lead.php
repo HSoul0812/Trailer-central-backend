@@ -92,7 +92,7 @@ class Lead extends Model
      */
     public function inventory()
     {
-        return $this->belongsTo(Inventory::class, 'inventory_id', 'identifier');
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
     /**
