@@ -99,6 +99,7 @@ class AutoAssign extends Command
             $dealerNotes[] = 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
 
             // Loop Leads for Current Dealer
+            $num = 0;
             foreach($leads as $lead) {
                 // Initialize Notes Array
                 $notes = $dealerNotes;
@@ -151,16 +152,16 @@ class AutoAssign extends Command
 
                     // Set Salesperson to Lead
                     try {
-                        /*$this->leadRepository->update([
+                        $this->leadRepository->update([
                             'id' => $lead->identifier,
                             'sales_person_id' => $salesPerson->id,
                             'next_contact_date' => $nextContactGmt
-                        ]);*/
+                        ]);
                         $status = 'assigned';
                         $notes[] = 'Assign Next Sales Person: ' . $newestSalesPerson->id . ' to Lead With ID: ' . $lead->identifier;
 
                         // Send Sales Email
-                        if(!empty($dealer->crmUser->enable_assign_notification)) {
+                        if(!empty($dealer->crmUser->enable_assign_notification) && 0) {
                             // Send Email to Sales Person
                             $status = 'mailed';
                             //$salesEmail = $salesPerson->email;
@@ -184,7 +185,9 @@ class AutoAssign extends Command
                         }
                     } catch(\Exception $e) {
                         // Add Error
-                        $status = 'error';
+                        if(empty($status)) {
+                            $status = 'error';
+                        }
                         $notes[] = 'Exception Returned! ' . $e->getMessage() . ': ' . $e->getTraceAsString();
                     }
                 }
@@ -201,6 +204,11 @@ class AutoAssign extends Command
                     'status' => $status,
                     'explanation' => $notes
                 ]);
+
+                $num++;
+                if($num > 4) {
+                    break;
+                }
             }
         }
     }
