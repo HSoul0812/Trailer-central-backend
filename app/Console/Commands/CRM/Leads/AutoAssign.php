@@ -157,7 +157,7 @@ class AutoAssign extends Command
                     // Initialize Next Contact Date
                     $nextDay = date("d") + 1;
                     $nextContactStamp = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
-                    $nextContactObj   = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone(env('DB_TIMEZONE')));
+                    $nextContactObj   = new \DateTime(date("Y:m:d H:i:s", $nextContactStamp), new \DateTimeZone(env('DB_TIMEZONE')));
 
                     // Set Next Contact Date
                     $nextContactGmt   = gmdate("Y-m-d H:i:s", $nextContactStamp);
