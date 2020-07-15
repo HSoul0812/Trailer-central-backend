@@ -58,26 +58,6 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         throw NotImplementedException;
     }
 
-    public function assign($params) {
-        DB::beginTransaction();
-
-        try {
-            // Fix Explanation!
-            if(isset($params['explanation']) && is_array($params['explanation'])) {
-                $params['explanation'] = implode("\n\n", $params['explanation']);
-            }
-
-            $leadAssign = LeadAssign::create($params);
-
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            throw new \Exception($ex->getMessage());
-        }
-
-        return $leadAssign;
-    }
-
     
 
     /**

@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Leads;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
@@ -193,6 +194,26 @@ class LeadRepository implements LeadRepositoryInterface {
         });
         
         return $lead;
+    }
+
+    public function assign($params) {
+        DB::beginTransaction();
+
+        try {
+            // Fix Explanation!
+            if(isset($params['explanation']) && is_array($params['explanation'])) {
+                $params['explanation'] = implode("\n\n", $params['explanation']);
+            }
+
+            $leadAssign = LeadAssign::create($params);
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw new \Exception($ex->getMessage());
+        }
+
+        return $leadAssign;
     }
     
     public function getCustomers($params = []) {
