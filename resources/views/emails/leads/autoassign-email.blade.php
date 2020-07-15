@@ -43,7 +43,7 @@
                                     @endif
 
                                     @if (!empty($lead_address))
-                                        <strong>Address:</strong><br />{{ $lead_address }}<br />
+                                        <strong>Address:</strong> {{ $lead_address }}<br />
                                     @endif
 
                                     @if (!empty($lead_comments))

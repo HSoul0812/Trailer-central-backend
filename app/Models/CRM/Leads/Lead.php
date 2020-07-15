@@ -183,7 +183,20 @@ class Lead extends Model
      * @return string
      */
     public function getFullNameAttribute() {
-        return "{$this->first_name} {$this->last_name}";
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    /**
+     * Get the user's full name or ID #.
+     *
+     * @return string
+     */
+    public function getIdNameAttribute() {
+        $idName = $this->getFullAddressAttribute();
+        if(empty($fullName)) {
+            $idName = "#" . $this->identifier;
+        }
+        return $idName;
     }
 
     public static function findLeadContact($id) {
