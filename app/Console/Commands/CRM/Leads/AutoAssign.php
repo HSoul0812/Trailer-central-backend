@@ -188,7 +188,7 @@ class AutoAssign extends Command
                                     'date' => Carbon::now()->toDateTimeString(),
                                     'salesperson_name' => $salesPerson->getFullNameAttribute(),
                                     'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
-                                    'lead_name' => $lead->getLeadNameIdAttribute(),
+                                    'lead_name' => $lead->getIdNameAttribute(),
                                     'lead_email' => $lead->email_address,
                                     'lead_phone' => $lead->phone_number,
                                     'lead_address' => $lead->getFullAddressAttribute(),
