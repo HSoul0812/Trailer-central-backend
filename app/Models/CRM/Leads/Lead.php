@@ -281,4 +281,8 @@ class Lead extends Model
     public static function getTableName() {
         return self::TABLE_NAME;
     }
+
+    public static function getLeadUrl($leadId, $credential) {
+        return env('CRM_LOGIN_URL') . $credential . '&r=' . urlencode(env('CRM_LEAD_ROUTE') . CompactHelper::expand($leadId));
+    }
 }

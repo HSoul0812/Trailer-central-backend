@@ -155,10 +155,26 @@ class AutoAssign extends Command
 
                         // Send Sales Email
                         if(!empty($dealer->crmUser->enable_assign_notification)) {
-                            // Send Sales Email
+                            // Send Email to Sales Person
                             $status = 'mailed';
-                            $notes[] = 'Send Notification Email to Sales Person: ' . $newestSalesPerson->id . ' for Lead With ID: ' . $lead->identifier;
-                            //$this->sendSalesEmail($salesPerson, $lead->identifier);
+                            //$salesEmail = $salesPerson->email;
+                            $salesEmail = "david.a.conway.jr@gmail.com";
+                            Mail::to($salesEmail ?? "" )->send(
+                                new AutoAssignEmail([
+                                    'date' => Carbon::now()->toDateTimeString(),
+                                    'salesperson_name' => $salesPerson->getFullNameAttribute(),
+                                    'launch_url' => Lead::getLeadUrl($lead->identifier, NewUser::getDealerCredential($dealer->crmUser->user_id)),
+                                    'lead_name' => $lead->getFullNameAttribute(),
+                                    'lead_email' => $lead->email_address,
+                                    'lead_phone' => $lead->phone_number,
+                                    'lead_address' => $lead->getFullAddressAttribute(),
+                                    'lead_status' => !empty($lead->leadStatus->status) ? $lead->leadStatus->status : 'Uncontacted',
+                                    'lead_comments' => $lead->comments,
+                                    'next_contact_date' => $nextContactGmt,
+                                    'id' => sprintf('<%s@%s>', $this->generateId(), $this->serverHostname())
+                                ])
+                            );
+                            $notes[] = 'Sent Notification Email to: ' . $salesEmail . ' for Lead With ID: ' . $lead->identifier;
                         }
                     } catch(\Exception $e) {
                         // Add Error
@@ -181,27 +197,5 @@ class AutoAssign extends Command
                 ]);
             }
         }
-    }
-
-    /**
-     * Send Email to Sales Person for Auto Assign
-     * 
-     * @param App\Models\CRM\User\SalesPerson $salesPerson
-     * @param type $leadId
-     */
-    private function sendSalesEmail(SalesPerson $salesPerson, $leadId) {
-
-        // Send Email
-        Mail::to($customer["email"] ?? "" )->send(
-            new AutoAssignEmail([
-                'date' => Carbon::now()->toDateTimeString(),
-                'replyToEmail' => $user->email ?? "",
-                'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
-                'subject' => $subject,
-                'body' => $body,
-                'attach' => $attach,
-                'id' => $uniqueId
-            ])
-        );
     }
 }
