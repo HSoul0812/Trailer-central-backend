@@ -70,6 +70,12 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      */
     public function findNewestSalesPerson($dealerId, $dealerLocationId, $salesType) {
         // Last Sales Person Already Exists?
+        var_dump($dealerId);
+        echo "\n";
+        var_dump($dealerLocationId);
+        echo "\n";
+        var_dump($salesType);
+        echo "\n\n";
         if(isset($this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType])) {
             $newestSalesPersonId = $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType];
             return $this->findSalesPerson($newestSalesPersonId);
