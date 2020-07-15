@@ -156,8 +156,6 @@ class AutoAssign extends Command
                         $notes[] = 'Assign Next Sales Person: ' . $newestSalesPerson->id . ' to Lead With ID: ' . $lead->identifier;
 
                         // Send Sales Email
-                        var_dump($dealer->crmUser);
-                        die;
                         if(!empty($dealer->crmUser->enable_assign_notification)) {
                             // Send Email to Sales Person
                             $status = 'mailed';
