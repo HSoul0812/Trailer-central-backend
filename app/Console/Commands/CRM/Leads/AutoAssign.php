@@ -84,9 +84,7 @@ class AutoAssign extends Command
             }
 
             // Get Dealer Credential
-            var_dump($dealer);
-            die;
-            $credential = NewUser::getDealerCredential($dealer->crmUser->user_id);
+            $credential = NewUser::getDealerCredential($dealer->user_id);
 
             // Set Sales People
             $this->salesPersonRepository->setSalesPeople($dealer->id, $dealer->salespeopleEmails);
