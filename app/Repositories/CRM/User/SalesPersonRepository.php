@@ -118,18 +118,15 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      * @param array $salesPeople
      * @return SalesPerson next sales person
      */
-    public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson, $salesPeople = array()) {
+    public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson) {
         // Set Newest ID
         $newestSalesPersonId = 0;
         if(!empty($newestSalesPerson->id)) {
             $newestSalesPersonId = $newestSalesPerson->id;
         }
 
-        // Don't Already Have SalesPeople?
-        if(empty($salesPeople)) {
-            // Get Sales People for Dealer ID
-            $salesPeople = $this->findSalesPeople($dealerId);
-        }
+        // Get Sales People for Dealer ID
+        $salesPeople = $this->findSalesPeople($dealerId);
 
         // Loop Sales People
         $validSalesPeople = [];
@@ -151,6 +148,8 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
             // Insert Valid Salespeople
             $validSalesPeople[] = $salesPerson;
         }
+        var_dump($validSalesPeople);
+        die;
 
         // Loop Valid Sales People
         if(count($validSalesPeople) > 1) {
