@@ -123,6 +123,7 @@ class AutoAssign extends Command
 
                 // Find Next Salesperson
                 $salesPerson = $this->salesPersonRepository->findNextSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
+                continue;
 
                 // Skip Entry!
                 if(empty($salesPerson->id)) {
@@ -131,7 +132,7 @@ class AutoAssign extends Command
                 }
                 // Process Auto Assign!
                 else {
-                    $notes[] = 'Preparing to Assign Next Sales Person: ' . $newestSalesPerson->id . ' to Lead With ID: ' . $lead->identifier;
+                    $notes[] = 'Found Next Matching Sales Person: ' . $newestSalesPerson->id . ' for Lead With ID: ' . $lead->identifier;
 
                     // Initialize Next Contact Date
                     $nextDay = date("d") + 1;

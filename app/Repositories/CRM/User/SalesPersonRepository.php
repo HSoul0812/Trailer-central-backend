@@ -148,6 +148,12 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
             // Insert Valid Salespeople
             $validSalesPeople[] = $salesPerson;
         }
+        if(empty($validSalesPeople)) {
+            var_dump($dealerLocationId);
+            var_dump($salesType);
+            var_dump($salesPeople);
+        }
+        die;
 
         // Loop Valid Sales People
         if(count($validSalesPeople) > 1) {
