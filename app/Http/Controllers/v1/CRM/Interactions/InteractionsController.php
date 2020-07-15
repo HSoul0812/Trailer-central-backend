@@ -9,17 +9,17 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\Lead;
 use App\Models\User\User;
 use App\Repositories\Repository;
-use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 
 class InteractionsController extends RestfulController
 {
-    use CustomerHelper, MailHelper;
+    use MailHelper;
 
     protected $interactions;
 
