@@ -179,7 +179,8 @@ class AutoAssign extends Command
                         if(!empty($dealer->crmUser->enable_assign_notification)) {
                             // Send Email to Sales Person
                             $status = 'mailed';
-                            $salesEmail = $salesPerson->email;
+                            //$salesEmail = $salesPerson->email;
+                            $salesEmail = "david.a.conway.jr@gmail.com";
                             Mail::to($salesEmail ?? "" )->send(
                                 new AutoAssignEmail([
                                     'date' => Carbon::now()->toDateTimeString(),
