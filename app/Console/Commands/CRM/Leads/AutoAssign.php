@@ -123,7 +123,7 @@ class AutoAssign extends Command
                 // Skip Entry!
                 if(empty($salesPerson->id)) {
                     $notes[] = 'Couldn\'t Find Salesperson ID to Assign Lead #' . $lead->identifier . ' to, skipping temporarily!';
-                    $status = 'skipped'
+                    $status = 'skipped';
                 }
                 // Process Auto Assign!
                 else {
