@@ -15,11 +15,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 {
     use WithRequestQueryable;
 
-    /**
-     * @var Array
-     */
-    private $roundRobinSalesPeople = [];
-
     public function __construct()
     {
         $this->withQuery(SalesPerson::query());
@@ -154,12 +149,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @param SalesPerson
      */
     public function findNewestSalesPerson($dealerId, $dealerLocationId, $salesType) {
-        // Last Sales Person Already Exists?
-        if(isset($this->roundRobinSalesPeople[$dealerId][$dealerLocationId][$salesType])) {
-            $newestSalesPersonId = $this->roundRobinSalesPeople[$dealerId][$dealerLocationId][$salesType];
-            return SalesPerson::find($newestSalesPersonId);
-        }
-
         // Find Newest Salesperson in DB
         $query = LeadStatus::select(SalesPerson::getTableName() . '.*')
                             ->leftJoin(SalesPerson::getTableName(), SalesPerson::getTableName() . '.id', '=', LeadStatus::getTableName() . '.sales_person_id')
@@ -185,9 +174,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             $salesPerson = new stdclass;
             $salesPerson->id = $salesPersonId;
         }
-
-        // Set Sales Person ID
-        $this->setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId);
 
         // Return Sales Person
         return $salesPerson;
@@ -264,44 +250,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             $nextSalesPerson = $newestSalesPerson;
         }
 
-        // Set Next Salesperson
-        $this->setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $nextSalesPerson->id);
-
         // Return Next Sales Person
         return $nextSalesPerson;
-    }
-
-    /**
-     * Preserve the Round Robin Sales Person Temporarily
-     * 
-     * @param int $dealerId
-     * @param int $dealerLocationId
-     * @param string $salesType
-     * @param int $salesPersonId
-     * @return int last sales person ID
-     */
-    public function setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId) {
-        // Assign to Arrays
-        if(!isset($this->roundRobinSalesPeople[$dealerId])) {
-            $this->roundRobinSalesPeople[$dealerId] = array();
-        }
-
-        // Match By Dealer Location ID!
-        if(!empty($dealerLocationId)) {
-            if(!isset($this->roundRobinSalesPeople[$dealerId][$dealerLocationId])) {
-                $this->roundRobinSalesPeople[$dealerId][$dealerLocationId] = array();
-            }
-            $this->roundRobinSalesPeople[$dealerId][$dealerLocationId][$salesType] = $salesPersonId;
-        }
-
-        // Always Set for 0!
-        if(!isset($this->roundRobinSalesPeople[$dealerId][0])) {
-            $this->roundRobinSalesPeople[$dealerId][0] = array();
-        }
-        $this->roundRobinSalesPeople[$dealerId][0][$salesType] = $salesPersonId;
-
-        // Return Last Sales Person ID
-        return $this->roundRobinSalesPeople[$dealerId][0][$salesType];
     }
 
     /**

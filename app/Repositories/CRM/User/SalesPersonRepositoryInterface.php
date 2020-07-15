@@ -38,17 +38,6 @@ interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
     public function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson);
 
     /**
-     * Preserve the Round Robin Sales Person Temporarily
-     * 
-     * @param int $dealerId
-     * @param int $dealerLocationId
-     * @param string $salesType
-     * @param int $salesPersonId
-     * @return int last sales person ID
-     */
-    public function setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId, $salesPeople = array());
-
-    /**
      * Find Sales People By Dealer ID
      * 
      * @param type $dealerId

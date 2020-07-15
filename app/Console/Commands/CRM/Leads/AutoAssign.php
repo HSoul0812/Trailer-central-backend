@@ -48,6 +48,11 @@ class AutoAssign extends Command
     protected $datetime = null;
 
     /**
+     * @var Array
+     */
+    protected $roundRobinSalesPeople = [];
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -117,8 +122,19 @@ class AutoAssign extends Command
                     $notes[] = 'Cannot Find Preferred Location on Lead with ID ' . $lead->identifier . ', ignoring Dealer Location in Matching';
                 }
 
-                // Get Sales Person ID
-                $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+                // Last Sales Person Already Exists?
+                $newestSalesPerson = null;
+                if(isset($this->roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType])) {
+                    $newestSalesPersonId = $this->roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType];
+                    $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
+                }
+
+                // Newest Sales Person DOESN'T Exist?
+                if(empty($newestSalesPerson->id)) {
+                    // Look it up!
+                    $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+                    $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson->id);
+                }
                 if(!empty($dealerLocationId)) {
                     $notes[] = 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer Location #' . $dealerLocationId . ' and Salesperson Type ' . $salesType;
                 } else {
@@ -127,6 +143,7 @@ class AutoAssign extends Command
 
                 // Find Next Salesperson
                 $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+                $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
 
                 // Skip Entry!
                 if(empty($salesPerson->id)) {
@@ -201,7 +218,45 @@ class AutoAssign extends Command
                     'status' => $status,
                     'explanation' => $notes
                 ]);
+
+                $num++;
+                if($num > 2) {
+                    die;
+                }
             }
         }
+    }
+
+    /**
+     * Preserve the Round Robin Sales Person Temporarily
+     * 
+     * @param int $dealerId
+     * @param int $dealerLocationId
+     * @param string $salesType
+     * @param int $salesPersonId
+     * @return int last sales person ID
+     */
+    public function setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId) {
+        // Assign to Arrays
+        if(!isset($this->roundRobinSalesPeople[$dealerId])) {
+            $this->roundRobinSalesPeople[$dealerId] = array();
+        }
+
+        // Match By Dealer Location ID!
+        if(!empty($dealerLocationId)) {
+            if(!isset($this->roundRobinSalesPeople[$dealerId][$dealerLocationId])) {
+                $this->roundRobinSalesPeople[$dealerId][$dealerLocationId] = array();
+            }
+            $this->roundRobinSalesPeople[$dealerId][$dealerLocationId][$salesType] = $salesPersonId;
+        }
+
+        // Always Set for 0!
+        if(!isset($this->roundRobinSalesPeople[$dealerId][0])) {
+            $this->roundRobinSalesPeople[$dealerId][0] = array();
+        }
+        $this->roundRobinSalesPeople[$dealerId][0][$salesType] = $salesPersonId;
+
+        // Return Last Sales Person ID
+        return $this->roundRobinSalesPeople[$dealerId][0][$salesType];
     }
 }
