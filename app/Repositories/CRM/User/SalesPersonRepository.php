@@ -141,18 +141,13 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
             }
 
             // Search by Type?
-            if($salesPerson->{'is_' . $salesType} !== '1') {
+            if($salesPerson->{'is_' . $salesType} !== 1 && $salesPerson->{'is_' . $salesType} !== '1') {
                 continue;
             }
 
             // Insert Valid Salespeople
             $validSalesPeople[] = $salesPerson;
         }
-        var_dump($dealerLocationId);
-        var_dump($salesType);
-        var_dump($salesPeople);
-        var_dump($validSalesPeople);
-        die;
 
         // Loop Valid Sales People
         if(count($validSalesPeople) > 1) {
