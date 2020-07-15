@@ -133,14 +133,18 @@ class AutoAssign extends Command
                     $nextDay = date("d") + 1;
                     $nextContactTime = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
                     $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone(env('DB_TIMEZONE')));
-                    $notes[] = 'Setting Next Contact Date: ' . $nextContactDate . ' to Lead With ID: ' . $lead->identifier;
+
+                    // Set Next Contact Date
+                    $nextContactGmt = gmdate("Y-m-d H:i:s", $nextContactTime);
+                    $nextContact = $nextContactDate->format("Y-m-d H:i:s");
+                    $notes[] = 'Setting Next Contact Date: ' . $nextContact . ' to Lead With ID: ' . $lead->identifier;
 
                     // Set Salesperson to Lead
                     try {
                         /*$this->leadRepository->update([
                             'id' => $lead->identifier,
                             'sales_person_id' => $salesPerson->id,
-                            'next_contact_date' => $nextContactDate
+                            'next_contact_date' => $nextContactGmt
                         ]);*/
                         $status = 'assigned';
                         $notes[] = 'Assign Next Sales Person: ' . $newestSalesPerson->id . ' to Lead With ID: ' . $lead->identifier;
