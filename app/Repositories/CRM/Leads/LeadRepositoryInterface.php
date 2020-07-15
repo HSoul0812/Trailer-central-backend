@@ -5,6 +5,21 @@ namespace App\Repositories\CRM\Leads;
 use App\Repositories\Repository;
 
 interface LeadRepositoryInterface extends Repository {
+    /**
+     * Get All Unassigned Leads
+     * 
+     * @param int $params
+     * @return type
+     */
+    public function getAllUnassigned($params);
+
+    /**
+     * Create Assign Log for Lead
+     * 
+     * @param type $params
+     * @return type
+     */
+    public function assign($params);
     
     /**
      * Returns array in the following format:

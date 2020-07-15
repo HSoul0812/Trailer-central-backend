@@ -18,12 +18,14 @@ use Illuminate\Database\Eloquent\Model;
  */
 class SalesPerson extends Model implements Filterable
 {
+    const TABLE_NAME = 'crm_sales_person';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'crm_sales_person';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
@@ -31,10 +33,25 @@ class SalesPerson extends Model implements Filterable
      * @var string
      */
     protected $primaryKey = 'id';
+    
+    /**
+     * Define Type Arrays
+     *
+     * @var array
+     */
+    const TYPES_DEFAULT   = ['general', 'manual'];
+    const TYPES_INVENTORY = ['craigslist', 'inventory', 'call'];
+    const TYPES_VALID     = ['default', 'inventory', 'financing', 'trade'];
 
+
+    /**
+     * Get Full Name
+     * 
+     * @return string
+     */
     public function getFullNameAttribute()
     {
-        return "{$this->first_name} {$this->last_name}";
+        return trim("{$this->first_name} {$this->last_name}");
     }
 
     public function dealer()
@@ -67,5 +84,9 @@ class SalesPerson extends Model implements Filterable
     public function jsonApiFilterableColumns(): ?array
     {
         return ['*'];
+    }
+
+    public static function getTableName() {
+        return self::TABLE_NAME;
     }
 }

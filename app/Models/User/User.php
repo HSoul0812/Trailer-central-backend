@@ -17,12 +17,14 @@ use App\Models\User\AuthToken;
  */
 class User extends Model implements Authenticatable
 {
+    const TABLE_NAME = 'dealer';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'dealer';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
@@ -105,11 +107,6 @@ class User extends Model implements Authenticatable
         return $authToken->access_token;
     }
 
-    public function dealer()
-    {
-        return $this->hasOne(Dealer::class, 'user_id', 'user_id');
-    }
-
     public function crmUser()
     {
         return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
@@ -123,5 +120,9 @@ class User extends Model implements Authenticatable
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
-    }    
+    }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }
