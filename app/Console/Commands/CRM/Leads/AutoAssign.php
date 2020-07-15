@@ -110,7 +110,7 @@ class AutoAssign extends Command
                 }
 
                 // Get Sales Person ID
-                $newestSalesPerson = $this->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+                $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
                 if(!empty($dealerLocationId)) {
                     $notes[] = 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer Location #' . $dealerLocationId . ' and Salesperson Type ' . $salesType;
                 } else {
