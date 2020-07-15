@@ -22,9 +22,9 @@ class AutoAssignEmail extends Mailable
      */
     public function __construct(array $data)
     {
+        $data['body']   = $this->getBody($data);
         $this->data     = $data;
         $this->subject  = $this->getSubject($data);
-        $this->body     = $this->getBody($data);
         $this->callbacks[] = function ($message) use ($data) {
             $message->getHeaders()->addTextHeader('Message-ID', $data['id']);
         };
@@ -46,8 +46,8 @@ class AutoAssignEmail extends Mailable
             $build->replyTo($this->data['replyToEmail'], $this->data['replyToName']);
         }
 
-        $build->view('emails.interactions.interaction-email')
-            ->text('emails.interactions.interaction-email-plain');
+        $build->view('emails.leads.autoassign-email')
+            ->text('emails.leads.autoassign-email-plain');
 
         if (! empty($this->data['attach']) && is_array($this->data['attach'])) {
             foreach ($this->data['attach'] as $attach) {
