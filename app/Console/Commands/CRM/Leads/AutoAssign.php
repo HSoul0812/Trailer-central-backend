@@ -102,12 +102,8 @@ class AutoAssign extends Command
                 $notes[] = 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead with ID ' . $lead->identifier;
 
                 // Get Dealer Location
-                if(!empty($lead->inventory) && count($lead->inventory) > 0) {
-                    var_dump($lead->inventory);
-                    die;
-                }
                 $dealerLocationId = $lead->dealer_location_id;
-                if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
+                if(empty($dealerLocationId) && $lead->inventory->dealer_location_id) {
                     $dealerLocationId = $lead->inventory->dealer_location_id;
                     $notes[] = 'Preferred Location doesn\'t exist on Lead with ID ' . $lead->identifier . ', grabbed Inventory Location instead: ' . $dealerLocationId;
                 } elseif(!empty($dealerLocationId)) {

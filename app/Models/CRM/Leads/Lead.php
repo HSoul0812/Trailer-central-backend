@@ -88,9 +88,17 @@ class Lead extends Model
     }
 
     /**
-     * Get all inventories for the lead.
+     * Get main inventory for the lead.
      */
     public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'identifier');
+    }
+
+    /**
+     * Get all units of interest for the lead.
+     */
+    public function units()
     {
         return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id');
     }
@@ -133,7 +141,13 @@ class Lead extends Model
     }
 
     public function getInventoryIds() {
-        return $this->inventory()->pluck('inventory_id')->toArray();
+        $inventoryIds = $this->units()->pluck('inventory_id')->toArray();
+
+        // Append Current Inventory ID
+        $inventoryIds = array_unshift($inventoryIds, $this->inventory_id);
+
+        // Return Full Array
+        return $inventoryIds;
     }
 
     /**
