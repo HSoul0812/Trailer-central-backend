@@ -100,8 +100,6 @@ class AutoAssign extends Command
                 // Get Sales Type
                 $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
                 $notes[] = 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead with ID ' . $lead->identifier;
-                var_dump($lead);
-                die;
 
                 // Get Dealer Location
                 $dealerLocationId = $lead->dealer_location_id;
@@ -114,7 +112,6 @@ class AutoAssign extends Command
                     $dealerLocationId = 0;
                     $notes[] = 'Cannot Find Preferred Location on Lead with ID ' . $lead->identifier . ', ignoring Dealer Location in Matching';
                 }
-                continue;
 
                 // Get Sales Person ID
                 $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
