@@ -100,10 +100,12 @@ class AutoAssign extends Command
                 // Get Sales Type
                 $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
                 $notes[] = 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead with ID ' . $lead->identifier;
+                var_dump($lead);
+                die;
 
                 // Get Dealer Location
                 $dealerLocationId = $lead->dealer_location_id;
-                if(empty($dealerLocationId) && $lead->inventory->dealer_location_id) {
+                if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
                     $dealerLocationId = $lead->inventory->dealer_location_id;
                     $notes[] = 'Preferred Location doesn\'t exist on Lead with ID ' . $lead->identifier . ', grabbed Inventory Location instead: ' . $dealerLocationId;
                 } elseif(!empty($dealerLocationId)) {
