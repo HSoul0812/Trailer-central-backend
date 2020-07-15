@@ -39,7 +39,8 @@ class LeadStatus extends Model
     protected $fillable = [
         'status',
         'next_contact_date',
-        'contact_type'
+        'contact_type',
+        'sales_person_id'
     ];
 
     public function lead()

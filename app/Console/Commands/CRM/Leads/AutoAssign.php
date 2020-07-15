@@ -158,7 +158,7 @@ class AutoAssign extends Command
                             'next_contact_date' => $nextContactGmt
                         ]);
                         $status = 'assigned';
-                        $notes[] = 'Assign Next Sales Person: ' . $newestSalesPerson->id . ' to Lead With ID: ' . $lead->identifier;
+                        $notes[] = 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead With ID: ' . $lead->identifier;
 
                         // Send Sales Email
                         if(!empty($dealer->crmUser->enable_assign_notification) && 0) {
