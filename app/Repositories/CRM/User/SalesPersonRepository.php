@@ -198,22 +198,23 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         if(!isset($this->lastSalesPeople[$dealerId])) {
             $this->lastSalesPeople[$dealerId] = array();
         }
-        if(!isset($this->lastSalesPeople[$dealerId][$dealerLocationId])) {
-            $this->lastSalesPeople[$dealerId][$dealerLocationId] = array();
-        }
-        $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType] = $salesPersonId;
 
-        // Dealer Location ID Isn't 0?!
+        // Match By Dealer Location ID!
         if(!empty($dealerLocationId)) {
-            // ALSO Set for 0!
-            if(!isset($this->lastSalesPeople[$dealerId][0])) {
-                $this->lastSalesPeople[$dealerId][0] = array();
+            if(!isset($this->lastSalesPeople[$dealerId][$dealerLocationId])) {
+                $this->lastSalesPeople[$dealerId][$dealerLocationId] = array();
             }
-            $this->lastSalesPeople[$dealerId][0][$salesType] = $salesPersonId;
+            $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType] = $salesPersonId;
         }
+
+        // Always Set for 0!
+        if(!isset($this->lastSalesPeople[$dealerId][0])) {
+            $this->lastSalesPeople[$dealerId][0] = array();
+        }
+        $this->lastSalesPeople[$dealerId][0][$salesType] = $salesPersonId;
 
         // Return Last Sales Person ID
-        return $this->lastSalesPeople[$dealerId][$dealerLocationId][$salesType];
+        return $this->lastSalesPeople[$dealerId][0][$salesType];
     }
 
     /**
