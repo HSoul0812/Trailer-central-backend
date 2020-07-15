@@ -10,6 +10,7 @@ use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\MailHelper;
+use App\Mail\AutoAssignEmail;
 use Carbon\Carbon;
 
 class AutoAssign extends Command
