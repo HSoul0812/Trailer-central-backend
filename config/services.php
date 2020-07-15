@@ -25,8 +25,8 @@ return [
     ],
 
     'ses' => [
-        'key' => env('MAIL_USERNAME'),
-        'secret' => env('MAIL_PASSWORD'),
+        'key' => env('AWS_ACCESS_KEY_ID'),
+        'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('MAIL_DEFAULT_REGION', 'us-east-1'),
         'options' => [
             'ConfigurationSetName' => env('MAIL_CONFIG_SET'),
