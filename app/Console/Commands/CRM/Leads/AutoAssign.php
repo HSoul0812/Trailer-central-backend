@@ -105,6 +105,8 @@ class AutoAssign extends Command
             foreach($leads as $lead) {
                 // Initialize Notes Array
                 $notes = $dealerNotes;
+                var_dump($lead);
+                die;
 
                 // Get Sales Type
                 $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
