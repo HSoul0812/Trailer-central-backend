@@ -161,7 +161,7 @@ class AutoAssign extends Command
                         $notes[] = 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead With ID: ' . $lead->identifier;
 
                         // Send Sales Email
-                        if(!empty($dealer->crmUser->enable_assign_notification) && 0) {
+                        if(!empty($dealer->crmUser->enable_assign_notification)) {
                             // Send Email to Sales Person
                             $status = 'mailed';
                             //$salesEmail = $salesPerson->email;
@@ -204,11 +204,6 @@ class AutoAssign extends Command
                     'status' => $status,
                     'explanation' => $notes
                 ]);
-
-                $num++;
-                if($num > 4) {
-                    break;
-                }
             }
         }
     }
