@@ -222,7 +222,9 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
 
         // Get New Sales People By Dealer ID
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
-        $salesPeople = SalesPerson::select('*')->where('user_id', $newDealerUser->user_id)->all();
+        $salesPeople = SalesPerson::select('*')
+                                  ->where('user_id', $newDealerUser->user_id)
+                                  ->orderBy('id', 'asc')->all();
 
         // Set Sales People
         $this->salesPeople = array(

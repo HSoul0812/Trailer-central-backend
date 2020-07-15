@@ -99,7 +99,7 @@ class NewDealerUser extends Model
      * @return HasMany
      */
     public function salespeopleEmails() {
-        return $this->salespeople()->whereNotNull('email')->where('email', '<>', '');
+        return $this->salespeople()->whereNotNull('email')->where('email', '<>', '')->orderBy('id', 'asc');
     }
     
     public static function getTableName() {
