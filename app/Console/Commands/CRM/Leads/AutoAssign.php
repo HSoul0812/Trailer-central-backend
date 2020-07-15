@@ -126,7 +126,9 @@ class AutoAssign extends Command
                 $newestSalesPerson = null;
                 if(isset($this->roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType])) {
                     $newestSalesPersonId = $this->roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType];
-                    $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
+                    $newestSalesPerson = $this->salesPersonRepository->get([
+                        'sales_person_id' => $newestSalesPersonId
+                    ]);
                 }
 
                 // Newest Sales Person DOESN'T Exist?

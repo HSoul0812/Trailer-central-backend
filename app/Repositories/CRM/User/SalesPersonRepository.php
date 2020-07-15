@@ -31,6 +31,11 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      */
     public function get($params)
     {
+        // Get Single!
+        if(isset($params['sales_person_id'])) {
+            return SalesPerson::find($params['sales_person_id']);
+        }
+
         $query = $this->query();
 
         // add other queryable params here
