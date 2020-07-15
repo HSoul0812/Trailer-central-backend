@@ -36,7 +36,10 @@ class AutoAssignEmail extends Mailable
      */
     public function build()
     {
-        $build = $this->from('address_added_on_aws');
+        $from = config('mail.from.address', 'noreply@trailercentral.com');
+        $name = config('mail.from.name', 'Trailer Central');
+
+        $build = $this->from($from, $name);
 
         if (! empty($this->data['replyToEmail'])) {
             $build->replyTo($this->data['replyToEmail'], $this->data['replyToName']);
