@@ -14,7 +14,7 @@ use App\Repositories\Traits\SortTrait;
 class InventoryRepository implements InventoryRepositoryInterface
 {
     use SortTrait;
-    
+
     private $sortOrders = [
         'title' => [
             'field' => 'title',
@@ -25,7 +25,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             'direction' => 'ASC'
         ]
     ];
-    
+
     /**
      * @param $params
      * @throws NotImplementedException
@@ -37,11 +37,15 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return Inventory
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        $item = Inventory::findOrFail($params['inventory_id']);
+
+        $item->fill($params)->save();
+
+        return $item;
     }
 
     /**
@@ -70,7 +74,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
     {
         $query = Inventory::select('*');
-        
+
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
@@ -79,7 +83,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%');
             });
         }
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
@@ -91,22 +95,28 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
-        
+
+        if (isset($params[self::CONDITION_AND_WHERE_RAW]) && is_array($params[self::CONDITION_AND_WHERE_RAW])) {
+            foreach ($params[self::CONDITION_AND_WHERE_RAW] as $condition) {
+                $query = $query->whereRaw($condition[0]);
+            }
+        }
+
         if (isset($params['dealer_id'])) {
             $query = $query->where('dealer_id', $params['dealer_id']);
         }
-        
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         if ($paginated) {
             return $query->paginate($params['per_page'])->appends($params);
         }
 
         return $query->get();
     }
-    
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }
