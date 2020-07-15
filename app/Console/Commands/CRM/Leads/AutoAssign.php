@@ -105,26 +105,22 @@ class AutoAssign extends Command
             foreach($leads as $lead) {
                 // Initialize Notes Array
                 $notes = $dealerNotes;
-                echo $lead->first_name . ' ';
-                echo $lead->last_name . "\n";
-                echo $lead->getFullNameAttribute() . "\n";
-                echo $lead->getIdNameAttribute();
-                die;
+                $leadName = $lead->getIdNameAttribute();
 
                 // Get Sales Type
                 $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
-                $notes[] = 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead with ID ' . $lead->identifier;
+                $notes[] = 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead ' . $leadName;
 
                 // Get Dealer Location
                 $dealerLocationId = $lead->dealer_location_id;
                 if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
                     $dealerLocationId = $lead->inventory->dealer_location_id;
-                    $notes[] = 'Preferred Location doesn\'t exist on Lead with ID ' . $lead->identifier . ', grabbed Inventory Location instead: ' . $dealerLocationId;
+                    $notes[] = 'Preferred Location doesn\'t exist on Lead ' . $leadName . ', grabbed Inventory Location instead: ' . $dealerLocationId;
                 } elseif(!empty($dealerLocationId)) {
-                    $notes[] = 'Got Preferred Location ID ' . $dealerLocationId . ' on Lead with ID ' . $lead->identifier;
+                    $notes[] = 'Got Preferred Location ID ' . $dealerLocationId . ' on Lead ' . $leadName;
                 } else {
                     $dealerLocationId = 0;
-                    $notes[] = 'Cannot Find Preferred Location on Lead with ID ' . $lead->identifier . ', ignoring Dealer Location in Matching';
+                    $notes[] = 'Cannot Find Preferred Location on Lead ' . $leadName . ', ignoring Dealer Location in Matching';
                 }
 
                 // Last Sales Person Already Exists?
@@ -159,7 +155,7 @@ class AutoAssign extends Command
                 }
                 // Process Auto Assign!
                 else {
-                    $notes[] = 'Found Next Matching Sales Person: ' . $newestSalesPerson->id . ' for Lead With ID: ' . $lead->identifier;
+                    $notes[] = 'Found Next Matching Sales Person: ' . $newestSalesPerson->id . ' for Lead: ' . $leadName;
 
                     // Initialize Next Contact Date
                     $nextDay = date("d") + 1;
@@ -170,7 +166,7 @@ class AutoAssign extends Command
                     $nextContactGmt   = gmdate("Y-m-d H:i:s", $nextContactStamp);
                     $nextContact      = $nextContactObj->format("Y-m-d H:i:s");
                     $nextContactText  = ' on ' . $nextContactObj->format("l, F jS, Y") . ' at ' . $nextContactObj->format("g:i A T");
-                    $notes[] = 'Setting Next Contact Date: ' . $nextContact . ' to Lead With ID: ' . $lead->identifier;
+                    $notes[] = 'Setting Next Contact Date: ' . $nextContact . ' to Lead: ' . $leadName;
 
                     // Set Salesperson to Lead
                     try {
@@ -180,7 +176,7 @@ class AutoAssign extends Command
                             'next_contact_date' => $nextContactGmt
                         ]);
                         $status = 'assigned';
-                        $notes[] = 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead With ID: ' . $lead->identifier;
+                        $notes[] = 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName;
 
                         // Send Sales Email
                         if(!empty($dealer->crmUser->enable_assign_notification)) {
@@ -193,7 +189,7 @@ class AutoAssign extends Command
                                     'date' => Carbon::now()->toDateTimeString(),
                                     'salesperson_name' => $salesPerson->getFullNameAttribute(),
                                     'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
-                                    'lead_name' => $lead->getIdNameAttribute(),
+                                    'lead_name' => $leadName,
                                     'lead_email' => $lead->email_address,
                                     'lead_phone' => $lead->phone_number,
                                     'lead_address' => $lead->getFullAddressAttribute(),
@@ -203,7 +199,7 @@ class AutoAssign extends Command
                                     'id' => sprintf('<%s@%s>', $this->generateId(), $this->serverHostname())
                                 ])
                             );
-                            $notes[] = 'Sent Notification Email to: ' . $salesEmail . ' for Lead With ID: ' . $lead->identifier;
+                            $notes[] = 'Sent Notification Email to: ' . $salesEmail . ' for Lead: ' . $leadName;
                         }
                     } catch(\Exception $e) {
                         // Add Error
