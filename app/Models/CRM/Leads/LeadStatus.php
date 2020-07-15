@@ -14,6 +14,8 @@ class LeadStatus extends Model
     const TYPE_CONTACT = 'CONTACT';
     const TYPE_TASK = 'TASK';
     
+    const STATUS_UNCONTACTED = 'Uncontacted';
+    
     const TABLE_NAME = 'crm_tc_lead_status';
     /**
      * The table associated with the model.
@@ -38,6 +40,7 @@ class LeadStatus extends Model
      */
     protected $fillable = [
         'status',
+        'tc_lead_identifier',
         'next_contact_date',
         'contact_type',
         'sales_person_id'

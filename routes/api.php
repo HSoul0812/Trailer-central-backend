@@ -128,6 +128,11 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Inventory Manufacturers
+     */
+    $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
@@ -214,6 +219,9 @@ $api->version('v1', function ($route) {
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
 
+    // Factory
+    $route->get('feed/factory/showroom', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@index');
+
     /*
     |--------------------------------------------------------------------------
     | User
@@ -260,6 +268,7 @@ $api->version('v1', function ($route) {
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
+        $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@create');
 
         /*
         |--------------------------------------------------------------------------
@@ -398,6 +407,15 @@ $api->version('v1', function ($route) {
         $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
         $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Various reports
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
     });
 
 });
