@@ -142,12 +142,13 @@ class AutoAssign extends Command
 
                     // Initialize Next Contact Date
                     $nextDay = date("d") + 1;
-                    $nextContactTime = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
-                    $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone(env('DB_TIMEZONE')));
+                    $nextContactStamp = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
+                    $nextContactObj   = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone(env('DB_TIMEZONE')));
 
                     // Set Next Contact Date
-                    $nextContactGmt = gmdate("Y-m-d H:i:s", $nextContactTime);
-                    $nextContact = $nextContactDate->format("Y-m-d H:i:s");
+                    $nextContactGmt   = gmdate("Y-m-d H:i:s", $nextContactStamp);
+                    $nextContact      = $nextContactObj->format("Y-m-d H:i:s");
+                    $nextContactText  = ' on ' . $nextContactObj->format("l, F jS, Y") . ' at ' . $nextContactObj->format("g:i A T");
                     $notes[] = 'Setting Next Contact Date: ' . $nextContact . ' to Lead With ID: ' . $lead->identifier;
 
                     // Set Salesperson to Lead
@@ -169,14 +170,14 @@ class AutoAssign extends Command
                                 new AutoAssignEmail([
                                     'date' => Carbon::now()->toDateTimeString(),
                                     'salesperson_name' => $salesPerson->getFullNameAttribute(),
-                                    'launch_url' => Lead::getLeadUrl($lead->identifier, $credential),
+                                    'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
                                     'lead_name' => $lead->getFullNameAttribute(),
                                     'lead_email' => $lead->email_address,
                                     'lead_phone' => $lead->phone_number,
                                     'lead_address' => $lead->getFullAddressAttribute(),
                                     'lead_status' => !empty($lead->leadStatus->status) ? $lead->leadStatus->status : 'Uncontacted',
                                     'lead_comments' => $lead->comments,
-                                    'next_contact_date' => $nextContactGmt,
+                                    'next_contact_date' => $nextContactText,
                                     'id' => sprintf('<%s@%s>', $this->generateId(), $this->serverHostname())
                                 ])
                             );

@@ -22,7 +22,6 @@ class AutoAssignEmail extends Mailable
      */
     public function __construct(array $data)
     {
-        $data['body']   = $this->getBody($data);
         $this->data     = $data;
         $this->subject  = $this->getSubject($data);
         $this->callbacks[] = function ($message) use ($data) {
@@ -79,51 +78,5 @@ class AutoAssignEmail extends Mailable
 
         // Return Subject
         return $subject;
-    }
-
-    /**
-     * Build Body for Email
-     * 
-     * @param array $data
-     * @return boolean
-     */
-    public function getBody($data) {
-        // Clean Up Next Contact Date Output
-        $nextContactText = '';
-        if(!empty($data['next_contact_date'])) {
-            $nextContactDate = new \DateTime($data['next_contact_date'], new \DateTimeZone(env('DB_TIMEZONE')));
-            $nextContactText = ' on ' . $nextContactDate->format("l, F jS, Y") .
-                                ' at ' . $nextContactDate->format("g:i A T");
-        }
-
-        // Initialize Body
-        $body = $data['salesperson_name'] . ', you have been assigned to handle the ' .
-                    'following lead "' . $data['lead_name'] . '"' . $nextContactText . '.<br />' .
-                    'See below for details.<br /><br />';
-
-        // Launch CRM to Exact URL
-        if(!empty($data['launch_url'])) {
-            $body .= '<a href="' . $data['launch_url'] . '">Click here to open this lead in Trailer Central CRM!</a><br /><br />';
-        }
-
-        // Handle Lead Details
-        if(!empty($data['lead_email'])) {
-            $body .= '<strong>Email Address:</strong> ' . $data['lead_email'] . '<br />';
-        }
-        if(!empty($data['lead_phone'])) {
-            $body .= '<strong>Phone Number:</strong> ' . $data['lead_phone'] . '<br />';
-        }
-        if(!empty($data['lead_status'])) {
-            $body .= '<strong>Status:</strong> ' . $data['lead_status'] . '<br />';
-        }
-        if(!empty($data['lead_address'])) {
-            $body .= '<strong>Address:</strong><br />' . $data['lead_address'] . '<br />';
-        }
-        if(!empty($data['lead_comments'])) {
-            $body .= '<br /><blockquote>' . $data['lead_comments'] . '</blockquote>';
-        }
-
-        // Return Body
-        return $body;
     }
 }
