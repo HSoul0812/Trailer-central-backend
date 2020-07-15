@@ -50,8 +50,8 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function get($params)
     {
-        throw new NotImplementedException;
-    }
+        return Inventory::findOrFail($params['id']);
+    } 
 
     /**
      * @param $params

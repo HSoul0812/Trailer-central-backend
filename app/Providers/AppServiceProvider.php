@@ -23,6 +23,8 @@ use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Website\WebsiteRepository;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Export\Parts\CsvExportService;
@@ -57,6 +59,9 @@ use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\CRM\Customer\CustomerRepository;
 use Laravel\Nova\Nova;
+use App\Rules\CRM\Leads\ValidLeadSource;
+use App\Repositories\Inventory\ManufacturerRepository;
+use App\Repositories\Inventory\ManufacturerRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -78,6 +83,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
         \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
+        \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -90,6 +96,17 @@ class AppServiceProvider extends ServiceProvider
         Nova::serving(function () {
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
         });
+
+        // log all queries
+        if (env('APP_LOG_QUERIES')) {
+            DB::listen(function($query) {
+                Log::info(
+                    $query->sql,
+                    $query->bindings,
+                    $query->time
+                );
+            });
+        }
     }
 
     /**
@@ -131,6 +148,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
+        $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
 
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(FinancingCompanyRepositoryInterface::class, FinancingCompanyRepository::class);

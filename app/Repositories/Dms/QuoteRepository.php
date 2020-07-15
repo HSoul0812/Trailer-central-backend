@@ -14,7 +14,7 @@ use App\Models\CRM\Account\Payment;
 class QuoteRepository implements QuoteRepositoryInterface {
 
     private $sortOrders = [
-        'title' => [ 
+        'title' => [
             'field' => 'title',
             'direction' => 'DESC'
         ],
@@ -57,7 +57,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
         if (isset($params['dealer_id'])) {
             $query = UnitSale::where('dealer_id', '=', $params['dealer_id']);
         } else {
-            $query = UnitSale::where('id', '>', 0);  
+            $query = UnitSale::where('id', '>', 0);
         }
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
@@ -105,7 +105,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
@@ -114,7 +114,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
         if (isset($params['dealer_id'])) {
             $query = UnitSale::where('dms_unit_sale.dealer_id', '=', $params['dealer_id']);
         } else {
-            $query = UnitSale::where('id', '>', 0);  
+            $query = UnitSale::where('id', '>', 0);
         }
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {

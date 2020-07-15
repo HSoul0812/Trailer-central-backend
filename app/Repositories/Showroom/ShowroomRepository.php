@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\Storage;
 
 class ShowroomRepository implements ShowroomRepositoryInterface {
     
+    private $sortOrders = [
+        'year' => [ 
+            'field' => 'year',
+            'direction' => 'DESC'
+        ],
+        '-year' => [
+            'field' => 'year',
+            'direction' => 'ASC'
+        ],
+    ];
+
     public function create($params) {
         DB::beginTransaction();
 
@@ -57,7 +68,25 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
     }
 
     public function getAll($params) {
-        throw new NotImplementedException;
+        $query = Showroom::where('id', '>', 0);
+
+        if (isset($params['search_term'])) {
+            $query = $query->where('model', 'LIKE', '%' . $params['search_term'] . '%');
+        }
+        if (isset($params['manufacturer'])) {
+            $query = $query->where('manufacturer', '=', $params['manufacturer']);
+        }
+        if (isset($params['model'])) {
+            $query = $query->where('model', '=', $params['model']);
+        }
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        }
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+        
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
@@ -109,4 +138,12 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
         $explodedFile = explode('/', $file);
         return $explodedFile[count($explodedFile) - 1];
     }
+
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
 }
