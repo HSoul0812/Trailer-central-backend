@@ -80,6 +80,8 @@ class AutoAssign extends Command
                 'per_page' => 'all',
                 'dealer_id' => $dealer->id
             ]);
+            echo $dealer->id . "\n\n";
+            continue;
             if(count($leads) < 1) {
                 continue;
             }
