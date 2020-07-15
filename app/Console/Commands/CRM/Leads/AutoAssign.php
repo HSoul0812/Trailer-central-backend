@@ -108,7 +108,7 @@ class AutoAssign extends Command
                 echo $lead->first_name . ' ';
                 echo $lead->last_name . "\n";
                 echo $lead->getFullNameAttribute() . "\n";
-                echo $lead->getIdNameAttribute()
+                echo $lead->getIdNameAttribute();
                 die;
 
                 // Get Sales Type
