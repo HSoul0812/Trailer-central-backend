@@ -22,7 +22,33 @@
                                 <td bgcolor="#FFFFFF" style="padding: 30px;">
                                     <!-- begin content -->
 
-                                    {!! $body !!}
+                                    {{ $salesperson_name }}, you have been assigned to handle the 
+                                    following lead "{{ $lead_name }}"{{ $next_contact_date }}.<br />
+                                    See below for details.<br /><br />
+
+                                    @if (!empty($launch_url))
+                                        <a href="{{ $launch_url }}">Click here to open this lead in Trailer Central CRM!</a><br /><br />
+                                    @endif
+
+                                    @if (!empty($lead_email))
+                                        <strong>Email Address:</strong> {{ $lead_email }}<br />
+                                    @endif
+
+                                    @if (!empty($lead_phone))
+                                        <strong>Phone Number:</strong> {{ $lead_phone }}<br />
+                                    @endif
+
+                                    @if (!empty($lead_status))
+                                        <strong>Status:</strong> {{ $lead_status }}<br />
+                                    @endif
+
+                                    @if (!empty($lead_address))
+                                        <strong>Address:</strong><br />{{ $lead_address }}<br />
+                                    @endif
+
+                                    @if (!empty($lead_comments))
+                                        <br /><blockquote>{{ $lead_comments }}</blockquote>
+                                    @endif
 
                                     <!-- end content -->
                                 </td>
