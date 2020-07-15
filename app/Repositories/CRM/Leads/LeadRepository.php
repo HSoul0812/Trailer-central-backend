@@ -113,7 +113,7 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return type
      */
     public function getAllUnassigned($params) {
-        $query = Lead::where('identifier', '>', 0);
+        $query = Lead::with('inventory');
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);

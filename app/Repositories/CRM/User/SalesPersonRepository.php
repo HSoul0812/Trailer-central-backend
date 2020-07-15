@@ -58,6 +58,21 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
         throw NotImplementedException;
     }
 
+    public function assign($params) {
+        DB::beginTransaction();
+
+        try {
+            $leadAssign = LeadAssign::create($params);
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw new \Exception($ex->getMessage());
+        }
+
+        return $leadAssign;
+    }
+
     
 
     /**
@@ -110,17 +125,11 @@ class SalesPersonRepository implements SalesPersonRepositoryInterface {
      * @param int $dealerId
      * @param int $dealerLocationId
      * @param string $salesType
+     * @param SalesPerson $newestSalesPerson
      * @param array $salesPeople
      * @return SalesPerson next sales person
      */
-    public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPeople = array()) {
-        // Get Sales Person ID
-        $newestSalesPerson = $this->findNewestSalesPerson($dealerId, $dealerLocationId, $salesType);
-        $newestSalesPersonId = 0;
-        if(!empty($newestSalesPerson->id)) {
-            $newestSalesPersonId = $newestSalesPerson->id;
-        }
-
+    public function findNextSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson, $salesPeople = array()) {
         // Don't Already Have SalesPeople?
         if(empty($salesPeople)) {
             // Get Sales People for Dealer ID
