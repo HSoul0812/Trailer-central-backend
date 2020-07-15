@@ -23,8 +23,8 @@ class AutoAssignEmail extends Mailable
     public function __construct(array $data)
     {
         $this->data     = $data;
-        $this->subject  = $this->buildSubject($data);
-        $this->body     = $this->buildBody($data);
+        $this->subject  = $this->getSubject($data);
+        $this->body     = $this->getBody($data);
         $this->callbacks[] = function ($message) use ($data) {
             $message->getHeaders()->addTextHeader('Message-ID', $data['id']);
         };
@@ -66,9 +66,9 @@ class AutoAssignEmail extends Mailable
     /**
      * Build Subject
      * 
-     * @param type $data
+     * @param array $data
      */
-    public function buildSubject($data) {
+    public function getSubject($data) {
         // Initialize
         $subject = 'Assigned to Handle Lead';
 
@@ -84,10 +84,10 @@ class AutoAssignEmail extends Mailable
     /**
      * Build Body for Email
      * 
-     * @param type $data
+     * @param array $data
      * @return boolean
      */
-    public function buildBody($data) {
+    public function getBody($data) {
         // Clean Up Next Contact Date Output
         $nextContactText = '';
         if(!empty($data['next_contact_date'])) {
