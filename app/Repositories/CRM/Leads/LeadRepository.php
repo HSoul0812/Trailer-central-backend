@@ -226,23 +226,12 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     public function assign($params) {
-        DB::beginTransaction();
-
-        try {
-            // Fix Explanation!
-            if(isset($params['explanation']) && is_array($params['explanation'])) {
-                $params['explanation'] = implode("\n\n", $params['explanation']);
-            }
-
-            $leadAssign = LeadAssign::create($params);
-
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            throw new \Exception($ex->getMessage());
+        // Fix Explanation!
+        if(isset($params['explanation']) && is_array($params['explanation'])) {
+            $params['explanation'] = implode("\n\n", $params['explanation']);
         }
 
-        return $leadAssign;
+        return LeadAssign::create($params);
     }
     
     public function getCustomers($params = []) {
