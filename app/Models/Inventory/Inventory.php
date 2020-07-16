@@ -76,7 +76,7 @@ class Inventory extends Model
 
     public function floorplanPayments()
     {
-        return $this->hasMany('App\Models\Inventory\Floorplan\Payment');
+        return $this->hasMany('App\Models\Inventory\Floorplan\Payment', 'inventory_id', 'inventory_id');
     }
     
     public function images()
