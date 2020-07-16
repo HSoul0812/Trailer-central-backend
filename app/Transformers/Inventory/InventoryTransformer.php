@@ -66,7 +66,8 @@ class InventoryTransformer extends TransformerAbstract
              'weight' => $inventory->weight,
              'width' => $inventory->width,
              'year' => $inventory->year,
-             'color' => $inventory->color
+             'color' => $inventory->color,
+             'floorplan_payments' => $inventory->floorplanPayments,
          ];
     }
     
