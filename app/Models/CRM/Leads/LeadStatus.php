@@ -42,7 +42,8 @@ class LeadStatus extends Model
         'status',
         'tc_lead_identifier',
         'next_contact_date',
-        'contact_type'
+        'contact_type',
+        'sales_person_id'
     ];
 
     public function lead()

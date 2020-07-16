@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
+use App\Nova\Observer\DealerIncomingMappingObserver;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
@@ -56,6 +58,7 @@ use App\Repositories\Dms\Quickbooks\AccountRepository;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\CRM\Customer\CustomerRepository;
+use Laravel\Nova\Nova;
 use App\Rules\CRM\Leads\ValidLeadSource;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
@@ -88,6 +91,10 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return $this;
+        });
+
+        Nova::serving(function () {
+            DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
         });
 
         // log all queries

@@ -5,6 +5,9 @@ namespace App\Repositories\CRM\Leads;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadAssign;
+use App\Models\CRM\User\SalesPerson;
+use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Interactions\Interaction;
@@ -133,25 +136,77 @@ class LeadRepository implements LeadRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * Get All Unassigned Leads
+     * 
+     * @param int $params
+     * @return type
+     */
+    public function getAllUnassigned($params) {
+        $query = Lead::select(Lead::getTableName().'.*')->with('inventory');
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
+        }
+
+        // Join Lead Status
+        $query = $query->leftJoin(NewDealerUser::getTableName(), Lead::getTableName().'.dealer_id', '=', NewDealerUser::getTableName().'.id');
+        $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
+        $query = $query->leftJoin(SalesPerson::getTableName(), function ($join) {
+            $join->on(LeadStatus::getTableName().'.sales_person_id', '=', SalesPerson::getTableName().'.id')
+                 ->on(SalesPerson::getTableName().'.user_id', '=', NewDealerUser::getTableName().'.user_id');
+        });
+
+        // Require Sales Person ID NULL or 0
+        $query = $query->where(function($query) {
+            $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
+                  ->orWhere(LeadStatus::getTableName().'.sales_person_id', 0);
+        })->where(Lead::getTableName().'.is_archived', 0)
+          ->where(Lead::getTableName().'.is_spam', 0)
+          ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY');
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        }
+        
+        if (isset($params['sort'])) {
+            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
+            $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
+        }
+        
+        $query = $query->groupBy(Lead::getTableName().'.identifier');
+
+        // Return By Dealer?
+        if($params['per_page'] === 'all') {
+            return $query->get();
+        }
+
+        // Paginate!
+        return $query->paginate($params['per_page'])->appends($params);
+    }
+
     public function update($params) {
         $lead = Lead::findOrFail($params['id']);
         
         DB::transaction(function() use (&$lead, $params) {
             $leadStatusUpdates = [];
-            
+
             if (isset($params['lead_status'])) {
                 $leadStatusUpdates['status'] = $params['lead_status'];
-                             
             }
-            
+
             if (isset($params['next_contact_date'])) {
-                $leadStatusUpdates['next_contact_date'] = $params['next_contact_date'];      
+                $leadStatusUpdates['next_contact_date'] = $params['next_contact_date'];
             }
-            
+
             if (isset($params['contact_type'])) {
-                $leadStatusUpdates['contact_type'] = $params['contact_type'];      
+                $leadStatusUpdates['contact_type'] = $params['contact_type'];
             }
-            
+
+            if (isset($params['sales_person_id'])) {
+                $leadStatusUpdates['sales_person_id'] = $params['sales_person_id'];
+            }
+
             if (!empty($leadStatusUpdates)) {
                 if ($lead->leadStatus) {
                     $lead->leadStatus()->update($leadStatusUpdates);
@@ -168,6 +223,21 @@ class LeadRepository implements LeadRepositoryInterface {
         });
         
         return $lead;
+    }
+
+    /**
+     * Create Assign Log for Lead
+     * 
+     * @param type $params
+     * @return type
+     */
+    public function assign($params) {
+        // Fix Explanation!
+        if(isset($params['explanation']) && is_array($params['explanation'])) {
+            $params['explanation'] = implode("\n\n", $params['explanation']);
+        }
+
+        return LeadAssign::create($params);
     }
     
     public function getCustomers($params = []) {

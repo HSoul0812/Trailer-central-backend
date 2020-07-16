@@ -3,6 +3,8 @@
 namespace App\Repositories\CRM\User;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\User\NewDealerUser;
 use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
@@ -17,6 +19,10 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
     {
         $this->withQuery(SalesPerson::query());
     }
+    
+    public function create($params) {
+        throw NotImplementedException;
+    }
 
     /**
      * find records; similar to findBy()
@@ -25,6 +31,11 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      */
     public function get($params)
     {
+        // Get Single!
+        if(isset($params['sales_person_id'])) {
+            return SalesPerson::find($params['sales_person_id']);
+        }
+
         $query = $this->query();
 
         // add other queryable params here
@@ -37,6 +48,12 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         return $query->get();
     }
 
+    /**
+     * Get All Salespeople
+     * 
+     * @param int $params
+     * @return type
+     */
     public function getAll($params) {
         $query = SalesPerson::SELECT('*');
 
@@ -126,4 +143,159 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         return $all;
     }
 
+    
+
+    /**
+     * Find Newest Sales Person From Vars or Check DB
+     * 
+     * @param int $dealerId
+     * @param int $dealerLocationId
+     * @param string $salesType
+     * @param SalesPerson
+     */
+    public function findNewestSalesPerson($dealerId, $dealerLocationId, $salesType) {
+        // Find Newest Salesperson in DB
+        $query = LeadStatus::select(SalesPerson::getTableName() . '.*')
+                            ->leftJoin(SalesPerson::getTableName(), SalesPerson::getTableName() . '.id', '=', LeadStatus::getTableName() . '.sales_person_id')
+                            ->leftJoin(Lead::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
+                            ->where(Lead::getTableName() . '.dealer_id', $dealerId)
+                            ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
+                            ->where(SalesPerson::getTableName() . '.id', '<>', 0)
+                            ->where(SalesPerson::getTableName() . '.id', '<>', '')
+                            ->whereNotNull(SalesPerson::getTableName() . '.id')
+                            ->orderBy(Lead::getTableName() . '.date_submitted', 'DESC');
+
+        // Append Dealer Location
+        if(!empty($dealerLocationId)) {
+            $query = $query->where(SalesPerson::getTableName() . '.dealer_location_id', $dealerLocationId);
+        }
+
+        // Get Sales Person ID
+        $salesPerson = $query->first();
+        $salesPersonId = 0;
+        if(!empty($salesPerson->id)) {
+            $salesPersonId = $salesPerson->id;
+        } else {
+            $salesPerson = new \stdclass;
+            $salesPerson->id = $salesPersonId;
+        }
+
+        // Return Sales Person
+        return $salesPerson;
+    }
+
+    /**
+     * Round Robin to Next Sales Person
+     * 
+     * @param int $dealerId
+     * @param int $dealerLocationId
+     * @param string $salesType
+     * @param SalesPerson $newestSalesPerson
+     * @param array $salesPeople
+     * @return SalesPerson next sales person
+     */
+    public function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson, $salesPeople = array()) {
+        // Set Newest ID
+        $newestSalesPersonId = 0;
+        if(!empty($newestSalesPerson->id)) {
+            $newestSalesPersonId = $newestSalesPerson->id;
+        }
+
+        // Get Sales People for Dealer ID
+        if(empty($salesPeople)) {
+            $salesPeople = $this->findSalesPeople($dealerId);
+        }
+
+        // Loop Sales People
+        $validSalesPeople = [];
+        $nextSalesPerson = null;
+        $lastId = 0;
+        foreach($salesPeople as $k => $salesPerson) {
+            // Search By Location?
+            if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
+                if($dealerLocationId !== $salesPerson->dealer_location_id) {
+                    continue;
+                }
+            }
+
+            // Search by Type?
+            if($salesPerson->{'is_' . $salesType} !== 1 && $salesPerson->{'is_' . $salesType} !== '1') {
+                continue;
+            }
+
+            // Insert Valid Salespeople
+            $validSalesPeople[] = $salesPerson;
+        }
+
+        // Loop Valid Sales People
+        if(count($validSalesPeople) > 1) {
+            $salesPerson = end($validSalesPeople);
+            $lastId = $salesPerson->id;
+            foreach($validSalesPeople as $salesPerson) {
+                // Compare ID
+                if($lastId === $newestSalesPersonId || $newestSalesPersonId === 0) {
+                    $nextSalesPerson = $salesPerson;
+                    break;
+                }
+                $lastId = $salesPerson->id;
+            }
+
+            // Still No Next Sales Person?
+            if(empty($nextSalesPerson)) {
+                $salesPerson = reset($validSalesPeople);
+                $nextSalesPerson = $salesPerson;
+            }
+        } elseif(count($validSalesPeople) === 1) {
+            $salesPerson = reset($validSalesPeople);
+            $nextSalesPerson = $salesPerson;
+        }
+
+        // Still No Next Sales Person?
+        if(empty($nextSalesPerson)) {
+            $nextSalesPerson = $newestSalesPerson;
+        }
+
+        // Return Next Sales Person
+        return $nextSalesPerson;
+    }
+
+    /**
+     * Find Sales People By Dealer ID
+     * 
+     * @param type $dealerId
+     */
+    public function findSalesPeople($dealerId) {
+        // Get New Sales People By Dealer ID
+        $newDealerUser = NewDealerUser::findOrFail($dealerId);
+        return SalesPerson::select('*')
+                                  ->where('user_id', $newDealerUser->user_id)
+                                  ->orderBy('id', 'asc')->all();
+    }
+
+    /**
+     * Find Sales Person Type
+     * 
+     * @param string $leadType
+     * @return string
+     */
+    public function findSalesType($leadType) {
+        // Set Default Lead Type
+        $salesType = 'default';
+        if(in_array($leadType, SalesPerson::TYPES_DEFAULT) || empty($leadType)) {
+            $salesType = 'default';
+        }
+
+        // Set Inventory Lead Type
+        if(in_array($leadType, SalesPerson::TYPES_INVENTORY)) {
+            $salesType = 'inventory';
+        }
+
+        // Not a Valid Type? Set Default!
+        if(!in_array($leadType, SalesPerson::TYPES_VALID)) {
+            $salesType = 'default';
+        }
+
+        // Return Lead Type!
+        return $salesType;
+    }
 }
