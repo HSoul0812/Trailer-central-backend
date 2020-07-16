@@ -46,6 +46,11 @@ class FixLengthWidthHeightFeetValues extends Command
      */
     public function handle()
     {
+        $emptyFeetUpdates = 0;
+        $notEmptyFeedUpdates = 0;
+        
+        $this->info("Updating empty feet");        
+        
         foreach (self::COLUMNS as $feetColumn => $minInchesLength) {
             $inchesColumn = sprintf(self::INCHES_TEMPLATE, $feetColumn);
 
@@ -63,10 +68,16 @@ class FixLengthWidthHeightFeetValues extends Command
                     'inventory_id' => $item->inventory_id,
                     $feetColumn => $feetValue,
                 ];
-
+                
+                $emptyFeetUpdates++;
+                
+                $this->info("Updating empty feet: ".json_encode($params));
                 $this->inventoryRepository->update($params);
             }
         }
+        
+        $this->info("Updated {$emptyFeetUpdates}");
+        $this->info("Updating feet not empty");        
 
         foreach (self::COLUMNS as $feetColumn => $minInchesLength) {
             $inchesColumn = sprintf(self::INCHES_TEMPLATE, $feetColumn);
@@ -92,10 +103,14 @@ class FixLengthWidthHeightFeetValues extends Command
                     'inventory_id' => $item->inventory_id,
                     $feetColumn => $feetValue,
                 ];
-
+                
+                $this->info("Updating feet not empty: ".json_encode($params));
+                $notEmptyFeedUpdates++;
                 $this->inventoryRepository->update($params);
             }
         }
+        
+        $this->info("Updated {$notEmptyFeedUpdates}");
 
         return true;
     }

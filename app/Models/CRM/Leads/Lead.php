@@ -47,6 +47,8 @@ class Lead extends Model
      */
     protected $primaryKey = 'identifier';
     
+    public $timestamps = false;
+    
     /**
      * The attributes that are mass assignable.
      *

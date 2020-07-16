@@ -26,8 +26,11 @@ class ValidLeadSource implements Rule
         
         $leadSource = LeadSource::where('source_name', $value)
                         ->where('deleted', 0)
-                        ->where('user_id', $user->dealer_id)
-                        ->first();
+                        ->where(function($query) use ($user) {
+                            $query->where('user_id', $user->dealer_id)
+                                    ->orWhere('user_id', 0);
+                        })->first();
+                        
         
         if (empty($leadSource)) {
             return false;

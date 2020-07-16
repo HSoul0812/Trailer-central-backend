@@ -44,7 +44,7 @@ class LeadController extends RestfulController
         $request = new CreateLeadRequest($request->all());
         
         if ($request->validate()) {             
-            return $this->response->paginator($this->leads->create($request->all()), $this->transformer);
+            return $this->response->item($this->leads->create($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

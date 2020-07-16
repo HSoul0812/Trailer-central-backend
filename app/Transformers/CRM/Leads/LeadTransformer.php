@@ -22,7 +22,7 @@ class LeadTransformer extends TransformerAbstract {
 	 $transformedLead =  [
              'id' => $lead->identifier,
              'name' => $lead->full_name,
-             'inventory_interested_in' => $this->transformInventory($lead->inventory),
+             'inventory_interested_in' => $lead->inventory ? $this->transformInventory($lead->inventory) : [],
              'interactions' => $lead->interactions,
              'status' => ($lead->leadStatus) ? $lead->leadStatus->status : Lead::STATUS_UNCONTACTED,
              'next_contact_date' => ($lead->leadStatus) ? $lead->leadStatus->next_contact_date : null,
