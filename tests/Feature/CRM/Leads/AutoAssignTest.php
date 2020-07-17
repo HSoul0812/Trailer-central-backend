@@ -26,6 +26,14 @@ class AutoAssignCommandTest extends TestCase
                                1931525, 1932625, 1932626, 1932627, 1932628];
     const TEST_FORM_TITLE = ['Value Your Trade', 'Rent to Own', 'Financing', 'Build Your Trailer'];
 
+
+    /**
+     * Construct Text Class
+     */
+    public function __construct() {
+        parent::__construct();   
+    }
+
     /**
      * Test all auto assign dealers
      *
