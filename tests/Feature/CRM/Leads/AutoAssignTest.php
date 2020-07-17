@@ -31,7 +31,9 @@ class AutoAssignCommandTest extends TestCase
      * Construct Text Class
      */
     public function __construct() {
-        parent::__construct();   
+        parent::__construct();
+        
+        $this->createApplication();
     }
 
     /**
