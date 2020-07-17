@@ -54,13 +54,26 @@ class Lead extends Model
      */
     protected $fillable = [
         'website_id',
-        'lead_type',
         'inventory_id',
+        'dealer_id',
+        'dealer_location_id',
+        'lead_type',
         'referral',
-        'first_name',
         'title',
+        'first_name',
         'last_name',
-        'phone_number'
+        'email_address',
+        'phone_number',
+        'preferred_contact',
+        'address',
+        'city',
+        'state',
+        'zip',
+        'comments',
+        'note',
+        'metadata',
+        'is_spam',
+        'is_archived'
     ];
 
     /**
