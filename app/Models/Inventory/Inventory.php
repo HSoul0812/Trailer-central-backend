@@ -37,6 +37,9 @@ class Inventory extends Model
     protected $fillable = [
         'fp_balance',
         'fp_interest_paid',
+        'length',
+        'width',
+        'height'
     ];
     
     protected $casts = [
