@@ -38,6 +38,10 @@ class AutoAssignCommandTest extends TestCase
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
 
+        // Log Start
+        $now = $datetime->format("l, F jS, Y");
+        $command = "leads:assign:auto " . self::TEST_DEALER_ID;
+
         // Build Random Factory Leads
         $leads = factory(Lead::class, 10)->create();
 
@@ -45,9 +49,15 @@ class AutoAssignCommandTest extends TestCase
         Mail::fake();
 
         // Call Leads Assign Command
-        $this->artisan('leads:assign:auto ' . self::TEST_DEALER_ID)
-            ->assertSuccessful()
-            ->assertExitCode(0);
+        $command = $this->artisan('leads:assign:auto ' . self::TEST_DEALER_ID)
+                        ->expectsOutput("{$command} started {$now}")
+                        ->expectsOutput("{$command} found " . count($leads) . " to process");
+
+        // Expect End
+        $datetime = new \DateTime();
+        $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $command->expectsOutput("{$command} finished on " . $datetime->format("l, F jS, Y"))
+                ->assertExitCode(0);
 
         // Loop Leads
         foreach($leads as $lead) {
