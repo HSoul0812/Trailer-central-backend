@@ -11,7 +11,7 @@ use Tests\TestCase;
 use Faker\Generator as Faker;
 use Illuminate\Support\Str;
 
-class AutoAssignCommandTest extends \TestCase
+class AutoAssignCommandTest extends TestCase
 {
     use RefreshDatabase;
 
