@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Parts;
+
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 use App\Repositories\Parts\PartRepository;
@@ -9,6 +11,7 @@ use App\Models\Parts\Brand;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
 use App\Models\User\AuthToken;
+use Tests\TestCase;
 
 class PartsUpdateTest extends TestCase
 {

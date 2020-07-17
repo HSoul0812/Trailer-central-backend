@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests;
+
 use App\Mail\InteractionEmail;
 use App\Models\CRM\Leads\Lead;
 use Illuminate\Support\Facades\Mail;
