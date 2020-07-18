@@ -2,9 +2,7 @@
 
 namespace Tests;
 
-use \Laravel\Lumen\Testing\TestCase AS BaseTestCase;
-
-abstract class TestCase extends BaseTextCase
+abstract class TestCase extends \Laravel\Lumen\Testing\TestCase
 {
     use CreatesApplication;
 }
