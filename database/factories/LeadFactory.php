@@ -2,7 +2,7 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use Tests\Feature\CRM\Leads\AutoAssignCommandTest;
+use Tests\Feature\CRM\Leads\AutoAssignTest;
 use App\Models\CRM\Leads\Lead;
 use Faker\Generator as Faker;
 
