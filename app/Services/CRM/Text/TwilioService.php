@@ -35,7 +35,7 @@ class TwilioService
      * @param string $fullName
      * @return result of $this->twilio->messages->create || array with error
      */
-    private function send($from_number, $to_number, $text, $fullName) {
+    public function send($from_number, $to_number, $text, $fullName) {
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
@@ -119,7 +119,7 @@ class TwilioService
      *
      * @return NumberTwilio || boolean false
      */
-    private function getNextAvailableNumber() {
+    public function getNextAvailableNumber() {
         // Get Next Available Number
         if (!empty($this->twilio)) {
             $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
