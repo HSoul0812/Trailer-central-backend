@@ -126,7 +126,7 @@ class BlastRepository implements BlastRepositoryInterface {
     /**
      * Get Leads for Blast
      * 
-     * @param int $id
+     * @param array $params
      * @return Collection
      */
     public function getLeads($params) {
@@ -180,6 +180,12 @@ class BlastRepository implements BlastRepositoryInterface {
         return $blast;
     }
 
+    /**
+     * Mark Blast as Sent
+     * 
+     * @param array $params
+     * return BlastSent
+     */
     public function sent($params) {
         DB::beginTransaction();
 

@@ -126,7 +126,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
     /**
      * Get Leads for Campaign
      * 
-     * @param int $id
+     * @param array $params
      * @return Collection
      */
     public function getLeads($params) {
@@ -181,6 +181,12 @@ class CampaignRepository implements CampaignRepositoryInterface {
         return $campaign;
     }
 
+    /**
+     * Mark Campaign as Sent
+     * 
+     * @param array $params
+     * return CampaignSent
+     */
     public function sent($params) {
         DB::beginTransaction();
 

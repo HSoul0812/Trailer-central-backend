@@ -194,11 +194,11 @@ class TextRepository implements TextRepositoryInterface {
     private function sendTwilio($from_number, $to_number, $text, $fullName) {
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
-        /*if (empty($carrier['mobile_country_code'])) {
+        if (empty($carrier['mobile_country_code'])) {
             return [
                 'error' => 'Error: The number provided is a landline and cannot receive texts!'
             ];
-        }*/
+        }
 
         // Get Twilio Number
         $twilioNumber = Number::getActiveTwilioNumber($from_number, $to_number);
@@ -275,7 +275,7 @@ class TextRepository implements TextRepositoryInterface {
      *
      * @return NumberTwilio || boolean false
      */
-    public function getNextAvailableNumber() {
+    private function getNextAvailableNumber() {
         // Get Next Available Number
         if (!empty($this->twilio)) {
             $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
