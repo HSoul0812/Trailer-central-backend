@@ -5,12 +5,14 @@ namespace App\Transformers\Dms;
 
 
 use App\Models\CRM\Account\Payment;
+use App\Transformers\Dms\RefundTransformer;
 use League\Fractal\TransformerAbstract;
 
 class PaymentTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'invoice'
+        'invoice',
+        'refunds',
     ];
 
     public function transform(Payment $payment)
@@ -39,5 +41,10 @@ class PaymentTransformer extends TransformerAbstract
     public function includeInvoice(Payment $payment)
     {
         return $this->item($payment->invoice, new InvoiceTransformer());
+    }
+
+    public function includeRefunds(Payment $payment)
+    {
+        return $this->collection($payment->refunds, new RefundTransformer());
     }
 }
