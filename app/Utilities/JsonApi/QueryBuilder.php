@@ -97,7 +97,7 @@ class QueryBuilder implements QueryBuilderInterface
     {
         // build all query clauses
         $this
-            //->buildRelations()
+            ->buildRelations()
             ->buildSearch()
             ->buildPagination()
             ->buildFilter()
@@ -208,7 +208,15 @@ class QueryBuilder implements QueryBuilderInterface
 
             foreach ($operators as $operator => $value) {
                 $operatorFunction = $this->operatorFunction($operator);
-                $operatorFunction($column, $value, $this->query);
+
+                if (strpos($column, '.') === false) {
+                    $operatorFunction($column, $value, $this->query); // this is my column
+                } else {
+                    $pos = strrpos($column, '.');
+                    $myRelation = substr($column, 0, $pos);
+                    $myColumn = substr($column, $pos + 1);
+                    $operatorFunction($myColumn, $value, $this->query->getRelation($myRelation)->getQuery()); // dot means this is a relation
+                }
             }
         }
 

@@ -9,6 +9,7 @@ use App\Http\Requests\CRM\Leads\GetLeadsRequest;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
+use App\Http\Requests\CRM\Leads\CreateLeadRequest;
 
 class LeadController extends RestfulController
 {
@@ -23,7 +24,7 @@ class LeadController extends RestfulController
      */
     public function __construct(LeadRepositoryInterface $leads)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
         $this->transformer = new LeadTransformer;
     }
@@ -34,6 +35,16 @@ class LeadController extends RestfulController
 
         if ($request->validate()) {             
             return $this->response->paginator($this->leads->getAll($requestData), $this->transformer)->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id'], $requestData));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+    
+    public function create(Request $request) {
+        $request = new CreateLeadRequest($request->all());
+        
+        if ($request->validate()) {             
+            return $this->response->item($this->leads->create($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

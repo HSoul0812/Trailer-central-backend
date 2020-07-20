@@ -33,7 +33,9 @@ class Request extends BaseRequest {
             if ($user) {
                 if ($this->getObjectIdValue()) {
                     $obj = $this->getObject()->findOrFail($this->getObjectIdValue());
-                    die(var_dump($obj));
+                    if ($user->dealer_id != $obj->dealer_id) {
+                        return false;
+                    }
                 }
                 
             }
@@ -43,7 +45,7 @@ class Request extends BaseRequest {
         return true;
     }
     
-    protected function getObjectIdValue() {
+    protected function getObjectIdValue() { 
         return false;
     }
         

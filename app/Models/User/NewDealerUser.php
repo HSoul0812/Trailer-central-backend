@@ -4,16 +4,21 @@ namespace App\Models\User;
 
 use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
+use App\Models\CRM\User\SalesPerson;
 use Illuminate\Database\Eloquent\Model;
 
 class NewDealerUser extends Model
 {
+    const TABLE_NAME = 'new_dealer_user';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = "new_dealer_user";
+    protected $table = self::TABLE_NAME;
 
     /**
      * The attributes that are mass assignable.
@@ -61,6 +66,14 @@ class NewDealerUser extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get the crm user
+     */
+    public function crmUser()
+    {
+        return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
+    }
+
     public function location()
     {
         return $this->hasOne(DealerLocation::class, 'dealer_id', 'dealer_id');
@@ -68,5 +81,28 @@ class NewDealerUser extends Model
 
     public function uploads() {
         return $this->hasMany(Upload::class, 'dealer_upload', 'dealer_id');
+    }
+
+
+    /**
+     * Get Salespeople
+     * 
+     * @return HasMany
+     */
+    public function salespeople() {
+        return $this->hasMany(SalesPerson::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get Salespeople w/Emails
+     * 
+     * @return HasMany
+     */
+    public function salespeopleEmails() {
+        return $this->salespeople()->whereNotNull('email')->where('email', '<>', '')->orderBy('id', 'asc');
+    }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
     }
 }

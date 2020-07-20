@@ -5,11 +5,11 @@ namespace App\Models\Feed\Mapping\Incoming;
 use Illuminate\Database\Eloquent\Model;
 
 class DealerIncomingMapping extends Model {
-    
+
     protected $table = 'dealer_incoming_mappings';
-    
+
     public $timestamps = false;
-    
+
     const MAKE = 'manufacturer';
     const CATEGORY = 'category';
     const ENTITY_TYPE = 'entity_type';
@@ -20,10 +20,12 @@ class DealerIncomingMapping extends Model {
     const CONSTRUCTION = 'construction';
     const FUEL_TYPE = 'fuel_type';
     const BRAND = 'brand';
+    const MANUFACTURER_BRAND = 'manufacturer_brand';
     const LOCATION = 'dealer_location';
-    
+
     public static $types = [
         self::MAKE => 'Manufacturer',
+        self::MANUFACTURER_BRAND => 'Manufacturer And Brand',
         self::CATEGORY => 'Category',
         self::ENTITY_TYPE => 'Entity Type',
         self::CONDITION => 'Condition',
@@ -35,13 +37,11 @@ class DealerIncomingMapping extends Model {
         self::BRAND => 'Brand',
         self::LOCATION => 'Dealer Location'
     ];
-    
+
     protected $fillable = [
-        'dealer_id', 
+        'dealer_id',
         'map_from',
         'map_to',
         'type'
     ];
-    
-    
 }

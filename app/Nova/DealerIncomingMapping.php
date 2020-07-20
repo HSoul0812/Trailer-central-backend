@@ -2,6 +2,8 @@
 
 namespace App\Nova;
 
+use Epartment\NovaDependencyContainer\HasDependencies;
+use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
@@ -9,6 +11,11 @@ use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncoming
 
 class DealerIncomingMapping extends Resource
 {
+    use HasDependencies;
+
+    const MAP_TO_MANUFACTURER = 'map_to_manufacturer';
+    const MAP_TO_BRAND = 'map_to_brand';
+
     /**
      * The model the resource corresponds to.
      *
@@ -40,7 +47,7 @@ class DealerIncomingMapping extends Resource
         'map_to',
         'dealer_id'
     ];
-    
+
     /**
      * Get the fields displayed by the resource.
      *
@@ -51,11 +58,21 @@ class DealerIncomingMapping extends Resource
     {
         return [
             Text::make('Map From', 'map_from')->sortable(),
-            
-            Text::make('Map To', 'map_to')->sortable(),
-            
+
+            NovaDependencyContainer::make([
+                Text::make('Map To', 'map_to')->sortable()
+            ])->dependsOnNot('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
+
+            NovaDependencyContainer::make([
+                Text::make('Map To Manufacturer', self::MAP_TO_MANUFACTURER)->sortable()
+            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
+
+            NovaDependencyContainer::make([
+                Text::make('Map To Brand', self::MAP_TO_BRAND)->sortable()
+            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
+
             Text::make('Dealer ID', 'dealer_id')->sortable(),
-            
+
             Select::make('Type', 'type')
                 ->options(FeedDealerIncomingMapping::$types)
                 ->displayUsingLabels(),

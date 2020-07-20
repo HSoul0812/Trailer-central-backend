@@ -33,6 +33,14 @@ class Inventory extends Model
      * @var string
      */
     protected $primaryKey = 'inventory_id';
+
+    protected $fillable = [
+        'fp_balance',
+        'fp_interest_paid',
+        'length',
+        'width',
+        'height'
+    ];
     
     protected $casts = [
         'is_archived' => 'integer',
@@ -71,7 +79,7 @@ class Inventory extends Model
 
     public function floorplanPayments()
     {
-        return $this->hasMany('App\Models\Inventory\Floorplan\Payment');
+        return $this->hasMany('App\Models\Inventory\Floorplan\Payment', 'inventory_id', 'inventory_id');
     }
     
     public function images()

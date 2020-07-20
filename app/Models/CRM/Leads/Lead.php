@@ -49,6 +49,8 @@ class Lead extends Model
      */
     protected $primaryKey = 'identifier';
     
+    public $timestamps = false;
+    
     /**
      * The attributes that are mass assignable.
      *
@@ -91,9 +93,17 @@ class Lead extends Model
     }
 
     /**
-     * Get all inventories for the lead.
+     * Get main inventory for the lead.
      */
     public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
+    /**
+     * Get all units of interest for the lead.
+     */
+    public function units()
     {
         return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id');
     }
@@ -152,7 +162,13 @@ class Lead extends Model
     }
 
     public function getInventoryIds() {
-        return $this->inventory()->pluck('inventory_id')->toArray();
+        $inventoryIds = $this->units()->pluck('inventory_id')->toArray();
+
+        // Append Current Inventory ID
+        $inventoryIds = array_unshift($inventoryIds, $this->inventory_id);
+
+        // Return Full Array
+        return $inventoryIds;
     }
 
     /**
@@ -188,7 +204,20 @@ class Lead extends Model
      * @return string
      */
     public function getFullNameAttribute() {
-        return "{$this->first_name} {$this->last_name}";
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    /**
+     * Get the user's full name or ID #.
+     *
+     * @return string
+     */
+    public function getIdNameAttribute() {
+        $idName = $this->getFullNameAttribute();
+        if(empty($idName)) {
+            $idName = "#" . $this->identifier;
+        }
+        return $idName;
     }
 
     public static function findLeadContact($id) {
@@ -285,5 +314,9 @@ class Lead extends Model
 
     public static function getTableName() {
         return self::TABLE_NAME;
+    }
+
+    public static function getLeadCrmUrl($leadId, $credential) {
+        return env('CRM_LOGIN_URL') . $credential . '&r=' . urlencode(env('CRM_LEAD_ROUTE') . CompactHelper::expand($leadId));
     }
 }

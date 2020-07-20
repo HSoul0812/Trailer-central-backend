@@ -71,5 +71,9 @@ class InventoryController extends RestfulController
         
         return $this->response->errorBadRequest();
     }
+    
+    public function show(int $id) { 
+        return $this->response->item($this->inventory->get(['id' => $id]), new InventoryTransformer());
+    }
 
 }

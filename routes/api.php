@@ -32,6 +32,7 @@ $api->version('v1', function ($route) {
      * Floorplan Payments
      */
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
+    $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
 
     /**
      * Part bins
@@ -127,6 +128,11 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Inventory Manufacturers
+     */
+    $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
@@ -180,7 +186,7 @@ $api->version('v1', function ($route) {
     $route->get('website/towing-capacity/makes/year/{year}', 'App\Http\Controllers\v1\Website\TowingCapacity\MakeController@index')->where('year', '[0-9]+');
     $route->get('website/towing-capacity/vehicles/years', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getYears');
     $route->get('website/towing-capacity/models/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getModels')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
-    $route->get('website/towing-capacity/vehicles/year/{year}/make/{makeId}/model/{model}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getVehicles')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
+    $route->get('website/towing-capacity/vehicles/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getVehicles')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
 
 
     /*
@@ -285,6 +291,9 @@ $api->version('v1', function ($route) {
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
 
+    // Factory
+    $route->get('feed/factory/showroom', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@index');
+
     /*
     |--------------------------------------------------------------------------
     | User
@@ -331,6 +340,7 @@ $api->version('v1', function ($route) {
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
+        $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
 
         /*
         |--------------------------------------------------------------------------
@@ -370,8 +380,8 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\CustomerController@index');
-
+        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
+        $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
 
         /*
         |--------------------------------------------------------------------------
@@ -398,6 +408,16 @@ $api->version('v1', function ($route) {
         'prefix' => 'dms',
         'middleware' => 'accesstoken.validate',
     ], function ($route) {
+        /*
+        |--------------------------------------------------------------------------
+        | Service Order
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('service-orders', 'App\Http\Controllers\v1\Dms\ServiceOrderController@index');
+
         /*
         |--------------------------------------------------------------------------
         | POS
@@ -430,6 +450,44 @@ $api->version('v1', function ($route) {
         */
         $route->get('payments/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Financing companies
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('financing-companies', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@index');
+        $route->get('financing-companies/{id}', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@show');
+        $route->post('financing-companies', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@create');
+        $route->put('financing-companies/{id}', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@update');
+        $route->delete('financing-companies/{id}', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Quickbooks
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+
+        /**
+         * Accounts
+         */
+        $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
+        $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Various reports
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
     });
 
 });

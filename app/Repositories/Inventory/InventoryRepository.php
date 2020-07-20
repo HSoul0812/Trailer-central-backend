@@ -14,7 +14,7 @@ use App\Repositories\Traits\SortTrait;
 class InventoryRepository implements InventoryRepositoryInterface
 {
     use SortTrait;
-    
+
     private $sortOrders = [
         'title' => [
             'field' => 'title',
@@ -23,9 +23,57 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-title' => [
             'field' => 'title',
             'direction' => 'ASC'
+        ],
+        'manufacturer' => [
+            'field' => 'manufacturer',
+            'direction' => 'DESC'
+        ],
+        '-manufacturer' => [
+            'field' => 'manufacturer',
+            'direction' => 'ASC'
+        ],
+        'vin' => [
+            'field' => 'vin',
+            'direction' => 'DESC'
+        ],
+        '-vin' => [
+            'field' => 'vin',
+            'direction' => 'ASC'
+        ],
+        'true_cost' => [
+            'field' => 'true_cost',
+            'direction' => 'DESC'
+        ],
+        '-true_cost' => [
+            'field' => 'true_cost',
+            'direction' => 'ASC'
+        ],
+        'fp_balance' => [
+            'field' => 'fp_balance',
+            'direction' => 'DESC'
+        ],
+        '-fp_balance' => [
+            'field' => 'fp_balance',
+            'direction' => 'ASC'
+        ],
+        'fp_interest_paid' => [
+            'field' => 'fp_interest_paid',
+            'direction' => 'DESC'
+        ],
+        '-fp_interest_paid' => [
+            'field' => 'fp_interest_paid',
+            'direction' => 'ASC'
+        ],
+        'fp_committed' => [
+            'field' => 'fp_committed',
+            'direction' => 'DESC'
+        ],
+        '-fp_committed' => [
+            'field' => 'fp_committed',
+            'direction' => 'ASC'
         ]
     ];
-    
+
     /**
      * @param $params
      * @throws NotImplementedException
@@ -37,11 +85,15 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return Inventory
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        $item = Inventory::findOrFail($params['inventory_id']);
+
+        $item->fill($params)->save();
+
+        return $item;
     }
 
     /**
@@ -50,8 +102,8 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function get($params)
     {
-        throw new NotImplementedException;
-    }
+        return Inventory::findOrFail($params['id']);
+    } 
 
     /**
      * @param $params
@@ -70,16 +122,11 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
     {
         $query = Inventory::select('*');
-        
-        if (isset($params['search_term'])) {
-            $query = $query->where(function($q) use ($params) {
-                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%');
-            });
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where('dealer_id', $params['dealer_id']);
         }
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
@@ -92,21 +139,40 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
         
-        if (isset($params['dealer_id'])) {
-            $query = $query->where('dealer_id', $params['dealer_id']);
+        if (isset($params['only_floorplanned']) && !empty($params['only_floorplanned'])) {
+            /**
+             * Filter only floored inventories to pay
+             * https://crm.trailercentral.com/accounting/floorplan-payment
+             */
+            $query = $query->whereNotNull('bill_id')
+                ->where([
+                    ['is_floorplan_bill', '=', 1],
+                    ['fp_vendor', '>', 0],
+                    ['true_cost', '>', 0],
+                    ['fp_balance', '>', 0]
+                ]);
         }
-        
+
+        if (isset($params['search_term'])) {
+            $query = $query->where(function($q) use ($params) {
+                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%');
+            });
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         if ($paginated) {
             return $query->paginate($params['per_page'])->appends($params);
         }
 
         return $query->get();
     }
-    
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }
