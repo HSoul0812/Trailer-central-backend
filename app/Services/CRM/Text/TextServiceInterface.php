@@ -2,15 +2,7 @@
 
 namespace App\Services\CRM\Text;
 
-use Twilio\Rest\Client;
-use App\Models\CRM\Text\Number;
-use App\Models\CRM\Text\NumberTwilio;
-
-namespace App\Repositories\CRM\Text;
-
-use App\Repositories\Repository;
-
-interface TextRepositoryInterface extends Repository {
+interface TextServiceInterface {
     /**
      * Send Text to Twilio
      * 
