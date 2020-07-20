@@ -135,13 +135,8 @@ class TextRepository implements TextRepositoryInterface {
         $lead = Lead::findOrFail($params['lead_id']);
         $dealerId = $lead->dealer_id;
         $locationId = $lead->dealer_location_id;
-        if(empty($locationId) && !empty($lead->inventory)) {
-            foreach($lead->inventory as $inventory) {
-                if(!empty($inventory->dealer_location_id)) {
-                    $locationId = $inventory->dealer_location_id;
-                    break;
-                }
-            }
+        if(empty($locationId) && !empty($lead->inventory->dealer_location_id)) {
+            $locationId = $lead->inventory->dealer_location_id;
         }
 
         // Get User
