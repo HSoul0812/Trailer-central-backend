@@ -8,8 +8,9 @@ interface TextRepositoryInterface extends Repository {
     /**
      * Send Text
      * 
-     * @param type $params
+     * @param int $leadId
+     * @param string $textMessage
      * @return type
      */
-    public function send($params);
+    public function send($leadId, $textMessage);
 }
