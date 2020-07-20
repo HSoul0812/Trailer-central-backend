@@ -2,15 +2,17 @@
 
 namespace App\Services\CRM\Text;
 
-use Twilio\Rest\Client;
+use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
+use Twilio\Rest\Client;
 
 /**
  * Class TwilioService
+ * 
  * @package App\Services\CRM\Text
  */
-class TwilioService
+class TwilioService implements TextServiceInterface
 {
     /**
      * @var Twilio Client
@@ -31,17 +33,15 @@ class TwilioService
      * 
      * @param string $from_number
      * @param string $to_number
-     * @param string $text
+     * @param string $textMessage
      * @param string $fullName
      * @return result of $this->twilio->messages->create || array with error
      */
-    public function send($from_number, $to_number, $text, $fullName) {
+    public function send($from_number, $to_number, $textMessage, $fullName) {
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
-            return [
-                'error' => 'Error: The number provided is a landline and cannot receive texts!'
-            ];
+            throw new \Exception("The number provided is a landline and cannot receive texts!");
         }
 
         // Get Twilio Number
@@ -51,10 +51,7 @@ class TwilioService
         if (!$twilioNumber) {
             $fromPhone = $this->getNextAvailableNumber();
             if (!$fromPhone) {
-                // Return Error!
-                return [
-                    'error' => 'An error has happened! Please try again later'
-                ];
+                throw new \Exception("Could not find available phone number!");
             }
 
             // Set Phone as Used
@@ -73,7 +70,7 @@ class TwilioService
                     $to_number,
                     array(
                         'from' => $fromPhone,
-                        'body' => $text
+                        'body' => $textMessage
                     )
                 );
             } catch (\Exception $ex) {
@@ -82,15 +79,13 @@ class TwilioService
                     // Get Next Available Number!
                     $fromPhone = $this->getNextAvailableNumber();
                     if (!$fromPhone) {
-                        return [
-                            'error' => 'An error has happened! Please try again later'
-                        ];
+                        throw new \Exception("Could not find available phone number!");
                     }
+
+                    // Add Tried Phones to array
                     $phonesTried[] = $fromPhone;
                     if (++$tries == 15) {
-                        return [
-                            'error' => 'An error has happened! Please try again later'
-                        ];
+                        throw new \Exception("Failed to use 15 different phone numbers, something is seriously wrong here");
                     }
 
                     // Set Phone as Used!
@@ -99,9 +94,7 @@ class TwilioService
                 }
                 // Return Other Error
                 else {
-                    return [
-                        'error' => $ex->getMessage() . ': ' . $ex->getTraceAsString()
-                    ];
+                    throw new \Exception($ex->getMessage() . ': ' . $ex->getTraceAsString());
                 }
             }
 

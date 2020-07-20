@@ -10,6 +10,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Text\Stop;
 use App\Services\CRM\Text\TwilioService;
+use Carbon\Carbon;
 
 class TextRepository implements TextRepositoryInterface {
 
@@ -28,6 +29,7 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * TextRepository constructor.
+     * 
      * @param TwilioService $service
      */
     public function __construct(TwilioService $service)
@@ -36,19 +38,7 @@ class TextRepository implements TextRepositoryInterface {
     }
     
     public function create($params) {
-        DB::beginTransaction();
-
-        try {
-            // Create Text
-            $text = TextLog::create($params);
-
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            throw new \Exception($ex->getMessage());
-        }
-        
-        return $text;
+        return TextLog::create($params);
     }
 
     public function delete($params) {
@@ -100,83 +90,87 @@ class TextRepository implements TextRepositoryInterface {
         return $text;
     }
 
+    public function stop($params) {
+        return Stop::create($params);
+    }
+
+    /**
+     * Send Text
+     * 
+     * @param int $leadId
+     * @param string $textMessage
+     * @return type
+     */
+    public function send($leadId, $textMessage) {
+        // Find Lead ID
+        $lead = Lead::findOrFail($params['lead_id']);
+        $dealerId = $lead->dealer_id;
+        $locationId = $lead->getPreferredLocationAttribute();
+
+        // Get User
+        $fullName = $lead->crmUser->getFullNameAttribute();
+
+        // Get From/To Numbers
+        $to_number = $lead->getTextPhoneAttribute();
+        $from_number = DealerLocation::findDealerNumber($dealerId, $locationId);
+
+        // No From Number?!
+        if(empty($from_number)) {
+            throw new \Exception("No SMS Number found for current dealer!");
+        }
+
+        // Send Text to Twilio
+        try {
+            $result = $this->twilio->send($from_number, $to_number, $textMessage, $fullName);
+        } catch(\Exception $ex) {
+            throw new \Exception($ex->getMessage());
+        }
+
+        // Save Lead Status
+        $this->updateLeadStatus($lead);
+
+        // Log SMS
+        return $this->create([
+            'lead_id'     => $leadId,
+            'from_number' => $from_number,
+            'to_number'   => $to_number,
+            'log_message' => $textMessage
+        ]);
+    }
+
+
+    /**
+     * Update Status for Lead
+     * 
+     * @param Lead $lead
+     * @return LeadStatus
+     */
+    private function updateLeadStatus($lead) {
+        $leadStatus = $lead->leadStatus()->first();
+
+        DB::transaction(function() use (&$text, $params) {
+            // Fill Text Details
+            $leadStatus->fill([
+                'status' => Lead::STATUS_MEDIUM,
+                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+            ])->save();
+        });
+
+        return $leadStatus;
+    }
+
+    /**
+     * Add Sort Query
+     * 
+     * @param type $query
+     * @param type $sort
+     * @return type
+     */
     private function addSortQuery($query, $sort) {
         if (!isset($this->sortOrders[$sort])) {
             return;
         }
 
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
-    }
-
-    public function stop($params) {
-        DB::beginTransaction();
-
-        try {
-            // Create Stop
-            $stop = Stop::create($params);
-
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            throw new \Exception($ex->getMessage());
-        }
-        
-        return $stop;
-    }
-
-    /**
-     * Send Text
-     * 
-     * @param type $params
-     * @return type
-     */
-    public function send($params) {
-        // Find Lead ID
-        $lead = Lead::findOrFail($params['lead_id']);
-        $dealerId = $lead->dealer_id;
-        $locationId = $lead->dealer_location_id;
-        if(empty($locationId) && !empty($lead->inventory->dealer_location_id)) {
-            $locationId = $lead->inventory->dealer_location_id;
-        }
-
-        // Get User
-        $user = $lead->crmUser;
-        $fullName = '';
-        if(!empty($user)) {
-            $fullName = $user->first_name . ' ' . $user->last_name;
-        }
-
-        // Get From/To Numbers
-        $phone = $params['phone'];
-        $to_number = '+' . ((strlen($phone) === 11) ? $phone : '1' . $phone);
-        $from_number = DealerLocation::findDealerNumber($dealerId, $locationId);
-
-        // No From Number?!
-        if(empty($from_number)) {
-            return [
-                'error' => 'No SMS Number found for current dealer!'
-            ];
-        }
-
-        // Send Text to Twilio
-        $text = $params['log_message'];
-        $result = $this->twilio->send($from_number, $to_number, $text, $fullName);
-
-        // Return Error?
-        if(is_array($result) && isset($result['error'])) {
-            return $result;
-        }
-
-        // Save Lead Status
-        $lead->leadStatus()->first()->updateStatus(Lead::STATUS_MEDIUM);
-        $lead->leadStatus()->first()->updateNextContactDate();
-
-        // Log SMS
-        return TextLog::create([
-            'lead_id'     => $params['lead_id'],
-            'from_number' => $from_number,
-            'to_number'   => $to_number,
-            'log_message' => $text
-        ]);
     }
 }

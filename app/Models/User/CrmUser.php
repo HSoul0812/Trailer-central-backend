@@ -72,4 +72,13 @@ class CrmUser extends Model
     public static function getTableName() {
         return self::TABLE_NAME;
     }
+
+    /**
+     * Get the user's full name.
+     *
+     * @return string
+     */
+    public function getFullNameAttribute() {
+        return trim("{$this->first_name} {$this->last_name}");
+    }
 }

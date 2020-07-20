@@ -373,16 +373,14 @@ class TextController extends RestfulControllerV2
      *      ),
      * )
      */
-    public function send(Request $request)
+    public function send(int $leadId, Request $request)
     {
-        $request = new SendTextRequest($request->all());
+        $params = $request->all();
+        $request = new SendTextRequest($params);
         
         if ( $request->validate()) {
             // Get Results
-            $result = $this->texts->send($request->all());
-            if(isset($result['error'])) {
-                return $this->response->errorBadRequest($result['error']);
-            }
+            $result = $this->texts->send($leadId, $params['log_message']);
 
             // Send Text
             return $this->response->item($result, new TextTransformer());

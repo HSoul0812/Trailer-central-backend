@@ -220,6 +220,15 @@ class Lead extends Model
         return $idName;
     }
 
+    /**
+     * Get the user's text number
+     * 
+     * @return string
+     */
+    public function getTextPhoneAttribute() {
+        return '+' . ((strlen($this->phone_number) === 11) ? $this->phone_number : '1' . $this->phone_number);
+    }
+
     public static function findLeadContact($id) {
         $result = Lead::findOrFail($id)->pluck('first_name', 'last_name', 'email_address')->toArray();
         return array('name' => $result['first_name'] .' '. $result['last_name'], 'email' => $result['email_address']);
@@ -246,6 +255,26 @@ class Lead extends Model
         } else {
             return null;
         }
+    }
+
+    /**
+     * Get Preferred Location Attribute
+     * 
+     * @return int
+     */
+    public function getPreferredLocationAttribute() {
+        // Dealer Location ID Exists?
+        if(!empty($this->dealer_location_id)){
+            return $this->dealer_location_id;
+        }
+
+        // Return Inventory Location ID Instead
+        if(!empty($lead->inventory->dealer_location_id)) {
+            return $lead->inventory->dealer_location_id;
+        }
+
+        // Return Nothing
+        return 0;
     }
 
     /**

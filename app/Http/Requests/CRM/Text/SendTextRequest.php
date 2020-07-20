@@ -13,7 +13,6 @@ class SendTextRequest extends Request {
 
     protected $rules = [
         'lead_id' => 'required|integer',
-        'phone' => 'required|string',
         'log_message' => 'required|string',
     ];
 }
