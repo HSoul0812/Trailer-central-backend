@@ -148,7 +148,7 @@ class TextRepository implements TextRepositoryInterface {
     private function updateLeadStatus($lead) {
         $leadStatus = $lead->leadStatus()->first();
 
-        DB::transaction(function() use (&$text, $params) {
+        DB::transaction(function() use (&$leadStatus) {
             // Fill Text Details
             $leadStatus->fill([
                 'status' => Lead::STATUS_MEDIUM,
