@@ -11,5 +11,7 @@ namespace App\Exceptions\CRM\Text;
  */
 class NoTwilioNumberAvailableException extends \Exception
 {
+    
+    protected $message = 'Could not find available twilio phone number!';
 
 }

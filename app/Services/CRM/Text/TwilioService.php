@@ -2,8 +2,11 @@
 
 namespace App\Services\CRM\Text;
 
+use App\Exceptions\CRM\Text\CreateTwilioMessageException;
+use App\Exceptions\CRM\Text\InvalidTwilioInboundNumberException;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoTwilioNumberAvailableException;
+use App\Exceptions\CRM\Text\TooManyNumbersTriedException;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
@@ -52,7 +55,7 @@ class TwilioService implements TextServiceInterface
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
-            throw new CustomerLandlineNumberException("The number provided is a landline and cannot receive texts!");
+            throw new CustomerLandlineNumberException();
         }
 
         // Get Twilio Number
@@ -64,14 +67,14 @@ class TwilioService implements TextServiceInterface
         while(true) {
             try {
                 $sent = $this->sendViaTwilio($fromPhone, $to_number, $textMessage);
-            } catch (InvalidInboundSmsNumberException $ex) {
+            } catch (InvalidTwilioInboundNumberException $ex) {
                 // Get Next Available Number!
                 $fromPhone = $this->getNextAvailableNumber();
 
                 // Add Tried Phones to array
                 $this->tried[] = $fromPhone;
                 if (++$this->tries == $this->maxTries) {
-                    throw new TooManyTwilioNumbersTriedException("Failed to use 15 different phone numbers, something is seriously wrong here");
+                    throw new TooManyNumbersTriedException();
                 }
 
                 // Set New Number!
@@ -111,7 +114,7 @@ class TwilioService implements TextServiceInterface
         } catch (\Exception $ex) {
             // Exception occurred?!
             if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
-                throw new InvalidInboundSmsNumberException($ex->getMessage());
+                throw new InvalidTwilioInboundNumberException();
             }
 
             // Throw Create Twilio Message Exception With Exact Error!
@@ -171,7 +174,7 @@ class TwilioService implements TextServiceInterface
                                     ]
                                 );
             } catch (\Exception $ex) {
-                throw new NoTwilioNumberAvailableException($ex->getMessage());
+                throw new NoTwilioNumberAvailableException();
             }
 
             // Insert New Twilio Number

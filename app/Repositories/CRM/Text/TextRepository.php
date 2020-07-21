@@ -119,7 +119,7 @@ class TextRepository implements TextRepositoryInterface {
 
         // No From Number?!
         if(empty($from_number)) {
-            throw new NoDealerSmsNumberAvailableException("No SMS Number found for current dealer!");
+            throw new NoDealerSmsNumberAvailableException();
         }
 
         // Send Text

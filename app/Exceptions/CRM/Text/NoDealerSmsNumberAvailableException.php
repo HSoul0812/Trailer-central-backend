@@ -11,5 +11,7 @@ namespace App\Exceptions\CRM\Text;
  */
 class NoDealerSmsNumberAvailableException extends \Exception
 {
+    
+    protected $message = 'Could not find find sms number for dealer!';
 
 }

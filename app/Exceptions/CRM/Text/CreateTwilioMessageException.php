@@ -3,13 +3,15 @@
 namespace App\Exceptions\CRM\Text;
 
 /**
- * Class InvalidInboundNumberException
+ * Class CreateTwilioMessageException
  *
- * Use this instead of \Exception to throw any kind of "invalid inbound sms number" exception
+ * Use this instead of \Exception to throw any kind of "create twilio message" exception
  *
  * @package App\Exceptions\CRM\Text
  */
-class InvalidInboundNumberException extends \Exception
+class CreateTwilioMessageException extends \Exception
 {
+    
+    protected $message = 'Exception occurred trying to create a twilio message to send!'; 
 
 }

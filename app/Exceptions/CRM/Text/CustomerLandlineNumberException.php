@@ -11,5 +11,7 @@ namespace App\Exceptions\CRM\Text;
  */
 class CustomerLandlineNumberException extends \Exception
 {
+    
+    protected $message = 'The number provided is a landline and cannot receive texts!';
 
 }
