@@ -31,7 +31,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
     public function send($dealerId, $params) {
         // Get Unique Message ID
         if(empty($params['message_id'])) {
-            $params['message_id'] = sprintf('<%s@%s>', $this->generateId(), $this->serverHostname());
+            $params['message_id'] = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
         }
 
         // Get Attachments
