@@ -23,25 +23,10 @@ interface EmailHistoryRepositoryInterface extends Repository {
     public function findEmailDraft($fromEmail, $leadId);
 
     /**
-     * Get Attachments
+     * Create Email Attachments
      * 
-     * @param type $files
+     * @param array $attachments
+     * @return Attachment
      */
-    public function getAttachments($files);
-
-    /**
-     * @param $files - mail attachment(-s)
-     * @return bool | string
-     */
-    public function checkAttachmentsSize($files);
-
-    /**
-     * Upload Attachments 
-     * 
-     * @param array $files
-     * @param int $dealerId
-     * @param string $messageId
-     * @return array of saved attachments
-     */
-    public function uploadAttachments($files, $dealerId, $messageId);
+    public function createAttachments($attachments);
 }
