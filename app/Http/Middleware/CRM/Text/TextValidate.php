@@ -30,11 +30,18 @@ class TextValidate extends ValidRoute {
     protected $validator = [];
     
     public function __construct() {
-        $this->validator[self::LEAD_ID_PARAM] = function($data) {            
-            if (empty(Lead::find($data))) {
+        $this->validator[self::LEAD_ID_PARAM] = function($data) {
+            $lead = Lead::find($data);
+            if (empty($lead)) {
                 return false;
             }
-            
+
+            // Get Auth
+            $auth = Auth::user();
+            if ($auth->dealer_id !== $lead->dealer_id) {
+                return false;
+            }
+
             return true;
         };
         
