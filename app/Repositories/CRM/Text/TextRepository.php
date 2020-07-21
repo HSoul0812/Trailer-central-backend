@@ -108,7 +108,7 @@ class TextRepository implements TextRepositoryInterface {
         $locationId = $lead->getPreferredLocationAttribute();
 
         // Get User
-        $fullName = $lead->crmUser->getFullNameAttribute();
+        $fullName = $lead->newDealerUser->crmUser->getFullNameAttribute();
 
         // Get From/To Numbers
         $to_number = $lead->getTextPhoneAttribute();

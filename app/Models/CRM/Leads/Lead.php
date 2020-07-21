@@ -10,6 +10,7 @@ use App\Models\CRM\Product\Product;
 use App\Models\CRM\Leads\LeadProduct;
 use App\Models\User\DealerLocation;
 use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
 use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
@@ -141,11 +142,11 @@ class Lead extends Model
     }
 
     /**
-     * Get CRM user.
+     * Get New Dealer user.
      */
-    public function crmUser()
+    public function newDealerUser()
     {
-        return $this->belongsTo(CrmUser::class, 'id', 'dealer_id');
+        return $this->belongsTo(NewDealerUser::class, 'id', 'dealer_id');
     }
 
     /**
