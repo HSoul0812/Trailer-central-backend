@@ -13,6 +13,8 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Repositories\Traits\SortTrait;
+use App\Traits\CustomerHelper;
+use App\Traits\MailHelper;
 use Carbon\Carbon;
 use Throwable;
 
@@ -68,15 +70,13 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * @return Interaction || error
      */
     public function sendEmail($leadId, $params, $files) {
-        // Find Lead By ID
+        // Find Lead/Sales Person
         $lead = Lead::findOrFail($leadId);
-        $dealerId = $lead->dealer_id;
-
-        // Get Sales Person
-        $this->setSalesPersonSmtpConfig($user);
+        $salesPerson = Auth::dealerUser();
+        $this->setSalesPersonSmtpConfig($salesPerson);
 
         // Get Draft if Exists
-        $emailHistory = EmailHistory::getEmailDraft($user->email, $lead->identifier);
+        $emailHistory = $this->emailHistory->findEmailDraft($salesPerson->email, $lead->identifier);
 
         // Initialize Email Parts
         $subject = $params['subject'];
@@ -91,7 +91,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $this->checkAttachmentsSize($files);
         if (!empty($files) && is_array($files)) {
             foreach ($files as $file) {
-                $attach[] = [
+                $attachments[] = [
                     'path' => $file->getPathname(),
                     'as' => $file->getClientOriginalName(),
                     'mime' => $file->getMimeType(),
@@ -106,7 +106,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             ]);
         } else {
             // Create Interaction
-            $interaction = $this->create([
+            $this->create([
                 "lead_product_id"   => $leadProductId,
                 "tc_lead_id"        => $lead->identifier,
                 "user_id"           => $user->user_id,
@@ -115,55 +115,39 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
                 "interaction_time"  => Carbon::now()->toDateTimeString(),
             ]);
         }
-        
-        try {
-            $attachment = new Attachment();
-            $dealer = $user->dealer();
-            $customer = $this->getCustomer($user, $lead);
 
-            $customer['email'] = 'david.a.conway.jr@gmail.com';
-            Mail::to($customer["email"] ?? "" )->send(
-                new InteractionEmail([
-                    'date' => Carbon::now()->toDateTimeString(),
-                    'replyToEmail' => $user->email ?? "",
-                    'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
-                    'subject' => $subject,
-                    'body' => $body,
-                    'attach' => $attachments,
-                    'id' => $uniqueId
-                ])
-            );
+        // Send Interaction Email
+        $customer['email'] = 'david.a.conway.jr@gmail.com';
+        Mail::to($customer["email"] ?? "" )->send(
+            new InteractionEmail([
+                'date' => Carbon::now()->toDateTimeString(),
+                'replyToEmail' => $user->email ?? "",
+                'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
+                'subject' => $subject,
+                'body' => $body,
+                'attach' => $attachments,
+                'id' => $uniqueId
+            ])
+        );
 
-            $insert = [
-                'interaction_id'    => $emailHistory->interaction_id,
-                'message_id'        => $uniqueId,
-                'lead_id'           => $lead->identifier,
-                'to_name'           => $customer['name'],
-                'to_email'          => $customer['email'],
-                'from_email'        => $user->email,
-                'from_name'         => $user->username,
-                'subject'           => $request->input('subject'),
-                'body'              => $request->input('body'),
-                'use_html'          => true,
-                'root_message_id'   => 0,
-                'parent_message_id'   => 0,
-            ];
+        // Upload Attachments
+        $this->emailHistory->uploadAttachments($files, $dealer, $uniqueId);
 
-            $attachment->uploadAttachments($files, $dealer, $uniqueId);
-            $emailHistory->createOrUpdateEmailHistory($emailHistory, $insert);
-
-            return $this->response->array([
-                'success' => true,
-                'message' => "Email sent successfully",
-            ]);
-
-        } catch (Throwable $throwable) {
-            Log::error($throwable->getMessage());
-            return $this->response->array([
-                'error' => true,
-                'message' => $throwable->getMessage()
-            ])->setStatusCode(500);
-        }
+        // Insert Email
+        return $this->emailHistory->createOrUpdateEmailHistory($emailHistory, [
+            'interaction_id'    => $emailHistory->interaction_id,
+            'message_id'        => $uniqueId,
+            'lead_id'           => $lead->identifier,
+            'to_name'           => $customer['name'],
+            'to_email'          => $customer['email'],
+            'from_email'        => $user->email,
+            'from_name'         => $user->username,
+            'subject'           => $subject,
+            'body'              => $body,
+            'use_html'          => true,
+            'root_message_id'   => 0,
+            'parent_message_id' => 0,
+        ]);
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
