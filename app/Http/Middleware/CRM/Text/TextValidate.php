@@ -3,6 +3,7 @@
 namespace App\Http\Middleware\CRM\Text;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\ValidRoute;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
@@ -37,8 +38,7 @@ class TextValidate extends ValidRoute {
             }
 
             // Get Auth
-            $auth = Auth::user();
-            if ($auth->dealer_id !== $lead->dealer_id) {
+            if (Auth::user()->dealer_id !== $lead->dealer_id) {
                 return false;
             }
 
