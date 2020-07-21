@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Interactions;
 
+use Illuminate\Support\Facades\Mail;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
