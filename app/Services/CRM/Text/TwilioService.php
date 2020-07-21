@@ -2,6 +2,11 @@
 
 namespace App\Services\CRM\Text;
 
+use App\Exceptions\CRM\Text\CreateTwilioMessageException;
+use App\Exceptions\CRM\Text\InvalidTwilioInboundNumberException;
+use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
+use App\Exceptions\CRM\Text\NoTwilioNumberAvailableException;
+use App\Exceptions\CRM\Text\TooManyNumbersTriedException;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
@@ -18,6 +23,15 @@ class TwilioService implements TextServiceInterface
      * @var Twilio Client
      */
     private $twilio;
+
+    /**
+     * @var int
+     * @var int
+     * @var array
+     */
+    private $maxTries = 15;
+    private $retries = 0;
+    private $tried = [];
 
     /**
      * TwilioService constructor.
@@ -41,64 +55,70 @@ class TwilioService implements TextServiceInterface
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
-            throw new \Exception("The number provided is a landline and cannot receive texts!");
+            throw new CustomerLandlineNumberException();
         }
 
         // Get Twilio Number
-        $twilioNumber = Number::getActiveTwilioNumber($from_number, $to_number);
-
-        // Twilio Number Doesn't Exist?
-        if (!$twilioNumber) {
-            $fromPhone = $this->getNextAvailableNumber();
-            if (!$fromPhone) {
-                throw new \Exception("Could not find available phone number!");
-            }
-
-            // Set Phone as Used
-            Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
-        } else {
-            $fromPhone = $twilioNumber->twilio_number;
-        }
+        $fromPhone = $this->getTwilioNumber($from_number, $to_number, $fullName);
 
         // Initialize Phones
-        $phonesTried = [];
-        $tries = 0;
-        while (true) {
+        $this->tries = 0;
+        $this->tried = [];
+        while(true) {
             try {
-                // Create/Send Text Message
-                $sent = $this->twilio->messages->create(
-                    $to_number,
-                    array(
-                        'from' => $fromPhone,
-                        'body' => $textMessage
-                    )
-                );
-            } catch (\Exception $ex) {
-                // Exception occurred?!
-                if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
-                    // Get Next Available Number!
-                    $fromPhone = $this->getNextAvailableNumber();
-                    if (!$fromPhone) {
-                        throw new \Exception("Could not find available phone number!");
-                    }
+                $sent = $this->sendViaTwilio($fromPhone, $to_number, $textMessage);
+            } catch (InvalidTwilioInboundNumberException $ex) {
+                // Get Next Available Number!
+                $fromPhone = $this->getNextAvailableNumber();
 
-                    // Add Tried Phones to array
-                    $phonesTried[] = $fromPhone;
-                    if (++$tries == 15) {
-                        throw new \Exception("Failed to use 15 different phone numbers, something is seriously wrong here");
-                    }
+                // Add Tried Phones to array
+                $this->tried[] = $fromPhone;
+                if (++$this->tries == $this->maxTries) {
+                    throw new TooManyNumbersTriedException();
+                }
 
-                    // Set Phone as Used!
-                    Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
-                    continue;
-                }
-                // Return Other Error
-                else {
-                    throw new \Exception($ex->getMessage() . ': ' . $ex->getTraceAsString());
-                }
+                // Set New Number!
+                Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
+                continue;
             }
 
             break;
+        }
+
+        // Return Message
+        return $sent;
+    }
+
+    /**
+     * Send Text Via Twilio
+     * 
+     * @param type $fromPhone
+     * @param type $toNumber
+     * @param type $textMessage
+     * @return type
+     * @throws NoTwilioNumberAvailableException
+     * @throws TooManyTwilioNumbersTriedException
+     * @throws CreateTwilioMessageException
+     */
+    private function sendViaTwilio($fromPhone, $toNumber, $textMessage) {
+        // Try Creating Twilio Message
+        try {
+            // Create/Send Text Message
+            $sent = $this->twilio->messages->create(
+                $toNumber,
+                array(
+                    'from' => $fromPhone,
+                    'body' => $textMessage
+                )
+            );
+        } catch (\Exception $ex) {
+            // Exception occurred?!
+            if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
+                throw new InvalidTwilioInboundNumberException();
+            }
+
+            // Throw Create Twilio Message Exception With Exact Error!
+            throw new CreateTwilioMessageException($ex->getMessage());
         }
 
         // TO DO: How to confirm text ACTUALLY sent?! Need to figure out what $this->twilio->messages->create returns.
@@ -108,11 +128,38 @@ class TwilioService implements TextServiceInterface
     }
 
     /**
+     * Get Twilio Number
+     * 
+     * @param type $from_number
+     * @param type $to_number
+     * @param type $customer_name
+     * @return type
+     * @throws NoTwilioNumberAvailableException
+     */
+    private function getTwilioNumber($from_number, $to_number, $customer_name) {
+        // Get Active Twilio Number for From/To Numbers
+        $twilioNumber = Number::getActiveTwilioNumber($from_number, $to_number);
+
+        // Twilio Number Doesn't Exist?
+        if (!$twilioNumber) {
+            $fromPhone = $this->getNextAvailableNumber();
+
+            // Set Phone as Used
+            Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $customer_name);
+        } else {
+            $fromPhone = $twilioNumber->twilio_number;
+        }
+
+        // Return From Phone
+        return $fromPhone;
+    }
+
+    /**
      * Return next available phone number or false if no available phone numbers
      *
      * @return NumberTwilio || boolean false
      */
-    public function getNextAvailableNumber() {
+    private function getNextAvailableNumber() {
         // Get Next Available Number
         if (!empty($this->twilio)) {
             $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
@@ -127,7 +174,7 @@ class TwilioService implements TextServiceInterface
                                     ]
                                 );
             } catch (\Exception $ex) {
-                return false;
+                throw new NoTwilioNumberAvailableException();
             }
 
             // Insert New Twilio Number

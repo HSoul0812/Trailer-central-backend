@@ -4,17 +4,20 @@ namespace App\Repositories\CRM\Text;
 
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Exceptions\NotImplementedException;
+use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Text\Stop;
-use App\Services\CRM\Text\TwilioService;
+use App\Services\CRM\Text\TextServiceInterface;
 use Carbon\Carbon;
 
 class TextRepository implements TextRepositoryInterface {
 
-    private $twilio;
+    /**
+     * @var TextServiceInterface
+     */
+    private $service;
 
     private $sortOrders = [
         'date_sent' => [
@@ -30,11 +33,11 @@ class TextRepository implements TextRepositoryInterface {
     /**
      * TextRepository constructor.
      * 
-     * @param TwilioService $service
+     * @param TextServiceInterface $service
      */
-    public function __construct(TwilioService $service)
+    public function __construct(TextServiceInterface $service)
     {
-        $this->twilio = $service;
+        $this->service = $service;
     }
     
     public function create($params) {
@@ -108,23 +111,19 @@ class TextRepository implements TextRepositoryInterface {
         $locationId = $lead->getPreferredLocationAttribute();
 
         // Get User
-        $fullName = $lead->newDealerUser()->first()->crmUser->getFullNameAttribute();
+        $fullName = $lead->newDealerUser()->first()->crmUser->full_name;
 
         // Get From/To Numbers
-        $to_number = $lead->getTextPhoneAttribute();
+        $to_number = $lead->text_phone;
         $from_number = DealerLocation::findDealerNumber($dealerId, $locationId);
 
         // No From Number?!
         if(empty($from_number)) {
-            throw new \Exception("No SMS Number found for current dealer!");
+            throw new NoDealerSmsNumberAvailableException();
         }
 
-        // Send Text to Twilio
-        try {
-            $result = $this->twilio->send($from_number, $to_number, $textMessage, $fullName);
-        } catch(\Exception $ex) {
-            throw new \Exception($ex->getMessage());
-        }
+        // Send Text
+        $this->service->send($from_number, $to_number, $textMessage, $fullName);
 
         // Save Lead Status
         $this->updateLeadStatus($lead);

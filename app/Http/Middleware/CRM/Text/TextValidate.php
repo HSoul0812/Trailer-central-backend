@@ -3,6 +3,7 @@
 namespace App\Http\Middleware\CRM\Text;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\ValidRoute;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
@@ -30,11 +31,17 @@ class TextValidate extends ValidRoute {
     protected $validator = [];
     
     public function __construct() {
-        $this->validator[self::LEAD_ID_PARAM] = function($data) {            
-            if (empty(Lead::find($data))) {
+        $this->validator[self::LEAD_ID_PARAM] = function($data) {
+            $lead = Lead::find($data);
+            if (empty($lead)) {
                 return false;
             }
-            
+
+            // Get Auth
+            if (Auth::user()->dealer_id !== $lead->dealer_id) {
+                return false;
+            }
+
             return true;
         };
         
