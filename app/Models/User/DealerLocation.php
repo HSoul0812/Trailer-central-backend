@@ -4,6 +4,8 @@ namespace App\Models\User;
 
 use App\Models\Inventory\Inventory;
 use App\Models\User\NewDealerUser;
+use App\Models\User\Dealer;
+use App\Models\CRM\Text\Number;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\DealerLocationSalesTax;
 
@@ -39,18 +41,35 @@ class DealerLocation extends Model
         // TODO: Add fields
     ];
 
+    /**
+     * @return type
+     */
     public function dealer()
     {
         return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
     }
 
+    /**
+     * @return type
+     */
     public function inventory()
     {
         return $this->hasOne(Inventory::class, 'dealer_location_id', 'dealer_location_id');
     }
-    
+
+    /**
+     * @return type
+     */
     public function salesTax()
     {
         return $this->hasOne(DealerLocationSalesTax::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function number()
+    {
+        return $this->belongsTo(Number::class, 'sms_phone', 'dealer_number');
     }
 }
