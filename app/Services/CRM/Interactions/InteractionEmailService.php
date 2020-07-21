@@ -51,7 +51,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             }
 
             // Send Interaction Email
-            Mail::to($mailTo)->send(
+            Mail::to([$mailTo])->send(
                 new InteractionEmail([
                     'date' => Carbon::now()->toDateTimeString(),
                     'replyToEmail' => $params['from_email'] ?? "",
