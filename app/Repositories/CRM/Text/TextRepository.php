@@ -103,12 +103,12 @@ class TextRepository implements TextRepositoryInterface {
      */
     public function send($leadId, $textMessage) {
         // Find Lead ID
-        $lead = Lead::with('newDealerUser')->findOrFail($leadId);
+        $lead = Lead::findOrFail($leadId);
         $dealerId = $lead->dealer_id;
         $locationId = $lead->getPreferredLocationAttribute();
 
         // Get User
-        $fullName = $lead->newDealerUser->crmUser->getFullNameAttribute();
+        $fullName = $lead->newDealerUser()->crmUser()->getFullNameAttribute();
 
         // Get From/To Numbers
         $to_number = $lead->getTextPhoneAttribute();
