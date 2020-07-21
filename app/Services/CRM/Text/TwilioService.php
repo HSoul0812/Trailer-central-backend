@@ -63,7 +63,7 @@ class TwilioService implements TextServiceInterface
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
-            throw new CustomerLandlineNumberException();
+            //throw new CustomerLandlineNumberException();
         }
 
         // Send Internal Number
