@@ -19,7 +19,7 @@ class CreateAccessToken extends Command{
     {
         // Get All Users
         $addCount = 0;
-        $users = User::with('dealerUsers')->all();
+        $users = User::with('dealerUsers')->get();
         foreach ($users as $user) {
             // Get Auth Token for User!
             $authToken = AuthToken::where('user_id', $user->dealer_id)
