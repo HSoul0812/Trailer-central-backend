@@ -12,6 +12,8 @@ use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\Dms\FinancingCompanyRepository;
 use App\Repositories\Dms\FinancingCompanyRepositoryInterface;
+use App\Repositories\Inventory\AttributeRepository;
+use App\Repositories\Inventory\AttributeRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
@@ -137,6 +139,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
