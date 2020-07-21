@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User\AuthToken;
 
-class CreateAuthTokenDealerUsersTable extends Migration
+class AddAuthTokenUserType extends Migration
 {
     /**
      * Run the migrations.
