@@ -33,7 +33,10 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         }
 
         // Get Attachments
-        $attachments = $this->getAttachments($params['attachments']);
+        $attachments = array();
+        if(isset($params['attachments'])) {
+            $attachments = $this->getAttachments($params['attachments']);
+        }
 
         // Try/Send Email!
         try {
@@ -62,7 +65,9 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         }
 
         // Store Attachments
-        $params['attachments'] = $this->storeAttachments($params['attachments'], $dealerId, $params['message_id']);
+        if(isset($params['attachments'])) {
+            $params['attachments'] = $this->storeAttachments($params['attachments'], $dealerId, $params['message_id']);
+        }
 
         // Returns Params With Attachments
         return $params;
