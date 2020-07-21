@@ -158,6 +158,11 @@ class Lead extends Model
         return $this->processProperty(CompactHelper::expand($this->identifier));
     }
 
+    public function getProductId() {
+        $productIds = $this->getProductIds();
+        return reset($productIds);
+    }
+
     public function getProductIds() {
         return $this->product()->pluck('product_id')->toArray();
     }

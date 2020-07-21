@@ -102,7 +102,7 @@ class TextRepository implements TextRepositoryInterface {
      * @return type
      */
     public function send($leadId, $textMessage) {
-        // Find Lead ID
+        // Find Lead By ID
         $lead = Lead::findOrFail($leadId);
         $dealerId = $lead->dealer_id;
         $locationId = $lead->getPreferredLocationAttribute();

@@ -7,6 +7,15 @@ use App\Repositories\Repository;
 interface InteractionsRepositoryInterface extends Repository {
     
     /**
+     * Send Email to Lead
+     * 
+     * @param int $leadId
+     * @param array $params
+     * @return Interaction || error
+     */
+    public function sendEmail($leadId, $params);
+
+    /**
      * Retrieves the list of tasks by dealer id
      * 
      * @param integer $dealerId
