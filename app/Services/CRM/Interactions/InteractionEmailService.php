@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\CRM\Text;
+namespace App\Services\CRM\Interactions;
 
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
