@@ -7,8 +7,8 @@ use App\Exceptions\CRM\Text\InvalidTwilioInboundNumberException;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoTwilioNumberAvailableException;
 use App\Exceptions\CRM\Text\TooManyNumbersTriedException;
+use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
-use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
 use Twilio\Rest\Client;
 
@@ -25,6 +25,11 @@ class TwilioService implements TextServiceInterface
     private $twilio;
 
     /**
+     * @var NumberRepositoryInterface
+     */
+    private $textNumber;
+
+    /**
      * @var int
      * @var int
      * @var array
@@ -36,10 +41,13 @@ class TwilioService implements TextServiceInterface
     /**
      * TwilioService constructor.
      */
-    public function __construct()
+    public function __construct(NumberRepositoryInterface $numberRepo)
     {
         // Initialize Twilio Client
         $this->twilio = new Client(env('TWILIO_ACCOUNT_ID'), env('TWILIO_AUTH_TOKEN'));
+
+        // Initialize Number Repository
+        $this->textNumber = $numberRepo;
     }
 
     /**
@@ -78,7 +86,7 @@ class TwilioService implements TextServiceInterface
                 }
 
                 // Set New Number!
-                Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
+                $this->textNumber->setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
                 continue;
             }
 
@@ -138,14 +146,14 @@ class TwilioService implements TextServiceInterface
      */
     private function getTwilioNumber($from_number, $to_number, $customer_name) {
         // Get Active Twilio Number for From/To Numbers
-        $twilioNumber = Number::getActiveTwilioNumber($from_number, $to_number);
+        $twilioNumber = $this->textNumber->get($from_number, $to_number);
 
         // Twilio Number Doesn't Exist?
         if (!$twilioNumber) {
             $fromPhone = $this->getNextAvailableNumber();
 
             // Set Phone as Used
-            Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $customer_name);
+            $this->textNumber->setPhoneAsUsed($from_number, $fromPhone, $to_number, $customer_name);
         } else {
             $fromPhone = $twilioNumber->twilio_number;
         }
@@ -178,7 +186,7 @@ class TwilioService implements TextServiceInterface
             }
 
             // Insert New Twilio Number
-            NumberTwilio::create(['phone_number' => $phoneNumber]);
+            $this->textNumber->createTwilioNumber($phoneNumber);
 
             // Return Phone Number
             return $phoneNumber;

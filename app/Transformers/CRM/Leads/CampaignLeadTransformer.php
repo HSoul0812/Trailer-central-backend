@@ -6,11 +6,6 @@ use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Leads\Lead;
 
 class CampaignLeadTransformer extends TransformerAbstract {
-
-    public function __construct()
-    {
-        
-    }
     
     public function transform(Lead $lead)
     {   
