@@ -5,7 +5,6 @@ namespace App\Services\CRM\Text;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
-use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Mail\InteractionEmail;
 use App\Traits\CustomerHelper;

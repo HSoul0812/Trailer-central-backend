@@ -2,15 +2,13 @@
 
 namespace App\Services\CRM\Text;
 
-interface TextServiceInterface {
+interface InteractionEmailServiceInterface {
     /**
-     * Send Text
+     * Send Email With Params
      * 
-     * @param string $from_number
-     * @param string $to_number
-     * @param string $textMessage
-     * @param string $fullName
-     * @return result || array with error
+     * @param int $dealerId
+     * @param array $params
+     * @throws SendEmailFailedException
      */
-    public function send($from_number, $to_number, $textMessage, $fullName);
+    public function send($dealerId, $params);
 }
