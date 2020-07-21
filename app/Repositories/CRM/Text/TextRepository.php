@@ -4,8 +4,8 @@ namespace App\Repositories\CRM\Text;
 
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
-use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Text\Stop;
@@ -18,6 +18,11 @@ class TextRepository implements TextRepositoryInterface {
      * @var TextServiceInterface
      */
     private $service;
+
+    /**
+     * @var DealerLocationRepositoryInterface
+     */
+    private $dealerLocation;
 
     private $sortOrders = [
         'date_sent' => [
@@ -35,9 +40,10 @@ class TextRepository implements TextRepositoryInterface {
      * 
      * @param TextServiceInterface $service
      */
-    public function __construct(TextServiceInterface $service)
+    public function __construct(TextServiceInterface $service, DealerLocationRepositoryInterface $dealerLocation)
     {
         $this->service = $service;
+        $this->dealerLocation = $dealerLocation;
     }
     
     public function create($params) {
@@ -105,17 +111,13 @@ class TextRepository implements TextRepositoryInterface {
      * @return type
      */
     public function send($leadId, $textMessage) {
-        // Find Lead By ID
+        // Get Lead/User
         $lead = Lead::findOrFail($leadId);
-        $dealerId = $lead->dealer_id;
-        $locationId = $lead->getPreferredLocationAttribute();
-
-        // Get User
         $fullName = $lead->newDealerUser()->first()->crmUser->full_name;
 
         // Get From/To Numbers
         $to_number = $lead->text_phone;
-        $from_number = DealerLocation::findDealerNumber($dealerId, $locationId);
+        $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
 
         // No From Number?!
         if(empty($from_number)) {
