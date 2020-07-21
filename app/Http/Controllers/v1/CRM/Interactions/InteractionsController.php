@@ -163,7 +163,7 @@ class InteractionsController extends RestfulController
         
         if ( $request->validate()) {
             // Get Results
-            $result = $this->interactions->sendEmail($leadId, $params);
+            $result = $this->interactions->sendEmail($leadId, $params, $request->allFiles());
 
             // Send Text
             return $this->response->item($result, new InteractionTransformer());

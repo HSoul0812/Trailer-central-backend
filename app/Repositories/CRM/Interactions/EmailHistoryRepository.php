@@ -3,8 +3,6 @@
 namespace App\Repositories\CRM\Interactions;
 
 use Illuminate\Support\Facades\DB;
-use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
-use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Email\Attachment;
@@ -32,6 +30,11 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
     public function create($params) {
         // Fill Report Fields
         $fields = $this->fillReportFields($params);
+
+        // Insert Attachments?
+        if(!empty($fields['attachments'])) {
+            $this->createAttachments($fields['attachments']);
+        }
 
         // Create Email History Entry
         return EmailHistory::create($fields);
@@ -97,6 +100,11 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         // Fill Report Fields
         $fields = $this->fillReportFields($params);
 
+        // Insert Attachments?
+        if(!empty($fields['attachments'])) {
+            $this->createAttachments($fields['attachments']);
+        }
+
         DB::transaction(function() use (&$emailHistory, $fields) {
             // Fill EmailHistory Details
             $emailHistory->fill($fields)->save();
@@ -124,6 +132,27 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
     }
 
     /**
+     * Create Email Attachments
+     * 
+     * @param array $attachments
+     * @return Attachment
+     */
+    public function createAttachments($attachments) {
+        // Initialize Attachments Array
+        $emailAttachments = array();
+
+        // Loop Attachments
+        if(count($attachments) > 0) {
+            foreach($attachments as $attachment) {
+                $emailAttachments[] = Attachment::create($attachment);
+            }
+        }
+
+        // Return Array of Created Attachments
+        return $emailAttachments;
+    }
+
+    /**
      * Find Email Draft
      * 
      * @param string $fromEmail
@@ -136,88 +165,6 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
             ->whereFromEmail($fromEmail)
             ->whereNull('date_sent')
             ->first();
-    }
-
-
-    /**
-     * Get Attachments
-     * 
-     * @param type $files
-     */
-    public function getAttachments($files) {
-        // Check Size of Attachments
-        $this->checkAttachmentsSize($files);
-        if (!empty($files) && is_array($files)) {
-            foreach ($files as $file) {
-                $attachments[] = [
-                    'path' => $file->getPathname(),
-                    'as' => $file->getClientOriginalName(),
-                    'mime' => $file->getMimeType(),
-                ];
-            }
-        }
-    }
-
-    /**
-     * @param $files - mail attachment(-s)
-     * @return bool | string
-     */
-    public function checkAttachmentsSize($files) {
-        // Calculate Total Size
-        $totalSize = 0;
-        foreach ($files as $file) {
-            if ($file['size'] > Attachment::MAX_FILE_SIZE) {
-                throw new ExceededSingleAttachmentSizeException();
-            } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
-                throw new ExceededTotalAttachmentSizeException();
-            }
-            $totalSize += $file['size'];
-        }
-
-        // Return Total Size
-        return $totalSize;
-    }
-
-    /**
-     * Upload Attachments 
-     * 
-     * @param array $files
-     * @param int $dealerId
-     * @param string $messageId
-     * @return array of saved attachments
-     */
-    public function uploadAttachments($files, $dealerId, $messageId) {
-        // Calculate Directory
-        $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
-
-        // Loop Attachments
-        $attachments = array();
-        if (!empty($files) && is_array($files)) {
-            // Valid Attachment Size?!
-            if($this->checkAttachmentsSize($files)) {
-                // Loop Attachments
-                foreach ($files as $file) {
-                    // Generate Path
-                    $path_parts = pathinfo( $file->getPathname() );
-                    $filePath = 'https://email-trailercentral.s3.amazonaws.com/' . 'crm/'
-                        . $dealerId . "/" . $messageDir
-                        . "/attachments/{$path_parts['filename']}." . $path_parts['extension'];
-
-                    // Save File to S3
-                    Storage::disk('s3')->put($filePath, file_get_contents($file));
-
-                    // Create Attachment
-                    $attachments[] = $this->createAttachment([
-                        'message_id' => $messageId,
-                        'filename' => $filePath,
-                        'original_filename' => time() . $file->getClientOriginalName()
-                    ]);
-                }
-            }
-        }
-
-        // Return Attachment Objects
-        return $attachments;
     }
 
 

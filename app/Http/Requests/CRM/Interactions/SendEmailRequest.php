@@ -14,6 +14,8 @@ class SendEmailRequest extends Request {
     protected $rules = [
         'lead_id' => 'required|integer',
         'subject' => 'required|string',
-        'body'    => 'required|string',
+        'body' => 'required|string',
+        'attachments' => 'array',
+        'attachments.*' => 'file',
     ];
 }
