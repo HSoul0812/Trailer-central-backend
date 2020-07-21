@@ -93,11 +93,14 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * @return EmailHistory
      */
     public function createOrUpdate($params) {
-        $interaction = Interaction::findOrFail($params['id']);
+        // ID Exists?!
+        if(isset($params['id'])) {
+            $interaction = Interaction::findOrFail($params['id']);
 
-        // Interaction Exists?!
-        if(empty($interaction)) {
-            return $this->create($params);
+            // Interaction Exists?!
+            if(empty($interaction)) {
+                return $this->create($params);
+            }
         }
 
         // Update Interaction
