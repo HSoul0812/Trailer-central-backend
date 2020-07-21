@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\Lead;
+use App\Models\User\DealerUser;
 use App\Models\User\AuthToken;
 
 /**
@@ -105,6 +106,11 @@ class User extends Model implements Authenticatable
     {
         $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
         return $authToken->access_token;
+    }
+
+    public function dealerUsers()
+    {
+        return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
     }
 
     public function crmUser()

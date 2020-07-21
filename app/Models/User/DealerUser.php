@@ -25,7 +25,8 @@ class DealerUser extends Model
     
     public function getAccessTokenAttribute()
     {
-        $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
+        $authToken = AuthToken::where('user_id', $this->dealer_user_id)
+                              ->where('user_type', 'dealer_user')->firstOrFail();
         return $authToken->access_token;
     }
     

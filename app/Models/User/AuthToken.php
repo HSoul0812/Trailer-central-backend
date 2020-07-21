@@ -7,6 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class AuthToken extends Model
 { 
     protected $table = 'auth_token';
+
+    /**
+     * @var array
+     */
+    const USER_TYPES = [
+        'dealer',
+        'dealer_user'
+    ];
     
     /**
      * The attributes that are mass assignable.
@@ -15,6 +23,7 @@ class AuthToken extends Model
      */
     protected $fillable = [
         'user_id',
+        'user_type',
         'access_token'
     ];
 
@@ -29,6 +38,11 @@ class AuthToken extends Model
     
     public function user()
     {
-        return $this->hasOne('App\Models\User\User', 'dealer_id', 'user_id');
+        return $this->hasOne(User::class, 'dealer_id', 'user_id');
+    }
+    
+    public function dealerUser()
+    {
+        return $this->hasOne(DealerUser::Class, 'dealer_user_id', 'user_id');
     }
 }
