@@ -52,7 +52,7 @@ class TwilioService implements TextServiceInterface
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
-            throw new CustomerLandlineNumberException();
+            throw new CustomerLandlineNumberException("The number provided is a landline and cannot receive texts!");
         }
 
         // Get Twilio Number
@@ -67,14 +67,11 @@ class TwilioService implements TextServiceInterface
             } catch (InvalidInboundSmsNumberException $ex) {
                 // Get Next Available Number!
                 $fromPhone = $this->getNextAvailableNumber();
-                if (!$fromPhone) {
-                    throw new NoTwilioNumberAvailableException();
-                }
 
                 // Add Tried Phones to array
                 $this->tried[] = $fromPhone;
                 if (++$this->tries == $this->maxTries) {
-                    throw new TooManyTwilioNumbersTriedException();
+                    throw new TooManyTwilioNumbersTriedException("Failed to use 15 different phone numbers, something is seriously wrong here");
                 }
 
                 // Set New Number!
@@ -143,9 +140,6 @@ class TwilioService implements TextServiceInterface
         // Twilio Number Doesn't Exist?
         if (!$twilioNumber) {
             $fromPhone = $this->getNextAvailableNumber();
-            if (!$fromPhone) {
-                throw new NoTwilioNumberAvailableException();
-            }
 
             // Set Phone as Used
             Number::setPhoneAsUsed($from_number, $fromPhone, $to_number, $customer_name);
@@ -177,7 +171,7 @@ class TwilioService implements TextServiceInterface
                                     ]
                                 );
             } catch (\Exception $ex) {
-                return false;
+                throw new NoTwilioNumberAvailableException($ex->getMessage());
             }
 
             // Insert New Twilio Number
