@@ -57,6 +57,10 @@ class Inventory extends Model
         'gvwr' => 'float'
     ];
     
+    protected $hidden = [
+        'geolocation'
+    ];
+    
     public function user()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
