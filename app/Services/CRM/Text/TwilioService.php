@@ -40,9 +40,9 @@ class TwilioService implements TextServiceInterface
     public function send($from_number, $to_number, $textMessage, $fullName) {
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
-        /*if (empty($carrier['mobile_country_code'])) {
+        if (empty($carrier['mobile_country_code'])) {
             throw new \Exception("The number provided is a landline and cannot receive texts!");
-        }*/
+        }
 
         // Get Twilio Number
         $twilioNumber = Number::getActiveTwilioNumber($from_number, $to_number);
