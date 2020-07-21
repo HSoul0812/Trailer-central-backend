@@ -4,7 +4,7 @@ namespace App\Repositories\CRM\Text;
 
 use App\Repositories\Repository;
 
-interface TextRepositoryInterface extends Repository {
+interface NumberRepositoryInterface extends Repository {
     /**
      * Set Phone as Used
      * 
