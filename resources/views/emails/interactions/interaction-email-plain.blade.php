@@ -1,1 +1,1 @@
-Test plain text
+{!! $body !!}
