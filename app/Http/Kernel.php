@@ -8,6 +8,10 @@ use App\Http\Middleware\AccessToken;
 use App\Http\Middleware\Website\WebsiteValidate;
 use App\Http\Middleware\SetDealerIdOnRequest;
 use App\Http\Middleware\ValidAccessToken;
+use App\Http\Middleware\CRM\Text\TextValidate;
+use App\Http\Middleware\CRM\Text\TemplateValidate;
+use App\Http\Middleware\CRM\Text\BlastValidate;
+use App\Http\Middleware\CRM\Text\CampaignValidate;
 
 class Kernel extends HttpKernel
 {
@@ -70,8 +74,12 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'cors' => CorsMiddleware::class,
         'website.validate' => WebsiteValidate::class,
+        'accesstoken.validate' => ValidAccessToken::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
-        'accesstoken.validate' => ValidAccessToken::class
+        'text.validate' => TextValidate::class,
+        'text.template.validate' => TemplateValidate::class,
+        'text.blast.validate' => BlastValidate::class,
+        'text.campaign.validate' => CampaignValidate::class,
     ];
 
     /**
