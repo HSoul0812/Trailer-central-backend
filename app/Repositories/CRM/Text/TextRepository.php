@@ -4,7 +4,7 @@ namespace App\Repositories\CRM\Text;
 
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
