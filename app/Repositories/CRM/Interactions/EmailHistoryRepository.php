@@ -120,11 +120,14 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
      * @return EmailHistory
      */
     public function createOrUpdate($params) {
-        $emailHistory = EmailHistory::findOrFail($params['id']);
+        // ID Exists?!
+        if(isset($params['id'])) {
+            $emailHistory = EmailHistory::findOrFail($params['id']);
 
-        // Email History Exists?!
-        if(empty($emailHistory)) {
-            return $this->create($params);
+            // Email History Exists?!
+            if(empty($emailHistory)) {
+                return $this->create($params);
+            }
         }
 
         // Update Email History
