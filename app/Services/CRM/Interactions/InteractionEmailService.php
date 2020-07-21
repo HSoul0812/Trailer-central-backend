@@ -10,6 +10,7 @@ use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Mail\InteractionEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
+use Carbon\Carbon;
 
 /**
  * Class InteractionEmailService
