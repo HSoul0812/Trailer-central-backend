@@ -2,16 +2,13 @@
 
 namespace App\Repositories\CRM\Interactions;
 
-use Illuminate\Support\Facades\Log;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
-use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
-use App\Models\User\NewDealerUser;
-use App\Models\User\User;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
@@ -19,6 +16,11 @@ use Carbon\Carbon;
 use Throwable;
 
 class InteractionsRepository implements InteractionsRepositoryInterface {
+
+    /**
+     * @var EmailHistoryRepositoryInterface
+     */
+    private $emailHistory;
     
     use SortTrait, CustomerHelper, MailHelper;
     
@@ -41,9 +43,19 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             'name' => 'Oldest Tasks to Newest Tasks, then Future Tasks',
         ],
     ];
+
+    /**
+     * InteractionsRepository constructor.
+     * 
+     * @param EmailHistoryRepositoryInterface
+     */
+    public function __construct(EmailHistoryRepositoryInterface $emailHistory)
+    {
+        $this->emailHistory = $emailHistory;
+    }
     
     public function create($params) {
-        throw new NotImplementedException;
+        return Interaction::create($params);
     }
 
     public function delete($params) {
@@ -59,7 +71,14 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
 
     public function update($params) {
-        throw new NotImplementedException;
+        $interaction = Interaction::findOrFail($params['id']);
+
+        DB::transaction(function() use (&$interaction, $params) {
+            // Fill Interaction Details
+            $interaction->fill($params)->save();
+        });
+
+        return $interaction;
     }
 
     /**
@@ -72,11 +91,16 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     public function sendEmail($leadId, $params, $files) {
         // Find Lead/Sales Person
         $lead = Lead::findOrFail($leadId);
-        $salesPerson = Auth::dealerUser();
-        $this->setSalesPersonSmtpConfig($salesPerson);
+        $user = Auth::user();
+        if(!empty($user->salesPerson)) {
+            $this->setSalesPersonSmtpConfig($user->salesPerson);
+            $fromEmail = $user->salesPerson->email;
+        } else {
+            $fromEmail = $user->email;
+        }
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($salesPerson->email, $lead->identifier);
+        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $lead->identifier);
 
         // Initialize Email Parts
         $subject = $params['subject'];
@@ -87,61 +111,51 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $uniqueId = $emailHistory->message_id ?? sprintf('<%s@%s>', $this->generateId(), $this->serverHostname());
 
         // Get Attachments
-        $attachments = $this->getAttachments($files);
-        $this->checkAttachmentsSize($files);
-        if (!empty($files) && is_array($files)) {
-            foreach ($files as $file) {
-                $attachments[] = [
-                    'path' => $file->getPathname(),
-                    'as' => $file->getClientOriginalName(),
-                    'mime' => $file->getMimeType(),
-                ];
-            }
+        $attachments = $this->emailHistory->getAttachments($files);
+
+        // Try/Send Email!
+        try {
+            // Send Interaction Email
+            $customer['email'] = 'david.a.conway.jr@gmail.com';
+            Mail::to($customer["email"] ?? "" )->send(
+                new InteractionEmail([
+                    'date' => Carbon::now()->toDateTimeString(),
+                    'replyToEmail' => $user->email ?? "",
+                    'replyToName' => $user->crmUser->full_name,
+                    'subject' => $subject,
+                    'body' => $body,
+                    'attach' => $attachments,
+                    'id' => $uniqueId
+                ])
+            );
+        } catch(\Exception $ex) {
+            throw SendEmailFailedException($ex->getMessage());
         }
 
-        // Update Interaction?
-        if(!empty($emailHistory) && !empty($emailHistory->interaction_id)) {
-            $this->update($emailHistory->interaction_id, [
-                "interaction_notes" => "E-Mail Sent: {$subject}"
-            ]);
-        } else {
-            // Create Interaction
-            $this->create([
-                "lead_product_id"   => $leadProductId,
-                "tc_lead_id"        => $lead->identifier,
-                "user_id"           => $user->user_id,
-                "interaction_type"  => "EMAIL",
-                "interaction_notes" => "E-Mail Sent: {$subject}",
-                "interaction_time"  => Carbon::now()->toDateTimeString(),
-            ]);
-        }
-
-        // Send Interaction Email
-        $customer['email'] = 'david.a.conway.jr@gmail.com';
-        Mail::to($customer["email"] ?? "" )->send(
-            new InteractionEmail([
-                'date' => Carbon::now()->toDateTimeString(),
-                'replyToEmail' => $user->email ?? "",
-                'replyToName' => "{$user->crmUser->first_name} {$user->crmUser->last_name}",
-                'subject' => $subject,
-                'body' => $body,
-                'attach' => $attachments,
-                'id' => $uniqueId
-            ])
-        );
+        // Create or Update
+        $this->createOrUpdate([
+            'interaction_id'    => $emailHistory ?? $emailHistory->interaction_id,
+            'lead_product_id'   => $leadProductId,
+            'tc_lead_id'        => $lead->identifier,
+            'user_id'           => $user->crmUser->user_id,
+            'interaction_type'  => "EMAIL",
+            'interaction_notes' => "E-Mail Sent: {$subject}",
+            'interaction_time'  => Carbon::now()->toDateTimeString(),
+        ]);
 
         // Upload Attachments
-        $this->emailHistory->uploadAttachments($files, $dealer, $uniqueId);
+        $this->emailHistory->uploadAttachments($files, $user->dealer_id, $uniqueId);
 
         // Insert Email
-        return $this->emailHistory->createOrUpdateEmailHistory($emailHistory, [
+        return $this->emailHistory->createOrUpdate([
+            'email_id'          => $emailHistory ?? $emailHistory->email_id,
             'interaction_id'    => $emailHistory->interaction_id,
             'message_id'        => $uniqueId,
             'lead_id'           => $lead->identifier,
             'to_name'           => $customer['name'],
             'to_email'          => $customer['email'],
-            'from_email'        => $user->email,
-            'from_name'         => $user->username,
+            'from_email'        => $fromEmail,
+            'from_name'         => $fromName,
             'subject'           => $subject,
             'body'              => $body,
             'use_html'          => true,
