@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\v1\CRM\Interactions;
 
 use App\Http\Controllers\RestfulController;
-use App\Repositories\Repository;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use Dingo\Api\Http\Request;
 
