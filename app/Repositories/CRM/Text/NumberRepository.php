@@ -41,25 +41,12 @@ class NumberRepository implements NumberRepositoryInterface {
         throw new NotImplementedException();
     }
 
-    /**
-     * Get Active Twilio Number
-     * 
-     * @param type $dealerNo
-     * @param type $customerNo
-     * @return array
-     */
-    public function get($dealerNo, $customerNo) {
-        return Number::select('twilio_number')
-            ->where('dealer_number', $dealerNo)
-            ->where('customer_number', $customerNo)
-            ->first();
+    public function get($params) {
+        throw new NotImplementedException();
     }
 
-    public function getAll($dealerNo, $customerNo) {
-        return Number::select('twilio_number')
-            ->where('dealer_number', $dealerNo)
-            ->orWhere('customer_number', $customerNo)
-            ->all();
+    public function getAll($params) {
+        throw new NotImplementedException();
     }
 
     public function update($params) {
@@ -104,5 +91,33 @@ class NumberRepository implements NumberRepositoryInterface {
      */
     public function createTwilioNumber($phoneNumber) {
         return NumberTwilio::create(['phone_number' => $phoneNumber]);
+    }
+
+    /**
+     * Find Active Twilio Number
+     * 
+     * @param string $dealerNo
+     * @param string $customerNo
+     * @return Number
+     */
+    public function findActiveTwilioNumber($dealerNo, $customerNo) {
+        // Return Number
+        return Number::where('dealer_number', $dealerNo)
+                     ->where('customer_number', $customerNo)
+                     ->first();
+    }
+
+    /**
+     * Find All Twilio Numbers
+     * 
+     * @param string $dealerNo
+     * @param string $customerNo
+     * @return array Number
+     */
+    public function findAllTwilioNumbers($dealerNo, $customerNo) {
+        // Return Numbers
+        return Number::where('dealer_number', $dealerNo)
+                     ->orWhere('customer_number', $customerNo)
+                     ->all();
     }
 }

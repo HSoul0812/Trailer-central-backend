@@ -23,4 +23,22 @@ interface NumberRepositoryInterface extends Repository {
      * @return NumberTwilio
      */
     public function createTwilioNumber($phoneNumber);
+
+    /**
+     * Find Active Twilio Number
+     * 
+     * @param type $dealerNo
+     * @param type $customerNo
+     * @return Number
+     */
+    public function findActiveTwilioNumber($dealerNo, $customerNo);
+
+    /**
+     * Find All Twilio Numbers
+     * 
+     * @param type $dealerNo
+     * @param type $customerNo
+     * @return array Number
+     */
+    public function findAllTwilioNumbers($dealerNo, $customerNo);
 }

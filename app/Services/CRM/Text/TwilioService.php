@@ -66,6 +66,21 @@ class TwilioService implements TextServiceInterface
             throw new CustomerLandlineNumberException();
         }
 
+        // Send Internal Number
+        return $this->sendInternal($from_number, $to_number, $textMessage, $fullName);
+    }
+
+    /**
+     * Send Internal Text
+     * 
+     * @param type $from_number
+     * @param type $to_number
+     * @param type $textMessage
+     * @param type $fullName
+     * @return boolean
+     * @throws TooManyNumbersTriedException
+     */
+    private function sendInternal($from_number, $to_number, $textMessage, $fullName) {
         // Get Twilio Number
         $fromPhone = $this->getTwilioNumber($from_number, $to_number, $fullName);
 
@@ -129,8 +144,6 @@ class TwilioService implements TextServiceInterface
             throw new CreateTwilioMessageException($ex->getMessage());
         }
 
-        // TO DO: How to confirm text ACTUALLY sent?! Need to figure out what $this->twilio->messages->create returns.
-
         // Return Successful Result
         return $sent;
     }
@@ -146,7 +159,7 @@ class TwilioService implements TextServiceInterface
      */
     private function getTwilioNumber($from_number, $to_number, $customer_name) {
         // Get Active Twilio Number for From/To Numbers
-        $twilioNumber = $this->textNumber->get($from_number, $to_number);
+        $twilioNumber = $this->textNumber->findActiveTwilioNumber($from_number, $to_number);
 
         // Twilio Number Doesn't Exist?
         if (!$twilioNumber) {
