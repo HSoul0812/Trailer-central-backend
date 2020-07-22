@@ -21,8 +21,7 @@ class UpdateLeadRequest extends Request {
         'state' => 'string',
         'zip' => 'string',
         'dealer_location_id' => 'exists:dealer_location,dealer_location_id',
-        'lead_source' => 'array',
-        'lead_source.*' => 'lead_source_valid',
+        'lead_source' => 'lead_source_valid',
         'lead_status' => 'lead_status_valid',
         'next_contact_date' => 'date_format:Y-m-d H:i:s',
         'contact_type' => 'in:CONTACT,TASK'        

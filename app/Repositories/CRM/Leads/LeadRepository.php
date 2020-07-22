@@ -71,10 +71,20 @@ class LeadRepository implements LeadRepositoryInterface {
     
     
     public function create($params) {
+        // Get First Lead Type
+        if(isset($params['lead_types']) && is_array($params['lead_types'])) {
+            $params['lead_type'] = reset($params['lead_types']);
+        }
+
+        // Create Lead
         $lead = Lead::create($params);
         $leadStatus = null;
         $leadSource = null;
-        
+
+        if (isset($params['lead_types'])) {
+            $this->updateLeadTypes($lead->identifier, $params['lead_types']);
+        }
+
         if (isset($params['next_contact_date'])) {
             $leadStatus = $leadSource = LeadStatus::create([
                 'status' => empty($params['lead_status']) ? LeadStatus::STATUS_UNCONTACTED : $params['lead_status'],
@@ -216,14 +226,51 @@ class LeadRepository implements LeadRepositoryInterface {
                         $leadStatusUpdates['status'] = Lead::STATUS_UNCONTACTED;
                     }
                     $lead->leadStatus()->create($leadStatusUpdates);
-                }   
+                }
+            }
+
+            // Process Lead Types
+            if(isset($params['lead_types']) && is_array($params['lead_types'])) {
+                if(!in_array($lead->lead_type, $params['lead_types'])) {
+                    $params['lead_type'] = reset($params['lead_types']);
+                }
+
+                // Create Lead Types
+                $this->updateLeadTypes($lead->identifier, $params['lead_types']);
             }
             
-            $lead->save();
+            $lead->fill($params)->save();
 
         });
         
         return $lead;
+    }
+
+    /**
+     * Delete Existing Lead Types and Insert New Ones
+     * 
+     * @param int $leadId
+     * @param array $leadTypes
+     * @return array of LeadType
+     */
+    public function updateLeadTypes($leadId, $leadTypes) {
+        // Delete Existing Lead Types!
+        LeadType::whereLeadId($leadId)->delete();
+
+        // Initialize Lead Type
+        $leadTypeModels = array();
+        DB::transaction(function() use (&$leadTypeModels, $leadId, $leadTypes) {
+            // Loop Lead Types
+            foreach($leadTypes as $leadType) {
+                $leadTypeModels[] = LeadType::create([
+                    'lead_id' => $leadId,
+                    'lead_type' => $leadType
+                ]);
+            }
+        });
+
+        // Return Array of Lead Types
+        return $leadTypeModels;
     }
 
     /**
@@ -361,6 +408,10 @@ class LeadRepository implements LeadRepositoryInterface {
             [ 
                 'id' => LeadType::TYPE_SERVICE,
                 'name' => ucfirst(LeadType::TYPE_SERVICE)
+            ],
+            [ 
+                'id' => LeadType::TYPE_TRADE,
+                'name' => ucfirst(LeadType::TYPE_TRADE)
             ]
         ]; 
     }
