@@ -131,6 +131,10 @@ $api->version('v1', function ($route) {
      * Inventory Manufacturers
      */
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+    /**
+     * Inventory Categories
+     */
+    $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
 
     /**
      * Inventory
