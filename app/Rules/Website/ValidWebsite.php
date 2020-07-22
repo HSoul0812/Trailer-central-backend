@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rules\CRM\User;
+namespace App\Rules\Website;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\Website\Website;

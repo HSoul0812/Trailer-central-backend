@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rules\CRM\User;
+namespace App\Rules\User;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\User\DealerLocation;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rules\CRM\Leads;
+namespace App\Rules\CRM\Interactions;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\CRM\Interactions\Interaction;
