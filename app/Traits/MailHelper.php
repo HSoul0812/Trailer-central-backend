@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use Illuminate\Mail\Mailer;
 use Illuminate\Support\Facades\Config;
 use App\Models\CRM\User\SalesPerson;
 
@@ -27,110 +26,7 @@ trait MailHelper
                 ]
             ];
             Config::set('mail', $config);
-            (new \Illuminate\Mail\MailServiceProvider(app()))->register();
         }
-    }
-
-    /**
-     * @var array
-     */
-    /*protected $smtpConfig = [
-        'smtp_host'        => '',
-        'smtp_port'        => '',
-        'smtp_username'    => '',
-        'smtp_password'    => '',
-        'smtp_encryption'  => '',
-        'from_email'       => '',
-        'from_name'        => '',
-    ];*/
-
-    /**
-     * @param SalesPerson $salesPerson
-     */
-    /*public function setSalesPersonSmtpConfig(SalesPerson $salesPerson): void
-    {
-        // Set Config
-        if (!empty($salesPerson->smtp_server)) {
-            $this->smtpConfig = [
-                'smtp_host'       => $salesPerson->smtp_server,
-                'smtp_port'       => $salesPerson->smtp_port ?? '2525',
-                'smtp_username'   => $salesPerson->smtp_email,
-                'smtp_password'   => $salesPerson->smtp_password,
-                'smtp_encryption' => $salesPerson->smtp_security ?? 'tls',
-                'from_email'      => $salesPerson->smtp_email,
-                'from_name'       => $salesPerson->full_name
-            ];
-        }
-    }*/
-
-    /**
-     * Initialize User Mailer to Bind
-     * 
-     * @return Mailer
-     */
-    protected function getUserMailer() {
-        // Fix SMTP Config
-        $params = $this->validateConfig($this->smtpConfig);
-
-        // Get SMTP Details
-        $smtp_host = $params['smtp_host'];
-        $smtp_port = $params['smtp_port'];
-        $smtp_username = $params['smtp_username'];
-        $smtp_password = $params['smtp_password'];
-        $smtp_encryption = $params['smtp_encryption'];
-
-        // Get From Details
-        $from_email = $params['from_email'];
-        $from_name = $params['from_name'];
-
-        // Create Swift SMTP Transport
-        $transport = new \Swift_SmtpTransport($smtp_host, $smtp_port);
-        $transport->setUsername($smtp_username);
-        $transport->setPassword($smtp_password);
-        $transport->setEncryption($smtp_encryption);
-
-        // Create Swift Mailer
-        $swift_mailer = new \Swift_Mailer($transport);
-
-        // Create Mailer
-        $mailer = new Mailer(app()->get('view'), $swift_mailer, app()->get('events'));
-        $mailer->alwaysFrom($from_email, $from_name);
-        $mailer->alwaysReplyTo($from_email, $from_name);
-
-        // Return Mailer!
-        return $mailer;
-    }
-
-    /**
-     * Validate Config
-     * 
-     * @param array $config
-     * @return array of set config, or default app config if set config is invalid
-     */
-    protected function validateConfig($config) {
-        // If ANYTHING Important is Missing, Fallback to Defaults!
-        if(empty($config['smtp_host']) || empty($config['smtp_port']) ||
-           empty($config['smtp_username']) || empty($config['smtp_password']) ||
-           empty($config['smtp_encryption'])) {
-            // Set All Defaults!
-            return [
-                'smtp_host' => Config::get('mail.host'),
-                'smtp_port' => Config::get('mail.post'),
-                'smtp_username' => Config::get('mail.username'),
-                'smtp_password' => Config::get('mail.password'),
-                'smtp_encryption' => Config::get('mail.encryption'),
-                'from_email' => Config::get('mail.from.address'),
-                'from_name' => Config::get('mail.from.name')
-            ];
-        }
-
-        // Only Uneeded Things are Empty!
-        if(empty($config['from_email'])) {
-            $config['from_email'] = $config['smtp_username'];
-        }
-
-        // Return Fallback Config
-        return $config;
     }
 
     /**
