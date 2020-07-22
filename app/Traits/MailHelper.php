@@ -59,8 +59,6 @@ trait MailHelper
         // Get From Details
         $from_email = $params['from_email'];
         $from_name = $params['from_name'];
-        var_dump($params);
-        die;
 
         // Create Swift SMTP Transport
         $transport = new \Swift_SmtpTransport($smtp_host, $smtp_port);
