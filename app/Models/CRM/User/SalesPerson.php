@@ -2,12 +2,10 @@
 
 namespace App\Models\CRM\User;
 
-use App\Models\CRM\Dms\GenericSaleInterface;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
 use App\Utilities\JsonApi\Filterable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -46,6 +44,15 @@ class SalesPerson extends Model implements Filterable
         'first_name',
         'last_name',
         'email'
+    ];
+
+    /**
+     * Force Append Vars
+     *
+     * @var array
+     */
+    protected $appends = [
+        'full_name'
     ];
     
     /**

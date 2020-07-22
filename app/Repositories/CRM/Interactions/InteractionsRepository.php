@@ -122,8 +122,6 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $user = Auth::user();
         if(!empty($user->sales_person)) {
             $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
-            var_dump($user->sales_person);
-            die;
             $params['from_email'] = $user->sales_person->smtp_email;
             $params['from_name'] = $user->sales_person->full_name ?? '';
         } else {
