@@ -41,6 +41,20 @@ class Attachment extends Model
     const MAX_UPLOAD_SIZE = 8388608;
 
     /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'date_retrieved';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
+
+    /**
      * Get message by attachment.
      */
     public function message()
