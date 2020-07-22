@@ -23,7 +23,46 @@ class DealerUser extends Model implements Authenticatable
      * @var string
      */
     protected $primaryKey = "dealer_user_id";
-    
+
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName() {
+        return $this->email;
+    }
+
+    /**
+     * Get the unique identifier for the user.
+     *
+     * @return mixed
+     */
+    public function getAuthIdentifier() {
+        return $this->dealer_user_id;
+    }
+
+    /**
+     * Get the password for the user.
+     *
+     * @return string
+     */
+    public function getAuthPassword() {
+        return $this->password;
+    }
+
+    /**
+     * Get the token value for the "remember me" session.
+     *
+     * @return string
+     */
+    public function getRememberToken() {}
+
+    /**
+     * Get Access Token
+     * 
+     * @return type
+     */
     public function getAccessTokenAttribute()
     {
         $authToken = AuthToken::where('user_id', $this->dealer_user_id)
