@@ -82,6 +82,8 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * @param type $files
      */
     private function getAttachments($files) {
+        var_dump($files);
+        die;
         // Check Size of Attachments
         $this->checkAttachmentsSize($files);
 
