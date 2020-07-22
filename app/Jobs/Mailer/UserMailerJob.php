@@ -39,11 +39,8 @@ class UserMailerJob implements ShouldQueue {
      */
     public function handle()
     {
-        die;
         $mailer = $this->getUserMailer($this->configuration);
-        die;
         $mailer->to($this->to)->send($this->mailable);
-        die;
     }
 
     /**

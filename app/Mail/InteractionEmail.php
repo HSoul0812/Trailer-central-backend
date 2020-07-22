@@ -8,8 +8,6 @@ use Illuminate\Queue\SerializesModels;
 
 class InteractionEmail extends Mailable
 {
-    use Queueable, SerializesModels;
-
     /**
      * @var array
      */
