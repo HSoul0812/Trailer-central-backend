@@ -29,8 +29,8 @@ class UserMailerJob implements ShouldQueue {
     {
         $this->configuration = $this->validateConfig($configuration);
         $this->to = $this->fixTo($to);
-        die;
         $this->mailable = $mailable;
+        die;
     }
 
     /**
