@@ -42,7 +42,7 @@ class UserMailerJob implements ShouldQueue {
      */
     public function handle()
     {
-        $mailer = app()->makeWith(self::CUSTOM_MAILER_NAME, $this->configuration);
+        $mailer = $this->getUserMailer($this->configuration);
         $mailer->to($this->to)->send($this->mailable);
     }
 
@@ -127,7 +127,7 @@ class UserMailerJob implements ShouldQueue {
      * @param type $params
      * @return Mailer
      */
-    public static function userMailer($app, $params) {
+    private function getUserMailer($params) {
         // Get SMTP Details
         $smtp_host = $params['smtp_host'];
         $smtp_port = $params['smtp_port'];
@@ -149,7 +149,7 @@ class UserMailerJob implements ShouldQueue {
         $swift_mailer = new \Swift_Mailer($transport);
 
         // Create Mailer
-        $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
+        $mailer = new Mailer(app()->get('view'), $swift_mailer, app()->get('events'));
         $mailer->alwaysFrom($from_email, $from_name);
         $mailer->alwaysReplyTo($from_email, $from_name);
 

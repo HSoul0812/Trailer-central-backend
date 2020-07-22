@@ -191,11 +191,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->when(CsvExportService::class)
             ->needs(Filesystem::class)
             ->give(function () { return Storage::disk('partsCsvExport');});
-
-        // Mailer Binder
-        $this->app->bind(UserMailerJob::CUSTOM_MAILER_NAME, function($app, $config) {
-            return UserMailerJob::userMailer($app, $config);
-        });
     }
 
 }
