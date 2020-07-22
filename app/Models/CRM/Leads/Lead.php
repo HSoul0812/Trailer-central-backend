@@ -199,7 +199,7 @@ class Lead extends Model
      */
     public function units()
     {
-        return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id');
+        return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id', 'identifier');
     }
 
     /**

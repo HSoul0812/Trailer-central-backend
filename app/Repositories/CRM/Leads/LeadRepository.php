@@ -321,6 +321,8 @@ class LeadRepository implements LeadRepositoryInterface {
         InventoryLead::whereWebsiteLeadId($leadId)->delete();
 
         // Initialize Lead Type
+        var_dump($inventoryIds);
+        die;
         $inventoryLeads = array();
         DB::transaction(function() use (&$inventoryLeads, $leadId, $inventoryIds) {
             // Loop Lead Types
