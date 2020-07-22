@@ -6,6 +6,7 @@ use App\Exceptions\NotImplementedException;
 use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class InventoryRepository
@@ -98,25 +99,37 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return Inventory
      */
     public function get($params)
     {
         return Inventory::findOrFail($params['id']);
-    } 
+    }
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return boolean
      */
     public function delete($params)
     {
-        throw new NotImplementedException;
+        /** @var Inventory $item */
+        $item = Inventory::findOrFail($params['inventory_id']);
+
+        DB::transaction(function() use (&$item, $params) {
+            $item->attributeValues()->delete();
+            $item->features()->delete();
+            $item->clapps()->delete();
+
+            $item->delete();
+        });
+
+        return true;
     }
 
     /**
      * @param $params
      * @param bool $withDefault
+     * @param bool $paginated
      * @return Collection
      */
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
@@ -138,7 +151,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
-        
+
         if (isset($params['only_floorplanned']) && !empty($params['only_floorplanned'])) {
             /**
              * Filter only floored inventories to pay

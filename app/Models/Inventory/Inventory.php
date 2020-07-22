@@ -6,20 +6,17 @@ use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
 use App\Traits\CompactHelper;
+use App\Models\Traits\Inventory\SoftDeletesWithDeletedColumn;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Inventory\InventoryImage;
-use App\Models\Inventory\Image;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
 
 class Inventory extends Model
-{    
-    use TableAware;
-    
-    const COLOR_ATTRIBUTE_ID = 11;
-    
+{
+    use TableAware, SoftDeletesWithDeletedColumn;
+
     const TABLE_NAME = 'inventory';
-    
+
     /**
      * The table associated with the model.
      *
@@ -41,7 +38,7 @@ class Inventory extends Model
         'width',
         'height'
     ];
-    
+
     protected $casts = [
         'is_archived' => 'integer',
         'length' => 'float',
@@ -56,11 +53,11 @@ class Inventory extends Model
         'msrp' => 'float',
         'gvwr' => 'float'
     ];
-    
+
     protected $hidden = [
         'geolocation'
     ];
-    
+
     public function user()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
@@ -85,24 +82,25 @@ class Inventory extends Model
     {
         return $this->hasMany('App\Models\Inventory\Floorplan\Payment', 'inventory_id', 'inventory_id');
     }
-    
+
     public function images()
     {
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
     }
-    
-    public function getColorAttribute()
+
+    public function features()
     {
-        $color = self::select('*')
-                    ->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')
-                    ->where('inventory.inventory_id', $this->inventory_id)
-                    ->where('eav_attribute_value.attribute_id', self::COLOR_ATTRIBUTE_ID)
-                    ->first();
-        if ($color) {
-            return $color->value;
-        }
-        
-        return null;
+        return $this->hasMany(Feature::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function clapps()
+    {
+        return $this->hasMany(Clapp::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function attributeValues()
+    {
+        return $this->hasMany(AttributeValue::class, 'inventory_id', 'inventory_id');
     }
 
     public function __toString() {
@@ -122,7 +120,7 @@ class Inventory extends Model
 
         return $url;
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }
