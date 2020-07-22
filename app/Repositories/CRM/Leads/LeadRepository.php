@@ -10,6 +10,7 @@ use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\LeadSource;
