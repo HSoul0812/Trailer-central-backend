@@ -261,12 +261,12 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         return TextLog::select([
             'id AS interaction_id',
             'lead_id AS tc_lead_id',
-            '0 AS lead_product_id',
-            $lead->newDealerUser->user_id . ' AS user_id',
-            '"TEXT_LOG" AS interaction_type',
+            DB::raw('0 AS lead_product_id'),
+            DB::raw($lead->newDealerUser->user_id . ' AS user_id'),
+            DB::raw('"TEXT_LOG" AS interaction_type'),
             'log_message AS interaction_notes',
             'date_sent AS interaction_time'
         ])->where('lead_id', $params['lead_id'])
-          ->union($query)->get();
+          ->union($query);
     }
 }
