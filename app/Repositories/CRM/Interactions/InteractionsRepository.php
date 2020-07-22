@@ -16,6 +16,8 @@ use Carbon\Carbon;
 use Throwable;
 
 class InteractionsRepository implements InteractionsRepositoryInterface {
+    
+    use SortTrait;
 
     /**
      * @var InteractionEmailServiceInterface
@@ -26,8 +28,6 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * @var EmailHistoryRepositoryInterface
      */
     private $emailHistory;
-    
-    use SortTrait;
     
     private $sortOrders = [
         'created_at' => [
@@ -122,7 +122,9 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $user = Auth::user();
         if(!empty($user->sales_person)) {
             $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
-            $params['from_email'] = $user->sales_person->email;
+            var_dump($user->sales_person);
+            die;
+            $params['from_email'] = $user->sales_person->smtp_email;
             $params['from_name'] = $user->sales_person->full_name ?? '';
         } else {
             $params['from_email'] = $user->email;

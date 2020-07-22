@@ -60,8 +60,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 'id' => $messageId
             ]));
         } catch(\Exception $ex) {
-            throw new SendEmailFailedException($ex->getMessage() . ': ' . $ex->getTraceAsString());
-            //throw new SendEmailFailedException($ex->getMessage());
+            throw new SendEmailFailedException($ex->getMessage());
         }
 
         // Store Attachments
