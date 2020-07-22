@@ -12,13 +12,13 @@ trait MailHelper
      * @var array
      */
     protected $smtpConfig = [
-        'smtp_host'        => 'SMTP-HOST-HERE',
-        'smtp_port'        => 'SMTP-PORT-HERE',
-        'smtp_username'    => 'SMTP-USERNAME-HERE',
-        'smtp_password'    => 'SMTP-PASSWORD-HERE',
-        'smtp_encryption'  => 'SMTP-ENCRYPTION-HERE',
-        'from_email'       => 'FROM-EMAIL-HERE',
-        'from_name'        => 'FROM-NAME-HERE',
+        'smtp_host'        => '',
+        'smtp_port'        => '',
+        'smtp_username'    => '',
+        'smtp_password'    => '',
+        'smtp_encryption'  => '',
+        'from_email'       => '',
+        'from_name'        => '',
     ];
 
     /**
