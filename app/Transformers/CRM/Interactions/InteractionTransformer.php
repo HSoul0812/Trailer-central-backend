@@ -22,11 +22,11 @@ class InteractionTransformer extends TransformerAbstract
     public function transform(Interaction $interaction) {
         // Check if Actually TextLog!
         if($interaction->interaction_type === 'TEXT_LOG') {
-            $lead = $this->leadTransformer->transform($interaction->lead);
+            $lead = $interaction->lead;
         }
         // Transform as Normal!
         else {
-            $lead = $this->leadTransformer->transform(Lead::findOrFail($interaction->tc_lead_id));
+            $lead = Lead::findOrFail($interaction->tc_lead_id);
         }
 
         // Return Result!
@@ -35,7 +35,7 @@ class InteractionTransformer extends TransformerAbstract
             'type' => $interaction->interaction_type,
             'time' => Carbon::parse($interaction->interaction_time),
             'notes' => $interaction->interaction_notes,
-            'lead' => $lead,
+            'lead' => $this->leadTransformer->transform($lead),
             'contact_name' => $lead->full_name,
             'sales_person' => $lead->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($lead->leadStatus->salesPerson) : null,
             'email_history' => $lead->emailHistory
