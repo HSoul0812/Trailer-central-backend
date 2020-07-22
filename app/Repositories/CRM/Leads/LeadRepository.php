@@ -320,10 +320,12 @@ class LeadRepository implements LeadRepositoryInterface {
      */
     public function updateUnitsOfInterest($leadId, $inventoryIds) {
         // Delete Existing Units of Interest!
-        InventoryLead::whereWebsiteLeadId($leadId)->delete();
+        InventoryLead::where('website_lead_id', $leadId)->delete();
 
         // Initialize Lead Type
         $inventoryLeads = array();
+        var_dump($inventoryIds);
+        die;
         DB::transaction(function() use (&$inventoryLeads, $leadId, $inventoryIds) {
             // Loop Lead Types
             foreach($inventoryIds as $inventoryId) {
