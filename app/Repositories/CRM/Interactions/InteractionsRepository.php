@@ -257,8 +257,8 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         // Get User ID
         $lead = Lead::findOrFail($params['lead_id']);
 
-        // Initialize TextLog Query
-        return TextLog::select([
+        // Initialize TextLog Object
+        $textLog = TextLog::select([
             'id AS interaction_id',
             'lead_id AS tc_lead_id',
             DB::raw('0 AS lead_product_id'),
@@ -266,7 +266,9 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             DB::raw('"TEXT_LOG" AS interaction_type'),
             'log_message AS interaction_notes',
             'date_sent AS interaction_time'
-        ])->where('lead_id', $params['lead_id'])
-          ->union($query);
+        ])->where('lead_id', $params['lead_id']);
+
+        // Initialize TextLog Query
+        return $query->union($textLog);
     }
 }
