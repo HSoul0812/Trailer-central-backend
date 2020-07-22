@@ -4,7 +4,6 @@
 namespace App\Http\Controllers\v1\Dms;
 
 
-use App\Exceptions\GenericClientException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Dms\CreateFinancingCompanyRequest;
 use App\Http\Requests\Dms\DeleteFinancingCompanyRequest;
@@ -18,6 +17,7 @@ use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\ArraySerializer;
+use OpenApi\Annotations as OA;
 
 class FinancingCompanyController extends RestfulControllerV2
 {
@@ -66,6 +66,23 @@ class FinancingCompanyController extends RestfulControllerV2
         return $this->response->array($result);
     }
 
+    /**
+     * @param $id
+     * @param Request $request
+     * @return \Dingo\Api\Http\Response
+     *
+     * @OA\Get(
+     *     path="/api/dms/financing-companies/{id}",
+     *     description="Retrieve a single financing ocmpany object",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Primary key",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     * )
+     */
     public function show($id, Request $request)
     {
         $this->fractal->parseIncludes($request->query('with', ''));
@@ -82,38 +99,33 @@ class FinancingCompanyController extends RestfulControllerV2
 
     /**
      *
+     * @OA\Post(
+     *     path="/api/dms/financing-companies",
+     *     description="create a financing company object",
+     * )
      */
     public function create(Request $request)
     {
         $request = new CreateFinancingCompanyRequest($request->all());
 
-        try {
-            if (!$request->validate()) {
-                throw new GenericClientException("Validation failed", 400);
-            }
-
-            $financingCompany = $this->financingCompanyRepository->create($request->all());
-            if (!$financingCompany) {
-                throw new \Exception("Could not save", 400);
-            }
-
+        if ($request->validate() && $financingCompany = $this->financingCompanyRepository->create($request->all())) {
             return $this->response->item($financingCompany, $this->financingCompanyTransformer);
-
-        } catch (GenericClientException $e) {
-            return $this->response->array([
-                'error' => $e->getMessage()
-            ])->setStatusCode($e->getCode());
-
-        } catch (\Exception $e) {
-            return $this->response->array([
-                'error' => $e->getMessage()
-            ])->setStatusCode(500);
-
         }
     }
 
     /**
      *
+     * @OA\Put(
+     *     path="/api/dms/financing-companies/{id}",
+     *     description="create a financing company object",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Primary key",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     * )
      */
     public function update($id, Request $request)
     {
@@ -121,58 +133,34 @@ class FinancingCompanyController extends RestfulControllerV2
         $params['id'] = $id;
         $request = new UpdateFinancingCompanyRequest($params);
 
-        try {
-            if (!$request->validate()) {
-                throw new GenericClientException("Validation failed", 400);
-            }
-
-            $financingCompany = $this->financingCompanyRepository->update($request->all());
-            if (!$financingCompany) {
-                throw new \Exception("Could not save", 400);
-            }
-
+        if ($request->validate() && $financingCompany = $this->financingCompanyRepository->update($request->all())) {
             return $this->response->item($financingCompany, $this->financingCompanyTransformer);
-
-        } catch (GenericClientException $e) {
-            return $this->response->array([
-                'error' => $e->getMessage()
-            ])->setStatusCode($e->getCode());
-
-        } catch (\Exception $e) {
-            return $this->response->array([
-                'error' => $e->getMessage()
-            ])->setStatusCode(500);
-
         }
+
+        return $this->response->errorBadRequest();
     }
 
-    public function destroy($id)
+    /**
+     *
+     * @OA\Delete(
+     *     path="/api/dms/financing-companies/{id}",
+     *     description="create a financing company object",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Primary key",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     * )
+     */    public function destroy($id)
     {
         $deleteRequest = new DeleteFinancingCompanyRequest(['id' => $id]);
-
-        try {
-            if (!$deleteRequest->validate()) {
-                throw new GenericClientException('The record being deleted is not owned', 403);
-            }
-
-            if (!$this->financingCompanyRepository->delete(['id' => $deleteRequest->input('id')])) {
-                throw new \Exception('Unable to delete', 500);
-            }
-
-            return $this->response->array([
-                'message' => 'Deleted'
-            ]);
-
-        } catch (GenericClientException $e) {
-            return $this->response->array([
-                'message' => $e->getMessage()
-            ])->setStatusCode($e->getCode()? $e->getCode(): 400);
-
-        } catch (\Exception $e) {
-            return $this->response->array([
-                'message' => $e->getMessage()
-            ])->setStatusCode(500);
+        if ($deleteRequest->validate() && $this->financingCompanyRepository->delete(['id' => $id])) {
+            return $this->response->noContent();
         }
+
+        return $this->response->errorBadRequest();
     }
 
 }
