@@ -27,8 +27,8 @@ class UserMailerJob implements ShouldQueue {
      */
     public function __construct($configuration, $to, $mailable)
     {
-        die;
         $this->configuration = $this->validateConfig($configuration);
+        die;
         $this->to = $this->fixTo($to);
         $this->mailable = $mailable;
     }
