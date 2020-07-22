@@ -18,17 +18,26 @@ class InteractionTransformer extends TransformerAbstract
         $this->leadTransformer = new LeadTransformer;
         $this->salesPersonTransformer = new SalesPersonTransformer;
     }
-    public function transform(Interaction $interaction)
-    {       
-	return [
+    public function transform(Interaction $interaction) {
+        // Check if Actually TextLog!
+        if($interaction->interaction_type === 'TEXT_LOG') {
+            $lead = $this->leadTransformer->transform($interaction->lead);
+        }
+        // Transform as Normal!
+        else {
+            $lead = $this->leadTransformer->transform(Lead::findOrFail($interaction->tc_lead_id));
+        }
+
+        // Return Result!
+        return [
             'id' => $interaction->interaction_id,
             'type' => $interaction->interaction_type,
             'time' => Carbon::parse($interaction->interaction_time),
             'notes' => $interaction->interaction_notes,
-            'lead' => $this->leadTransformer->transform($interaction->lead),
-            'contact_name' => $interaction->lead->getFullNameAttribute(),
-            'sales_person' => $interaction->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($interaction->leadStatus->salesPerson) : null,
-            'email_history' => $interaction->emailHistory
+            'lead' => $lead,
+            'contact_name' => $lead->full_name,
+            'sales_person' => $lead->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($lead->leadStatus->salesPerson) : null,
+            'email_history' => $lead->emailHistory
         ];
     }
 }
