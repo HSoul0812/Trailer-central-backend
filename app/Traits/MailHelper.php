@@ -14,7 +14,7 @@ trait MailHelper
     {
         if (!empty($salesPerson->smtp_server)) {
             $config = [
-                'driver'        => 'smtp',
+                'driver'        => $salesPerson->smtp_auth === 'NTLM' ? 'pop3' : 'smtp',
                 'host'          => $salesPerson->smtp_server,
                 'port'          => $salesPerson->smtp_port ?? '2525',
                 'username'      => $salesPerson->smtp_email,
