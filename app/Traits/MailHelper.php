@@ -19,7 +19,11 @@ trait MailHelper
                 'port'          => $salesPerson->smtp_port ?? '2525',
                 'username'      => $salesPerson->smtp_email,
                 'password'      => $salesPerson->smtp_password,
-                'encryption'    => $salesPerson->smtp_security ?? 'tls'
+                'encryption'    => $salesPerson->smtp_security ?? 'tls',
+                'from'          => [
+                    'email' => $salesPerson->smtp_email,
+                    'name'  => $salesPerson->full_name
+                ]
             ];
             Config::set('mail', $config);
         }
