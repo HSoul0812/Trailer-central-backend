@@ -41,6 +41,11 @@ class Attachment extends Model
     const MAX_UPLOAD_SIZE = 8388608;
 
     /**
+     * @var 
+     */
+    const AWS_PREFIX = 'https://email-trailercentral.s3.amazonaws.com';
+
+    /**
      * The name of the "created at" column.
      *
      * @var string
