@@ -2,10 +2,11 @@
 
 namespace App\Models\User;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
 
-class DealerUser extends Model
+class DealerUser extends Model implements Authenticatable
 {
     const TABLE_NAME = 'dealer_users';
 
