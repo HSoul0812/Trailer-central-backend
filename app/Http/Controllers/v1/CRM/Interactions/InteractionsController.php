@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\CRM\Interactions;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Transformers\CRM\Interactions\InteractionTextTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use App\Http\Requests\CRM\Interactions\GetInteractionsRequest;
 use App\Http\Requests\CRM\Interactions\CreateInteractionRequest;
@@ -29,10 +30,19 @@ class InteractionsController extends RestfulControllerV2
     }
 
     public function index(Request $request) {
-        $request = new GetInteractionsRequest($request->all());
+        $params = $request->all();
+        $request = new GetInteractionsRequest($params);
         
         if ($request->validate()) {
-            return $this->response->paginator($this->interactions->getAll($request->all()), new InteractionTransformer());
+            // Change Transformer Based on Settings!
+            if(!isset($params['include_texts']) || !empty($params['include_texts'])) {
+                $transformer = new InteractionTextTransformer();
+            } else {
+                $transformer = new InteractionTransformer();
+            }
+
+            // Return Result
+            return $this->response->paginator($this->interactions->getAll($params), $transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -204,7 +214,7 @@ class InteractionsController extends RestfulControllerV2
             // Get Results
             $result = $this->interactions->sendEmail($leadId, $params, $request->allFiles());
 
-            // Send Text
+            // Send Email Response
             return $this->response->item($result, new InteractionTransformer());
         }
         
