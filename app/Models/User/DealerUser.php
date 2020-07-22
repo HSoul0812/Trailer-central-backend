@@ -101,6 +101,26 @@ class DealerUser extends Model implements Authenticatable
     {
         return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
     }
+
+    /**
+     * Get dealer user permissions
+     */
+    public function perms()
+    {
+        return $this->hasMany(DealerUserPermission::class, 'dealer_user_id', 'dealer_user_id');
+    }
+
+    /**
+     * Get sales person
+     */
+    public function salesPerson()
+    {
+        // Get Sales Person ID From Perms
+        $salesPersonId = $this->perms()->where('feature', 'crm')->pluck('permission_level')->first();
+
+        // Find Sales Person
+        return SalesPerson::find($salesPersonId);
+    }
     
     public static function getTableName() {
         return self::TABLE_NAME;

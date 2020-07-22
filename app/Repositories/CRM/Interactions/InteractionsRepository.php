@@ -120,15 +120,18 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         // Find Lead/Sales Person
         $lead = Lead::findOrFail($leadId);
         $user = Auth::user();
-        var_dump($user);
-        die;
         if(!empty($user->salesPerson)) {
             $this->interactionEmail->setSalesPersonSmtpConfig($user->salesPerson);
             $params['from_email'] = $user->salesPerson->email;
-            $params['from_name'] = $user->salesPerson->full_name;
+            $params['from_name'] = $user->salesPerson->full_name ?? '';
         } else {
             $params['from_email'] = $user->email;
-            $params['from_name'] = $user->name;
+            $params['from_name'] = $user->name ?? '';
+
+            // Are We a Dealer User?!
+            if(!empty($user->user) && empty($params['from_name'])) {
+                $params['from_name'] = $user->user->name ?? '';
+            }
         }
 
         // Get Draft if Exists
