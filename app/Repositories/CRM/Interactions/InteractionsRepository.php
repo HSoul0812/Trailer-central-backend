@@ -9,6 +9,7 @@ use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\Traits\SortTrait;
