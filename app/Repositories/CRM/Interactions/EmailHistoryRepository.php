@@ -125,7 +125,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
             $emailHistory = EmailHistory::find($params['id']);
 
             // Email History Exists?!
-            if(!empty($emailHistory)) {
+            if(!empty($emailHistory->message_id)) {
                 // Update Email History
                 return $this->update($params);
             }
