@@ -371,7 +371,7 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return type
      */
     public function getSources() {
-        return LeadSource::where('user_id', 0)->orderBy('lead_source_id', 'ASC')->get();
+        return LeadSource::where('user_id', 0)->orderBy('lead_source_id', 'ASC')->pluck('source_name');
     }
 
     /**
