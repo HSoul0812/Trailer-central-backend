@@ -5,6 +5,10 @@ namespace App\Http\Controllers\v1\CRM\Interactions;
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
+use App\Http\Requests\CRM\Interactions\GetInteractionsRequest;
+use App\Http\Requests\CRM\Interactions\CreateInteractionRequest;
+use App\Http\Requests\CRM\Interactions\ShowInteractionRequest;
+use App\Http\Requests\CRM\Interactions\UpdateInteractionRequest;
 use App\Http\Requests\CRM\Interactions\SendEmailRequest;
 use Dingo\Api\Http\Request;
 
@@ -24,12 +28,46 @@ class InteractionsController extends RestfulController
         $this->transformer = new InteractionTransformer();
     }
 
-    public function index(Request $request)
-    {
-        return $this->response->array([
-            'success' => true,
-            'message' => "Interactions API",
-        ]);
+    public function index(Request $request) {
+        $request = new GetInteractionsRequest($request->all());
+        
+        if ($request->validate()) {
+            return $this->response->paginator($this->interactions->getAll($request->all()), new InteractionTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function create(Request $request) {
+        $request = new CreateInteractionRequest($request->all());
+        if ( $request->validate() ) {
+            // Create Text
+            return $this->response->item($this->interactions->create($request->all()), new InteractionTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function show(int $leadId, int $id) {
+        $request = new ShowInteractionRequest(['id' => $id]);
+        
+        if ( $request->validate() ) {
+            return $this->response->item($this->interactions->get(['id' => $id]), new InteractionTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function update(int $leadId, int $id, Request $request) {
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new UpdateInteractionRequest($requestData);
+        
+        if ( $request->validate() ) {
+            return $this->response->item($this->interactions->update($request->all()), new InteractionTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
     }
 
     /**
