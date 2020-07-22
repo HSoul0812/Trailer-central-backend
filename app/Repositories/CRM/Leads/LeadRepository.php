@@ -76,6 +76,14 @@ class LeadRepository implements LeadRepositoryInterface {
             $params['lead_type'] = reset($params['lead_types']);
         }
 
+        // Fix Preferred Contact
+        if(empty($params['preferred_contact'])) {
+            $params['preferred_contact'] = 'phone';
+            if(empty($params['phone_number']) && !empty($params['email_address'])) {
+                $params['preferred_contact'] = 'email';
+            }
+        }
+
         // Create Lead
         $lead = Lead::create($params);
         $leadStatus = null;
@@ -85,30 +93,32 @@ class LeadRepository implements LeadRepositoryInterface {
             $this->updateLeadTypes($lead->identifier, $params['lead_types']);
         }
 
+        // Start Lead Status Updates
+        $leadStatusUpdates = [
+            'tc_lead_identifier' => $lead->identifier,
+            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'status' => Lead::STATUS_UNCONTACTED
+        ];
+
+        // Override Fixes
+        if (isset($params['lead_source'])) {
+            $leadStatusUpdates['source'] = $params['lead_source'];
+        }
+        if (isset($params['lead_status'])) {
+            $leadStatusUpdates['status'] = $params['lead_status'];
+        }
         if (isset($params['next_contact_date'])) {
-            $leadStatus = $leadSource = LeadStatus::create([
-                'status' => empty($params['lead_status']) ? LeadStatus::STATUS_UNCONTACTED : $params['lead_status'],
-                'tc_lead_identifier' => $lead->identifier,
-                'next_contact_date' => $params['next_contact_date'],
-                'contact_type' => LeadStatus::TYPE_CONTACT,
-                'source' => empty($params['lead_source']) ? null : $params['lead_source']
-            ]);
+            $leadStatusUpdates['next_contact_date'] = $params['next_contact_date'];
         }
-        
-        if (isset($params['lead_status']) && empty($leadStatus)) {
-            $leadStatus = $leadSource = LeadStatus::create([
-                'status' => $params['lead_status'],
-                'tc_lead_identifier' => $lead->identifier,
-                'source' => empty($params['lead_source']) ? null : $params['lead_source']
-            ]);
+        if (isset($params['contact_type'])) {
+            $leadStatusUpdates['contact_type'] = $params['contact_type'];
         }
-        
-        if (isset($params['lead_source']) && empty($leadSource)) {
-            LeadStatus::create([
-                'source' => $params['lead_source'],
-                'tc_lead_identifier' => $lead->identifier
-            ]);
+        if (isset($params['sales_person_id'])) {
+            $leadStatusUpdates['sales_person_id'] = $params['sales_person_id'];
         }
+
+        // Create Lead Status
+        LeadStatus::create($leadStatusUpdates);
 
         // Return Full Lead Details
         return Lead::find($lead->identifier);
@@ -205,6 +215,10 @@ class LeadRepository implements LeadRepositoryInterface {
 
             if (isset($params['lead_status'])) {
                 $leadStatusUpdates['status'] = $params['lead_status'];
+            }
+
+            if (isset($params['lead_source'])) {
+                $leadStatusUpdates['source'] = $params['lead_source'];
             }
 
             if (isset($params['next_contact_date'])) {
