@@ -59,7 +59,7 @@ class SalesPerson extends Model implements Filterable
 
 
     /**
-     * Get Full Name
+     * Get the sales person's full name
      * 
      * @return string
      */
