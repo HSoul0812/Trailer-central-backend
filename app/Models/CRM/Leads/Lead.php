@@ -8,6 +8,9 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Product\Product;
 use App\Models\CRM\Leads\LeadProduct;
+use App\Models\User\DealerLocation;
+use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
 use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
@@ -56,6 +59,7 @@ class Lead extends Model
      */
     protected $fillable = [
         'website_id',
+        'dealer_id',
         'lead_type',
         'inventory_id',
         'referral',
@@ -130,6 +134,22 @@ class Lead extends Model
     }
 
     /**
+     * Get Dealer location
+     */
+    public function dealerLocation()
+    {
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * Get New Dealer user.
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
+    }
+
+    /**
      * Return All Product ID's for Current Lead
      *
      * @return array
@@ -201,6 +221,15 @@ class Lead extends Model
         return $idName;
     }
 
+    /**
+     * Get the user's text number
+     * 
+     * @return string
+     */
+    public function getTextPhoneAttribute() {
+        return '+' . ((strlen($this->phone_number) === 11) ? $this->phone_number : '1' . $this->phone_number);
+    }
+
     public static function findLeadContact($id) {
         $result = Lead::findOrFail($id)->pluck('first_name', 'last_name', 'email_address')->toArray();
         return array('name' => $result['first_name'] .' '. $result['last_name'], 'email' => $result['email_address']);
@@ -227,6 +256,26 @@ class Lead extends Model
         } else {
             return null;
         }
+    }
+
+    /**
+     * Get Preferred Location Attribute
+     * 
+     * @return int
+     */
+    public function getPreferredLocationAttribute() {
+        // Dealer Location ID Exists?
+        if(!empty($this->dealer_location_id)){
+            return $this->dealer_location_id;
+        }
+
+        // Return Inventory Location ID Instead
+        if(!empty($lead->inventory->dealer_location_id)) {
+            return $lead->inventory->dealer_location_id;
+        }
+
+        // Return Nothing
+        return 0;
     }
 
     /**
@@ -292,7 +341,7 @@ class Lead extends Model
         }
         return 0;
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }
