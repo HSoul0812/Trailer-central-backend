@@ -13,7 +13,12 @@ class AddCrmInventoryLeadIdIndex extends Migration
      */
     public function up()
     {
-        //
+        Schema::table('crm_inventory_lead', function (Blueprint $table) {
+
+            $table->index('website_lead_id');
+            $table->index('inventory_id');
+
+        });
     }
 
     /**
@@ -23,6 +28,8 @@ class AddCrmInventoryLeadIdIndex extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('crm_inventory_lead', function (Blueprint $table) {
+            //
+        });
     }
 }
