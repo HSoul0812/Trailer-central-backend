@@ -113,7 +113,7 @@ class DealerUser extends Model implements Authenticatable
     /**
      * Get sales person
      */
-    public function salesPerson()
+    public function getSalesPersonAttribute()
     {
         // Get Sales Person ID From Perms
         $salesPersonId = $this->perms()->where('feature', 'crm')->pluck('permission_level')->first();
