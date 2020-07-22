@@ -9,9 +9,10 @@ use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
-use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
+use App\Models\CRM\Leads\LeadSource;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
@@ -267,7 +268,12 @@ class LeadRepository implements LeadRepositoryInterface {
         
         return $query->paginate($params['per_page'])->appends($params);
     }
-    
+
+    /**
+     * Get All Lead Statuses
+     * 
+     * @return type
+     */
     public function getStatuses() { 
         return [
             [ 
@@ -305,6 +311,11 @@ class LeadRepository implements LeadRepositoryInterface {
         ];
     }
 
+    /**
+     * Get All Lead Types
+     * 
+     * @return type
+     */
     public function getTypes() {
         return [
             [ 
@@ -354,6 +365,31 @@ class LeadRepository implements LeadRepositoryInterface {
         ]; 
     }
 
+    /**
+     * Get All Default Lead Sources
+     * 
+     * @return type
+     */
+    public function getSources() {
+        return LeadSource::where('user_id', 0)->orderBy('lead_source_id', 'ASC');
+    }
+
+    /**
+     * Get All Supported States
+     * 
+     * @return array of supported states on leads
+     */
+    public function getStates() {
+        return Lead::STATES_LIST;
+    }
+
+    /**
+     * Get Lead Status Counts By Dealer
+     * 
+     * @param type $dealerId
+     * @param type $params
+     * @return type
+     */
     public function getLeadStatusCountByDealer($dealerId, $params = []) {                    
         return [
             'won' => $this->getWonLeadsByDealer($dealerId, $params),
