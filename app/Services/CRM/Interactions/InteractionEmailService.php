@@ -82,8 +82,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * @param type $files
      */
     private function getAttachments($files) {
-        var_dump($files);
-        die;
         // Check Size of Attachments
         $this->checkAttachmentsSize($files);
 
@@ -119,7 +117,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
                 throw new ExceededTotalAttachmentSizeException();
             }
-            $totalSize += $file->getSize;
+            $totalSize += $file->getSize();
         }
 
         // Return Total Size
