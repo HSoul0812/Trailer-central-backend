@@ -68,7 +68,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        return Interaction::findOrFail($params['id']);
     }
 
     public function getAll($params) {
@@ -157,7 +157,10 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $email['interaction_id'] = $interaction->interaction_id;
 
         // Insert Email
-        return $this->emailHistory->createOrUpdate($email);
+        $this->emailHistory->createOrUpdate($email);
+
+        // Return Interaction
+        return $this->get(['id' => $email['interaction_id']]);
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
