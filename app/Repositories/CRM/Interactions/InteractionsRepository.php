@@ -93,13 +93,15 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             $params['per_page'] = 100;
         }
 
+        if(!isset($params['sort'])) {
+            $params['sort'] = 'date_created';
+        }
+
         if (!isset($params['include_texts']) || !empty($params['include_texts'])) {
             $query = $this->addTextUnion($query, $params);
         }
 
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
-        }
+        $query = $this->addSortQuery($query, $params['sort']);
         
         return $query->paginate($params['per_page'])->appends($params);
     }
