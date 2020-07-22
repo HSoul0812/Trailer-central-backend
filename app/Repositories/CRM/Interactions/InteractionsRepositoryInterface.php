@@ -5,7 +5,16 @@ namespace App\Repositories\CRM\Interactions;
 use App\Repositories\Repository;
 
 interface InteractionsRepositoryInterface extends Repository {
-    
+    /**
+     * Save Email From Send Email
+     * 
+     * @param type $leadId
+     * @param type $userId
+     * @param type $params
+     * @return type
+     */
+    public function saveEmail($leadId, $userId, $params);
+
     /**
      * Send Email to Lead
      * 

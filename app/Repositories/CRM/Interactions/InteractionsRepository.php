@@ -110,6 +110,41 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
 
     /**
+     * Save Email From Send Email
+     * 
+     * @param type $leadId
+     * @param type $userId
+     * @param type $params
+     * @return type
+     */
+    public function saveEmail($leadId, $userId, $params) {
+        // Initialize Transaction
+        DB::transaction(function() use ($leadId, $userId, $params) {
+            // Create or Update
+            $interaction = $this->createOrUpdate([
+                'id'                => $params['interaction_id'] ?? 0,
+                'tc_lead_id'        => $leadId,
+                'user_id'           => $userId,
+                'interaction_type'  => "EMAIL",
+                'interaction_notes' => "E-Mail Sent: {$params['subject']}",
+                'interaction_time'  => Carbon::now()->toDateTimeString(),
+            ]);
+
+            // Set Interaction ID!
+            $params['interaction_id'] = $interaction->interaction_id;
+
+            // Insert Email
+            $params['date_sent'] = 1;
+            $this->emailHistory->createOrUpdate($params);
+        });
+
+        // Return Interaction
+        return $this->get([
+            'id' => $params['interaction_id']
+        ]);
+    }
+
+    /**
      * Send Email to Lead
      * 
      * @param int $leadId
@@ -149,25 +184,8 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         // Send Email
         $email = $this->interactionEmail->send($lead->dealer_id, $params);
 
-        // Create or Update
-        $interaction = $this->createOrUpdate([
-            'id'                => $params['interaction_id'] ?? 0,
-            'tc_lead_id'        => $lead->identifier,
-            'user_id'           => $user->newDealerUser->user_id,
-            'interaction_type'  => "EMAIL",
-            'interaction_notes' => "E-Mail Sent: {$email['subject']}",
-            'interaction_time'  => Carbon::now()->toDateTimeString(),
-        ]);
-
-        // Set Interaction ID!
-        $email['interaction_id'] = $interaction->interaction_id;
-
-        // Insert Email
-        $email['date_sent'] = 1;
-        $this->emailHistory->createOrUpdate($email);
-
-        // Return Interaction
-        return $this->get(['id' => $email['interaction_id']]);
+        // Save Email
+        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $email);
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
