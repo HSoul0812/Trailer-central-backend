@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Mail\Mailer;
+use Illuminate\Support\Facades\Config;
 use App\Models\CRM\User\SalesPerson;
 
 trait MailHelper
