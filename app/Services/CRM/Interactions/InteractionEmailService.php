@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Interactions;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
@@ -47,7 +48,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         // Try/Send Email!
         try {
             // Send Interaction Email
-            $this->getUserMailer()->to($this->getCleanTo([
+            Mail::to($this->getCleanTo([
                 'email' => $params['to_email'],
                 'name' => $params['to_name']
             ]))->send(new InteractionEmail([

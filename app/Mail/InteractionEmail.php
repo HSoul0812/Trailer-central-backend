@@ -34,7 +34,10 @@ class InteractionEmail extends Mailable
      */
     public function build()
     {
-        $build = $this;
+        $from = config('mail.from.address', 'noreply@trailercentral.com');
+        $name = config('mail.from.name', 'Trailer Central');
+
+        $build = $this->from($from, $name);
 
         if (! empty($this->data['replyToEmail'])) {
             $build->replyTo($this->data['replyToEmail'], $this->data['replyToName']);

@@ -9,9 +9,32 @@ use App\Models\CRM\User\SalesPerson;
 trait MailHelper
 {
     /**
+     * @param SalesPerson $salesPerson
+     */
+    public function setSalesPersonSmtpConfig(SalesPerson $salesPerson): void
+    {
+        if (!empty($salesPerson->smtp_server)) {
+            $config = [
+                'driver'        => 'smtp',
+                'host'          => $salesPerson->smtp_server,
+                'port'          => $salesPerson->smtp_port ?? '2525',
+                'username'      => $salesPerson->smtp_email,
+                'password'      => $salesPerson->smtp_password,
+                'encryption'    => $salesPerson->smtp_security ?? 'tls',
+                'from'          => [
+                    'address'   => $salesPerson->smtp_email,
+                    'name'      => $salesPerson->full_name
+                ]
+            ];
+            Config::set('mail', $config);
+            (new \Illuminate\Mail\MailServiceProvider(app()))->register();
+        }
+    }
+
+    /**
      * @var array
      */
-    protected $smtpConfig = [
+    /*protected $smtpConfig = [
         'smtp_host'        => '',
         'smtp_port'        => '',
         'smtp_username'    => '',
@@ -19,12 +42,12 @@ trait MailHelper
         'smtp_encryption'  => '',
         'from_email'       => '',
         'from_name'        => '',
-    ];
+    ];*/
 
     /**
      * @param SalesPerson $salesPerson
      */
-    public function setSalesPersonSmtpConfig(SalesPerson $salesPerson): void
+    /*public function setSalesPersonSmtpConfig(SalesPerson $salesPerson): void
     {
         // Set Config
         if (!empty($salesPerson->smtp_server)) {
@@ -38,7 +61,7 @@ trait MailHelper
                 'from_name'       => $salesPerson->full_name
             ];
         }
-    }
+    }*/
 
     /**
      * Initialize User Mailer to Bind
