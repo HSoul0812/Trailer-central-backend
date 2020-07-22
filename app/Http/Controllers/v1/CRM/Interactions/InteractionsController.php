@@ -34,16 +34,8 @@ class InteractionsController extends RestfulControllerV2
         $request = new GetInteractionsRequest($params);
         
         if ($request->validate()) {
-            // Change Transformer Based on Settings!
-            if(!isset($params['include_texts']) || !empty($params['include_texts'])) {
-                $transformer = new InteractionTextTransformer();
-            } else {
-                $transformer = new InteractionTransformer();
-            }
-            $transformer = new InteractionTransformer();
-
             // Return Result
-            return $this->response->paginator($this->interactions->getAll($params), $transformer);
+            return $this->response->paginator($this->interactions->getAll($params), new InteractionTransformer());
         }
         
         return $this->response->errorBadRequest();
