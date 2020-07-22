@@ -14,7 +14,7 @@ class StatesController extends RestfulController
 
         if ($request->validate()) {             
             return $this->response->array([
-                'data' => Lead::getStates()
+                'data' => Lead::STATES_LIST
             ]);
         }
         
