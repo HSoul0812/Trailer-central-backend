@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Interactions;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
@@ -157,6 +158,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $email['interaction_id'] = $interaction->interaction_id;
 
         // Insert Email
+        $email['date_sent'] = 1;
         $this->emailHistory->createOrUpdate($email);
 
         // Return Interaction
