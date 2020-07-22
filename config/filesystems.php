@@ -69,7 +69,7 @@ return [
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('SES_BUCKET'),
+            'bucket' => env('MAIL_BUCKET'),
             'url' => env('AWS_URL'),
         ],
 
