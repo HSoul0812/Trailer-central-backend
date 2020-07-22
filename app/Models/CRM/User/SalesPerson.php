@@ -33,6 +33,20 @@ class SalesPerson extends Model implements Filterable
      * @var string
      */
     protected $primaryKey = 'id';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'dealer_location_id',
+        'perms',
+        'first_name',
+        'last_name',
+        'email'
+    ];
     
     /**
      * Define Type Arrays
