@@ -76,6 +76,7 @@ use App\Services\CRM\Text\TwilioService;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailService;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Jobs\Mailer\UserMailerJob;
 use App\Rules\CRM\Leads\ValidLeadSource;
 use Laravel\Nova\Nova;
 
@@ -190,6 +191,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->when(CsvExportService::class)
             ->needs(Filesystem::class)
             ->give(function () { return Storage::disk('partsCsvExport');});
+
+        // Mailer Binder
+        $this->app->bind(UserMailerJob::CUSTOM_MAILER_NAME, UserMailerJob::userMailer);
     }
 
 }

@@ -3,7 +3,7 @@
 namespace App\Services\CRM\Interactions;
 
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
+use App\Jobs\Mailer\UserMailerJob;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
@@ -47,26 +47,19 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Try/Send Email!
         try {
-            // Initialize To Array
-            $mailTo = [
-                'email' => $params['to_email']
-            ];
-            if(!empty($params['to_name'])) {
-                $mailTo['name'] = $params['to_name'];
-            }
-
             // Send Interaction Email
-            Mail::to([$mailTo])->send(
-                new InteractionEmail([
-                    'date' => Carbon::now()->toDateTimeString(),
-                    'replyToEmail' => $params['from_email'] ?? "",
-                    'replyToName' => $params['from_name'],
-                    'subject' => $params['subject'],
-                    'body' => $params['body'],
-                    'attach' => $attachments,
-                    'id' => $messageId
-                ])
-            );
+            UserMailerJob::dispatch($this->smtpConfig, [
+                'email' => $params['to_email'],
+                'name' => $params['to_name']
+            ], new InteractionEmail([
+                'date' => Carbon::now()->toDateTimeString(),
+                'replyToEmail' => $params['from_email'] ?? "",
+                'replyToName' => $params['from_name'],
+                'subject' => $params['subject'],
+                'body' => $params['body'],
+                'attach' => $attachments,
+                'id' => $messageId
+            ]));
         } catch(\Exception $ex) {
             throw new SendEmailFailedException($ex->getMessage());
         }

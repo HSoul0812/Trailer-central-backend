@@ -3,30 +3,38 @@
 namespace App\Traits;
 
 use App\Models\CRM\User\SalesPerson;
-use Illuminate\Support\Facades\Config;
 
 trait MailHelper
 {
+    /**
+     * @var array
+     */
+    public $smtpConfig = [
+        'smtp_host'        => 'SMTP-HOST-HERE',
+        'smtp_port'        => 'SMTP-PORT-HERE',
+        'smtp_username'    => 'SMTP-USERNAME-HERE',
+        'smtp_password'    => 'SMTP-PASSWORD-HERE',
+        'smtp_encryption'  => 'SMTP-ENCRYPTION-HERE',
+        'from_email'       => 'FROM-EMAIL-HERE',
+        'from_name'        => 'FROM-NAME-HERE',
+    ];
+
     /**
      * @param SalesPerson $salesPerson
      */
     public function setSalesPersonSmtpConfig(SalesPerson $salesPerson): void
     {
+        // Set Config
         if (!empty($salesPerson->smtp_server)) {
-            $config = [
-                'driver'        => 'smtp',
-                'host'          => $salesPerson->smtp_server,
-                'port'          => $salesPerson->smtp_port ?? '2525',
-                'username'      => $salesPerson->smtp_email,
-                'password'      => $salesPerson->smtp_password,
-                'encryption'    => $salesPerson->smtp_security ?? 'tls',
-                'from'          => [
-                    'address'   => $salesPerson->smtp_email,
-                    'name'      => $salesPerson->full_name
-                ]
+            $this->smtpConfig = [
+                'smtp_host'       => $salesPerson->smtp_server,
+                'smtp_port'       => $salesPerson->smtp_port ?? '2525',
+                'smtp_username'   => $salesPerson->smtp_email,
+                'smtp_password'   => $salesPerson->smtp_password,
+                'smtp_encryption' => $salesPerson->smtp_security ?? 'tls',
+                'from_email'      => $salesPerson->smtp_email,
+                'from_name'       => $salesPerson->full_name
             ];
-            Config::set('mail', $config);
-            (new \Illuminate\Mail\MailServiceProvider(app()))->register();
         }
     }
 
