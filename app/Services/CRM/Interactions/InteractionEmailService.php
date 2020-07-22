@@ -144,10 +144,10 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 // Loop Attachments
                 foreach ($files as $file) {
                     // Generate Path
-                    $path_parts = pathinfo( $file->getPathname() );
-                    $filePath = 'https://email-trailercentral.s3.amazonaws.com/' . 'crm/'
-                        . $dealerId . "/" . $messageDir
-                        . "/attachments/{$path_parts['filename']}." . $path_parts['extension'];
+                    $filePath = 'https://email-trailercentral.s3.amazonaws.com' .
+                        '/crm/' . $dealerId . '/' . $messageDir .
+                        '/attachments/' . $file->hashName() .
+                        '.' . $file->getClientOriginalExtension();
 
                     // Save File to S3
                     Storage::disk('s3')->put($filePath, file_get_contents($file));
