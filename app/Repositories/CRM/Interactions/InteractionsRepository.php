@@ -87,7 +87,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      */
     public function getAll($params) {
         // Get User ID
-        $query = Interaction::where('lead_id', $params['lead_id']);
+        $query = Interaction::where('tc_lead_id', $params['lead_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
