@@ -25,6 +25,8 @@ trait MailHelper
                     'name'  => $salesPerson->full_name
                 ]
             ];
+            var_dump($config);
+            die;
             Config::set('mail', $config);
         }
     }
