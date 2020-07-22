@@ -4,6 +4,7 @@ namespace App\Models\User;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
 
 class DealerUser extends Model implements Authenticatable
@@ -98,7 +99,7 @@ class DealerUser extends Model implements Authenticatable
      */
     public function newDealerUser()
     {
-        return $this->belongsTo(NewDealerUser::class, 'id', 'dealer_id');
+        return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
     }
     
     public static function getTableName() {
