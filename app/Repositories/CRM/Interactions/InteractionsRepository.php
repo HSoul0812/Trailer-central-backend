@@ -94,7 +94,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         }
 
         if(!isset($params['sort'])) {
-            $params['sort'] = 'date_created';
+            $params['sort'] = 'created_at';
         }
 
         if (!isset($params['include_texts']) || !empty($params['include_texts'])) {
