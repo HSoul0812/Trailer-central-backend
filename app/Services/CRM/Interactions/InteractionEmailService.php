@@ -153,8 +153,8 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
                     // Create Attachment
                     $attachments[] = [
-                        'message_id' => $messageId,
-                        'filename' => Attachment::AWS_PREFIX . $filePath,
+                        'message_id' => '<' . $messageId . '>',
+                        'filename' => Attachment::AWS_PREFIX . urlencode($filePath),
                         'original_filename' => time() . $file->getClientOriginalName()
                     ];
                 }
