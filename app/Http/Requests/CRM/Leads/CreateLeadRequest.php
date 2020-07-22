@@ -5,11 +5,14 @@ namespace App\Http\Requests\CRM\Leads;
 use App\Http\Requests\Request;
 
 class CreateLeadRequest extends Request {
-    
+
     protected $rules = [
         'lead_types' => 'required|array',
         'lead_types.*' => 'lead_type_valid',
+        'website_id' => 'exists:website,website_id',
         'customer_id' => 'exists:dms_customer,id',
+        'lead_title' => 'string',
+        'referral' => 'string',
         'first_name' => 'required|string',
         'last_name' => 'required|string',
         'email' => 'email',
@@ -18,11 +21,20 @@ class CreateLeadRequest extends Request {
         'city' => 'string',
         'state' => 'string',
         'zip' => 'string',
+        'comments' => 'string',
+        'note' => 'string',
+        'metadata' => 'string',
+        'contact_email_sent' => 'date_format:Y-m-d H:i:s',
+        'adf_email_sent' => 'date_format:Y-m-d H:i:s',
+        'cdk_email_sent' => 'boolean',
+        'newsletter' => 'boolean',
+        'is_spam' => 'boolean',
+        'is_archived' => 'boolean',
         'dealer_location_id' => 'exists:dealer_location,dealer_location_id',
         'lead_source' => 'lead_source_valid',
         'lead_status' => 'lead_status_valid',
         'next_contact_date' => 'date_format:Y-m-d H:i:s',
         'contact_type' => 'in:CONTACT,TASK'
     ];
-    
+
 }

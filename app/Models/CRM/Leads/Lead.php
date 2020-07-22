@@ -114,8 +114,20 @@ class Lead extends Model
      * @var string
      */
     protected $primaryKey = 'identifier';
-    
-    public $timestamps = false;
+
+    /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'date_submitted';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
     
     /**
      * The attributes that are mass assignable.
@@ -125,13 +137,29 @@ class Lead extends Model
     protected $fillable = [
         'website_id',
         'dealer_id',
+        'dealer_location_id',
         'lead_type',
         'inventory_id',
         'referral',
-        'first_name',
         'title',
+        'first_name',
         'last_name',
-        'phone_number'
+        'email_address',
+        'phone_number',
+        'preferred_contact',
+        'address',
+        'city',
+        'state',
+        'zip',
+        'comments',
+        'note',
+        'metadata',
+        'contact_email_sent',
+        'adf_email_sent',
+        'cdk_email_sent',
+        'newsletter',
+        'is_spam',
+        'is_archived'
     ];
 
     /**
@@ -232,16 +260,6 @@ class Lead extends Model
         return $this->product()->pluck('product_id')->toArray();
     }
 
-    public function getInventoryIds() {
-        $inventoryIds = $this->units()->pluck('inventory_id')->toArray();
-
-        // Append Current Inventory ID
-        $inventoryIds = array_unshift($inventoryIds, $this->inventory_id);
-
-        // Return Full Array
-        return $inventoryIds;
-    }
-
     /**
      * Retrieves this lead status from the DB
      *
@@ -267,6 +285,34 @@ class Lead extends Model
 
     public function getStatusId() {
         return null;
+    }
+
+    /**
+     * Find Lead Contact Details
+     * 
+     * @param type $id
+     * @return type
+     */
+    public static function findLeadContact($id) {
+        $result = Lead::findOrFail($id)->pluck('first_name', 'last_name', 'email_address')->toArray();
+        return array('name' => $result['first_name'] .' '. $result['last_name'], 'email' => $result['email_address']);
+    }
+
+
+    /**
+     * Get Inventory ID's
+     * 
+     * @return array
+     */
+    public function getInventoryIdsAttribute() {
+        // Initialize Inventory ID's Array
+        $inventoryIds = $this->units()->pluck('inventory_id')->toArray();
+
+        // Append Current Inventory ID
+        array_unshift($inventoryIds, $this->inventory_id);
+
+        // Return Full Array
+        return $inventoryIds;
     }
 
     /**
@@ -300,9 +346,22 @@ class Lead extends Model
         return '+' . ((strlen($this->phone_number) === 11) ? $this->phone_number : '1' . $this->phone_number);
     }
 
-    public static function findLeadContact($id) {
-        $result = Lead::findOrFail($id)->pluck('first_name', 'last_name', 'email_address')->toArray();
-        return array('name' => $result['first_name'] .' '. $result['last_name'], 'email' => $result['email_address']);
+    /**
+     * Get lead types array.
+     *
+     * @return array
+     */
+    public function getLeadTypesAttribute() {
+        // Initialize Inventory ID's Array
+        $leadTypes = $this->leadTypes()->pluck('lead_type')->toArray();
+
+        // Append Current Lead Type If Not Already in Array
+        if(in_array($this->lead_type, $leadTypes)) {
+            array_unshift($leadTypes, $this->lead_type);
+        }
+
+        // Return Full Array
+        return $leadTypes;
     }
 
     /**

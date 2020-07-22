@@ -6,12 +6,15 @@ use App\Http\Requests\Request;
 use App\Models\CRM\Leads\Lead;
 
 class UpdateLeadRequest extends Request {
-    
+
     protected $rules = [
         'id' => 'exists:website_lead,identifier',
         'lead_type' => 'array',
         'lead_type.*' => 'lead_type_valid',
+        'website_id' => 'exists:website,website_id',
         'customer_id' => 'exists:dms_customer,id',
+        'lead_title' => 'string',
+        'referral' => 'string',
         'first_name' => 'string',
         'last_name' => 'string',
         'email' => 'email',
@@ -20,23 +23,32 @@ class UpdateLeadRequest extends Request {
         'city' => 'string',
         'state' => 'string',
         'zip' => 'string',
+        'comments' => 'string',
+        'note' => 'string',
+        'metadata' => 'string',
+        'contact_email_sent' => 'date_format:Y-m-d H:i:s',
+        'adf_email_sent' => 'date_format:Y-m-d H:i:s',
+        'cdk_email_sent' => 'boolean',
+        'newsletter' => 'boolean',
+        'is_spam' => 'boolean',
+        'is_archived' => 'boolean',
         'dealer_location_id' => 'exists:dealer_location,dealer_location_id',
         'lead_source' => 'lead_source_valid',
         'lead_status' => 'lead_status_valid',
         'next_contact_date' => 'date_format:Y-m-d H:i:s',
-        'contact_type' => 'in:CONTACT,TASK'        
+        'contact_type' => 'in:CONTACT,TASK'
     ];
-    
+
     protected function getObject() {
         return new Lead();
     }
-    
+
     protected function getObjectIdValue() {
         return $this->id;
     }
-            
+
     protected function validateObjectBelongsToUser() {
         return true;
     }
-    
+
 }

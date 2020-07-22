@@ -27,14 +27,22 @@ class LeadTransformer extends TransformerAbstract {
         $transformedLead =  [
             'id' => $lead->identifier,
             'name' => $lead->full_name,
+            'lead_types' => $lead->lead_types,
             'inventory_interested_in' => $lead->inventory ? $this->transformInventory($lead->inventory) : [],
             'interactions' => $lead->interactions,
-            'status' => ($lead->leadStatus) ? $lead->leadStatus->status : Lead::STATUS_UNCONTACTED,
-            'next_contact_date' => ($lead->leadStatus) ? $lead->leadStatus->next_contact_date : null,
-            'created_at' => $lead->date_submitted,
-            'contact_type' => ($lead->leadStatus) ? $lead->leadStatus->contact_type : null,
             'email' => $lead->email_address,
-            'preferred_contact' => $lead->preferred_contact
+            'phone' => $lead->phone_number,
+            'preferred_contact' => $lead->preferred_contact,
+            'address' => $lead->full_address,
+            'comments' => $lead->comments,
+            'note' => $lead->note,
+            'referral' => $lead->referral,
+            'title' => $lead->title,
+            'status' => ($lead->leadStatus) ? $lead->leadStatus->status : Lead::STATUS_UNCONTACTED,
+            'source' => ($lead->leadStatus) ? $lead->leadStatus->source : '',
+            'next_contact_date' => ($lead->leadStatus) ? $lead->leadStatus->next_contact_date : null,
+            'contact_type' => ($lead->leadStatus) ? $lead->leadStatus->contact_type : null,
+            'created_at' => $lead->date_submitted
         ];
 
         if (!empty($lead->pretty_phone_number)) {
