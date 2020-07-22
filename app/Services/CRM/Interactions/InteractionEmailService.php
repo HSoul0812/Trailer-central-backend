@@ -32,9 +32,11 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      */
     public function send($dealerId, $params) {
         // Get Unique Message ID
+        $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
         if(empty($params['message_id'])) {
-            $params['message_id'] = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
+            $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
         }
+        $params['message_id'] = sprintf('<%s>', $messageId);
 
         // Get Attachments
         $attachments = array();
@@ -61,7 +63,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                     'subject' => $params['subject'],
                     'body' => $params['body'],
                     'attach' => $attachments,
-                    'id' => $params['message_id']
+                    'id' => $messageId
                 ])
             );
         } catch(\Exception $ex) {
@@ -153,8 +155,8 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
                     // Create Attachment
                     $attachments[] = [
-                        'message_id' => '<' . $messageId . '>',
-                        'filename' => Attachment::AWS_PREFIX . urlencode($filePath),
+                        'message_id' => $messageId,
+                        'filename' => Attachment::AWS_PREFIX . str_replace('@', '%40', $filePath),
                         'original_filename' => time() . $file->getClientOriginalName()
                     ];
                 }
