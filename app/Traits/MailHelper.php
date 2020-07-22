@@ -21,12 +21,10 @@ trait MailHelper
                 'password'      => $salesPerson->smtp_password,
                 'encryption'    => $salesPerson->smtp_security ?? 'tls',
                 'from'          => [
-                    'email' => $salesPerson->smtp_email,
-                    'name'  => $salesPerson->full_name
+                    'address'   => $salesPerson->smtp_email,
+                    'name'      => $salesPerson->full_name
                 ]
             ];
-            var_dump($config);
-            die;
             Config::set('mail', $config);
         }
     }
