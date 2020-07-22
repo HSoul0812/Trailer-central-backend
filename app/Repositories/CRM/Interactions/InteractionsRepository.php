@@ -119,7 +119,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      */
     public function saveEmail($leadId, $userId, $params) {
         // Initialize Transaction
-        DB::transaction(function() use ($leadId, $userId, $params) {
+        DB::transaction(function() use (&$params, $leadId, $userId) {
             // Create or Update
             $interaction = $this->createOrUpdate([
                 'id'                => $params['interaction_id'] ?? 0,
