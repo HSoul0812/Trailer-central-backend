@@ -5,7 +5,7 @@ namespace App\Repositories\CRM\Interactions;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Models\CRM\Interactions\EmailHistory;
-use App\Models\CRM\Interactions\Email\Attachment;
+use App\Models\CRM\Email\Attachment;
 use Carbon\Carbon;
 
 class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
