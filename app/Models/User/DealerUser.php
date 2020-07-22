@@ -29,10 +29,21 @@ class DealerUser extends Model
                               ->where('user_type', 'dealer_user')->firstOrFail();
         return $authToken->access_token;
     }
-    
-    public function dealer()
+
+    /**
+     * Get dealer
+     */
+    public function user()
     {
-        return $this->hasOne(User::class, 'dealer_id', 'dealer_id');
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get new dealer user
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'id', 'dealer_id');
     }
     
     public static function getTableName() {

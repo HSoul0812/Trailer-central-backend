@@ -108,21 +108,25 @@ class User extends Model implements Authenticatable
         return $authToken->access_token;
     }
 
+    /**
+     * Get new dealer user
+     */
+    public function newDealerUser()
+    {
+        return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
+    }
+
+    /**
+     * Get dealer users
+     */
     public function dealerUsers()
     {
         return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
     }
 
-    public function crmUser()
-    {
-        return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
-    }
-
-    public function salesPerson()
-    {
-        return $this->hasOne(SalesPerson::class, 'user_id', 'user_id');
-    }
-    
+    /**
+     * Get leads
+     */
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);

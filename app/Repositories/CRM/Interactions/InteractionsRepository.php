@@ -146,7 +146,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $interaction = $this->createOrUpdate([
             'id'                => $params['interaction_id'] ?? 0,
             'tc_lead_id'        => $lead->identifier,
-            'user_id'           => $user->crmUser->user_id,
+            'user_id'           => $user->newDealerUser->user_id,
             'interaction_type'  => "EMAIL",
             'interaction_notes' => "E-Mail Sent: {$email['subject']}",
             'interaction_time'  => Carbon::now()->toDateTimeString(),
