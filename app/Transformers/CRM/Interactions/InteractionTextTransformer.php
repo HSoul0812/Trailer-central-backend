@@ -21,10 +21,6 @@ class InteractionTextTransformer extends TransformerAbstract
     }
     public function transform(Interaction $interaction) {
         // Get Lead Through ID Instead of Relations!
-        if(empty($interaction->tc_lead_id)) {
-            var_dump($interaction);
-            die;
-        }
         $lead = Lead::findOrFail($interaction->tc_lead_id);
 
         // Return Result!

@@ -260,8 +260,8 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         // Initialize TextLog Object
         $textLog = TextLog::select([
             'id AS interaction_id',
-            'lead_id AS tc_lead_id',
             DB::raw('0 AS lead_product_id'),
+            'lead_id AS tc_lead_id',
             DB::raw($lead->newDealerUser->user_id . ' AS user_id'),
             DB::raw('"TEXT_LOG" AS interaction_type'),
             'log_message AS interaction_notes',
