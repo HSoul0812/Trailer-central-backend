@@ -26,6 +26,9 @@ class LeadTransformer extends TransformerAbstract {
     {
         $transformedLead =  [
             'id' => $lead->identifier,
+            'website_id' => $lead->website_id,
+            'dealer_id' => $lead->dealer_id,
+            'preferred_location' => $lead->preferred_location,
             'name' => $lead->full_name,
             'lead_types' => $lead->lead_types,
             'inventory_interested_in' => $lead->inventory ? $this->transformInventory($lead->inventory) : [],

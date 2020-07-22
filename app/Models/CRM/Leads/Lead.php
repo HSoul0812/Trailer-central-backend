@@ -399,8 +399,8 @@ class Lead extends Model
         }
 
         // Return Inventory Location ID Instead
-        if(!empty($lead->inventory->dealer_location_id)) {
-            return $lead->inventory->dealer_location_id;
+        if(!empty($this->inventory->dealer_location_id)) {
+            return $this->inventory->dealer_location_id;
         }
 
         // Return Nothing
