@@ -26,6 +26,7 @@ trait MailHelper
                 ]
             ];
             Config::set('mail', $config);
+            (new \Illuminate\Mail\MailServiceProvider(app()))->register();
         }
     }
 
