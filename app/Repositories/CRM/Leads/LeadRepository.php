@@ -109,8 +109,9 @@ class LeadRepository implements LeadRepositoryInterface {
                 'tc_lead_identifier' => $lead->identifier
             ]);
         }
-        
-        return $lead;
+
+        // Return Full Lead Details
+        return Lead::find($lead->identifier);
     }
 
     public function delete($params) {
@@ -242,7 +243,8 @@ class LeadRepository implements LeadRepositoryInterface {
             $lead->fill($params)->save();
 
         });
-        
+
+        // Return Full Lead Details
         return $lead;
     }
 
