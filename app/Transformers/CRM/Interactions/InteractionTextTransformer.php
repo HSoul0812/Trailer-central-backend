@@ -29,7 +29,7 @@ class InteractionTextTransformer extends TransformerAbstract
             'type' => $interaction->interaction_type,
             'time' => Carbon::parse($interaction->interaction_time),
             'notes' => $interaction->interaction_notes,
-            'lead' => $this->leadTransformer->transform($lead),
+            'lead' => $lead,
             'contact_name' => $lead->full_name,
             'sales_person' => $lead->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($lead->leadStatus->salesPerson) : null,
             'email_history' => $lead->emailHistory
