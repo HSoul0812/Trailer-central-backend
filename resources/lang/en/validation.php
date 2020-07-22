@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\Lead;
 
