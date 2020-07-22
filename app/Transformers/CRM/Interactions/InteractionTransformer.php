@@ -6,6 +6,7 @@ use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Interactions\Interaction;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
+use App\Models\CRM\Leads\Lead;
 use Carbon\Carbon;
 
 class InteractionTransformer extends TransformerAbstract 
