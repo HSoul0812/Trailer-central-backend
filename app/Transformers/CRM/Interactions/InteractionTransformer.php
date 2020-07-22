@@ -16,7 +16,9 @@ class InteractionTransformer extends TransformerAbstract
     protected $salesPersonTransformer;
 
     protected $defaultIncludes = [
-        'lead'
+        'lead',
+        'salesPerson',
+        'emailHistory'
     ];
     
     public function __construct()
@@ -38,11 +40,29 @@ class InteractionTransformer extends TransformerAbstract
             'type' => $interaction->interaction_type,
             'time' => Carbon::parse($interaction->interaction_time),
             'notes' => $interaction->interaction_notes,
-            'lead' => $this->leadTransformer->transform($interaction->lead),
-            'contact_name' => $interaction->lead->full_name,
-            'sales_person' => $interaction->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($interaction->leadStatus->salesPerson) : null,
-            'email_history' => $interaction->interaction_type !== 'TEXT' ? $interaction->emailHistory : []
+            'contact_name' => $interaction->lead->full_name
         ];
+    }
+
+    public function includeLead(Interaction $interaction)
+    {
+        return $this->leadTransformer->transform($interaction->lead);
+    }
+
+    public function includeSalesPerson(Interaction $interaction)
+    {
+        if(!empty($interaction->leadStatus->salesPerson)) {
+            return $this->salesPersonTransformer->transform($interaction->leadStatus->salesPerson);
+        }
+        return null;
+    }
+
+    public function includeEmailHistory(Interaction $interaction)
+    {
+        if($interaction->interaction_type !== 'TEXT') {
+            return $interaction->emailHistory;
+        }
+        return [];
     }
 
     /**
