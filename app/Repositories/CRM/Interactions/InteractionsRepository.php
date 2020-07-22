@@ -98,13 +98,14 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             $interaction = Interaction::find($params['id']);
 
             // Interaction Exists?!
-            if(empty($interaction)) {
-                return $this->create($params);
+            if(!empty($interaction)) {
+                // Update Interaction
+                return $this->update($params);
             }
         }
 
-        // Update Interaction
-        return $this->update($params);
+        // Create Interaction
+        return $this->create($params);
     }
 
     /**
