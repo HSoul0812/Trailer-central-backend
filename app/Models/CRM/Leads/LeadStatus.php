@@ -39,11 +39,12 @@ class LeadStatus extends Model
      * @var array
      */
     protected $fillable = [
-        'status',
         'tc_lead_identifier',
+        'status',
+        'source',
         'next_contact_date',
-        'contact_type',
-        'sales_person_id'
+        'sales_person_id',
+        'contact_type'
     ];
 
     public function lead()
