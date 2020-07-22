@@ -92,18 +92,6 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Create Lead
         $lead = Lead::create($params);
-        $leadStatus = null;
-        $leadSource = null;
-
-        // Update Units of Inventory
-        if (isset($params['inventory'])) {
-            $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
-        }
-
-        // Update Lead Types
-        if (isset($params['lead_types'])) {
-            $this->updateLeadTypes($lead->identifier, $params['lead_types']);
-        }
 
         // Start Lead Status Updates
         $leadStatusUpdates = [
@@ -131,6 +119,16 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Create Lead Status
         LeadStatus::create($leadStatusUpdates);
+
+        // Update Units of Inventory
+        if (isset($params['inventory'])) {
+            $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
+        }
+
+        // Update Lead Types
+        if (isset($params['lead_types'])) {
+            $this->updateLeadTypes($lead->identifier, $params['lead_types']);
+        }
 
         // Return Full Lead Details
         return Lead::find($lead->identifier);
@@ -321,8 +319,6 @@ class LeadRepository implements LeadRepositoryInterface {
     public function updateUnitsOfInterest($leadId, $inventoryIds) {
         // Initialize Lead Type
         $inventoryLeads = array();
-        var_dump($inventoryIds);
-        die;
         DB::transaction(function() use (&$inventoryLeads, $leadId, $inventoryIds) {
             // Delete Existing Units of Interest!
             InventoryLead::where('website_lead_id', $leadId)->delete();
