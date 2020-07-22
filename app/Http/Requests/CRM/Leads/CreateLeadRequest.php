@@ -9,7 +9,7 @@ class CreateLeadRequest extends Request {
     protected $rules = [
         'lead_types' => 'required|array',
         'lead_types.*' => 'lead_type_valid',
-        'website_id' => 'exists:website,website_id',
+        'website_id' => 'exists:website,id',
         'customer_id' => 'exists:dms_customer,id',
         'title' => 'string',
         'referral' => 'string',
