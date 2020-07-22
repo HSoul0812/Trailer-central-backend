@@ -7,6 +7,7 @@ use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Models\CRM\Email\Attachment;
 use App\Mail\InteractionEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
