@@ -73,7 +73,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Store Attachments
         if(isset($params['attachments'])) {
-            $params['attachments'] = $this->storeAttachments($params['attachments'], $dealerId, $params['message_id']);
+            $params['attachments'] = $this->storeAttachments($params['attachments'], $dealerId, $messageId);
         }
 
         // Returns Params With Attachments
@@ -156,8 +156,8 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
                     // Create Attachment
                     $attachments[] = [
-                        'message_id' => $messageId,
-                        'filename' => Attachment::AWS_PREFIX . str_replace('@', '%40', $filePath),
+                        'message_id' => '<' . $messageId . '>',
+                        'filename' => Attachment::AWS_PREFIX . $filePath,
                         'original_filename' => time() . $file->getClientOriginalName()
                     ];
                 }
