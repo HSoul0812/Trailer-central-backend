@@ -32,9 +32,10 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      */
     public function send($dealerId, $params) {
         // Get Unique Message ID
-        $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
         if(empty($params['message_id'])) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
+        } else {
+            $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
         }
         $params['message_id'] = sprintf('<%s>', $messageId);
 
