@@ -95,7 +95,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     public function createOrUpdate($params) {
         // ID Exists?!
         if(isset($params['id'])) {
-            $interaction = Interaction::findOrFail($params['id']);
+            $interaction = Interaction::find($params['id']);
 
             // Interaction Exists?!
             if(empty($interaction)) {

@@ -122,7 +122,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
     public function createOrUpdate($params) {
         // ID Exists?!
         if(isset($params['id'])) {
-            $emailHistory = EmailHistory::findOrFail($params['id']);
+            $emailHistory = EmailHistory::find($params['id']);
 
             // Email History Exists?!
             if(empty($emailHistory)) {
