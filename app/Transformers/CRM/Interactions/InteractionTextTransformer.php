@@ -20,9 +20,6 @@ class InteractionTextTransformer extends TransformerAbstract
         $this->salesPersonTransformer = new SalesPersonTransformer;
     }
     public function transform(Interaction $interaction) {
-        // Get Lead Through ID Instead of Relations!
-        $lead = Lead::findOrFail($interaction->tc_lead_id);
-
         // Return Result!
         return [
             'id' => $interaction->interaction_id,

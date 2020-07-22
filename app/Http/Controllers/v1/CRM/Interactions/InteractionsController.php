@@ -40,6 +40,7 @@ class InteractionsController extends RestfulControllerV2
             } else {
                 $transformer = new InteractionTransformer();
             }
+            $transformer = new InteractionTransformer();
 
             // Return Result
             return $this->response->paginator($this->interactions->getAll($params), $transformer);
