@@ -3,7 +3,6 @@
 namespace App\Services\CRM\Interactions;
 
 use Illuminate\Support\Facades\Storage;
-use App\Jobs\Mailer\UserMailerJob;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
@@ -48,10 +47,10 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         // Try/Send Email!
         try {
             // Send Interaction Email
-            UserMailerJob::dispatch($this->smtpConfig, [
+            $this->getUserMailer()->to($this->getCleanTo([
                 'email' => $params['to_email'],
                 'name' => $params['to_name']
-            ], new InteractionEmail([
+            ]))->send(new InteractionEmail([
                 'date' => Carbon::now()->toDateTimeString(),
                 'replyToEmail' => $params['from_email'] ?? "",
                 'replyToName' => $params['from_name'],
