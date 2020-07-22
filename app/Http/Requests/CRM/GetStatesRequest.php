@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\CRM\Leads;
+namespace App\Http\Requests\CRM;
 
 use App\Http\Requests\Request;
 
-class GetLeadsStatesRequest extends Request {
+class GetStatesRequest extends Request {
     
     protected $rules = [
    

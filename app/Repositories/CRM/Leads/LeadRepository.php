@@ -492,15 +492,6 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     /**
-     * Get All Supported States
-     * 
-     * @return array of supported states on leads
-     */
-    public function getStates() {
-        return Lead::STATES_LIST;
-    }
-
-    /**
      * Get Lead Status Counts By Dealer
      * 
      * @param type $dealerId
