@@ -77,7 +77,7 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         // Fix Units of Interest
-        if(empty($params['inventory'])) {
+        if(isset($params['inventory']) && is_array($params['inventory'])) {
             $params['inventory_id'] = reset($params['inventory']);
         }
 
@@ -256,11 +256,12 @@ class LeadRepository implements LeadRepositoryInterface {
             }
 
             // Update Units of Inventory
-            if (isset($params['inventory'])) {
+            if (isset($params['inventory']) && is_array($params['inventory'])) {
                 if(!in_array($lead->inventory_id, $params['inventory'])) {
                     $params['inventory_id'] = reset($params['inventory']);
                 }
 
+                // Update Units of Interest
                 $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
             }
 
@@ -270,7 +271,7 @@ class LeadRepository implements LeadRepositoryInterface {
                     $params['lead_type'] = reset($params['lead_types']);
                 }
 
-                // Create Lead Types
+                // Update Lead Types
                 $this->updateLeadTypes($lead->identifier, $params['lead_types']);
             }
             
@@ -321,8 +322,6 @@ class LeadRepository implements LeadRepositoryInterface {
         InventoryLead::whereWebsiteLeadId($leadId)->delete();
 
         // Initialize Lead Type
-        var_dump($inventoryIds);
-        die;
         $inventoryLeads = array();
         DB::transaction(function() use (&$inventoryLeads, $leadId, $inventoryIds) {
             // Loop Lead Types
