@@ -18,9 +18,6 @@ class UserMailerJob implements ShouldQueue {
     public $to;
     public $mailable;
 
-    // Initialize Custom Mailer Name
-    const CUSTOM_MAILER_NAME = 'user.mailer';
-
     /**
      * Create a new job instance.
      *
@@ -30,6 +27,7 @@ class UserMailerJob implements ShouldQueue {
      */
     public function __construct($configuration, $to, $mailable)
     {
+        die;
         $this->configuration = $this->validateConfig($configuration);
         $this->to = $this->fixTo($to);
         $this->mailable = $mailable;
