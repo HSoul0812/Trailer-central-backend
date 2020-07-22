@@ -356,7 +356,7 @@ class Lead extends Model
         $leadTypes = $this->leadTypes()->pluck('lead_type')->toArray();
 
         // Append Current Lead Type If Not Already in Array
-        if(in_array($this->lead_type, $leadTypes)) {
+        if(!in_array($this->lead_type, $leadTypes)) {
             array_unshift($leadTypes, $this->lead_type);
         }
 
