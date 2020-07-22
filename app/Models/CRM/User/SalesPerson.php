@@ -45,15 +45,6 @@ class SalesPerson extends Model implements Filterable
         'last_name',
         'email'
     ];
-
-    /**
-     * Force Append Vars
-     *
-     * @var array
-     */
-    protected $appends = [
-        'full_name'
-    ];
     
     /**
      * Define Type Arrays
