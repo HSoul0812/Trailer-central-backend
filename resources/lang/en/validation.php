@@ -183,7 +183,8 @@ return [
                             LeadType::TYPE_JOTFORM . ', ' .
                             LeadType::TYPE_RENTALS . ', ' .
                             LeadType::TYPE_FINANCING . ', ' .
-                            LeadType::TYPE_SERVICE,
+                            LeadType::TYPE_SERVICE . ', ' .
+                            LeadType::TYPE_TRADE,
     'lead_status_valid' => 'Lead status needs to be: '.
                             Lead::STATUS_HOT . ', ' .
                             Lead::STATUS_COLD . ',' .  
@@ -192,6 +193,10 @@ return [
                             Lead::STATUS_NEW_INQUIRY . ',' .
                             Lead::STATUS_UNCONTACTED . ',' .
                             Lead::STATUS_WON . ',' .
-                            Lead::STATUS_WON_CLOSED . ',',
-    'sales_person_valid' => 'Sales person ID must exist or be 0'
+                            Lead::STATUS_WON_CLOSED,
+    'interaction_type_valid' => 'Interaction type needs to be: '. implode(',', Interaction::INTERACTION_TYPES),
+    'sales_person_valid' => 'Sales person ID must exist or be 0',
+    'dealer_location_valid' => 'Dealer Location ID must exist or be 0',
+    'website_valid' => 'Website ID must exist or be 0',
+    'inventory_valid' => 'Inventory ID must exist'
 ];

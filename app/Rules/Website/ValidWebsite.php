@@ -3,9 +3,9 @@
 namespace App\Rules\CRM\User;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Models\CRM\User\SalesPerson;
+use App\Models\Website\Website;
 
-class ValidSalesPerson implements Rule
+class ValidWebsite implements Rule
 {
             
     /**
@@ -23,19 +23,9 @@ class ValidSalesPerson implements Rule
             return false;
         }
 
-        // No Sales Person?
-        if(empty($value)) {
-            return true;
-        }
-
-        // Get Valid Sales Person!
-        $salesPerson = SalesPerson::find($value);
-        if(empty($salesPerson)) {
-            return false;
-        }
-
-        // Does Sales Person Belong to Dealer?!
-        if($salesPerson->user_id !== $user->newDealerUser->user_id) {
+        // Get Valid Website!
+        $website = Website::find($value);
+        if(empty($website)) {
             return false;
         }
 
@@ -50,6 +40,6 @@ class ValidSalesPerson implements Rule
      */
     public function message()
     {
-        return 'Sales person must exist';
+        return 'Website must exist';
     }
 }

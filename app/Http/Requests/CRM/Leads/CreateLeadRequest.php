@@ -9,9 +9,9 @@ class CreateLeadRequest extends Request {
     protected $rules = [
         'lead_types' => 'required|array',
         'lead_types.*' => 'lead_type_valid',
-        'website_id' => 'exists:website,id',
+        'website_id' => 'website_valid',
         'inventory' => 'array',
-        'inventory.*' => 'exists:inventory,inventory_id',
+        'inventory.*' => 'inventory_valid',
         'customer_id' => 'exists:dms_customer,id',
         'title' => 'string',
         'referral' => 'string',
@@ -32,12 +32,12 @@ class CreateLeadRequest extends Request {
         'newsletter' => 'boolean',
         'is_spam' => 'boolean',
         'is_archived' => 'boolean',
-        'dealer_location_id' => 'exists:dealer_location,dealer_location_id',
+        'dealer_location_id' => 'dealer_location_valid',
         'lead_source' => 'lead_source_valid',
         'lead_status' => 'lead_status_valid',
         'next_contact_date' => 'date_format:Y-m-d H:i:s',
         'contact_type' => 'in:CONTACT,TASK',
-        'sales_person_id' => 'exists:crm_sales_person,id'
+        'sales_person_id' => 'sales_person_valid'
     ];
 
 }
