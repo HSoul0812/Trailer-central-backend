@@ -292,12 +292,12 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return array of LeadType
      */
     public function updateLeadTypes($leadId, $leadTypes) {
-        // Delete Existing Lead Types!
-        LeadType::whereLeadId($leadId)->delete();
-
         // Initialize Lead Type
         $leadTypeModels = array();
         DB::transaction(function() use (&$leadTypeModels, $leadId, $leadTypes) {
+            // Delete Existing Lead Types!
+            LeadType::whereLeadId($leadId)->delete();
+
             // Loop Lead Types
             foreach($leadTypes as $leadType) {
                 $leadTypeModels[] = LeadType::create([
@@ -319,14 +319,14 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return array of InventoryLead
      */
     public function updateUnitsOfInterest($leadId, $inventoryIds) {
-        // Delete Existing Units of Interest!
-        InventoryLead::where('website_lead_id', $leadId)->delete();
-
         // Initialize Lead Type
         $inventoryLeads = array();
         var_dump($inventoryIds);
         die;
         DB::transaction(function() use (&$inventoryLeads, $leadId, $inventoryIds) {
+            // Delete Existing Units of Interest!
+            InventoryLead::where('website_lead_id', $leadId)->delete();
+
             // Loop Lead Types
             foreach($inventoryIds as $inventoryId) {
                 $inventoryLeads[] = InventoryLead::create([
