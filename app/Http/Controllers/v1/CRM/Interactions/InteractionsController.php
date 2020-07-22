@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\v1\CRM\Interactions;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use App\Http\Requests\CRM\Interactions\GetInteractionsRequest;
@@ -13,7 +13,7 @@ use App\Http\Requests\CRM\Interactions\SendEmailRequest;
 use Dingo\Api\Http\Request;
 
 
-class InteractionsController extends RestfulController
+class InteractionsController extends RestfulControllerV2
 {
     protected $interactions;
 
