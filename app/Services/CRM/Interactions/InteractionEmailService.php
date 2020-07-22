@@ -47,8 +47,11 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Try/Send Email!
         try {
-            // Initialize Interaction Email
-            $interactionEmail = new InteractionEmail([
+            // Send Interaction Email
+            UserMailerJob::dispatch($this->smtpConfig, [
+                'email' => $params['to_email'],
+                'name' => $params['to_name']
+            ], new InteractionEmail([
                 'date' => Carbon::now()->toDateTimeString(),
                 'replyToEmail' => $params['from_email'] ?? "",
                 'replyToName' => $params['from_name'],
@@ -56,15 +59,10 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 'body' => $params['body'],
                 'attach' => $attachments,
                 'id' => $messageId
-            ]);
-
-            // Send Interaction Email
-            UserMailerJob::dispatch($this->smtpConfig, [
-                'email' => $params['to_email'],
-                'name' => $params['to_name']
-            ], $interactionEmail);
+            ]));
         } catch(\Exception $ex) {
-            throw new SendEmailFailedException($ex->getMessage());
+            throw new SendEmailFailedException($ex->getMessage() . ': ' . $ex->getTraceAsString());
+            //throw new SendEmailFailedException($ex->getMessage());
         }
 
         // Store Attachments
