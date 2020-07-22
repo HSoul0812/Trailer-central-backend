@@ -11,6 +11,8 @@ class UpdateLeadRequest extends Request {
         'id' => 'exists:website_lead,identifier',
         'lead_type' => 'array',
         'lead_type.*' => 'lead_type_valid',
+        'inventory' => 'array',
+        'inventory.*' => 'exists:inventory,inventory_id',
         'customer_id' => 'exists:dms_customer,id',
         'title' => 'string',
         'referral' => 'string',

@@ -76,6 +76,11 @@ class LeadRepository implements LeadRepositoryInterface {
             $params['lead_type'] = reset($params['lead_types']);
         }
 
+        // Fix Units of Interest
+        if(empty($params['inventory'])) {
+            $params['inventory_id'] = reset($params['inventory']);
+        }
+
         // Fix Preferred Contact
         if(empty($params['preferred_contact'])) {
             $params['preferred_contact'] = 'phone';
@@ -89,6 +94,12 @@ class LeadRepository implements LeadRepositoryInterface {
         $leadStatus = null;
         $leadSource = null;
 
+        // Update Units of Inventory
+        if (isset($params['inventory'])) {
+            $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
+        }
+
+        // Update Lead Types
         if (isset($params['lead_types'])) {
             $this->updateLeadTypes($lead->identifier, $params['lead_types']);
         }
@@ -244,6 +255,15 @@ class LeadRepository implements LeadRepositoryInterface {
                 }
             }
 
+            // Update Units of Inventory
+            if (isset($params['inventory'])) {
+                if(!in_array($lead->inventory_id, $params['inventory'])) {
+                    $params['inventory_id'] = reset($params['inventory']);
+                }
+
+                $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
+            }
+
             // Process Lead Types
             if(isset($params['lead_types']) && is_array($params['lead_types'])) {
                 if(!in_array($lead->lead_type, $params['lead_types'])) {
@@ -287,6 +307,33 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Return Array of Lead Types
         return $leadTypeModels;
+    }
+
+    /**
+     * Delete Existing Units of Interest and Insert New Ones
+     * 
+     * @param int $leadId
+     * @param array $inventoryIds
+     * @return array of InventoryLead
+     */
+    public function updateUnitsOfInterest($leadId, $inventoryIds) {
+        // Delete Existing Units of Interest!
+        InventoryLead::whereWebsiteLeadId($leadId)->delete();
+
+        // Initialize Lead Type
+        $inventoryLeads = array();
+        DB::transaction(function() use (&$inventoryLeads, $leadId, $inventoryIds) {
+            // Loop Lead Types
+            foreach($inventoryIds as $inventoryId) {
+                $inventoryLeads[] = InventoryLead::create([
+                    'website_lead_id' => $leadId,
+                    'inventory_id' => $inventoryId
+                ]);
+            }
+        });
+
+        // Return Array of Inventory Lead
+        return $inventoryLeads;
     }
 
     /**

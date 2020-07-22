@@ -18,4 +18,15 @@ class InventoryLead extends Model
      * @var string
      */
     protected $primaryKey = 'id';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'crm_lead_id',
+        'website_lead_id',
+        'inventory_id'
+    ];
 }

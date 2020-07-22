@@ -10,6 +10,8 @@ class CreateLeadRequest extends Request {
         'lead_types' => 'required|array',
         'lead_types.*' => 'lead_type_valid',
         'website_id' => 'exists:website,id',
+        'inventory' => 'array',
+        'inventory.*' => 'exists:inventory,inventory_id',
         'customer_id' => 'exists:dms_customer,id',
         'title' => 'string',
         'referral' => 'string',
