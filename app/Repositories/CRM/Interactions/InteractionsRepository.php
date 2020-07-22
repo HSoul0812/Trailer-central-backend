@@ -102,7 +102,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         }
 
         $query = $this->addSortQuery($query, $params['sort']);
-        echo $query->getSql();
+        echo $query->toSql();
         die;
         
         return $query->paginate($params['per_page'])->appends($params);
