@@ -34,7 +34,7 @@ class InteractionTransformer extends TransformerAbstract
             'lead' => $this->transformLead($interaction->lead),
             'contact_name' => $interaction->lead->full_name,
             'sales_person' => $interaction->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($interaction->leadStatus->salesPerson) : null,
-            'email_history' => $interaction->emailHistory
+            'email_history' => $interaction->interaction_type !== 'TEXT_LOG' ? $interaction->emailHistory : []
         ];
     }
 
