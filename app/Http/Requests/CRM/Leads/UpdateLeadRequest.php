@@ -18,7 +18,7 @@ class UpdateLeadRequest extends Request {
         'first_name' => 'string',
         'last_name' => 'string',
         'email_address' => 'email',
-        'phone_number' => 'regex:/(01)[0-9]{9}/',
+        'phone_number' => 'regex:/(0-9)?[0-9]{10}/',
         'address' => 'string',
         'city' => 'string',
         'state' => 'string',

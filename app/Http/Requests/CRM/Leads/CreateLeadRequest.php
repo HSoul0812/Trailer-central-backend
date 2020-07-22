@@ -16,7 +16,7 @@ class CreateLeadRequest extends Request {
         'first_name' => 'required|string',
         'last_name' => 'required|string',
         'email_address' => 'email',
-        'phone_number' => 'regex:/(01)[0-9]{9}/',
+        'phone_number' => 'regex:/(0-9)?[0-9]{10}/',
         'address' => 'string',
         'city' => 'string',
         'state' => 'string',
