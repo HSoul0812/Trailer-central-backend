@@ -156,7 +156,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             // Create or Update
             $interaction = $this->createOrUpdate([
                 'id'                => $params['interaction_id'] ?? 0,
-                'tc_lead_id'        => $leadId,
+                'lead_id'           => $leadId,
                 'user_id'           => $userId,
                 'interaction_type'  => "EMAIL",
                 'interaction_notes' => "E-Mail Sent: {$params['subject']}",
