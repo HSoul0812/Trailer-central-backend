@@ -4,6 +4,7 @@ namespace App\Rules\User;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\User\DealerLocation;
+use Illuminate\Support\Facades\Auth;
 
 class ValidDealerLocation implements Rule
 {
