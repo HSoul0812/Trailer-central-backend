@@ -3,25 +3,26 @@
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Class Clapp
+ * Class Feature
  * @package App\Models\Inventory
  */
-class Clapp extends Model
+class InventoryFeature extends Model
 {
     /**
      * @var string
      */
-    protected $table = 'inventory_clapp';
+    protected $table = 'inventory_feature';
 
     /**
      * @var string
      */
-    protected $primaryKey = 'inventory_clapp_id';
+    protected $primaryKey = 'inventory_feature_id';
 
     /**
-     * @return Inventory
+     * @return BelongsTo
      */
     public function inventory()
     {

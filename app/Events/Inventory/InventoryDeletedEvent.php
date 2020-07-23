@@ -11,7 +11,7 @@ use Illuminate\Foundation\Events\Dispatchable;
  * Class InventoryDeleted
  * @package App\Events\Inventory
  */
-class InventoryDeleted
+class InventoryDeletedEvent implements InventoryEventInterface
 {
     const ACTION = 'delete';
 
@@ -29,5 +29,13 @@ class InventoryDeleted
     public function __construct(Inventory $inventory)
     {
         $this->inventory = $inventory;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAction()
+    {
+        return self::ACTION;
     }
 }

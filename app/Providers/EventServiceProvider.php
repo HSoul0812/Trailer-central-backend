@@ -2,12 +2,11 @@
 
 namespace App\Providers;
 
-use App\Events\Inventory\InventoryDeleted;
-use App\Listeners\LotVantage\DeleteLotVantageListener;
+use App\Events\Inventory\InventoryDeletedEvent;
+use App\Listeners\Inventory\InventoryUpdateListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -20,8 +19,8 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        InventoryDeleted::class => [
-            DeleteLotVantageListener::class,
+        InventoryDeletedEvent::class => [
+            InventoryUpdateListener::class,
         ],
     ];
 
@@ -33,7 +32,5 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-
-        //
     }
 }

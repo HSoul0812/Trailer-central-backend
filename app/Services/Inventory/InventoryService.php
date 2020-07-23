@@ -2,8 +2,7 @@
 
 namespace App\Services\Inventory;
 
-use App\Events\Inventory\InventoryDeleted;
-use App\Events\Inventory\InventoryDeleting;
+use App\Events\Inventory\InventoryDeletedEvent;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 
 /**
@@ -55,7 +54,7 @@ class InventoryService
         $result = $this->inventoryRepository->delete(['id' => $id]);
 
         if ($result) {
-            event(new InventoryDeleted($item));
+            event(new InventoryDeletedEvent($item));
         }
 
         return $result;

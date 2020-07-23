@@ -113,12 +113,13 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function delete($params)
     {
         /** @var Inventory $item */
-        $item = Inventory::findOrFail($params['inventory_id']);
+        $item = Inventory::findOrFail($params['id']);
 
         DB::transaction(function() use (&$item, $params) {
             $item->attributeValues()->delete();
             $item->features()->delete();
             $item->clapps()->delete();
+            $item->lotVantageInventory()->delete();
 
             $item->delete();
         });

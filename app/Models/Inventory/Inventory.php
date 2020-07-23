@@ -2,18 +2,18 @@
 namespace App\Models\Inventory;
 
 use App\Helpers\StringHelper;
+use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
 use App\Traits\CompactHelper;
-use App\Models\Traits\Inventory\SoftDeletesWithDeletedColumn;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
 
 class Inventory extends Model
 {
-    use TableAware, SoftDeletesWithDeletedColumn;
+    use TableAware;
 
     const TABLE_NAME = 'inventory';
 
@@ -90,17 +90,22 @@ class Inventory extends Model
 
     public function features()
     {
-        return $this->hasMany(Feature::class, 'inventory_id', 'inventory_id');
+        return $this->hasMany(InventoryFeature::class, 'inventory_id', 'inventory_id');
     }
 
     public function clapps()
     {
-        return $this->hasMany(Clapp::class, 'inventory_id', 'inventory_id');
+        return $this->hasMany(InventoryClapp::class, 'inventory_id', 'inventory_id');
     }
 
     public function attributeValues()
     {
         return $this->hasMany(AttributeValue::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function lotVantageInventory()
+    {
+        return $this->hasOne(DealerInventory::class, 'inventory_id', 'inventory_id');
     }
 
     public function __toString() {
