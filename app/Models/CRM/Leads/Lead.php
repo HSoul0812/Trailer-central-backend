@@ -278,6 +278,9 @@ class Lead extends Model
      * @return string
      */
     public function getTextPhoneAttribute() {
+        if(empty($this->phone_number)) {
+            return '';
+        }
         return '+' . ((strlen($this->phone_number) === 11) ? $this->phone_number : '1' . $this->phone_number);
     }
 
