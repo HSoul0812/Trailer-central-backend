@@ -11,9 +11,24 @@ use App\Models\CRM\Leads\LeadStatus;
 class Interaction extends Model
 {
     use TableAware;
-    
+
     const TABLE_NAME = 'crm_interaction';
-    
+
+    /**
+     * @const array
+     */
+    const INTERACTION_TYPES = [
+        'PHONE',
+        'EMAIL',
+        'IN PERSON',
+        'INQUIRY',
+        'CAMPAIGN',
+        'BLAST',
+        'CONTACT',
+        'TASK',
+        'CHAT'
+    ];
+
     /**
      * The table associated with the model.
      *

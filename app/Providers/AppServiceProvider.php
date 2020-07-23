@@ -48,6 +48,8 @@ use App\Repositories\CRM\Leads\LeadRepository;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepository;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Interactions\EmailHistoryRepository;
+use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepository;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepository;
@@ -72,6 +74,9 @@ use App\Services\Export\Parts\CsvExportService;
 use App\Services\Export\Parts\CsvExportServiceInterface;
 use App\Services\CRM\Text\TwilioService;
 use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Interactions\InteractionEmailService;
+use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Jobs\Mailer\UserMailerJob;
 use App\Rules\CRM\Leads\ValidLeadSource;
 use Laravel\Nova\Nova;
 
@@ -92,10 +97,14 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('cycle_count_exists', 'App\Rules\Parts\CycleCountExists@passes');
         \Validator::extend('manufacturer_exists', 'App\Rules\Parts\ManufacturerExists@passes');
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
+        \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
+        \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
+        \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
-        \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
         \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');
+        \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
+        \Validator::extend('interaction_type_valid', 'App\Rules\CRM\Interactions\ValidInteractionType@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -141,6 +150,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind(TextServiceInterface::class, TwilioService::class);
+        $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind('App\Repositories\Dms\QuoteRepositoryInterface', 'App\Repositories\Dms\QuoteRepository');
@@ -161,6 +171,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(SalesPersonRepositoryInterface::class, SalesPersonRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
+        $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);

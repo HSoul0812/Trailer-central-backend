@@ -18,10 +18,6 @@ class ValidLeadType implements Rule
     public function passes($attribute, $value)
     {        
         switch ($value) {
-            case LeadType::TYPE_BUILD:
-                break;
-            case LeadType::TYPE_CALL:
-                break;
             case LeadType::TYPE_GENERAL:
                 break;
             case LeadType::TYPE_CRAIGSLIST:
@@ -29,17 +25,23 @@ class ValidLeadType implements Rule
             case LeadType::TYPE_INVENTORY:
                 break;
             case LeadType::TYPE_TEXT:
-                break;           
+                break;
             case LeadType::TYPE_SHOWROOM_MODEL:
                 break;
             case LeadType::TYPE_JOTFORM:
+                break;
+            case LeadType::TYPE_BUILD:
                 break;
             case LeadType::TYPE_RENTALS:
                 break;
             case LeadType::TYPE_FINANCING:
                 break;
             case LeadType::TYPE_SERVICE:
-                break;     
+                break;
+            case LeadType::TYPE_CALL:
+                break;
+            case LeadType::TYPE_TRADE:
+                break;
             default:
                 return false;
         }
