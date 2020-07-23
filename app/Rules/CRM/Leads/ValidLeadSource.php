@@ -17,17 +17,21 @@ class ValidLeadSource implements Rule
      * @return bool
      */
     public function passes($attribute, $value)
-    {        
+    {
+        // Must Be Authorized!
         $user = Auth::user();
-        
         if (empty($user)) {
             return false;
         }
-        
+
+        // Get User ID!
+        $userId = $user->newDealerUser->user_id;
+
+        // Find Lead Source!
         $leadSource = LeadSource::where('source_name', $value)
                         ->where('deleted', 0)
-                        ->where(function($query) use ($user) {
-                            $query->where('user_id', $user->dealer_id)
+                        ->where(function($query) use ($userId) {
+                            $query->where('user_id', $userId)
                                     ->orWhere('user_id', 0);
                         })->first();
                         
