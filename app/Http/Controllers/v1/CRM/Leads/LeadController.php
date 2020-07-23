@@ -20,11 +20,12 @@ class LeadController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param Repository $interactions
+     * @param Repository $leads
      */
     public function __construct(LeadRepositoryInterface $leads)
     {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create']);
+        $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
         $this->transformer = new LeadTransformer;
     }
@@ -34,7 +35,8 @@ class LeadController extends RestfulController
         $requestData = $request->all();
 
         if ($request->validate()) {             
-            return $this->response->paginator($this->leads->getAll($requestData), $this->transformer)->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id'], $requestData));
+            return $this->response->paginator($this->leads->getAll($requestData), $this->transformer)
+                        ->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id'], $requestData));
         }
         
         return $this->response->errorBadRequest();

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Rules\CRM\User;
+namespace App\Rules\Inventory;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Models\CRM\User\SalesPerson;
+use App\Models\Inventory\Inventory;
 
-class ValidSalesPerson implements Rule
+class ValidInventory implements Rule
 {
             
     /**
@@ -23,19 +23,14 @@ class ValidSalesPerson implements Rule
             return false;
         }
 
-        // No Sales Person?
-        if(empty($value)) {
-            return true;
-        }
-
-        // Get Valid Sales Person!
-        $salesPerson = SalesPerson::find($value);
-        if(empty($salesPerson)) {
+        // Get Valid Inventory!
+        $inventory = Inventory::find($value);
+        if(empty($inventory)) {
             return false;
         }
 
-        // Does Sales Person Belong to Dealer?!
-        if($salesPerson->user_id !== $user->newDealerUser->user_id) {
+        // Does Inventory Belong to Dealer?!
+        if($inventory->dealer_id !== $user->dealer_id) {
             return false;
         }
 
@@ -50,6 +45,6 @@ class ValidSalesPerson implements Rule
      */
     public function message()
     {
-        return 'Sales person must exist';
+        return 'Inventory must exist';
     }
 }

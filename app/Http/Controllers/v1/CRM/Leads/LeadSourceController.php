@@ -5,9 +5,9 @@ namespace App\Http\Controllers\v1\CRM\Leads;
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\CRM\Leads\GetLeadsTypeRequest;
+use App\Http\Requests\CRM\Leads\GetLeadsSourceRequest;
 
-class LeadTypeController extends RestfulController
+class LeadSourceController extends RestfulController
 {
     protected $leads;
 
@@ -22,12 +22,12 @@ class LeadTypeController extends RestfulController
     }
 
     public function index(Request $request) {
-        $request = new GetLeadsTypeRequest($request->all());
+        $request = new GetLeadsSourceRequest($request->all());
         $requestData = $request->all();
 
         if ($request->validate()) {             
             return $this->response->array([
-                'data' => $this->leads->getTypes()
+                'data' => $this->leads->getSources()
             ]);
         }
         

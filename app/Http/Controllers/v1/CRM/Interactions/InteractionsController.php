@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers\v1\CRM\Interactions;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Transformers\CRM\Interactions\InteractionTextTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
+use App\Http\Requests\CRM\Interactions\GetInteractionsRequest;
+use App\Http\Requests\CRM\Interactions\CreateInteractionRequest;
+use App\Http\Requests\CRM\Interactions\ShowInteractionRequest;
+use App\Http\Requests\CRM\Interactions\UpdateInteractionRequest;
 use App\Http\Requests\CRM\Interactions\SendEmailRequest;
 use Dingo\Api\Http\Request;
 
 
-class InteractionsController extends RestfulController
+class InteractionsController extends RestfulControllerV2
 {
     protected $interactions;
 
@@ -24,12 +29,48 @@ class InteractionsController extends RestfulController
         $this->transformer = new InteractionTransformer();
     }
 
-    public function index(Request $request)
-    {
-        return $this->response->array([
-            'success' => true,
-            'message' => "Interactions API",
-        ]);
+    public function index(Request $request) {
+        $params = $request->all();
+        $request = new GetInteractionsRequest($params);
+        
+        if ($request->validate()) {
+            // Return Result
+            return $this->response->paginator($this->interactions->getAll($params), new InteractionTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function create(Request $request) {
+        $request = new CreateInteractionRequest($request->all());
+        if ( $request->validate() ) {
+            // Create Text
+            return $this->response->item($this->interactions->create($request->all()), new InteractionTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function show(int $leadId, int $id) {
+        $request = new ShowInteractionRequest(['id' => $id]);
+        
+        if ( $request->validate() ) {
+            return $this->response->item($this->interactions->get(['id' => $id]), new InteractionTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function update(int $leadId, int $id, Request $request) {
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new UpdateInteractionRequest($requestData);
+        
+        if ( $request->validate() ) {
+            return $this->response->item($this->interactions->update($request->all()), new InteractionTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -166,7 +207,7 @@ class InteractionsController extends RestfulController
             // Get Results
             $result = $this->interactions->sendEmail($leadId, $params, $request->allFiles());
 
-            // Send Text
+            // Send Email Response
             return $this->response->item($result, new InteractionTransformer());
         }
         

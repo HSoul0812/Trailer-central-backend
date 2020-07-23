@@ -9,6 +9,7 @@ use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\Traits\SortTrait;
@@ -61,6 +62,12 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
     
     public function create($params) {
+        // Get User ID
+        $lead = Lead::findOrFail($params['lead_id']);
+        $params['tc_lead_id'] = $lead->identifier;
+        $params['user_id'] = $lead->newDealerUser->user_id;
+
+        // Create Interaction
         return Interaction::create($params);
     }
 
@@ -72,14 +79,40 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         return Interaction::findOrFail($params['id']);
     }
 
+    /**
+     * Get All Interactions
+     * 
+     * @param array $params
+     * @return Collection EmailHistory
+     */
     public function getAll($params) {
-        throw new NotImplementedException;
+        // Get User ID
+        $query = Interaction::where('tc_lead_id', $params['lead_id']);
+
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
+
+        if(!isset($params['sort'])) {
+            $params['sort'] = '-created_at';
+        }
+
+        if (!isset($params['include_texts']) || !empty($params['include_texts'])) {
+            $query = $this->addTextUnion($query, $params);
+        }
+
+        $query = $this->addSortQuery($query, $params['sort']);
+        
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
         $interaction = Interaction::findOrFail($params['id']);
 
         DB::transaction(function() use (&$interaction, $params) {
+            // Fix Lead ID
+            $params['tc_lead_id'] = $params['lead_id'];
+
             // Fill Interaction Details
             $interaction->fill($params)->save();
         });
@@ -215,6 +248,29 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         return $this->sortOrders;
     }
 
-    
+    /**
+     * Add Text to Interaction Query
+     * 
+     * @param QueryBuilder $query
+     * @param array $params
+     * @return QueryBuilder
+     */
+    private function addTextUnion($query, $params) {
+        // Get User ID
+        $lead = Lead::findOrFail($params['lead_id']);
 
+        // Initialize TextLog Object
+        $textLog = TextLog::select([
+            'id AS interaction_id',
+            DB::raw('0 AS lead_product_id'),
+            'lead_id AS tc_lead_id',
+            DB::raw($lead->newDealerUser->user_id . ' AS user_id'),
+            DB::raw('"TEXT" AS interaction_type'),
+            'log_message AS interaction_notes',
+            'date_sent AS interaction_time'
+        ])->where('lead_id', $params['lead_id']);
+
+        // Initialize TextLog Query
+        return $query->union($textLog);
+    }
 }

@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Website\Website;
 
-class SetDealerIdOnRequest
+class SetWebsiteIdOnRequest
 {
     /**
      * Handle an incoming request.
@@ -20,7 +20,13 @@ class SetDealerIdOnRequest
         if (empty(Auth::user())) {
             return response('Invalid access token.', 403);
         }
-        $request['dealer_id'] = Auth::user()->dealer_id;
+
+        // Get Website?!
+        $dealerId = Auth::user()->dealer_id;
+        $website = Website::whereDealerId($request['dealer_id'])->first();
+        if(!empty($website['id'])) {
+            $request['website_id'] = $website['id'];
+        }
         
         return $next($request);
     }

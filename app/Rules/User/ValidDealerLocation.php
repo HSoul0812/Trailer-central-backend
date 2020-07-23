@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Rules\CRM\User;
+namespace App\Rules\User;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Models\CRM\User\SalesPerson;
+use App\Models\User\DealerLocation;
 
-class ValidSalesPerson implements Rule
+class ValidDealerLocation implements Rule
 {
             
     /**
@@ -23,19 +23,19 @@ class ValidSalesPerson implements Rule
             return false;
         }
 
-        // No Sales Person?
+        // No Dealer Location?
         if(empty($value)) {
             return true;
         }
 
-        // Get Valid Sales Person!
-        $salesPerson = SalesPerson::find($value);
-        if(empty($salesPerson)) {
+        // Get Valid Dealer Location!
+        $dealerLocation = DealerLocation::find($value);
+        if(empty($dealerLocation)) {
             return false;
         }
 
-        // Does Sales Person Belong to Dealer?!
-        if($salesPerson->user_id !== $user->newDealerUser->user_id) {
+        // Does Dealer Location Belong to Dealer?!
+        if($dealerLocation->dealer_id !== $user->dealer_id) {
             return false;
         }
 
@@ -50,6 +50,6 @@ class ValidSalesPerson implements Rule
      */
     public function message()
     {
-        return 'Sales person must exist';
+        return 'Dealer Location must exist';
     }
 }
