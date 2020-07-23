@@ -655,7 +655,7 @@ class LeadRepository implements LeadRepositoryInterface {
     }   
     
     private function addCustomerNameToQuery($query, $customerName) {
-        return $query->whereRaw("CONCAT(".Lead::getTableName().".first_name, ' ', ".Lead::getTableName().".last_name)", $customerName);   
+        return $query->whereRaw("CONCAT(".Lead::getTableName().".first_name, ' ', ".Lead::getTableName().".last_name) LIKE ?", $customerName);   
     }  
     
     private function addSalesPersonIdToQuery($query, $salesPersonId) {
