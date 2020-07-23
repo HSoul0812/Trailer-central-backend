@@ -5,22 +5,39 @@ namespace App\Http\Requests\CRM\Leads;
 use App\Http\Requests\Request;
 
 class CreateLeadRequest extends Request {
-    
+
     protected $rules = [
-        'lead_type' => 'lead_type_valid',
+        'lead_types' => 'required|array',
+        'lead_types.*' => 'lead_type_valid',
+        'website_id' => 'website_valid',
+        'inventory' => 'array',
+        'inventory.*' => 'inventory_valid',
         'customer_id' => 'exists:dms_customer,id',
+        'title' => 'string',
+        'referral' => 'string',
         'first_name' => 'required|string',
         'last_name' => 'required|string',
-        'email' => 'email',
-        'phone_number' => 'regex:/(01)[0-9]{9}/',
+        'email_address' => 'email',
+        'phone_number' => 'regex:/(0-9)?[0-9]{10}/',
         'address' => 'string',
         'city' => 'string',
         'state' => 'string',
         'zip' => 'string',
-        'lead_status' => 'lead_status_valid',
+        'comments' => 'string',
+        'note' => 'string',
+        'metadata' => 'string',
+        'contact_email_sent' => 'date_format:Y-m-d H:i:s',
+        'adf_email_sent' => 'date_format:Y-m-d H:i:s',
+        'cdk_email_sent' => 'boolean',
+        'newsletter' => 'boolean',
+        'is_spam' => 'boolean',
+        'is_archived' => 'boolean',
+        'dealer_location_id' => 'dealer_location_valid',
         'lead_source' => 'lead_source_valid',
-        'dealer_location_id' => 'exists:dealer_location,dealer_location_id',
-        'next_contact_date' => 'date_format:Y-m-d H:i:s'
+        'lead_status' => 'lead_status_valid',
+        'next_contact_date' => 'date_format:Y-m-d H:i:s',
+        'contact_type' => 'in:CONTACT,TASK',
+        'sales_person_id' => 'sales_person_valid'
     ];
-    
+
 }

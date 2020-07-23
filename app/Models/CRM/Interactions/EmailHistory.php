@@ -58,6 +58,27 @@ class EmailHistory extends Model
     ];
 
     /**
+     * @const array
+     */
+    const REPORT_FIELDS = [
+        'date_sent',
+        'date_delivered',
+        'date_bounced',
+        'date_complained',
+        'date_unsubscribed',
+        'date_opened',
+        'date_clicked'
+    ];
+
+    /**
+     * @const array
+     */
+    const BOOL_FIELDS = [
+        'invalid_email',
+        'was_skipped'
+    ];
+
+    /**
      * Get the lead that owns the email history.
      */
     public function lead()
@@ -72,52 +93,4 @@ class EmailHistory extends Model
     {
         return $this->belongsTo(Lead::class, "interaction_id", "interaction_id");
     }
-
-    /**
-     * @param string $fromEmail
-     * @param string $leadId
-     * @return EmailHistory
-     */
-    public static function getEmailDraft(string $fromEmail, string $leadId): EmailHistory
-    {
-        return self::whereLeadId($leadId)
-            ->whereFromEmail($fromEmail)
-            ->whereNull('date_sent')
-            ->first();
-    }
-
-    public function createOrUpdateEmailHistory($history, $insert = []) {
-        $reportFields = [
-            'date_sent',
-            'date_delivered',
-            'date_bounced',
-            'date_complained',
-            'date_unsubscribed',
-            'date_opened',
-            'date_clicked',
-            'invalid_email',
-            'was_skipped'
-        ];
-
-        foreach ($insert as $key => $value) {
-            if (in_array($key, $reportFields)) {
-                if ($key === 'invalid_email' || $key === 'was_skipped') {
-                    if (!empty($value))
-                        $insert[$key] = 1;
-                } else if (!empty($value)) {
-                    if ($value === 1) {
-                        $insert[$key] = date("Y-m-d H:i:s");
-                    } else {
-                        $insert[$key] = $value;
-                    }
-                }
-            }
-        }
-        if(!!$history) {
-            $history->update($insert);
-        } else {
-            EmailHistory::create($insert);
-        }
-    }
-
 }

@@ -55,21 +55,17 @@ class CrmUser extends Model
     protected $hidden = [
         'password',
     ];
-
-    public function dealer()
-    {
-        return $this->hasOne(Dealer::class, 'user_id', 'user_id');
-    }
-
-    /**
-     * Get the user
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
     
     public static function getTableName() {
         return self::TABLE_NAME;
+    }
+
+    /**
+     * Get the user's full name.
+     *
+     * @return string
+     */
+    public function getFullNameAttribute() {
+        return trim("{$this->first_name} {$this->last_name}");
     }
 }

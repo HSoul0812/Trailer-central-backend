@@ -4,6 +4,7 @@ namespace App\Rules\CRM\User;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\CRM\User\SalesPerson;
+use Illuminate\Support\Facades\Auth;
 
 class ValidSalesPerson implements Rule
 {
@@ -16,22 +17,31 @@ class ValidSalesPerson implements Rule
      * @return bool
      */
     public function passes($attribute, $value)
-    {        
+    {
+        // Must Be Authorized!
+        $user = Auth::user();
+        if (empty($user)) {
+            return false;
+        }
+
+        // No Sales Person?
+        if(empty($value)) {
+            return true;
+        }
+
+        // Get Valid Sales Person!
         $salesPerson = SalesPerson::find($value);
-        
-        if ($salesPerson) {
-            return true;
+        if(empty($salesPerson)) {
+            return false;
         }
-        
-        /**
-         * The unassigned sales person
-         */
-        if (empty($value)) {
-            return true;
+
+        // Does Sales Person Belong to Dealer?!
+        if($salesPerson->user_id !== $user->newDealerUser->user_id) {
+            return false;
         }
-        
-        
-        return false;
+
+        // Success!
+        return true;
     }
 
     /**
@@ -41,6 +51,6 @@ class ValidSalesPerson implements Rule
      */
     public function message()
     {
-        return 'Sales person must exist';           
+        return 'Sales person must exist';
     }
 }
