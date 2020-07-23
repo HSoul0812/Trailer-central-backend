@@ -15,6 +15,18 @@ class Category extends Model {
     protected $table = 'inventory_category';
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'label',
+        'legacy_category',
+        'entity_type_id',
+        'category',
+    ];
+
+    /**
      * The primary key associated with the table.
      *
      * @var string
