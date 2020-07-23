@@ -25,7 +25,9 @@ class InteractionEmail extends Mailable
         $this->data     = $data;
         $this->subject  = $data['subject'] ?? 'Trailer Central';
         $this->callbacks[] = function ($message) use ($data) {
-            $message->getHeaders()->addTextHeader('Message-ID', $data['id']);
+            if(isset($data['id'])) {
+                $message->getHeaders()->get('Message-ID')->setId($data['id']);
+            }
         };
     }
 

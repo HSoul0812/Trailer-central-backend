@@ -9,22 +9,22 @@ use App\Transformers\User\DealerLocationTransformer;
 use App\Transformers\Inventory\ImageTransformer;
 use Illuminate\Database\Eloquent\Collection;
 
-class InventoryTransformer extends TransformerAbstract 
+class InventoryTransformer extends TransformerAbstract
 {
-    
+
     protected $userTransformer;
 
     protected $dealerLocationTransformer;
-    
+
     protected $imageTransformer;
-    
-    public function __construct() 
+
+    public function __construct()
     {
         $this->userTransformer = new UserTransformer();
         $this->dealerLocationTransformer = new DealerLocationTransformer();
         $this->imageTransformer = new ImageTransformer();
     }
-    
+
     public function transform(Inventory $inventory)
     {
 	 return [
@@ -40,7 +40,7 @@ class InventoryTransformer extends TransformerAbstract
              'dealer_location_id' => $inventory->dealer_location_id,
              'dealer_location' => $inventory->dealerLocation ? $this->dealerLocationTransformer->transform($inventory->dealerLocation) : null,
              'description' => $inventory->description,
-             'entity_type_id' => $inventory->entity_type,
+             'entity_type_id' => $inventory->entity_type_id ,
              'fp_balance' => $inventory->fp_balance,
              'fp_interest_paid' => $inventory->fp_interest_paid,
              'fp_committed' => $inventory->fp_committed,
@@ -66,11 +66,12 @@ class InventoryTransformer extends TransformerAbstract
              'weight' => $inventory->weight,
              'width' => $inventory->width,
              'year' => $inventory->year,
-             'color' => $inventory->color
+             'color' => $inventory->color,
+             'floorplan_payments' => $inventory->floorplanPayments,
          ];
     }
-    
-    private function transformImages(Collection $images) 
+
+    private function transformImages(Collection $images)
     {
         $ret = [];
         foreach($images as $img) {

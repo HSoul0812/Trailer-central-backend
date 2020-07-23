@@ -38,4 +38,56 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
         throw new NotImplementedException;
     }
 
+
+    /**
+     * Get All Dealer SMS Numbers
+     * 
+     * @param int $dealerId
+     * @return type
+     */
+    public function findAllDealerSmsNumbers($dealerId)
+    {
+        // Get All Dealer Location SMS Numbers
+        return DealerLocation::where('dealer_id', $dealerId)
+                                ->whereNotNull('sms_phone')
+                                ->get();
+    }
+
+    /**
+     * Get Dealer Number for Location or Default
+     * 
+     * @param int $dealerId
+     * @param int $locationId
+     * @return type
+     */
+    public function findDealerNumber($dealerId, $locationId) {
+        // Get Dealer Location
+        $location = DealerLocation::find($locationId);
+        if(!empty($location->sms_phone)) {
+            return $location->sms_phone;
+        }
+
+        // Get Numbers By Dealer ID
+        if(!empty($location->dealer_id)) {
+            $numbers = $this->findAllDealerSmsNumbers($location->dealer_id);
+        } else {
+            $numbers = $this->findAllDealerSmsNumbers($dealerId);
+        }
+
+        // Loop Numbers
+        $phoneNumber = '';
+        if(!empty($numbers)) {
+            // Get First Valid Number!
+            foreach($numbers as $number) {
+                if(!empty($number->sms_phone)) {
+                    $phoneNumber = $number->sms_phone;
+                    break;
+                }
+            }
+        }
+
+        // Return Phone Number
+        return $phoneNumber;
+    }
+
 }

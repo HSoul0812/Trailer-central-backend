@@ -191,6 +191,77 @@ $api->version('v1', function ($route) {
 
     /*
     |--------------------------------------------------------------------------
+    | Interactions
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    /**
+     * Interactions
+     */
+    $route->group(['middleware' => 'interaction.validate'], function ($route) {
+        $route->get('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index')->where('leadId', '[0-9]+');
+        $route->put('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@create')->where('leadId', '[0-9]+');
+        $route->post('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
+        $route->get('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+    });
+
+    /**
+     * Texts Logs
+     */
+    $route->group(['middleware' => 'text.validate'], function ($route) {
+        $route->get('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@index')->where('leadId', '[0-9]+');
+        $route->put('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@create')->where('leadId', '[0-9]+');
+        $route->put('leads/{leadId}/texts/send', 'App\Http\Controllers\v1\CRM\Text\TextController@send')->where('leadId', '[0-9]+');
+        $route->get('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@destroy')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('leads/{leadId}/texts/{id}/stop', 'App\Http\Controllers\v1\CRM\Text\TextController@stop')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+    });
+
+    /**
+     * Texts Template
+     */
+    $route->group(['middleware' => 'text.template.validate'], function ($route) {
+        $route->get('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@index')->where('userId', '[0-9]+');
+        $route->put('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@create')->where('userId', '[0-9]+');
+        $route->get('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+    });
+
+    /**
+     * Texts Campaign
+     */
+    $route->group(['middleware' => 'text.campaign.validate'], function ($route) {
+        $route->get('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Text\CampaignController@index')->where('userId', '[0-9]+');
+        $route->put('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Text\CampaignController@create')->where('userId', '[0-9]+');
+        $route->get('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/campaign/{id}/sent', 'App\Http\Controllers\v1\CRM\Text\CampaignController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/campaign/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\CampaignController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+    });
+
+    /**
+     * Texts Blast
+     */
+    $route->group(['middleware' => 'text.blast.validate'], function ($route) {
+        $route->get('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Text\BlastController@index')->where('userId', '[0-9]+');
+        $route->put('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Text\BlastController@create')->where('userId', '[0-9]+');
+        $route->get('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->delete('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('crm/{userId}/texts/blast/{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+        $route->get('crm/{userId}/texts/blast/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\BlastController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Vendors
     |--------------------------------------------------------------------------
     |
@@ -244,7 +315,9 @@ $api->version('v1', function ($route) {
 
     $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
+    $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
+    $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
     /*
     |--------------------------------------------------------------------------
@@ -268,7 +341,7 @@ $api->version('v1', function ($route) {
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
-        $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@create');
+        $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
 
         /*
         |--------------------------------------------------------------------------

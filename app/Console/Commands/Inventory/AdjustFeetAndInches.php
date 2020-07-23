@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Inventory;
 
 use Illuminate\Console\Command;
 use App\Models\Inventory\Inventory;

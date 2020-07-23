@@ -37,6 +37,9 @@ class Inventory extends Model
     protected $fillable = [
         'fp_balance',
         'fp_interest_paid',
+        'length',
+        'width',
+        'height'
     ];
     
     protected $casts = [
@@ -52,6 +55,10 @@ class Inventory extends Model
         'price' => 'float',
         'msrp' => 'float',
         'gvwr' => 'float'
+    ];
+    
+    protected $hidden = [
+        'geolocation'
     ];
     
     public function user()
@@ -76,7 +83,7 @@ class Inventory extends Model
 
     public function floorplanPayments()
     {
-        return $this->hasMany('App\Models\Inventory\Floorplan\Payment');
+        return $this->hasMany('App\Models\Inventory\Floorplan\Payment', 'inventory_id', 'inventory_id');
     }
     
     public function images()

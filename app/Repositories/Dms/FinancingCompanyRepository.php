@@ -48,12 +48,8 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
     public function create($params)
     {
         $financingCompany = new FinancingCompany($params);
-
-        if ($financingCompany->saveOrFail()) {
-            return $financingCompany;
-        } else {
-            return null;
-        }
+        $financingCompany->saveOrFail();
+        return $financingCompany;
     }
 
     /**
@@ -66,24 +62,22 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
         /** @var FinancingCompany $financingCompany */
         $financingCompany = FinancingCompany::find($params['id']);
         $financingCompany->fill($params);
-        if ($financingCompany->saveOrFail()) {
-            return $financingCompany;
-        } else {
-            return null;
-        }
+        $financingCompany->saveOrFail();
+        return $financingCompany;
     }
 
     /**
      * @param array $params
-     * @return bool|void
+     * @return void
      * @throws \Throwable
      */
     public function delete($params)
     {
         /** @var FinancingCompany $financingCompany */
         $financingCompany = FinancingCompany::find($params['id']);
-
-        return $financingCompany->delete();
+        if (!$financingCompany->delete()) {
+            throw new \Exception("Unable to delete Financing company ID {$params['id']}");
+        }
     }
 
 }

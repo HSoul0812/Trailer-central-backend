@@ -23,6 +23,54 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-title' => [
             'field' => 'title',
             'direction' => 'ASC'
+        ],
+        'manufacturer' => [
+            'field' => 'manufacturer',
+            'direction' => 'DESC'
+        ],
+        '-manufacturer' => [
+            'field' => 'manufacturer',
+            'direction' => 'ASC'
+        ],
+        'vin' => [
+            'field' => 'vin',
+            'direction' => 'DESC'
+        ],
+        '-vin' => [
+            'field' => 'vin',
+            'direction' => 'ASC'
+        ],
+        'true_cost' => [
+            'field' => 'true_cost',
+            'direction' => 'DESC'
+        ],
+        '-true_cost' => [
+            'field' => 'true_cost',
+            'direction' => 'ASC'
+        ],
+        'fp_balance' => [
+            'field' => 'fp_balance',
+            'direction' => 'DESC'
+        ],
+        '-fp_balance' => [
+            'field' => 'fp_balance',
+            'direction' => 'ASC'
+        ],
+        'fp_interest_paid' => [
+            'field' => 'fp_interest_paid',
+            'direction' => 'DESC'
+        ],
+        '-fp_interest_paid' => [
+            'field' => 'fp_interest_paid',
+            'direction' => 'ASC'
+        ],
+        'fp_committed' => [
+            'field' => 'fp_committed',
+            'direction' => 'DESC'
+        ],
+        '-fp_committed' => [
+            'field' => 'fp_committed',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -75,13 +123,8 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $query = Inventory::select('*');
 
-        if (isset($params['search_term'])) {
-            $query = $query->where(function($q) use ($params) {
-                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%');
-            });
+        if (isset($params['dealer_id'])) {
+            $query = $query->where('dealer_id', $params['dealer_id']);
         }
 
         if (!isset($params['per_page'])) {
@@ -95,15 +138,28 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
-
-        if (isset($params[self::CONDITION_AND_WHERE_RAW]) && is_array($params[self::CONDITION_AND_WHERE_RAW])) {
-            foreach ($params[self::CONDITION_AND_WHERE_RAW] as $condition) {
-                $query = $query->whereRaw($condition[0]);
-            }
+        
+        if (isset($params['only_floorplanned']) && !empty($params['only_floorplanned'])) {
+            /**
+             * Filter only floored inventories to pay
+             * https://crm.trailercentral.com/accounting/floorplan-payment
+             */
+            $query = $query->whereNotNull('bill_id')
+                ->where([
+                    ['is_floorplan_bill', '=', 1],
+                    ['fp_vendor', '>', 0],
+                    ['true_cost', '>', 0],
+                    ['fp_balance', '>', 0]
+                ]);
         }
 
-        if (isset($params['dealer_id'])) {
-            $query = $query->where('dealer_id', $params['dealer_id']);
+        if (isset($params['search_term'])) {
+            $query = $query->where(function($q) use ($params) {
+                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%');
+            });
         }
 
         if (isset($params['sort'])) {
