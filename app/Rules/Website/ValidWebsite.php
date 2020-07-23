@@ -4,6 +4,7 @@ namespace App\Rules\Website;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\Website\Website;
+use Illuminate\Support\Facades\Auth;
 
 class ValidWebsite implements Rule
 {

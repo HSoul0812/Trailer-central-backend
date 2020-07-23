@@ -4,6 +4,7 @@ namespace App\Rules\Inventory;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\Inventory\Inventory;
+use Illuminate\Support\Facades\Auth;
 
 class ValidInventory implements Rule
 {
