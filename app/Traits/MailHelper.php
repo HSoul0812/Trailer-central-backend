@@ -2,28 +2,74 @@
 
 namespace App\Traits;
 
-use App\Models\User\User;
 use Illuminate\Support\Facades\Config;
+use App\Models\CRM\User\SalesPerson;
 
 trait MailHelper
 {
     /**
-     * @param User $user
+     * @param SalesPerson $salesPerson
      */
-    public function setSalesPersonSmtpConfig(User $user): void
+    public function setSalesPersonSmtpConfig(SalesPerson $salesPerson): void
     {
-        if (! empty($user->salesPerson) && ! empty($user->salesPerson->smtp_server)) {
+        if (!empty($salesPerson->smtp_server)) {
             $config = [
                 'driver'        => 'smtp',
-                'host'          => $user->salesPerson->smtp_server,
-                'port'          => $user->salesPerson->smtp_port ?? '2525',
-                'username'      => $user->salesPerson->smtp_email,
-                'password'      => $user->salesPerson->smtp_password,
-                'encryption'    => $user->salesPerson->smtp_security ?? 'tls'
+                'host'          => $salesPerson->smtp_server,
+                'port'          => $salesPerson->smtp_port ?? '2525',
+                'username'      => $salesPerson->smtp_email,
+                'password'      => $salesPerson->smtp_password,
+                'encryption'    => $salesPerson->smtp_security ?? 'tls',
+                'from'          => [
+                    'address'   => $salesPerson->smtp_email,
+                    'name'      => $salesPerson->full_name
+                ]
             ];
             Config::set('mail', $config);
         }
     }
+
+    /**
+     * Fix To Config
+     * 
+     * To Must be Array of Arrays or Just Email!
+     * 
+     * @param string|array $to
+     * @return string|array
+     */
+    protected function getCleanTo($to) {
+        // Is Array?
+        if(is_array($to)) {
+            // Only Single?
+            if(isset($to['email'])) {
+                // Validate Name!
+                if(isset($to['name']) && empty($to['name'])) {
+                    unset($to['name']);
+                }
+
+                // Return To As Array!
+                return [$to];
+            } else {
+                // Loop To Array!
+                foreach($to as $k => $v) {
+                    // Remove if To Email Invalid!
+                    if(!isset($v['email'])) {
+                        unset($to[$k]);
+                    }
+
+                    // Remove Name if Name Empty!
+                    if(isset($v['name']) && empty($v['name'])) {
+                        unset($v['name']);
+                        $to[$k] = $v;
+                    }
+                }
+            }
+        }
+
+        // Return To As Normal!
+        return $to;
+    }
+
 
     /**
      * Create a unique ID to use for boundaries.

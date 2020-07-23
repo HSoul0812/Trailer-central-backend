@@ -24,6 +24,7 @@ class LeadType extends Model
     const TYPE_TRADE = 'trade';
     
     const TABLE_NAME = 'website_lead_types';
+
     /**
      * The table associated with the model.
      *
@@ -37,6 +38,30 @@ class LeadType extends Model
      * @var string
      */
     protected $primaryKey = 'lead_type_id';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'lead_id',
+        'lead_type'
+    ];
+
+    /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'added';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
 
     /**
      * Get lead.

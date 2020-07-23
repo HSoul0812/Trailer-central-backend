@@ -34,51 +34,36 @@ class Attachment extends Model
     ];
 
     /**
+     * @var int
+     * @var int
+     */
+    const MAX_FILE_SIZE = 2097152;
+    const MAX_UPLOAD_SIZE = 8388608;
+
+    /**
+     * @var 
+     */
+    const AWS_PREFIX = 'https://email-trailercentral.s3.amazonaws.com';
+
+    /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'date_retrieved';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
+
+    /**
      * Get message by attachment.
      */
     public function message()
     {
         return $this->belongsTo(Lead::class, "lead_id", "identifier");
-    }
-
-    /**
-     * @param $files - mail attachment(-s)
-     * @return bool | string
-     */
-    public function checkAttachmentsSize($files)
-    {
-        $totalSize = 0;
-        foreach ($files as $file) {
-            if ($file['size'] > 2097152) {
-                throw new Exception("Single upload size must be less than 2 MB.");
-            } else if ($totalSize > 8388608) {
-                throw new Exception("Total upload size must be less than 8 MB");
-            }
-            $totalSize += $file['size'];
-        }
-
-        return true;
-    }
-
-    public function uploadAttachments($files, $dealer, $uniqueId) {
-        $messageDir = str_replace(">", "", str_replace("<", "", $uniqueId));
-
-        if (!empty($files) && is_array($files)) {
-            $message = $this->checkAttachmentsSize($files);
-            if( false !== $message ) {
-                return response()->json([
-                    'error' => true,
-                    'message' => $message
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            foreach ($files as $file) {
-                $path_parts = pathinfo( $file->getPathname() );
-                $filePath = 'https://email-trailercentral.s3.amazonaws.com/' . 'crm/'
-                    . $dealer->id . "/" . $messageDir
-                    . "/attachments/{$path_parts['filename']}." . $path_parts['extension'];
-                Storage::disk('s3')->put($filePath, file_get_contents($file));
-                Attachment::create(['message_id' => $uniqueId, 'filename' => $filePath, 'original_filename' => time() . $file->getClientOriginalName()]);
-            }
-        }
     }
 }
