@@ -15,8 +15,8 @@ $factory->define(Lead::class, function (Faker $faker) {
 
     // Return Overrides
     return [
-        'website_id' => AutoAssignTest::TEST_WEBSITE_ID,
-        'dealer_id' => AutoAssignTest::TEST_DEALER_ID[$websiteKey],
+        'website_id' => AutoAssignTest::TEST_WEBSITE_ID[$websiteKey],
+        'dealer_id' => AutoAssignTest::TEST_DEALER_ID,
         'dealer_location_id' => AutoAssignTest::TEST_LOCATION_ID[$locationKey],
         'inventory_id' => AutoAssignTest::TEST_INVENTORY_ID[$inventoryKey],
         'title' => AutoAssignTest::TEST_FORM_TITLE[$titleKey],
