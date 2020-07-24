@@ -4,32 +4,31 @@ namespace App\Http\Controllers\v1\Inventory;
 
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
-use App\Services\Inventory\InventoryService;
 use Dingo\Api\Http\Request;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Http\Requests\Inventory\GetInventoryRequest;
 use App\Transformers\Inventory\InventoryTransformer;
 
 class InventoryController extends RestfulController
 {
-    /**
-     * @var InventoryService
-     */
-    protected $inventoryService;
+
+    protected $inventoryRepository;
 
     /**
      * Create a new controller instance.
      *
-     * @param InventoryService $inventoryService
+     * @param InventoryRepositoryInterface $inventoryRepository
      */
-    public function __construct(InventoryService $inventoryService)
+    public function __construct(InventoryRepositoryInterface $inventoryRepository)
     {
-        $this->inventoryService = $inventoryService;
+        $this->inventoryRepository = $inventoryRepository;
     }
 
     /**
      * @OA\Get(
      *     path="/api/inventory",
      *     description="Retrieve a list of inventory",
+
      *     tags={"Inventory"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -62,15 +61,12 @@ class InventoryController extends RestfulController
      *         description="Error: Bad request.",
      *     ),
      * )
-     *
-     * @param Request $request
-     * @return \Dingo\Api\Http\Response|void
      */
     public function index(Request $request) {
         $request = new GetInventoryRequest($request->all());
 
         if ( $request->validate() ) {
-            return $this->response->paginator($this->inventoryService->getAll($request->all()), new InventoryTransformer());
+            return $this->response->paginator($this->inventoryRepository->getAll($request->all(), true, true), new InventoryTransformer());
         }
 
         return $this->response->errorBadRequest();
@@ -103,7 +99,7 @@ class InventoryController extends RestfulController
      * @return \Dingo\Api\Http\Response
      */
     public function show(int $id) {
-        return $this->response->item($this->inventoryService->get($id), new InventoryTransformer());
+        return $this->response->item($this->inventoryRepository->get(['id' => $id]), new InventoryTransformer());
     }
 
     /**
@@ -133,7 +129,7 @@ class InventoryController extends RestfulController
     {
         $request = new DeleteInventoryRequest(['id' => $id]);
 
-        if ($request->validate() && $this->inventoryService->delete($id)) {
+        if ($request->validate() && $this->inventoryRepository->delete(['id' => $id])) {
             return $this->response->noContent();
         }
 
