@@ -1,11 +1,16 @@
 <?php
 
-use Illuminate\Database\Seeder;
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class InventoryCategorySeeder extends Seeder
+class AddNewInventoryCategories extends Migration
 {
-    public function run()
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
     {
         DB::table('inventory_category')->truncate();
 
@@ -151,5 +156,15 @@ class InventoryCategorySeeder extends Seeder
             ['entity_type_id' => 10, 'category' => 'trailer.garage_carport', 'label' => 'Garage/Carport', 'legacy_category' => 'garage_carport'],
             ['entity_type_id' => 10, 'category' => 'trailer.other', 'label' => 'Other', 'legacy_category' => 'other'],
         ]);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        //
     }
 }
