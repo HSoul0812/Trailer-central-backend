@@ -24,6 +24,11 @@ class AutoAssignEmail extends Mailable
     {
         $this->data     = $data;
         $this->subject  = $this->getSubject($data);
+        $this->callbacks[] = function ($message) use ($data) {
+            if(isset($data['id'])) {
+                $message->getHeaders()->get('Message-ID')->setId($data['id']);
+            }
+        };
     }
 
     /**

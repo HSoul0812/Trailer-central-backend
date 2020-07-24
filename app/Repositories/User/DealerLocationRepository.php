@@ -48,10 +48,9 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
     public function findAllDealerSmsNumbers($dealerId)
     {
         // Get All Dealer Location SMS Numbers
-        return DealerLocation::get(['sms_phone', 'dealer_location_id'])
-            ->where('dealer_id', $dealerId)
-            ->whereNotNull('sms_phone')
-            ->all();
+        return DealerLocation::where('dealer_id', $dealerId)
+                                ->whereNotNull('sms_phone')
+                                ->get();
     }
 
     /**

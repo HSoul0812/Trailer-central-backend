@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Text;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
 use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
@@ -115,11 +116,14 @@ class TextRepository implements TextRepositoryInterface {
         $lead = Lead::findOrFail($leadId);
         $fullName = $lead->newDealerUser()->first()->crmUser->full_name;
 
-        // Get From/To Numbers
+        // Get To Numbers
         $to_number = $lead->text_phone;
-        $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+        if(empty($to_number)) {
+            throw new NoLeadSmsNumberAvailableException();
+        }
 
-        // No From Number?!
+        // Get From Number
+        $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
         if(empty($from_number)) {
             throw new NoDealerSmsNumberAvailableException();
         }

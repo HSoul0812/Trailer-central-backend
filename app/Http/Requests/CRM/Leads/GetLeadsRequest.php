@@ -13,6 +13,8 @@ class GetLeadsRequest extends Request {
         'lead_status' => 'array',
         'lead_status.*' => 'lead_status_valid',
         'sales_person_id' => 'sales_person_valid',
+        'search_term' => 'string',
+        'customer_name' => 'string',
         'is_archived' => 'in:0,1',
         'location' => 'exists:dealer_location,dealer_location_id',
         'date_from' => 'date',

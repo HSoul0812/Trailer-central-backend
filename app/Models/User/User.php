@@ -4,8 +4,8 @@ namespace App\Models\User;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\Lead;
+use App\Models\User\DealerUser;
 use App\Models\User\AuthToken;
 
 /**
@@ -107,16 +107,25 @@ class User extends Model implements Authenticatable
         return $authToken->access_token;
     }
 
-    public function crmUser()
+    /**
+     * Get new dealer user
+     */
+    public function newDealerUser()
     {
-        return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
+        return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
     }
 
-    public function salesPerson()
+    /**
+     * Get dealer users
+     */
+    public function dealerUsers()
     {
-        return $this->hasOne(SalesPerson::class, 'user_id', 'user_id');
+        return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
     }
-    
+
+    /**
+     * Get leads
+     */
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
