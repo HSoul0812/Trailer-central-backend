@@ -98,3 +98,13 @@
 3. Define processes/business logic in `Services`. This way you can reuse code in controllers, jobs, events, etc. 
 4. Define asynchronous tasks/long-running tasks in `Jobs`. Even better, in `Services` wrapped in `Jobs`. 
 5. Define data operations in `Repositories`. `Repositories` may contain more than just CRUD operations.
+
+## Tests
+
+1. Put unit tests under `tests/Unit` and feature tests under `tests/Feature`. 
+2. (Directory structures under `Unit` and `Feature` TBD).
+3. (Coverage of code to test TBD).
+4. The namespace root for tests is `Tests` and is located in the `tests/` directory.
+5. Feature test classes should extend `Tests\TestCase`.
+6. Unit test classes can extend `PHPUnit\Framework\TestCase`, since unit tests do not need the Application instance.
+7. Run tests by running `./vendor/bin/phpunit` (all), `./vendor/bin/phpunit --testsuite Unit` (unit tests only), `./vendor/bin/phpunit --testsuite Feature` (feature tests only) 
