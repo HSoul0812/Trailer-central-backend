@@ -17,6 +17,8 @@ class Inventory extends Model
 
     const TABLE_NAME = 'inventory';
 
+    const COLOR_ATTRIBUTE_ID = 11;
+
     /**
      * The table associated with the model.
      *
@@ -106,6 +108,20 @@ class Inventory extends Model
     public function lotVantageInventory()
     {
         return $this->hasOne(DealerInventory::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function getColorAttribute()
+    {
+        $color = self::select('*')
+            ->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')
+            ->where('inventory.inventory_id', $this->inventory_id)
+            ->where('eav_attribute_value.attribute_id', self::COLOR_ATTRIBUTE_ID)
+            ->first();
+        if ($color) {
+            return $color->value;
+        }
+
+        return null;
     }
 
     public function __toString() {
