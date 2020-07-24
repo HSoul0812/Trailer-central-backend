@@ -9,7 +9,8 @@ class CustomerTransformer extends TransformerAbstract
 
     public function transform($customer)
     {           
-        return [
+        return [ 
+            'id' => $customer->id,
             'name' => trim($customer->first_name)." ".trim($customer->last_name)
         ];
     }

@@ -131,6 +131,10 @@ $api->version('v1', function ($route) {
      * Inventory Manufacturers
      */
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+    /**
+     * Inventory Categories
+     */
+    $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
 
     /**
      * Inventory
@@ -204,10 +208,9 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'interaction.validate'], function ($route) {
         $route->get('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@create')->where('leadId', '[0-9]+');
-        $route->put('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
+        $route->post('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
         $route->get('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@destroy')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
@@ -316,7 +319,9 @@ $api->version('v1', function ($route) {
 
     $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
+    $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
+    $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
     /*
     |--------------------------------------------------------------------------

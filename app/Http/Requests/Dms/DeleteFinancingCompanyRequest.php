@@ -13,16 +13,28 @@ class DeleteFinancingCompanyRequest extends Request
         'id' => 'required|integer'
     ];
 
+    /**
+     * Used by Request::validate() `this->getObject()`
+     */
     protected function getObject()
     {
         return new FinancingCompany();
     }
 
-    protected function getObjectIdValue() {
+    /**
+     * Used by Request::validate() `$this->getObject()`
+     */
+    protected function getObjectIdValue()
+    {
         return $this->input('id');
     }
 
-    protected function validateObjectBelongsToUser() {
+    /**
+     * Tells if request should check if object belongs to requesting user
+     * Used by Request::validate() `$this->getObject()`
+     */
+    protected function validateObjectBelongsToUser()
+    {
         return true;
     }
 

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\CRM\Leads;
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\CRM\Leads\GetLeadsStatusRequest;
+use App\Http\Requests\CRM\Leads\GetLeadsTypeRequest;
 
 class LeadTypeController extends RestfulController
 {
@@ -14,7 +14,7 @@ class LeadTypeController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param Repository $interactions
+     * @param Repository $leads
      */
     public function __construct(LeadRepositoryInterface $leads)
     {
@@ -22,7 +22,7 @@ class LeadTypeController extends RestfulController
     }
 
     public function index(Request $request) {
-        $request = new GetLeadsStatusRequest($request->all());
+        $request = new GetLeadsTypeRequest($request->all());
         $requestData = $request->all();
 
         if ($request->validate()) {             

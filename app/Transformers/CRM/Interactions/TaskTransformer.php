@@ -29,7 +29,7 @@ class TaskTransformer extends TransformerAbstract
            'lead' => $this->leadTransformer->transform($interaction->lead),
            'notes' => $interaction->interaction_notes,
            'id' => $interaction->interaction_id,
-           'contact_name' => "{$interaction->lead->first_name} {$interaction->lead->last_name}",
+           'contact_name' => $interaction->lead->getFullNameAttribute(),
            'sales_person' => $interaction->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($interaction->leadStatus->salesPerson) : null
         ];
     }
