@@ -8,7 +8,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
 use App\Console\Commands\RunBulkUploadCommand;
 use App\Console\Commands\ReplaceYoutubeEmbeds;
-use App\Console\Commands\AdjustFeetAndInches;
+use App\Console\Commands\Inventory\AdjustFeetAndInches;
 use App\Console\Commands\User\CreateAccessToken;
 
 class Kernel extends ConsoleKernel
