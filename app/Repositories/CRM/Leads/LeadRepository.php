@@ -139,7 +139,7 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        return Lead::findOrFail($params['id']);
     }
 
     public function getAll($params) {

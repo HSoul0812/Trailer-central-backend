@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use App\Models\CRM\Leads\LeadAssign;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 use App\Policies\DealerIncomingPendingMappingPolicy;
+use App\Policies\LeadAssignPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         DealerIncomingPendingMapping::class => DealerIncomingPendingMappingPolicy::class,
+        LeadAssign::class => LeadAssignPolicy::class,
     ];
 
     /**

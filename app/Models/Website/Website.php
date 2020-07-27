@@ -5,6 +5,7 @@ namespace App\Models\Website;
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Website\Blog\Post;
+use App\Models\User\User;
 
 class Website extends Model
 {
@@ -12,6 +13,11 @@ class Website extends Model
 
     protected $table = 'website';
 
+    public function dealer()
+    {
+        return $this->hasOne(User::class, 'dealer_id', 'dealer_id');
+    }
+    
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
