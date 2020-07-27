@@ -11,3 +11,4 @@ auth.json
 /storage
 node_modules
 .vscode/
+.phpunit.result.cache
