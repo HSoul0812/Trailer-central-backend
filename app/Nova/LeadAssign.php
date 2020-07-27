@@ -3,11 +3,9 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
-use App\Models\CRM\Leads\LeadAssign;
 
-class LeadAssign extends Resource
+class LeadAssign extends Resource 
 {
     /**
      * The model the resource corresponds to.
