@@ -99,8 +99,6 @@ class AutoAssign extends Command
             $dealerNotes = array();
             $dealerNotes[] = 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign';
             $dealerNotes[] = 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
-            var_dump($dealer->crmUser);
-            die;
 
             // Loop Leads for Current Dealer
             foreach($leads as $lead) {
