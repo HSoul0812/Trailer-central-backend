@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\v1\Inventory;
 
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
+use App\Services\Inventory\InventoryService;
 use Dingo\Api\Http\Request;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Http\Requests\Inventory\GetInventoryRequest;
@@ -11,17 +13,26 @@ use App\Transformers\Inventory\InventoryTransformer;
 
 class InventoryController extends RestfulController
 {
-
+    /**
+     * @var InventoryRepositoryInterface
+     */
     protected $inventoryRepository;
+
+    /**
+     * @var InventoryService
+     */
+    protected $inventoryService;
 
     /**
      * Create a new controller instance.
      *
      * @param InventoryRepositoryInterface $inventoryRepository
+     * @param InventoryService $inventoryService
      */
-    public function __construct(InventoryRepositoryInterface $inventoryRepository)
+    public function __construct(InventoryRepositoryInterface $inventoryRepository, InventoryService $inventoryService)
     {
         $this->inventoryRepository = $inventoryRepository;
+        $this->inventoryService = $inventoryService;
     }
 
     /**
@@ -103,6 +114,20 @@ class InventoryController extends RestfulController
     }
 
     /**
+     * @param Request $request
+     */
+    public function create(Request $request)
+    {
+        $request = new CreateInventoryRequest($request->all());
+
+        if ($request->validate() && $this->inventoryService->create($request->all())) {
+            return true;
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
      * @OA\Delete(
      *     path="/api/inventory/{id}",
      *     description="Delete a item",
@@ -124,6 +149,9 @@ class InventoryController extends RestfulController
      *         description="Error: Bad request.",
      *     ),
      * )
+     *
+     * @param int $id
+     * @return \Dingo\Api\Http\Response|void
      */
     public function destroy(int $id)
     {
