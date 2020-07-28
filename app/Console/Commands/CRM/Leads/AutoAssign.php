@@ -82,8 +82,6 @@ class AutoAssign extends Command
 
         // Get Dealers With Valid Salespeople
         $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
-        var_dump($dealers);
-        die;
         foreach($dealers as $dealer) {
             // Get Unassigned Leads
             $leads = $this->leadRepository->getAllUnassigned([
@@ -101,6 +99,8 @@ class AutoAssign extends Command
             $dealerNotes = array();
             $dealerNotes[] = 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign';
             $dealerNotes[] = 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
+            echo 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
+            continue;
 
             // Loop Leads for Current Dealer
             foreach($leads as $lead) {
@@ -150,6 +150,7 @@ class AutoAssign extends Command
                 $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
 
                 // Skip Entry!
+                continue;
                 if(empty($salesPerson->id)) {
                     $notes[] = 'Couldn\'t Find Salesperson ID to Assign Lead #' . $lead->identifier . ' to, skipping temporarily!';
                     $status = 'skipped';
