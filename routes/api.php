@@ -458,6 +458,17 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Purchase Orders
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        // Purchase Order Receipts
+        $route->get('po-receipts', 'App\Http\Controllers\v1\Dms\PurchaseOrder\PurchaseOrderReceiptController@index');
+
+        /*
+        |--------------------------------------------------------------------------
         | Financing companies
         |--------------------------------------------------------------------------
         |
