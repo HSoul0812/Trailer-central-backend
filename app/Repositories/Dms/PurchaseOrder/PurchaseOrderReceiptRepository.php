@@ -4,7 +4,7 @@ namespace App\Repositories\Dms\PurchaseOrder;
 
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Dms\PurchaseOrderReceipt;
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderReceipt;
 
 /**
  * @author Marcel

@@ -14,4 +14,15 @@ use Illuminate\Database\Eloquent\Model;
 class Item extends Model
 {
     protected $table = 'qb_items';
+
+    const ITEM_TYPES = [
+        'TRAILER' => 'trailer',
+        'PART' => 'part',
+        'LABOR' => 'labor',
+        'ADD_ON' => 'add_on',
+        'DISCOUNT' => 'discount',
+        'TAX' => 'tax',
+        'DOWN_PAYMENT' => 'down_payment',
+        'UNDEFINED' => 'undefined'
+    ];
 }

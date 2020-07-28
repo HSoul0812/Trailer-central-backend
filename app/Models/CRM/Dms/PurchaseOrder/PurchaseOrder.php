@@ -1,16 +1,16 @@
 <?php
 
 
-namespace App\Models\CRM\Dms;
+namespace App\Models\CRM\Dms\PurchaseOrder;
 
 
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\CRM\Dms\PurchaseOrderReceipt;
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderReceipt;
 
 /**
  * Class PurchaseOrder
- * @package App\Models\CRM\Dms
+ * @package App\Models\CRM\Dms\PurchaseOrder
  */
 class PurchaseOrder extends Model
 {
