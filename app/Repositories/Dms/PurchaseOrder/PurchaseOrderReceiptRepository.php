@@ -32,7 +32,7 @@ class PurchaseOrderReceiptRepository implements PurchaseOrderReceiptRepositoryIn
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        return PurchaseOrderReceipt::findOrFail($params['id']);
     }
 
     public function getAll($params) {

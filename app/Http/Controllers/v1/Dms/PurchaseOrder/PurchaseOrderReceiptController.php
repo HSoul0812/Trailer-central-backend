@@ -7,6 +7,7 @@ use Dingo\Api\Http\Request;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 use App\Transformers\Dms\PurchaseOrder\PurchaseOrderReceiptTransformer;
 use App\Http\Requests\Dms\PurchaseOrder\GetPoReceiptRequest;
+use App\Http\Requests\Dms\PurchaseOrder\ShowPoReceiptRequest;
 
 /**
  * @author Marcel
@@ -15,6 +16,8 @@ class PurchaseOrderReceiptController extends RestfulController
 {
     
     protected $poReceiptRepository;
+
+    protected $poReceiptTransformer;
     
     /**
      * Create a new controller instance.
@@ -25,6 +28,7 @@ class PurchaseOrderReceiptController extends RestfulController
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->poReceiptRepository = $poReceiptRepository;
+        $this->poReceiptTransformer = new PurchaseOrderReceiptTransformer();
     }
     
     /**
@@ -76,7 +80,18 @@ class PurchaseOrderReceiptController extends RestfulController
         $request = new GetPoReceiptRequest($request->all());
         
         if ($request->validate()) {
-          return $this->response->paginator($this->poReceiptRepository->getAll($request->all()), new PurchaseOrderReceiptTransformer);
+          return $this->response->paginator($this->poReceiptRepository->getAll($request->all()), $this->poReceiptTransformer);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function show($id)
+    {
+        $request = new ShowPoReceiptRequest(['id' => $id]);
+        
+        if ( $request->validate() ) {
+            return $this->response->item($this->poReceiptRepository->get(['id' => $id]), $this->poReceiptTransformer);
         }
         
         return $this->response->errorBadRequest();

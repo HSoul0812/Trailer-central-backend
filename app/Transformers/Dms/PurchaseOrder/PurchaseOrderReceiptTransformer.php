@@ -15,7 +15,7 @@ class PurchaseOrderReceiptTransformer extends TransformerAbstract
             'purchase_order' => $poReceipt->purchaseOrder,
             'ref_num' => $poReceipt->ref_num,
             'memo' => $poReceipt->memo,
-            'created_at' => $poReceipt->created_at
+            'created_at' => $poReceipt->created_at,
         ];
     }
 } 
