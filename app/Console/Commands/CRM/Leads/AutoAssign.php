@@ -81,7 +81,7 @@ class AutoAssign extends Command
         $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
 
         // Get Dealers With Valid Salespeople
-        $dealers = NewDealerUser::has('crmUser')->has('salespeopleEmails')->with('crmUser')->with('salespeopleEmails')->get();
+        $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
         foreach($dealers as $dealer) {
             // Get Unassigned Leads
             $leads = $this->leadRepository->getAllUnassigned([
