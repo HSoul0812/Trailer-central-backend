@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\DateTime;
 
 class LeadAssign extends Resource 
 {
@@ -37,19 +38,19 @@ class LeadAssign extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Dealer')
+            Text::make('Dealer', 'dealer_id')
                 ->sortable(),
 
-            Text::make('Lead')
+            Text::make('Lead', 'lead_id')
                 ->sortable(),
 
-            Text::make('Location'),
+            Text::make('Location', 'dealer_location_id'),
 
             Text::make('Salesperson Type'),
 
-            Text::make('Found'),
+            Text::make('Found', 'found_salesperson_id'),
 
-            Text::make('Assigned')
+            Text::make('Assigned', 'chosen_salesperson_id')
                 ->sortable(),
 
             Text::make('Assigned By')
@@ -61,7 +62,8 @@ class LeadAssign extends Resource
             Text::make('Explanation')
                 ->hideFromIndex(),
 
-            Text::make('Created At')
+            DateTime::make('Created At')
+                ->format('MM-DD-YYYY hh:mm:ss')
                 ->sortable(),
         ];
     }
