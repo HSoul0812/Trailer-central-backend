@@ -31,6 +31,16 @@ class LeadAssign extends Resource
     public static $search = [];
 
     /**
+     * Authorizable to Ensure Edit/Delete Can Be Disabled
+     * 
+     * @return boolean true
+     */
+    public static function authorizable()
+    {
+        return true;
+    }
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -48,6 +58,45 @@ class LeadAssign extends Resource
             Text::make('Location', 'dealer_location_id'),
 
             Text::make('Salesperson Type'),
+
+            Text::make('Found', 'found_salesperson_id'),
+
+            Text::make('Assigned', 'chosen_salesperson_id')
+                ->sortable(),
+
+            Text::make('Assigned By')
+                ->sortable(),
+
+            Text::make('Status')
+                ->sortable(),
+
+            Textarea::make('Explanation')
+                ->hideFromIndex(),
+
+            DateTime::make('Created At')
+                ->format('MM-DD-YYYY hh:mm:ss')
+                ->sortable(),
+        ];
+    }
+
+    /**
+     * Get the fields for index
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function fieldsForIndex(Request $request)
+    {
+        return [
+            Text::make('Dealer', 'dealer_id')
+                ->sortable(),
+
+            Text::make('Lead', 'lead_id')
+                ->sortable(),
+
+            Text::make('Location', 'dealer_location_id'),
+
+            Text::make('Type', 'salesperson_type'),
 
             Text::make('Found', 'found_salesperson_id'),
 
