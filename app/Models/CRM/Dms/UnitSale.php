@@ -47,7 +47,7 @@ class UnitSale extends Model implements GenericSaleInterface
 
     public function invoice()
     {
-        return $this->hasOne(Invoice::class, 'unit_sale_id');
+        return $this->hasMany(Invoice::class, 'unit_sale_id');
     }
 
     public function payments()

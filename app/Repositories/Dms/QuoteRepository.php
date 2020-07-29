@@ -87,7 +87,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
                         ->where('is_archived', '=', 0)
                         ->whereHas('payments', function($query) {
                             $query->select(DB::raw('sum(amount) as paid_amount'))
-                                ->groupBy('invoice_id')
+                                ->groupBy('unit_sale_id')
                                 ->havingRaw('paid_amount < dms_unit_sale.total_price');
                         });
                     break;
@@ -96,7 +96,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
                         ->where('is_archived', '=', 0)
                         ->whereHas('payments', function($query) {
                             $query->select(DB::raw('sum(amount) as paid_amount'))
-                                ->groupBy('invoice_id')
+                                ->groupBy('unit_sale_id')
                                 ->havingRaw('paid_amount >= dms_unit_sale.total_price');
                         });
                     break;
@@ -126,16 +126,16 @@ class QuoteRepository implements QuoteRepositoryInterface {
                     });
             });
         }
-        $groupedPayments = Payment::select('invoice_id', DB::raw('SUM(amount) as paid_amount'))
-            ->groupBy('invoice_id');
+        $groupedPayments = Payment::select('unit_sale_id', DB::raw('SUM(amount) as paid_amount'))
+            ->leftJoin('qb_invoices', 'qb_payment.invoice_id', '=', 'qb_invoices.id')
+            ->groupBy('qb_invoices.unit_sale_id');
         return $query->select(
                 DB::raw('sum(dms_unit_sale.total_price) as totalFrontGross, count(*) as totalQty,
                     IF(COALESCE(group_payment.paid_amount, 0) > 0, 1, 0) AS deal,
                     IF(dms_unit_sale.total_price - COALESCE(group_payment.paid_amount, 0) > 0, 0, 1) AS completed_deal')
             )
-            ->leftJoin('qb_invoices', 'dms_unit_sale.id', '=', 'qb_invoices.unit_sale_id')
             ->leftJoinSub($groupedPayments, 'group_payment', function ($join) {
-                $join->on('qb_invoices.id', '=', 'group_payment.invoice_id');
+                $join->on('dms_unit_sale.id', '=', 'group_payment.unit_sale_id');
             })
             ->where('dms_unit_sale.is_archived', '=', 0)
             ->groupBy(DB::raw('CASE WHEN group_payment.paid_amount THEN 1 ELSE 0 END, CASE WHEN dms_unit_sale.total_price - group_payment.paid_amount > 0 THEN 0 ELSE 1 END'))
