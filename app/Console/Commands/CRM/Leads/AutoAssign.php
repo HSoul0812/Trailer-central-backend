@@ -107,6 +107,7 @@ class AutoAssign extends Command
                     'dealer_id' => $dealer->id
                 ]);
                 Log::info("{$command} dealer #{$dealer->id} found " . count($leads) . " to process");
+                echo "{$command} dealer #{$dealer->id} found " . count($leads) . " to process" . PHP_EOL;
                 if(count($leads) < 1) {
                     continue;
                 }
@@ -118,7 +119,6 @@ class AutoAssign extends Command
                 $dealerNotes = array();
                 $dealerNotes[] = 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign';
                 $dealerNotes[] = 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
-                echo 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
 
                 // Loop Leads for Current Dealer
                 foreach($leads as $lead) {
