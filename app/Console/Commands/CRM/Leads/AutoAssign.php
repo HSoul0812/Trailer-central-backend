@@ -96,8 +96,8 @@ class AutoAssign extends Command
             } else {
                 $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
             }
-            Log::info("{$command} found " . count($dealers) . " to process");
-            echo "{$command} found " . count($dealers) . " to process" . PHP_EOL;
+            Log::info("{$command} found " . count($dealers) . " dealers to process");
+            echo "{$command} found " . count($dealers) . " dealers to process" . PHP_EOL;
 
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
@@ -118,6 +118,7 @@ class AutoAssign extends Command
                 $dealerNotes = array();
                 $dealerNotes[] = 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign';
                 $dealerNotes[] = 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
+                echo 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
 
                 // Loop Leads for Current Dealer
                 foreach($leads as $lead) {
