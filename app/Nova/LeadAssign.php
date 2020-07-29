@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\TextArea;
 use Laravel\Nova\Fields\DateTime;
 
 class LeadAssign extends Resource 
@@ -59,7 +60,7 @@ class LeadAssign extends Resource
             Text::make('Status')
                 ->sortable(),
 
-            Text::make('Explanation')
+            TextArea::make('Explanation')
                 ->hideFromIndex(),
 
             DateTime::make('Created At')
