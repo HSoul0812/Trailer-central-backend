@@ -14,4 +14,10 @@ interface UserRepositoryInterface extends Repository {
      */
     public function findUserByEmailAndPassword($email, $password);
     
+    /**
+     * Returns dealers who have the dms active
+     * @return Collection
+     */
+    public function getDmsActiveUsers();
+    
 }
