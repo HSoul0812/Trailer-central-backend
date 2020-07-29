@@ -131,6 +131,10 @@ $api->version('v1', function ($route) {
      * Inventory Manufacturers
      */
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+    /**
+     * Inventory Categories
+     */
+    $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
 
     /**
      * Inventory
@@ -340,6 +344,7 @@ $api->version('v1', function ($route) {
         */
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
+        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
 
@@ -450,6 +455,18 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('payments/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Purchase Orders
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        // Purchase Order Receipts
+        $route->get('po-receipts', 'App\Http\Controllers\v1\Dms\PurchaseOrder\PurchaseOrderReceiptController@index');
+        $route->get('po-receipts/{id}', 'App\Http\Controllers\v1\Dms\PurchaseOrder\PurchaseOrderReceiptController@show');
 
         /*
         |--------------------------------------------------------------------------

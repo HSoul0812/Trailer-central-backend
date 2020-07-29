@@ -94,7 +94,7 @@ class AutoAssign extends Command
                 $dealer = NewDealerUser::findOrFail($dealerId);
                 $dealers[] = $dealer;
             } else {
-                $dealers = NewDealerUser::has('crmUser')->has('salespeopleEmails')->with('crmUser')->with('salespeopleEmails')->get();
+                $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
             }
             Log::info("{$command} found " . count($dealers) . " to process");
             echo "{$command} found " . count($dealers) . " to process\n";
@@ -202,11 +202,11 @@ class AutoAssign extends Command
                             $status = 'assigning';
                             $notes[] = 'Assigning Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName;
                             Log::info("{$command} assigning next sales person {$salesPerson->id} for lead {$leadName}");
-                            /*$this->leadRepository->update([
+                            $this->leadRepository->update([
                                 'id' => $lead->identifier,
                                 'sales_person_id' => $salesPerson->id,
                                 'next_contact_date' => $nextContactGmt
-                            ]);*/
+                            ]);
 
                             // Finish Assigning
                             $status = 'assigned';

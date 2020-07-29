@@ -2,7 +2,15 @@
 
 namespace Tests;
 
-abstract class TestCase extends \Laravel\Lumen\Testing\TestCase
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+
+abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+
+    protected function accessToken()
+    {
+        return env('TESTS_DEFAULT_ACCESS_TOKEN', '123');
+    }
+
 }

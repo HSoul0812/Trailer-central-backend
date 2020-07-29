@@ -6,8 +6,13 @@ use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Leads\Lead;
 use App\Transformers\Inventory\InventoryTransformer;
 use Illuminate\Database\Eloquent\Collection;
+use App\Transformers\User\DealerLocationTransformer;
 
 class LeadTransformer extends TransformerAbstract {
+    
+    protected $defaultIncludes = [
+        'preferredLocation'
+    ];
     
     protected $inventoryTransformer;
     
@@ -23,12 +28,11 @@ class LeadTransformer extends TransformerAbstract {
      * @return type
      */
     public function transform(Lead $lead)
-    {
+    {        
         $transformedLead =  [
             'id' => $lead->identifier,
             'website_id' => $lead->website_id,
             'dealer_id' => $lead->dealer_id,
-            'preferred_location' => $lead->preferred_location,
             'name' => $lead->full_name,
             'lead_types' => $lead->lead_types,
             'inventory_interested_in' => $lead->units ? $this->transformInventory($lead->units) : [],
@@ -53,6 +57,15 @@ class LeadTransformer extends TransformerAbstract {
         }
 
         return $transformedLead;
+    }
+    
+    public function includePreferredLocation($lead)
+    {
+        if (empty($lead->preferred_dealer_location)) {
+            return null;
+        }
+        
+        return $this->item($lead->preferred_dealer_location, new DealerLocationTransformer());
     }
     
     private function transformInventory(Collection $inventory)

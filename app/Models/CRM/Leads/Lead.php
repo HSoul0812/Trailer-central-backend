@@ -160,7 +160,7 @@ class Lead extends Model
     {
         return $this->hasMany(UnitSale::class, 'lead_id', 'identifier');
     }
-
+ 
     /**
      * Get Dealer location
      */
@@ -249,7 +249,7 @@ class Lead extends Model
         // Return Full Array
         return $inventoryIds;
     }
-
+    
     /**
      * Get the user's full name.
      *
@@ -323,6 +323,15 @@ class Lead extends Model
         } else {
             return null;
         }
+    }
+    
+    public function getPreferredDealerLocationAttribute()
+    {
+        if (empty($this->preferred_location)) {
+            return null;
+        }
+               
+        return DealerLocation::where('dealer_location_id', $this->preferred_location)->first();
     }
 
     /**

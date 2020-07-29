@@ -75,6 +75,14 @@ class NewDealerUser extends Model
     }
 
     /**
+     * Get active crm user
+     */
+    public function activeCrmUser()
+    {
+        return $this->crmUser()->where('active', 1);
+    }
+
+    /**
      * Get dealer locations
      */
     public function location()
