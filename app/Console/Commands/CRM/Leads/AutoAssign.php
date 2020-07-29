@@ -86,7 +86,7 @@ class AutoAssign extends Command
             $now = $this->datetime->format("l, F jS, Y");
             $command = "leads:assign:auto" . (!empty($dealerId) ? ' ' . $dealerId : '');
             Log::info("{$command} started {$now}");
-            echo "{$command} started {$now}";
+            echo "{$command} started {$now}" . PHP_EOL;
 
             // Handle Dealer Differently
             $dealers = array();
@@ -97,7 +97,7 @@ class AutoAssign extends Command
                 $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
             }
             Log::info("{$command} found " . count($dealers) . " to process");
-            echo "{$command} found " . count($dealers) . " to process\n";
+            echo "{$command} found " . count($dealers) . " to process" . PHP_EOL;
 
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
@@ -277,7 +277,7 @@ class AutoAssign extends Command
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
         Log::info("{$command} finished on " . $datetime->format("l, F jS, Y"));
-        echo "{$command} finished on " . $datetime->format("l, F jS, Y");
+        echo "{$command} finished on " . $datetime->format("l, F jS, Y") . PHP_EOL . PHP_EOL;
     }
 
     /**
