@@ -333,7 +333,12 @@ class Lead extends Model
             return null;
         }
     }
-    
+
+    /**
+     * Preferred Dealer Location Attribute
+     * 
+     * @return null|DealerLocation
+     */
     public function getPreferredDealerLocationAttribute()
     {
         if (empty($this->preferred_location)) {

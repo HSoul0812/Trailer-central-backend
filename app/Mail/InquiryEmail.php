@@ -44,11 +44,12 @@ class InquiryEmail extends Mailable
         $data['year']      = date('Y');
         $data['bgcolor']   = (($data['website'] === 'trailertrader.com') ? '#ffff00': '#ffffff');
         $data['bgheader']  = (($data['website'] === 'trailertrader.com') ? '#00003d': 'transparent');
+        $data['subject']   = $this->getSubject($data);
 
         // Prepare Email Data
         $this->data        = $data;
         $this->inquiryType = $this->getInquiryType($data);
-        $this->subject     = $this->getSubject($data);
+        $this->subject     = $data['subject'];
         $this->callbacks[] = function ($message) use ($data) {
             if(isset($data['id'])) {
                 $message->getHeaders()->get('Message-ID')->setId($data['id']);

@@ -70,7 +70,22 @@
 
 @if (!empty($is_spam))
     <div style='width: 650px; margin: 0 auto; background: #ffeb3b; color: #000; border: 1px solid #333; padding: 10px; font-family: monospace'>
-        {{ $admin_msg }}
+
+        <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE -- SCORE: {{ $all_failures_count }}</strong><br />
+
+        <strong>Remote IP:</strong> {{ $remote_ip }}
+        @if (!empty($forwarded_for)
+            / Visible Proxy: {{ $forwarded_for }}
+        @endif
+        </strong><br/>
+
+        <strong>Matched Rules:</strong> {{ $all_failures }}<br/>
+
+        <strong>Original Recipients:</strong> {{ $original_contact_list }}
+
+        <strong>Not Spam?</strong> <a href="{{ $resend_url }}">Send to original recipients anyway</a>
+        <span style="color: #888">(expires after 7 days)</span>
+
     </div>
 @endif
 
