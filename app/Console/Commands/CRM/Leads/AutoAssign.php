@@ -167,6 +167,8 @@ class AutoAssign extends Command
                         $notes[] = 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType;
                         Log::info("{$command} found newest sales person {$newestSalesPerson->id} for dealer {$dealer->id} and salesperson type {$salesType}");
                     }
+                    echo "{$command} found newest sales person {$newestSalesPerson->id} for " .
+                            "lead {$leadName}, location {$dealerLocationId}, type {$salesType}";
 
                     // Find Next Salesperson
                     $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
