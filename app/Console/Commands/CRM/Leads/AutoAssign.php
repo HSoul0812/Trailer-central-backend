@@ -168,7 +168,7 @@ class AutoAssign extends Command
                         Log::info("{$command} found newest sales person {$newestSalesPerson->id} for dealer {$dealer->id} and salesperson type {$salesType}");
                     }
                     echo "{$command} found newest sales person {$newestSalesPerson->id} for " .
-                            "lead {$leadName}, location {$dealerLocationId}, type {$salesType}";
+                            "lead {$leadName}, location {$dealerLocationId}, type {$salesType}" . PHP_EOL;
 
                     // Find Next Salesperson
                     $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
@@ -215,7 +215,7 @@ class AutoAssign extends Command
                             $notes[] = 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName;
                             Log::info("{$command} assigned next sales person {$salesPerson->id} for lead {$leadName}");
                             echo "{$command} assigned next sales person {$salesPerson->id} for " .
-                                    "lead {$leadName}, location {$dealerLocationId}, type {$salesType}";
+                                    "lead {$leadName}, location {$dealerLocationId}, type {$salesType}" . PHP_EOL;
 
                             // Send Sales Email
                             if(!empty($dealer->crmUser->enable_assign_notification)) {
