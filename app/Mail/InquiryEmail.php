@@ -23,12 +23,13 @@ class InquiryEmail extends Mailable
     /**
      * @var array
      */
-    private $validInquiryTypes = array(
+    const INQUIRY_TYPES = array(
         'general',
         'cta',
         'inventory',
         'part',
         'showroom',
+        'call',
         'sms'
     );
 
@@ -39,6 +40,12 @@ class InquiryEmail extends Mailable
      */
     public function __construct(array $data)
     {
+        // Set Extra Vars
+        $data['year']      = date('Y');
+        $data['bgcolor']   = (($data['website'] === 'trailertrader.com') ? '#ffff00': '#ffffff');
+        $data['bgheader']  = (($data['website'] === 'trailertrader.com') ? '#00003d': 'transparent');
+
+        // Prepare Email Data
         $this->data        = $data;
         $this->inquiryType = $this->getInquiryType($data);
         $this->subject     = $this->getSubject($data);
@@ -65,8 +72,7 @@ class InquiryEmail extends Mailable
             $build->replyTo($this->data['replyToEmail'], $this->data['replyToName']);
         }
 
-        $build->view('emails.leads.inquiry-' . $this->inquiryType . '-email')
-            ->text('emails.leads.inquiry-' . $this->inquiryType . '-email-plain');
+        $build->getInquiryView();
 
         $build->with($this->data);
 
@@ -78,10 +84,10 @@ class InquiryEmail extends Mailable
      * 
      * @param array $data
      */
-    public function getInquiryType($data) {
+    private function getInquiryType($data) {
         // Get Type
         $type = $data['inquiry_type'];
-        if(!in_array($type, $this->validInquiryTypes)) {
+        if(!in_array($type, self::INQUIRY_TYPES)) {
             $type = $this->inquiryType;
         }
 
@@ -90,13 +96,35 @@ class InquiryEmail extends Mailable
     }
 
     /**
+     * Get Inquiry Views
+     * 
+     * @return type
+     */
+    private function getInquiryView() {
+        // Check Type
+        $view = $this->inquiryType;
+
+        // CTA Must be General!
+        if($view === 'cta') {
+            $view = 'general';
+        }
+
+        // Set Templates
+        return $this->view('emails.leads.inquiry-' . $view)
+                    ->text('emails.leads.inquiry-' . $view . '-plain');
+    }
+
+    /**
      * Build Subject
      * 
      * @param array $data
      */
-    public function getSubject($data) {
+    private function getSubject($data) {
         // Initialize
         switch($this->inquiryType) {
+            case "call":
+                $subject = "You Just Received a Click to Call From %s";
+                return sprintf($subject, trim($data['first_name'] . ' ' . $data['last_name']));
             case "inventory":
                 $subject = 'Inventory Information Request on %s';
             break;
@@ -110,6 +138,9 @@ class InquiryEmail extends Mailable
                 $subject = "New CTA Response on %s";
             break;
             case "sms":
+                $subject = "New SMS Sent on %s";
+            break;
+            default:
                 $subject = "New SMS Sent on %s";
             break;
         }

@@ -382,7 +382,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Valid Lead?!
         if(!empty($lead->identifier)) {
-            
+            $this->inquiry->send($lead->identifier);
         }
 
         // Return Lead

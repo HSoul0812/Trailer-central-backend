@@ -98,7 +98,7 @@ class LeadController extends RestfulController
      * @param Request $request
      * @return type
      */
-    public function inquire(Request $request) {
+    public function inquiry(Request $request) {
         $request = new InquiryLeadRequest($request->all());
 
         if ($request->validate()) {

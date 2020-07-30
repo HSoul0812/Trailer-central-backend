@@ -8,9 +8,10 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Product\Product;
 use App\Models\CRM\Leads\LeadProduct;
+use App\Models\User\User;
 use App\Models\User\DealerLocation;
-use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
+use App\Models\User\CrmUser;
 use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
@@ -160,13 +161,13 @@ class Lead extends Model
     {
         return $this->hasMany(UnitSale::class, 'lead_id', 'identifier');
     }
- 
+
     /**
-     * Get Dealer location
+     * Get dealer.
      */
-    public function dealerLocation()
+    public function user()
     {
-        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 
     /**
@@ -175,6 +176,14 @@ class Lead extends Model
     public function newDealerUser()
     {
         return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
+    }
+ 
+    /**
+     * Get Dealer location
+     */
+    public function dealerLocation()
+    {
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
     }
 
     /**
@@ -353,6 +362,47 @@ class Lead extends Model
         // Return Nothing
         return 0;
     }
+
+    /**
+     * Get Inquiry Name Attribute
+     * 
+     * @return Inquiry Name
+     */
+    public function getInquiryNameAttribute() {
+        // Dealer Location Name Exists?
+        if(!empty($this->dealerLocation->name)) {
+            return $this->dealerLocation->name;
+        }
+
+        // Inventory Dealer Location Name Exists?
+        if(!empty($this->inventory->dealerLocation->name)) {
+            return $this->inventory->dealerLocation->name;
+        }
+
+        // Return Dealer Name
+        return $this->user->name;
+    }
+
+    /**
+     * Get Inquiry Email Attribute
+     * 
+     * @return Inquiry Email
+     */
+    public function getInquiryEmailAttribute() {
+        // Dealer Location Email Exists?
+        if(!empty($this->dealerLocation->email)) {
+            return $this->dealerLocation->email;
+        }
+
+        // Inventory Dealer Location Email Exists?
+        if(!empty($this->inventory->dealerLocation->email)) {
+            return $this->inventory->dealerLocation->email;
+        }
+
+        // Return Dealer Email
+        return $this->user->email;
+    }
+
 
     /**
      * Process the property value to comply with what the interface methods expect

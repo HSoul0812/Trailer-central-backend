@@ -7,9 +7,11 @@ use App\Http\Requests\Request;
 class InquiryLeadRequest extends Request {
 
     protected $rules = [
+        'website_id' => 'required|website_valid',
+        'dealer_location_id' => 'required|dealer_location_valid',
+        'inquiry_type' => 'required|inquiry_type_valid',
         'lead_types' => 'required|array',
         'lead_types.*' => 'lead_type_valid',
-        'website_id' => 'website_valid',
         'inventory' => 'array',
         'inventory.*' => 'inventory_valid',
         'title' => 'string',
@@ -31,7 +33,6 @@ class InquiryLeadRequest extends Request {
         'newsletter' => 'boolean',
         'is_spam' => 'boolean',
         'is_archived' => 'boolean',
-        'dealer_location_id' => 'dealer_location_valid',
         'lead_source' => 'lead_source_valid',
         'lead_status' => 'lead_status_valid',
         'next_contact_date' => 'date_format:Y-m-d H:i:s',

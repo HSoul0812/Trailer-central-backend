@@ -29,19 +29,16 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Lead
         $lead = Lead::findOrFail($leadId);
 
+        // Set Params
+        $params = [];
+
         // Try/Send Email!
         try {
             // Send Interaction Email
             Mail::to($this->getCleanTo([
-                'email' => $params['to_email'],
-                'name' => $params['to_name']
-            ]))->send(new InquiryEmail([
-                'date' => Carbon::now()->toDateTimeString(),
-                'replyToEmail' => $params['from_email'] ?? "",
-                'replyToName' => $params['from_name'],
-                'subject' => $params['subject'],
-                'body' => $params['body']
-            ]));
+                'email' => $lead->inquiry_email,
+                'name' => $lead->inquiry_name
+            ]))->send(new InquiryEmail($params));
         } catch(\Exception $ex) {
             throw new SendInquiryFailedException($ex->getMessage());
         }

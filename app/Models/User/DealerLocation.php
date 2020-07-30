@@ -38,7 +38,28 @@ class DealerLocation extends Model
         "contact",
         "website",
         "phone",
-        // TODO: Add fields
+        "fax",
+        "email",
+        "address",
+        "city",
+        "county",
+        "region",
+        "postalcode",
+        "country",
+        "geolocation",
+        "latitude",
+        "longitude",
+        "coordinates_updated",
+        "sms",
+        "sms_phone",
+        "permanent_phone",
+        "show_on_website_locations",
+        "county_issued",
+        "state_issued",
+        "dealer_license_no",
+        "federal_id",
+        "pac_amount",
+        "pac_type"
     ];
 
     /**
