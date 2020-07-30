@@ -10,6 +10,7 @@ use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
 use App\Http\Requests\CRM\Leads\CreateLeadRequest;
+use App\Http\Requests\CRM\Leads\InquiryLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadRequest;
 
 class LeadController extends RestfulController
@@ -88,6 +89,22 @@ class LeadController extends RestfulController
             return $this->response->array([ 'data' => $this->leads->getLeadsSortFields() ]);
         }
         
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Create Lead and Send Email Inquiry
+     * 
+     * @param Request $request
+     * @return type
+     */
+    public function inquire(Request $request) {
+        $request = new InquiryLeadRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->item($this->leads->inquiry($request->all()), $this->transformer);
+        }
+
         return $this->response->errorBadRequest();
     }
 }

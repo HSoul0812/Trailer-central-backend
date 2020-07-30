@@ -3,7 +3,9 @@
 namespace App\Repositories\CRM\Leads;
 
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\User\SalesPerson;
@@ -21,6 +23,23 @@ use Illuminate\Support\Facades\DB;
 class LeadRepository implements LeadRepositoryInterface {
 
     use SortTrait;
+
+    /**
+     * @var InquiryEmailServiceInterface
+     */
+    private $inquiry;
+
+    /**
+     * LeadsRepository constructor.
+     * 
+     * @param InquiryEmailRepositoryInterface
+     * @param InteractionsRepositoryInterface
+     */
+    public function __construct(InquiryEmailServiceInterface $inquiry, InteractionsRepositoryInterface $interactions)
+    {
+        $this->inquiry = $inquiry;
+        $this->interactions = $interactions;
+    }
     
     private $sortOrders = [
         'no_due_past_due_future_due' => [
@@ -349,6 +368,25 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         return LeadAssign::create($params);
+    }
+
+    /**
+     * Send Inquiry
+     * 
+     * @param array $params
+     * @return Lead
+     */
+    public function inquiry($params) {
+        // Create Lead
+        $lead = $this->mergeOrCreate($params);
+
+        // Valid Lead?!
+        if(!empty($lead->identifier)) {
+            
+        }
+
+        // Return Lead
+        return $lead;
     }
     
     public function getCustomers($params = []) {
