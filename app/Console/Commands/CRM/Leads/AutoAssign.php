@@ -97,7 +97,6 @@ class AutoAssign extends Command
                 $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
             }
             Log::info("{$command} found " . count($dealers) . " dealers to process");
-            echo "{$command} found " . count($dealers) . " dealers to process" . PHP_EOL;
 
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
@@ -213,6 +212,8 @@ class AutoAssign extends Command
                             $status = 'assigned';
                             $notes[] = 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName;
                             Log::info("{$command} assigned next sales person {$salesPerson->id} for lead {$leadName}");
+                            echo "{$command} assigned next sales person {$salesPerson->id} for " .
+                                    "lead {$leadName}, location {$dealerLocationId}, type {$salesType}";
 
                             // Send Sales Email
                             if(!empty($dealer->crmUser->enable_assign_notification)) {
