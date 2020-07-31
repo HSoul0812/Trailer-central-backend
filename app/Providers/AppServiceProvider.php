@@ -52,6 +52,8 @@ use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepository;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\InquiryRepository;
+use App\Repositories\CRM\Leads\InquiryRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepository;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepository;
@@ -164,6 +166,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
+        $this->app->bind(InquiryRepositoryInterface::class, InquiryRepository::class);
         $this->app->bind(TextRepositoryInterface::class, TextRepository::class);
         $this->app->bind(TemplateRepositoryInterface::class, TemplateRepository::class);
         $this->app->bind(CampaignRepositoryInterface::class, CampaignRepository::class);

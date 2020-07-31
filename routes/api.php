@@ -195,6 +195,30 @@ $api->version('v1', function ($route) {
 
     /*
     |--------------------------------------------------------------------------
+    | Dealer Sites Routes
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'dealer-sites',
+        'middleware' => 'apikey.validate',
+    ], function ($route) {
+        $route->put('inquiry', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
+        $route->put('send-text', 'App\Http\Controllers\v1\Website\TextController@create');
+
+        /**
+         * TO DO: Duplicate of Blog!
+         * 
+         * This will require api key, while the other blog will require access token instead!
+         */
+        $route->get('blog', 'App\Http\Controllers\v1\Website\Blog\PostController@index');
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Interactions
     |--------------------------------------------------------------------------
     |
@@ -508,5 +532,4 @@ $api->version('v1', function ($route) {
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
     });
-
 });

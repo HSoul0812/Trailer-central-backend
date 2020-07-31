@@ -9,6 +9,7 @@ use App\Http\Middleware\Website\WebsiteValidate;
 use App\Http\Middleware\SetDealerIdOnRequest;
 use App\Http\Middleware\SetWebsiteIdOnRequest;
 use App\Http\Middleware\ValidAccessToken;
+use App\Http\Middleware\ValidApiKey;
 use App\Http\Middleware\CRM\Interactions\InteractionValidate;
 use App\Http\Middleware\CRM\Text\TextValidate;
 use App\Http\Middleware\CRM\Text\TemplateValidate;
@@ -77,6 +78,7 @@ class Kernel extends HttpKernel
         'cors' => CorsMiddleware::class,
         'website.validate' => WebsiteValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
+        'apikey.validate' => ValidApiKey::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
         'setWebsiteIdOnRequest' => SetWebsiteIdOnRequest::class,
         'interaction.validate' => InteractionValidate::class,
