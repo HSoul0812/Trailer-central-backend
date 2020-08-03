@@ -65,7 +65,7 @@ class ImportRedirects extends Command {
             if ($lineNumber == 1) {
                 return;
             }            
-            
+
             $urlFrom = $this->removeUrlRoot($csvData[0]);
             $urlTo = $this->removeUrlRoot($csvData[1]);
             

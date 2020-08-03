@@ -11,6 +11,6 @@ use \App\Repositories\Repository;
  */
 interface PartRepositoryInterface extends Repository {
     
-    
+    public function getBySku($sku);
     
 }
