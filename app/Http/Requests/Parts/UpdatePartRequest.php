@@ -21,8 +21,7 @@ class UpdatePartRequest extends Request {
         'qb_id' => 'nullable|integer',
         'subcategory' => 'nullable|string',
         'title' => 'nullable|string',
-        'alternative_part_number' => 'nullable|string',
-        'sku' => 'required|string',
+        'alternative_part_number' => 'nullable|string',        
         'price' => 'numeric',
         'dealer_cost' => 'nullable|numeric',
         'msrp' => 'nullable|numeric',
@@ -44,4 +43,8 @@ class UpdatePartRequest extends Request {
         'bins' => 'array'
     ];
     
+    public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null) {
+        parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
+        $this->rules['sku'] = 'required|string|parts_sku_unique:'.$this->input('id');
+    }
 }

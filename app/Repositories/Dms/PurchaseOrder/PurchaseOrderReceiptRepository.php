@@ -48,6 +48,9 @@ class PurchaseOrderReceiptRepository implements PurchaseOrderReceiptRepositoryIn
                 $query->where('vendor_id', '=', $params['vendor_id']);
             });
         }
+        if (isset($params['is_billed'])) {
+            $query = $query->where('is_billed', '=', (int) $params['is_billed']);
+        }
         if (isset($params['search_term'])) {
             $query = $query->where('ref_num', 'LIKE', '%' . $params['search_term'] . '%');
         }
