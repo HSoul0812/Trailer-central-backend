@@ -16,7 +16,7 @@ class ChangeLeadEmailTable extends Migration
     public function up()
     {
         Schema::table('lead_email', function (Blueprint $table) {
-            $table->text('email');
+            $table->text('email')->change();
             $table->text('cc_email')->nullable();    
             $table->integer('dealer_location_id')->nullable();
         });
