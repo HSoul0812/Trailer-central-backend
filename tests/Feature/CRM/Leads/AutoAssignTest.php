@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\CRM\Leads;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
 use App\Models\CRM\Leads\Lead;
@@ -13,8 +12,6 @@ use Illuminate\Support\Str;
 
 class AutoAssignTest extends TestCase
 {
-    use RefreshDatabase;
-
     // Initialize Test Constants
     const TEST_DEALER_ID = 1001;
     const TEST_LOCATION_ID = [11998, 12084, 14427];
