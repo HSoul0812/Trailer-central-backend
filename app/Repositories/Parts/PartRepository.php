@@ -147,13 +147,18 @@ class PartRepository implements PartRepositoryInterface {
     public function get($params) {
         return Part::findOrFail($params['id'])->load('bins.bin');
     }
+    
+    public function getBySku($sku) {
+        return Part::where('sku', $sku)->first();
+    }
 
     public function getAllSearch($params) {
         if (isset($params['naive_search'])) {
             $query = Part::where(function($q) use ($params) {
                 $q->where('sku', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%');
+                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('alternative_part_number', 'LIKE', '%' . $params['search_term'] . '%');                        
             });
         } else {
             $query = Part::search($params['search_term']);
@@ -345,6 +350,6 @@ class PartRepository implements PartRepositoryInterface {
     
     protected function getSortOrders() {
         return $this->sortOrders;
-    }
+    }    
 
 }

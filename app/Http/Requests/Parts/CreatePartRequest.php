@@ -23,7 +23,7 @@ class CreatePartRequest extends Request {
         'subcategory' => 'nullable|string',
         'title' => 'nullable|string',
         'alternative_part_number' => 'nullable|string',
-        'sku' => 'required|string',
+        'sku' => 'required|string|parts_sku_unique',
         'price' => 'numeric',
         'dealer_cost' => 'nullable|numeric',
         'msrp' => 'nullable|numeric',

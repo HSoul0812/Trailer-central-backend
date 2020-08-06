@@ -99,10 +99,10 @@ class QueryBuilder implements QueryBuilderInterface
         $this
             ->buildRelations()
             ->buildSearch()
-            ->buildPagination()
             ->buildFilter()
             ->buildLimit()
-            ->buildSort();
+            ->buildSort()
+            ->buildPagination();
 
         return $this->query;
     }
@@ -199,11 +199,12 @@ class QueryBuilder implements QueryBuilderInterface
         }
 
         $filterableColumns = $model->jsonApiFilterableColumns();
-        if (!$filterableColumns) {
+        if (!$filterableColumns) { // if empty means all columns are filterable
             return $this;
         }
 
         foreach ($filter as $column => $operators) {
+            // if column is not specified as filterable then skip this filter item
             if (!in_array('*', $filterableColumns) && !in_array($column, $filterableColumns)) continue;
 
             foreach ($operators as $operator => $value) {
