@@ -13,9 +13,7 @@ trait CreatesApplication
     {
         $app = require __DIR__.'/../bootstrap/app.php';
 
-        $app->singleton('Illuminate\Contracts\Console\Kernel', 'Illuminate\Foundation\Console\Kernel');
-
-        $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
+        $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
         return $app;
     }
