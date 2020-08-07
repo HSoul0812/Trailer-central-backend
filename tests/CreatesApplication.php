@@ -15,7 +15,7 @@ trait CreatesApplication
 
         $app->singleton('Illuminate\Contracts\Console\Kernel', 'Illuminate\Foundation\Console\Kernel');
 
-        $app->make('Illuminate\Foundation\Console\Kernel')->bootstrap();
+        $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
         return $app;
     }
