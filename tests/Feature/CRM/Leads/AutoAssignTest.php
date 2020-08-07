@@ -46,14 +46,14 @@ class AutoAssignTest extends TestCase
         Mail::fake();
 
         // Call Leads Assign Command
-        $command = $this->artisan('leads:assign:auto ' . self::TEST_DEALER_ID)
+        $console = $this->artisan('leads:assign:auto ' . self::TEST_DEALER_ID)
                         ->expectsOutput("{$command} started {$now}")
                         ->expectsOutput("{$command} found " . count($leads) . " to process");
 
         // Expect End
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
-        $command->expectsOutput("{$command} finished on " . $datetime->format("l, F jS, Y"))
+        $console->expectsOutput("{$command} finished on " . $datetime->format("l, F jS, Y"))
                 ->assertExitCode(0);
 
         // Loop Leads
