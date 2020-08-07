@@ -2,24 +2,33 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use Tests\Feature\CRM\Leads\AutoAssignTest;
+use Tests\TestCase;
 use App\Models\CRM\Leads\Lead;
 use Faker\Generator as Faker;
 
 $factory->define(Lead::class, function (Faker $faker) {
+    // Get Titles
+    $leadTypes = ['trade', 'financing', 'build'];
+    $formTitles = [
+        'trade' => 'Value Your Trade',
+        'financing' => 'Financing',
+        'build' => 'Build Your Trailer'
+    ];
+
     // Select Random Values
-    $websiteKey = array_rand(AutoAssignTest::TEST_WEBSITE_ID);
-    $locationKey = array_rand(AutoAssignTest::TEST_LOCATION_ID);
-    $inventoryKey = array_rand(AutoAssignTest::TEST_INVENTORY_ID);
-    $titleKey = array_rand(AutoAssignTest::TEST_FORM_TITLE);
+    $websiteKey = array_rand(TestCase::TEST_WEBSITE_ID);
+    $locationKey = array_rand(TestCase::TEST_LOCATION_ID);
+    $typeKey = array_rand($leadTypes);
+    $leadType = $leadTypes[$typeKey];
 
     // Return Overrides
     return [
-        'website_id' => AutoAssignTest::TEST_WEBSITE_ID[$websiteKey],
-        'dealer_id' => AutoAssignTest::TEST_DEALER_ID,
-        'dealer_location_id' => AutoAssignTest::TEST_LOCATION_ID[$locationKey],
-        'inventory_id' => AutoAssignTest::TEST_INVENTORY_ID[$inventoryKey],
-        'title' => AutoAssignTest::TEST_FORM_TITLE[$titleKey],
+        'website_id' => TestCase::TEST_WEBSITE_ID[$websiteKey],
+        'dealer_id' => TestCase::TEST_DEALER_ID,
+        'dealer_location_id' => TestCase::TEST_LOCATION_ID[$locationKey],
+        'inventory_id' => 0,
+        'lead_type' => $leadType,
+        'title' => $formTitles[$leadType],
         'referral' => $faker->url,
         'first_name' => $faker->firstName,
         'last_name' => $faker->lastName,

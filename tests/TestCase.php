@@ -8,6 +8,11 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
+    // Initialize Test Constants
+    const TEST_DEALER_ID = 1001;
+    const TEST_LOCATION_ID = [11998, 12084, 14427];
+    const TEST_WEBSITE_ID = [500, 779];
+
     protected function setUp(): void
     {
         parent::setUp();
