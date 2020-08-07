@@ -27,8 +27,8 @@ class AutoAssignTest extends TestCase
     /**
      * @param LeadRepositoryInterface $leads
      */
-    public function __construct(LeadRepositoryInterface $leads) {
-        $this->leads = $leads;
+    public function __construct() {
+        $this->leads = new LeadRepositoryInterface();
     }
 
     /**
