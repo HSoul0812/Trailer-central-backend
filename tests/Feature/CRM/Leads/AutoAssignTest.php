@@ -4,6 +4,7 @@ namespace Tests\Feature\CRM\Leads;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Mail\AutoAssignEmail;
 use Tests\TestCase;
@@ -16,12 +17,19 @@ class AutoAssignTest extends TestCase
     const TEST_DEALER_ID = 1001;
     const TEST_LOCATION_ID = [11998, 12084, 14427];
     const TEST_WEBSITE_ID = [500, 779];
-    const TEST_INVENTORY_ID = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                               1906584, 1910233, 1923231, 1925876, 1925877,
-                               1925878, 1925974, 1925975, 1925977, 1927132,
-                               1927133, 1928656, 1928657, 1928658, 1931524,
-                               1931525, 1932625, 1932626, 1932627, 1932628];
     const TEST_FORM_TITLE = ['Value Your Trade', 'Rent to Own', 'Financing', 'Build Your Trailer'];
+
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     */
+    private $leads;
+
+    /**
+     * @param LeadRepositoryInterface $leads
+     */
+    public function __construct(LeadRepositoryInterface $leads) {
+        $this->leads = $leads;
+    }
 
     /**
      * Test all auto assign dealers
@@ -39,8 +47,28 @@ class AutoAssignTest extends TestCase
         $now = $datetime->format("l, F jS, Y");
         $command = "leads:assign:auto " . self::TEST_DEALER_ID;
 
-        // Build Random Factory Leads
-        $leads = factory(Lead::class, 10)->create();
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::TEST_DEALER_ID);
+
+        // Get Sales People
+        if(empty($salespeople)) {
+            // TO DO: factory for sales people!
+        }
+
+        // Get Inventory
+        if(empty($inventory)) {
+            // TO DO: factory for inventory!
+        }
+
+        // Get Leads
+        $leads = $this->leads->getAllUnassigned([
+            'per_page' => 'all',
+            'dealer_id' => $dealer->id
+        ]);
+        if(empty($leads)) {
+            // Build Random Factory Leads
+            $leads = factory(Lead::class, 10)->create();
+        }
 
         // Fake Mail
         Mail::fake();
@@ -59,9 +87,11 @@ class AutoAssignTest extends TestCase
         // Loop Leads
         foreach($leads as $lead) {
             // Assert a message was sent to the given leads...
-            Mail::assertSent(AutoAssignMail::class, function ($mail) use ($lead) {
-                return $mail->hasTo($lead->email_address);
-            });
+            if(!empty($dealer->crmUser->enable_assign_notification)) {
+                Mail::assertSent(AutoAssignMail::class, function ($mail) use ($lead) {
+                    return $mail->hasTo($lead->email_address);
+                });
+            }
         }
     }
 }
