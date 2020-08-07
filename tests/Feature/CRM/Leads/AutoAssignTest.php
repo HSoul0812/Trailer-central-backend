@@ -5,6 +5,7 @@ namespace Tests\Feature\CRM\Leads;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
 use App\Models\CRM\Leads\Lead;
+use App\Models\User\NewDealerUser;
 use App\Mail\AutoAssignEmail;
 use Tests\TestCase;
 use Faker\Generator as Faker;
