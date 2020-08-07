@@ -4,7 +4,6 @@ namespace Tests\Feature\CRM\Leads;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Mail\AutoAssignEmail;
 use Tests\TestCase;
@@ -18,18 +17,6 @@ class AutoAssignTest extends TestCase
     const TEST_LOCATION_ID = [11998, 12084, 14427];
     const TEST_WEBSITE_ID = [500, 779];
     const TEST_FORM_TITLE = ['Value Your Trade', 'Rent to Own', 'Financing', 'Build Your Trailer'];
-
-    /**
-     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
-     */
-    private $leads;
-
-    /**
-     * @param LeadRepositoryInterface $leads
-     */
-    public function __construct() {
-        $this->leads = new LeadRepositoryInterface();
-    }
 
     /**
      * Test all auto assign dealers
@@ -61,10 +48,6 @@ class AutoAssignTest extends TestCase
         }
 
         // Get Leads
-        $leads = $this->leads->getAllUnassigned([
-            'per_page' => 'all',
-            'dealer_id' => $dealer->id
-        ]);
         if(empty($leads)) {
             // Build Random Factory Leads
             $leads = factory(Lead::class, 10)->create();
