@@ -13,7 +13,7 @@ trait CreatesApplication
     {
         $app = require __DIR__.'/../bootstrap/app.php';
 
-        $kernel = $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        $kernel = $app->make(\Illuminate\Foundation\Console\Kernel::class)->bootstrap();
 
         return $app;
     }
