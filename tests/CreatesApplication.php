@@ -2,8 +2,6 @@
 
 namespace Tests;
 
-use Illuminate\Contracts\Console\Kernel;
-
 trait CreatesApplication
 {
     /**
@@ -15,7 +13,9 @@ trait CreatesApplication
     {
         $app = require __DIR__.'/../bootstrap/app.php';
 
-        $app->make(Kernel::class)->bootstrap();
+        $app->singleton('Illuminate\Contracts\Console\Kernel', 'Illuminate\Foundation\Console\Kernel');
+
+        $app->make('Illuminate\Foundation\Console\Kernel')->bootstrap();
 
         return $app;
     }
