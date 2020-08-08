@@ -43,11 +43,11 @@ class AutoAssignTest extends TestCase
         var_dump($salespeople);
 
         // Get Inventory
-        $inventory = Inventory::where('dealer_id', $dealer->id);
+        $inventory = Inventory::where('dealer_id', $dealer->id)->take(5);
         if(empty($inventory)) {
             $inventory = factory(Inventory::class, 5)->create();
         }
-        var_dump($inventory);
+        //var_dump($inventory);
 
         // Get Leads
         $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
