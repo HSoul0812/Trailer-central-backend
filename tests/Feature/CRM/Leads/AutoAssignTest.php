@@ -103,10 +103,11 @@ class AutoAssignTest extends TestCase
         // Loop Leads
         foreach($leads as $lead) {
             // Assert a message was sent to the given leads...
+            $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
             $status = 'assigned';
             if(!empty($dealer->crmUser->enable_assign_notification)) {
-                Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($lead) {
-                    return $mail->hasTo($lead->email_address);
+                Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
+                    return $mail->hasTo($salesPerson->email);
                 });
                 $status = 'mailed';
             }

@@ -214,8 +214,7 @@ class AutoAssign extends Command
                             // Send Sales Email
                             if(!empty($dealer->crmUser->enable_assign_notification)) {
                                 // Get Sales Person Email
-                                //$salesEmail = $salesPerson->email;
-                                $salesEmail = "david.a.conway.jr@gmail.com";
+                                $salesEmail = $salesPerson->email;
                                 $status = 'mailing';
                                 $notes[] = 'Attempting to Send Notification Email to: ' . $salesEmail . ' for Lead: ' . $leadName;
                                 Log::info("{$command} sending notification email to {$salesEmail} for lead {$leadName}");
