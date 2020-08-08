@@ -36,6 +36,8 @@ class AutoAssignTest extends TestCase
 
         // Get Sales People
         $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)->get();
+        var_dump($salespeople);
+        die;
         if(empty($salespeople)) {
             // Build Random Factory Salespeople
             $salespeople = factory(SalesPerson::class, 3)->create();
