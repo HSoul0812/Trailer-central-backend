@@ -31,10 +31,6 @@ class AutoAssignTest extends TestCase
         $leadRepo = new LeadRepository();
         $salesRepo = new SalesPersonRepository();
 
-        // Log Start
-        $now = $datetime->format("l, F jS, Y");
-        $command = "leads:assign:auto " . self::TEST_DEALER_ID;
-
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::TEST_DEALER_ID);
 
@@ -44,12 +40,14 @@ class AutoAssignTest extends TestCase
             // Build Random Factory Salespeople
             $salespeople = factory(SalesPerson::class, 3)->create();
         }
+        var_dump($salespeople);
 
         // Get Inventory
         $inventory = Inventory::where('dealer_id', $dealer->id);
         if(empty($inventory)) {
             $inventory = factory(Inventory::class, 5)->create();
         }
+        var_dump($inventory);
 
         // Get Leads
         $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
