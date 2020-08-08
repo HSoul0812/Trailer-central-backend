@@ -25,9 +25,6 @@ class AutoAssignTest extends TestCase
      */
     public function __construct() {
         parent::__construct();
-
-        $this->leads = new LeadRepository();
-        $this->salesPerson = new SalesPersonRepository();
     }
 
     /**
