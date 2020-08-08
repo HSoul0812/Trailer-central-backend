@@ -86,7 +86,6 @@ class AutoAssign extends Command
             $now = $this->datetime->format("l, F jS, Y");
             $command = "leads:assign:auto" . (!empty($dealerId) ? ' ' . $dealerId : '');
             Log::info("{$command} started {$now}");
-            echo "{$command} started {$now}" . PHP_EOL;
 
             // Handle Dealer Differently
             $dealers = array();
@@ -117,7 +116,6 @@ class AutoAssign extends Command
                 $dealerNotes[] = 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign';
                 $dealerNotes[] = 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
                 Log::info("{$command} dealer #{$dealer->id} found " . count($leads) . " to process");
-                echo "{$command} dealer #{$dealer->id} found " . count($leads) . " to process" . PHP_EOL;
 
                 // Loop Leads for Current Dealer
                 foreach($leads as $lead) {
@@ -167,8 +165,6 @@ class AutoAssign extends Command
                         $notes[] = 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType;
                         Log::info("{$command} found newest sales person {$newestSalesPerson->id} for dealer {$dealer->id} and salesperson type {$salesType}");
                     }
-                    echo "{$command} found newest sales person {$newestSalesPerson->id} for " .
-                            "lead {$leadName}, location {$dealerLocationId}, type {$salesType}" . PHP_EOL;
 
                     // Find Next Salesperson
                     $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
@@ -214,8 +210,6 @@ class AutoAssign extends Command
                             $status = 'assigned';
                             $notes[] = 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName;
                             Log::info("{$command} assigned next sales person {$salesPerson->id} for lead {$leadName}");
-                            echo "{$command} assigned next sales person {$salesPerson->id} for " .
-                                    "lead {$leadName}, location {$dealerLocationId}, type {$salesType}" . PHP_EOL;
 
                             // Send Sales Email
                             if(!empty($dealer->crmUser->enable_assign_notification)) {
@@ -281,7 +275,6 @@ class AutoAssign extends Command
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
         Log::info("{$command} finished on " . $datetime->format("l, F jS, Y"));
-        echo "{$command} finished on " . $datetime->format("l, F jS, Y") . PHP_EOL . PHP_EOL;
     }
 
     /**

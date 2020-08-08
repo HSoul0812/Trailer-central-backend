@@ -4,6 +4,7 @@
 
 use Tests\TestCase;
 use App\Models\CRM\Leads\Lead;
+use App\Models\Inventory\Inventory;
 use Faker\Generator as Faker;
 
 $factory->define(Lead::class, function (Faker $faker) {
@@ -21,12 +22,15 @@ $factory->define(Lead::class, function (Faker $faker) {
     $typeKey = array_rand($leadTypes);
     $leadType = $leadTypes[$typeKey];
 
+    // Get Random Inventory
+    $inventory = Inventory::where('dealer_id', TestCase::TEST_DEALER_ID)->inRandomOrder()->first();
+
     // Return Overrides
     return [
         'website_id' => TestCase::TEST_WEBSITE_ID[$websiteKey],
         'dealer_id' => TestCase::TEST_DEALER_ID,
         'dealer_location_id' => TestCase::TEST_LOCATION_ID[$locationKey],
-        'inventory_id' => 0,
+        'inventory_id' => $inventory->inventory_id,
         'lead_type' => $leadType,
         'title' => $formTitles[$leadType],
         'referral' => $faker->url,
