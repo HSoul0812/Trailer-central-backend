@@ -86,8 +86,8 @@ class AutoAssignTest extends TestCase
 
             // Find Next!
             $salesPerson = $salesRepo->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $salespeople);
-            $leadSalesPeople[$lead->identifier] = $salesPerson->id;
-            $roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType] = $salesPerson->id;
+            $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
+            $roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType] = $leadSalesPeople[$lead->identifier];
         }
 
         // Fake Mail
