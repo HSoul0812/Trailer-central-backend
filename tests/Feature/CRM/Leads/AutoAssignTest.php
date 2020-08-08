@@ -35,16 +35,14 @@ class AutoAssignTest extends TestCase
         $dealer = NewDealerUser::findOrFail(self::TEST_DEALER_ID);
 
         // Get Sales People
-        $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id);
-        echo count($salespeople);
-        die;
-        /*if(empty($salespeople)) {
+        $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)->get();
+        if(empty($salespeople)) {
             // Build Random Factory Salespeople
             $salespeople = factory(SalesPerson::class, 3)->create();
-        }*/
+        }
 
         // Get Inventory
-        $inventory = Inventory::where('dealer_id', $dealer->id)->take(5);
+        $inventory = Inventory::where('dealer_id', $dealer->id)->take(5)->get();
         if(empty($inventory)) {
             $inventory = factory(Inventory::class, 5)->create();
         }
