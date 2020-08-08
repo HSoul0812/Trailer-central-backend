@@ -36,22 +36,20 @@ class AutoAssignTest extends TestCase
 
         // Get Sales People
         $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)->get();
-        var_dump($salespeople);
-        die;
-        if(empty($salespeople)) {
+        if(empty($salespeople) || count($salespeople) < 1) {
             // Build Random Factory Salespeople
             $salespeople = factory(SalesPerson::class, 3)->create();
         }
 
         // Get Inventory
         $inventory = Inventory::where('dealer_id', $dealer->id)->take(5)->get();
-        if(empty($inventory)) {
+        if(empty($inventory) || count($inventory) < 1) {
             $inventory = factory(Inventory::class, 5)->create();
         }
 
         // Get Leads
         $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
-        if(empty($leads)) {
+        if(empty($leads) || count($leads) < 1) {
             // Build Random Factory Leads
             factory(Lead::class, 10)->create();
             $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
