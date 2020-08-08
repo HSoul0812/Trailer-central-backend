@@ -52,11 +52,11 @@ class AutoAssignTest extends TestCase
         }
 
         // Get Leads
-        $leads = $this->leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
         if(empty($leads)) {
             // Build Random Factory Leads
             factory(Lead::class, 10)->create();
-            $leads = $this->leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
+            $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
         }
 
         // Detect What Sales People Will be Assigned!
