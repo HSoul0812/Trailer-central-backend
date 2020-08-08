@@ -9,7 +9,7 @@ use Faker\Generator as Faker;
 
 $factory->define(SalesPerson::class, function (Faker $faker) {
     // Get Dealer User
-    $newDealerUser = NewDealerUser::find(TestCase::TEST_DEALER_ID);
+    $newDealerUser = NewDealerUser::findOrFail(TestCase::TEST_DEALER_ID);
 
     // Select Random Location
     $locationKey = array_rand(TestCase::TEST_LOCATION_ID);
