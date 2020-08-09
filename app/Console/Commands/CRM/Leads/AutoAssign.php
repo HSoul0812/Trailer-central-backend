@@ -179,8 +179,8 @@ class AutoAssign extends Command
                     }
                     // Process Auto Assign!
                     else {
-                        $notes[] = 'Found Next Matching Sales Person: ' . $newestSalesPerson->id . ' for Lead: ' . $leadName;
-                        Log::info("{$command} found next sales person {$newestSalesPerson->id} for lead {$leadName}");
+                        $notes[] = 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $leadName;
+                        Log::info("{$command} found next sales person {$salesPerson->id} for lead {$leadName}");
 
                         // Initialize Next Contact Date
                         $nextDay = date("d") + 1;
