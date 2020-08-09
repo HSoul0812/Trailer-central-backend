@@ -20,8 +20,6 @@ abstract class TestCase extends BaseTestCase
 
     protected function tearDown(): void
     {
-        $this->reset();
-
         parent::tearDown();
     }
 
