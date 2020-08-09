@@ -97,7 +97,6 @@ class AutoAssignTest extends TestCase
             $status = 'assigned';
             if(!empty($dealer->crmUser->enable_assign_notification)) {
                 Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
-                    var_dump($mail);
                     return $mail->hasTo($salesPerson->email);
                 });
                 $status = 'mailed';
