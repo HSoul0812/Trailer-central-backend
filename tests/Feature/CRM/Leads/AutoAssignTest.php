@@ -39,7 +39,6 @@ class AutoAssignTest extends TestCase
                 ]);
             }
         }
-        $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id);
 
         // Get Inventory
         $inventory = Inventory::where('dealer_id', $dealer->id)->take(5)->get();
@@ -51,7 +50,7 @@ class AutoAssignTest extends TestCase
         $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
         if(empty($leads) || count($leads) < 1) {
             // Build Random Factory Leads
-            factory(Lead::class, 30)->create();
+            factory(Lead::class, 10)->create();
             $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
         }
 
@@ -81,7 +80,7 @@ class AutoAssignTest extends TestCase
             $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
 
             // Find Next!
-            $salesPerson = $salesRepo->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $salespeople);
+            $salesPerson = $salesRepo->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType] = $leadSalesPeople[$lead->identifier];
         }
