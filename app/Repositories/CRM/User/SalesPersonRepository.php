@@ -269,7 +269,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
         return SalesPerson::select('*')
                                   ->where('user_id', $newDealerUser->user_id)
-                                  ->orderBy('id', 'asc')->all();
+                                  ->orderBy('id', 'asc')->get();
     }
 
     /**
