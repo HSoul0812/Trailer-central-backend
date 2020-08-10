@@ -96,12 +96,14 @@ class QuoteRepository implements QuoteRepositoryInterface {
                 case UnitSale::QUOTE_STATUS_COMPLETED:
                     $query = $query
                         ->where('is_archived', '=', 0)
-                        ->where('is_po', '=', 1)
-                        ->orWhereHas('payments', function($query) {
-                            $query->select(DB::raw('sum(amount) as paid_amount'))
-                                ->groupBy('unit_sale_id')
-                                ->havingRaw('paid_amount >= dms_unit_sale.total_price');
-                        });
+                        ->where(function($query) {
+                            $query->where('is_po', '=', 1)
+                                ->orWhereHas('payments', function($query) {
+                                    $query->select(DB::raw('sum(amount) as paid_amount'))
+                                        ->groupBy('unit_sale_id')
+                                        ->havingRaw('paid_amount >= dms_unit_sale.total_price');
+                                });
+                        });                        
                     break;
             }
         }
