@@ -29,7 +29,7 @@ class AutoAssignTest extends TestCase
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
 
         // Build Random Factory Salespeople
-        foreach(TestCase::getTestLocationIds() as $locationId) {
+        foreach(TestCase::getTestDealerLocationIds() as $locationId) {
             // Get Sales People By Location
             $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)
                                       ->where('dealer_location_id', $locationId)->get();
