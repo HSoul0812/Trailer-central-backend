@@ -93,10 +93,10 @@ class AutoAssignTest extends TestCase
             // Find Newest Assigned Sales Person
             if(!isset($this->roundRobin[$dealer->id][$dealerLocationId][$salesType])) {
                 $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
-                $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson->id);
+            } else {
+                $newestSalesPersonId = $this->roundRobin[$dealer->id][$dealerLocationId][$salesType];
+                $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
             }
-            $newestSalesPersonId = $this->roundRobin[$dealer->id][$dealerLocationId][$salesType];
-            $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
 
             // Find Next!
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
@@ -109,6 +109,7 @@ class AutoAssignTest extends TestCase
 
         // Call Leads Assign Command
         $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
+        var_dump($leadSalesPeople);
 
         // Loop Leads
         foreach($leads as $lead) {
@@ -190,10 +191,10 @@ class AutoAssignTest extends TestCase
             // Find Newest Assigned Sales Person
             if(!isset($this->roundRobin[$dealer->id][$locationId][$salesType])) {
                 $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
-                $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson->id);
+            } else {
+                $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
+                $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
             }
-            $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
-            $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
 
             // Find Next!
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
