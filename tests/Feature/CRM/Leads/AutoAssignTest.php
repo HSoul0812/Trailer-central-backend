@@ -17,7 +17,7 @@ class AutoAssignTest extends TestCase
     protected $leads;
     protected $salespeople;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
