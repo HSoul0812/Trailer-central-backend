@@ -38,7 +38,6 @@ class AutoAssignTest extends TestCase
         $this->salespeople = $this->app->make('App\Repositories\CRM\User\SalesPersonRepositoryInterface');
 
         // Reset Round Robin Array
-        echo "test";
         $this->roundRobin = array();
     }
 
@@ -100,7 +99,7 @@ class AutoAssignTest extends TestCase
             $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
+            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson->id);
         }
@@ -197,7 +196,7 @@ class AutoAssignTest extends TestCase
             $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson);
+            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson->id);
         }
