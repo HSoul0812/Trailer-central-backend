@@ -43,7 +43,10 @@ class AutoAssignTest extends TestCase
 
     /**
      * Test round robin only by location
-     *
+     * 
+     * @specs array dealer_location_id = all in TEST_LOCATION_ID
+     * @specs string lead_type = general
+     * @specs bool enable_assign_notification = 1
      * @return void
      */
     public function testLocationRoundRobin()
@@ -139,7 +142,10 @@ class AutoAssignTest extends TestCase
 
     /**
      * Test round robin only with no email sent
-     *
+     * 
+     * @specs int dealer_location_id = first in TEST_LOCATION_ID
+     * @specs string lead_type = inventory
+     * @specs bool enable_assign_notification = 0
      * @return void
      */
     public function testNoEmailRoundRobin()
