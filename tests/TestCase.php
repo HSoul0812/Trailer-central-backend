@@ -41,7 +41,7 @@ abstract class TestCase extends BaseTestCase
     public static function getTestDealerLocationIds() {
         // Get Location
         $locationId = env('TEST_LOCATION_ID');
-        if(empty($dealerId)) {
+        if(empty($locationId)) {
             throw new MissingTestDealerLocationIdException();
         }
         return explode(",", $locationId);
@@ -59,7 +59,7 @@ abstract class TestCase extends BaseTestCase
     public static function getTestWebsiteIds() {
         // Get Website
         $websiteId = env('TEST_WEBSITE_ID');
-        if(empty($dealerId)) {
+        if(empty($websiteId)) {
             throw new MissingTestWebsiteIdException();
         }
         return explode(",", $websiteId);
