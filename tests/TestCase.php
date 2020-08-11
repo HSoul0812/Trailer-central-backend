@@ -3,6 +3,9 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use App\Exceptions\Tests\MissingTestDealerIdException;
+use App\Exceptions\Tests\MissingTestDealerLocationIdException;
+use App\Exceptions\Tests\MissingTestWebsiteIdException;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -29,7 +32,7 @@ abstract class TestCase extends BaseTestCase
         // Get Test Dealer ID
         $dealerId = env('TEST_DEALER_ID');
         if(empty($dealerId)) {
-            throw new MissingTestDealerIdException;
+            throw new MissingTestDealerIdException();
         }
         return $dealerId;
     }
@@ -39,7 +42,7 @@ abstract class TestCase extends BaseTestCase
         // Get Location
         $locationId = env('TEST_LOCATION_ID');
         if(empty($dealerId)) {
-            throw new MissingTestDealerLocationIdException;
+            throw new MissingTestDealerLocationIdException();
         }
         return explode(",", $locationId);
     }
@@ -57,7 +60,7 @@ abstract class TestCase extends BaseTestCase
         // Get Website
         $websiteId = env('TEST_WEBSITE_ID');
         if(empty($dealerId)) {
-            throw new MissingTestWebsiteIdException;
+            throw new MissingTestWebsiteIdException();
         }
         return explode(",", $websiteId);
     }
