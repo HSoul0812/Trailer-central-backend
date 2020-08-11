@@ -38,6 +38,7 @@ class AutoAssignTest extends TestCase
         $this->salespeople = $this->app->make('App\Repositories\CRM\User\SalesPersonRepositoryInterface');
 
         // Reset Round Robin Array
+        echo "test";
         $this->roundRobin = array();
     }
 
@@ -88,10 +89,7 @@ class AutoAssignTest extends TestCase
         foreach($leads as $lead) {
             // Get Newest Sales Person
             $salesType = 'default';
-            $dealerLocationId = !empty($lead->dealer_location_id) ? $lead->dealer_location_id : 0;
-            if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
-                $dealerLocationId = $lead->inventory->dealer_location_id;
-            }
+            $dealerLocationId = $lead->dealer_location_id;
 
             // Find Newest Assigned Sales Person
             if(!isset($this->roundRobin[$dealer->id][$dealerLocationId][$salesType])) {
