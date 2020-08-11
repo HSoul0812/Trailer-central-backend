@@ -101,7 +101,7 @@ class AutoAssignTest extends TestCase
             // Find Next!
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
-            $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson->id);
+            $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
         }
 
         // Fake Mail
@@ -109,7 +109,6 @@ class AutoAssignTest extends TestCase
 
         // Call Leads Assign Command
         $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
-        var_dump($leadSalesPeople);
 
         // Loop Leads
         foreach($leads as $lead) {
@@ -199,7 +198,7 @@ class AutoAssignTest extends TestCase
             // Find Next!
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
-            $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson->id);
+            $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
 
         // Fake Mail
