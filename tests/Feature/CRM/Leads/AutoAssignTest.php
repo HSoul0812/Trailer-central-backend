@@ -14,6 +14,18 @@ use Tests\TestCase;
 
 class AutoAssignTest extends TestCase
 {
+    protected $leads;
+    protected $salespeople;
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        // Make Lead Repo
+        $this->leads = $this->app->make('App\Repositories\CRM\Leads\LeadRepositoryInterface');
+        $this->salespeople = $this->app->make('App\Repositories\CRM\User\SalesPersonRepositoryInterface');
+    }
+
     /**
      * Test all auto assign dealers
      *
@@ -21,10 +33,6 @@ class AutoAssignTest extends TestCase
      */
     public function testDealer()
     {
-        // Initialize Repositories
-        $leadRepo = new LeadRepository();
-        $salesRepo = new SalesPersonRepository();
-
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
 
@@ -47,11 +55,11 @@ class AutoAssignTest extends TestCase
         }
 
         // Get Leads
-        $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
         if(empty($leads) || count($leads) < 1) {
             // Build Random Factory Leads
             factory(Lead::class, 10)->create();
-            $leads = $leadRepo->getAllUnassigned(['dealer_id' => $dealer->id]);
+            $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
         }
 
         // Detect What Sales People Will be Assigned!
@@ -59,7 +67,7 @@ class AutoAssignTest extends TestCase
         $leadSalesPeople = array();
         foreach($leads as $lead) {
             // Get Newest Sales Person
-            $salesType = $salesRepo->findSalesType($lead->lead_type);
+            $salesType = $this->salespeople->findSalesType($lead->lead_type);
             $dealerLocationId = !empty($lead->dealer_location_id) ? $lead->dealer_location_id : 0;
             if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
                 $dealerLocationId = $lead->inventory->dealer_location_id;
@@ -67,7 +75,7 @@ class AutoAssignTest extends TestCase
 
             // Find Newest Assigned Sales Person
             if(!isset($roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType])) {
-                $newestSalesPerson = $salesRepo->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
                 if(!isset($roundRobinSalesPeople[$dealer->id])) {
                     $roundRobinSalesPeople[$dealer->id] = array();
                 }
@@ -80,7 +88,7 @@ class AutoAssignTest extends TestCase
             $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
 
             // Find Next!
-            $salesPerson = $salesRepo->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
+            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType] = $leadSalesPeople[$lead->identifier];
         }
