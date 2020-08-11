@@ -203,6 +203,7 @@ class AutoAssignTest extends TestCase
 
         // Fake Mail
         Mail::fake();
+        var_dump($leadSalesPeople);
 
         // Call Leads Assign Command
         $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
