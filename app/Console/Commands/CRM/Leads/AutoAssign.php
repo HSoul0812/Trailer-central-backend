@@ -85,7 +85,7 @@ class AutoAssign extends Command
             // Log Start
             $now = $this->datetime->format("l, F jS, Y");
             $command = "leads:assign:auto" . (!empty($dealerId) ? ' ' . $dealerId : '');
-            Log::info("{$command} started {$now}");
+            $this->info("{$command} started {$now}");
 
             // Handle Dealer Differently
             $dealers = array();
@@ -95,7 +95,7 @@ class AutoAssign extends Command
             } else {
                 $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
             }
-            Log::info("{$command} found " . count($dealers) . " dealers to process");
+            $this->info("{$command} found " . count($dealers) . " dealers to process");
 
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
@@ -115,7 +115,7 @@ class AutoAssign extends Command
                 $dealerNotes = array();
                 $dealerNotes[] = 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign';
                 $dealerNotes[] = 'Found ' . count($leads) . ' total leads for Dealer ID #' . $dealer->id;
-                Log::info("{$command} dealer #{$dealer->id} found " . count($leads) . " to process");
+                $this->info("{$command} dealer #{$dealer->id} found " . count($leads) . " to process");
 
                 // Loop Leads for Current Dealer
                 foreach($leads as $lead) {
@@ -126,21 +126,21 @@ class AutoAssign extends Command
                     // Get Sales Type
                     $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
                     $notes[] = 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead ' . $leadName;
-                    Log::info("{$command} matched lead type {$lead->lead_type} to sales type {$salesType} for lead {$leadName}");
+                    $this->info("{$command} matched lead type {$lead->lead_type} to sales type {$salesType} for lead {$leadName}");
 
                     // Get Dealer Location
                     $dealerLocationId = $lead->dealer_location_id;
                     if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
                         $dealerLocationId = $lead->inventory->dealer_location_id;
                         $notes[] = 'Preferred Location doesn\'t exist on Lead ' . $leadName . ', grabbed Inventory Location instead: ' . $dealerLocationId;
-                        Log::info("{$command} lead {$leadName} doesn't have preferred location, found inventory location {$dealerLocationId}");
+                        $this->info("{$command} lead {$leadName} doesn't have preferred location, found inventory location {$dealerLocationId}");
                     } elseif(!empty($dealerLocationId)) {
                         $notes[] = 'Got Preferred Location ID ' . $dealerLocationId . ' on Lead ' . $leadName;
-                        Log::info("{$command} lead {$leadName} found preferred location {$dealerLocationId}");
+                        $this->info("{$command} lead {$leadName} found preferred location {$dealerLocationId}");
                     } else {
                         $dealerLocationId = 0;
                         $notes[] = 'Cannot Find Preferred Location on Lead ' . $leadName . ', only matching sales type ' . $salesType . ' instead';
-                        Log::info("{$command} lead {$leadName} doesn't have preferred location, only matching sales type {$salesType} instead");
+                        $this->info("{$command} lead {$leadName} doesn't have preferred location, only matching sales type {$salesType} instead");
                     }
 
                     // Last Sales Person Already Exists?
@@ -160,10 +160,10 @@ class AutoAssign extends Command
                     }
                     if(!empty($dealerLocationId)) {
                         $notes[] = 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer Location #' . $dealerLocationId . ' and Salesperson Type ' . $salesType;
-                        Log::info("{$command} found newest sales person {$newestSalesPerson->id} for location {$dealerLocationId} and salesperson type {$salesType}");
+                        $this->info("{$command} found newest sales person {$newestSalesPerson->id} for location {$dealerLocationId} and salesperson type {$salesType}");
                     } else {
                         $notes[] = 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType;
-                        Log::info("{$command} found newest sales person {$newestSalesPerson->id} for dealer {$dealer->id} and salesperson type {$salesType}");
+                        $this->info("{$command} found newest sales person {$newestSalesPerson->id} for dealer {$dealer->id} and salesperson type {$salesType}");
                     }
 
                     // Find Next Salesperson
@@ -173,14 +173,14 @@ class AutoAssign extends Command
                     // Skip Entry!
                     if(empty($salesPerson->id)) {
                         $notes[] = 'Couldn\'t Find Salesperson ID to Assign Lead #' . $leadName . ' to, skipping temporarily!';
-                        Log::info("{$command} couldn't find next sales person for lead {$leadName}");
+                        $this->info("{$command} couldn't find next sales person for lead {$leadName}");
                         $status = 'skipped';
                         continue;
                     }
                     // Process Auto Assign!
                     else {
                         $notes[] = 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $leadName;
-                        Log::info("{$command} found next sales person {$salesPerson->id} for lead {$leadName}");
+                        $this->info("{$command} found next sales person {$salesPerson->id} for lead {$leadName}");
 
                         // Initialize Next Contact Date
                         $nextDay = date("d") + 1;
@@ -192,14 +192,14 @@ class AutoAssign extends Command
                         $nextContact      = $nextContactObj->format("Y-m-d H:i:s");
                         $nextContactText  = ' on ' . $nextContactObj->format("l, F jS, Y") . ' at ' . $nextContactObj->format("g:i A T");
                         $notes[] = 'Setting Next Contact Date: ' . $nextContact . ' to Lead: ' . $leadName;
-                        Log::info("{$command} setting next contact date {$nextContact} for lead {$leadName}");
+                        $this->info("{$command} setting next contact date {$nextContact} for lead {$leadName}");
 
                         // Set Salesperson to Lead
                         try {
                             // Prepare to Assign
                             $status = 'assigning';
                             $notes[] = 'Assigning Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName;
-                            Log::info("{$command} assigning next sales person {$salesPerson->id} for lead {$leadName}");
+                            $this->info("{$command} assigning next sales person {$salesPerson->id} for lead {$leadName}");
                             $this->leadRepository->update([
                                 'id' => $lead->identifier,
                                 'sales_person_id' => $salesPerson->id,
@@ -209,7 +209,7 @@ class AutoAssign extends Command
                             // Finish Assigning
                             $status = 'assigned';
                             $notes[] = 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName;
-                            Log::info("{$command} assigned next sales person {$salesPerson->id} for lead {$leadName}");
+                            $this->info("{$command} assigned next sales person {$salesPerson->id} for lead {$leadName}");
 
                             // Send Sales Email
                             if(!empty($dealer->crmUser->enable_assign_notification)) {
@@ -217,7 +217,7 @@ class AutoAssign extends Command
                                 $salesEmail = $salesPerson->email;
                                 $status = 'mailing';
                                 $notes[] = 'Attempting to Send Notification Email to: ' . $salesEmail . ' for Lead: ' . $leadName;
-                                Log::info("{$command} sending notification email to {$salesEmail} for lead {$leadName}");
+                                $this->info("{$command} sending notification email to {$salesEmail} for lead {$leadName}");
 
                                 // Send Email to Sales Person
                                 Mail::to($salesEmail ?? "" )->send(
@@ -239,7 +239,7 @@ class AutoAssign extends Command
                                 // Success, Marked Mailed
                                 $status = 'mailed';
                                 $notes[] = 'Sent Notification Email to: ' . $salesEmail . ' for Lead: ' . $leadName;
-                                Log::info("{$command} sent notification email to {$salesEmail} for lead {$leadName}");
+                                $this->info("{$command} sent notification email to {$salesEmail} for lead {$leadName}");
                             }
                         } catch(\Exception $e) {
                             // Add Error
@@ -263,7 +263,7 @@ class AutoAssign extends Command
                         'status' => $status,
                         'explanation' => $notes
                     ]);
-                    Log::info("{$command} inserted assign notification for lead {$leadName} with status {$status}");
+                    $this->info("{$command} inserted assign notification for lead {$leadName} with status {$status}");
                 }
             }
         } catch(\Exception $e) {
@@ -273,7 +273,7 @@ class AutoAssign extends Command
         // Log End
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
-        Log::info("{$command} finished on " . $datetime->format("l, F jS, Y"));
+        $this->info("{$command} finished on " . $datetime->format("l, F jS, Y"));
     }
 
     /**

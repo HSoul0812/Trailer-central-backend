@@ -9,15 +9,12 @@ use Faker\Generator as Faker;
 
 $factory->define(SalesPerson::class, function (Faker $faker) {
     // Get Dealer User
-    $newDealerUser = NewDealerUser::findOrFail(TestCase::TEST_DEALER_ID);
-
-    // Select Random Location
-    $locationKey = array_rand(TestCase::TEST_LOCATION_ID);
+    $newDealerUser = NewDealerUser::findOrFail(TestCase::getTestDealerId());
 
     // Return Overrides
     return [
         'user_id' => $newDealerUser->crmUser->user_id,
-        'dealer_location_id' => TestCase::TEST_LOCATION_ID[$locationKey],
+        'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
         'perms' => 'user',
         'first_name' => $faker->firstName,
         'last_name' => $faker->lastName,

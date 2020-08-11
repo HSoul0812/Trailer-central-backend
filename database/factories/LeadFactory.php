@@ -17,19 +17,17 @@ $factory->define(Lead::class, function (Faker $faker) {
     ];
 
     // Select Random Values
-    $websiteKey = array_rand(TestCase::TEST_WEBSITE_ID);
-    $locationKey = array_rand(TestCase::TEST_LOCATION_ID);
     $typeKey = array_rand($leadTypes);
     $leadType = $leadTypes[$typeKey];
 
     // Get Random Inventory
-    $inventory = Inventory::where('dealer_id', TestCase::TEST_DEALER_ID)->inRandomOrder()->first();
+    $inventory = Inventory::where('dealer_id', TestCase::getTestDealerId())->inRandomOrder()->first();
 
     // Return Overrides
     return [
-        'website_id' => TestCase::TEST_WEBSITE_ID[$websiteKey],
-        'dealer_id' => TestCase::TEST_DEALER_ID,
-        'dealer_location_id' => TestCase::TEST_LOCATION_ID[$locationKey],
+        'website_id' => TestCase::getTestWebsiteRandom(),
+        'dealer_id' => TestCase::getTestDealerId(),
+        'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
         'inventory_id' => $inventory->inventory_id,
         'lead_type' => $leadType,
         'title' => $formTitles[$leadType],

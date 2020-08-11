@@ -26,10 +26,10 @@ class AutoAssignTest extends TestCase
         $salesRepo = new SalesPersonRepository();
 
         // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::TEST_DEALER_ID);
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
 
         // Build Random Factory Salespeople
-        foreach(TestCase::TEST_LOCATION_ID as $locationId) {
+        foreach(TestCase::getTestLocationIds() as $locationId) {
             // Get Sales People By Location
             $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)
                                       ->where('dealer_location_id', $locationId)->get();
@@ -89,7 +89,7 @@ class AutoAssignTest extends TestCase
         Mail::fake();
 
         // Call Leads Assign Command
-        $this->artisan('leads:assign:auto ' . self::TEST_DEALER_ID)->assertExitCode(0);
+        $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
 
         // Loop Leads
         foreach($leads as $lead) {

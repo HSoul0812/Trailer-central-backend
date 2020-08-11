@@ -23,7 +23,6 @@ $factory->define(Inventory::class, function (Faker $faker) {
     $showroom = Showroom::where('manufacturer', $mfg->name)->inRandomOrder()->first();
 
     // Select Random Values
-    $locationKey = array_rand(TestCase::TEST_LOCATION_ID);
     $conditions = ['new', 'used'];
     $condition = array_rand($conditions);
 
@@ -40,8 +39,8 @@ $factory->define(Inventory::class, function (Faker $faker) {
     // Return Overrides
     return [
         'entity_type_id' => $entityType->entity_type_id,
-        'dealer_id' => TestCase::TEST_DEALER_ID,
-        'dealer_location_id' => TestCase::TEST_LOCATION_ID[$locationKey],
+        'dealer_id' => TestCase::getTestDealerId(),
+        'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
         'created_at' => $createdAt,
         'updated_at' => $createdAt,
         'updated_at_auto' => $createdAt,
