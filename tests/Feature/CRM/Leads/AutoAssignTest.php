@@ -422,6 +422,150 @@ class AutoAssignTest extends TestCase
     }
 
     /**
+     * Test no round robin; all entries must match exactly one thing
+     * 
+     * @specs array dealer_location_id = all in TEST_LOCATION_ID
+     * @specs array lead_type = general, inventory, trade
+     * @specs bool enable_assign_notification = 1
+     * @return void
+     */
+    public function testNoRoundRobin()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer->crmUser()->update([
+            'enable_assign_notification' => 1
+        ]);
+
+        // Clean Up Salespeople
+        $this->roundRobin[$dealer->id] = array();
+        foreach(TestCase::getTestDealerLocationIds() as $locationId) {
+            // Get Sales People for Location
+            $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)
+                                      ->where('dealer_location_id', $locationId)->get();
+
+            // Loop Salespeople
+            $this->roundRobin[$dealer->id][$locationId] = array();
+            $roundRobinLocation = array();
+            foreach($salespeople as $salesPerson) {
+                $roundRobinLocation[] = $salesPerson;
+            }
+
+            // Loop Valid Types
+            foreach(SalesPerson::TYPES_VALID as $salesType) {
+                // Initialize Sales Type
+                $this->roundRobin[$dealer->id][$locationId][$salesType] = array();
+
+                // Get First Sales Person
+                $salesPerson = array_shift($roundRobinLocation);
+                if(!empty($salesPerson->id)) {
+                    // Toggle Sales Person to ONLY Work With This Sales Type
+                    $params = [
+                        'is_default' => 0,
+                        'is_inventory' => 0,
+                        'is_financing' => 0,
+                        'is_trade' => 0
+                    ];
+                    $params['is_' . $salesType] = 1;
+                    SalesPerson::where('id', $salesPerson->id)->update($params);
+                } else {
+                    // Create Sales Person!
+                    $params = [
+                        'dealer_location_id' => $locationId,
+                        'is_default' => 0,
+                        'is_inventory' => 0,
+                        'is_financing' => 0,
+                        'is_trade' => 0
+                    ];
+                    $params['is_' . $salesType] = 1;
+                    $salesPerson = factory(SalesPerson::class, 1)->create($params);
+                }
+
+                // Set Sales Person ID
+                $this->roundRobin[$dealer->id][$locationId][$salesType] = $salesPerson->id;
+            }
+
+            // Delete Remaining Locations!
+            if(count($roundRobinLocation) > 0) {
+                foreach($roundRobinLocation as $salesPerson) {
+                    SalesPerson::where('id', $salesPerson->id)->delete();
+                }
+            }
+        }
+
+
+        // Refresh Leads
+        $this->refreshLeads($dealer->id);
+
+        // Build Random Factory Default Leads For Each Location
+        foreach(TestCase::getTestDealerLocationIds() as $locationId) {
+            factory(Lead::class, 2)->create([
+                'dealer_location_id' => $locationId,
+                'lead_type' => 'general'
+            ]);
+            factory(Lead::class, 2)->create([
+                'dealer_location_id' => $locationId,
+                'lead_type' => 'inventory'
+            ]);
+            factory(Lead::class, 2)->create([
+                'dealer_location_id' => $locationId,
+                'lead_type' => 'trade'
+            ]);
+            factory(Lead::class, 2)->create([
+                'dealer_location_id' => $locationId,
+                'lead_type' => 'financing'
+            ]);
+        }
+        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+
+
+        // Detect What Sales People Will be Assigned!
+        $leadSalesPeople = array();
+        foreach($leads as $lead) {
+            // Get Correct Sales Type
+            $salesType = $lead->lead_type;
+            if($salesType === 'general') {
+                $salesType = 'default';
+            }
+
+            // We Should Know EXACTLY Where it Goes!
+            $leadSalesPeople[$lead->identifier] = $this->roundRobin[$dealer->id][$lead->dealer_location_id][$salesType];
+        }
+
+        // Fake Mail
+        Mail::fake();
+
+        // Call Leads Assign Command
+        $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Assert a message was sent to the given leads...
+            $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
+            Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
+                if(empty($salesPerson->email)) {
+                    return false;
+                }
+                return $mail->hasTo($salesPerson->email);
+            });
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('crm_tc_lead_status', [
+                'tc_lead_identifier' => $lead->identifier,
+                'sales_person_id' => $leadSalesPeople[$lead->identifier]
+            ]);
+
+            // Assert a lead assign entry was saved...
+            $this->assertDatabaseHas('crm_lead_assign', [
+                'dealer_id' => $dealer->id,
+                'lead_id' => $lead->identifier,
+                'chosen_salesperson_id' => $leadSalesPeople[$lead->identifier],
+                'status' => 'mailed'
+            ]);
+        }
+    }
+
+    /**
      * Test round robin on consecutive runs
      * 
      * @specs int dealer_location_id = first in TEST_LOCATION_ID
