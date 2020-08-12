@@ -141,100 +141,6 @@ class AutoAssignTest extends TestCase
     }
 
     /**
-     * Test round robin only with no email sent
-     * 
-     * @specs int dealer_location_id = first in TEST_LOCATION_ID
-     * @specs string lead_type = inventory
-     * @specs bool enable_assign_notification = 0
-     * @return void
-     */
-    public function testNoEmailRoundRobin()
-    {
-        // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
-        $dealer->crmUser()->update([
-            'enable_assign_notification' => 1
-        ]);
-
-        // Build Random Factory Salespeople
-        $locationIds = TestCase::getTestDealerLocationIds();
-        $locationId = end($locationIds);
-
-        // Force Default On Existing Items
-        $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                 ->where('dealer_location_id', $locationId);
-        $salesQuery->update([
-            'is_inventory' => 1
-        ]);
-
-        // Get Salespeople
-        $salespeople = $salesQuery->get();
-        if(empty($salespeople) || count($salespeople) < 3) {
-            $add = (3 - count($salespeople));
-            factory(SalesPerson::class, $add)->create([
-                'dealer_location_id' => $locationId
-            ]);
-        }
-
-        // Get Leads
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        if(empty($leads) || count($leads) < 1) {
-            // Build Random Factory Leads
-            factory(Lead::class, 5)->create([
-                'dealer_location_id' => $locationId,
-                'lead_type' => 'inventory'
-            ]);
-            $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        }
-
-        // Detect What Sales People Will be Assigned!
-        $leadSalesPeople = array();
-        foreach($leads as $lead) {
-            // Get Newest Sales Person
-            $salesType = 'inventory';
-
-            // Find Newest Assigned Sales Person
-            if(!isset($this->roundRobin[$dealer->id][$locationId][$salesType])) {
-                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
-            } else {
-                $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
-                $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
-            }
-
-            // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
-            $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
-            $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
-        }
-
-        // Fake Mail
-        Mail::fake();
-
-        // Call Leads Assign Command
-        $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
-
-        // Loop Leads
-        foreach($leads as $lead) {
-            // Assert a message was sent to the given leads...
-            $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
-
-            // Assert a lead assign entry was saved...
-            $this->assertDatabaseHas('crm_tc_lead_status', [
-                'tc_lead_identifier' => $lead->identifier,
-                'sales_person_id' => $leadSalesPeople[$lead->identifier]
-            ]);
-
-            // Assert a lead assign entry was saved...
-            $this->assertDatabaseHas('crm_lead_assign', [
-                'dealer_id' => $dealer->id,
-                'lead_id' => $lead->identifier,
-                'chosen_salesperson_id' => $leadSalesPeople[$lead->identifier],
-                'status' => 'assigned'
-            ]);
-        }
-    }
-
-    /**
      * Test round robin with empty preferred location
      * 
      * @specs int dealer_location_id = first in TEST_LOCATION_ID
@@ -247,7 +153,7 @@ class AutoAssignTest extends TestCase
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
         $dealer->crmUser()->update([
-            'enable_assign_notification' => 0
+            'enable_assign_notification' => 1
         ]);
 
         // Build Random Factory Salespeople
@@ -365,6 +271,106 @@ class AutoAssignTest extends TestCase
         foreach($leads as $lead) {
             // Assert a message was sent to the given leads...
             $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
+            Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
+                if(empty($salesPerson->email)) {
+                    return false;
+                }
+                return $mail->hasTo($salesPerson->email);
+            });
+
+            // Assert a lead assign entry was saved...
+            $this->assertDatabaseHas('crm_tc_lead_status', [
+                'tc_lead_identifier' => $lead->identifier,
+                'sales_person_id' => $leadSalesPeople[$lead->identifier]
+            ]);
+
+            // Assert a lead assign entry was saved...
+            $this->assertDatabaseHas('crm_lead_assign', [
+                'dealer_id' => $dealer->id,
+                'lead_id' => $lead->identifier,
+                'chosen_salesperson_id' => $leadSalesPeople[$lead->identifier],
+                'status' => 'mailed'
+            ]);
+        }
+    }
+
+    /**
+     * Test round robin only with no email sent
+     * 
+     * @specs int dealer_location_id = first in TEST_LOCATION_ID
+     * @specs string lead_type = inventory
+     * @specs bool enable_assign_notification = 0
+     * @return void
+     */
+    public function testNoEmailRoundRobin()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer->crmUser()->update([
+            'enable_assign_notification' => 0
+        ]);
+
+        // Build Random Factory Salespeople
+        $locationIds = TestCase::getTestDealerLocationIds();
+        $locationId = reset($locationIds);
+
+        // Force Default On Existing Items
+        $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
+                                 ->where('dealer_location_id', $locationId);
+        $salesQuery->update([
+            'is_inventory' => 1
+        ]);
+
+        // Get Salespeople
+        $salespeople = $salesQuery->get();
+        if(empty($salespeople) || count($salespeople) < 3) {
+            $add = (3 - count($salespeople));
+            factory(SalesPerson::class, $add)->create([
+                'dealer_location_id' => $locationId
+            ]);
+        }
+
+        // Get Leads
+        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        if(empty($leads) || count($leads) < 1) {
+            // Build Random Factory Leads
+            factory(Lead::class, 5)->create([
+                'dealer_location_id' => $locationId,
+                'lead_type' => 'inventory'
+            ]);
+            $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        }
+
+        // Detect What Sales People Will be Assigned!
+        $leadSalesPeople = array();
+        foreach($leads as $lead) {
+            // Get Newest Sales Person
+            $salesType = 'inventory';
+
+            // Find Newest Assigned Sales Person
+            if(!isset($this->roundRobin[$dealer->id][$locationId][$salesType])) {
+                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
+            } else {
+                $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
+                $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
+            }
+
+            // Find Next!
+            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
+            $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
+        }
+
+        // Fake Mail
+        Mail::fake();
+
+        // Call Leads Assign Command
+        $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Assert a message was sent to the given leads...
+            $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
 
             // Assert a lead assign entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
@@ -381,6 +387,7 @@ class AutoAssignTest extends TestCase
             ]);
         }
     }
+
 
     /**
      * Preserve the Round Robin Sales Person Temporarily
