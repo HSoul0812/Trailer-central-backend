@@ -3,8 +3,6 @@
 namespace Tests\Feature\CRM\Leads;
 
 use Illuminate\Support\Facades\Mail;
-use App\Repositories\CRM\Leads\LeadRepository;
-use App\Repositories\CRM\User\SalesPersonRepository;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Inventory\Inventory;
@@ -76,15 +74,16 @@ class AutoAssignTest extends TestCase
             }
         }
 
-        // Get Leads
+
+        // Refresh Leads
+        $this->refreshLeads($dealerId);
+
+        // Build Random Factory Leads
+        factory(Lead::class, 10)->create([
+            'lead_type' => 'general'
+        ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        if(empty($leads) || count($leads) < 1) {
-            // Build Random Factory Leads
-            factory(Lead::class, 10)->create([
-                'lead_type' => 'general'
-            ]);
-            $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        }
+
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
@@ -206,31 +205,32 @@ class AutoAssignTest extends TestCase
         }
         $inventoryId = $inventory->inventory_id;
 
-        // Get Leads
+
+        // Refresh Leads
+        $this->refreshLeads($dealerId);
+
+        // Build Random Factory Leads With Location
+        factory(Lead::class, 5)->create([
+            'dealer_location_id' => $locationId,
+            'inventory_id' => $inventoryId,
+            'lead_type' => 'inventory'
+        ]);
+
+        // Build Random Factory Leads With No Location
+        factory(Lead::class, 5)->create([
+            'dealer_location_id' => 0,
+            'inventory_id' => $inventoryId,
+            'lead_type' => 'inventory'
+        ]);
+
+        // Build Random Factory Leads With No Location or Inventory
+        factory(Lead::class, 5)->create([
+            'dealer_location_id' => 0,
+            'inventory_id' => 0,
+            'lead_type' => 'inventory'
+        ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        if(empty($leads) || count($leads) < 1) {
-            // Build Random Factory Leads With Location
-            factory(Lead::class, 5)->create([
-                'dealer_location_id' => $locationId,
-                'inventory_id' => $inventoryId,
-                'lead_type' => 'inventory'
-            ]);
 
-            // Build Random Factory Leads With No Location
-            factory(Lead::class, 5)->create([
-                'dealer_location_id' => 0,
-                'inventory_id' => $inventoryId,
-                'lead_type' => 'inventory'
-            ]);
-
-            // Build Random Factory Leads With No Location or Inventory
-            factory(Lead::class, 5)->create([
-                'dealer_location_id' => 0,
-                'inventory_id' => 0,
-                'lead_type' => 'inventory'
-            ]);
-            $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        }
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
@@ -333,28 +333,28 @@ class AutoAssignTest extends TestCase
         }
 
 
-        // Get Leads
+        // Refresh Leads
+        $this->refreshLeads($dealerId);
+
+        // Build Random Factory Default Leads With Location
+        factory(Lead::class, 5)->create([
+            'dealer_location_id' => $locationId,
+            'lead_type' => 'general'
+        ]);
+
+        // Build Random Factory Inventory Leads With Location
+        factory(Lead::class, 5)->create([
+            'dealer_location_id' => $locationId,
+            'lead_type' => 'inventory'
+        ]);
+
+        // Build Random Factory Trade Leads With Location
+        factory(Lead::class, 5)->create([
+            'dealer_location_id' => $locationId,
+            'lead_type' => 'trade'
+        ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        if(empty($leads) || count($leads) < 1) {
-            // Build Random Factory Default Leads With Location
-            factory(Lead::class, 5)->create([
-                'dealer_location_id' => $locationId,
-                'lead_type' => 'general'
-            ]);
 
-            // Build Random Factory Inventory Leads With Location
-            factory(Lead::class, 5)->create([
-                'dealer_location_id' => $locationId,
-                'lead_type' => 'inventory'
-            ]);
-
-            // Build Random Factory Trade Leads With Location
-            factory(Lead::class, 5)->create([
-                'dealer_location_id' => $locationId,
-                'lead_type' => 'trade'
-            ]);
-            $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        }
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
@@ -374,7 +374,7 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
         }
@@ -456,16 +456,17 @@ class AutoAssignTest extends TestCase
             ]);
         }
 
-        // Get Leads
+
+        // Refresh Leads
+        $this->refreshLeads($dealerId);
+
+        // Build Random Factory Leads
+        factory(Lead::class, 5)->create([
+            'dealer_location_id' => $locationId,
+            'lead_type' => 'inventory'
+        ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        if(empty($leads) || count($leads) < 1) {
-            // Build Random Factory Leads
-            factory(Lead::class, 5)->create([
-                'dealer_location_id' => $locationId,
-                'lead_type' => 'inventory'
-            ]);
-            $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
-        }
+
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
@@ -514,6 +515,22 @@ class AutoAssignTest extends TestCase
         }
     }
 
+
+    /**
+     * Refresh Unassigned Leads in DB
+     * 
+     * @param type $dealerId
+     * @return void
+     */
+    private function refreshLeads($dealerId) {
+        // Get Existing Unassigned Leads for Dealer ID
+        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            Lead::where('identifier', $lead->identifier)->delete();
+        }
+    }
 
     /**
      * Preserve the Round Robin Sales Person Temporarily
