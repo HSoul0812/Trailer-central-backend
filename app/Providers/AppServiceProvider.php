@@ -112,6 +112,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
         \Validator::extend('interaction_type_valid', 'App\Rules\CRM\Interactions\ValidInteractionType@passes');
         \Validator::extend('parts_sku_unique', 'App\Rules\Parts\SkuUnique@validate');
+        \Validator::extend('vendor_exists', 'App\Rules\Inventory\VendorExists@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {

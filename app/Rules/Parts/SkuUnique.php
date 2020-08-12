@@ -4,6 +4,7 @@ namespace App\Rules\Parts;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Repositories\Parts\PartRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
 
 class SkuUnique implements Rule
 {
@@ -19,7 +20,12 @@ class SkuUnique implements Rule
             }
         }
         
-        $part = $partRepository->getBySku($value);
+        if (empty(Auth::user())) {
+            $part = $partRepository->getBySku($value);
+        } else {
+            $part = $partRepository->getDealerSku(Auth::user()->dealer_id, $value);
+        }
+        
         
         if ($part) {
             return false;

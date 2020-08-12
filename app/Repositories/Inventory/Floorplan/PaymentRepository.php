@@ -49,26 +49,6 @@ class PaymentRepository implements PaymentRepositoryInterface {
         ]
     ];
 
-    /**
-     * If type is balance, decrease floorplan balance of the inventory
-     * If type is interest, increase interest amount of the inventory
-     */
-    private function adjustBalance(Payment $payment, array $params):void
-    {
-        $amount = (float) $params['amount'];
-        if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
-            $amount *= -1;
-        }
-        
-        if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
-            Inventory::find($params['inventory_id'])
-                ->update(['fp_balance' => (float) $payment['inventory']['fp_balance'] - (float) $params['amount']]);
-        } else {
-            Inventory::find($params['inventory_id'])
-                ->update(['fp_interest_paid' => (float) $payment['inventory']['fp_interest_paid'] + (float) $params['amount']]);
-        }
-    }
-
     public function create($params) {
         DB::beginTransaction();
 
@@ -83,6 +63,26 @@ class PaymentRepository implements PaymentRepositoryInterface {
         }
 
         return $floorplanPayment;
+    }
+    
+    public function createBulk($payments) {
+        // Should probably queue this
+        $floorplanPayments = [];
+        DB::beginTransaction();
+        
+        try {
+            foreach($payments as $paymentData) {
+                $floorplanPayment = Payment::create($paymentData);
+                $this->adjustBalance($floorplanPayment, $paymentData);
+                $floorplanPayments[] = $floorplanPayment;
+            }
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw new \Exception($ex->getMessage());
+        }
+        
+        return collect($floorplanPayments);
     }
 
     public function delete($params) {
@@ -134,6 +134,26 @@ class PaymentRepository implements PaymentRepositoryInterface {
             return;
         }
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+    
+     /**
+     * If type is balance, decrease floorplan balance of the inventory
+     * If type is interest, increase interest amount of the inventory
+     */
+    private function adjustBalance(Payment $payment, array $params):void
+    {
+        $amount = (float) $params['amount'];
+        if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
+            $amount *= -1;
+        }
+        
+        if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
+            Inventory::find($params['inventory_id'])
+                ->update(['fp_balance' => (float) $payment['inventory']['fp_balance'] - (float) $params['amount']]);
+        } else {
+            Inventory::find($params['inventory_id'])
+                ->update(['fp_interest_paid' => (float) $payment['inventory']['fp_interest_paid'] + (float) $params['amount']]);
+        }
     }
 
 }

@@ -33,6 +33,14 @@ $api->version('v1', function ($route) {
      */
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
     $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
+    
+    $route->put('inventory/floorplan/bulk/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create');
+    
+    $route->get('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@index');
+    $route->put('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@create');
+    $route->get('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@show')->where('id', '[0-9]+');
+    $route->post('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@update')->where('id', '[0-9]+');
+    $route->delete('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')->where('id', '[0-9]+');
 
     /**
      * Part bins

@@ -13,6 +13,7 @@ class GetInventoryRequest extends Request {
         'dealer_id' => 'array',
         'dealer_id.*' => 'integer',
         'only_floorplanned' => 'boolean',
+        'floorplan_vendor' => 'vendor_exists'
     ];
     
 }

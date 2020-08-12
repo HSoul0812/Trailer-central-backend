@@ -148,6 +148,10 @@ class PartRepository implements PartRepositoryInterface {
         return Part::findOrFail($params['id'])->load('bins.bin');
     }
     
+    public function getDealerSku($dealerId, $sku) {
+        return Part::where('sku', $sku)->where('dealer_id', $dealerId)->first();
+    }
+    
     public function getBySku($sku) {
         return Part::where('sku', $sku)->first();
     }

@@ -13,4 +13,6 @@ interface PartRepositoryInterface extends Repository {
     
     public function getBySku($sku);
     
+    public function getDealerSku($dealerId, $sku);
+    
 }

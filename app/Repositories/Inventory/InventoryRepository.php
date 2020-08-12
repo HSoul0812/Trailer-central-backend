@@ -139,6 +139,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
         
+        if (isset($params['floorplan_vendor'])) {
+            $query = $query->where('fp_vendor', $params['floorplan_vendor']);
+        }
+        
         if (isset($params['only_floorplanned']) && !empty($params['only_floorplanned'])) {
             /**
              * Filter only floored inventories to pay
