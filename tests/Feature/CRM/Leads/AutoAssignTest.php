@@ -59,14 +59,15 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Salespeople
         foreach(TestCase::getTestDealerLocationIds() as $locationId) {
-            // Get Sales People By Location
-            $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                      ->where('dealer_location_id', $locationId)->get();
-            if(count($salespeople) > 0) {
-                $salespeople->update([
-                    'is_default' => 1
-                ]);
-            }
+            // Force Default On Existing Items
+            $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
+                                         ->where('dealer_location_id', $locationId);
+            $salesQuery->update([
+                'is_default' => 1
+            ]);
+
+            // Get Salespeople
+            $salespeople = $salesQuery->get();
             if(empty($salespeople) || count($salespeople) < 3) {
                 $add = (3 - count($salespeople));
                 factory(SalesPerson::class, $add)->create([
@@ -165,14 +166,15 @@ class AutoAssignTest extends TestCase
         $locationIds = TestCase::getTestDealerLocationIds();
         $locationId = reset($locationIds);
 
-        // Get Sales People By Location
-        $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                  ->where('dealer_location_id', $locationId)->get();
-        if(count($salespeople) > 0) {
-            $salespeople->update([
-                'is_inventory' => 1
-            ]);
-        }
+        // Force Default On Existing Items
+        $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
+                                     ->where('dealer_location_id', $locationId);
+        $salesQuery->update([
+            'is_inventory' => 1
+        ]);
+
+        // Get Salespeople
+        $salespeople = $salesQuery->get();
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
