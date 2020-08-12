@@ -210,7 +210,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $validSalesPeople = [];
         $nextSalesPerson = null;
         $lastId = 0;
-        var_dump($salesPeople);
         foreach($salesPeople as $k => $salesPerson) {
             // Search By Location?
             if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
@@ -227,14 +226,14 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             // Insert Valid Salespeople
             $validSalesPeople[] = $salesPerson;
         }
-        var_dump($validSalesPeople);
 
         // Loop Valid Sales People
         if(count($validSalesPeople) > 1) {
-            $salesPerson = end($validSalesPeople);
-            $lastId = $salesPerson->id;
+            $lastSalesPerson = end($validSalesPeople);
+            $lastId = $lastSalesPerson->id;
             foreach($validSalesPeople as $salesPerson) {
                 // Compare ID
+                echo "last id: " . $lastId . PHP_EOL;
                 if($lastId === $newestSalesPersonId || $newestSalesPersonId === 0) {
                     $nextSalesPerson = $salesPerson;
                     break;
@@ -248,9 +247,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 $nextSalesPerson = $salesPerson;
             }
         } elseif(count($validSalesPeople) === 1) {
-            $salesPerson = reset($validSalesPeople);
-            $nextSalesPerson = $salesPerson;
+            $nextSalesPerson = reset($validSalesPeople);
         }
+        die;
 
         // Still No Next Sales Person?
         if(empty($nextSalesPerson)) {
