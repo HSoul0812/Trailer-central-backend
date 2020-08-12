@@ -290,8 +290,12 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             $salesType = 'inventory';
         }
 
+        // Set To Valid Type if Exists!
+        if(in_array($leadType, SalesPerson::TYPES_VALID)) {
+            $salesType = $leadType;
+        }
         // Not a Valid Type? Set Default!
-        if(!in_array($leadType, SalesPerson::TYPES_VALID)) {
+        else {
             $salesType = 'default';
         }
 
