@@ -483,9 +483,6 @@ class AutoAssignTest extends TestCase
                 }
 
                 // Set Sales Person ID
-                if(empty($salesPerson->id)) {
-                    var_dump($salesPerson);
-                }
                 $this->roundRobin[$dealer->id][$locationId][$salesType] = $salesPerson->id;
             }
 
