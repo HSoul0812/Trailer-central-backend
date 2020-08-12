@@ -359,6 +359,12 @@ class AutoAssignTest extends TestCase
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
+            // Get Correct Sales Type
+            $salesType = $lead->lead_type;
+            if($salesType === 'general') {
+                $salesType = 'default';
+            }
+
             // Find Newest Assigned Sales Person
             if(!isset($this->roundRobin[$dealer->id][$locationId][$salesType])) {
                 $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
