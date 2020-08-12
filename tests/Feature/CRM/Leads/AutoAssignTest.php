@@ -208,8 +208,8 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            var_dump($this->roundRobin);
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            echo $dealer->id . " => " . $locationId . " => " . $salesType . " => " . $newestSalesPerson->id . " => " . $salesPerson->id . PHP_EOL;
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
