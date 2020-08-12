@@ -27,6 +27,7 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
      */
     public function get($params)
     {
+        // do not use $params with a RequestQueryable -- pagination will not work
         return $this->query()->get();
     }
 
