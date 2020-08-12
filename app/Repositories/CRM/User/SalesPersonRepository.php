@@ -249,7 +249,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         } elseif(count($validSalesPeople) === 1) {
             $nextSalesPerson = reset($validSalesPeople);
         }
-        die;
 
         // Still No Next Sales Person?
         if(empty($nextSalesPerson)) {
