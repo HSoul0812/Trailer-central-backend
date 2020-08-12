@@ -161,7 +161,6 @@ class AutoAssignTest extends TestCase
         $dealer->crmUser()->update([
             'enable_assign_notification' => 0
         ]);
-        var_dump($dealer->salespeopleEmails);
 
         // Build Random Factory Salespeople
         $locationIds = TestCase::getTestDealerLocationIds();
@@ -209,7 +208,7 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
