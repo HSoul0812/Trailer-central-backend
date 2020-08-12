@@ -195,7 +195,6 @@ class AutoAssignTest extends TestCase
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
-        var_dump($leads);
         foreach($leads as $lead) {
             // Get Newest Sales Person
             $salesType = 'inventory';
@@ -213,6 +212,7 @@ class AutoAssignTest extends TestCase
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
+        var_dump($this->roundRobin);
 
         // Fake Mail
         Mail::fake();
