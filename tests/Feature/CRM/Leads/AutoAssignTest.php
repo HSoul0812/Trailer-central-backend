@@ -298,13 +298,13 @@ class AutoAssignTest extends TestCase
         foreach($salesPeople as $k => $salesPerson) {
             // Search By Location?
             if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
-                echo $salesPerson->dealer_location_id;
                 if($dealerLocationId !== $salesPerson->dealer_location_id) {
                     continue;
                 }
             }
 
             // Search by Type?
+            echo $salesPerson->is_inventory . PHP_EOL;
             if($salesPerson->{'is_' . $salesType} !== 1 && $salesPerson->{'is_' . $salesType} !== '1') {
                 continue;
             }
