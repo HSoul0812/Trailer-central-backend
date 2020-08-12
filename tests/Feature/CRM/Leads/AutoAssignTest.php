@@ -326,8 +326,6 @@ class AutoAssignTest extends TestCase
         }
 
         // Detect What Sales People Will be Assigned!
-        var_dump($dealer->salespeopleEmails);
-        die;
         $leadSalesPeople = array();
         foreach($leads as $lead) {
             // Get Newest Sales Person
@@ -352,6 +350,7 @@ class AutoAssignTest extends TestCase
 
             // Find Next!
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            echo $dealer->id . " => " . $dealerLocationId . " => " . $salesType . " => " . $newestSalesPerson->id . " => " . $salesPerson->id . PHP_EOL;
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
         }
