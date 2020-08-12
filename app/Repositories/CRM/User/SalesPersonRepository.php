@@ -210,9 +210,10 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $validSalesPeople = [];
         $nextSalesPerson = null;
         $lastId = 0;
+        $dealerLocationId = (int) $dealerLocationId;
         foreach($salesPeople as $k => $salesPerson) {
             // Search By Location?
-            if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
+            if($dealerLocationId !== 0) {
                 if($dealerLocationId !== $salesPerson->dealer_location_id) {
                     continue;
                 }
