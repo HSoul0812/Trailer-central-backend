@@ -297,6 +297,7 @@ class AutoAssignTest extends TestCase
         $lastId = 0;
         foreach($salesPeople as $k => $salesPerson) {
             // Search By Location?
+            var_dump($salesPerson);
             if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
                 if($dealerLocationId !== $salesPerson->dealer_location_id) {
                     continue;
@@ -312,6 +313,7 @@ class AutoAssignTest extends TestCase
             $validSalesPeople[] = $salesPerson;
         }
         echo $dealerId . " => " . $dealerLocationId . " => " . $salesType . " => " . $newestSalesPerson->id . PHP_EOL;
+        die;
 
         // Loop Valid Sales People
         if(count($validSalesPeople) > 1) {
