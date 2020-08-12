@@ -208,11 +208,11 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
+            var_dump($this->roundRobin);
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
-        var_dump($this->roundRobin);
 
         // Fake Mail
         Mail::fake();
