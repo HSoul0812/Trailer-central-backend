@@ -76,12 +76,6 @@ class AutoAssignTest extends TestCase
             }
         }
 
-        // Get Inventory
-        $inventory = Inventory::where('dealer_id', $dealer->id)->take(5)->get();
-        if(empty($inventory) || count($inventory) < 1) {
-            $inventory = factory(Inventory::class, 5)->create();
-        }
-
         // Get Leads
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
         if(empty($leads) || count($leads) < 1) {
@@ -159,12 +153,12 @@ class AutoAssignTest extends TestCase
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
         $dealer->crmUser()->update([
-            'enable_assign_notification' => 0
+            'enable_assign_notification' => 1
         ]);
 
         // Build Random Factory Salespeople
         $locationIds = TestCase::getTestDealerLocationIds();
-        $locationId = reset($locationIds);
+        $locationId = end($locationIds);
 
         // Force Default On Existing Items
         $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
@@ -240,6 +234,134 @@ class AutoAssignTest extends TestCase
         }
     }
 
+    /**
+     * Test round robin with empty preferred location
+     * 
+     * @specs int dealer_location_id = first in TEST_LOCATION_ID
+     * @specs string lead_type = inventory
+     * @specs bool enable_assign_notification = 1
+     * @return void
+     */
+    public function testNoPreferredLocationRoundRobin()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer->crmUser()->update([
+            'enable_assign_notification' => 0
+        ]);
+
+        // Build Random Factory Salespeople
+        $locationIds = TestCase::getTestDealerLocationIds();
+        $locationId = reset($locationIds);
+        $lastLocationId = end($locationIds);
+
+        // Force Default On Existing Items
+        $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
+                                 ->where('dealer_location_id', $locationId);
+        $salesQuery->update([
+            'is_inventory' => 1
+        ]);
+
+        // Get Inventory
+        $inventory = Inventory::where('dealer_id', $dealer->id)
+                              ->where('dealer_location_id', $lastLocationId)->first();
+        if(empty($inventory) || count($inventory) < 1) {
+            $inventory = factory(Inventory::class, 1)->create([
+                'dealer_location_id' => $lastLocationId
+            ]);
+        }
+        $inventoryId = $inventory->inventory_id;
+
+        // Get Salespeople
+        $salespeople = $salesQuery->get();
+        if(empty($salespeople) || count($salespeople) < 3) {
+            $add = (3 - count($salespeople));
+            factory(SalesPerson::class, $add)->create([
+                'dealer_location_id' => $locationId
+            ]);
+        }
+
+        // Get Leads
+        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        if(empty($leads) || count($leads) < 1) {
+            // Build Random Factory Leads With Location
+            factory(Lead::class, 5)->create([
+                'dealer_location_id' => $locationId,
+                'inventory_id' => $inventoryId,
+                'lead_type' => 'inventory'
+            ]);
+
+            // Build Random Factory Leads With No Location
+            factory(Lead::class, 5)->create([
+                'dealer_location_id' => 0,
+                'inventory_id' => $inventoryId,
+                'lead_type' => 'inventory'
+            ]);
+
+            // Build Random Factory Leads With No Location or Inventory
+            factory(Lead::class, 5)->create([
+                'dealer_location_id' => 0,
+                'inventory_id' => 0,
+                'lead_type' => 'inventory'
+            ]);
+            $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        }
+
+        // Detect What Sales People Will be Assigned!
+        $leadSalesPeople = array();
+        foreach($leads as $lead) {
+            // Get Newest Sales Person
+            $salesType = 'inventory';
+
+            // Get Dealer Location
+            $dealerLocationId = $locationId;
+            if(empty($lead->dealer_location_id)) {
+                $dealerLocationId = $lastLocationId;
+            }
+            if(empty($lead->inventory_id)) {
+                $dealerLocationId = 0;
+            }
+
+            // Find Newest Assigned Sales Person
+            if(!isset($this->roundRobin[$dealer->id][$dealerLocationId][$salesType])) {
+                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+            } else {
+                $newestSalesPersonId = $this->roundRobin[$dealer->id][$dealerLocationId][$salesType];
+                $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
+            }
+
+            // Find Next!
+            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
+            $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
+        }
+
+        // Fake Mail
+        Mail::fake();
+
+        // Call Leads Assign Command
+        $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Assert a message was sent to the given leads...
+            $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
+
+            // Assert a lead assign entry was saved...
+            $this->assertDatabaseHas('crm_tc_lead_status', [
+                'tc_lead_identifier' => $lead->identifier,
+                'sales_person_id' => $leadSalesPeople[$lead->identifier]
+            ]);
+
+            // Assert a lead assign entry was saved...
+            $this->assertDatabaseHas('crm_lead_assign', [
+                'dealer_id' => $dealer->id,
+                'lead_id' => $lead->identifier,
+                'chosen_salesperson_id' => $leadSalesPeople[$lead->identifier],
+                'status' => 'assigned'
+            ]);
+        }
+    }
 
     /**
      * Preserve the Round Robin Sales Person Temporarily
