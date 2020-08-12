@@ -62,6 +62,11 @@ class AutoAssignTest extends TestCase
             // Get Sales People By Location
             $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)
                                       ->where('dealer_location_id', $locationId)->get();
+            if(count($salespeople) > 0) {
+                $salespeople->update([
+                    'is_default' => 1
+                ]);
+            }
             if(empty($salespeople) || count($salespeople) < 3) {
                 $add = (3 - count($salespeople));
                 factory(SalesPerson::class, $add)->create([
@@ -163,6 +168,11 @@ class AutoAssignTest extends TestCase
         // Get Sales People By Location
         $salespeople = SalesPerson::where('user_id', $dealer->crmUser->user_id)
                                   ->where('dealer_location_id', $locationId)->get();
+        if(count($salespeople) > 0) {
+            $salespeople->update([
+                'is_inventory' => 1
+            ]);
+        }
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
@@ -183,7 +193,7 @@ class AutoAssignTest extends TestCase
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
-        var_dump($dealer->salespeopleEmails);
+        var_dump($leads);
         foreach($leads as $lead) {
             // Get Newest Sales Person
             $salesType = 'inventory';
@@ -204,7 +214,6 @@ class AutoAssignTest extends TestCase
 
         // Fake Mail
         Mail::fake();
-        var_dump($leadSalesPeople);
 
         // Call Leads Assign Command
         $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
