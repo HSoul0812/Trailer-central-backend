@@ -210,6 +210,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $validSalesPeople = [];
         $nextSalesPerson = null;
         $lastId = 0;
+        var_dump($salesPeople);
         foreach($salesPeople as $k => $salesPerson) {
             // Search By Location?
             if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
@@ -226,6 +227,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             // Insert Valid Salespeople
             $validSalesPeople[] = $salesPerson;
         }
+        var_dump($validSalesPeople);
 
         // Loop Valid Sales People
         if(count($validSalesPeople) > 1) {
