@@ -295,6 +295,7 @@ class AutoAssignTest extends TestCase
         $validSalesPeople = [];
         $nextSalesPerson = null;
         $lastId = 0;
+        $dealerLocationId = (int) $dealerLocationId;
         foreach($salesPeople as $k => $salesPerson) {
             // Search By Location?
             if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
