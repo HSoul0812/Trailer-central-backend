@@ -112,6 +112,7 @@ class AutoAssignTest extends TestCase
         // Call Leads Assign Command
         $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
 
+
         // Loop Leads
         foreach($leads as $lead) {
             // Assert a message was sent to the given leads...
@@ -448,14 +449,18 @@ class AutoAssignTest extends TestCase
         ]);
 
         // Get Salespeople
+        $salesType = 'inventory';
         $salespeople = $salesQuery->get();
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
                 'dealer_location_id' => $locationId,
-                'lead_type' => 'inventory'
+                'lead_type' => $salesType
             ]);
         }
+
+        // Fake Mail
+        Mail::fake();
 
 
         // Refresh Leads
@@ -464,32 +469,21 @@ class AutoAssignTest extends TestCase
         // Build Random Factory Leads
         factory(Lead::class, 1)->create([
             'dealer_location_id' => $locationId,
-            'lead_type' => 'inventory'
+            'lead_type' => $salesType
         ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
-            // Get Newest Sales Person
-            $salesType = 'inventory';
-
             // Find Newest Assigned Sales Person
-            if(!isset($this->roundRobin[$dealer->id][$locationId][$salesType])) {
-                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
-            } else {
-                $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
-                $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
-            }
+            $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
 
             // Find Next!
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
-
-        // Fake Mail
-        Mail::fake();
 
         // Call Leads Assign Command
         $this->artisan('leads:assign:auto ' . self::getTestDealerId())->assertExitCode(0);
@@ -498,16 +492,13 @@ class AutoAssignTest extends TestCase
         // Build Random Factory Leads
         factory(Lead::class, 5)->create([
             'dealer_location_id' => $locationId,
-            'lead_type' => 'inventory'
+            'lead_type' => $salesType
         ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
-            // Get Newest Sales Person
-            $salesType = 'inventory';
-
             // Find Newest Assigned Sales Person
             $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
             $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
@@ -525,16 +516,13 @@ class AutoAssignTest extends TestCase
         // Build Random Factory Leads
         factory(Lead::class, 3)->create([
             'dealer_location_id' => $locationId,
-            'lead_type' => 'inventory'
+            'lead_type' => $salesType
         ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
-            // Get Newest Sales Person
-            $salesType = 'inventory';
-
             // Find Newest Assigned Sales Person
             $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
             $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
@@ -571,7 +559,7 @@ class AutoAssignTest extends TestCase
                 'dealer_id' => $dealer->id,
                 'lead_id' => $lead->identifier,
                 'chosen_salesperson_id' => $leadSalesPeople[$lead->identifier],
-                'status' => 'assigned'
+                'status' => 'mailed'
             ]);
         }
     }
