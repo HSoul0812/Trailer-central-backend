@@ -292,7 +292,7 @@ class AutoAssignTest extends TestCase
         // Get Inventory
         $inventory = Inventory::where('dealer_id', $dealer->id)
                               ->where('dealer_location_id', $lastLocationId)->first();
-        if(empty($inventory) || count($inventory) < 1) {
+        if(empty($inventory) || empty($inventory->inventory_id)) {
             $inventory = factory(Inventory::class, 1)->create([
                 'dealer_location_id' => $lastLocationId
             ]);
@@ -326,6 +326,8 @@ class AutoAssignTest extends TestCase
         }
 
         // Detect What Sales People Will be Assigned!
+        var_dump($dealer->salespeopleEmails);
+        die;
         $leadSalesPeople = array();
         foreach($leads as $lead) {
             // Get Newest Sales Person
