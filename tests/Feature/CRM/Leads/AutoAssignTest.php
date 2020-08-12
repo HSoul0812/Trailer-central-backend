@@ -255,12 +255,39 @@ class AutoAssignTest extends TestCase
         $locationId = reset($locationIds);
         $lastLocationId = end($locationIds);
 
+
         // Force Default On Existing Items
         $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
                                  ->where('dealer_location_id', $locationId);
         $salesQuery->update([
             'is_inventory' => 1
         ]);
+
+        // Get Salespeople
+        $salespeople = $salesQuery->get();
+        if(empty($salespeople) || count($salespeople) < 3) {
+            $add = (3 - count($salespeople));
+            factory(SalesPerson::class, $add)->create([
+                'dealer_location_id' => $locationId
+            ]);
+        }
+
+        // Force Default On Existing Items
+        $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
+                                 ->where('dealer_location_id', $lastLocationId);
+        $salesQuery->update([
+            'is_inventory' => 1
+        ]);
+
+        // Get Salespeople
+        $salespeople = $salesQuery->get();
+        if(empty($salespeople) || count($salespeople) < 3) {
+            $add = (3 - count($salespeople));
+            factory(SalesPerson::class, $add)->create([
+                'dealer_location_id' => $lastLocationId
+            ]);
+        }
+
 
         // Get Inventory
         $inventory = Inventory::where('dealer_id', $dealer->id)
@@ -271,15 +298,6 @@ class AutoAssignTest extends TestCase
             ]);
         }
         $inventoryId = $inventory->inventory_id;
-
-        // Get Salespeople
-        $salespeople = $salesQuery->get();
-        if(empty($salespeople) || count($salespeople) < 3) {
-            $add = (3 - count($salespeople));
-            factory(SalesPerson::class, $add)->create([
-                'dealer_location_id' => $locationId
-            ]);
-        }
 
         // Get Leads
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
