@@ -61,7 +61,7 @@ class AutoAssignTest extends TestCase
         foreach(TestCase::getTestDealerLocationIds() as $locationId) {
             // Force Default On Existing Items
             $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                         ->where('dealer_location_id', $locationId);
+                                     ->where('dealer_location_id', $locationId);
             $salesQuery->update([
                 'is_default' => 1
             ]);
@@ -161,6 +161,7 @@ class AutoAssignTest extends TestCase
         $dealer->crmUser()->update([
             'enable_assign_notification' => 0
         ]);
+        var_dump($dealer->salespeopleEmails);
 
         // Build Random Factory Salespeople
         $locationIds = TestCase::getTestDealerLocationIds();
@@ -168,7 +169,7 @@ class AutoAssignTest extends TestCase
 
         // Force Default On Existing Items
         $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                     ->where('dealer_location_id', $locationId);
+                                 ->where('dealer_location_id', $locationId);
         $salesQuery->update([
             'is_inventory' => 1
         ]);
@@ -208,7 +209,7 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            $salesPerson = $this->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
