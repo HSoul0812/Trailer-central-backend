@@ -170,12 +170,6 @@ class AutoAssignTest extends TestCase
             ]);
         }
 
-        // Get Inventory
-        $inventory = Inventory::where('dealer_id', $dealer->id)->take(5)->get();
-        if(empty($inventory) || count($inventory) < 1) {
-            $inventory = factory(Inventory::class, 5)->create();
-        }
-
         // Get Leads
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
         if(empty($leads) || count($leads) < 1) {
@@ -189,6 +183,7 @@ class AutoAssignTest extends TestCase
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
+        var_dump($dealer->salespeopleEmails);
         foreach($leads as $lead) {
             // Get Newest Sales Person
             $salesType = 'inventory';
