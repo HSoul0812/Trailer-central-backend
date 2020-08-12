@@ -522,9 +522,9 @@ class AutoAssignTest extends TestCase
      * @param type $dealer->id
      * @return void
      */
-    private function refreshLeads($dealer->id) {
+    private function refreshLeads($dealerId) {
         // Get Existing Unassigned Leads for Dealer ID
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealerId]);
 
         // Loop Leads
         foreach($leads as $lead) {
@@ -541,27 +541,27 @@ class AutoAssignTest extends TestCase
      * @param int $salesPersonId
      * @return int last sales person ID
      */
-    private function setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPersonId) {
+    private function setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId) {
         // Assign to Arrays
-        if(!isset($this->roundRobin[$dealer->id])) {
-            $this->roundRobin[$dealer->id] = array();
+        if(!isset($this->roundRobin[$dealerId])) {
+            $this->roundRobin[$dealerId] = array();
         }
 
         // Match By Dealer Location ID!
         if(!empty($dealerLocationId)) {
-            if(!isset($this->roundRobin[$dealer->id][$dealerLocationId])) {
-                $this->roundRobin[$dealer->id][$dealerLocationId] = array();
+            if(!isset($this->roundRobin[$dealerId][$dealerLocationId])) {
+                $this->roundRobin[$dealerId][$dealerLocationId] = array();
             }
-            $this->roundRobin[$dealer->id][$dealerLocationId][$salesType] = $salesPersonId;
+            $this->roundRobin[$dealerId][$dealerLocationId][$salesType] = $salesPersonId;
         }
 
         // Always Set for 0!
-        if(!isset($this->roundRobin[$dealer->id][0])) {
-            $this->roundRobin[$dealer->id][0] = array();
+        if(!isset($this->roundRobin[$dealerId][0])) {
+            $this->roundRobin[$dealerId][0] = array();
         }
-        $this->roundRobin[$dealer->id][0][$salesType] = $salesPersonId;
+        $this->roundRobin[$dealerId][0][$salesType] = $salesPersonId;
 
         // Return Last Sales Person ID
-        return $this->roundRobin[$dealer->id][0][$salesType];
+        return $this->roundRobin[$dealerId][0][$salesType];
     }
 }
