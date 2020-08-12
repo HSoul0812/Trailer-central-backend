@@ -478,7 +478,8 @@ class AutoAssignTest extends TestCase
                         'is_trade' => 0
                     ];
                     $params['is_' . $salesType] = 1;
-                    $salesPerson = factory(SalesPerson::class, 1)->create($params);
+                    $salespeople = factory(SalesPerson::class, 1)->create($params);
+                    $salesPerson = reset($salespeople);
                 }
 
                 // Set Sales Person ID
