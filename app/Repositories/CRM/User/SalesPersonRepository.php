@@ -233,14 +233,12 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             $lastId = $lastSalesPerson->id;
             foreach($validSalesPeople as $salesPerson) {
                 // Compare ID
-                echo "last id: " . $lastId . PHP_EOL;
                 if($lastId === $newestSalesPersonId || $newestSalesPersonId === 0) {
                     $nextSalesPerson = $salesPerson;
                     break;
                 }
                 $lastId = $salesPerson->id;
             }
-            echo "chosen sales person: " . $nextSalesPerson->id . PHP_EOL . PHP_EOL;
 
             // Still No Next Sales Person?
             if(empty($nextSalesPerson)) {

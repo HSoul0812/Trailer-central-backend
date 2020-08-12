@@ -208,8 +208,7 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
-            echo $dealer->id . " => " . $locationId . " => " . $salesType . " => " . $newestSalesPerson->id . " => " . $salesPerson->id . PHP_EOL;
+            $salesPerson = $this->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
@@ -273,5 +272,81 @@ class AutoAssignTest extends TestCase
 
         // Return Last Sales Person ID
         return $this->roundRobin[$dealerId][0][$salesType];
+    }
+
+    /**
+     * Round Robin to Next Sales Person
+     * 
+     * @param int $dealerId
+     * @param int $dealerLocationId
+     * @param string $salesType
+     * @param SalesPerson $newestSalesPerson
+     * @param array $salesPeople
+     * @return SalesPerson next sales person
+     */
+    private function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson, $salesPeople = array()) {
+        // Set Newest ID
+        $newestSalesPersonId = 0;
+        if(!empty($newestSalesPerson->id)) {
+            $newestSalesPersonId = $newestSalesPerson->id;
+        }
+
+        // Get Sales People for Dealer ID
+        if(empty($salesPeople)) {
+            $salesPeople = $this->findSalesPeople($dealerId);
+        }
+
+        // Loop Sales People
+        $validSalesPeople = [];
+        $nextSalesPerson = null;
+        $lastId = 0;
+        foreach($salesPeople as $k => $salesPerson) {
+            // Search By Location?
+            if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
+                if($dealerLocationId !== $salesPerson->dealer_location_id) {
+                    continue;
+                }
+            }
+
+            // Search by Type?
+            if($salesPerson->{'is_' . $salesType} !== 1 && $salesPerson->{'is_' . $salesType} !== '1') {
+                continue;
+            }
+
+            // Insert Valid Salespeople
+            $validSalesPeople[] = $salesPerson;
+        }
+
+        // Loop Valid Sales People
+        if(count($validSalesPeople) > 1) {
+            $lastSalesPerson = end($validSalesPeople);
+            $lastId = $lastSalesPerson->id;
+            foreach($validSalesPeople as $salesPerson) {
+                // Compare ID
+                echo "last id: " . $lastId . PHP_EOL;
+                if($lastId === $newestSalesPersonId || $newestSalesPersonId === 0) {
+                    $nextSalesPerson = $salesPerson;
+                    break;
+                }
+                $lastId = $salesPerson->id;
+            }
+            echo "chosen sales person: " . $nextSalesPerson->id . PHP_EOL . PHP_EOL;
+
+            // Still No Next Sales Person?
+            if(empty($nextSalesPerson)) {
+                $salesPerson = reset($validSalesPeople);
+                $nextSalesPerson = $salesPerson;
+            }
+        } elseif(count($validSalesPeople) === 1) {
+            $nextSalesPerson = reset($validSalesPeople);
+        }
+
+        // Still No Next Sales Person?
+        if(empty($nextSalesPerson)) {
+            $nextSalesPerson = $newestSalesPerson;
+        }
+
+        // Return Next Sales Person
+        return $nextSalesPerson;
     }
 }
