@@ -76,7 +76,7 @@ class AutoAssignTest extends TestCase
 
 
         // Refresh Leads
-        $this->refreshLeads($dealerId);
+        $this->refreshLeads($dealer->id);
 
         // Build Random Factory Leads
         factory(Lead::class, 10)->create([
@@ -207,7 +207,7 @@ class AutoAssignTest extends TestCase
 
 
         // Refresh Leads
-        $this->refreshLeads($dealerId);
+        $this->refreshLeads($dealer->id);
 
         // Build Random Factory Leads With Location
         factory(Lead::class, 5)->create([
@@ -334,7 +334,7 @@ class AutoAssignTest extends TestCase
 
 
         // Refresh Leads
-        $this->refreshLeads($dealerId);
+        $this->refreshLeads($dealer->id);
 
         // Build Random Factory Default Leads With Location
         factory(Lead::class, 5)->create([
@@ -458,7 +458,7 @@ class AutoAssignTest extends TestCase
 
 
         // Refresh Leads
-        $this->refreshLeads($dealerId);
+        $this->refreshLeads($dealer->id);
 
         // Build Random Factory Leads
         factory(Lead::class, 5)->create([
@@ -519,10 +519,10 @@ class AutoAssignTest extends TestCase
     /**
      * Refresh Unassigned Leads in DB
      * 
-     * @param type $dealerId
+     * @param type $dealer->id
      * @return void
      */
-    private function refreshLeads($dealerId) {
+    private function refreshLeads($dealer->id) {
         // Get Existing Unassigned Leads for Dealer ID
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
 
@@ -535,33 +535,33 @@ class AutoAssignTest extends TestCase
     /**
      * Preserve the Round Robin Sales Person Temporarily
      * 
-     * @param int $dealerId
+     * @param int $dealer->id
      * @param int $dealerLocationId
      * @param string $salesType
      * @param int $salesPersonId
      * @return int last sales person ID
      */
-    private function setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId) {
+    private function setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPersonId) {
         // Assign to Arrays
-        if(!isset($this->roundRobin[$dealerId])) {
-            $this->roundRobin[$dealerId] = array();
+        if(!isset($this->roundRobin[$dealer->id])) {
+            $this->roundRobin[$dealer->id] = array();
         }
 
         // Match By Dealer Location ID!
         if(!empty($dealerLocationId)) {
-            if(!isset($this->roundRobin[$dealerId][$dealerLocationId])) {
-                $this->roundRobin[$dealerId][$dealerLocationId] = array();
+            if(!isset($this->roundRobin[$dealer->id][$dealerLocationId])) {
+                $this->roundRobin[$dealer->id][$dealerLocationId] = array();
             }
-            $this->roundRobin[$dealerId][$dealerLocationId][$salesType] = $salesPersonId;
+            $this->roundRobin[$dealer->id][$dealerLocationId][$salesType] = $salesPersonId;
         }
 
         // Always Set for 0!
-        if(!isset($this->roundRobin[$dealerId][0])) {
-            $this->roundRobin[$dealerId][0] = array();
+        if(!isset($this->roundRobin[$dealer->id][0])) {
+            $this->roundRobin[$dealer->id][0] = array();
         }
-        $this->roundRobin[$dealerId][0][$salesType] = $salesPersonId;
+        $this->roundRobin[$dealer->id][0][$salesType] = $salesPersonId;
 
         // Return Last Sales Person ID
-        return $this->roundRobin[$dealerId][0][$salesType];
+        return $this->roundRobin[$dealer->id][0][$salesType];
     }
 }
