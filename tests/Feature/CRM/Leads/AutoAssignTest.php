@@ -284,16 +284,11 @@ class AutoAssignTest extends TestCase
      * @param array $salesPeople
      * @return SalesPerson next sales person
      */
-    private function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson, $salesPeople = array()) {
+    private function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson, $salesPeople) {
         // Set Newest ID
         $newestSalesPersonId = 0;
         if(!empty($newestSalesPerson->id)) {
             $newestSalesPersonId = $newestSalesPerson->id;
-        }
-
-        // Get Sales People for Dealer ID
-        if(empty($salesPeople)) {
-            $salesPeople = $this->findSalesPeople($dealerId);
         }
 
         // Loop Sales People
@@ -316,6 +311,7 @@ class AutoAssignTest extends TestCase
             // Insert Valid Salespeople
             $validSalesPeople[] = $salesPerson;
         }
+        echo $dealerId . " => " . $dealerLocationId . " => " . $salesType . " => " . $newestSalesPerson->id . PHP_EOL;
 
         // Loop Valid Sales People
         if(count($validSalesPeople) > 1) {
