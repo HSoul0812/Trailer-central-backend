@@ -210,9 +210,10 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $validSalesPeople = [];
         $nextSalesPerson = null;
         $lastId = 0;
+        $dealerLocationId = (int) $dealerLocationId;
         foreach($salesPeople as $k => $salesPerson) {
             // Search By Location?
-            if($dealerLocationId !== 0 && $dealerLocationId !== '0') {
+            if($dealerLocationId !== 0) {
                 if($dealerLocationId !== $salesPerson->dealer_location_id) {
                     continue;
                 }
@@ -229,8 +230,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
         // Loop Valid Sales People
         if(count($validSalesPeople) > 1) {
-            $salesPerson = end($validSalesPeople);
-            $lastId = $salesPerson->id;
+            $lastSalesPerson = end($validSalesPeople);
+            $lastId = $lastSalesPerson->id;
             foreach($validSalesPeople as $salesPerson) {
                 // Compare ID
                 if($lastId === $newestSalesPersonId || $newestSalesPersonId === 0) {
@@ -246,8 +247,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 $nextSalesPerson = $salesPerson;
             }
         } elseif(count($validSalesPeople) === 1) {
-            $salesPerson = reset($validSalesPeople);
-            $nextSalesPerson = $salesPerson;
+            $nextSalesPerson = reset($validSalesPeople);
         }
 
         // Still No Next Sales Person?
@@ -268,8 +268,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         // Get New Sales People By Dealer ID
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
         return SalesPerson::select('*')
-                                  ->where('user_id', $newDealerUser->user_id)
-                                  ->orderBy('id', 'asc')->all();
+                          ->where('user_id', $newDealerUser->user_id)
+                          ->orderBy('id', 'asc')->get();
     }
 
     /**
@@ -290,8 +290,12 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             $salesType = 'inventory';
         }
 
+        // Set To Valid Type if Exists!
+        if(in_array($leadType, SalesPerson::TYPES_VALID)) {
+            $salesType = $leadType;
+        }
         // Not a Valid Type? Set Default!
-        if(!in_array($leadType, SalesPerson::TYPES_VALID)) {
+        else {
             $salesType = 'default';
         }
 
