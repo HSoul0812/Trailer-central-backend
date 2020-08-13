@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Policies;
+namespace App\Nova\Policies;
 
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;

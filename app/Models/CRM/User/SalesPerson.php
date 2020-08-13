@@ -45,6 +45,13 @@ class SalesPerson extends Model implements Filterable
         'last_name',
         'email'
     ];
+
+    /**
+     * Disable timestamps
+     *
+     * @var bool
+     */
+    public $timestamps = false;
     
     /**
      * Define Type Arrays
