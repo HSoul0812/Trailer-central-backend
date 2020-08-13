@@ -115,6 +115,8 @@ class FinancingCompanyController extends RestfulControllerV2
         if ($request->validate() && $financingCompany = $this->financingCompanyRepository->create($request->all())) {
             return $this->response->item($financingCompany, $this->financingCompanyTransformer);
         }
+        
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -157,7 +159,8 @@ class FinancingCompanyController extends RestfulControllerV2
      *         @OA\Schema(type="integer")
      *     ),
      * )
-     */    public function destroy($id)
+     */    
+    public function destroy($id)
     {
         $deleteRequest = new DeleteFinancingCompanyRequest(['id' => $id]);
         if ($deleteRequest->validate() && $this->financingCompanyRepository->delete(['id' => $id])) {

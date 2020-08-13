@@ -25,6 +25,7 @@ class CreateFinancingCompanyRequest extends Request
         'country' => '',
         'tax_exempt' => 'required',
         'account_number' => 'required',
+        'fin' => 'required',
         'gender' => '',
         'dob' => '',
     ];
