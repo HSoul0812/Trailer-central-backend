@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Parts;
+
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 use App\Repositories\Parts\PartRepository;
@@ -10,6 +12,7 @@ use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
 use App\Models\User\AuthToken;
 use App\Models\Parts\BinQuantity;
+use Tests\TestCase;
 
 class PartsCreateTest extends TestCase
 {

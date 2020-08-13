@@ -65,24 +65,6 @@ return [
             'retry_after' => 90,
             'block_for' => null,
         ],
-
-        // for factory feeds api uploads
-        'factory-feeds' => [
-            'driver' => 'redis',
-            'connection' => 'default',
-            'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => 90,
-            'block_for' => null,
-        ],
-
-        'mails' => [
-            'driver' => 'redis',
-            'connection' => 'default',
-            'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => 90,
-            'block_for' => null,
-        ],
-
     ],
 
     /*

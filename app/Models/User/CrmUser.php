@@ -55,6 +55,11 @@ class CrmUser extends Model
     protected $hidden = [
         'password',
     ];
+
+    /**
+     * @var bool
+     */
+    public $timestamps = false;
     
     public static function getTableName() {
         return self::TABLE_NAME;
