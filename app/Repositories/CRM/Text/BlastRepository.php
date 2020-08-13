@@ -273,6 +273,7 @@ class BlastRepository implements BlastRepositoryInterface {
         // Find Filtered Leads
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                     ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
                      ->where('website_lead.dealer_id', $dealerId);
 
         // Is Archived?!
@@ -306,6 +307,14 @@ class BlastRepository implements BlastRepositoryInterface {
             if(count($brands) > 0) {
                 $query = $query->whereIn('inventory.manufacturer', $brands);
             }
+        }
+        
+        // Toggle Action
+        if($blast->action === 'purchased') {
+            $query = $query->where('crm_tc_lead_status.status', Lead::STATUS_WON);
+        } else {
+            $query = $query->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON)
+                           ->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON_CLOSED);
         }
 
         // Return Filtered Query

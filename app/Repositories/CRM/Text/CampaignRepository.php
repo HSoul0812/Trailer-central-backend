@@ -275,6 +275,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
         // Find Filtered Leads
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                     ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
                      ->where('website_lead.dealer_id', $dealerId);
 
         // Is Archived?!
@@ -309,11 +310,20 @@ class CampaignRepository implements CampaignRepositoryInterface {
                 $query = $query->whereIn('inventory.manufacturer', $brands);
             }
         }
+        
+        // Toggle Action
+        if($campaign->action === 'purchased') {
+            $query = $query->where('crm_tc_lead_status.status', Lead::STATUS_WON);
+        } else {
+            $query = $query->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON)
+                           ->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON_CLOSED);
+        }
 
         // Return Filtered Query
         return $query->where(function (Builder $query) use($campaign) {
             return $query->where('website_lead.dealer_location_id', $campaign->location_id)
-                    ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
-        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()');
+                         ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
+        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
+          ->whereRaw('(FLOOR(UNIX_TIMESTAMP(NOW() - website_lead.date_submitted) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') > 10');
     }
 }
