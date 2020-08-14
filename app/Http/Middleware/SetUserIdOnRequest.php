@@ -19,6 +19,9 @@ class SetUserIdOnRequest
         if (empty(Auth::user())) {
             return response('Invalid access token.', 403);
         }
+        if (empty(Auth::user()->newDealerUser->user_id)) {
+            return response('Invalid user id.', 403);
+        }
         $request['user_id'] = Auth::user()->newDealerUser->user_id;
         
         return $next($request);
