@@ -82,6 +82,8 @@ use App\Services\CRM\Text\TwilioService;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailService;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Services\Parts\PartServiceInterface;
+use App\Services\Parts\PartService;
 use App\Jobs\Mailer\UserMailerJob;
 use App\Rules\CRM\Leads\ValidLeadSource;
 use Laravel\Nova\Nova;
@@ -196,6 +198,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
+        
+        $this->app->bind(PartServiceInterface::class, PartService::class);
 
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
