@@ -3,7 +3,7 @@
 namespace App\Rules\Inventory;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Models\Inventory\Manufacturers;
+use App\Models\Inventory\Manufacturers\Manufacturers;
 
 class ManufacturerExists implements Rule
 {
