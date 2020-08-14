@@ -33,6 +33,7 @@ class FinancingCompany extends Model implements Filterable
         'account_number',
         'gender',
         'dob',
+        'fin'
     ];
 
     public function jsonApiFilterableColumns(): ?array

@@ -31,6 +31,7 @@ class FinancingCompanyTransformer extends TransformerAbstract
             'account_number' => $financingCompany->account_number, // varchar(255) DEFAULT NULL,
             'gender' => $financingCompany->gender, // varchar(255) DEFAULT NULL,
             'dob' => $financingCompany->dob, // varchar(255) DEFAULT NULL,
+            'fin' => $financingCompany->fin,
             // 'payment_method_id' => $financingCompany->payment_method_id, // int(11) DEFAULT NULL,
             // 'qb_id' => $financingCompany->qb_id, // int(11) DEFAULT NULL,
             'created_at' => $financingCompany->created_at, // datetime DEFAULT NULL,
