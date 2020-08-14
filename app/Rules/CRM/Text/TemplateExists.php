@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rules\Text;
+namespace App\Rules\CRM\Text;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\CRM\Text\Template;
