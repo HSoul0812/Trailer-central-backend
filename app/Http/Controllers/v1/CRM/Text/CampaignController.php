@@ -26,6 +26,7 @@ class CampaignController extends RestfulControllerV2
      */
     public function __construct(CampaignRepositoryInterface $campaigns)
     {
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create']);
         $this->campaigns = $campaigns;
     }
 
@@ -142,7 +143,7 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function show(int $userId, int $id) {
+    public function show(int $id) {
         $request = new ShowCampaignRequest(['id' => $id]);
         
         if ( $request->validate() ) {
@@ -190,7 +191,7 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function update(int $userId, int $id, Request $request) {
+    public function update(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateCampaignRequest($requestData);
@@ -225,7 +226,7 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function destroy(int $userId, int $id) {
+    public function destroy(int $id) {
         $request = new DeleteCampaignRequest(['id' => $id]);
         
         if ( $request->validate()) {
@@ -259,7 +260,7 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function sent(int $userId, int $id) {
+    public function sent(int $id) {
         $request = new SentCampaignRequest(['id' => $id]);
         
         if ( $request->validate()) {
