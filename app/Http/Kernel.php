@@ -5,6 +5,7 @@ namespace App\Http;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
+use App\Http\Middleware\User\UserValidate;
 use App\Http\Middleware\Website\WebsiteValidate;
 use App\Http\Middleware\SetDealerIdOnRequest;
 use App\Http\Middleware\SetWebsiteIdOnRequest;
@@ -75,6 +76,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'cors' => CorsMiddleware::class,
+        'user.validate' => UserValidate::class,
         'website.validate' => WebsiteValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
@@ -82,8 +84,8 @@ class Kernel extends HttpKernel
         'interaction.validate' => InteractionValidate::class,
         'text.validate' => TextValidate::class,
         'text.template.validate' => TemplateValidate::class,
-        'text.blast.validate' => BlastValidate::class,
         'text.campaign.validate' => CampaignValidate::class,
+        'text.blast.validate' => BlastValidate::class,
     ];
 
     /**

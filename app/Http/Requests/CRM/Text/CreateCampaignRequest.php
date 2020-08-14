@@ -12,18 +12,17 @@ use App\Http\Requests\Request;
 class CreateCampaignRequest extends Request {
 
     protected $rules = [
-        'template_id' => 'required|integer',
+        'template_id' => 'required|text_template_exists',
         'campaign_name' => 'required|string',
         'campaign_subject' => 'required|string',
         'from_sms_number' => 'nullable|string',
-        'action' => 'required|in:inquired,purchased',
-        'location_id' => 'nullable|integer',
+        'action' => 'required|campaign_action_valid',
+        'location_id' => 'nullable|dealer_location_valid',
         'send_after_days' => 'required|integer',
         'category' => 'nullable|array',
-        'category.*' => 'nullable|string',
+        'category.*' => 'inventory_cat_valid',
         'brand' => 'nullable|array',
-        'brand.*' => 'nullable|string',
+        'brand.*' => 'inventory_mfg_valid',
         'include_archived' => 'in:0,-1,1',
-        'is_enabled' => 'nullable|integer',
     ];
 }
