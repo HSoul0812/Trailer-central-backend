@@ -15,7 +15,7 @@ class CreateCampaignRequest extends Request {
         'template_id' => 'required|text_template_exists',
         'campaign_name' => 'required|string',
         'campaign_subject' => 'required|string',
-        'from_sms_number' => 'nullable|string',
+        'from_sms_number' => 'nullable|regex:/(0-9)?[0-9]{10}/',
         'action' => 'required|campaign_action_valid',
         'location_id' => 'nullable|dealer_location_valid',
         'send_after_days' => 'required|integer',
