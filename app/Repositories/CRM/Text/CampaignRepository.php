@@ -342,8 +342,13 @@ class CampaignRepository implements CampaignRepositoryInterface {
         })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
           ->whereRaw('(FLOOR(UNIX_TIMESTAMP(NOW() - website_lead.date_submitted) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') > 10');
         echo $query->toSql() . PHP_EOL;
-        var_dump($campaign);
+        echo 'dealer: ' . $dealerId . PHP_EOL;
+        echo 'is archived: ' . $campaign->include_archived . PHP_EOL;
+        echo 'action: ' . $campaign->action . PHP_EOL;
+        echo 'location: ' . $campaign->location_id . PHP_EOL;
+        echo 'send after days: ' . $campaign->send_after_days . PHP_EOL;
         var_dump($brands);
+        echo PHP_EOL;
         var_dump($categories);
         die;
         return $query;
