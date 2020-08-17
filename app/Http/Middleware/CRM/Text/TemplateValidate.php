@@ -31,7 +31,7 @@ class TemplateValidate extends ValidRoute {
             }
 
             // Get Auth
-            if (Auth::user()->dealer_id !== $template->newDealerUser->dealer_id) {
+            if (Auth::user()->dealer_id !== $template->newDealerUser->id) {
                 return false;
             }
             
