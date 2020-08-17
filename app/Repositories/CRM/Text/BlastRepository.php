@@ -53,6 +53,13 @@ class BlastRepository implements BlastRepositoryInterface {
         DB::beginTransaction();
 
         try {
+            // Find Blast With Name
+            $blastMatch = Blast::where('campaign_name', $params['campaign_name'])
+                                ->where('user_id', $params['user_id'])->first();
+            if(!empty($blastMatch->campaign_name)) {
+                throw new DuplicateTextBlastNameException();
+            }
+
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {
@@ -153,6 +160,14 @@ class BlastRepository implements BlastRepositoryInterface {
         $blast = Blast::findOrFail($params['id']);
 
         DB::transaction(function() use (&$blast, $params) {
+            // Find Blast With Name
+            $blastMatch = Blast::where('campaign_name', $params['campaign_name'])
+                                ->where('user_id', $params['user_id'])
+                                ->where('id', '<>', $params['id'])->first();
+            if(!empty($blastMatch->campaign_name)) {
+                throw new DuplicateTextBlastNameException();
+            }
+
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {

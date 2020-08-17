@@ -53,6 +53,13 @@ class CampaignRepository implements CampaignRepositoryInterface {
         DB::beginTransaction();
 
         try {
+            // Find Campaign With Name
+            $campaignMatch = Campaign::where('campaign_name', $params['campaign_name'])
+                                ->where('user_id', $params['user_id'])->first();
+            if(!empty($campaignMatch->campaign_name)) {
+                throw new DuplicateTextCampaignNameException();
+            }
+
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {
@@ -154,6 +161,14 @@ class CampaignRepository implements CampaignRepositoryInterface {
         $campaign = Campaign::findOrFail($params['id']);
 
         DB::transaction(function() use (&$campaign, $params) {
+            // Find Campaign With Name
+            $campaignMatch = Campaign::where('campaign_name', $params['campaign_name'])
+                                ->where('user_id', $params['user_id'])
+                                ->where('id', '<>', $params['id'])->first();
+            if(!empty($campaignMatch->campaign_name)) {
+                throw new DuplicateTextCampaignNameException();
+            }
+
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {
