@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Text;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
+use App\Exceptions\CRM\Text\DuplicateTextCampaignNameException;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Campaign;
