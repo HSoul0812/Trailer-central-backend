@@ -327,14 +327,15 @@ class BlastRepository implements BlastRepositoryInterface {
         
         // Toggle Action
         if($blast->action === 'purchased') {
-            $query = $query->where('crm_tc_lead_status.status', Lead::STATUS_WON);
+            $query = $query->where('crm_tc_lead_status.status', Lead::STATUS_WON)
+                           ->orWhere('crm_tc_lead_status.status', Lead::STATUS_WON_CLOSED);
         } else {
             $query = $query->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON)
                            ->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON_CLOSED);
         }
 
         // Return Filtered Query
-        $query = $query->where(function (Builder $query) use($blast) {
+        return $query->where(function (Builder $query) use($blast) {
             return $query->where('website_lead.dealer_location_id', $blast->location_id)
                          ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
         })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) > NOW()');
