@@ -3,6 +3,7 @@
 namespace App\Http\Middleware\CRM\Text;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\ValidRoute;
 use App\Models\CRM\Text\Blast;
 
