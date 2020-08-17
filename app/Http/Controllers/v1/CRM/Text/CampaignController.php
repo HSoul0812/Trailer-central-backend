@@ -26,7 +26,7 @@ class CampaignController extends RestfulControllerV2
      */
     public function __construct(CampaignRepositoryInterface $campaigns)
     {
-        $this->middleware('setUserIdOnRequest')->only(['index', 'create']);
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update']);
         $this->campaigns = $campaigns;
     }
 
