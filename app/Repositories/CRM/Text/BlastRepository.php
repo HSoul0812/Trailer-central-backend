@@ -338,7 +338,10 @@ class BlastRepository implements BlastRepositoryInterface {
             return $query->where('website_lead.dealer_location_id', $blast->location_id)
                     ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
         })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) > NOW()');
-        echo $query->getSql();
+        echo $query->getQuery() . PHP_EOL;
+        var_dump($blast);
+        var_dump($brands);
+        var_dump($categories);
         die;
         return $query;
     }
