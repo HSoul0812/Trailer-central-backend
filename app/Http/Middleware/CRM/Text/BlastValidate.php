@@ -28,6 +28,11 @@ class BlastValidate extends ValidRoute {
             if (empty($blast)) {
                 return false;
             }
+
+            // Get Auth
+            if (Auth::user()->dealer_id !== $blast->newDealerUser->dealer_id) {
+                return false;
+            }
             
             return true;
         };

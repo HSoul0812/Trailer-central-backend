@@ -28,6 +28,11 @@ class CampaignValidate extends ValidRoute {
             if (empty($campaign)) {
                 return false;
             }
+
+            // Get Auth
+            if (Auth::user()->dealer_id !== $campaign->newDealerUser->dealer_id) {
+                return false;
+            }
             
             return true;
         };
