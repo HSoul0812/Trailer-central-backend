@@ -334,16 +334,10 @@ class BlastRepository implements BlastRepositoryInterface {
         }
 
         // Return Filtered Query
-        $query = $query->where(function (Builder $query) use($blast) {
+        return $query->where(function (Builder $query) use($blast) {
             return $query->where('website_lead.dealer_location_id', $blast->location_id)
                     ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
         })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) > NOW()');
-        echo $query->toSql() . PHP_EOL;
-        var_dump($blast);
-        var_dump($brands);
-        var_dump($categories);
-        die;
-        return $query;
     }
 
 }
