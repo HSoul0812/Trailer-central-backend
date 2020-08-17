@@ -13,21 +13,21 @@ class UpdateBlastRequest extends Request {
     
     protected $rules = [
         'id' => 'required|integer',
-        'template_id' => 'integer',
+        'template_id' => 'text_template_exists',
         'campaign_name' => 'string',
         'campaign_subject' => 'string',
-        'send_date' => 'string',
-        'from_sms_number' => 'nullable|string',
-        'action' => 'in:inquired,purchased',
-        'location_id' => 'nullable|integer',
+        'send_date' => 'date_format:Y-m-d H:i:s',
+        'from_sms_number' => 'nullable|regex:/(0-9)?[0-9]{10}',
+        'action' => 'campaign_action_valid',
+        'location_id' => 'nullable|dealer_location_valid',
         'send_after_days' => 'integer',
         'category' => 'nullable|array',
-        'category.*' => 'nullable|string',
+        'category.*' => 'inventory_cat_valid',
         'brand' => 'nullable|array',
-        'brand.*' => 'nullable|string',
+        'brand.*' => 'inventory_mfg_valid',
         'include_archived' => 'in:0,-1,1',
-        'is_delivered' => 'nullable|integer',
-        'is_cancelled' => 'nullable|integer',
+        'is_delivered' => 'nullable|boolean',
+        'is_cancelled' => 'nullable|boolean',
     ];
     
 }

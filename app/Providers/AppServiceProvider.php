@@ -106,11 +106,19 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
+        \Validator::extend('inventory_mfg_exists', 'App\Rules\Inventory\ManufacturerValid@passes');
+        \Validator::extend('inventory_mfg_valid', 'App\Rules\Inventory\ManufacturerValid@passes');
+        \Validator::extend('inventory_cat_exists', 'App\Rules\Inventory\CategoryExists@passes');
+        \Validator::extend('inventory_cat_valid', 'App\Rules\Inventory\CategoryValid@passes');
+        \Validator::extend('inventory_brand_exists', 'App\Rules\Inventory\BrandValid@passes');
+        \Validator::extend('inventory_brand_valid', 'App\Rules\Inventory\BrandValid@passes');
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
         \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');
         \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
         \Validator::extend('interaction_type_valid', 'App\Rules\CRM\Interactions\ValidInteractionType@passes');
+        \Validator::extend('campaign_action_valid', 'App\Rules\CRM\Email\CampaignActionValid@passes');
+        \Validator::extend('text_template_exists', 'App\Rules\CRM\Text\TemplateExists@passes');
         \Validator::extend('parts_sku_unique', 'App\Rules\Parts\SkuUnique@validate');
         \Validator::extend('vendor_exists', 'App\Rules\Inventory\VendorExists@passes');
 

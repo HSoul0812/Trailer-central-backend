@@ -26,6 +26,7 @@ class BlastController extends RestfulControllerV2
      */
     public function __construct(BlastRepositoryInterface $blasts)
     {
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create']);
         $this->blasts = $blasts;
     }
 
@@ -142,7 +143,7 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function show(int $userId, int $id) {
+    public function show(int $id) {
         $request = new ShowBlastRequest(['id' => $id]);
         
         if ( $request->validate() ) {
@@ -190,7 +191,7 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function update(int $userId, int $id, Request $request) {
+    public function update(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateBlastRequest($requestData);
@@ -225,7 +226,7 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function destroy(int $userId, int $id) {
+    public function destroy(int $id) {
         $request = new DeleteBlastRequest(['id' => $id]);
         
         if ( $request->validate()) {
@@ -259,7 +260,7 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function sent(int $userId, int $id) {
+    public function sent(int $id) {
         $request = new SentBlastRequest(['id' => $id]);
         
         if ( $request->validate()) {

@@ -1,7 +1,10 @@
 <?php
 
+namespace Tests\Parts;
+
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\DatabaseTransactions;
+use Tests\TestCase;
 
 
 class TypesGetTest extends TestCase

@@ -6,11 +6,19 @@ use App\Repositories\Repository;
 
 interface TextRepositoryInterface extends Repository {
     /**
+     * Stop Processing Text Repository
+     * 
+     * @param array $params
+     * @return Stop
+     */
+    public function stop($params);
+
+    /**
      * Send Text
      * 
      * @param int $leadId
      * @param string $textMessage
-     * @return type
+     * @return TextLog
      */
     public function send($leadId, $textMessage);
 }

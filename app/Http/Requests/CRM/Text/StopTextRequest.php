@@ -13,7 +13,7 @@ class StopTextRequest extends Request {
     
     protected $rules = [
         'response_id' => 'nullable|integer',
-        'text_number' => 'required|string'
+        'text_number' => 'required|regex:/(0-9)?[0-9]{10}/'
     ];
     
 }

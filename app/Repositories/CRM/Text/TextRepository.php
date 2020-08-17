@@ -100,6 +100,12 @@ class TextRepository implements TextRepositoryInterface {
         return $text;
     }
 
+    /**
+     * Stop Processing Text Repository
+     * 
+     * @param array $params
+     * @return Stop
+     */
     public function stop($params) {
         return Stop::create($params);
     }
@@ -109,7 +115,7 @@ class TextRepository implements TextRepositoryInterface {
      * 
      * @param int $leadId
      * @param string $textMessage
-     * @return type
+     * @return TextLog
      */
     public function send($leadId, $textMessage) {
         // Get Lead/User
