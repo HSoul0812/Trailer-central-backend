@@ -334,7 +334,7 @@ class BlastRepository implements BlastRepositoryInterface {
         }
 
         // Return Filtered Query
-        return $query->where(function (Builder $query) use($blast) {
+        $query = $query->where(function (Builder $query) use($blast) {
             return $query->where('website_lead.dealer_location_id', $blast->location_id)
                          ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
         })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) > NOW()');
