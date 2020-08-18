@@ -13,13 +13,13 @@ use App\Models\User\User;
 use App\Models\Traits\TableAware;
 
 class Inventory extends Model
-{    
+{
     use TableAware;
-    
+
     const COLOR_ATTRIBUTE_ID = 11;
-    
+
     const TABLE_NAME = 'inventory';
-    
+
     /**
      * The table associated with the model.
      *
@@ -41,7 +41,7 @@ class Inventory extends Model
         'width',
         'height'
     ];
-    
+
     protected $casts = [
         'is_archived' => 'integer',
         'length' => 'float',
@@ -56,11 +56,11 @@ class Inventory extends Model
         'msrp' => 'float',
         'gvwr' => 'float'
     ];
-    
+
     protected $hidden = [
         'geolocation'
     ];
-    
+
     public function user()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
@@ -85,12 +85,17 @@ class Inventory extends Model
     {
         return $this->hasMany('App\Models\Inventory\Floorplan\Payment', 'inventory_id', 'inventory_id');
     }
-    
+
     public function images()
     {
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
     }
-    
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class, 'status');
+    }
+
     public function getColorAttribute()
     {
         $color = self::select('*')
@@ -101,7 +106,7 @@ class Inventory extends Model
         if ($color) {
             return $color->value;
         }
-        
+
         return null;
     }
 
@@ -122,7 +127,7 @@ class Inventory extends Model
 
         return $url;
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }
