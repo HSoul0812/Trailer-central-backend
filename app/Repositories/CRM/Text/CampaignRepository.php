@@ -340,8 +340,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
         return $query->where(function (Builder $query) use($campaign) {
             return $query->where('website_lead.dealer_location_id', $campaign->location_id)
                          ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
-        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
-          ->whereRaw('(FLOOR(UNIX_TIMESTAMP(NOW() - website_lead.date_submitted) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10');
+        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()');
         echo $query->toSql() . PHP_EOL;
         echo 'dealer: ' . $dealerId . PHP_EOL;
         echo 'is archived: ' . $campaign->include_archived . PHP_EOL;
