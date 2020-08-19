@@ -290,7 +290,10 @@ class BlastRepository implements BlastRepositoryInterface {
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
                      ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
-                     ->leftJoin('crm_text_stop', "REPLACE(website_lead.phone_number, '(', '')", '=', 'crm_text_stop.sms_number')
+                     ->leftJoin('crm_text_stop', function($join) {
+                        return $join->on("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), 1, 10))", '=', 'crm_text_stop.sms_number')
+                                    ->onOr("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), 1, 11))", '=', 'crm_text_stop.sms_number');
+                     })
                      ->where('website_lead.dealer_id', $dealerId)
                      ->where('website_lead.phone_number', '<>', '')
                      ->whereNotNull('website_lead.phone_number')
