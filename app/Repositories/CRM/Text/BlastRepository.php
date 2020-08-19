@@ -292,7 +292,7 @@ class BlastRepository implements BlastRepositoryInterface {
                      ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
                      ->leftJoin('crm_text_stop', function($join) {
                         return $join->on("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), 1, 10))", '=', 'crm_text_stop.sms_number')
-                                    ->onOr("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), 1, 11))", '=', 'crm_text_stop.sms_number');
+                                    ->orOn("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), 1, 11))", '=', 'crm_text_stop.sms_number');
                      })
                      ->where('website_lead.dealer_id', $dealerId)
                      ->where('website_lead.phone_number', '<>', '')
