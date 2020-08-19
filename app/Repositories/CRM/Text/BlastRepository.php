@@ -339,17 +339,6 @@ class BlastRepository implements BlastRepositoryInterface {
             return $query->where('website_lead.dealer_location_id', $blast->location_id)
                          ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
         })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()');
-        echo $query->toSql() . PHP_EOL;
-        echo 'dealer: ' . $dealerId . PHP_EOL;
-        echo 'is archived: ' . $blast->include_archived . PHP_EOL;
-        echo 'action: ' . $blast->action . PHP_EOL;
-        echo 'location: ' . $blast->location_id . PHP_EOL;
-        echo 'send after days: ' . $blast->send_after_days . PHP_EOL;
-        var_dump($brands);
-        echo PHP_EOL;
-        var_dump($categories);
-        die;
-        return $query;
     }
 
 }
