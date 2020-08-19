@@ -16,7 +16,7 @@ class AddCrmTextStopSmsNumber extends Migration
         Schema::table('crm_text_stop', function (Blueprint $table) {
             $table->string('sms_number', 12)->index();
 
-            if(Schema::hasColumn('response_id')) {
+            if(Schema::hasColumn('crm_text_stop', 'response_id')) {
                 $table->dropColumn('response_id');
             }
 
