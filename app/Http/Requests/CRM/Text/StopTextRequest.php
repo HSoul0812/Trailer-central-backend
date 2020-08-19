@@ -12,7 +12,9 @@ use App\Http\Requests\Request;
 class StopTextRequest extends Request {
     
     protected $rules = [
-        'sms_number' => 'required|regex:/(0-9)?[0-9]{10}/'
+        'sms_number' => 'required|regex:/(0-9)?[0-9]{10}/',
+        'lead_id' => 'lead_exists',
+        'text_id' => 'text_exists'
     ];
     
 }

@@ -11,9 +11,7 @@ use App\Http\Requests\CRM\Text\ShowTextRequest;
 use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Http\Requests\CRM\Text\SendTextRequest;
-use App\Http\Requests\CRM\Text\StopTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
-use App\Transformers\CRM\Text\StopTransformer;
 
 class TextController extends RestfulControllerV2
 {
@@ -231,43 +229,6 @@ class TextController extends RestfulControllerV2
         if ( $request->validate()) {
             // Create Text
             return $this->response->item($this->texts->delete(['id' => $id]), new TextTransformer());
-        }
-        
-        return $this->response->errorBadRequest();
-    }
-
-    /**
-     * @OA\Stop(
-     *     path="/api/leads/{leadId}/texts/{id}/stop",
-     *     description="Stop sending future texts to this number",
-     *     tags={"Text"},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="Text ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Confirms text was deleted",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
-     */
-    public function stop(int $leadId, int $id, Request $request) {
-        $requestData = $request->all();
-        $requestData['lead_id'] = $leadId;
-        $requestData['text_id'] = $id;
-        $request = new StopTextRequest($requestData);
-        
-        if ( $request->validate()) {
-            // Stop Text
-            return $this->response->item($this->texts->stop($request->all()), new StopTransformer());
         }
         
         return $this->response->errorBadRequest();
