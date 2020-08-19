@@ -292,7 +292,7 @@ class BlastRepository implements BlastRepositoryInterface {
                      ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
                      ->leftJoin('crm_email_bounces', 'website_lead.email_address', '=', 'crm_email_bounces.email_address')
                      ->where('website_lead.dealer_id', $dealerId)
-                     ->whereNotNull('crm_email_bounces.email_address');
+                     ->whereNull('crm_email_bounces.email_address');
 
         // Is Archived?!
         if($blast->included_archived === -1 || $blast->include_archived === '-1') {
