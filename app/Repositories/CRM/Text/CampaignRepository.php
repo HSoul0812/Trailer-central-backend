@@ -331,8 +331,10 @@ class CampaignRepository implements CampaignRepositoryInterface {
         
         // Toggle Action
         if($campaign->action === 'purchased') {
-            $query = $query->where('crm_tc_lead_status.status', Lead::STATUS_WON)
-                           ->orWhere('crm_tc_lead_status.status', Lead::STATUS_WON_CLOSED);
+            $query = $query->where(function (Builder $query) {
+                $query->where('crm_tc_lead_status.status', Lead::STATUS_WON)
+                      ->orWhere('crm_tc_lead_status.status', Lead::STATUS_WON_CLOSED);
+            });
         } else {
             $query = $query->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON)
                            ->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON_CLOSED);
