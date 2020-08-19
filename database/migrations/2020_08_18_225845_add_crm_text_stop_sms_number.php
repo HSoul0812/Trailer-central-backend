@@ -15,6 +15,12 @@ class AddCrmTextStopSmsNumber extends Migration
     {
         Schema::table('crm_text_stop', function (Blueprint $table) {
             $table->string('sms_number', 12)->index();
+
+            $table->dropForeign('crm_text_stop_lead_id_foreign');
+
+            $table->dropForeign('crm_text_stop_text_id_foreign');
+
+            $table->dropForeign('crm_text_stop_response_id_foreign');
         });
     }
 
