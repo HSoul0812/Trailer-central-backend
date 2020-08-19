@@ -258,8 +258,11 @@ class TextController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function stop(int $leadId, int $id) {
-        $request = new StopTextRequest(['lead_id' => $leadId, 'text_id' => $id]);
+    public function stop(int $leadId, int $id, Request $request) {
+        $requestData = $request->all();
+        $requestData['lead_id'] = $leadId;
+        $requestData['text_id'] = $id;
+        $request = new StopTextRequest($requestData);
         
         if ( $request->validate()) {
             // Stop Text
