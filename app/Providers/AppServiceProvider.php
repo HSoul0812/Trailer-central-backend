@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Inventory\StatusRepository;
+use App\Repositories\Inventory\StatusRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
@@ -175,6 +177,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
         $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
@@ -198,7 +201,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
-        
+
         $this->app->bind(PartServiceInterface::class, PartService::class);
 
         // CSV exporter bindings
