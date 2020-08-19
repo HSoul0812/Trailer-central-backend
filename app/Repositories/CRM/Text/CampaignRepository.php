@@ -292,7 +292,9 @@ class CampaignRepository implements CampaignRepositoryInterface {
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
                      ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
-                     ->where('website_lead.dealer_id', $dealerId);
+                     ->leftJoin('crm_email_bounces', 'website_lead.email_address', '=', 'crm_email_bounces.email_address')
+                     ->where('website_lead.dealer_id', $dealerId)
+                     ->where('crm_email_bounces.email_address', '<>', NULL);
 
         // Is Archived?!
         if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
