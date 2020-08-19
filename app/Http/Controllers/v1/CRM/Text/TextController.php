@@ -11,6 +11,7 @@ use App\Http\Requests\CRM\Text\ShowTextRequest;
 use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Http\Requests\CRM\Text\SendTextRequest;
+use App\Http\Requests\CRM\Text\StopTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
 
 class TextController extends RestfulControllerV2
@@ -258,11 +259,11 @@ class TextController extends RestfulControllerV2
      * )
      */
     public function stop(int $leadId, int $id) {
-        $request = new StopTextRequest(['id' => $id]);
+        $request = new StopTextRequest(['lead_id' => $leadId, 'text_id' => $id]);
         
         if ( $request->validate()) {
             // Stop Text
-            return $this->response->item($this->texts->stop(['id' => $id]), new TextTransformer());
+            return $this->response->item($this->texts->stop($request->all()), new TextTransformer());
         }
         
         return $this->response->errorBadRequest();
