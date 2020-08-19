@@ -21,7 +21,6 @@ class Stop extends Model
     protected $fillable = [
         'lead_id',
         'text_id',
-        'response_id',
-        'text_number'
+        'sms_number'
     ];
 }

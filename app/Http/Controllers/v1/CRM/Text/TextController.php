@@ -13,6 +13,7 @@ use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Http\Requests\CRM\Text\SendTextRequest;
 use App\Http\Requests\CRM\Text\StopTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
+use App\Transformers\CRM\Text\StopTransformer;
 
 class TextController extends RestfulControllerV2
 {
@@ -266,7 +267,7 @@ class TextController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Stop Text
-            return $this->response->item($this->texts->stop($request->all()), new TextTransformer());
+            return $this->response->item($this->texts->stop($request->all()), new StopTransformer());
         }
         
         return $this->response->errorBadRequest();
