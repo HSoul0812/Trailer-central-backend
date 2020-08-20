@@ -40,7 +40,10 @@ class CreatePartRequest extends Request {
         'images' => 'array',
         'images.*.url' => 'url',
         'images.*.position' => 'integer',
-        'bins' => 'array'
+        'bins' => 'array',
+        'bins.*.bin_id' => 'integer',
+        'bins.*.quantity' => 'integer',
+        'bins.*.old_quantity' => 'integer'
     ];
     
 }
