@@ -22,6 +22,7 @@ class RefundItemTransformer extends TransformerAbstract
             // 'user_id' => (int)$refundItem->user_id, // express as include
             'item_id' => (int)$refundItem->item_id,
             'amount' => (float)$refundItem->amount,
+            'quantity' => (float)$refundItem->quantity,
             'created_at' => $refundItem->created_at,
             'updated_at' => $refundItem->updated_at,
         ];
