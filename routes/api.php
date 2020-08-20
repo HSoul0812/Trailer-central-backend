@@ -238,7 +238,7 @@ $api->version('v1', function ($route) {
     });
 
     // Stop Text!
-    $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\TextStopController@index');
+    $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
 
 
     /*
