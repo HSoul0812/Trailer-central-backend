@@ -86,6 +86,8 @@ use App\Services\CRM\Interactions\InteractionEmailService;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\Parts\PartServiceInterface;
 use App\Services\Parts\PartService;
+use App\Services\Website\Log\LogServiceInterface;
+use App\Services\Website\Log\LogService;
 use App\Jobs\Mailer\UserMailerJob;
 use App\Rules\CRM\Leads\ValidLeadSource;
 use Laravel\Nova\Nova;
@@ -201,6 +203,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
+        $this->app->bind(LogServiceInterface::class, LogService::class);
 
         $this->app->bind(PartServiceInterface::class, PartService::class);
 

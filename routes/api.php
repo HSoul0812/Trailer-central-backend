@@ -166,7 +166,12 @@ $api->version('v1', function ($route) {
     |
     |
     */
-
+    
+    /**
+     * Log
+     */
+    $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create');
+    
     /**
      * Website Part Filters
      */

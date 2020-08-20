@@ -40,6 +40,11 @@ class PartService implements PartServiceInterface
             $part = $this->partRepository->create($partData);
         
             foreach($bins as $bin) {
+                
+                if (empty($bin['old_quantity']) || empty($bin['quantity'])) {
+                    continue;
+                }
+                
                 $this->cycleCountRepository->create([
                     'bin_id' => $bin['bin_id'],
                     'dealer_id' => $part->dealer_id,
@@ -58,7 +63,7 @@ class PartService implements PartServiceInterface
         });
         
         
-        return $part;
+        return $part; 
     }
     
     public function update($partData, $bins) : Part 
@@ -69,6 +74,11 @@ class PartService implements PartServiceInterface
             $part = $this->partRepository->update($partData);
         
             foreach($bins as $bin) {
+                
+                if (empty($bin['old_quantity']) || empty($bin['quantity'])) {
+                    continue;
+                }
+                
                 $this->cycleCountRepository->create([
                     'bin_id' => $bin['bin_id'],
                     'dealer_id' => $part->dealer_id,
