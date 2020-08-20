@@ -8,7 +8,7 @@ use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Text\StopTextRequest;
 use App\Transformers\CRM\Text\StopTransformer;
 
-class TextController extends RestfulControllerV2
+class StopController extends RestfulControllerV2
 {
     protected $texts;
 
