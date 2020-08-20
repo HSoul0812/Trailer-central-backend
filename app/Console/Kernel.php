@@ -40,6 +40,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('user:create-access-token')->daily();
         $schedule->command('leads:assign:auto')->withoutOverlapping();
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
+        //$schedule->command('text:process-campaign')->withoutOverlapping();
         // $schedule->command('inspire')
         //          ->hourly();
     }
