@@ -46,7 +46,7 @@ class StopController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function index(int $leadId, int $id, Request $request) {
+    public function index(Request $request) {
         $request = new StopTextRequest($request->all());
         
         if ( $request->validate()) {
