@@ -153,6 +153,11 @@ class BlastRepository implements BlastRepositoryInterface {
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
+        // Return All?
+        if($params['per_page'] === 'all') {
+            return $query->get();
+        }
+
         // Return Blast Leads
         return $query->paginate($params['per_page'])->appends($params);
     }
@@ -289,6 +294,10 @@ class BlastRepository implements BlastRepositoryInterface {
         // Find Filtered Leads
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                     ->leftJoin('crm_text_blast_sent', function($join) {
+                        return $join->on('crm_text_blast_sent.lead_id', '=', 'website_lead.identifier')
+                                    ->on('crm_text_blast_sent.text_blast_id', '=', $blast->id);
+                     })
                      ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
                      ->leftJoin('crm_text_stop', function($join) {
                         return $join->on(DB::raw("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 10))"), '=', 'crm_text_stop.sms_number')
@@ -297,7 +306,8 @@ class BlastRepository implements BlastRepositoryInterface {
                      ->where('website_lead.dealer_id', $dealerId)
                      ->where('website_lead.phone_number', '<>', '')
                      ->whereNotNull('website_lead.phone_number')
-                     ->whereNull('crm_text_stop.sms_number');
+                     ->whereNull('crm_text_stop.sms_number')
+                     ->whereNull('crm_text_blast_sent.id');
 
         // Is Archived?!
         if($blast->included_archived === -1 || $blast->include_archived === '-1') {

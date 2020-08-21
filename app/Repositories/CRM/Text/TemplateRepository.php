@@ -101,6 +101,27 @@ class TemplateRepository implements TemplateRepositoryInterface {
         return $template;
     }
 
+    /**
+     * Fill Text Template Body
+     * 
+     * @param string $template
+     * @param array $replaces
+     * @return type
+     */
+    public function fillTemplate($template, $replaces) {
+        // Add Footer
+        $body = $template . "\n\nReply \"STOP\" if you do not want to receive texts and promos from \"{dealer_name}\"";
+
+        // Loop Replacements!
+        foreach($replaces as $field => $value) {
+            // Replace Field
+            $body = str_replace('{' . $field . '}', $value, $body);
+        }
+
+        // Return Result Template Body Text
+        return $body;
+    }
+
     private function addSortQuery($query, $sort) {
         if (!isset($this->sortOrders[$sort])) {
             return;
