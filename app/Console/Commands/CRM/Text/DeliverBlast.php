@@ -142,71 +142,69 @@ class DeliverBlast extends Command
                         'per_page' => 'all',
                         'id' => $blast->id
                     ]);
-                    if(count($leads) < 1) {
-                        continue;
-                    }
+                    if(count($leads) > 0) {
+                        // Get Template!
+                        $template = $blast->template->template;
 
-                    // Get Template!
-                    $template = $blast->template->template;
-
-                    // Loop Leads for Current Dealer
-                    $this->info("{$command} dealer #{$dealer->id} blast {$blast->campaign_name} found " . count($leads) . " leads to process");
-                    foreach($leads as $lead) {
-                        // If Error Occurs, Skip
-                        try {
-                            // Initialize Notes Array
-                            $leadName = $lead->id_name;
-
-                            // Get To Numbers
-                            $to_number = $lead->text_phone;
-                            if(empty($to_number)) {
-                                continue;
-                            }
-                            $to_number = "+12626619236";
-
-                            // Get Text Message
-                            $textMessage = $this->templates->fillTemplate($template, [
-                                'lead_name' => $lead->full_name,
-                                'title_of_unit_of_interest' => $lead->inventory->title,
-                                'dealer_name' => $dealer->user->name
-                            ]);
-                            $this->info("{$command} preparing to send text to {$leadName} at {$to_number}");
-
-                            // Send Text
-                            $this->service->send($from_number, $to_number, $textMessage, $lead->full_name);
-                            $this->info("{$command} send text to {$leadName} at {$to_number}");
-                            $status = 'sent';
-
-                            // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
+                        // Loop Leads for Current Dealer
+                        $this->info("{$command} dealer #{$dealer->id} blast {$blast->campaign_name} found " . count($leads) . " leads to process");
+                        foreach($leads as $lead) {
+                            // If Error Occurs, Skip
                             try {
-                                // Save Lead Status
-                                $this->texts->updateLeadStatus($lead);
-                                $this->info("{$command} updated lead {$leadName} status");
-                                $status = 'lead';
+                                // Initialize Notes Array
+                                $leadName = $lead->id_name;
 
-                                // Log SMS
-                                $textLog = $this->texts->create([
-                                    'lead_id'     => $lead->identifier,
-                                    'from_number' => $from_number,
-                                    'to_number'   => $to_number,
-                                    'log_message' => $textMessage
+                                // Get To Numbers
+                                $to_number = $lead->text_phone;
+                                if(empty($to_number)) {
+                                    continue;
+                                }
+                                $to_number = "+12626619236";
+
+                                // Get Text Message
+                                $textMessage = $this->templates->fillTemplate($template, [
+                                    'lead_name' => $lead->full_name,
+                                    'title_of_unit_of_interest' => $lead->inventory->title,
+                                    'dealer_name' => $dealer->user->name
                                 ]);
-                                $this->info("{$command} logged text for {$leadName} at {$to_number}");
-                                $status = 'logged';
-                            } catch(\Exception $e) {
-                                $this->error("{$command} exception returned after blast sent {$e->getMessage()}: {$e->getTraceAsString()}");
-                            }
+                                $this->info("{$command} preparing to send text to {$leadName} at {$to_number}");
 
-                            // Mark Blast as Sent to Lead
-                            $this->blasts->sent([
-                                'text_blast_id' => $blast->id,
-                                'lead_id' => $lead->identifier,
-                                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-                                'status' => $status
-                            ]);
-                            $this->info("{$command} inserted blast sent for lead {$leadName}");
-                        } catch(\Exception $e) {
-                            $this->error("{$command} exception returned trying to send blast text {$e->getMessage()}: {$e->getTraceAsString()}");
+                                // Send Text
+                                $this->service->send($from_number, $to_number, $textMessage, $lead->full_name);
+                                $this->info("{$command} send text to {$leadName} at {$to_number}");
+                                $status = 'sent';
+
+                                // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
+                                try {
+                                    // Save Lead Status
+                                    $this->texts->updateLeadStatus($lead);
+                                    $this->info("{$command} updated lead {$leadName} status");
+                                    $status = 'lead';
+
+                                    // Log SMS
+                                    $textLog = $this->texts->create([
+                                        'lead_id'     => $lead->identifier,
+                                        'from_number' => $from_number,
+                                        'to_number'   => $to_number,
+                                        'log_message' => $textMessage
+                                    ]);
+                                    $this->info("{$command} logged text for {$leadName} at {$to_number}");
+                                    $status = 'logged';
+                                } catch(\Exception $e) {
+                                    $this->error("{$command} exception returned after blast sent {$e->getMessage()}: {$e->getTraceAsString()}");
+                                }
+
+                                // Mark Blast as Sent to Lead
+                                $this->blasts->sent([
+                                    'text_blast_id' => $blast->id,
+                                    'lead_id' => $lead->identifier,
+                                    'text_id' => !empty($textLog->id) ? $textLog->id : 0,
+                                    'status' => $status
+                                ]);
+                                $this->info("{$command} inserted blast sent for lead {$leadName}");
+                            } catch(\Exception $e) {
+                                $this->error("{$command} exception returned trying to send blast text {$e->getMessage()}: {$e->getTraceAsString()}");
+                            }
                         }
                     }
 

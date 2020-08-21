@@ -177,11 +177,13 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
         DB::transaction(function() use (&$campaign, $params) {
             // Find Campaign With Name
-            $campaignMatch = Campaign::where('campaign_name', $params['campaign_name'])
-                                ->where('user_id', $params['user_id'])
-                                ->where('id', '<>', $params['id'])->first();
-            if(!empty($campaignMatch->campaign_name)) {
-                throw new DuplicateTextCampaignNameException();
+            if(isset($params['campaign_name'])) {
+                $campaignMatch = Campaign::where('campaign_name', $params['campaign_name'])
+                                    ->where('user_id', $campaign->user_id)
+                                    ->where('id', '<>', $params['id'])->first();
+                if(!empty($campaignMatch->campaign_name)) {
+                    throw new DuplicateTextCampaignNameException();
+                }
             }
 
             // Get Categories

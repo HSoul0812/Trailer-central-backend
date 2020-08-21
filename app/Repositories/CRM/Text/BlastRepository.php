@@ -189,11 +189,13 @@ class BlastRepository implements BlastRepositoryInterface {
 
         DB::transaction(function() use (&$blast, $params) {
             // Find Blast With Name
-            $blastMatch = Blast::where('campaign_name', $params['campaign_name'])
-                                ->where('user_id', $params['user_id'])
-                                ->where('id', '<>', $params['id'])->first();
-            if(!empty($blastMatch->campaign_name)) {
-                throw new DuplicateTextBlastNameException();
+            if(isset($params['campaign_name'])) {
+                $blastMatch = Blast::where('campaign_name', $params['campaign_name'])
+                                    ->where('user_id', $blast->user_id)
+                                    ->where('id', '<>', $params['id'])->first();
+                if(!empty($blastMatch->campaign_name)) {
+                    throw new DuplicateTextBlastNameException();
+                }
             }
 
             // Get Categories
