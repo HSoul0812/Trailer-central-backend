@@ -147,6 +147,7 @@ class BlastRepository implements BlastRepositoryInterface {
 
         // Return All?
         if($params['per_page'] === 'all') {
+            echo $query->toSql();
             return $query->get();
         }
         
