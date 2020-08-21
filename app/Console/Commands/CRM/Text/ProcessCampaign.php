@@ -118,7 +118,6 @@ class ProcessCampaign extends Command
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
                 // Get Unassigned Leads
-                $this->info("Got user id: {$dealer->user_id}");
                 $campaigns = $this->campaigns->getAll([
                     'is_enabled' => true,
                     'per_page' => 'all',
@@ -141,7 +140,7 @@ class ProcessCampaign extends Command
                     }
 
                     // Get Unsent Campaign Leads
-                    $leads = $this->campaignRepository->getLeads([
+                    $leads = $this->campaigns->getLeads([
                         'per_page' => 'all',
                         'id' => $campaign->id
                     ]);
