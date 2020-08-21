@@ -19,6 +19,8 @@ class Inventory extends Model
     const COLOR_ATTRIBUTE_ID = 11;
 
     const TABLE_NAME = 'inventory';
+    
+    const STATUS_QUOTE = 6;
 
     /**
      * The table associated with the model.
