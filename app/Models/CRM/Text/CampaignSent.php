@@ -13,6 +13,13 @@ class CampaignSent extends Model
 {
     protected $table = 'crm_text_campaign_sent';
 
+    // Define Constants to Make it Easier to Handle Sent Types
+    const STATUS_TYPES = [
+        'sent', // sent text
+        'lead', // lead updated
+        'logged' // logged text
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,6 +28,7 @@ class CampaignSent extends Model
     protected $fillable = [
         'text_campaign_id',
         'lead_id',
-        'text_id'
+        'text_id',
+        'status'
     ];
 }
