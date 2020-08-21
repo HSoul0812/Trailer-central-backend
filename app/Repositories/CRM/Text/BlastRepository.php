@@ -307,7 +307,7 @@ class BlastRepository implements BlastRepositoryInterface {
                      ->where('website_lead.phone_number', '<>', '')
                      ->whereNotNull('website_lead.phone_number')
                      ->whereNull('crm_text_stop.sms_number')
-                     ->whereNull('crm_text_blast_sent.id');
+                     ->whereNull('crm_text_blast_sent.text_blast_id');
 
         // Is Archived?!
         if($blast->included_archived === -1 || $blast->include_archived === '-1') {

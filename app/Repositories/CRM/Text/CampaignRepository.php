@@ -318,7 +318,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
                      ->where('website_lead.phone_number', '<>', '')
                      ->whereNotNull('website_lead.phone_number')
                      ->whereNull('crm_text_stop.sms_number')
-                     ->whereNull('crm_text_campaign_sent.id');
+                     ->whereNull('crm_text_campaign_sent.text_campaign_id');
 
         // Is Archived?!
         if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
