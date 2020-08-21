@@ -114,7 +114,7 @@ class ProcessCampaign extends Command
                     'per_page' => 'all',
                     'user_id' => $dealer->user_id
                 ]);
-                echo $dealer->user_id;
+                $this->info("Got user id: {$dealer->user_id}");
                 if(count($campaigns) < 1) {
                     continue;
                 }
