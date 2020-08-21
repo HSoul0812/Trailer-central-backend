@@ -104,7 +104,6 @@ class DeliverBlast extends Command
             $this->info("{$command} started {$now}");
 
             // Handle Dealer Differently
-            $dealers = array();
             if(!empty($dealerId)) {
                 $dealers = NewDealerUser::where('id', $dealerId)->with('user')->get();
             } else {
@@ -151,7 +150,7 @@ class DeliverBlast extends Command
                     $template = $blast->template->template;
 
                     // Loop Leads for Current Dealer
-                    $this->info("{$command} dealer #{$dealer->id} blast {$blast->blast_name} found " . count($leads) . " leads to process");
+                    $this->info("{$command} dealer #{$dealer->id} blast {$blast->campaign_name} found " . count($leads) . " leads to process");
                     foreach($leads as $lead) {
                         // If Error Occurs, Skip
                         try {
@@ -163,7 +162,7 @@ class DeliverBlast extends Command
                             if(empty($to_number)) {
                                 continue;
                             }
-                            $to_number = "+12626619236"; // DEBUG OVERRIDE
+                            $to_number = "+12626619236";
 
                             // Get Text Message
                             $textMessage = $this->templates->fillTemplate($template, [
@@ -209,8 +208,13 @@ class DeliverBlast extends Command
                         } catch(\Exception $e) {
                             $this->error("{$command} exception returned trying to send blast text {$e->getMessage()}: {$e->getTraceAsString()}");
                         }
-                        die;
                     }
+
+                    // Update Blast!
+                    $this->blasts->update([
+                        'id' => $blast->id,
+                        'is_delivered' => 1
+                    ]);
                 }
             }
         } catch(\Exception $e) {

@@ -104,7 +104,6 @@ class ProcessCampaign extends Command
             $this->info("{$command} started {$now}");
 
             // Handle Dealer Differently
-            $dealers = array();
             if(!empty($dealerId)) {
                 $dealers = NewDealerUser::where('id', $dealerId)->with('user')->get();
             } else {
@@ -161,7 +160,6 @@ class ProcessCampaign extends Command
                             if(empty($to_number)) {
                                 continue;
                             }
-                            $to_number = "+12626619236"; // DEBUG OVERRIDE
 
                             // Get Text Message
                             $textMessage = $this->templates->fillTemplate($template, [
