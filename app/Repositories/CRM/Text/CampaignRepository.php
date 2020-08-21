@@ -305,7 +305,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
         // Find Filtered Leads
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->leftJoin('crm_text_campaign_sent', function($join) {
+                     ->leftJoin('crm_text_campaign_sent', function($join) use($campaign) {
                         return $join->on('crm_text_campaign_sent.lead_id', '=', 'website_lead.identifier')
                                     ->on('crm_text_campaign_sent.text_campaign_id', '=', $campaign->id);
                      })
