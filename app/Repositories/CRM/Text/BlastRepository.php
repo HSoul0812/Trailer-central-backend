@@ -12,6 +12,7 @@ use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\CRM\Text\BlastBrand;
 use App\Models\CRM\Text\BlastCategory;
+use Carbon\Carbon;
 
 class BlastRepository implements BlastRepositoryInterface {
 
@@ -120,12 +121,33 @@ class BlastRepository implements BlastRepositoryInterface {
             $query = $query->where('user_id', $params['user_id']);
         }
 
+        if (isset($params['is_delivered'])) {
+            $query = $query->where('is_delivered', !empty($params['is_delivered']) ? 1 : 0);
+        }
+
+        if (isset($params['is_cancelled'])) {
+            $query = $query->where('is_cancelled', !empty($params['is_cancelled']) ? 1 : 0);
+        }
+
+        if (isset($params['send_date'])) {
+            if($params['send_date'] === 'due_now') {
+                $query = $query->where('send_date', '<', Carbon::now()->toDateTimeString());
+            } else {
+                $query = $query->where('send_date', '<', $params['send_date']);
+            }
+        }
+
         if (isset($params['id'])) {
             $query = $query->whereIn('id', $params['id']);
         }
 
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        // Return All?
+        if($params['per_page'] === 'all') {
+            return $query->get();
         }
         
         return $query->paginate($params['per_page'])->appends($params);

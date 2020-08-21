@@ -6,26 +6,26 @@ use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Repositories\CRM\Text\CampaignRepositoryInterface;
+use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 
-class ProcessCampaign extends Command
+class DeliverBlast extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'text:process-campaign {dealer?}';
+    protected $signature = 'text:deliver-blast {dealer?}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Process sending texts to all leads on all active campaigns.';
+    protected $description = 'Process sending texts to all leads on all active blasts.';
 
     /**
      * @var App\Services\CRM\Text\TextServiceInterface
@@ -43,9 +43,9 @@ class ProcessCampaign extends Command
     protected $texts;
 
     /**
-     * @var App\Repositories\CRM\Text\CampaignRepository
+     * @var App\Repositories\CRM\Text\BlastRepository
      */
-    protected $campaigns;
+    protected $blasts;
 
     /**
      * @var App\Repositories\CRM\Text\TemplateRepository
@@ -68,7 +68,7 @@ class ProcessCampaign extends Command
      * @return void
      */
     public function __construct(TextServiceInterface $service, LeadRepositoryInterface $leadRepo,
-                                CampaignRepositoryInterface $campaignRepo, TemplateRepositoryInterface $templateRepo,
+                                BlastRepositoryInterface $blastRepo, TemplateRepositoryInterface $templateRepo,
                                 TextRepositoryInterface $textRepo, DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         parent::__construct();
@@ -76,7 +76,7 @@ class ProcessCampaign extends Command
         $this->service = $service;
         $this->leads = $leadRepo;
         $this->texts = $textRepo;
-        $this->campaigns = $campaignRepo;
+        $this->blasts = $blastRepo;
         $this->templates = $templateRepo;
         $this->dealerLocation = $dealerLocationRepo;
     }
@@ -100,7 +100,7 @@ class ProcessCampaign extends Command
         try {
             // Log Start
             $now = $this->datetime->format("l, F jS, Y");
-            $command = "text:process-campaign" . (!empty($dealerId) ? ' ' . $dealerId : '');
+            $command = "text:deliver-blast" . (!empty($dealerId) ? ' ' . $dealerId : '');
             $this->info("{$command} started {$now}");
 
             // Handle Dealer Differently
@@ -115,20 +115,22 @@ class ProcessCampaign extends Command
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
                 // Get Unassigned Leads
-                $campaigns = $this->campaigns->getAll([
-                    'is_enabled' => true,
+                $blasts = $this->blasts->getAll([
+                    'is_cancelled' => false,
+                    'is_delivered' => true,
+                    'send_date' => 'due_now',
                     'per_page' => 'all',
                     'user_id' => $dealer->user_id
                 ]);
-                if(count($campaigns) < 1) {
+                if(count($blasts) < 1) {
                     continue;
                 }
 
-                // Loop Campaigns for Current Dealer
-                $this->info("{$command} dealer #{$dealer->id} found " . count($campaigns) . " active campaigns to process");
-                foreach($campaigns as $campaign) {
+                // Loop Blasts for Current Dealer
+                $this->info("{$command} dealer #{$dealer->id} found " . count($blasts) . " active blasts to process");
+                foreach($blasts as $blast) {
                     // Get From Number
-                    $from_number = $campaign->from_sms_number;
+                    $from_number = $blast->from_sms_number;
                     if(empty($from_number)) {
                         $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
                         if(empty($from_number)) {
@@ -136,20 +138,20 @@ class ProcessCampaign extends Command
                         }
                     }
 
-                    // Get Unsent Campaign Leads
-                    $leads = $this->campaigns->getLeads([
+                    // Get Unsent Blast Leads
+                    $leads = $this->blasts->getLeads([
                         'per_page' => 'all',
-                        'id' => $campaign->id
+                        'id' => $blast->id
                     ]);
                     if(count($leads) < 1) {
                         continue;
                     }
 
                     // Get Template!
-                    $template = $campaign->template->template;
+                    $template = $blast->template->template;
 
                     // Loop Leads for Current Dealer
-                    $this->info("{$command} dealer #{$dealer->id} campaign {$campaign->campaign_name} found " . count($leads) . " leads to process");
+                    $this->info("{$command} dealer #{$dealer->id} blast {$blast->blast_name} found " . count($leads) . " leads to process");
                     foreach($leads as $lead) {
                         // If Error Occurs, Skip
                         try {
@@ -193,20 +195,21 @@ class ProcessCampaign extends Command
                                 $this->info("{$command} logged text for {$leadName} at {$to_number}");
                                 $status = 'logged';
                             } catch(\Exception $e) {
-                                $this->error("{$command} exception returned after campaign sent {$e->getMessage()}: {$e->getTraceAsString()}");
+                                $this->error("{$command} exception returned after blast sent {$e->getMessage()}: {$e->getTraceAsString()}");
                             }
 
-                            // Mark Campaign as Sent to Lead
-                            $this->campaigns->sent([
-                                'text_campaign_id' => $campaign->id,
+                            // Mark Blast as Sent to Lead
+                            $this->blasts->sent([
+                                'text_blast_id' => $blast->id,
                                 'lead_id' => $lead->identifier,
                                 'text_id' => !empty($textLog->id) ? $textLog->id : 0,
                                 'status' => $status
                             ]);
-                            $this->info("{$command} inserted campaign sent for lead {$leadName}");
+                            $this->info("{$command} inserted blast sent for lead {$leadName}");
                         } catch(\Exception $e) {
-                            $this->error("{$command} exception returned trying to send campaign text {$e->getMessage()}: {$e->getTraceAsString()}");
+                            $this->error("{$command} exception returned trying to send blast text {$e->getMessage()}: {$e->getTraceAsString()}");
                         }
+                        die;
                     }
                 }
             }
