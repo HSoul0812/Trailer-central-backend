@@ -11,6 +11,7 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 
 class ProcessCampaign extends Command
 {
@@ -54,6 +55,11 @@ class ProcessCampaign extends Command
     protected $templates;
 
     /**
+     * @var App\Repositories\User\DealerLocationRepository
+     */
+    protected $dealerLocation;
+
+    /**
      * @var datetime
      */
     protected $datetime = null;
@@ -63,7 +69,9 @@ class ProcessCampaign extends Command
      *
      * @return void
      */
-    public function __construct(TextServiceInterface $service, LeadRepositoryInterface $leadRepo, CampaignRepositoryInterface $campaignRepo, TemplateRepositoryInterface $templateRepo, TextRepositoryInterface $textRepo)
+    public function __construct(TextServiceInterface $service, LeadRepositoryInterface $leadRepo,
+                                CampaignRepositoryInterface $campaignRepo, TemplateRepositoryInterface $templateRepo,
+                                TextRepositoryInterface $textRepo, DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         parent::__construct();
 
@@ -72,6 +80,7 @@ class ProcessCampaign extends Command
         $this->texts = $textRepo;
         $this->campaigns = $campaignRepo;
         $this->templates = $templateRepo;
+        $this->dealerLocation = $dealerLocationRepo;
     }
 
     /**
@@ -110,7 +119,7 @@ class ProcessCampaign extends Command
             foreach($dealers as $dealer) {
                 // Get Unassigned Leads
                 $this->info("Got user id: {$dealer->user_id}");
-                $campaigns = $this->campaignRepository->getAll([
+                $campaigns = $this->campaigns->getAll([
                     'is_enabled' => true,
                     'per_page' => 'all',
                     'user_id' => $dealer->user_id
