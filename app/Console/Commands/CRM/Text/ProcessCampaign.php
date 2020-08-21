@@ -108,7 +108,7 @@ class ProcessCampaign extends Command
             // Handle Dealer Differently
             $dealers = array();
             if(!empty($dealerId)) {
-                $dealer = NewDealerUser::findOrFail($dealerId)->with('user');
+                $dealer = NewDealerUser::with('user')->findOrFail($dealerId);
                 $dealers[] = $dealer;
             } else {
                 $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->with('user')->get();
