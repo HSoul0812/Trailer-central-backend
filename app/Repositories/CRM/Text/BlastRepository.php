@@ -316,7 +316,7 @@ class BlastRepository implements BlastRepositoryInterface {
         // Find Filtered Leads
         $query = Lead::select('website_lead.*')
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->leftJoin('crm_text_blast_sent', function($join) use($campaign) {
+                     ->leftJoin('crm_text_blast_sent', function($join) use($blast) {
                         return $join->on('crm_text_blast_sent.lead_id', '=', 'website_lead.identifier')
                                     ->where('crm_text_blast_sent.text_blast_id', '=', $blast->id);
                      })
