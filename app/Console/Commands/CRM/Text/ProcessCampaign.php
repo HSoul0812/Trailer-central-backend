@@ -176,24 +176,29 @@ class ProcessCampaign extends Command
                         $this->service->send($from_number, $to_number, $textMessage, $lead->full_name);
                         $this->info("{$command} send text to {$leadName} at {$to_number}");
 
-                        // Save Lead Status
-                        $this->texts->updateLeadStatus($lead);
-                        $this->info("{$command} updated lead {$leadName} status");
+                        // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
+                        try {
+                            // Save Lead Status
+                            $this->texts->updateLeadStatus($lead);
+                            $this->info("{$command} updated lead {$leadName} status");
 
-                        // Log SMS
-                        $textLog = $this->texts->create([
-                            'lead_id'     => $leadId,
-                            'from_number' => $from_number,
-                            'to_number'   => $to_number,
-                            'log_message' => $textMessage
-                        ]);
-                        $this->info("{$command} logged text for {$leadName} at {$to_number}");
+                            // Log SMS
+                            $textLog = $this->texts->create([
+                                'lead_id'     => $leadId,
+                                'from_number' => $from_number,
+                                'to_number'   => $to_number,
+                                'log_message' => $textMessage
+                            ]);
+                            $this->info("{$command} logged text for {$leadName} at {$to_number}");
+                        } catch(\Exception $e) {
+                            $this->error("{$command} exception returned after campaign sent {$e->getMessage()}: {$e->getTraceAsString()}");
+                        }
 
                         // Mark Campaign as Sent to Lead
                         $this->campaigns->sent([
                             'text_campaign_id' => $campaign->id,
                             'lead_id' => $lead->identifier,
-                            'text_id' => $textLog->id
+                            'text_id' => !empty($textLog->id) ? $textLog->id : 0
                         ]);
                         $this->info("{$command} inserted campaign sent for lead {$leadName}");
                         die;
