@@ -109,12 +109,12 @@ class ProcessCampaign extends Command
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
                 // Get Unassigned Leads
+                $this->info("Got user id: {$dealer->user_id}");
                 $campaigns = $this->campaignRepository->getAll([
                     'is_enabled' => true,
                     'per_page' => 'all',
                     'user_id' => $dealer->user_id
                 ]);
-                $this->info("Got user id: {$dealer->user_id}");
                 if(count($campaigns) < 1) {
                     continue;
                 }
@@ -193,7 +193,7 @@ class ProcessCampaign extends Command
                 }
             }
         } catch(\Exception $e) {
-            Log::error("{$command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
+            $this->error("{$command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
         }
 
         // Log End
