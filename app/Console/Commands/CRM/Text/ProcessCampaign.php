@@ -108,10 +108,10 @@ class ProcessCampaign extends Command
             // Handle Dealer Differently
             $dealers = array();
             if(!empty($dealerId)) {
-                $dealer = NewDealerUser::findOrFail($dealerId);
+                $dealer = NewDealerUser::findOrFail($dealerId)->with('user');
                 $dealers[] = $dealer;
             } else {
-                $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
+                $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->with('user')->get();
             }
             $this->info("{$command} found " . count($dealers) . " dealers to process");
 
