@@ -117,7 +117,7 @@ class DeliverBlast extends Command
                 // Get Unassigned Leads
                 $blasts = $this->blasts->getAll([
                     'is_cancelled' => false,
-                    'is_delivered' => true,
+                    'is_delivered' => false,
                     'send_date' => 'due_now',
                     'per_page' => 'all',
                     'user_id' => $dealer->user_id

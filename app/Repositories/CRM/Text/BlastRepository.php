@@ -147,10 +147,6 @@ class BlastRepository implements BlastRepositoryInterface {
 
         // Return All?
         if($params['per_page'] === 'all') {
-            var_dump($params);
-            echo PHP_EOL;
-            echo Carbon::now()->toDateTimeString() . PHP_EOL;
-            echo $query->toSql() . PHP_EOL;
             return $query->get();
         }
         
