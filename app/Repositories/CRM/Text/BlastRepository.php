@@ -296,7 +296,7 @@ class BlastRepository implements BlastRepositoryInterface {
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
                      ->leftJoin('crm_text_blast_sent', function($join) use($campaign) {
                         return $join->on('crm_text_blast_sent.lead_id', '=', 'website_lead.identifier')
-                                    ->on('crm_text_blast_sent.text_blast_id', '=', $blast->id);
+                                    ->where('crm_text_blast_sent.text_blast_id', '=', $blast->id);
                      })
                      ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
                      ->leftJoin('crm_text_stop', function($join) {

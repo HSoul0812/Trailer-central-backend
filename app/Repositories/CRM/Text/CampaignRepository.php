@@ -307,7 +307,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
                      ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
                      ->leftJoin('crm_text_campaign_sent', function($join) use($campaign) {
                         return $join->on('crm_text_campaign_sent.lead_id', '=', 'website_lead.identifier')
-                                    ->on('crm_text_campaign_sent.text_campaign_id', '=', $campaign->id);
+                                    ->where('crm_text_campaign_sent.text_campaign_id', '=', $campaign->id);
                      })
                      ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
                      ->leftJoin('crm_text_stop', function($join) {
