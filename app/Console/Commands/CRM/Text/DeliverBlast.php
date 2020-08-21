@@ -159,7 +159,6 @@ class DeliverBlast extends Command
                                 if(empty($to_number)) {
                                     continue;
                                 }
-                                $to_number = "+12626619236";
 
                                 // Get Text Message
                                 $textMessage = $this->templates->fillTemplate($template, [
@@ -213,6 +212,7 @@ class DeliverBlast extends Command
                         'id' => $blast->id,
                         'is_delivered' => 1
                     ]);
+                    $this->info("{$command} marked blast {$blast->campaign_name} as delivered");
                 }
             }
         } catch(\Exception $e) {
