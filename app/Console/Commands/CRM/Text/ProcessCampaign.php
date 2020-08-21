@@ -110,7 +110,8 @@ class ProcessCampaign extends Command
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
                 // Get Unassigned Leads
-                $campaigns = $this->campaignRepository->getAllActive([
+                $campaigns = $this->campaignRepository->getAll([
+                    'is_enabled' => true,
                     'per_page' => 'all',
                     'user_id' => $dealer->user_id
                 ]);

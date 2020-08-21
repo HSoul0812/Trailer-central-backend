@@ -120,12 +120,21 @@ class CampaignRepository implements CampaignRepositoryInterface {
             $query = $query->where('user_id', $params['user_id']);
         }
 
+        if (isset($params['is_enabled'])) {
+            $query = $query->where('is_enabled', !empty($params['is_enabled']) ? 1 : 0);
+        }
+
         if (isset($params['id'])) {
             $query = $query->whereIn('id', $params['id']);
         }
 
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        // Return All?
+        if($params['per_page'] === 'all') {
+            return $query->get();
         }
         
         return $query->paginate($params['per_page'])->appends($params);
