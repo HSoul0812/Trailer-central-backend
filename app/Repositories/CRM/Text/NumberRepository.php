@@ -71,7 +71,7 @@ class NumberRepository implements NumberRepositoryInterface {
      */
     public function setPhoneAsUsed($dealerNo, $usedNo, $customerNo, $customerName) {
         // Calculate Expiration
-        $expirationTime = time() + (self::EXPIRATION_TIME * 60 * 60);
+        $expirationTime = time() + (Number::EXPIRATION_TIME * 60 * 60);
 
         // Create Number in DB
         return $this->create([
