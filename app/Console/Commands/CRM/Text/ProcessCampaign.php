@@ -170,7 +170,7 @@ class ProcessCampaign extends Command
                             $textMessage = $this->templates->fillTemplate($template, [
                                 'lead_name' => $lead->full_name,
                                 'title_of_unit_of_interest' => $lead->inventory->title,
-                                'dealer_name' => $dealer->name
+                                'dealer_name' => $dealer->user->name
                             ]);
                             $this->info("{$command} preparing to send text to {$leadName} at {$to_number}");
 
