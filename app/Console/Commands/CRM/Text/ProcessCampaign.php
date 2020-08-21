@@ -14,8 +14,6 @@ use App\Repositories\CRM\Text\TextRepositoryInterface;
 
 class ProcessCampaign extends Command
 {
-    use MailHelper;
-
     /**
      * The name and signature of the console command.
      *
