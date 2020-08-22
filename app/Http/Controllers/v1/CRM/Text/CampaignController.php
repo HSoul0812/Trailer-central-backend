@@ -11,8 +11,6 @@ use App\Http\Requests\CRM\Text\ShowCampaignRequest;
 use App\Http\Requests\CRM\Text\UpdateCampaignRequest;
 use App\Http\Requests\CRM\Text\DeleteCampaignRequest;
 use App\Http\Requests\CRM\Text\SentCampaignRequest;
-use App\Http\Requests\CRM\Text\LeadsCampaignRequest;
-use App\Transformers\CRM\Leads\CampaignLeadTransformer;
 use App\Transformers\CRM\Text\CampaignTransformer;
 
 class CampaignController extends RestfulControllerV2
@@ -266,46 +264,6 @@ class CampaignController extends RestfulControllerV2
         if ( $request->validate()) {
             // Create Text
             return $this->response->item($this->campaigns->sent(['id' => $id]), new CampaignTransformer());
-        }
-        
-        return $this->response->errorBadRequest();
-    }
-
-    /**
-     * @OA\Get(
-     *     path="/api/crm/{userId}/texts/campaign/{id}/leads",
-     *     description="Retrieve a list of leads for text campaign id",
-     *     tags={"Text"},
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="Page Limit",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="sort",
-     *         in="query",
-     *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     )
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns a list of texts",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
-     */
-    public function leads(Request $request) {
-        $request = new LeadsCampaignRequest($request->all());
-        
-        if ($request->validate()) {
-            return $this->response->paginator($this->campaigns->getLeads($request->all()), new CampaignLeadTransformer());
         }
         
         return $this->response->errorBadRequest();

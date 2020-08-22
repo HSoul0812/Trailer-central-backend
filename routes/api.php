@@ -431,7 +431,6 @@ $api->version('v1', function ($route) {
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@destroy')->where('id', '[0-9]+');
                     $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\CampaignController@sent')->where('id', '[0-9]+');
-                    $route->get('{id}/leads', 'App\Http\Controllers\v1\CRM\Text\CampaignController@leads')->where('id', '[0-9]+');
                 });
 
                 // Texts Blast
@@ -445,7 +444,6 @@ $api->version('v1', function ($route) {
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@destroy')->where('id', '[0-9]+');
                     $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
-                    $route->get('{id}/leads', 'App\Http\Controllers\v1\CRM\Text\BlastController@leads')->where('id', '[0-9]+');
                 });
             });
         });

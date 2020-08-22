@@ -136,11 +136,7 @@ class ProcessCampaign extends Command
                     }
 
                     // Get Unsent Campaign Leads
-                    $leads = $this->campaigns->getLeads([
-                        'per_page' => 'all',
-                        'id' => $campaign->id
-                    ]);
-                    if(count($leads) < 1) {
+                    if(count($campaign->leads) < 1) {
                         continue;
                     }
 
@@ -148,8 +144,9 @@ class ProcessCampaign extends Command
                     $template = $campaign->template->template;
 
                     // Loop Leads for Current Dealer
-                    $this->info("{$command} dealer #{$dealer->id} campaign {$campaign->campaign_name} found " . count($leads) . " leads to process");
-                    foreach($leads as $lead) {
+                    $this->info("{$command} dealer #{$dealer->id} campaign {$campaign->campaign_name} found " . count($campaign->leads) . " leads to process");
+                    continue;
+                    foreach($campaign->leads as $lead) {
                         // If Error Occurs, Skip
                         try {
                             // Initialize Notes Array

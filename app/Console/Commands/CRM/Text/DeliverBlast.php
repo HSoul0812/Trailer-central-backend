@@ -138,17 +138,14 @@ class DeliverBlast extends Command
                     }
 
                     // Get Unsent Blast Leads
-                    $leads = $this->blasts->getLeads([
-                        'per_page' => 'all',
-                        'id' => $blast->id
-                    ]);
-                    if(count($leads) > 0) {
+                    if(count($blast->leads) > 0) {
                         // Get Template!
                         $template = $blast->template->template;
 
                         // Loop Leads for Current Dealer
-                        $this->info("{$command} dealer #{$dealer->id} blast {$blast->campaign_name} found " . count($leads) . " leads to process");
-                        foreach($leads as $lead) {
+                        $this->info("{$command} dealer #{$dealer->id} blast {$blast->campaign_name} found " . count($blast->leads) . " leads to process");
+                        continue;
+                        foreach($blast->leads as $lead) {
                             // If Error Occurs, Skip
                             try {
                                 // Initialize Notes Array
