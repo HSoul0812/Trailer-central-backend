@@ -121,7 +121,7 @@ class Blast extends Model
                         return $join->on(DB::raw("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 10))"), '=', 'crm_text_stop.sms_number')
                                     ->orOn(DB::raw("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 11))"), '=', 'crm_text_stop.sms_number');
                      })
-                     ->where('website_lead.dealer_id', $dealerId)
+                     ->where('website_lead.dealer_id', $blast->newDealerUser->id)
                      ->where('website_lead.phone_number', '<>', '')
                      ->whereNotNull('website_lead.phone_number')
                      ->whereNull('crm_text_stop.sms_number')
