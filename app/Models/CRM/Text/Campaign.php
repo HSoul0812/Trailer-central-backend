@@ -5,6 +5,7 @@ namespace App\Models\CRM\Text;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
+use App\Models\CRM\Leads\Lead;
 
 /**
  * Class Text Campaign
