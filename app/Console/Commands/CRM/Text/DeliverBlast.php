@@ -144,7 +144,6 @@ class DeliverBlast extends Command
 
                         // Loop Leads for Current Dealer
                         $this->info("{$command} dealer #{$dealer->id} blast {$blast->campaign_name} found " . count($blast->leads) . " leads to process");
-                        continue;
                         foreach($blast->leads as $lead) {
                             // If Error Occurs, Skip
                             try {
