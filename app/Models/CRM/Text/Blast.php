@@ -103,7 +103,7 @@ class Blast extends Model
      * 
      * @return Collection of Leads
      */
-    private function getLeadsAttribute()
+    public function getLeadsAttribute()
     {
         // Initialize Blast
         $blast = $this;

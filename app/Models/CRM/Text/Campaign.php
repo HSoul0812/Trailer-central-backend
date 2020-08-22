@@ -100,7 +100,7 @@ class Campaign extends Model
      * 
      * @return Collection of Leads
      */
-    private function getLeadsAttribute()
+    public function getLeadsAttribute()
     {
         // Initialize Campaign
         $campaign = $this;
