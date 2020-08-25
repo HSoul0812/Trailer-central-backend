@@ -21,7 +21,7 @@ class InventoryController extends RestfulController
      */
     public function __construct(InventoryRepositoryInterface $inventory)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'show']);
+        $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->inventory = $inventory;
     }
     

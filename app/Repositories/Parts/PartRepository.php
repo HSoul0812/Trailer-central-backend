@@ -100,7 +100,12 @@ class PartRepository implements PartRepositoryInterface {
 
             if (isset($params['images'])) {
                 foreach ($params['images'] as $image) {
-                    $this->storeImage($part->id, $image);
+                    try {
+                        $this->storeImage($part->id, $image);
+                    } catch (\ImageNotDownloadedException $ex) {
+
+                    }
+                    
                 }
             }
 
@@ -310,7 +315,11 @@ class PartRepository implements PartRepositoryInterface {
                 if (isset($params['images'])) {
                     $part->images()->delete();
                     foreach($params['images'] as $image) {
-                        $this->storeImage($part->id, $image);
+                        try {
+                            $this->storeImage($part->id, $image);
+                        } catch (\ImageNotDownloadedException $ex) {
+
+                        }
                     }
                 }
 
