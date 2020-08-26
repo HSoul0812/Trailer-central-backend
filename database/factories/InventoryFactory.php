@@ -45,7 +45,7 @@ $factory->define(Inventory::class, function (Faker $faker) {
         'updated_at' => $createdAt,
         'updated_at_auto' => $createdAt,
         'active' => 1,
-        'title' => !empty($showroom->title) ? $showroom->title : $faker->title,
+        'title' => !empty($showroom->title) ? $showroom->title : $faker->sentence,
         'stock' => Str::random(10),
         'manufacturer' => $mfg->name,
         'brand' => !empty($showroom->brand) ? $showroom->brand : (!empty($brand->name) ? $brand->name : ''),

@@ -12,18 +12,18 @@ use Faker\Generator as Faker;
  */
 $factory->define(Campaign::class, function (Faker $faker) {
     // Get New Dealer User
-    $newDealerUser = NewDealerUser::find(TestCase::getTestDealerId());
+    $dealer = NewDealerUser::find(TestCase::getTestDealerId());
 
     // Get Template ID
-    $template = Template::where('user_id', TestCase::getTestDealerId())->inRandomOrder()->first();
+    $template = Template::where('user_id', $dealer->user_id)->inRandomOrder()->first();
     
     // Get Name
-    $name = $faker->title;
+    $name = $faker->sentence;
 
     // Return Overrides
     return [
-        'user_id' => $newDealerUser->user_id,
-        'template_id' => !empty($template->id) ? $template->id : 0,
+        'user_id' => $dealer->user_id,
+        'template_id' => $template->id,
         'campaign_name' => $name,
         'campaign_subject' => $name,
         'from_sms_number' => $faker->phoneNumber,

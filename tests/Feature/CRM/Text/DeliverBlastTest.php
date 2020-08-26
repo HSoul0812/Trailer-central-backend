@@ -55,10 +55,14 @@ class DeliverBlastTest extends TestCase
         $this->refreshBlasts($dealer->id);
 
 
+        // Build Generic Template
+        $template = Template::where('user_id', $dealer->user_id)->first();
+        if(empty($template->id)) {
+            factory(Template::class)->create();
+        }
+
         // Build Generic Blast
         $blast = factory(Blast::class)->create();
-
-        // Refresh Leads and Return Leads Not to Return in Blast
         $unused = $this->refreshLeads($blast->id);
 
         // Get Blasts for Dealer
@@ -73,7 +77,7 @@ class DeliverBlastTest extends TestCase
         $leads = $blast->leads;
 
         // Mock Text Service
-        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $dealer) {
+        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
                 // Get From Number
@@ -83,7 +87,7 @@ class DeliverBlastTest extends TestCase
                 }
 
                 // Get Text Message
-                $textMessage = $this->templates->fillTemplate($template, [
+                $textMessage = $this->templates->fillTemplate($blast->template->template, [
                     'lead_name' => $lead->full_name,
                     'title_of_unit_of_interest' => $lead->inventory->title,
                     'dealer_name' => $dealer->user->name
