@@ -5,7 +5,6 @@ namespace App\Console\Commands\CRM\Text;
 use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Text\TextServiceInterface;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
@@ -31,11 +30,6 @@ class DeliverBlast extends Command
      * @var App\Services\CRM\Text\TextServiceInterface
      */
     protected $service;
-
-    /**
-     * @var App\Repositories\CRM\Leads\LeadRepository
-     */
-    protected $leads;
 
     /**
      * @var App\Repositories\CRM\Text\TextRepository
@@ -67,14 +61,15 @@ class DeliverBlast extends Command
      *
      * @return void
      */
-    public function __construct(TextServiceInterface $service, LeadRepositoryInterface $leadRepo,
-                                BlastRepositoryInterface $blastRepo, TemplateRepositoryInterface $templateRepo,
-                                TextRepositoryInterface $textRepo, DealerLocationRepositoryInterface $dealerLocationRepo)
+    public function __construct(TextServiceInterface $service,
+                                BlastRepositoryInterface $blastRepo,
+                                TemplateRepositoryInterface $templateRepo,
+                                TextRepositoryInterface $textRepo,
+                                DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         parent::__construct();
 
         $this->service = $service;
-        $this->leads = $leadRepo;
         $this->texts = $textRepo;
         $this->blasts = $blastRepo;
         $this->templates = $templateRepo;
@@ -107,13 +102,13 @@ class DeliverBlast extends Command
             if(!empty($dealerId)) {
                 $dealers = NewDealerUser::where('id', $dealerId)->with('user')->get();
             } else {
-                $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->with('user')->get();
+                $dealers = NewDealerUser::has('activeCrmUser')->with('user')->get();
             }
             $this->info("{$command} found " . count($dealers) . " dealers to process");
 
-            // Get Dealers With Valid Salespeople
+            // Get Dealers With Active CRM
             foreach($dealers as $dealer) {
-                // Get Unassigned Leads
+                // Get Blasts for Dealer
                 $blasts = $this->blasts->getAll([
                     'is_cancelled' => false,
                     'is_delivered' => false,
@@ -155,6 +150,7 @@ class DeliverBlast extends Command
                                 if(empty($to_number)) {
                                     continue;
                                 }
+                                $to_number = '+12626619236';
 
                                 // Get Text Message
                                 $textMessage = $this->templates->fillTemplate($template, [

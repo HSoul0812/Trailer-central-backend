@@ -107,13 +107,13 @@ class ProcessCampaign extends Command
             if(!empty($dealerId)) {
                 $dealers = NewDealerUser::where('id', $dealerId)->with('user')->get();
             } else {
-                $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->with('user')->get();
+                $dealers = NewDealerUser::has('activeCrmUser')->with('user')->get();
             }
             $this->info("{$command} found " . count($dealers) . " dealers to process");
 
-            // Get Dealers With Valid Salespeople
+            // Get Dealers With Active CRM
             foreach($dealers as $dealer) {
-                // Get Unassigned Leads
+                // Get Campaigns for Dealer
                 $campaigns = $this->campaigns->getAll([
                     'is_enabled' => true,
                     'per_page' => 'all',
@@ -156,6 +156,7 @@ class ProcessCampaign extends Command
                             if(empty($to_number)) {
                                 continue;
                             }
+                            $to_number = '+12626619236';
 
                             // Get Text Message
                             $textMessage = $this->templates->fillTemplate($template, [
