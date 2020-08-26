@@ -75,6 +75,9 @@ class DeliverBlastTest extends TestCase
             'user_id' => $dealer->user_id
         ]);
         $blast = reset($blasts);
+        var_dump($blasts);
+        var_dump($blast);
+        die;
         $leads = $blast->leads;
 
         // Mock Text Service
