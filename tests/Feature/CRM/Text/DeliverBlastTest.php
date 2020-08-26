@@ -15,9 +15,11 @@ class DeliverBlastTest extends TestCase
     /**
      * App\Repositories\CRM\Text\BlastRepositoryInterface $blasts
      * App\Repositories\CRM\Text\TemplateRepositoryInterface $templates
+     * App\Repositories\User\DealerLocationRepository $dealerLocation
      */
     protected $blasts;
     protected $templates;
+    protected $dealerLocation;
 
     /**
      * Faker\Generator $faker
@@ -34,6 +36,7 @@ class DeliverBlastTest extends TestCase
         // Make Lead Repo
         $this->blasts = $this->app->make('App\Repositories\CRM\Text\BlastRepositoryInterface');
         $this->templates = $this->app->make('App\Repositories\CRM\Text\TemplateRepositoryInterface');
+        $this->dealerLocation = $this->app->make('App\Repositories\User\DealerLocationRepositoryInterface');
 
         // Create Faker
         $this->faker = new Faker();
@@ -80,7 +83,7 @@ class DeliverBlastTest extends TestCase
         }
         $leads = $blast->leads;
         if(count($leads) < 1) {
-            throw new \Exception("There MUST be Leads on the Blast!");
+            throw new NoLeadsTestDeliverBlastException();
         }
 
         // Mock Text Service
