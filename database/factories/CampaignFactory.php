@@ -15,7 +15,7 @@ $factory->define(Campaign::class, function (Faker $faker) {
     $newDealerUser = NewDealerUser::find(TestCase::getTestDealerId());
 
     // Get Template ID
-    $template = Template::where('user_id', TextCase::getTestDealerId())->inRandomOrder()->first();
+    $template = Template::where('user_id', TestCase::getTestDealerId())->inRandomOrder()->first();
     
     // Get Name
     $name = $faker->title;
