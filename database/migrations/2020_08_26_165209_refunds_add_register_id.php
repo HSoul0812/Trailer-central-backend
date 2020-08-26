@@ -15,7 +15,7 @@ class RefundsAddRegisterId extends Migration
     {
         Schema::table('dealer_refunds', function (Blueprint $table) {
             //
-            $table->unsignedInteger('register_id');
+            $table->unsignedInteger('register_id')->after('dealer_id');
         });
     }
 
