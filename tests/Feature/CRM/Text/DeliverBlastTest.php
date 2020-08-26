@@ -53,7 +53,7 @@ class DeliverBlastTest extends TestCase
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
 
         // Refresh Leads
-        $this->refreshBlasts($dealer->id);
+        $this->refreshBlasts($dealer->user_id);
 
 
         // Build Generic Template
@@ -172,21 +172,10 @@ class DeliverBlastTest extends TestCase
      * @return void
      */
     private function refreshBlasts($userId) {
-        // Get Active Blasts
-        $blasts = $this->blasts->getAll([
-            'is_cancelled' => false,
-            'is_delivered' => false,
-            'send_date' => 'due_now',
-            'per_page' => 'all',
-            'user_id' => $userId
+        // Cancel All Dealer Blasts
+        Blast::where('user_id', $userId)->update([
+            'is_cancelled' => true
         ]);
-
-        // Loop Leads
-        foreach($blasts as $blast) {
-            Blast::where('id', $blast->id)->update([
-                'is_cancelled' => true
-            ]);
-        }
     }
 
     /**
