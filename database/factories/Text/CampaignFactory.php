@@ -26,7 +26,7 @@ $factory->define(Campaign::class, function (Faker $faker) {
         'template_id' => $template->id,
         'campaign_name' => $name,
         'campaign_subject' => $name,
-        'from_sms_number' => $faker->phoneNumber,
+        'from_sms_number' => '+1' . $faker->randomNumber(10),
         'send_after_days' => 15,
         'action' => 'inquired'
     ];

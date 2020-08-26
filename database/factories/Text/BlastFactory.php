@@ -30,7 +30,7 @@ $factory->define(Blast::class, function (Faker $faker) {
         'template_id' => !empty($template->id) ? $template->id : 0,
         'campaign_name' => $name,
         'campaign_subject' => $name,
-        'from_sms_Number' => $faker->phoneNumber,
+        'from_sms_number' => '+1' . $faker->randomNumber(10),
         'action' => 'inquired',
         'send_after_days' => 15,
         'send_date' => Carbon::now()->toDateTimeString()
