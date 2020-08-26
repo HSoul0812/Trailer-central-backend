@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\CRM\Text;
 
+use App\Exceptions\CRM\Text\NoLeadsTestDeliverBlastException;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Blast;
