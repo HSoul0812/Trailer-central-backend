@@ -74,10 +74,10 @@ class DeliverBlastTest extends TestCase
             'per_page' => 'all',
             'user_id' => $dealer->user_id
         ]);
-        $blast = reset($blasts);
-        var_dump($blasts);
-        var_dump($blast);
-        die;
+        foreach($blasts as $single) {
+            $blast = $single;
+            break;
+        }
         $leads = $blast->leads;
 
         // Mock Text Service
