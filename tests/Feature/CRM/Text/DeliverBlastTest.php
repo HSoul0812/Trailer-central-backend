@@ -5,6 +5,7 @@ namespace Tests\Feature\CRM\Text;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Blast;
+use App\Models\CRM\Text\Template;
 use App\Models\User\NewDealerUser;
 use Faker\Generator as Faker;
 use Tests\TestCase;
