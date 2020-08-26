@@ -79,6 +79,9 @@ class DeliverBlastTest extends TestCase
             break;
         }
         $leads = $blast->leads;
+        if(count($leads) < 1) {
+            throw new \Exception("There MUST be Leads on the Blast!");
+        }
 
         // Mock Text Service
         $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
