@@ -153,7 +153,7 @@ class DeliverBlastTest extends TestCase
             ]);
 
             // Assert a lead status entry was saved...
-            $this->assertDatabaseHas('dealer_texts_log', [
+            /*$this->assertDatabaseHas('dealer_texts_log', [
                 'lead_id'     => $lead->identifier,
                 'from_number' => $from_number,
                 'to_number'   => $lead->text_phone
@@ -164,7 +164,7 @@ class DeliverBlastTest extends TestCase
                 'text_blast_id' => $blast->id,
                 'lead_id' => $lead->identifier,
                 'status' => 'logged'
-            ]);
+            ]);*/
         }
     }
 

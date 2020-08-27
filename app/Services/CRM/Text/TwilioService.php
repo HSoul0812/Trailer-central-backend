@@ -97,8 +97,6 @@ class TwilioService implements TextServiceInterface
                 $sent = $this->sendViaTwilio($fromPhone, $to_number, $textMessage);
             } catch (InvalidTwilioInboundNumberException $ex) {
                 // Get Next Available Number!
-                echo $ex->getMessage();
-                die;
                 $fromPhone = $this->getNextAvailableNumber();
 
                 // Add Tried Phones to array
@@ -143,8 +141,6 @@ class TwilioService implements TextServiceInterface
             );
         } catch (\Exception $ex) {
             // Exception occurred?!
-            echo $ex->getMessage();
-            die;
             if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
                 throw new InvalidTwilioInboundNumberException();
             }
@@ -167,11 +163,6 @@ class TwilioService implements TextServiceInterface
      * @throws NoTwilioNumberAvailableException
      */
     private function getTwilioNumber($from_number, $to_number, $customer_name) {
-        // Is a Magic Number?!
-        if(in_array($from_number, self::MAGIC_NUMBERS)) {
-            return $from_number;
-        }
-
         // Get Active Twilio Number for From/To Numbers
         $twilioNumber = $this->textNumber->findActiveTwilioNumber($from_number, $to_number);
 
