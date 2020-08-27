@@ -21,12 +21,4 @@ interface TextRepositoryInterface extends Repository {
      * @return TextLog
      */
     public function send($leadId, $textMessage);
-
-    /**
-     * Update Status for Lead
-     * 
-     * @param Lead $lead
-     * @return LeadStatus
-     */
-    public function updateLeadStatus($lead);
 }

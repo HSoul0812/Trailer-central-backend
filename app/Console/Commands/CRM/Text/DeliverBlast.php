@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Text\TextServiceInterface;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
@@ -31,6 +32,11 @@ class DeliverBlast extends Command
      * @var App\Services\CRM\Text\TextServiceInterface
      */
     protected $service;
+
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepository
+     */
+    protected $leads;
 
     /**
      * @var App\Repositories\CRM\Text\TextRepository
@@ -66,11 +72,13 @@ class DeliverBlast extends Command
                                 BlastRepositoryInterface $blastRepo,
                                 TemplateRepositoryInterface $templateRepo,
                                 TextRepositoryInterface $textRepo,
+                                LeadRepositoryInterface $leadRepo,
                                 DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         parent::__construct();
 
         $this->service = $service;
+        $this->leads = $leadRepo;
         $this->texts = $textRepo;
         $this->blasts = $blastRepo;
         $this->templates = $templateRepo;
@@ -177,7 +185,11 @@ class DeliverBlast extends Command
                                 // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
                                 try {
                                     // Save Lead Status
-                                    $this->texts->updateLeadStatus($lead);
+                                    $this->leads->update([
+                                        'id' => $lead->identifier,
+                                        'lead_status' => Lead::STATUS_MEDIUM,
+                                        'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+                                    ]);
                                     $this->info("{$command} updated lead {$leadName} status");
                                     $status = 'lead';
 

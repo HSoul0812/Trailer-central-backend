@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\Text;
 
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
 use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
@@ -19,6 +20,11 @@ class TextRepository implements TextRepositoryInterface {
      * @var TextServiceInterface
      */
     private $service;
+
+    /**
+     * @var LeadRepositoryInterface
+     */
+    private $leads;
 
     /**
      * @var DealerLocationRepositoryInterface
@@ -41,9 +47,10 @@ class TextRepository implements TextRepositoryInterface {
      * 
      * @param TextServiceInterface $service
      */
-    public function __construct(TextServiceInterface $service, DealerLocationRepositoryInterface $dealerLocation)
+    public function __construct(TextServiceInterface $service, LeadRepositoryInterface $leads, DealerLocationRepositoryInterface $dealerLocation)
     {
         $this->service = $service;
+        $this->leads = $leads;
         $this->dealerLocation = $dealerLocation;
     }
     
@@ -138,7 +145,11 @@ class TextRepository implements TextRepositoryInterface {
         $this->service->send($from_number, $to_number, $textMessage, $fullName);
 
         // Save Lead Status
-        $this->updateLeadStatus($lead);
+        $this->leads->update([
+            'id' => $lead->identifier,
+            'lead_status' => Lead::STATUS_MEDIUM,
+            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+        ]);
 
         // Log SMS
         return $this->create([
@@ -149,26 +160,6 @@ class TextRepository implements TextRepositoryInterface {
         ]);
     }
 
-
-    /**
-     * Update Status for Lead
-     * 
-     * @param Lead $lead
-     * @return LeadStatus
-     */
-    public function updateLeadStatus($lead) {
-        $leadStatus = $lead->leadStatus()->first();
-
-        DB::transaction(function() use (&$leadStatus) {
-            // Fill Text Details
-            $leadStatus->fill([
-                'status' => Lead::STATUS_MEDIUM,
-                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-            ])->save();
-        });
-
-        return $leadStatus;
-    }
 
     /**
      * Add Sort Query

@@ -67,9 +67,12 @@ class ProcessCampaign extends Command
      *
      * @return void
      */
-    public function __construct(TextServiceInterface $service, LeadRepositoryInterface $leadRepo,
-                                CampaignRepositoryInterface $campaignRepo, TemplateRepositoryInterface $templateRepo,
-                                TextRepositoryInterface $textRepo, DealerLocationRepositoryInterface $dealerLocationRepo)
+    public function __construct(TextServiceInterface $service,
+                                LeadRepositoryInterface $leadRepo,
+                                CampaignRepositoryInterface $campaignRepo,
+                                TemplateRepositoryInterface $templateRepo,
+                                TextRepositoryInterface $textRepo,
+                                DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         parent::__construct();
 
@@ -180,7 +183,11 @@ class ProcessCampaign extends Command
                         // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
                         try {
                             // Save Lead Status
-                            $this->texts->updateLeadStatus($lead);
+                            $this->leads->update([
+                                'id' => $lead->identifier,
+                                'lead_status' => Lead::STATUS_MEDIUM,
+                                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+                            ]);
                             $this->info("{$command} updated lead {$leadName} status");
                             $status = 'lead';
 
