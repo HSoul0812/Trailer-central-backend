@@ -168,8 +168,12 @@ class Blast extends Model
                       ->orWhere('crm_tc_lead_status.status', Lead::STATUS_WON_CLOSED);
             });
         } else {
-            $query = $query->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON)
-                           ->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON_CLOSED);
+            $query = $query->where(function (Builder $query) {
+                $query->where(function (Builder $query) {
+                    $query->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON)
+                          ->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON_CLOSED);
+                })->orWhere('crm_tc_lead_status.status', NULL);
+            });
         }
 
         // Add Location to Query!
@@ -182,9 +186,9 @@ class Blast extends Model
 
         // Return Filtered Query
         $query = $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()');
-        echo $query->toSql() . PHP_EOL . PHP_EOL;
-        var_dump($blast);
-        die;
+        //echo $query->toSql() . PHP_EOL . PHP_EOL;
+        //var_dump($blast);
+        //die;
         return $query->get();
     }
 }
