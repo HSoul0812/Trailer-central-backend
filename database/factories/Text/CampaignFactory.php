@@ -4,6 +4,9 @@
 
 use Tests\TestCase;
 use App\Models\CRM\Text\Campaign;
+use App\Models\CRM\Text\CampaignBrand;
+use App\Models\CRM\Text\CampaignCategory;
+use App\Models\CRM\Text\Template;
 use App\Models\User\NewDealerUser;
 use Faker\Generator as Faker;
 
@@ -23,7 +26,7 @@ $factory->define(Campaign::class, function (Faker $faker) {
     // Return Overrides
     return [
         'user_id' => $dealer->user_id,
-        'template_id' => $template->id,
+        'template_id' => !empty($template->id) ? $template->id : 0,
         'campaign_name' => $name,
         'campaign_subject' => $name,
         'from_sms_number' => TestCase::getSMSNumber(),
