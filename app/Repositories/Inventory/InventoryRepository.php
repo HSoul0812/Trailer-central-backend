@@ -122,7 +122,9 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
     {
         $query = Inventory::select('*');
-
+        
+        $query->where('status', '<>', Inventory::STATUS_QUOTE);
+        
         if (isset($params['dealer_id'])) {
             $query = $query->where('dealer_id', $params['dealer_id']);
         }
@@ -148,13 +150,13 @@ class InventoryRepository implements InventoryRepositoryInterface
              * Filter only floored inventories to pay
              * https://crm.trailercentral.com/accounting/floorplan-payment
              */
-            $query = $query->whereNotNull('bill_id')
-                ->where([
-                    ['is_floorplan_bill', '=', 1],
-                    ['fp_vendor', '>', 0],
-                    ['true_cost', '>', 0],
-                    ['fp_balance', '>', 0]
-                ]);
+            $query->where(function ($q) {
+                $q->whereNotNull('bill_id')
+                        ->where('is_floorplan_bill', 1)
+                        ->where('fp_vendor', '>', 0)
+                        ->where('true_cost', '>', 0)
+                        ->where('fp_balance', '>', 0);
+            });           
         }
 
         if (isset($params['search_term'])) {

@@ -107,12 +107,22 @@ class QueryBuilder implements QueryBuilderInterface
         return $this->query;
     }
 
+    /**
+     * Set the request object that should provide the parameters for this builder
+     * @param Request $request
+     * @return $this
+     */
     public function withRequest(Request $request)
     {
         $this->request = $request;
         return $this;
     }
 
+    /**
+     * Set the base query to be built upon; base query can contain e.g. specific where clauses, etc
+     * @param Builder $query
+     * @return $this
+     */
     public function withQuery(Builder $query)
     {
         $this->query = $query;
@@ -329,6 +339,10 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
+    /**
+     * Return the paginator built by this builder
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
     public function paginator()
     {
         return $this->paginator;
