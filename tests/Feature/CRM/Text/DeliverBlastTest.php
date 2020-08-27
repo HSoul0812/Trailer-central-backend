@@ -46,9 +46,10 @@ class DeliverBlastTest extends TestCase
     /**
      * Test simple blast
      * 
-     * @specs array dealer_location_id = any in TEST_LOCATION_ID
-     * @specs string lead_type = general
-     * @specs bool enable_assign_notification = 1
+     * @specs string action = inquired
+     * @specs array location_id = null
+     * @specs int send_after_days = 15
+     * @specs int include_archived = 0
      * @return void
      */
     public function testSimpleBlast()

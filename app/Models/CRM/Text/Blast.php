@@ -172,10 +172,15 @@ class Blast extends Model
                            ->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON_CLOSED);
         }
 
+        // Add Location to Query!
+        if(!empty($blast->location_id)) {
+            $query = $query->where(function (Builder $query) use($blast) {
+                return $query->where('website_lead.dealer_location_id', $blast->location_id)
+                             ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
+            });
+        }
+
         // Return Filtered Query
-        return $query->where(function (Builder $query) use($blast) {
-            return $query->where('website_lead.dealer_location_id', $blast->location_id)
-                         ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
-        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()')->get();
+        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()')->get();
     }
 }

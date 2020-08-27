@@ -170,11 +170,16 @@ class Campaign extends Model
                            ->where('crm_tc_lead_status.status', '<>', Lead::STATUS_WON_CLOSED);
         }
 
+        // Add Location to Query!
+        if(!empty($campaign->location_id)) {
+            $query = $query->where(function (Builder $query) use($campaign) {
+                return $query->where('website_lead.dealer_location_id', $campaign->location_id)
+                             ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
+            });
+        }
+
         // Return Filtered Query
-        return $query->where(function (Builder $query) use($campaign) {
-            return $query->where('website_lead.dealer_location_id', $campaign->location_id)
-                         ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
-        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
-          ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10')->get();
+        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
+                     ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10')->get();
     }
 }
