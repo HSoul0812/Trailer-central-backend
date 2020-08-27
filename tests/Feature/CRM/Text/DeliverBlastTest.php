@@ -72,13 +72,7 @@ class DeliverBlastTest extends TestCase
         $unused = $this->refreshLeads($blast->id);
 
         // Get Blasts for Dealer
-        $blasts = $this->blasts->getAll([
-            'is_cancelled' => false,
-            'is_delivered' => false,
-            'send_date' => 'due_now',
-            'per_page' => 'all',
-            'user_id' => $dealer->user_id
-        ]);
+        $blasts = $this->blasts->getAllActive($dealer->user_id);
         foreach($blasts as $single) {
             $blast = $single;
             break;

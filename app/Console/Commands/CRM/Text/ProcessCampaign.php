@@ -120,11 +120,7 @@ class ProcessCampaign extends Command
             // Get Dealers With Active CRM
             foreach($dealers as $dealer) {
                 // Get Campaigns for Dealer
-                $campaigns = $this->campaigns->getAll([
-                    'is_enabled' => true,
-                    'per_page' => 'all',
-                    'user_id' => $dealer->user_id
-                ]);
+                $campaigns = $this->campaigns->getAllActive($dealer->user_id);
                 if(count($campaigns) < 1) {
                     continue;
                 }

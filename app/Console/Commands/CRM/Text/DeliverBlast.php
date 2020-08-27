@@ -120,13 +120,7 @@ class DeliverBlast extends Command
             // Get Dealers With Active CRM
             foreach($dealers as $dealer) {
                 // Get Blasts for Dealer
-                $blasts = $this->blasts->getAll([
-                    'is_cancelled' => false,
-                    'is_delivered' => false,
-                    'send_date' => 'due_now',
-                    'per_page' => 'all',
-                    'user_id' => $dealer->user_id
-                ]);
+                $blasts = $this->blasts->getAllActive($dealer->user_id);
                 if(count($blasts) < 1) {
                     continue;
                 }

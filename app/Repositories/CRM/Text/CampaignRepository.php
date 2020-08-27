@@ -140,6 +140,13 @@ class CampaignRepository implements CampaignRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * Get All Active Blasts For Dealer
+     */
+    public function getAllActive($userId) {
+        return Blast::where('user_id', $userId)->where('is_enabled', 1)->get();
+    }
+
     public function update($params) {
         // Find Campaign or Die
         $campaign = Campaign::findOrFail($params['id']);

@@ -153,6 +153,15 @@ class BlastRepository implements BlastRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * Get All Active Blasts For Dealer
+     */
+    public function getAllActive($userId) {
+        return Blast::where('user_id', $userId)
+                    ->where('is_delivered', 0)->where('is_cancelled', 0)
+                    ->where('send_date', '<', Carbon::now()->toDateTimeString())->get();
+    }
+
     public function update($params) {
         $blast = Blast::findOrFail($params['id']);
 

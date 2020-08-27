@@ -59,15 +59,8 @@ class TextRepository implements TextRepositoryInterface {
     }
 
     public function delete($params) {
-        $text = TextLog::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$text, $params) {
-            $params['deleted'] = '1';
-
-            $text->fill($params)->save();
-        });
-
-        return $text;
+        // Mark Text Log as Deleted
+        return TextLog::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
     }
 
     public function get($params) {

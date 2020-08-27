@@ -72,11 +72,7 @@ class ProcessCampaignTest extends TestCase
         $unused = $this->refreshLeads($campaign->id);
 
         // Get Campaigns for Dealer
-        $campaigns = $this->campaigns->getAll([
-            'is_enabled' => true,
-            'per_page' => 'all',
-            'user_id' => $dealer->user_id
-        ]);
+        $campaigns = $this->campaigns->getAllActive($dealer->user_id);
         foreach($campaigns as $single) {
             $campaign = $single;
             break;

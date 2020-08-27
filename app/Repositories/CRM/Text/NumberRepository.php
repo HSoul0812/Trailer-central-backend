@@ -50,14 +50,8 @@ class NumberRepository implements NumberRepositoryInterface {
     }
 
     public function update($params) {
-        $number = Number::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$number, $params) {
-            // Fill Text Details
-            $number->fill($params)->save();
-        });
-
-        return $number;
+        // Save Text Number
+        return Number::findOrFail($params['id'])->fill($params)->save();
     }
 
     /**
