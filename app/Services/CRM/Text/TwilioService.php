@@ -90,6 +90,8 @@ class TwilioService implements TextServiceInterface
         $fromPhone = $this->getTwilioNumber($from_number, $to_number, $fullName);
 
         // Initialize Phones
+        var_dump($fromPhone);
+        die;
         $this->tries = 0;
         $this->tried = [];
         while(true) {

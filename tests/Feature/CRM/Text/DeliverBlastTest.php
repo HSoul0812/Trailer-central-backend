@@ -156,8 +156,7 @@ class DeliverBlastTest extends TestCase
             $this->assertDatabaseHas('dealer_texts_log', [
                 'lead_id'     => $lead->identifier,
                 'from_number' => $from_number,
-                'to_number'   => $lead->text_phone,
-                'log_message' => $textMessage
+                'to_number'   => $lead->text_phone
             ]);
 
             // Assert a text blast was logged sent
