@@ -173,7 +173,7 @@ class DeliverBlast extends Command
                             }
 
                             // Not Sent?!
-                            if($status !== 'sent') {
+                            if($status === 'sent') {
                                 // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
                                 try {
                                     // Save Lead Status
