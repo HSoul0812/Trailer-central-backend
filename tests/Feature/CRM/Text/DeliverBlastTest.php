@@ -107,7 +107,7 @@ class DeliverBlastTest extends TestCase
 
                 // Should Receive Send With Args Once!
                 $mock->shouldReceive('send')
-                     ->withArgs([$from_number, $lead->text_number, $textMessage, $lead->full_name])
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
                      ->once();
             }
 
@@ -128,7 +128,7 @@ class DeliverBlastTest extends TestCase
 
                 // Should Receive Send With Args Once!
                 $mock->shouldReceive('send')
-                     ->withArgs([$from_number, $lead->text_number, $textMessage, $lead->full_name])
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
                      ->never();
             }
         });
@@ -146,10 +146,6 @@ class DeliverBlastTest extends TestCase
             }
 
             // Get Text Message
-            if(empty($lead->text_number)) {
-                var_dump($lead);
-                die;
-            }
             $textMessage = $this->templates->fillTemplate($blast->template->template, [
                 'lead_name' => $lead->full_name,
                 'title_of_unit_of_interest' => $lead->inventory->title,
@@ -160,7 +156,7 @@ class DeliverBlastTest extends TestCase
             $this->assertDatabaseHas('dealer_texts_log', [
                 'lead_id'     => $lead->identifier,
                 'from_number' => $from_number,
-                'to_number'   => $lead->text_number,
+                'to_number'   => $lead->text_phone,
                 'log_message' => $textMessage
             ]);
 
