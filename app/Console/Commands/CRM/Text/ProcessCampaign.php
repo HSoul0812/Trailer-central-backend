@@ -3,6 +3,8 @@
 namespace App\Console\Commands\CRM\Text;
 
 use Illuminate\Console\Command;
+use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
+use App\Models\CRM\Leads\Lead;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
