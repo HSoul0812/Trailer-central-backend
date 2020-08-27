@@ -97,6 +97,8 @@ class TwilioService implements TextServiceInterface
                 $sent = $this->sendViaTwilio($fromPhone, $to_number, $textMessage);
             } catch (InvalidTwilioInboundNumberException $ex) {
                 // Get Next Available Number!
+                echo $ex->getMessage();
+                die;
                 $fromPhone = $this->getNextAvailableNumber();
 
                 // Add Tried Phones to array
