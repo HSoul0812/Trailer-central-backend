@@ -159,7 +159,6 @@ class DeliverBlast extends Command
                             if(empty($to_number)) {
                                 continue;
                             }
-                            $to_number = '+12626619236';
 
                             // Get Text Message
                             $textMessage = $this->templates->fillTemplate($template, [
