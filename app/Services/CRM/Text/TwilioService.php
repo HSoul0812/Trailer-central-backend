@@ -39,6 +39,11 @@ class TwilioService implements TextServiceInterface
     private $tried = [];
 
     /**
+     * @const array
+     */
+    const MAGIC_NUMBERS = ['+15005550000', '+15005550007', '+15005550008', '+15005550001', '+15005550006'];
+
+    /**
      * TwilioService constructor.
      */
     public function __construct(NumberRepositoryInterface $numberRepo)
@@ -158,6 +163,11 @@ class TwilioService implements TextServiceInterface
      * @throws NoTwilioNumberAvailableException
      */
     private function getTwilioNumber($from_number, $to_number, $customer_name) {
+        // Is a Magic Number?!
+        if(in_array($from_number, self::MAGIC_NUMBERS)) {
+            return $from_number;
+        }
+
         // Get Active Twilio Number for From/To Numbers
         $twilioNumber = $this->textNumber->findActiveTwilioNumber($from_number, $to_number);
 
