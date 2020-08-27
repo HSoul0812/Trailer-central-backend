@@ -7,6 +7,10 @@ use App\Models\CRM\Text\Campaign;
 
 class CampaignTransformer extends TransformerAbstract
 {
+    protected $availableIncludes = [
+        'leads'
+    ];
+
     public function transform(Campaign $campaign)
     {
 	 return [
@@ -28,5 +32,10 @@ class CampaignTransformer extends TransformerAbstract
              'updated_at' => $campaign->updated_at,
              'deleted' => (int)$campaign->deleted,
          ];
+    }
+
+    public function includeLeads(Campaign $campaign)
+    {
+        return $this->collection($campaign->leads, new LeadTransformer());
     }
 }

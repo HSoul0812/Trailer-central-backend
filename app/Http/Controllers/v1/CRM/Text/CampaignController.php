@@ -4,7 +4,6 @@ namespace App\Http\Controllers\v1\CRM\Text;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
-use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Text\GetCampaignsRequest;
 use App\Http\Requests\CRM\Text\CreateCampaignRequest;
 use App\Http\Requests\CRM\Text\ShowCampaignRequest;
@@ -12,6 +11,8 @@ use App\Http\Requests\CRM\Text\UpdateCampaignRequest;
 use App\Http\Requests\CRM\Text\DeleteCampaignRequest;
 use App\Http\Requests\CRM\Text\SentCampaignRequest;
 use App\Transformers\CRM\Text\CampaignTransformer;
+use Dingo\Api\Http\Request;
+use League\Fractal\Manager;
 
 class CampaignController extends RestfulControllerV2
 {
@@ -142,6 +143,10 @@ class CampaignController extends RestfulControllerV2
      * )
      */
     public function show(int $id) {
+        $fractal = new Manager();
+        $fractal->parseIncludes('leads');
+
+        // Get Campaign Request
         $request = new ShowCampaignRequest(['id' => $id]);
         
         if ( $request->validate() ) {
