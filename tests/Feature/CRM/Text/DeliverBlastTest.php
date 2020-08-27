@@ -8,7 +8,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\Template;
 use App\Models\User\NewDealerUser;
-use Faker\Generator as Faker;
+use Faker\Provider\DateTime as FakerDate;
 use Tests\TestCase;
 
 class DeliverBlastTest extends TestCase
@@ -23,11 +23,6 @@ class DeliverBlastTest extends TestCase
     protected $dealerLocation;
 
     /**
-     * Faker\Generator $faker
-     */
-    protected $faker;
-
-    /**
      * Set Up Test
      */
     public function setUp(): void
@@ -38,9 +33,6 @@ class DeliverBlastTest extends TestCase
         $this->blasts = $this->app->make('App\Repositories\CRM\Text\BlastRepositoryInterface');
         $this->templates = $this->app->make('App\Repositories\CRM\Text\TemplateRepositoryInterface');
         $this->dealerLocation = $this->app->make('App\Repositories\User\DealerLocationRepositoryInterface');
-
-        // Create Faker
-        $this->faker = new Faker();
     }
 
     /**
@@ -200,12 +192,14 @@ class DeliverBlastTest extends TestCase
             }
         }
 
+        // Create Faker
+        $faker = new FakerDate();
+
         // Create 10 Leads in Last 15 Days
-        $recent = array();
         for($n = 0; $n < 10; $n++) {
             // Get Random Date Since "Send After Days"
-            $recent[] = factory(Lead::class)->create([
-                'date_submitted' => $this->faker->dateTimeBetween('-' . $blast->send_after_days . ' days')
+            factory(Lead::class)->create([
+                'date_submitted' => $faker->dateTimeBetween('-' . $blast->send_after_days . ' days')
             ]);
         }
 
@@ -214,7 +208,7 @@ class DeliverBlastTest extends TestCase
         for($n = 0; $n < 5; $n++) {
             // Get Random Date Since "Send After Days"
             $leads[] = factory(Lead::class)->create([
-                'date_submitted' => $this->faker->dateTimeBetween('-' . ($blast->send_after_days + 10) . ' days', '-' . $blast->send_after_days . ' days')
+                'date_submitted' => $faker->dateTimeBetween('-' . ($blast->send_after_days + 10) . ' days', '-' . $blast->send_after_days . ' days')
             ]);
         }
         return $leads;
