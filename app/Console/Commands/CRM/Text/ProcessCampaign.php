@@ -12,6 +12,7 @@ use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use Carbon\Carbon;
 
 class ProcessCampaign extends Command
 {
