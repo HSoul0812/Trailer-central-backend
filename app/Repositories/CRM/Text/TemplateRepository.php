@@ -53,15 +53,7 @@ class TemplateRepository implements TemplateRepositoryInterface {
     }
 
     public function delete($params) {
-        $template = Template::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$template, $params) {
-            $params['deleted'] = '1';
-
-            $template->fill($params)->save();
-        });
-
-        return $template;
+        return Template::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
     }
 
     public function get($params) {
