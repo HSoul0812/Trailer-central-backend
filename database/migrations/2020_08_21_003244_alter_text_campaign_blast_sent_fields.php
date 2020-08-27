@@ -23,7 +23,7 @@ class AlterTextCampaignBlastSentFields extends Migration
 
                 $table->dropForeign('crm_text_campaign_sent_lead_id_foreign');
 
-                //$table->dropForeign('crm_text_campaign_sent_text_id_foreign');
+                $table->dropForeign('crm_text_campaign_sent_text_id_foreign');
             }
         });
 
@@ -35,7 +35,7 @@ class AlterTextCampaignBlastSentFields extends Migration
 
                 $table->dropForeign('crm_text_blast_sent_lead_id_foreign');
 
-                //$table->dropForeign('crm_text_blast_sent_text_id_foreign');
+                $table->dropForeign('crm_text_blast_sent_text_id_foreign');
             }
         });
     }

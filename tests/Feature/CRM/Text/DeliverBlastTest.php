@@ -201,12 +201,15 @@ class DeliverBlastTest extends TestCase
         }
 
         // Create 10 Leads in Last 15 Days
+        $recent = array();
         for($n = 0; $n++; $n < 10) {
             // Get Random Date Since "Send After Days"
-            factory(Lead::class)->create([
+            $recent[] = factory(Lead::class)->create([
                 'date_submitted' => $this->faker->dateTimeBetween('-' . $blast->send_after_days . ' days')
             ]);
         }
+        var_dump($recent);
+        die;
 
         // Create 5 Leads After 15 Days
         $leads = array();
