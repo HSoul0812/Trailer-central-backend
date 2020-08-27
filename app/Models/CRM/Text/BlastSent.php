@@ -15,6 +15,8 @@ class BlastSent extends Model
 
     // Define Constants to Make it Easier to Handle Sent Types
     const STATUS_TYPES = [
+        'landline', // not a valid mobile number
+        'invalid', // not a valid number
         'sent', // sent text
         'lead', // lead updated
         'logged' // logged text
