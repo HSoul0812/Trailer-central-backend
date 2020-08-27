@@ -2,12 +2,8 @@
 
 namespace App\Repositories\CRM\Text;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
-use App\Exceptions\CRM\Text\DuplicateTextBlastNameException;
-use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\CRM\Text\BlastBrand;
@@ -55,13 +51,6 @@ class BlastRepository implements BlastRepositoryInterface {
         DB::beginTransaction();
 
         try {
-            // Find Blast With Name
-            $blastMatch = Blast::where('campaign_name', $params['campaign_name'])
-                                ->where('user_id', $params['user_id'])->first();
-            if(!empty($blastMatch->campaign_name)) {
-                throw new DuplicateTextBlastNameException();
-            }
-
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {
@@ -161,16 +150,6 @@ class BlastRepository implements BlastRepositoryInterface {
         $blast = Blast::findOrFail($params['id']);
 
         DB::transaction(function() use (&$blast, $params) {
-            // Find Blast With Name
-            if(isset($params['campaign_name'])) {
-                $blastMatch = Blast::where('campaign_name', $params['campaign_name'])
-                                    ->where('user_id', $blast->user_id)
-                                    ->where('id', '<>', $params['id'])->first();
-                if(!empty($blastMatch->campaign_name)) {
-                    throw new DuplicateTextBlastNameException();
-                }
-            }
-
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {

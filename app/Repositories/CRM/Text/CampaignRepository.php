@@ -2,12 +2,8 @@
 
 namespace App\Repositories\CRM\Text;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
-use App\Exceptions\CRM\Text\DuplicateTextCampaignNameException;
-use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
 use App\Models\CRM\Text\CampaignBrand;
@@ -54,13 +50,6 @@ class CampaignRepository implements CampaignRepositoryInterface {
         DB::beginTransaction();
 
         try {
-            // Find Campaign With Name
-            $campaignMatch = Campaign::where('campaign_name', $params['campaign_name'])
-                                ->where('user_id', $params['user_id'])->first();
-            if(!empty($campaignMatch->campaign_name)) {
-                throw new DuplicateTextCampaignNameException();
-            }
-
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {
@@ -142,16 +131,6 @@ class CampaignRepository implements CampaignRepositoryInterface {
         $campaign = Campaign::findOrFail($params['id']);
 
         DB::transaction(function() use (&$campaign, $params) {
-            // Find Campaign With Name
-            if(isset($params['campaign_name'])) {
-                $campaignMatch = Campaign::where('campaign_name', $params['campaign_name'])
-                                    ->where('user_id', $campaign->user_id)
-                                    ->where('id', '<>', $params['id'])->first();
-                if(!empty($campaignMatch->campaign_name)) {
-                    throw new DuplicateTextCampaignNameException();
-                }
-            }
-
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {
