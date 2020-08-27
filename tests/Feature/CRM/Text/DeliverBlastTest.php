@@ -40,7 +40,7 @@ class DeliverBlastTest extends TestCase
         $this->dealerLocation = $this->app->make('App\Repositories\User\DealerLocationRepositoryInterface');
 
         // Create Faker
-        $this->faker = new Faker();
+        $this->faker = Faker::create();
     }
 
     /**
