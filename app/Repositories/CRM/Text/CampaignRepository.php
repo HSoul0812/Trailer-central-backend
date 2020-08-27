@@ -131,11 +131,6 @@ class CampaignRepository implements CampaignRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-
-        // Return All?
-        if($params['per_page'] === 'all') {
-            return $query->get();
-        }
         
         return $query->paginate($params['per_page'])->appends($params);
     }
