@@ -185,10 +185,7 @@ class Blast extends Model
         }
 
         // Return Filtered Query
-        $query = $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()');
-        //echo $query->toSql() . PHP_EOL . PHP_EOL;
-        //var_dump($blast);
-        //die;
-        return $query->get();
+        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()')
+                     ->get();
     }
 }

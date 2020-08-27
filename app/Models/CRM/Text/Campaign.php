@@ -183,11 +183,8 @@ class Campaign extends Model
         }
 
         // Return Filtered Query
-        $query = $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
-                     ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10');
-        echo $query->toSql() . PHP_EOL . PHP_EOL;
-        var_dump($campaign);
-        die;
-        return $query->get();
+        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
+                     ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10')
+                     ->get();
     }
 }
