@@ -94,15 +94,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function delete($params) {
-        $campaign = Campaign::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$campaign, $params) {
-            $params['deleted'] = '1';
-
-            $campaign->fill($params)->save();
-        });
-
-        return $campaign;
+        return Campaign::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
     }
 
     public function get($params) {
@@ -137,6 +129,9 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
     /**
      * Get All Active Campaigns For Dealer
+     * 
+     * @param int $userId
+     * @return Collection of Campaign
      */
     public function getAllActive($userId) {
         return Campaign::where('user_id', $userId)->where('is_enabled', 1)->get();

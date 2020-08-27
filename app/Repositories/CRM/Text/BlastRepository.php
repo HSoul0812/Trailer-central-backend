@@ -95,15 +95,7 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function delete($params) {
-        $blast = Blast::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$blast, $params) {
-            $params['deleted'] = '1';
-
-            $blast->fill($params)->save();
-        });
-
-        return $blast;
+        return Blast::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
     }
 
     public function get($params) {
@@ -155,6 +147,9 @@ class BlastRepository implements BlastRepositoryInterface {
 
     /**
      * Get All Active Blasts For Dealer
+     * 
+     * @param int $userId
+     * @return Collection of Blast
      */
     public function getAllActive($userId) {
         return Blast::where('user_id', $userId)
