@@ -143,6 +143,8 @@ class TwilioService implements TextServiceInterface
             );
         } catch (\Exception $ex) {
             // Exception occurred?!
+            echo $ex->getMessage();
+            die;
             if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
                 throw new InvalidTwilioInboundNumberException();
             }
