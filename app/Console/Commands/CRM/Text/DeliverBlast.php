@@ -3,6 +3,7 @@
 namespace App\Console\Commands\CRM\Text;
 
 use Illuminate\Console\Command;
+use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
@@ -140,31 +141,39 @@ class DeliverBlast extends Command
                         // Loop Leads for Current Dealer
                         $this->info("{$command} dealer #{$dealer->id} blast {$blast->campaign_name} found " . count($blast->leads) . " leads to process");
                         foreach($blast->leads as $lead) {
-                            // If Error Occurs, Skip
+                            // Initialize Notes Array
+                            $leadName = $lead->id_name;
+
+                            // Get To Numbers
+                            $to_number = $lead->text_phone;
+                            if(empty($to_number)) {
+                                continue;
+                            }
+                            $to_number = '+12626619236';
+
+                            // Get Text Message
+                            $textMessage = $this->templates->fillTemplate($template, [
+                                'lead_name' => $lead->full_name,
+                                'title_of_unit_of_interest' => $lead->inventory->title,
+                                'dealer_name' => $dealer->user->name
+                            ]);
+                            $this->info("{$command} preparing to send text to {$leadName} at {$to_number}");
+
+                            // Send Text
                             try {
-                                // Initialize Notes Array
-                                $leadName = $lead->id_name;
-
-                                // Get To Numbers
-                                $to_number = $lead->text_phone;
-                                if(empty($to_number)) {
-                                    continue;
-                                }
-                                $to_number = '+12626619236';
-
-                                // Get Text Message
-                                $textMessage = $this->templates->fillTemplate($template, [
-                                    'lead_name' => $lead->full_name,
-                                    'title_of_unit_of_interest' => $lead->inventory->title,
-                                    'dealer_name' => $dealer->user->name
-                                ]);
-                                $this->info("{$command} preparing to send text to {$leadName} at {$to_number}");
-
-                                // Send Text
                                 $this->service->send($from_number, $to_number, $textMessage, $lead->full_name);
                                 $this->info("{$command} send text to {$leadName} at {$to_number}");
                                 $status = 'sent';
+                            } catch (CustomerLandlineNumberException $ex) {
+                                $status = 'landline';
+                                $this->error("{$command} exception returned, phone number {$to_number} cannot receive texts!");
+                            } catch (Exception $ex) {
+                                $status = 'invalid';
+                                $this->error("{$command} exception returned trying to send blast {$e->getMessage()}: {$e->getTraceAsString()}");
+                            }
 
+                            // Not Sent?!
+                            if($status !== 'sent') {
                                 // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
                                 try {
                                     // Save Lead Status
@@ -184,18 +193,16 @@ class DeliverBlast extends Command
                                 } catch(\Exception $e) {
                                     $this->error("{$command} exception returned after blast sent {$e->getMessage()}: {$e->getTraceAsString()}");
                                 }
-
-                                // Mark Blast as Sent to Lead
-                                $this->blasts->sent([
-                                    'text_blast_id' => $blast->id,
-                                    'lead_id' => $lead->identifier,
-                                    'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-                                    'status' => $status
-                                ]);
-                                $this->info("{$command} inserted blast sent for lead {$leadName}");
-                            } catch(\Exception $e) {
-                                $this->error("{$command} exception returned trying to send blast text {$e->getMessage()}: {$e->getTraceAsString()}");
                             }
+
+                            // Mark Blast as Sent to Lead
+                            $this->blasts->sent([
+                                'text_blast_id' => $blast->id,
+                                'lead_id' => $lead->identifier,
+                                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
+                                'status' => $status
+                            ]);
+                            $this->info("{$command} inserted blast sent for lead {$leadName} and blast {$blast->id}");
                         }
                     }
 
