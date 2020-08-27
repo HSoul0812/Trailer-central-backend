@@ -146,6 +146,10 @@ class DeliverBlastTest extends TestCase
             }
 
             // Get Text Message
+            if(empty($lead->text_number)) {
+                var_dump($lead);
+                die;
+            }
             $textMessage = $this->templates->fillTemplate($blast->template->template, [
                 'lead_name' => $lead->full_name,
                 'title_of_unit_of_interest' => $lead->inventory->title,
