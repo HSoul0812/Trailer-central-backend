@@ -73,9 +73,7 @@ class ProcessCampaignTest extends TestCase
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAll([
-            'is_cancelled' => false,
-            'is_delivered' => false,
-            'send_date' => 'due_now',
+            'is_enabled' => true,
             'per_page' => 'all',
             'user_id' => $dealer->user_id
         ]);
@@ -134,7 +132,7 @@ class ProcessCampaignTest extends TestCase
         });
 
         // Call Leads Assign Command
-        $this->artisan('text:deliver-campaign ' . self::getTestDealerId())->assertExitCode(0);
+        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
 
 
         // Loop Leads
@@ -178,7 +176,7 @@ class ProcessCampaignTest extends TestCase
     private function refreshCampaigns($userId) {
         // Cancel All Dealer Campaigns
         Campaign::where('user_id', $userId)->update([
-            'is_cancelled' => true
+            'is_enabled' => false
         ]);
     }
 
