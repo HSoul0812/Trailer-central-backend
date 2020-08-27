@@ -84,6 +84,8 @@ class DeliverBlastTest extends TestCase
             break;
         }
         $leads = $blast->leads;
+        var_dump($blast);
+        die;
         if(count($leads) < 1) {
             throw new NoLeadsTestDeliverBlastException();
         }
