@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\CRM\Text;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
+use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Text\GetBlastsRequest;
 use App\Http\Requests\CRM\Text\CreateBlastRequest;
 use App\Http\Requests\CRM\Text\ShowBlastRequest;
@@ -11,8 +12,6 @@ use App\Http\Requests\CRM\Text\UpdateBlastRequest;
 use App\Http\Requests\CRM\Text\DeleteBlastRequest;
 use App\Http\Requests\CRM\Text\SentBlastRequest;
 use App\Transformers\CRM\Text\BlastTransformer;
-use Dingo\Api\Http\Request;
-use League\Fractal\Manager;
 
 class BlastController extends RestfulControllerV2
 {
@@ -143,10 +142,6 @@ class BlastController extends RestfulControllerV2
      * )
      */
     public function show(int $id) {
-        $fractal = new Manager();
-        $fractal->parseIncludes('leads');
-
-        // Get Blast Request
         $request = new ShowBlastRequest(['id' => $id]);
         
         if ( $request->validate() ) {

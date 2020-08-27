@@ -4,6 +4,7 @@ namespace App\Transformers\CRM\Text;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Text\Campaign;
+use App\Transformers\CRM\Leads\LeadTransformer;
 
 class CampaignTransformer extends TransformerAbstract
 {
