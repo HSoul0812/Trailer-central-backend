@@ -8,8 +8,8 @@ class UpdateMigrations20200827 extends Seeder
 {
     public function run()
     {
-        DB::statemnent("TRUNCATE TABLE `migrations_api`");
-        DB::statemnent("
+        DB::statement("TRUNCATE TABLE `migrations_api`");
+        DB::statement("
             INSERT INTO `migrations_api` (`migration`, `batch`)
             VALUES
             ('2014_10_12_000000_create_users_table', 1),
@@ -108,7 +108,8 @@ class UpdateMigrations20200827 extends Seeder
             ('2020_08_21_153748_add_sales_person_id_to_crm_interaction_table', 1),
             ('2020_08_25_152155_add_semi_trailer_pull_type_to_eav_entity_type_attribute_table', 1),
             ('2020_08_26_165209_refunds_add_register_id', 1),
-            ('2020_08_26_185032_register_add_refund', 1)
+            ('2020_08_26_185032_register_add_refund', 1),
+            ('2020_08_27_164841_dealer_location_tax_add_shop_env_basis', 1);
         ");
     }
 }
