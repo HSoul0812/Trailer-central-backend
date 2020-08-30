@@ -15,7 +15,7 @@ class AddClappQueueParentId extends Migration
     {
         Schema::table('clapp_queue', function (Blueprint $table) {
             // Add Parent ID to Clapp Queue
-            $table->integer('parent_id', 10)->nullable()->after('session_id')->index();
+            $table->integer('parent_id')->nullable()->after('session_id')->index();
         });
     }
 
