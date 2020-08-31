@@ -110,8 +110,7 @@ class UpdateMigrations20200827 extends Seeder
             ('2020_08_26_165209_refunds_add_register_id', 1),
             ('2020_08_26_185032_register_add_refund', 1),
             ('2018_01_01_000000_create_action_events_table', 1),
-            ('2019_05_10_000000_add_fields_to_action_events_table', 1),
-            ('2020_08_27_164841_dealer_location_tax_add_shop_env_basis', 1);
+            ('2019_05_10_000000_add_fields_to_action_events_table', 1);
         ");
     }
 }
