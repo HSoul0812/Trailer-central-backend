@@ -205,11 +205,11 @@ class Part extends Model
         $costModifiedRepo = app(CostModifierRepositoryInterface::class);
         $costModifier = $costModifiedRepo->getByDealerId($this->dealer_id);
         
-        if ($costModifier) {
+        if ($costModifier && $costModifier->modifier > 0) {
             $newCost = $this->dealer_cost + ($this->dealer_cost * ( $costModifier->modifier / 100 ));
-            return $newCost > 0 ? $newCost : $this->price;
+            return (float) $newCost > 0 ? $newCost : $this->price;
         }
         
-        return $this->price;
+        return (float) $this->price;
     }
 }
