@@ -17,6 +17,7 @@ class SaleProductTransformer extends TransformerAbstract
     public function transform(SaleProduct $saleProduct)
     {
         return [
+            'id' => (int)$saleProduct->id,
             'qty' => (int)$saleProduct->qty,
             'price' => (float)$saleProduct->price,
             'item_id' => (int)$saleProduct->item_id
