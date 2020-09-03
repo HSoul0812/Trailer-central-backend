@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\CRM\User\Customer;
 
-class CustomerSeeder extends Seeder
+class CustomerAddressUpdate extends Seeder
 {
     /**
      * Set address to bill_to if does not exist.
