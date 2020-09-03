@@ -29,17 +29,11 @@ class BulkDownloadController extends Controller
      *
      * @OA\Post(
      *     path="/api/parts/bulk/download",
-     *     @OA\Parameter(
-     *         name="dealerId",
-     *         in="query",
-     *         description="Dealer ID to get parts for",
-     *         required=true,
-     *     )
      * )
      */
     public function create(Request $request, BulkDownloadRepository $repository)
     {
-        $dealerId = $request->input('dealerId');
+        $dealerId = $request->input('dealer_id');
 
         // create a new download token (can be anything)
         $token = uniqid();
@@ -115,6 +109,55 @@ class BulkDownloadController extends Controller
             return response()->streamDownload(function() use ($download) {
                 fpassthru(Storage::disk('partsCsvExports')->readStream($download->export_file));
             }, $download->export_file);
+        }
+
+        return response()->json([
+            'message' => 'Error: unknown status',
+        ], 500);
+    }
+
+    /**
+     * Check status of CSV file building
+     *
+     * @param string $token The token returned by the create service
+     * @param Request $request
+     * @param BulkDownloadRepository $repository
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
+     *
+     * @OA\Get(
+     *     path="/api/parts/bulk/status/{token}",
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="path",
+     *         required=true
+     *     )
+     * )
+     */
+    public function status($token, BulkDownloadRepository $repository)
+    {
+        $download = $repository->findByToken($token);
+
+        if ($download->status === BulkDownload::STATUS_NEW ||
+            $download->status === BulkDownload::STATUS_PROCESSING
+        ) {
+            return response()->json([
+                'message' => 'Still processing',
+                'progress' => $download->progress,
+            ], 200);
+        }
+
+        if ($download->status === BulkDownload::STATUS_COMPLETED
+        ) {
+            return response()->json([
+                'message' => 'Completed',
+                'progress' => $download->progress,
+            ], 200);
+        }
+
+        if ($download->status === BulkDownload::STATUS_ERROR) {
+            return response()->json([
+                'message' => 'This file could not be completed. Please request a new file.',
+            ], 500);
         }
 
         return response()->json([
