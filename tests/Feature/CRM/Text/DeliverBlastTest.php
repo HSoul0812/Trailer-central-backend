@@ -573,8 +573,8 @@ class DeliverBlastTest extends TestCase
         }
 
         // Get Random Brands
-        $brands = Manufacturers::inRandomOrder()->take(3)->pluck('name');
-        $unusedBrands = Manufacturers::whereNotIn('name', $brands)->inRandomOrder()->take(3)->pluck('name');
+        $brands = Manufacturers::inRandomOrder()->take(3)->pluck('name')->toArray();
+        $unusedBrands = Manufacturers::whereNotIn('name', $brands)->inRandomOrder()->take(3)->pluck('name')->toArray();
 
         // Build Generic Blast
         $blast = factory(Blast::class)->create();
@@ -707,8 +707,8 @@ class DeliverBlastTest extends TestCase
         }
 
         // Get Random Categories
-        $categories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->inRandomOrder()->take(3)->pluck('legacy_category');
-        $unusedCategories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->whereNotIn('legacy_category', $categories)->inRandomOrder()->take(3)->pluck('legacy_category');
+        $categories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->inRandomOrder()->take(3)->pluck('legacy_category')->toArray();
+        $unusedCategories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->whereNotIn('legacy_category', $categories)->inRandomOrder()->take(3)->pluck('legacy_category')->toArray();
 
         // Build Generic Blast
         $blast = factory(Blast::class)->create();
