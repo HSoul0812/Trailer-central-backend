@@ -5,6 +5,7 @@ namespace Tests\Feature\CRM\Text;
 use App\Exceptions\CRM\Text\NoLeadsTestDeliverCampaignException;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\Template;
 use App\Models\User\NewDealerUser;
@@ -162,6 +163,374 @@ class ProcessCampaignTest extends TestCase
         }
     }
 
+    /**
+     * Test campaign on purchases
+     * 
+     * @specs string action = purchased
+     * @specs array location_id = null
+     * @specs int send_after_days = 15
+     * @specs int include_archived = 0
+     * @return void
+     */
+    public function testPurchasesCampaign()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Refresh Leads
+        $this->refreshCampaigns($dealer->user_id);
+
+
+        // Build Generic Template
+        $template = Template::where('user_id', $dealer->user_id)->first();
+        if(empty($template->id)) {
+            factory(Template::class)->create();
+        }
+
+        // Build Generic Campaign
+        $campaign = factory(Campaign::class)->create([
+            'action' => 'purchased'
+        ]);
+        $unused = $this->refreshLeads($campaign->id);
+
+        // Get Campaigns for Dealer
+        $campaigns = $this->campaigns->getAllActive($dealer->user_id);
+        foreach($campaigns as $single) {
+            $campaign = $single;
+            break;
+        }
+        $leads = $campaign->leads;
+        if(count($leads) < 1) {
+            throw new NoLeadsTestDeliverCampaignException();
+        }
+
+        // Mock Text Service
+        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+            // Loop Leads to Mock Text Sent
+            foreach($leads as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->once();
+            }
+
+            // Loop Leads to Mock Text NOT Sent
+            foreach($unused as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->never();
+            }
+        });
+
+        // Call Leads Assign Command
+        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
+
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Get From Number
+            $from_number = $campaign->from_sms_number;
+            if(empty($from_number)) {
+                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+            }
+
+            // Get Text Message
+            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                'lead_name' => $lead->full_name,
+                'title_of_unit_of_interest' => $lead->inventory->title,
+                'dealer_name' => $dealer->user->name
+            ]);
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('dealer_texts_log', [
+                'lead_id'     => $lead->identifier,
+                'from_number' => $from_number,
+                'to_number'   => $lead->text_phone
+            ]);
+
+            // Assert a text campaign was logged sent
+            $this->assertDatabaseHas('crm_text_campaign_sent', [
+                'text_campaign_id' => $campaign->id,
+                'lead_id' => $lead->identifier,
+                'status' => 'logged'
+            ]);
+        }
+    }
+
+    /**
+     * Test campaign by location
+     * 
+     * @specs string action = inquired
+     * @specs array location_id = first
+     * @specs int send_after_days = 15
+     * @specs int include_archived = 0
+     * @return void
+     */
+    public function testLocationSpecificCampaign()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Refresh Leads
+        $this->refreshCampaigns($dealer->user_id);
+
+
+        // Build Generic Template
+        $template = Template::where('user_id', $dealer->user_id)->first();
+        if(empty($template->id)) {
+            factory(Template::class)->create();
+        }
+
+        // Build Random Factory Salespeople
+        $locationIds = TestCase::getTestDealerLocationIds();
+        $locationId = reset($locationIds);
+        $lastLocationId = end($locationIds);
+
+        // Build Generic Campaign
+        $campaign = factory(Campaign::class)->create([
+            'location_id' => $locationId
+        ]);
+        $unused = $this->refreshLeads($campaign->id);
+
+        // Get Campaigns for Dealer
+        $campaigns = $this->campaigns->getAllActive($dealer->user_id);
+        foreach($campaigns as $single) {
+            $campaign = $single;
+            break;
+        }
+        $leads = $campaign->leads;
+        if(count($leads) < 1) {
+            throw new NoLeadsTestDeliverCampaignException();
+        }
+
+        // Mock Text Service
+        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+            // Loop Leads to Mock Text Sent
+            foreach($leads as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->once();
+            }
+
+            // Loop Leads to Mock Text NOT Sent
+            foreach($unused as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->never();
+            }
+        });
+
+        // Call Leads Assign Command
+        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
+
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Get From Number
+            $from_number = $campaign->from_sms_number;
+            if(empty($from_number)) {
+                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+            }
+
+            // Get Text Message
+            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                'lead_name' => $lead->full_name,
+                'title_of_unit_of_interest' => $lead->inventory->title,
+                'dealer_name' => $dealer->user->name
+            ]);
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('dealer_texts_log', [
+                'lead_id'     => $lead->identifier,
+                'from_number' => $from_number,
+                'to_number'   => $lead->text_phone
+            ]);
+
+            // Assert a text campaign was logged sent
+            $this->assertDatabaseHas('crm_text_campaign_sent', [
+                'text_campaign_id' => $campaign->id,
+                'lead_id' => $lead->identifier,
+                'status' => 'logged'
+            ]);
+        }
+    }
+
+    /**
+     * Test campaign for archived leads
+     * 
+     * @specs string action = inquired
+     * @specs array location_id = any
+     * @specs int send_after_days = 15
+     * @specs int include_archived = 1
+     * @return void
+     */
+    public function testArchivedCampaign()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Refresh Leads
+        $this->refreshCampaigns($dealer->user_id);
+
+
+        // Build Generic Template
+        $template = Template::where('user_id', $dealer->user_id)->first();
+        if(empty($template->id)) {
+            factory(Template::class)->create();
+        }
+
+        // Build Generic Campaign
+        $campaign = factory(Campaign::class)->create([
+            'is_archived' => 1
+        ]);
+        $unused = $this->refreshLeads($campaign->id);
+
+        // Get Campaigns for Dealer
+        $campaigns = $this->campaigns->getAllActive($dealer->user_id);
+        foreach($campaigns as $single) {
+            $campaign = $single;
+            break;
+        }
+        $leads = $campaign->leads;
+        if(count($leads) < 1) {
+            throw new NoLeadsTestDeliverCampaignException();
+        }
+
+        // Mock Text Service
+        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+            // Loop Leads to Mock Text Sent
+            foreach($leads as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->once();
+            }
+
+            // Loop Leads to Mock Text NOT Sent
+            foreach($unused as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->never();
+            }
+        });
+
+        // Call Leads Assign Command
+        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
+
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Get From Number
+            $from_number = $campaign->from_sms_number;
+            if(empty($from_number)) {
+                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+            }
+
+            // Get Text Message
+            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                'lead_name' => $lead->full_name,
+                'title_of_unit_of_interest' => $lead->inventory->title,
+                'dealer_name' => $dealer->user->name
+            ]);
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('dealer_texts_log', [
+                'lead_id'     => $lead->identifier,
+                'from_number' => $from_number,
+                'to_number'   => $lead->text_phone
+            ]);
+
+            // Assert a text campaign was logged sent
+            $this->assertDatabaseHas('crm_text_campaign_sent', [
+                'text_campaign_id' => $campaign->id,
+                'lead_id' => $lead->identifier,
+                'status' => 'logged'
+            ]);
+        }
+    }
+
 
     /**
      * Refresh Campaigns in DB
@@ -193,29 +562,115 @@ class ProcessCampaignTest extends TestCase
             }
         }
 
-        // Create 10 Leads From X Days Ago to X+10 Days Ago
+        // Build Random Factory Salespeople
+        $locationIds = TestCase::getTestDealerLocationIds();
+        $locationId = reset($locationIds);
+        $lastLocationId = end($locationIds);
+
+        // Create 10 Leads That Match the Campaign!
         for($n = 0; $n < 10; $n++) {
             // Get Random Date Since "Send After Days"
-            factory(Lead::class)->create([
+            $params = [
                 'date_submitted' => $this->faker->dateTimeBetween('-' . ($campaign->send_after_days + 10) . ' days', '-' . $campaign->send_after_days . ' days')
-            ]);
+            ];
+
+            // Insert With Location ID
+            if(!empty($campaign->location_id)) {
+                $params['dealer_location_id'] = $locationId;
+            }
+
+            // Insert With Archived Status
+            if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
+                $params['is_archived'] = 0;
+            } elseif($campaign->included_archived === 1 || $campaign->include_archived === '1') {
+                $params['is_archived'] = 1;
+            }
+
+            // Insert Leads Into DB
+            $lead = factory(Lead::class)->create($params);
+
+            // Add Done Status
+            if($campaign->action === 'purchased') {
+                factory(LeadStatus::class)->create([
+                    'tc_lead_identifier' => $lead->identifier,
+                    'status' => Lead::STATUS_WON_CLOSED
+                ]);
+            }
         }
 
-        // Create 5 Leads Within X Days
+        // Create Leads That DON'T Match the Criteria!
         $leads = array();
         for($n = 0; $n < 5; $n++) {
             // Get Random Date Since "Send After Days"
-            $leads[] = factory(Lead::class)->create([
-                'date_submitted' => $this->faker->dateTimeBetween('-' . $campaign->send_after_days . ' days')
-            ]);
+            $params = [];
+
+            // Insert With Location ID
+            if(!empty($campaign->location_id)) {
+                $params['dealer_location_id'] = $lastLocationId;
+            }
+
+            // Insert With Archived Status
+            if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
+                $params['is_archived'] = 0;
+            } elseif($campaign->included_archived === 1 || $campaign->include_archived === '1') {
+                $params['is_archived'] = 1;
+            }
+
+            // No Other Params Set?! Make Date Not Match Criteria!
+            if(empty($params)) {
+                $params['date_submitted'] = $this->faker->dateTimeBetween('-' . $campaign->send_after_days . ' days');
+            } else {
+                $params['date_submitted'] = $this->faker->dateTimeBetween('-' . ($campaign->send_after_days + 10) . ' days', '-' . $campaign->send_after_days . ' days');
+            }
+
+            // Insert Leads Into DB
+            $lead = factory(Lead::class)->create($params);
+
+            // Add Done Status
+            if($campaign->action === 'purchased') {
+                factory(LeadStatus::class)->create([
+                    'tc_lead_identifier' => $lead->identifier,
+                    'status' => Lead::STATUS_WON_CLOSED
+                ]);
+            }
+            $leads[] = $lead;
         }
 
         // Create 5 Leads In Last X+10 Days to X+25 Days
         for($n = 0; $n < 5; $n++) {
             // Get Random Date Since "Send After Days"
-            $leads[] = factory(Lead::class)->create([
-                'date_submitted' => $this->faker->dateTimeBetween('-' . ($campaign->send_after_days + 25) . ' days', '-' . ($campaign->send_after_days + 10) . ' days')
-            ]);
+            $params = [];
+
+            // Insert With Location ID
+            if(!empty($campaign->location_id)) {
+                $params['dealer_location_id'] = $lastLocationId;
+            }
+
+            // Insert With Archived Status
+            if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
+                $params['is_archived'] = 0;
+            } elseif($campaign->included_archived === 1 || $campaign->include_archived === '1') {
+                $params['is_archived'] = 1;
+            }
+
+            // No Other Params Set?! Make Date Not Match Criteria!
+            if(empty($params)) {
+                $params['date_submitted'] = $this->faker->dateTimeBetween('-' . ($campaign->send_after_days + 25) . ' days', '-' . ($campaign->send_after_days + 10) . ' days');
+            } else {
+                $params['date_submitted'] = $this->faker->dateTimeBetween('-' . ($campaign->send_after_days + 10) . ' days', '-' . $campaign->send_after_days . ' days');
+            }
+
+            // Insert Leads Into DB
+            $lead = factory(Lead::class)->create($params);
+
+            // Add Done Status
+            if($campaign->action === 'purchased') {
+                factory(LeadStatus::class)->create([
+                    'tc_lead_identifier' => $lead->identifier,
+                    'status' => Lead::STATUS_WON_CLOSED
+                ]);
+            }
+            $leads[] = $lead;
         }
         return $leads;
     }
