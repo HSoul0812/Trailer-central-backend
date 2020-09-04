@@ -33,7 +33,7 @@ $factory->define(Blast::class, function (Faker $faker) {
         'from_sms_number' => TestCase::getSMSNumber(),
         'action' => 'inquired',
         'send_after_days' => 15,
-        'send_date' => Carbon::now()->toDateTimeString()
+        'send_date' => Carbon::subDay()->toDateTimeString()
     ];
 });
 
