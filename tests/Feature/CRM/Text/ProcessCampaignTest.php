@@ -592,6 +592,7 @@ class ProcessCampaignTest extends TestCase
         ]);
 
         // Get Campaigns for Dealer
+        die;
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
         foreach($campaigns as $single) {
             $campaign = $single;
@@ -601,7 +602,6 @@ class ProcessCampaignTest extends TestCase
         if(count($leads) < 1) {
             throw new NoLeadsTestDeliverCampaignException();
         }
-        die;
 
         // Mock Text Service
         $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
@@ -728,6 +728,7 @@ class ProcessCampaignTest extends TestCase
         ]);
 
         // Get Campaigns for Dealer
+        die;
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
         foreach($campaigns as $single) {
             $campaign = $single;
@@ -737,7 +738,6 @@ class ProcessCampaignTest extends TestCase
         if(count($leads) < 1) {
             throw new NoLeadsTestDeliverCampaignException();
         }
-        die;
 
         // Mock Text Service
         $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
