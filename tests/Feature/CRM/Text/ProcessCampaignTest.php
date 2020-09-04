@@ -586,10 +586,10 @@ class ProcessCampaignTest extends TestCase
                 ]));
             }
         });
-        $unused = $this->refreshLeads($campaign->id, [
+        /*$unused = $this->refreshLeads($campaign->id, [
             'brands' => $brands,
             'unused_brands' => $unusedBrands
-        ]);
+        ]);*/
 
         // Get Campaigns for Dealer
         die;
@@ -721,11 +721,11 @@ class ProcessCampaignTest extends TestCase
                 ]));
             }
         });
-        $unused = $this->refreshLeads($campaign->id, [
+        /*$unused = $this->refreshLeads($campaign->id, [
             'entity_type_id' => self::ENTITY_TYPE_ID,
             'categories' => $categories,
             'unused_categories' => $unusedCategories
-        ]);
+        ]);*/
 
         // Get Campaigns for Dealer
         die;
