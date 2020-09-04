@@ -894,7 +894,7 @@ class ProcessCampaignTest extends TestCase
             }
 
             // Add Done Status
-            if(isset($filters['action']) && $params['filters'] === 'purchased') {
+            if(isset($filters['action']) && $filters['action'] === 'purchased') {
                 factory(LeadStatus::class)->create([
                     'tc_lead_identifier' => $lead->identifier,
                     'status' => Lead::STATUS_WON_CLOSED
