@@ -869,7 +869,7 @@ class ProcessCampaignTest extends TestCase
             // Insert With Manufacturer
             if(isset($filters['brands'])) {
                 // Pick a Random (Valid) Brand
-                $brandKey = array_rand($params['brands']);
+                $brandKey = array_rand($filters['brands']);
                 $brand = $filters['brands'][$brandKey];
 
                 // Add MFG
@@ -884,7 +884,7 @@ class ProcessCampaignTest extends TestCase
                 // Add Inventory Item
                 $lead->each(function($lead) use($filters) {
                     // Pick a Random (Valid) Category
-                    $catKey = array_rand($params['categories']);
+                    $catKey = array_rand($filters['categories']);
                     $cat = $filters['categories'][$catKey];
 
                     // Add Campaign Brand
@@ -923,7 +923,7 @@ class ProcessCampaignTest extends TestCase
             // Insert With Manufacturer
             if(isset($filters['unused_brands'])) {
                 // Pick a Random (Valid) Brand
-                $brandKey = array_rand($params['unused_brands']);
+                $brandKey = array_rand($filters['unused_brands']);
                 $brand = $filters['unused_brands'][$brandKey];
 
                 // Add MFG
@@ -933,7 +933,7 @@ class ProcessCampaignTest extends TestCase
             // Insert With Category
             if(isset($filters['unused_categories'])) {
                 // Pick a Random (Valid) Category
-                $catKey = array_rand($params['unused_categories']);
+                $catKey = array_rand($filters['unused_categories']);
                 $cat = $filters['unused_categories'][$catKey];
 
                 // Add Category
@@ -956,7 +956,7 @@ class ProcessCampaignTest extends TestCase
                 // Add Inventory Item
                 $lead->each(function($lead) use($filters) {
                     // Pick a Random (Valid) Category
-                    $catKey = array_rand($params['unused_categories']);
+                    $catKey = array_rand($filters['unused_categories']);
                     $cat = $filters['unused_categories'][$catKey];
 
                     // Add Campaign Brand
@@ -989,7 +989,7 @@ class ProcessCampaignTest extends TestCase
             // Insert With Manufacturer
             if(isset($filters['unused_brands'])) {
                 // Pick a Random (Valid) Brand
-                $brandKey = array_rand($params['unused_brands']);
+                $brandKey = array_rand($filters['unused_brands']);
                 $brand = $filters['unused_brands'][$brandKey];
 
                 // Add MFG
@@ -999,7 +999,7 @@ class ProcessCampaignTest extends TestCase
             // Insert With Category
             if(isset($filters['unused_categories'])) {
                 // Pick a Random (Valid) Category
-                $catKey = array_rand($params['unused_categories']);
+                $catKey = array_rand($filters['unused_categories']);
                 $cat = $filters['unused_categories'][$catKey];
 
                 // Add Category
@@ -1022,7 +1022,7 @@ class ProcessCampaignTest extends TestCase
                 // Add Inventory Item
                 $lead->each(function($lead) use($filters) {
                     // Pick a Random (Valid) Category
-                    $catKey = array_rand($params['unused_categories']);
+                    $catKey = array_rand($filters['unused_categories']);
                     $cat = $filters['unused_categories'][$catKey];
 
                     // Add Campaign Brand
