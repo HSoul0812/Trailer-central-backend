@@ -6,7 +6,11 @@ use App\Exceptions\CRM\Text\NoLeadsTestDeliverCampaignException;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Models\Inventory\Inventory;
+use App\Models\Inventory\Category;
 use App\Models\CRM\Text\Campaign;
+use App\Models\CRM\Text\CampaignBrand;
+use App\Models\CRM\Text\CampaignCategory;
 use App\Models\CRM\Text\Template;
 use App\Models\User\NewDealerUser;
 use Faker\Factory as Faker;
@@ -27,6 +31,11 @@ class ProcessCampaignTest extends TestCase
      * Faker\Generator $faker
      */
     protected $faker;
+
+    /**
+     * @const int
+     */
+    const ENTITY_TYPE_ID = 1;
 
     /**
      * Set Up Test
@@ -191,7 +200,9 @@ class ProcessCampaignTest extends TestCase
         $campaign = factory(Campaign::class)->create([
             'action' => 'purchased'
         ]);
-        $unused = $this->refreshLeads($campaign->id);
+        $unused = $this->refreshLeads($campaign->id, [
+            'action' => 'purchased'
+        ]);
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
@@ -317,7 +328,10 @@ class ProcessCampaignTest extends TestCase
         $campaign = factory(Campaign::class)->create([
             'location_id' => $locationId
         ]);
-        $unused = $this->refreshLeads($campaign->id);
+        $unused = $this->refreshLeads($campaign->id, [
+            'location_id' => $locationId,
+            'unused_location_id' => $lastLocationId
+        ]);
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
@@ -438,7 +452,276 @@ class ProcessCampaignTest extends TestCase
         $campaign = factory(Campaign::class)->create([
             'include_archived' => 1
         ]);
-        $unused = $this->refreshLeads($campaign->id);
+        $unused = $this->refreshLeads($campaign->id, [
+            'is_archived' => 1
+        ]);
+
+        // Get Campaigns for Dealer
+        $campaigns = $this->campaigns->getAllActive($dealer->user_id);
+        foreach($campaigns as $single) {
+            $campaign = $single;
+            break;
+        }
+        $leads = $campaign->leads;
+        if(count($leads) < 1) {
+            throw new NoLeadsTestDeliverCampaignException();
+        }
+
+        // Mock Text Service
+        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+            // Loop Leads to Mock Text Sent
+            foreach($leads as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->once();
+            }
+
+            // Loop Leads to Mock Text NOT Sent
+            foreach($unused as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->never();
+            }
+        });
+
+        // Call Leads Assign Command
+        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
+
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Get From Number
+            $from_number = $campaign->from_sms_number;
+            if(empty($from_number)) {
+                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+            }
+
+            // Get Text Message
+            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                'lead_name' => $lead->full_name,
+                'title_of_unit_of_interest' => $lead->inventory->title,
+                'dealer_name' => $dealer->user->name
+            ]);
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('dealer_texts_log', [
+                'lead_id'     => $lead->identifier,
+                'from_number' => $from_number,
+                'to_number'   => $lead->text_phone
+            ]);
+
+            // Assert a text campaign was logged sent
+            $this->assertDatabaseHas('crm_text_campaign_sent', [
+                'text_campaign_id' => $campaign->id,
+                'lead_id' => $lead->identifier,
+                'status' => 'logged'
+            ]);
+        }
+    }
+
+    /**
+     * Test campaign with brands
+     * 
+     * @specs string action = inquired
+     * @specs array location_id = any
+     * @specs int send_after_days = 15
+     * @specs int include_archived = 0
+     * @return void
+     */
+    public function testBrandCampaign()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Refresh Leads
+        $this->refreshCampaigns($dealer->user_id);
+
+
+        // Build Generic Template
+        $template = Template::where('user_id', $dealer->user_id)->first();
+        if(empty($template->id)) {
+            factory(Template::class)->create();
+        }
+
+        // Get Random Brands
+        $brands = Manufacturers::inRandomOrder()->take(3)->pluck('name');
+        $unusedBrands = Manufacturers::whereNotIn('name', $brands)->inRandomOrder()->take(3)->pluck('name');
+
+        // Build Generic Campaign
+        $campaign = factory(Campaign::class)->create()->each(function ($campaign) use($brands) {
+            // Add Campaign Brands
+            foreach($brands as $brand) {
+                $campaign->brands()->save(factory(CampaignBrand::class)->make([
+                    'brand' => $brand
+                ]));
+            }
+        });
+        $unused = $this->refreshLeads($campaign->id, [
+            'brands' => $brands,
+            'unused_brands' => $unusedBrands
+        ]);
+
+        // Get Campaigns for Dealer
+        $campaigns = $this->campaigns->getAllActive($dealer->user_id);
+        foreach($campaigns as $single) {
+            $campaign = $single;
+            break;
+        }
+        $leads = $campaign->leads;
+        if(count($leads) < 1) {
+            throw new NoLeadsTestDeliverCampaignException();
+        }
+
+        // Mock Text Service
+        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+            // Loop Leads to Mock Text Sent
+            foreach($leads as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->once();
+            }
+
+            // Loop Leads to Mock Text NOT Sent
+            foreach($unused as $lead) {
+                // Get From Number
+                $from_number = $campaign->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->never();
+            }
+        });
+
+        // Call Leads Assign Command
+        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
+
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Get From Number
+            $from_number = $campaign->from_sms_number;
+            if(empty($from_number)) {
+                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+            }
+
+            // Get Text Message
+            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
+                'lead_name' => $lead->full_name,
+                'title_of_unit_of_interest' => $lead->inventory->title,
+                'dealer_name' => $dealer->user->name
+            ]);
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('dealer_texts_log', [
+                'lead_id'     => $lead->identifier,
+                'from_number' => $from_number,
+                'to_number'   => $lead->text_phone
+            ]);
+
+            // Assert a text campaign was logged sent
+            $this->assertDatabaseHas('crm_text_campaign_sent', [
+                'text_campaign_id' => $campaign->id,
+                'lead_id' => $lead->identifier,
+                'status' => 'logged'
+            ]);
+        }
+    }
+
+    /**
+     * Test campaign with categories
+     * 
+     * @specs string action = inquired
+     * @specs array location_id = any
+     * @specs int send_after_days = 15
+     * @specs int include_archived = 0
+     * @return void
+     */
+    public function testCategoryCampaign()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Refresh Leads
+        $this->refreshCampaigns($dealer->user_id);
+
+
+        // Build Generic Template
+        $template = Template::where('user_id', $dealer->user_id)->first();
+        if(empty($template->id)) {
+            factory(Template::class)->create();
+        }
+
+        // Get Random Categories
+        $categories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->inRandomOrder()->take(3)->pluck('legacy_category');
+        $unusedCategories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->whereNotIn('legacy_category', $categories)->inRandomOrder()->take(3)->pluck('legacy_category');
+
+        // Build Generic Campaign
+        $campaign = factory(Campaign::class)->create()->each(function ($campaign) use($categories) {
+            // Add Campaign Categories
+            foreach($categories as $cat) {
+                $campaign->brands()->save(factory(CampaignCategory::class)->make([
+                    'category' => $cat
+                ]));
+            }
+        });
+        $unused = $this->refreshLeads($campaign->id, [
+            'entity_type_id' => self::ENTITY_TYPE_ID,
+            'categories' => $categories,
+            'unused_categories' => $unusedCategories
+        ]);
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
@@ -549,9 +832,10 @@ class ProcessCampaignTest extends TestCase
      * Refresh Campaign Leads in DB
      * 
      * @param int $campaignId
+     * @param array $filters
      * @return array of leads outside of range
      */
-    private function refreshLeads($campaignId) {
+    private function refreshLeads($campaignId, $filters = []) {
         // Get Existing Unassigned Leads for Dealer ID
         $campaign = Campaign::find($campaignId);
 
@@ -562,11 +846,6 @@ class ProcessCampaignTest extends TestCase
             }
         }
 
-        // Build Random Factory Salespeople
-        $locationIds = TestCase::getTestDealerLocationIds();
-        $locationId = reset($locationIds);
-        $lastLocationId = end($locationIds);
-
         // Create 10 Leads That Match the Campaign!
         for($n = 0; $n < 10; $n++) {
             // Get Random Date Since "Send After Days"
@@ -575,22 +854,46 @@ class ProcessCampaignTest extends TestCase
             ];
 
             // Insert With Location ID
-            if(!empty($campaign->location_id)) {
-                $params['dealer_location_id'] = $locationId;
+            if(isset($filters['location_id'])) {
+                $params['dealer_location_id'] = $filters['location_id'];
             }
 
             // Insert With Archived Status
-            if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
-                $params['is_archived'] = 0;
-            } elseif($campaign->included_archived === 1 || $campaign->include_archived === '1') {
-                $params['is_archived'] = 1;
+            if(isset($filters['is_archived'])) {
+                $params['is_archived'] = $filters['is_archived'];
+            }
+
+            // Insert With Manufacturer
+            if(isset($filters['brands'])) {
+                // Pick a Random (Valid) Brand
+                $brandKey = array_rand($params['brands']);
+                $brand = $filters['brands'][$brandKey];
+
+                // Add MFG
+                $params['manufacturer'] = $brand;
             }
 
             // Insert Leads Into DB
             $lead = factory(Lead::class)->create($params);
 
+            // Insert With Category
+            if(isset($filters['categories'])) {
+                // Add Inventory Item
+                $lead->each(function($lead) use($filters) {
+                    // Pick a Random (Valid) Category
+                    $catKey = array_rand($params['categories']);
+                    $cat = $filters['categories'][$catKey];
+
+                    // Add Campaign Brand
+                    $lead->inventory()->save(factory(Inventory::class)->make([
+                        'entity_type_id' => $filters['entity_type_id'] ?: 1,
+                        'category' => $category
+                    ]));
+                });
+            }
+
             // Add Done Status
-            if($campaign->action === 'purchased') {
+            if(isset($params['action']) && $params['action'] === 'purchased') {
                 factory(LeadStatus::class)->create([
                     'tc_lead_identifier' => $lead->identifier,
                     'status' => Lead::STATUS_WON_CLOSED
@@ -601,19 +904,38 @@ class ProcessCampaignTest extends TestCase
         // Create Leads That DON'T Match the Criteria!
         $leads = array();
         for($n = 0; $n < 5; $n++) {
-            // Get Random Date Since "Send After Days"
+            // Initialize Empty Params
             $params = [];
 
             // Insert With Location ID
-            if(!empty($campaign->location_id)) {
-                $params['dealer_location_id'] = $lastLocationId;
+            if(isset($filters['unused_location_id'])) {
+                $params['dealer_location_id'] = $filters['unused_location_id'];
             }
 
             // Insert With Archived Status
-            if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
-                $params['is_archived'] = 1;
-            } elseif($campaign->included_archived === 1 || $campaign->include_archived === '1') {
-                $params['is_archived'] = 0;
+            if(isset($filters['is_archived'])) {
+                $params['is_archived'] = !empty($filters['is_archived']) ? 0 : 1;
+            }
+
+            // Insert With Manufacturer
+            if(isset($filters['unused_brands'])) {
+                // Pick a Random (Valid) Brand
+                $brandKey = array_rand($params['unused_brands']);
+                $brand = $filters['unused_brands'][$brandKey];
+
+                // Add MFG
+                $params['manufacturer'] = $brand;
+            }
+
+            // Insert With Category
+            if(isset($filters['unused_categories'])) {
+                // Pick a Random (Valid) Category
+                $catKey = array_rand($params['unused_categories']);
+                $cat = $filters['unused_categories'][$catKey];
+
+                // Add Category
+                $params['entity_type_id'] = $filters['entity_type_id'] ?: 1;
+                $params['category'] = $cat;
             }
 
             // No Other Params Set?! Make Date Not Match Criteria!
@@ -626,31 +948,60 @@ class ProcessCampaignTest extends TestCase
             // Insert Leads Into DB
             $lead = factory(Lead::class)->create($params);
 
-            // Add Done Status
-            if($campaign->action === 'purchased') {
-                factory(LeadStatus::class)->create([
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_WON_CLOSED
-                ]);
+            // Insert With Category
+            if(isset($filters['unused_categories'])) {
+                // Add Inventory Item
+                $lead->each(function($lead) use($filters) {
+                    // Pick a Random (Valid) Category
+                    $catKey = array_rand($params['unused_categories']);
+                    $cat = $filters['unused_categories'][$catKey];
+
+                    // Add Campaign Brand
+                    $lead->inventory()->save(factory(Inventory::class)->make([
+                        'entity_type_id' => $filters['entity_type_id'] ?: 1,
+                        'category' => $category
+                    ]));
+                });
             }
+
+            // Append Leads
             $leads[] = $lead;
         }
 
         // Create 5 Leads In Last X+10 Days to X+25 Days
         for($n = 0; $n < 5; $n++) {
-            // Get Random Date Since "Send After Days"
+            // Initialize Empty Params
             $params = [];
 
             // Insert With Location ID
-            if(!empty($campaign->location_id)) {
-                $params['dealer_location_id'] = $lastLocationId;
+            if(isset($filters['unused_location_id'])) {
+                $params['dealer_location_id'] = $filters['unused_location_id'];
             }
 
             // Insert With Archived Status
-            if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
-                $params['is_archived'] = 0;
-            } elseif($campaign->included_archived === 1 || $campaign->include_archived === '1') {
-                $params['is_archived'] = 1;
+            if(isset($filters['is_archived'])) {
+                $params['is_archived'] = !empty($filters['is_archived']) ? 0 : 1;
+            }
+
+            // Insert With Manufacturer
+            if(isset($filters['unused_brands'])) {
+                // Pick a Random (Valid) Brand
+                $brandKey = array_rand($params['unused_brands']);
+                $brand = $filters['unused_brands'][$brandKey];
+
+                // Add MFG
+                $params['manufacturer'] = $brand;
+            }
+
+            // Insert With Category
+            if(isset($filters['unused_categories'])) {
+                // Pick a Random (Valid) Category
+                $catKey = array_rand($params['unused_categories']);
+                $cat = $filters['unused_categories'][$catKey];
+
+                // Add Category
+                $params['entity_type_id'] = $filters['entity_type_id'] ?: 1;
+                $params['category'] = $cat;
             }
 
             // No Other Params Set?! Make Date Not Match Criteria!
@@ -663,13 +1014,23 @@ class ProcessCampaignTest extends TestCase
             // Insert Leads Into DB
             $lead = factory(Lead::class)->create($params);
 
-            // Add Done Status
-            if($campaign->action === 'purchased') {
-                factory(LeadStatus::class)->create([
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_WON_CLOSED
-                ]);
+            // Insert With Category
+            if(isset($filters['unused_categories'])) {
+                // Add Inventory Item
+                $lead->each(function($lead) use($filters) {
+                    // Pick a Random (Valid) Category
+                    $catKey = array_rand($params['unused_categories']);
+                    $cat = $filters['unused_categories'][$catKey];
+
+                    // Add Campaign Brand
+                    $lead->inventory()->save(factory(Inventory::class)->make([
+                        'entity_type_id' => $filters['entity_type_id'] ?: 1,
+                        'category' => $category
+                    ]));
+                });
             }
+
+            // Append Leads
             $leads[] = $lead;
         }
         return $leads;
