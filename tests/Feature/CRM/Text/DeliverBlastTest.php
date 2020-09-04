@@ -876,17 +876,6 @@ class DeliverBlastTest extends TestCase
                 $params['manufacturer'] = $brand;
             }
 
-            // Insert With Category
-            if(isset($filters['categories'])) {
-                // Pick a Random (Valid) Category
-                $catKey = array_rand($filters['categories']);
-                $cat = $filters['categories'][$catKey];
-
-                // Add Category
-                $params['entity_type_id'] = $filters['entity_type_id'] ?: 1;
-                $params['category'] = $cat;
-            }
-
             // Insert Leads Into DB
             $lead = factory(Lead::class)->create($params);
 
@@ -939,17 +928,6 @@ class DeliverBlastTest extends TestCase
 
                 // Add MFG
                 $params['manufacturer'] = $brand;
-            }
-
-            // Insert With Category
-            if(isset($filters['unused_categories'])) {
-                // Pick a Random (Valid) Category
-                $catKey = array_rand($filters['unused_categories']);
-                $cat = $filters['unused_categories'][$catKey];
-
-                // Add Category
-                $params['entity_type_id'] = $filters['entity_type_id'] ?: 1;
-                $params['category'] = $cat;
             }
 
             // No Other Params Set?! Make Date Not Match Criteria!
