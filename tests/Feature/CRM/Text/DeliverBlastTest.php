@@ -577,7 +577,8 @@ class DeliverBlastTest extends TestCase
         $unusedBrands = Manufacturers::whereNotIn('name', $brands)->inRandomOrder()->take(3)->pluck('name');
 
         // Build Generic Blast
-        $blast = factory(Blast::class)->create()->each(function ($blast) use($brands) {
+        $blast = factory(Blast::class)->create();
+        $blast->each(function ($blast) use($brands) {
             // Add Campaign Brands
             foreach($brands as $brand) {
                 $blast->brands()->save(factory(BlastBrand::class)->make([
@@ -710,7 +711,8 @@ class DeliverBlastTest extends TestCase
         $unusedCategories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->whereNotIn('legacy_category', $categories)->inRandomOrder()->take(3)->pluck('legacy_category');
 
         // Build Generic Blast
-        $blast = factory(Blast::class)->create()->each(function ($blast) use($categories) {
+        $blast = factory(Blast::class)->create();
+        $blast->each(function ($blast) use($categories) {
             // Add Campaign Categories
             foreach($categories as $cat) {
                 $blast->brands()->save(factory(BlastCategory::class)->make([

@@ -577,7 +577,8 @@ class ProcessCampaignTest extends TestCase
         $unusedBrands = Manufacturers::whereNotIn('name', $brands)->inRandomOrder()->take(3)->pluck('name');
 
         // Build Generic Campaign
-        $campaign = factory(Campaign::class)->create()->each(function ($campaign) use($brands) {
+        $campaign = factory(Campaign::class)->create();
+        $campaign->each(function ($campaign) use($brands) {
             // Add Campaign Brands
             foreach($brands as $brand) {
                 $campaign->brands()->save(factory(CampaignBrand::class)->make([
@@ -710,7 +711,8 @@ class ProcessCampaignTest extends TestCase
         $unusedCategories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->whereNotIn('legacy_category', $categories)->inRandomOrder()->take(3)->pluck('legacy_category');
 
         // Build Generic Campaign
-        $campaign = factory(Campaign::class)->create()->each(function ($campaign) use($categories) {
+        $campaign = factory(Campaign::class)->create();
+        $campaign->each(function ($campaign) use($categories) {
             // Add Campaign Categories
             foreach($categories as $cat) {
                 $campaign->brands()->save(factory(CampaignCategory::class)->make([
