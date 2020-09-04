@@ -691,7 +691,7 @@ class DeliverBlastTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    /*public function testCategoryBlast()
+    public function testCategoryBlast()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -815,7 +815,7 @@ class DeliverBlastTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }*/
+    }
 
 
     /**

@@ -691,7 +691,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    /*public function testCategoryCampaign()
+    public function testCategoryCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -815,7 +815,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }*/
+    }
 
 
     /**
