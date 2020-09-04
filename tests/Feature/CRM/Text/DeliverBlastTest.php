@@ -866,16 +866,6 @@ class DeliverBlastTest extends TestCase
                 $params['is_archived'] = $filters['is_archived'];
             }
 
-            // Insert With Manufacturer
-            if(isset($filters['brands'])) {
-                // Pick a Random (Valid) Brand
-                $brandKey = array_rand($filters['brands']);
-                $brand = $filters['brands'][$brandKey];
-
-                // Add MFG
-                $params['manufacturer'] = $brand;
-            }
-
             // Insert Leads Into DB
             $lead = factory(Lead::class)->create($params);
 
@@ -907,8 +897,9 @@ class DeliverBlastTest extends TestCase
                         $leadParams['category'] = $cat;
                     }
 
-                    // Add Campaign Brand
-                    $lead->inventory()->save(factory(Inventory::class)->make($leadParams));
+                    // Add Inventory to Lead
+                    $inventory = factory(Inventory::class)->create($leadParams);
+                    $lead->fill(['inventory_id' => $inventory->inventory_id])->save();
                 });
             }
 
@@ -975,8 +966,9 @@ class DeliverBlastTest extends TestCase
                         $leadParams['category'] = $cat;
                     }
 
-                    // Add Campaign Brand
-                    $lead->inventory()->save(factory(Inventory::class)->make($leadParams));
+                    // Add Inventory to Lead
+                    $inventory = factory(Inventory::class)->create($leadParams);
+                    $lead->fill(['inventory_id' => $inventory->inventory_id])->save();
                 });
             }
 

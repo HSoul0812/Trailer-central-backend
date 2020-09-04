@@ -897,8 +897,9 @@ class ProcessCampaignTest extends TestCase
                         $leadParams['category'] = $cat;
                     }
 
-                    // Add Campaign Brand
-                    $lead->inventory()->save(factory(Inventory::class)->make($leadParams));
+                    // Add Inventory to Lead
+                    $inventory = factory(Inventory::class)->create($leadParams);
+                    $lead->fill(['inventory_id' => $inventory->inventory_id])->save();
                 });
             }
 
@@ -965,8 +966,9 @@ class ProcessCampaignTest extends TestCase
                         $leadParams['category'] = $cat;
                     }
 
-                    // Add Campaign Brand
-                    $lead->inventory()->save(factory(Inventory::class)->make($leadParams));
+                    // Add Inventory to Lead
+                    $inventory = factory(Inventory::class)->create($leadParams);
+                    $lead->fill(['inventory_id' => $inventory->inventory_id])->save();
                 });
             }
 
@@ -1027,8 +1029,9 @@ class ProcessCampaignTest extends TestCase
                         $leadParams['category'] = $cat;
                     }
 
-                    // Add Campaign Brand
-                    $lead->inventory()->save(factory(Inventory::class)->make($leadParams));
+                    // Add Inventory to Lead
+                    $inventory = factory(Inventory::class)->create($leadParams);
+                    $lead->fill(['inventory_id' => $inventory->inventory_id])->save();
                 });
             }
 
