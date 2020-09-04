@@ -879,19 +879,36 @@ class DeliverBlastTest extends TestCase
             // Insert Leads Into DB
             $lead = factory(Lead::class)->create($params);
 
-            // Insert With Category
-            if(isset($filters['categories'])) {
+            // Insert With Manufacturer or Category
+            if(isset($filters['brands']) || isset($filters['categories'])) {
                 // Add Inventory Item
                 $lead->each(function($lead) use($filters) {
-                    // Pick a Random (Valid) Category
-                    $catKey = array_rand($filters['categories']);
-                    $cat = $filters['categories'][$catKey];
+                    // Initialize Lead Params
+                    $leadParams = [];
+
+                    // Insert With Manufacturer
+                    if(isset($filters['brands'])) {
+                        // Pick a Random (Valid) Brand
+                        $brandKey = array_rand($filters['brands']);
+                        $brand = $filters['brands'][$brandKey];
+
+                        // Add MFG
+                        $leadParams['manufacturer'] = $brand;
+                    }
+
+                    // Insert With Manufacturer
+                    if(isset($filters['categories'])) {
+                        // Pick a Random (Valid) Category
+                        $catKey = array_rand($filters['categories']);
+                        $cat = $filters['categories'][$catKey];
+
+                        // Set Params
+                        $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
+                        $leadParams['category'] = $cat;
+                    }
 
                     // Add Campaign Brand
-                    $lead->inventory()->save(factory(Inventory::class)->make([
-                        'entity_type_id' => $filters['entity_type_id'] ?: 1,
-                        'category' => $category
-                    ]));
+                    $lead->inventory()->save(factory(Inventory::class)->make($leadParams));
                 });
             }
 
@@ -920,16 +937,6 @@ class DeliverBlastTest extends TestCase
                 $params['is_archived'] = !empty($filters['is_archived']) ? 0 : 1;
             }
 
-            // Insert With Manufacturer
-            if(isset($filters['unused_brands'])) {
-                // Pick a Random (Valid) Brand
-                $brandKey = array_rand($filters['unused_brands']);
-                $brand = $filters['unused_brands'][$brandKey];
-
-                // Add MFG
-                $params['manufacturer'] = $brand;
-            }
-
             // No Other Params Set?! Make Date Not Match Criteria!
             if(empty($params)) {
                 $params['date_submitted'] = $this->faker->dateTimeBetween('-' . ($blast->send_after_days + 10) . ' days', '-' . $blast->send_after_days . ' days');
@@ -940,19 +947,36 @@ class DeliverBlastTest extends TestCase
             // Insert Leads Into DB
             $lead = factory(Lead::class)->create($params);
 
-            // Insert With Category
-            if(isset($filters['unused_categories'])) {
+            // Insert With Manufacturer or Category
+            if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
                 // Add Inventory Item
                 $lead->each(function($lead) use($filters) {
-                    // Pick a Random (Valid) Category
-                    $catKey = array_rand($filters['unused_categories']);
-                    $cat = $filters['unused_categories'][$catKey];
+                    // Initialize Lead Params
+                    $leadParams = [];
+
+                    // Insert With Manufacturer
+                    if(isset($filters['unused_brands'])) {
+                        // Pick a Random (Valid) Brand
+                        $brandKey = array_rand($filters['unused_brands']);
+                        $brand = $filters['unused_brands'][$brandKey];
+
+                        // Add MFG
+                        $leadParams['manufacturer'] = $brand;
+                    }
+
+                    // Insert With Manufacturer
+                    if(isset($filters['unused_categories'])) {
+                        // Pick a Random (Valid) Category
+                        $catKey = array_rand($filters['unused_categories']);
+                        $cat = $filters['unused_categories'][$catKey];
+
+                        // Set Params
+                        $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
+                        $leadParams['category'] = $cat;
+                    }
 
                     // Add Campaign Brand
-                    $lead->inventory()->save(factory(Inventory::class)->make([
-                        'entity_type_id' => $filters['entity_type_id'] ?: 1,
-                        'category' => $category
-                    ]));
+                    $lead->inventory()->save(factory(Inventory::class)->make($leadParams));
                 });
             }
 
