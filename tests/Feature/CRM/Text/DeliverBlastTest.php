@@ -905,7 +905,7 @@ class DeliverBlastTest extends TestCase
             }
 
             // Add Done Status
-            if(isset($params['action']) && $params['action'] === 'purchased') {
+            if(isset($filters['action']) && $params['filters'] === 'purchased') {
                 factory(LeadStatus::class)->create([
                     'tc_lead_identifier' => $lead->identifier,
                     'status' => Lead::STATUS_WON_CLOSED
