@@ -857,25 +857,25 @@ class DeliverBlastTest extends TestCase
             ];
 
             // Insert With Manufacturer or Category
-            if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
+            if(isset($filters['brands']) || isset($filters['categories'])) {
                 // Initialize Lead Params
                 $leadParams = [];
 
                 // Insert With Manufacturer
-                if(isset($filters['unused_brands'])) {
+                if(isset($filters['brands'])) {
                     // Pick a Random (Valid) Brand
-                    $brandKey = array_rand($filters['unused_brands']);
-                    $brand = $filters['unused_brands'][$brandKey];
+                    $brandKey = array_rand($filters['brands']);
+                    $brand = $filters['brands'][$brandKey];
 
                     // Add MFG
                     $leadParams['manufacturer'] = $brand;
                 }
 
                 // Insert With Manufacturer
-                if(isset($filters['unused_categories'])) {
+                if(isset($filters['categories'])) {
                     // Pick a Random (Valid) Category
-                    $catKey = array_rand($filters['unused_categories']);
-                    $cat = $filters['unused_categories'][$catKey];
+                    $catKey = array_rand($filters['categories']);
+                    $cat = $filters['categories'][$catKey];
 
                     // Set Params
                     $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
