@@ -63,7 +63,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    /*public function testSimpleCampaign()
+    public function testSimpleCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -171,7 +171,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }*/
+    }
 
     /**
      * Test campaign on purchases
@@ -182,7 +182,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    /*public function testPurchasesCampaign()
+    public function testPurchasesCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -294,7 +294,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }*/
+    }
 
     /**
      * Test campaign by location
@@ -305,7 +305,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    /*public function testLocationSpecificCampaign()
+    public function testLocationSpecificCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -423,7 +423,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }*/
+    }
 
     /**
      * Test campaign for archived leads
@@ -434,7 +434,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 1
      * @return void
      */
-    /*public function testArchivedCampaign()
+    public function testArchivedCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -546,7 +546,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }*/
+    }
 
     /**
      * Test campaign with brands
@@ -586,13 +586,12 @@ class ProcessCampaignTest extends TestCase
                 ]));
             }
         });
-        /*$unused = $this->refreshLeads($campaign->id, [
+        $unused = $this->refreshLeads($campaign->id, [
             'brands' => $brands,
             'unused_brands' => $unusedBrands
-        ]);*/
+        ]);
 
         // Get Campaigns for Dealer
-        die;
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
         foreach($campaigns as $single) {
             $campaign = $single;
@@ -721,14 +720,13 @@ class ProcessCampaignTest extends TestCase
                 ]));
             }
         });
-        /*$unused = $this->refreshLeads($campaign->id, [
+        $unused = $this->refreshLeads($campaign->id, [
             'entity_type_id' => self::ENTITY_TYPE_ID,
             'categories' => $categories,
             'unused_categories' => $unusedCategories
-        ]);*/
+        ]);
 
         // Get Campaigns for Dealer
-        die;
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
         foreach($campaigns as $single) {
             $campaign = $single;
@@ -858,6 +856,39 @@ class ProcessCampaignTest extends TestCase
                 'date_submitted' => $this->faker->dateTimeBetween('-' . ($campaign->send_after_days + 10) . ' days', '-' . $campaign->send_after_days . ' days')
             ];
 
+            // Insert With Manufacturer or Category
+            if(isset($filters['brands']) || isset($filters['categories'])) {
+                // Initialize Lead Params
+                $leadParams = [];
+
+                // Insert With Manufacturer
+                if(isset($filters['brands'])) {
+                    // Pick a Random (Valid) Brand
+                    $brandKey = array_rand($filters['brands']);
+                    $brand = $filters['brands'][$brandKey];
+
+                    // Add MFG
+                    $leadParams['manufacturer'] = $brand;
+                }
+
+                // Insert With Manufacturer
+                if(isset($filters['categories'])) {
+                    // Pick a Random (Valid) Category
+                    $catKey = array_rand($filters['categories']);
+                    $cat = $filters['categories'][$catKey];
+
+                    // Set Params
+                    $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
+                    $leadParams['category'] = $cat;
+                }
+
+                // Add Inventory to Lead
+                $inventory = factory(Inventory::class)->create($leadParams);
+
+                // Add Inventory ID
+                $params['inventory_id'] = $inventory->inventory_id;
+            }
+
             // Insert With Location ID
             if(isset($filters['location_id'])) {
                 $params['dealer_location_id'] = $filters['location_id'];
@@ -870,40 +901,6 @@ class ProcessCampaignTest extends TestCase
 
             // Insert Leads Into DB
             $lead = factory(Lead::class)->create($params);
-
-            // Insert With Manufacturer or Category
-            if(isset($filters['brands']) || isset($filters['categories'])) {
-                // Add Inventory Item
-                $lead->each(function($lead) use($filters) {
-                    // Initialize Lead Params
-                    $leadParams = [];
-
-                    // Insert With Manufacturer
-                    if(isset($filters['brands'])) {
-                        // Pick a Random (Valid) Brand
-                        $brandKey = array_rand($filters['brands']);
-                        $brand = $filters['brands'][$brandKey];
-
-                        // Add MFG
-                        $leadParams['manufacturer'] = $brand;
-                    }
-
-                    // Insert With Manufacturer
-                    if(isset($filters['categories'])) {
-                        // Pick a Random (Valid) Category
-                        $catKey = array_rand($filters['categories']);
-                        $cat = $filters['categories'][$catKey];
-
-                        // Set Params
-                        $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
-                        $leadParams['category'] = $cat;
-                    }
-
-                    // Add Inventory to Lead
-                    $inventory = factory(Inventory::class)->create($leadParams);
-                    $lead->fill(['inventory_id' => $inventory->inventory_id])->save();
-                });
-            }
 
             // Add Done Status
             if(isset($filters['action']) && $filters['action'] === 'purchased') {
@@ -919,6 +916,39 @@ class ProcessCampaignTest extends TestCase
         for($n = 0; $n < 5; $n++) {
             // Initialize Empty Params
             $params = [];
+
+            // Insert With Manufacturer or Category
+            if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
+                // Initialize Lead Params
+                $leadParams = [];
+
+                // Insert With Manufacturer
+                if(isset($filters['unused_brands'])) {
+                    // Pick a Random (Valid) Brand
+                    $brandKey = array_rand($filters['unused_brands']);
+                    $brand = $filters['unused_brands'][$brandKey];
+
+                    // Add MFG
+                    $leadParams['manufacturer'] = $brand;
+                }
+
+                // Insert With Manufacturer
+                if(isset($filters['unused_categories'])) {
+                    // Pick a Random (Valid) Category
+                    $catKey = array_rand($filters['unused_categories']);
+                    $cat = $filters['unused_categories'][$catKey];
+
+                    // Set Params
+                    $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
+                    $leadParams['category'] = $cat;
+                }
+
+                // Add Inventory to Lead
+                $inventory = factory(Inventory::class)->create($leadParams);
+
+                // Add Inventory ID
+                $params['inventory_id'] = $inventory->inventory_id;
+            }
 
             // Insert With Location ID
             if(isset($filters['unused_location_id'])) {
@@ -938,50 +968,46 @@ class ProcessCampaignTest extends TestCase
             }
 
             // Insert Leads Into DB
-            $lead = factory(Lead::class)->create($params);
-
-            // Insert With Category
-            if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
-                // Add Inventory Item
-                $lead->each(function($lead) use($filters) {
-                    // Initialize Lead Params
-                    $leadParams = [];
-
-                    // Insert With Manufacturer
-                    if(isset($filters['unused_brands'])) {
-                        // Pick a Random (Valid) Brand
-                        $brandKey = array_rand($filters['unused_brands']);
-                        $brand = $filters['unused_brands'][$brandKey];
-
-                        // Add MFG
-                        $leadParams['manufacturer'] = $brand;
-                    }
-
-                    // Insert With Manufacturer
-                    if(isset($filters['unused_categories'])) {
-                        // Pick a Random (Valid) Category
-                        $catKey = array_rand($filters['unused_categories']);
-                        $cat = $filters['unused_categories'][$catKey];
-
-                        // Set Params
-                        $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
-                        $leadParams['category'] = $cat;
-                    }
-
-                    // Add Inventory to Lead
-                    $inventory = factory(Inventory::class)->create($leadParams);
-                    $lead->fill(['inventory_id' => $inventory->inventory_id])->save();
-                });
-            }
-
-            // Append Leads
-            $leads[] = $lead;
+            $leads[] = factory(Lead::class)->create($params);
         }
 
         // Create 5 Leads In Last X+10 Days to X+25 Days
         for($n = 0; $n < 5; $n++) {
             // Initialize Empty Params
             $params = [];
+
+            // Insert With Manufacturer or Category
+            if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
+                // Initialize Lead Params
+                $leadParams = [];
+
+                // Insert With Manufacturer
+                if(isset($filters['unused_brands'])) {
+                    // Pick a Random (Valid) Brand
+                    $brandKey = array_rand($filters['unused_brands']);
+                    $brand = $filters['unused_brands'][$brandKey];
+
+                    // Add MFG
+                    $leadParams['manufacturer'] = $brand;
+                }
+
+                // Insert With Manufacturer
+                if(isset($filters['unused_categories'])) {
+                    // Pick a Random (Valid) Category
+                    $catKey = array_rand($filters['unused_categories']);
+                    $cat = $filters['unused_categories'][$catKey];
+
+                    // Set Params
+                    $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
+                    $leadParams['category'] = $cat;
+                }
+
+                // Add Inventory to Lead
+                $inventory = factory(Inventory::class)->create($leadParams);
+
+                // Add Inventory ID
+                $params['inventory_id'] = $inventory->inventory_id;
+            }
 
             // Insert With Location ID
             if(isset($filters['unused_location_id'])) {
@@ -1001,44 +1027,7 @@ class ProcessCampaignTest extends TestCase
             }
 
             // Insert Leads Into DB
-            $lead = factory(Lead::class)->create($params);
-
-            // Insert With Category
-            if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
-                // Add Inventory Item
-                $lead->each(function($lead) use($filters) {
-                    // Initialize Lead Params
-                    $leadParams = [];
-
-                    // Insert With Manufacturer
-                    if(isset($filters['unused_brands'])) {
-                        // Pick a Random (Valid) Brand
-                        $brandKey = array_rand($filters['unused_brands']);
-                        $brand = $filters['unused_brands'][$brandKey];
-
-                        // Add MFG
-                        $leadParams['manufacturer'] = $brand;
-                    }
-
-                    // Insert With Manufacturer
-                    if(isset($filters['unused_categories'])) {
-                        // Pick a Random (Valid) Category
-                        $catKey = array_rand($filters['unused_categories']);
-                        $cat = $filters['unused_categories'][$catKey];
-
-                        // Set Params
-                        $leadParams['entity_type_id'] = $filters['entity_type_id'] ?: 1;
-                        $leadParams['category'] = $cat;
-                    }
-
-                    // Add Inventory to Lead
-                    $inventory = factory(Inventory::class)->create($leadParams);
-                    $lead->fill(['inventory_id' => $inventory->inventory_id])->save();
-                });
-            }
-
-            // Append Leads
-            $leads[] = $lead;
+            $leads[] = factory(Lead::class)->create($params);
         }
         return $leads;
     }
