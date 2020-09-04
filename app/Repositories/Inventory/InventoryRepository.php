@@ -164,7 +164,10 @@ class InventoryRepository implements InventoryRepositoryInterface
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%');
+                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhereHas('floorplanVendor', function ($query) use ($params) {
+                            $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
+                        });
             });
         }
 
