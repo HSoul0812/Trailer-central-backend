@@ -410,6 +410,127 @@ class DeliverBlastTest extends TestCase
         }
     }
 
+    /**
+     * Test blast by archived status
+     * 
+     * @specs string action = inquired
+     * @specs array location_id = first
+     * @specs int send_after_days = 15
+     * @specs int include_archived = 1
+     * @return void
+     */
+    public function testArchivedBlast()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Refresh Leads
+        $this->refreshBlasts($dealer->user_id);
+
+
+        // Build Generic Template
+        $template = Template::where('user_id', $dealer->user_id)->first();
+        if(empty($template->id)) {
+            factory(Template::class)->create();
+        }
+
+        // Build Generic Blast
+        $blast = factory(Blast::class)->create([
+            'include_archived' => 1
+        ]);
+        $unused = $this->refreshLeads($blast->id);
+
+        // Get Blasts for Dealer
+        $blasts = $this->blasts->getAllActive($dealer->user_id);
+        foreach($blasts as $single) {
+            $blast = $single;
+            break;
+        }
+        $leads = $blast->leads;
+        if(count($leads) < 1) {
+            throw new NoLeadsTestDeliverBlastException();
+        }
+
+        // Mock Text Service
+        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
+            // Loop Leads to Mock Text Sent
+            foreach($leads as $lead) {
+                // Get From Number
+                $from_number = $blast->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($blast->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->once();
+            }
+
+            // Loop Leads to Mock Text NOT Sent
+            foreach($unused as $lead) {
+                // Get From Number
+                $from_number = $blast->from_sms_number;
+                if(empty($from_number)) {
+                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+                }
+
+                // Get Text Message
+                $textMessage = $this->templates->fillTemplate($blast->template->template, [
+                    'lead_name' => $lead->full_name,
+                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'dealer_name' => $dealer->user->name
+                ]);
+
+                // Should Receive Send With Args Once!
+                $mock->shouldReceive('send')
+                     ->withArgs([$from_number, $lead->text_phone, $textMessage, $lead->full_name])
+                     ->never();
+            }
+        });
+
+        // Call Leads Assign Command
+        $this->artisan('text:deliver-blast ' . self::getTestDealerId())->assertExitCode(0);
+
+
+        // Loop Leads
+        foreach($leads as $lead) {
+            // Get From Number
+            $from_number = $blast->from_sms_number;
+            if(empty($from_number)) {
+                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+            }
+
+            // Get Text Message
+            $textMessage = $this->templates->fillTemplate($blast->template->template, [
+                'lead_name' => $lead->full_name,
+                'title_of_unit_of_interest' => $lead->inventory->title,
+                'dealer_name' => $dealer->user->name
+            ]);
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('dealer_texts_log', [
+                'lead_id'     => $lead->identifier,
+                'from_number' => $from_number,
+                'to_number'   => $lead->text_phone
+            ]);
+
+            // Assert a text blast was logged sent
+            $this->assertDatabaseHas('crm_text_blast_sent', [
+                'text_blast_id' => $blast->id,
+                'lead_id' => $lead->identifier,
+                'status' => 'logged'
+            ]);
+        }
+    }
+
 
     /**
      * Refresh Blasts in DB
@@ -490,9 +611,9 @@ class DeliverBlastTest extends TestCase
 
             // Insert With Archived Status
             if($blast->included_archived === -1 || $blast->include_archived === '-1') {
-                $params['is_archived'] = 0;
-            } elseif($blast->included_archived === 1 || $blast->include_archived === '1') {
                 $params['is_archived'] = 1;
+            } elseif($blast->included_archived === 1 || $blast->include_archived === '1') {
+                $params['is_archived'] = 0;
             }
 
             // No Other Params Set?! Make Date Not Match Criteria!

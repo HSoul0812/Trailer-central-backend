@@ -436,7 +436,7 @@ class ProcessCampaignTest extends TestCase
 
         // Build Generic Campaign
         $campaign = factory(Campaign::class)->create([
-            'is_archived' => 1
+            'include_archived' => 1
         ]);
         $unused = $this->refreshLeads($campaign->id);
 
@@ -611,9 +611,9 @@ class ProcessCampaignTest extends TestCase
 
             // Insert With Archived Status
             if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
-                $params['is_archived'] = 0;
-            } elseif($campaign->included_archived === 1 || $campaign->include_archived === '1') {
                 $params['is_archived'] = 1;
+            } elseif($campaign->included_archived === 1 || $campaign->include_archived === '1') {
+                $params['is_archived'] = 0;
             }
 
             // No Other Params Set?! Make Date Not Match Criteria!
