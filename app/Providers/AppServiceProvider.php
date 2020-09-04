@@ -142,6 +142,20 @@ class AppServiceProvider extends ServiceProvider
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
         });
 
+        // add other migration directories
+        $this->loadMigrationsFrom([
+            // old directory
+            __DIR__ . '/../../database/migrations',
+
+            // dms migrations
+            __DIR__ . '/../../database/migrations/dms',
+            
+            // integrations migrations
+            __DIR__ . '/../../database/migrations/integrations',
+
+            // add other migration directories here
+        ]);
+
         // log all queries
         if (env('APP_LOG_QUERIES')) {
             DB::listen(function($query) {

@@ -61,7 +61,7 @@ class InventoryTransformer extends TransformerAbstract
              'note' => $inventory->note,
              'price' => $inventory->price,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
-             'status' => $inventory->status,
+             'status' => $inventory->status_label,
              'stock' => $inventory->stock,
              'title' => $inventory->title,
              'true_cost' => $inventory->true_cost,
