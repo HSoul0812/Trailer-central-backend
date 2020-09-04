@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\Category;
+use App\Models\Inventory\Manufacturers\Manufacturers;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignBrand;
 use App\Models\CRM\Text\CampaignCategory;
