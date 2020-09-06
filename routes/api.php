@@ -519,6 +519,11 @@ $api->version('v1', function ($route) {
         $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
         $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
 
+        /**
+         * Quickbook Approval
+         */
+        $route->get('quickbooks/quickbook-approvals', 'App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController@index');
+
         /*
         |--------------------------------------------------------------------------
         | Various reports
