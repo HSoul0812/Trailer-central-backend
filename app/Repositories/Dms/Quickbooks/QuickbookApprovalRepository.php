@@ -72,7 +72,10 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('action_type', 'LIKE', '%' . $params['search_term'] . '%')
-                    ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%');
+                    ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere(function($query) use($params) {
+                        $query->filterByTableName($params['search_term']);
+                    });
             });
         }
         if (!isset($params['per_page'])) {
@@ -81,7 +84,7 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
