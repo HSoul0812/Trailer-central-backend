@@ -4,7 +4,7 @@ namespace App\Console\Commands\CRM\Dms;
 
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Console\Command;
-use App\Models\CRM\Quickbooks\PaymentMethod;
+use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
 
 class PopulatePOPaymentMethod extends Command
 {

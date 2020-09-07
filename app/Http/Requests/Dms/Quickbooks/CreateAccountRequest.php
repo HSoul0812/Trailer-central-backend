@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests\Dms\Quickbooks;
 
-use Illuminate\Validation\Rule;
 use App\Http\Requests\Request;
-use App\Models\CRM\Quickbooks\Account;
 
 /**
  * @author Marcel

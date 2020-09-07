@@ -1,14 +1,14 @@
 <?php
 
 
-namespace App\Models\CRM\Quickbooks;
+namespace App\Models\CRM\Dms\Quickbooks;
 
 
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Item
- * @package App\Models\CRM\Quickbooks
+ * @package App\Models\CRM\DMs\Quickbooks
  * @todo get a better description
  */
 class Item extends Model

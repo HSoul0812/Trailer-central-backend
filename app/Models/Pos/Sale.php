@@ -6,8 +6,7 @@ namespace App\Models\Pos;
 
 use App\Models\CRM\Dms\Refund;
 use App\Models\CRM\Dms\GenericSaleInterface;
-use App\Models\CRM\Quickbooks\Item;
-use App\Models\CRM\Quickbooks\PaymentMethod;
+use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
 use App\Models\CRM\User\Customer;
 use App\Models\CRM\User\SalesPerson;
 use App\Utilities\JsonApi;

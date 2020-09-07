@@ -4,7 +4,7 @@
 namespace App\Transformers\Quickbooks;
 
 
-use App\Models\CRM\Quickbooks\Item;
+use App\Models\CRM\Dms\Quickbooks\Item;
 use League\Fractal\TransformerAbstract;
 
 class ItemTransformer extends TransformerAbstract
