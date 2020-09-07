@@ -35,7 +35,38 @@ class QuickbookApproval extends Model
 
     protected $table = 'quickbook_approval';
 
+    protected $appends = ['tb_label'];
+
     public $timestamps = false;
+
+    public function getTbLabelAttribute()
+    {
+        return self::TABLE_NAME_MAPPER[$this->tb_name];
+    }
+
+    public function getCustomerNameAttribute()
+    {
+        $qbObj = json_decode($this->qb_obj, true);
+        if ($this->tb_name === 'dms_customer' && isset($qbObj['DisplayName'])) {
+            return $qbObj['DisplayName'];
+        }
+        if (isset($qbObj['CustomerRef']) && !empty($qbObj['CustomerRef']['name'])) {
+            return $qbObj['CustomerRef']['name'];
+        }
+        return null;
+    }
+
+    public function getPaymentMethodAttribute()
+    {
+        $qbObj = json_decode($this->qb_obj, true);
+        if ($this->tb_name === 'qb_payment_methods' && isset($qbObj['Name'])) {
+            return $qbObj['Name'];
+        }
+        if (isset($qbObj['PaymentMethodRef']) && !empty($qbObj['PaymentMethodRef']['name'])) {
+            return $qbObj['PaymentMethodRef']['name'];
+        }
+        return null;
+    }
 
     public function scopeFilterByTableName($query, $searchTerm)
     {

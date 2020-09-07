@@ -12,6 +12,15 @@ class QuickbookApprovalTransformer extends TransformerAbstract
         return [
             'id' => $quickbookApproval->id,
             'dealer_id' => $quickbookApproval->dealer_id,
+            'qb_obj' => $quickbookApproval->qb_obj,
+            'error_result' => $quickbookApproval->error_result,
+            'tb_name' => $quickbookApproval->tb_name,
+            'tb_primary_id' => $quickbookApproval->tb_primary_id,
+            'tb_label' => $quickbookApproval->tb_label,
+            'action_type' => $quickbookApproval->action_type,
+            'created_at' => $quickbookApproval->created_at,
+            'customer_name' => $quickbookApproval->customer_name,
+            'payment_method' => $quickbookApproval->payment_method,
         ];
     }
 } 

@@ -20,6 +20,22 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
             'field' => 'created_at',
             'direction' => 'ASC'
         ],
+        'action_type' => [
+            'field' => 'action_type',
+            'direction' => 'DESC'
+        ],
+        '-action_type' => [
+            'field' => 'action_type',
+            'direction' => 'ASC'
+        ],
+        'tb_name' => [
+            'field' => 'tb_name',
+            'direction' => 'DESC'
+        ],
+        '-tb_name' => [
+            'field' => 'tb_name',
+            'direction' => 'ASC'
+        ],
     ];
 
 
@@ -76,14 +92,21 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
                     ->orWhere(function($query) use($params) {
                         $query->filterByTableName($params['search_term']);
                     });
+
+                if (isset($params['status']) && $params['status'] === QuickbookApproval::FAILED) {
+                    $q->orWhere('qb_obj', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('error_result', 'LIKE', '%' . $params['search_term'] . '%');
+                }
             });
         }
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
+
+        if (!isset($params['sort'])) {
+            $params['sort'] = 'created_at';
         }
+        $query = $this->addSortQuery($query, $params['sort']);
 
         return $query->paginate($params['per_page'])->appends($params);
     }

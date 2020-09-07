@@ -14,7 +14,7 @@ class GetQuickbookApprovalRequest extends Request {
         'dealer_id' => 'integer',
         'search_term' => 'string',
         'status' => 'in:'. QuickbookApproval::TO_SEND .','. QuickbookApproval::SENT .',' . QuickbookApproval::FAILED,
-        'sort' => 'in:created_at,-created_at'
+        'sort' => 'in:created_at,-created_at,action_type,-action_type,tb_name,-tb_name'
     ];
     
 }
