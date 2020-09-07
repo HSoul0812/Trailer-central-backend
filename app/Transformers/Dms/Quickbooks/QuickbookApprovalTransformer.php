@@ -21,6 +21,8 @@ class QuickbookApprovalTransformer extends TransformerAbstract
             'created_at' => $quickbookApproval->created_at,
             'customer_name' => $quickbookApproval->customer_name,
             'payment_method' => $quickbookApproval->payment_method,
+            'sales_ticket_num' => $quickbookApproval->sales_ticket_num,
+            'ticket_total' => $quickbookApproval->ticket_total,
         ];
     }
 } 

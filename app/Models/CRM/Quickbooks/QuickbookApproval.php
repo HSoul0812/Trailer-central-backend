@@ -68,6 +68,50 @@ class QuickbookApproval extends Model
         return null;
     }
 
+    public function getSalesTicketNumAttribute()
+    {
+        $qbObj = json_decode($this->qb_obj, true);
+        if ($this->tb_name === 'qb_payment' && isset($qbObj['PaymentRefNum'])) {
+            return $qbObj['PaymentRefNum'];
+        }
+        if (isset($qbObj['DocNumber'])) {
+            return $qbObj['DocNumber'];
+        }
+        return null;
+    }
+
+    public function getTicketTotalAttribute()
+    {
+        $qbObj = json_decode($this->qb_obj, true);
+        if ($this->tb_name === 'inventory_floor_plan_payment' && isset($qbObj['Amount'])) {
+            return $qbObj['Amount'];
+        }
+        if (in_array($this->tb_name, ['qb_bill_payment', 'qb_payment']) && isset($qbObj['TotalAmt'])) {
+            return $qbObj['TotalAmt'];
+        }
+        if (
+            in_array($this->tb_name, [
+                'qb_bills',
+                'qb_invoices',
+                'crm_pos_sales',
+                'qb_expenses',
+                'dealer_refunds'
+            ]) &&
+            isset($qbObj['Line'])
+        ) {
+            if (is_array($qbObj['Line'])) {
+                $totalAmt = 0;
+                foreach ($qbObj['Line'] as $item) {
+                    if (isset($item['Amount'])) {
+                        $totalAmt += (float) $item['Amount'];
+                    }
+                }
+                return $totalAmt;
+            }
+        }
+        return null;
+    }
+
     public function scopeFilterByTableName($query, $searchTerm)
     {
         $filteredTables = array_filter(self::TABLE_NAME_MAPPER, function($tableLabel) use($searchTerm) {
