@@ -4,7 +4,7 @@ namespace App\Models\Inventory\Floorplan;
 
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\CRM\Quickbooks\Account;
+use App\Models\CRM\Dms\Quickbooks\Account;
 use App\Models\Inventory\Inventory;
 
 class Payment extends Model

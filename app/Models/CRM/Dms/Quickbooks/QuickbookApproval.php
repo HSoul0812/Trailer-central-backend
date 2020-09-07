@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Models\CRM\Quickbooks;
+namespace App\Models\CRM\Dms\Quickbooks;
 
 
 use Illuminate\Database\Eloquent\Model;

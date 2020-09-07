@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Dms\Quickbooks;
 
 use App\Http\Requests\Request;
-use App\Models\CRM\Quickbooks\QuickbookApproval;
+use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 
 /**
  * @author Marcel

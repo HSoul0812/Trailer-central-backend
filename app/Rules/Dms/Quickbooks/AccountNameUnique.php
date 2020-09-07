@@ -3,7 +3,7 @@
 namespace App\Rules\Dms\Quickbooks;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Models\CRM\Quickbooks\Account;
+use App\Models\CRM\Dms\Quickbooks\Account;
 
 class AccountNameUnique implements Rule
 {

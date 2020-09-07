@@ -4,7 +4,7 @@ namespace App\Repositories\Dms\Quickbooks;
 
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Quickbooks\QuickbookApproval;
+use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 
 /**
  * @author Marcel
