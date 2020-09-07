@@ -9,6 +9,7 @@ use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Inventory\InventoryImage;
 use App\Models\Inventory\Image;
+use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
 
@@ -117,6 +118,11 @@ class Inventory extends Model
     public function status()
     {
         return $this->belongsTo(Status::class, 'status');
+    }
+
+    public function floorplanVendor()
+    {
+        return $this->belongsTo(Vendor::class, 'fp_vendor');
     }
 
     public function getColorAttribute()
