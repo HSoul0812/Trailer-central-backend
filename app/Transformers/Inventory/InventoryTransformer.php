@@ -72,7 +72,8 @@ class InventoryTransformer extends TransformerAbstract
              'year' => $inventory->year,
              'color' => $inventory->color,
              'floorplan_payments' => $inventory->floorplanPayments,
-             'url' => $inventory->getUrl()
+             'url' => $inventory->getUrl(),
+             'floorplan_vendor' => $inventory->floorplanVendor
          ];
     }
     
