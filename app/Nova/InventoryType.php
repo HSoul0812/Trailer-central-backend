@@ -3,12 +3,9 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Gravatar;
-use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 
-class InventoryCategory extends Resource
+class InventoryType extends Resource
 {    
 
     /**
@@ -16,14 +13,14 @@ class InventoryCategory extends Resource
      *
      * @var string
      */
-    public static $model = 'App\Models\Inventory\Category';
+    public static $model = 'App\Models\Inventory\EntityType';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'label';
+    public static $title = 'title';
 
     /**
      * The columns that should be searched.
@@ -31,7 +28,7 @@ class InventoryCategory extends Resource
      * @var array
      */
     public static $search = [
-        'label'
+        'title'
     ];
 
     /**
@@ -43,21 +40,24 @@ class InventoryCategory extends Resource
     public function fields(Request $request)
     {
         return [            
-            Text::make('Legacy Category')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            
-            Text::make('Category')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            
-            Text::make('Entity Type ID')
+            Text::make('ID', 'entity_type_id')
                 ->sortable()
                 ->rules('required'),
-
-            Text::make('Label')
+            
+            Text::make('Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
+
+            Text::make('Title')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            
+            Text::make('Title Lowercase')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            
+            Text::make('Sort Order')
+                ->sortable()
         ];
     }
 

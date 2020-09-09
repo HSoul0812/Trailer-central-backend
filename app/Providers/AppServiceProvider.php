@@ -144,6 +144,9 @@ class AppServiceProvider extends ServiceProvider
             
             // integrations migrations
             __DIR__ . '/../../database/migrations/integrations',
+            
+            // inventory migrations
+            __DIR__ . '/../../database/migrations/inventory',
 
             // add other migration directories here
         ]);
