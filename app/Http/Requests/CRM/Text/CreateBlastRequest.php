@@ -14,7 +14,6 @@ class CreateBlastRequest extends Request {
     protected $rules = [
         'template_id' => 'required|text_template_exists',
         'campaign_name' => 'required|string',
-        'campaign_subject' => 'required|string',
         'send_date' => 'required|date_format:Y-m-d H:i:s',
         'from_sms_number' => 'nullable|regex:/(0-9)?[0-9]{10}/',
         'action' => 'required|campaign_action_valid',

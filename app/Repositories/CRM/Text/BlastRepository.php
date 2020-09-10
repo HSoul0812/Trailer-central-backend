@@ -21,14 +21,6 @@ class BlastRepository implements BlastRepositoryInterface {
             'field' => 'campaign_name',
             'direction' => 'ASC'
         ],
-        'subject' => [
-            'field' => 'campaign_subject',
-            'direction' => 'DESC'
-        ],
-        '-subject' => [
-            'field' => 'campaign_subject',
-            'direction' => 'ASC'
-        ],
         'created_at' => [
             'field' => 'created_at',
             'direction' => 'DESC'

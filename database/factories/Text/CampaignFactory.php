@@ -28,7 +28,6 @@ $factory->define(Campaign::class, function (Faker $faker) {
         'user_id' => $dealer->user_id,
         'template_id' => !empty($template->id) ? $template->id : 0,
         'campaign_name' => $name,
-        'campaign_subject' => $name,
         'from_sms_number' => TestCase::getSMSNumber(),
         'send_after_days' => 15,
         'action' => 'inquired'

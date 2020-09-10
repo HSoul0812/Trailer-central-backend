@@ -15,7 +15,6 @@ class UpdateBlastRequest extends Request {
         'id' => 'required|integer',
         'template_id' => 'text_template_exists',
         'campaign_name' => 'string',
-        'campaign_subject' => 'string',
         'send_date' => 'date_format:Y-m-d H:i:s',
         'from_sms_number' => 'nullable|regex:/(0-9)?[0-9]{10}/',
         'action' => 'campaign_action_valid',

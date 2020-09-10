@@ -15,7 +15,6 @@ class UpdateCampaignRequest extends Request {
         'id' => 'required|integer',
         'template_id' => 'text_template_exists',
         'campaign_name' => 'string',
-        'campaign_subject' => 'string',
         'from_sms_number' => 'nullable|regex:/(0-9)?[0-9]{10}/',
         'action' => 'campaign_action_valid',
         'location_id' => 'nullable|dealer_location_valid',

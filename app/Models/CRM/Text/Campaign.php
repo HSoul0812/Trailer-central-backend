@@ -39,7 +39,6 @@ class Campaign extends Model
         'user_id',
         'template_id',
         'campaign_name',
-        'campaign_subject',
         'from_sms_number',
         'action',
         'location_id',

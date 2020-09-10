@@ -20,7 +20,6 @@ class CampaignTransformer extends TransformerAbstract
              'template_id' => (int)$campaign->template_id,
              'template' => $campaign->template,
              'campaign_name' => $campaign->campaign_name,
-             'campaign_subject' => $campaign->campaign_subject,
              'from_sms_number' => $campaign->from_sms_number,
              'action' => $campaign->action,
              'location_id' => (int)$campaign->location_id,
