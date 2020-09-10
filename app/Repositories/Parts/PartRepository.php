@@ -102,7 +102,7 @@ class PartRepository implements PartRepositoryInterface {
                 foreach ($params['images'] as $image) {
                     try {
                         $this->storeImage($part->id, $image);
-                    } catch (\ImageNotDownloadedException $ex) {
+                    } catch (ImageNotDownloadedException $ex) {
 
                     }
                     
@@ -120,7 +120,7 @@ class PartRepository implements PartRepositoryInterface {
             }
 
              DB::commit();
-        } catch (\ImageNotDownloadedException $ex) {
+        } catch (ImageNotDownloadedException $ex) {
             DB::rollBack();
             throw new ImageNotDownloadedException($ex->getMessage());
         } catch (\Exception $ex) {
@@ -348,6 +348,7 @@ class PartRepository implements PartRepositoryInterface {
         try {
             $imageData = file_get_contents($image['url'], false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
         } catch (\Exception $ex) {
+            return;
             throw new ImageNotDownloadedException('Image not accessible: '.$image['url']);
         }
 

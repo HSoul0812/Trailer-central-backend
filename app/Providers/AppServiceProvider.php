@@ -26,6 +26,8 @@ use App\Repositories\Dms\ServiceOrderRepository;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\AccountRepository;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
@@ -152,6 +154,9 @@ class AppServiceProvider extends ServiceProvider
             
             // integrations migrations
             __DIR__ . '/../../database/migrations/integrations',
+            
+            // inventory migrations
+            __DIR__ . '/../../database/migrations/inventory',
 
             // add other migration directories here
         ]);
@@ -219,6 +224,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PurchaseOrderReceiptRepositoryInterface::class, PurchaseOrderReceiptRepository::class);
         $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
+        $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
 
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
