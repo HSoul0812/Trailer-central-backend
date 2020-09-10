@@ -100,6 +100,16 @@ class Blast extends Model
 
 
     /**
+     * Get Cleaned Include Archived Status
+     * 
+     * @return int version of include_archived
+     */
+    public function getIncludeArchivedAttribute()
+    {
+        return (int) $this->include_archived;
+    }
+
+    /**
      * Get Leads for Blast
      * 
      * @return Collection of Leads
@@ -128,9 +138,9 @@ class Blast extends Model
                      ->whereNull('crm_text_blast_sent.text_blast_id');
 
         // Is Archived?!
-        if($blast->included_archived === -1 || $blast->include_archived === '-1') {
+        if($blast->include_archived === -1) {
             $query = $query->where('website_lead.is_archived', 0);
-        } elseif($blast->included_archived !== 0 && $blast->include_archived !== '0') {
+        } elseif($blast->include_archived !== 0) {
             $query = $query->where('website_lead.is_archived', $blast->include_archived);
         }
 

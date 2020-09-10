@@ -98,6 +98,16 @@ class Campaign extends Model
 
 
     /**
+     * Get Cleaned Include Archived Status
+     * 
+     * @return int version of include_archived
+     */
+    public function getIncludeArchivedAttribute()
+    {
+        return (int) $this->include_archived;
+    }
+
+    /**
      * Get Leads for Campaign
      * 
      * @return Collection of Leads
@@ -126,9 +136,9 @@ class Campaign extends Model
                      ->whereNull('crm_text_campaign_sent.text_campaign_id');
 
         // Is Archived?!
-        if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
+        if($campaign->include_archived === -1) {
             $query = $query->where('website_lead.is_archived', 0);
-        } elseif($campaign->included_archived !== 0 && $campaign->include_archived !== '0') {
+        } elseif($campaign->include_archived !== 0) {
             $query = $query->where('website_lead.is_archived', $campaign->include_archived);
         }
 
