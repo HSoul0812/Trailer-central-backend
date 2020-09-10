@@ -102,7 +102,7 @@ class TemplateRepository implements TemplateRepositoryInterface {
      */
     public function fillTemplate($template, $replaces) {
         // Add Footer
-        $body = $template . "\n\nReply \"STOP\" if you do not want to receive texts and promos from \"{dealer_name}\"";
+        $body = $template . Template::REPLY_STOP;
 
         // Loop Replacements!
         foreach($replaces as $field => $value) {
