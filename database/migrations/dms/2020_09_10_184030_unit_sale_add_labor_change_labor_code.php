@@ -16,7 +16,6 @@ class UnitSaleAddLaborChangeLaborCode extends Migration
     {
         Schema::table('dms_unit_sale_labor', function (Blueprint $table) {
             //
-            $table->unsignedInteger('labor_code')->change();
             DB::statement('ALTER TABLE `dms_unit_sale_labor` CHANGE labor_code labor_code INT UNSIGNED NOT NULL');
         });
     }
