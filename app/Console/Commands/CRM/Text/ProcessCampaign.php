@@ -3,15 +3,11 @@
 namespace App\Console\Commands\CRM\Text;
 
 use Illuminate\Console\Command;
-use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
-use App\Models\CRM\Leads\Lead;
 use App\Models\User\NewDealerUser;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\CampaignServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
-use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\User\DealerLocationRepositoryInterface;
 use Carbon\Carbon;
 
 class ProcessCampaign extends Command
@@ -31,7 +27,7 @@ class ProcessCampaign extends Command
     protected $description = 'Process sending texts to all leads on all active campaigns.';
 
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var App\Services\CRM\Text\CampaignServiceInterface
      */
     protected $service;
 
@@ -51,16 +47,6 @@ class ProcessCampaign extends Command
     protected $campaigns;
 
     /**
-     * @var App\Repositories\CRM\Text\TemplateRepository
-     */
-    protected $templates;
-
-    /**
-     * @var App\Repositories\User\DealerLocationRepository
-     */
-    protected $dealerLocation;
-
-    /**
      * @var datetime
      */
     protected $datetime = null;
@@ -70,12 +56,10 @@ class ProcessCampaign extends Command
      *
      * @return void
      */
-    public function __construct(TextServiceInterface $service,
+    public function __construct(CampaignServiceInterface $service,
                                 LeadRepositoryInterface $leadRepo,
-                                CampaignRepositoryInterface $campaignRepo,
-                                TemplateRepositoryInterface $templateRepo,
                                 TextRepositoryInterface $textRepo,
-                                DealerLocationRepositoryInterface $dealerLocationRepo)
+                                CampaignRepositoryInterface $campaignRepo)
     {
         parent::__construct();
 
@@ -83,8 +67,6 @@ class ProcessCampaign extends Command
         $this->leads = $leadRepo;
         $this->texts = $textRepo;
         $this->campaigns = $campaignRepo;
-        $this->templates = $templateRepo;
-        $this->dealerLocation = $dealerLocationRepo;
     }
 
     /**
@@ -128,89 +110,8 @@ class ProcessCampaign extends Command
                 // Loop Campaigns for Current Dealer
                 $this->info("{$command} dealer #{$dealer->id} found " . count($campaigns) . " active campaigns to process");
                 foreach($campaigns as $campaign) {
-                    // Get From Number
-                    $from_number = $campaign->from_sms_number;
-                    if(empty($from_number)) {
-                        $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                        if(empty($from_number)) {
-                            continue;
-                        }
-                    }
-
-                    // Get Unsent Campaign Leads
-                    if(count($campaign->leads) < 1) {
-                        continue;
-                    }
-
-                    // Get Template!
-                    $template = $campaign->template->template;
-
-                    // Loop Leads for Current Dealer
-                    $this->info("{$command} dealer #{$dealer->id} campaign {$campaign->campaign_name} found " . count($campaign->leads) . " leads to process");
-                    foreach($campaign->leads as $lead) {
-                        // Initialize Notes Array
-                        $leadName = $lead->id_name;
-
-                        // Get To Numbers
-                        $to_number = $lead->text_phone;
-                        if(empty($to_number)) {
-                            continue;
-                        }
-
-                        // Get Text Message
-                        $textMessage = $this->templates->fillTemplate($template, [
-                            'lead_name' => $lead->full_name,
-                            'title_of_unit_of_interest' => $lead->inventory->title,
-                            'dealer_name' => $dealer->user->name
-                        ]);
-                        $this->info("{$command} preparing to send text to {$leadName} at {$to_number}");
-
-                        try {
-                            // Send Text
-                            $this->service->send($from_number, $to_number, $textMessage, $lead->full_name);
-                            $this->info("{$command} send text to {$leadName} at {$to_number}");
-                            $status = 'sent';
-                        } catch (CustomerLandlineNumberException $ex) {
-                            $status = 'landline';
-                            $this->error("{$command} exception returned, phone number {$to_number} cannot receive texts!");
-                        } catch (Exception $ex) {
-                            $status = 'invalid';
-                            $this->error("{$command} exception returned trying to send campaign {$e->getMessage()}: {$e->getTraceAsString()}");
-                        }
-
-                        // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
-                        try {
-                            // Save Lead Status
-                            $this->leads->update([
-                                'id' => $lead->identifier,
-                                'lead_status' => Lead::STATUS_MEDIUM,
-                                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-                            ]);
-                            $this->info("{$command} updated lead {$leadName} status");
-                            $status = 'lead';
-
-                            // Log SMS
-                            $textLog = $this->texts->create([
-                                'lead_id'     => $lead->identifier,
-                                'from_number' => $from_number,
-                                'to_number'   => $to_number,
-                                'log_message' => $textMessage
-                            ]);
-                            $this->info("{$command} logged text for {$leadName} at {$to_number}");
-                            $status = 'logged';
-                        } catch(\Exception $e) {
-                            $this->error("{$command} exception returned after campaign sent {$e->getMessage()}: {$e->getTraceAsString()}");
-                        }
-
-                        // Mark Campaign as Sent to Lead
-                        $this->campaigns->sent([
-                            'text_campaign_id' => $campaign->id,
-                            'lead_id' => $lead->identifier,
-                            'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-                            'status' => $status
-                        ]);
-                        $this->info("{$command} inserted campaign sent for lead {$leadName} and campaign {$campaign->id}");
-                    }
+                    // Send Campaign
+                    $this->service->send($command, $dealer, $campaign);
                 }
             }
         } catch(\Exception $e) {

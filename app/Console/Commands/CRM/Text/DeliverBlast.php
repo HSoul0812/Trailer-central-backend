@@ -3,15 +3,11 @@
 namespace App\Console\Commands\CRM\Text;
 
 use Illuminate\Console\Command;
-use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
-use App\Models\CRM\Leads\Lead;
 use App\Models\User\NewDealerUser;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\BlastServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
-use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\User\DealerLocationRepositoryInterface;
 use Carbon\Carbon;
 
 class DeliverBlast extends Command
@@ -31,7 +27,7 @@ class DeliverBlast extends Command
     protected $description = 'Process sending texts to all leads on all active blasts.';
 
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var App\Services\CRM\Text\CampaignServiceInterface
      */
     protected $service;
 
@@ -51,16 +47,6 @@ class DeliverBlast extends Command
     protected $blasts;
 
     /**
-     * @var App\Repositories\CRM\Text\TemplateRepository
-     */
-    protected $templates;
-
-    /**
-     * @var App\Repositories\User\DealerLocationRepository
-     */
-    protected $dealerLocation;
-
-    /**
      * @var datetime
      */
     protected $datetime = null;
@@ -70,12 +56,10 @@ class DeliverBlast extends Command
      *
      * @return void
      */
-    public function __construct(TextServiceInterface $service,
-                                BlastRepositoryInterface $blastRepo,
-                                TemplateRepositoryInterface $templateRepo,
-                                TextRepositoryInterface $textRepo,
+    public function __construct(BlastServiceInterface $service,
                                 LeadRepositoryInterface $leadRepo,
-                                DealerLocationRepositoryInterface $dealerLocationRepo)
+                                TextRepositoryInterface $textRepo,
+                                BlastRepositoryInterface $blastRepo)
     {
         parent::__construct();
 
@@ -83,8 +67,6 @@ class DeliverBlast extends Command
         $this->leads = $leadRepo;
         $this->texts = $textRepo;
         $this->blasts = $blastRepo;
-        $this->templates = $templateRepo;
-        $this->dealerLocation = $dealerLocationRepo;
     }
 
     /**
@@ -128,97 +110,8 @@ class DeliverBlast extends Command
                 // Loop Blasts for Current Dealer
                 $this->info("{$command} dealer #{$dealer->id} found " . count($blasts) . " active blasts to process");
                 foreach($blasts as $blast) {
-                    // Get From Number
-                    $from_number = $blast->from_sms_number;
-                    if(empty($from_number)) {
-                        $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                        if(empty($from_number)) {
-                            continue;
-                        }
-                    }
-
-                    // Get Unsent Blast Leads
-                    if(count($blast->leads) > 0) {
-                        // Get Template!
-                        $template = $blast->template->template;
-
-                        // Loop Leads for Current Dealer
-                        $this->info("{$command} dealer #{$dealer->id} blast {$blast->campaign_name} found " . count($blast->leads) . " leads to process");
-                        foreach($blast->leads as $lead) {
-                            // Initialize Notes Array
-                            $leadName = $lead->id_name;
-
-                            // Get To Numbers
-                            $to_number = $lead->text_phone;
-                            if(empty($to_number)) {
-                                continue;
-                            }
-
-                            // Get Text Message
-                            $textMessage = $this->templates->fillTemplate($template, [
-                                'lead_name' => $lead->full_name,
-                                'title_of_unit_of_interest' => $lead->inventory->title,
-                                'dealer_name' => $dealer->user->name
-                            ]);
-                            $this->info("{$command} preparing to send text to {$leadName} at {$to_number}");
-
-                            // Send Text
-                            try {
-                                $this->service->send($from_number, $to_number, $textMessage, $lead->full_name);
-                                $this->info("{$command} send text to {$leadName} at {$to_number}");
-                                $status = 'sent';
-                            } catch (CustomerLandlineNumberException $ex) {
-                                $status = 'landline';
-                                $this->error("{$command} exception returned, phone number {$to_number} cannot receive texts!");
-                            } catch (Exception $ex) {
-                                $status = 'invalid';
-                                $this->error("{$command} exception returned trying to send blast {$e->getMessage()}: {$e->getTraceAsString()}");
-                            }
-
-                            // Not Sent?!
-                            if($status === 'sent') {
-                                // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
-                                try {
-                                    // Save Lead Status
-                                    $this->leads->update([
-                                        'id' => $lead->identifier,
-                                        'lead_status' => Lead::STATUS_MEDIUM,
-                                        'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-                                    ]);
-                                    $this->info("{$command} updated lead {$leadName} status");
-                                    $status = 'lead';
-
-                                    // Log SMS
-                                    $textLog = $this->texts->create([
-                                        'lead_id'     => $lead->identifier,
-                                        'from_number' => $from_number,
-                                        'to_number'   => $to_number,
-                                        'log_message' => $textMessage
-                                    ]);
-                                    $this->info("{$command} logged text for {$leadName} at {$to_number}");
-                                    $status = 'logged';
-                                } catch(\Exception $e) {
-                                    $this->error("{$command} exception returned after blast sent {$e->getMessage()}: {$e->getTraceAsString()}");
-                                }
-                            }
-
-                            // Mark Blast as Sent to Lead
-                            $this->blasts->sent([
-                                'text_blast_id' => $blast->id,
-                                'lead_id' => $lead->identifier,
-                                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-                                'status' => $status
-                            ]);
-                            $this->info("{$command} inserted blast sent for lead {$leadName} and blast {$blast->id}");
-                        }
-                    }
-
-                    // Update Blast!
-                    $this->blasts->update([
-                        'id' => $blast->id,
-                        'is_delivered' => 1
-                    ]);
-                    $this->info("{$command} marked blast {$blast->campaign_name} as delivered");
+                    // Send Campaign
+                    $this->service->send($command, $dealer, $blast);
                 }
             }
         } catch(\Exception $e) {
