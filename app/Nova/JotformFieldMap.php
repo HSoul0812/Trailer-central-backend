@@ -44,8 +44,8 @@ class JotformFieldMap extends Resource
      */
     public function fields(Request $request)
     {
-        // Initialize Fields Array
-        $return = [
+        // Return Field Mapping
+        return [
             Select::make('Type')
                 ->options(FieldMap::MAP_TYPES)
                 ->displayUsingLabels()
@@ -55,24 +55,10 @@ class JotformFieldMap extends Resource
                 ->sortable(),
 
             Select::make('Map Field')
+                ->options(FieldMap::MAP_FIELDS)
+                ->displayUsingLabels()
                 ->sortable()
-                ->hideWhenCreating()
-                ->hideWhenUpdating()
         ];
-
-        // Loop Field Map Field Options
-        foreach(FieldMap::MAP_FIELDS as $type => $fields) {
-            $return[] = NovaDependencyContainer::make([
-                Select::make('Map Field', 'map_field')
-                    ->options($fields)
-                    ->displayUsingLabels()
-                    ->sortable()
-                    ->hideFromIndex()
-            ])->dependsOn('type', $type);
-        }
-
-        // Return FieldMap
-        return $return;
     }
 
     /**
@@ -94,7 +80,9 @@ class JotformFieldMap extends Resource
      */
     public function filters(Request $request)
     {
-        return [];
+        return [
+            new Filters\DealerIDAssignedLeads
+        ];
     }
 
     /**
