@@ -128,4 +128,22 @@ class FieldMap extends Model
         // Return Map Fields
         return $mapFields;
     }
+
+    /**
+     * Get Unique Map Tables
+     */
+    public static function getUniqueMapTables() {
+        // Rewrite for Nova
+        $mapTables = [];
+
+        // Loop Field Map
+        foreach(self::MAP_TABLES as $table) {
+            if(!in_array($table, $mapTables)) {
+                $mapTables[] = $table;
+            }
+        }
+
+        // Return Map Fields
+        return $mapTables;
+    }
 }
