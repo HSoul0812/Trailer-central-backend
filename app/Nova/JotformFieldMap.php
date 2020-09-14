@@ -5,6 +5,7 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Select;
 
 class JotformFieldMap extends Resource
 {
@@ -43,7 +44,7 @@ class JotformFieldMap extends Resource
     {
         // Initialize Fields Array
         $return = [
-            Option::make('Type')
+            Select::make('Type')
                 ->options(FieldMap::MAP_TYPES)
                 ->displayUsingLabels()
                 ->sortable(),
@@ -51,7 +52,7 @@ class JotformFieldMap extends Resource
             Text::make('Form Field')
                 ->sortable(),
 
-            Option::make('Map Field')
+            Select::make('Map Field')
                 ->sortable()
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
@@ -60,7 +61,7 @@ class JotformFieldMap extends Resource
         // Loop Field Map Field Options
         foreach(FieldMap::MAP_FIELDS as $type => $fields) {
             $return[] = NovaDependencyContainer::make([
-                Option::make('Map Field', 'map_field')
+                Select::make('Map Field', 'map_field')
                     ->options($fields)
                     ->displayUsingLabels()
                     ->sortable()
