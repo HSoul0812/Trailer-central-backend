@@ -106,4 +106,26 @@ class FieldMap extends Model
     public static function getTableName() {
         return self::TABLE_NAME;
     }
+
+    /**
+     * Get Nova Map Fields
+     */
+    public static function getNovaMapFields() {
+        // Rewrite for Nova
+        $mapFields = [];
+
+        // Loop Field Map
+        foreach(self::MAP_FIELDS as $type => $fields) {
+            // Loop Type Fields
+            foreach($fields as $column => $label) {
+                $mapFields[$column] = [
+                    'label' => $label,
+                    'group' => self::MAP_TYPES[$type]
+                ];
+            }
+        }
+
+        // Return Map Fields
+        return $mapFields;
+    }
 }

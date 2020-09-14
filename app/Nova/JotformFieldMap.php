@@ -55,7 +55,7 @@ class JotformFieldMap extends Resource
                 ->sortable(),
 
             Select::make('Map Field')
-                ->options(FieldMap::MAP_FIELDS)
+                ->options(FieldMap::getNovaMapFields())
                 ->displayUsingLabels()
                 ->sortable()
         ];
@@ -81,7 +81,7 @@ class JotformFieldMap extends Resource
     public function filters(Request $request)
     {
         return [
-            new Filters\DealerIDAssignedLeads
+            new Filters\JotformFieldPendingMapping
         ];
     }
 
