@@ -31,8 +31,8 @@ class CreateWebsiteFormFieldMap extends Migration
             // Base Lead Mapping
             ['type' => 'lead', 'form_field' => 'first name', 'map_field' => 'firstname', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead', 'form_field' => 'last name', 'map_field' => 'lastname', 'db_table' => 'website_lead', 'details' => NULL],
-            ['type' => 'lead', 'form_field' => 'name', 'map_field' => 'fullname', 'db_table' => 'website_lead', 'details' => 'Breaks into first and last name.'],
-            ['type' => 'lead', 'form_field' => 'full name', 'map_field' => 'fullname', 'db_table' => 'website_lead', 'details' => 'Breaks into first and last name.'],
+            ['type' => 'lead', 'form_field' => 'name', 'map_field' => 'special_name', 'db_table' => 'website_lead', 'details' => 'Breaks into first and last name.'],
+            ['type' => 'lead', 'form_field' => 'full name', 'map_field' => 'special_name', 'db_table' => 'website_lead', 'details' => 'Breaks into first and last name.'],
             ['type' => 'lead', 'form_field' => 'email', 'map_field' => 'email_address', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead', 'form_field' => 'email address', 'map_field' => 'email_address', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead', 'form_field' => 'phone', 'map_field' => 'phone_number', 'db_table' => 'website_lead', 'details' => NULL],

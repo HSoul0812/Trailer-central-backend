@@ -16,7 +16,8 @@ class FieldMap extends Model
         'special_name' => 'Full Name',
         'special_address' => 'Address',
         'trade' => 'Trade',
-        'lead_type' => 'Lead Type'
+        'lead_type' => 'Lead Type',
+        'fandi' => 'F&I'
     ];
 
     // Define Mapping Fields
@@ -27,13 +28,13 @@ class FieldMap extends Model
             'lead_type' => 'Lead Type',
             'firstname' => 'First Name',
             'lastname' => 'Last Name',
-            'fullname' => 'Map to Full Name Type',
+            'special_name' => 'Map to Full Name Type',
             'preferred_contact' => 'Preferred Contact (email/phone)',
             'dealer_location_id' => 'Preferred Location',
             'preferred_salesperson' => 'Directly Choose Sales Person',
-            'phone' => 'Phone Number',
-            'email' => 'Email Address',
-            'address' => 'Map to Address Type',
+            'phone_number' => 'Phone Number',
+            'email_address' => 'Email Address',
+            'special_address' => 'Map to Address Type',
             'comments' => 'Comments'
         ],
         'special_name' => [
@@ -76,7 +77,8 @@ class FieldMap extends Model
         'special_name' => 'website_lead',
         'special_address' => 'website_lead',
         'trade' => 'website_lead_trades',
-        'lead_type' => 'website_lead_types'
+        'lead_type' => 'website_lead_types',
+        'fandi' => 'website_lead_fandi'
     ];
 
     /**
