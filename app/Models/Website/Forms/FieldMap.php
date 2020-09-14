@@ -64,7 +64,7 @@ class FieldMap extends Model
         'lead_type' => [
             LeadType::TYPE_FINANCING => 'Financing',
             LeadType::TYPE_BUILD => 'Build a Trailer',
-            LeadType::TYPE_RENTAL => 'Rental',
+            LeadType::TYPE_RENTALS => 'Rentals',
             LeadType::TYPE_TRADE => 'Trade',
             LeadType::TYPE_SERVICE => 'Service'
         ]
