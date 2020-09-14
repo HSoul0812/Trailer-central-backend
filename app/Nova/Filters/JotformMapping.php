@@ -5,7 +5,7 @@ namespace App\Nova\Filters;
 use Illuminate\Http\Request;
 use Laravel\Nova\Filters\BooleanFilter;
 
-class JotformMapping extends BooleanFilter
+class FieldMapStatus extends BooleanFilter
 {
     /**
      * Apply the filter to the given query.
