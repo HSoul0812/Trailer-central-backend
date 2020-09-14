@@ -57,9 +57,9 @@ class JotformFieldMap extends Resource
             Select::make('Mapped Field', 'map_field')
                 ->options(FieldMap::getNovaMapFields())
                 ->displayUsingLabels()
-                ->hideOnCreating()
-                ->hideOnUpdating()
-                ->hideOnDetail()
+                ->hideWhenCreating()
+                ->hideWhenUpdating()
+                ->hideFromDetail()
                 ->sortable()
         ];
 
