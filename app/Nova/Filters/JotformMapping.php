@@ -25,7 +25,7 @@ class JotformMapping extends BooleanFilter
     public function apply(Request $request, $query, $value)
     {
         // Pending Mapping
-        if($value['is_pending']) {
+        if(!empty($value['is_pending'])) {
             return $query->where('map_field', '');
         }
         return $query;
