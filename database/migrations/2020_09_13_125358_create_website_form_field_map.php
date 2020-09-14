@@ -16,7 +16,7 @@ class CreateWebsiteFormFieldMap extends Migration
     {
         Schema::create('website_form_field_map', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->enum('type', FieldMap::MAP_TYPES);
+            $table->enum('type', array_keys(FieldMap::MAP_TYPES));
             $table->string('form_field', 50);
             $table->string('map_field', 50)->index();
             $table->string('db_table', 50)->index();

@@ -11,10 +11,71 @@ class FieldMap extends Model
 
     // Define Mapping Types
     const MAP_TYPES = [
-        'lead',
-        'special_address',
-        'trade',
-        'lead_type'
+        'lead' => 'Lead',
+        'special_name' => 'Full Name',
+        'special_address' => 'Address',
+        'trade' => 'Trade',
+        'lead_type' => 'Lead Type'
+    ];
+
+    // Define Mapping Fields
+    const MAP_FIELDS = [
+        'lead' => [
+            'referral' => 'Referrer',
+            'title' => 'Title',
+            'lead_type' => 'Lead Type',
+            'firstname' => 'First Name',
+            'lastname' => 'Last Name',
+            'fullname' => 'Map to Full Name Type',
+            'preferred_contact' => 'Preferred Contact (email/phone)',
+            'dealer_location_id' => 'Preferred Location',
+            'preferred_salesperson' => 'Directly Choose Sales Person',
+            'phone' => 'Phone Number',
+            'email' => 'Email Address',
+            'address' => 'Map to Address Type',
+            'comments' => 'Comments'
+        ],
+        'special_name' => [
+            'first' => 'First Name',
+            'last' => 'Last Name',
+            'prefix' => 'Prefix (Prepend to First Name)',
+            'middle' => 'Middle Name (Append to First Name)',
+            'suffix' => 'Suffix (Append to Last Name)'
+        ],
+        'special_address' => [
+            'address' => 'Address',
+            'address2' => 'Address Line 2 (Appends to Address)',
+            'city' => 'City',
+            'state' => 'State',
+            'zip' => 'Zip Code',
+        ],
+        'trade' => [
+            'type' => 'Type',
+            'make' => 'Make',
+            'model' => 'Model',
+            'year' => 'Year',
+            'price' => 'Price',
+            'length' => 'Length',
+            'width' => 'Width',
+            'notes' => 'Notes',
+            'photos' => 'Photos'
+        ],
+        'lead_type' => [
+            LeadType::TYPE_FINANCING => 'Financing',
+            LeadType::TYPE_BUILD => 'Build a Trailer',
+            LeadType::TYPE_RENTAL => 'Rental',
+            LeadType::TYPE_TRADE => 'Trade',
+            LeadType::TYPE_SERVICE => 'Service'
+        ]
+    ];
+
+    // Define Mapping Tables
+    const MAP_TABLES = [
+        'lead' => 'website_lead',
+        'special_name' => 'website_lead',
+        'special_address' => 'website_lead',
+        'trade' => 'website_lead_trades',
+        'lead_type' => 'website_lead_types'
     ];
 
     /**
