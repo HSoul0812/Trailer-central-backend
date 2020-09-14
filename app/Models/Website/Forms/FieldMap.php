@@ -3,6 +3,7 @@
 namespace App\Models\Website\Forms;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Leads\LeadType;
 
 class FieldMap extends Model
 {
