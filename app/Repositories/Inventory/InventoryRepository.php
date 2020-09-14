@@ -71,6 +71,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-fp_committed' => [
             'field' => 'fp_committed',
             'direction' => 'ASC'
+        ],
+        'fp_vendor' => [
+            'field' => 'fp_vendor',
+            'direction' => 'DESC'
+        ],
+        '-fp_vendor' => [
+            'field' => 'fp_vendor',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -126,7 +134,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $query->where('status', '<>', Inventory::STATUS_QUOTE);
         
         if (isset($params['dealer_id'])) {
-            $query = $query->where('dealer_id', $params['dealer_id']);
+            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
 
         if (!isset($params['per_page'])) {
@@ -172,7 +180,12 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
+            if ($params['sort'] === 'fp_vendor' || $params['sort'] === '-fp_vendor') {
+                $direction = $params['sort'] === 'fp_vendor' ? 'DESC' : 'ASC';
+                $query = $query->leftJoin('qb_vendors', 'qb_vendors.id', '=', 'inventory.fp_vendor')->orderBy('qb_vendors.name', $direction);
+            } else {
+                $query = $this->addSortQuery($query, $params['sort']);
+            }
         }
 
         if ($paginated) {
