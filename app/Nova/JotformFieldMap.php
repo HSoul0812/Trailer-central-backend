@@ -46,13 +46,21 @@ class JotformFieldMap extends Resource
     {
         // Initialize Field Mapping
         $return = [
-            Select::make('Type')
+            Select::make('Mapping Type', 'type')
                 ->options(FieldMap::MAP_TYPES)
                 ->displayUsingLabels()
                 ->sortable(),
 
-            Text::make('Form Field')
+            Text::make('Jotform Field', 'form_field')
                 ->sortable(),
+
+            Select::make('Mapped Field', 'map_field')
+                ->options($fields)
+                ->displayUsingLabels()
+                ->hideOnCreating()
+                ->hideOnUpdating()
+                ->hideOnDetail()
+                ->sortable()
         ];
 
         // Create Alternate Map Fields

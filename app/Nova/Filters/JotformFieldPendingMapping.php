@@ -3,10 +3,10 @@
 namespace App\Nova\Filters;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Filters\Filter;
+use Laravel\Nova\Filters\BooleanFilter;
 use App\Models\Website\Forms\FieldMap;
 
-class JotformFieldPendingMapping extends Filter
+class FormMapping extends BooleanFilter
 {
     /**
      * The filter's component.
@@ -25,7 +25,11 @@ class JotformFieldPendingMapping extends Filter
      */
     public function apply(Request $request, $query, $value)
     {
-        return $query->where('map_field', '');
+        // Pending Mapping
+        if($value['is_pending']) {
+            return $query->where('map_field', '');
+        }
+        return $query;
     }
 
     /**
@@ -36,6 +40,8 @@ class JotformFieldPendingMapping extends Filter
      */
     public function options(Request $request)
     {
-        return [];
+        return [
+            'Pending Mapping' => 'is_pending'
+        ];
     }
 }
