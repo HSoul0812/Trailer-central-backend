@@ -21,7 +21,8 @@ class CreateWebsiteFormFieldMap extends Migration
             $table->enum('map_field', array_keys(FieldMap::getNovaMapFields()))->index();
             $table->enum('db_table', array_values(FieldMap::getUniqueMapTables()))->index();
             $table->string('details')->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
 
             // Set Unique Index
             $table->unique(['type', 'form_field']);
