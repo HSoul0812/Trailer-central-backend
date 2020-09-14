@@ -97,7 +97,7 @@ class JotformFieldMap extends Resource
     public function filters(Request $request)
     {
         return [
-            new Filters\JotformFieldPendingMapping
+            new Filters\JotformMapping
         ];
     }
 

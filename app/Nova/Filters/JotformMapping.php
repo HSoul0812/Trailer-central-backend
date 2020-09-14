@@ -4,9 +4,8 @@ namespace App\Nova\Filters;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Filters\BooleanFilter;
-use App\Models\Website\Forms\FieldMap;
 
-class FormMapping extends BooleanFilter
+class JotformMapping extends BooleanFilter
 {
     /**
      * The filter's component.
