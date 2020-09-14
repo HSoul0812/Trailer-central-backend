@@ -8,13 +8,6 @@ use Laravel\Nova\Filters\BooleanFilter;
 class JotformMapping extends BooleanFilter
 {
     /**
-     * The filter's component.
-     *
-     * @var string
-     */
-    public $component = 'select-filter';
-
-    /**
      * Apply the filter to the given query.
      *
      * @param  \Illuminate\Http\Request  $request
