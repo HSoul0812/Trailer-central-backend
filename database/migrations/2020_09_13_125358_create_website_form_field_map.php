@@ -18,8 +18,8 @@ class CreateWebsiteFormFieldMap extends Migration
             $table->bigIncrements('id');
             $table->enum('type', array_keys(FieldMap::MAP_TYPES));
             $table->string('form_field', 50);
-            $table->string('map_field', 50)->index();
-            $table->string('db_table', 50)->index();
+            $table->enum('map_field', array_keys(FieldMap::getNovaMapFields()))->index();
+            $table->enum('db_table', array_values(FieldMap::MAP_TABLES))->index();
             $table->string('details')->nullable();
             $table->timestamps();
 
@@ -55,6 +55,13 @@ class CreateWebsiteFormFieldMap extends Migration
             ['type' => 'lead', 'form_field' => 'preferred salesperson', 'map_field' => 'preferred_salesperson', 'db_table' => 'website_lead', 'details' => 'Directly sets sales person if sales person name exists on dealer.'],
             ['type' => 'lead', 'form_field' => 'preferred sales person', 'map_field' => 'preferred_salesperson', 'db_table' => 'website_lead', 'details' => 'Directly sets sales person if sales person name exists on dealer.'],
 
+            // Lead Special Mapping - Name
+            ['type' => 'special_name', 'form_field' => 'first', 'map_field' => 'firstname', 'db_table' => 'website_lead', 'details' => NULL],
+            ['type' => 'special_name', 'form_field' => 'last', 'map_field' => 'lastname', 'db_table' => 'website_lead', 'details' => NULL],
+            ['type' => 'special_name', 'form_field' => 'prefix', 'map_field' => 'prefix', 'db_table' => 'website_lead', 'details' => 'This will prepend to first name.'],
+            ['type' => 'special_name', 'form_field' => 'middle', 'map_field' => 'middle', 'db_table' => 'website_lead', 'details' => 'This will append to first name.'],
+            ['type' => 'special_name', 'form_field' => 'suffix', 'map_field' => 'suffix', 'db_table' => 'website_lead', 'details' => 'This will append to last name.'],
+
             // Lead Special Mapping - Address
             ['type' => 'special_address', 'form_field' => 'addr_line1', 'map_field' => 'address', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'special_address', 'form_field' => 'addr_line2', 'map_field' => 'address2', 'db_table' => 'website_lead', 'details' => 'This will simply append to address.'],
@@ -81,7 +88,7 @@ class CreateWebsiteFormFieldMap extends Migration
             ['type' => 'lead_type', 'form_field' => 'rent to own', 'map_field' => 'financing', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead_type', 'form_field' => 'build', 'map_field' => 'build', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead_type', 'form_field' => 'design a trailer', 'map_field' => 'build', 'db_table' => 'website_lead', 'details' => NULL],
-            ['type' => 'lead_type', 'form_field' => 'rental', 'map_field' => 'rental', 'db_table' => 'website_lead', 'details' => NULL],
+            ['type' => 'lead_type', 'form_field' => 'rental', 'map_field' => 'rentals', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead_type', 'form_field' => 'sell your', 'map_field' => 'trade', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead_type', 'form_field' => 'trade', 'map_field' => 'trade', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead_type', 'form_field' => 'service your', 'map_field' => 'service', 'db_table' => 'website_lead', 'details' => NULL],
