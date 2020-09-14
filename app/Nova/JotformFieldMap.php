@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Select;
+use App\Models\Website\Forms\FieldMap;
 
 class JotformFieldMap extends Resource
 {
