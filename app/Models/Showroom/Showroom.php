@@ -2,14 +2,20 @@
 
 namespace App\Models\Showroom;
 
+use App\Models\Inventory\Category;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Showroom
+ * @package App\Models\Showroom
+ * @property Category $category
+ */
 class Showroom extends Model {
-    
+
     protected $table = 'showroom';
-    
+
     public $timestamps = false;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -114,5 +120,9 @@ class Showroom extends Model {
         'axle_weight',
         'product_group'
     ];
-    
+
+    public function category()
+    {
+        return $this->hasOne(Category::class, 'legacy_category', 'type');
+    }
 }

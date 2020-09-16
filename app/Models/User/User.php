@@ -4,9 +4,10 @@ namespace App\Models\User;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\Lead;
+use App\Models\User\DealerUser;
 use App\Models\User\AuthToken;
+use App\Models\Website\Website;
 
 /**
  * Class User
@@ -43,6 +44,10 @@ class User extends Model implements Authenticatable
         'name',
         'email',
         'password'
+    ];
+
+    protected $casts = [
+        'autoresponder_enable' => 'boolean',
     ];
 
     /**
@@ -100,28 +105,42 @@ class User extends Model implements Authenticatable
      * @return string
      */
     public function getRememberTokenName() {}
-    
+
     public function getAccessTokenAttribute()
     {
         $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
         return $authToken->access_token;
     }
 
-    public function crmUser()
+    public function website()
     {
-        return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
+        return $this->hasOne(Website::class, 'dealer_id', 'dealer_id');
     }
 
-    public function salesPerson()
+    /**
+     * Get new dealer user
+     */
+    public function newDealerUser()
     {
-        return $this->hasOne(SalesPerson::class, 'user_id', 'user_id');
+        return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
     }
-    
+
+    /**
+     * Get dealer users
+     */
+    public function dealerUsers()
+    {
+        return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get leads
+     */
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }

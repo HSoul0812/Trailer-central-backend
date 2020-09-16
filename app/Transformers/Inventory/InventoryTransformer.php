@@ -8,10 +8,14 @@ use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use App\Transformers\Inventory\ImageTransformer;
 use Illuminate\Database\Eloquent\Collection;
+use App\Transformers\Website\WebsiteTransformer;
 
 class InventoryTransformer extends TransformerAbstract
 {
-
+    protected $availableIncludes = [
+        'website'
+    ];
+    
     protected $userTransformer;
 
     protected $dealerLocationTransformer;
@@ -57,7 +61,7 @@ class InventoryTransformer extends TransformerAbstract
              'note' => $inventory->note,
              'price' => $inventory->price,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
-             'status' => $inventory->status,
+             'status' => $inventory->status_label,
              'stock' => $inventory->stock,
              'title' => $inventory->title,
              'true_cost' => $inventory->true_cost,
@@ -68,7 +72,14 @@ class InventoryTransformer extends TransformerAbstract
              'year' => $inventory->year,
              'color' => $inventory->color,
              'floorplan_payments' => $inventory->floorplanPayments,
+             'url' => $inventory->getUrl(),
+             'floorplan_vendor' => $inventory->floorplanVendor
          ];
+    }
+    
+    public function includeWebsite($inventory)
+    {
+        return $this->item($inventory->user->website, new WebsiteTransformer);
     }
 
     private function transformImages(Collection $images)
@@ -78,5 +89,5 @@ class InventoryTransformer extends TransformerAbstract
             $ret[] = $this->imageTransformer->transform($img);
         }
         return $ret;
-    }
+    } 
 }

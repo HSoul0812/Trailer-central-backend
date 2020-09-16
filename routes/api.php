@@ -34,6 +34,14 @@ $api->version('v1', function ($route) {
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
     $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
 
+    $route->put('inventory/floorplan/bulk/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create');
+
+    $route->get('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@index');
+    $route->put('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@create');
+    $route->get('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@show')->where('id', '[0-9]+');
+    $route->post('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@update')->where('id', '[0-9]+');
+    $route->delete('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')->where('id', '[0-9]+');
+
     /**
      * Part bins
      */
@@ -81,6 +89,7 @@ $api->version('v1', function ($route) {
      */
     $route->post('parts/bulk/download', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@create');
     $route->get('parts/bulk/file/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@read');
+    $route->get('parts/bulk/status/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@status');
 
     /**
      * Part Bulk
@@ -131,6 +140,14 @@ $api->version('v1', function ($route) {
      * Inventory Manufacturers
      */
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+    /**
+     * Inventory Categories
+     */
+    $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
+    /**
+     * Inventory Statuses
+     */
+    $route->get('inventory/statuses', 'App\Http\Controllers\v1\Inventory\StatusController@index');
 
     /**
      * Inventory
@@ -150,6 +167,11 @@ $api->version('v1', function ($route) {
     |
     |
     */
+
+    /**
+     * Log
+     */
+    $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create');
 
     /**
      * Website Part Filters
@@ -188,6 +210,10 @@ $api->version('v1', function ($route) {
     $route->get('website/towing-capacity/models/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getModels')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
     $route->get('website/towing-capacity/vehicles/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getVehicles')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
 
+    /**
+     * Website mail
+     */
+    $route->put('website/mail/lead/{leadId}/auto-respond', 'App\Http\Controllers\v1\Website\Mail\MailController@autoRespond');
 
     /*
     |--------------------------------------------------------------------------
@@ -204,10 +230,9 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'interaction.validate'], function ($route) {
         $route->get('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@create')->where('leadId', '[0-9]+');
-        $route->put('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
+        $route->post('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
         $route->get('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@destroy')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
     });
 
     /**
@@ -316,7 +341,9 @@ $api->version('v1', function ($route) {
 
     $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
+    $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
+    $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
     /*
     |--------------------------------------------------------------------------
@@ -339,6 +366,7 @@ $api->version('v1', function ($route) {
         */
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
+        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
 
@@ -452,6 +480,18 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Purchase Orders
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        // Purchase Order Receipts
+        $route->get('po-receipts', 'App\Http\Controllers\v1\Dms\PurchaseOrder\PurchaseOrderReceiptController@index');
+        $route->get('po-receipts/{id}', 'App\Http\Controllers\v1\Dms\PurchaseOrder\PurchaseOrderReceiptController@show');
+
+        /*
+        |--------------------------------------------------------------------------
         | Financing companies
         |--------------------------------------------------------------------------
         |
@@ -478,6 +518,11 @@ $api->version('v1', function ($route) {
          */
         $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
         $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
+
+        /**
+         * Quickbook Approval
+         */
+        $route->get('quickbooks/quickbook-approvals', 'App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController@index');
 
         /*
         |--------------------------------------------------------------------------

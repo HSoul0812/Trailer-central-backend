@@ -2,12 +2,10 @@
 
 namespace App\Models\CRM\User;
 
-use App\Models\CRM\Dms\GenericSaleInterface;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
 use App\Utilities\JsonApi\Filterable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -33,6 +31,27 @@ class SalesPerson extends Model implements Filterable
      * @var string
      */
     protected $primaryKey = 'id';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'dealer_location_id',
+        'perms',
+        'first_name',
+        'last_name',
+        'email'
+    ];
+
+    /**
+     * Disable timestamps
+     *
+     * @var bool
+     */
+    public $timestamps = false;
     
     /**
      * Define Type Arrays
@@ -45,7 +64,7 @@ class SalesPerson extends Model implements Filterable
 
 
     /**
-     * Get Full Name
+     * Get the sales person's full name
      * 
      * @return string
      */

@@ -47,7 +47,7 @@ class UnitSale extends Model implements GenericSaleInterface
 
     public function invoice()
     {
-        return $this->hasOne(Invoice::class, 'unit_sale_id');
+        return $this->hasMany(Invoice::class, 'unit_sale_id');
     }
 
     public function payments()
@@ -63,6 +63,9 @@ class UnitSale extends Model implements GenericSaleInterface
     public function getStatusAttribute() {
         if (!empty($this->is_archived)) {
             return 'Archived';
+        }
+        if ($this->is_po === 1) {
+            return 'Completed Deal';
         }
         if (empty($this->paid_amount)) {
             return 'Open';

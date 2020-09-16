@@ -63,7 +63,7 @@ class NewDealerUser extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'dealer_id', 'id');
     }
 
     /**
@@ -74,11 +74,25 @@ class NewDealerUser extends Model
         return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
     }
 
-    public function location()
+    /**
+     * Get active crm user
+     */
+    public function activeCrmUser()
     {
-        return $this->hasOne(DealerLocation::class, 'dealer_id', 'dealer_id');
+        return $this->crmUser()->where('active', 1);
     }
 
+    /**
+     * Get dealer locations
+     */
+    public function location()
+    {
+        return $this->hasMany(DealerLocation::class, 'dealer_id', 'id');
+    }
+
+    /**
+     * Get uploads
+     */
     public function uploads() {
         return $this->hasMany(Upload::class, 'dealer_upload', 'dealer_id');
     }

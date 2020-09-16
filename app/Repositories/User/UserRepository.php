@@ -46,4 +46,8 @@ class UserRepository implements UserRepositoryInterface {
         throw new ModelNotFoundException;
     }
 
+    public function getDmsActiveUsers() {
+        return User::where('is_dms_active', 1)->get();
+    }
+
 }

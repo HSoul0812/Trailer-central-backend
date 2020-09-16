@@ -2,10 +2,9 @@
 
 namespace App\Repositories\Dms\Quickbooks;
 
-use Illuminate\Support\Facades\DB;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Quickbooks\Account;
+use App\Models\CRM\Dms\Quickbooks\Account;
 
 /**
  * @author Marcel

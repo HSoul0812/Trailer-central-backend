@@ -23,6 +23,7 @@ class InvoiceItemTransformer extends TransformerAbstract
             'description' => $item->description,
             'qty' => (int)$item->qty,
             'unit_price' => (float)$item->unit_price,
+            'referenced_item_id' => $item->referenced_item_id,
             'is_taxable' => (bool)$item->is_taxable,
         ];
     }

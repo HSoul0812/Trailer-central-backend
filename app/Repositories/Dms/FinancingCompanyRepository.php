@@ -27,6 +27,7 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
      */
     public function get($params)
     {
+        // do not use $params with a RequestQueryable -- pagination will not work
         return $this->query()->get();
     }
 
@@ -48,12 +49,8 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
     public function create($params)
     {
         $financingCompany = new FinancingCompany($params);
-
-        if ($financingCompany->saveOrFail()) {
-            return $financingCompany;
-        } else {
-            return null;
-        }
+        $financingCompany->saveOrFail();
+        return $financingCompany;
     }
 
     /**
@@ -66,24 +63,23 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
         /** @var FinancingCompany $financingCompany */
         $financingCompany = FinancingCompany::find($params['id']);
         $financingCompany->fill($params);
-        if ($financingCompany->saveOrFail()) {
-            return $financingCompany;
-        } else {
-            return null;
-        }
+        $financingCompany->saveOrFail();
+        return $financingCompany;
     }
 
     /**
      * @param array $params
-     * @return bool|void
+     * @return bool
      * @throws \Throwable
      */
     public function delete($params)
     {
         /** @var FinancingCompany $financingCompany */
         $financingCompany = FinancingCompany::find($params['id']);
+        if (!$financingCompany->delete()) {
+            throw new \Exception("Unable to delete Financing company ID {$params['id']}");
+        }
 
-        return $financingCompany->delete();
+        return true;
     }
-
 }

@@ -2,10 +2,12 @@
 
 namespace App\Models\User;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
 
-class DealerUser extends Model
+class DealerUser extends Model implements Authenticatable
 {
     const TABLE_NAME = 'dealer_users';
 
@@ -22,16 +24,102 @@ class DealerUser extends Model
      * @var string
      */
     protected $primaryKey = "dealer_user_id";
-    
+
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName() {
+        return $this->email;
+    }
+
+    /**
+     * Get the unique identifier for the user.
+     *
+     * @return mixed
+     */
+    public function getAuthIdentifier() {
+        return $this->dealer_user_id;
+    }
+
+    /**
+     * Get the password for the user.
+     *
+     * @return string
+     */
+    public function getAuthPassword() {
+        return $this->password;
+    }
+
+    /**
+     * Get the token value for the "remember me" session.
+     *
+     * @return string
+     */
+    public function getRememberToken() {}
+
+    /**
+     * Set the token value for the "remember me" session.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setRememberToken($value) {}
+
+    /**
+     * Get the column name for the "remember me" token.
+     *
+     * @return string
+     */
+    public function getRememberTokenName() {}
+
+    /**
+     * Get Access Token
+     * 
+     * @return type
+     */
     public function getAccessTokenAttribute()
     {
-        $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
+        $authToken = AuthToken::where('user_id', $this->dealer_user_id)
+                              ->where('user_type', 'dealer_user')->firstOrFail();
         return $authToken->access_token;
     }
-    
-    public function dealer()
+
+    /**
+     * Get dealer
+     */
+    public function user()
     {
-        return $this->hasOne(User::class, 'dealer_id', 'dealer_id');
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get new dealer user
+     */
+    public function newDealerUser()
+    {
+        return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
+    }
+
+    /**
+     * Get dealer user permissions
+     */
+    public function perms()
+    {
+        return $this->hasMany(DealerUserPermission::class, 'dealer_user_id', 'dealer_user_id');
+    }
+
+    /**
+     * Get sales person
+     */
+    public function getSalesPersonAttribute()
+    {
+        // Get Sales Person ID From Perms
+        $salesPersonId = $this->perms()->where('feature', 'crm')->pluck('permission_level')->first();
+
+        // Find Sales Person
+        return SalesPerson::find($salesPersonId);
     }
     
     public static function getTableName() {

@@ -56,18 +56,10 @@ class CrmUser extends Model
         'password',
     ];
 
-    public function dealer()
-    {
-        return $this->hasOne(Dealer::class, 'user_id', 'user_id');
-    }
-
     /**
-     * Get the user
+     * @var bool
      */
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
+    public $timestamps = false;
     
     public static function getTableName() {
         return self::TABLE_NAME;

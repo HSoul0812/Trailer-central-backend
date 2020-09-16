@@ -4,7 +4,7 @@
 namespace App\Models\CRM\Account;
 
 
-use App\Models\CRM\Quickbooks\Item;
+use App\Models\CRM\Dms\Quickbooks\Item;
 use Illuminate\Database\Eloquent\Model;
 
 /**

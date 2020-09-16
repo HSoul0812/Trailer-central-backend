@@ -12,6 +12,7 @@ use App\Models\User\DealerLocation;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\Inventory\Inventory;
+use App\Models\User\User;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
@@ -20,22 +21,22 @@ use App\Models\Traits\TableAware;
 class Lead extends Model
 {
     use TableAware;
-    
+
     const STATUS_WON = 'Closed';
-    const STATUS_WON_CLOSED = 'Closed (Won)';    
+    const STATUS_WON_CLOSED = 'Closed (Won)';
     const STATUS_LOST = 'Closed (Lost)';
     const STATUS_HOT = 'Hot';
     const STATUS_COLD = 'Cold';
     const STATUS_MEDIUM = 'Medium';
     const STATUS_UNCONTACTED = 'Uncontacted';
     const STATUS_NEW_INQUIRY = 'New Inquiry';
-    
-    const NOT_ARCHIVED = 0; 
+
+    const NOT_ARCHIVED = 0;
     const LEAD_ARCHIVED = 1;
-    
+
     const TABLE_NAME = 'website_lead';
-    
-    
+
+
     /**
      * The table associated with the model.
      *
@@ -49,9 +50,21 @@ class Lead extends Model
      * @var string
      */
     protected $primaryKey = 'identifier';
-    
-    public $timestamps = false;
-    
+
+    /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'date_submitted';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -59,14 +72,30 @@ class Lead extends Model
      */
     protected $fillable = [
         'website_id',
-        'dealer_id',
-        'lead_type',
         'inventory_id',
+        'dealer_id',
+        'dealer_location_id',
+        'lead_type',
         'referral',
-        'first_name',
         'title',
+        'first_name',
         'last_name',
-        'phone_number'
+        'email_address',
+        'phone_number',
+        'preferred_contact',
+        'address',
+        'city',
+        'state',
+        'zip',
+        'comments',
+        'note',
+        'metadata',
+        'contact_email_sent',
+        'adf_email_sent',
+        'cdk_email_sent',
+        'newsletter',
+        'is_spam',
+        'is_archived'
     ];
 
     /**
@@ -106,7 +135,7 @@ class Lead extends Model
      */
     public function units()
     {
-        return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id');
+        return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id', 'identifier');
     }
 
     /**
@@ -150,6 +179,16 @@ class Lead extends Model
     }
 
     /**
+     * Get user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
      * Return All Product ID's for Current Lead
      *
      * @return array
@@ -158,18 +197,13 @@ class Lead extends Model
         return $this->processProperty(CompactHelper::expand($this->identifier));
     }
 
-    public function getProductIds() {
-        return $this->product()->pluck('product_id')->toArray();
+    public function getProductId() {
+        $productIds = $this->getProductIds();
+        return reset($productIds);
     }
 
-    public function getInventoryIds() {
-        $inventoryIds = $this->units()->pluck('inventory_id')->toArray();
-
-        // Append Current Inventory ID
-        $inventoryIds = array_unshift($inventoryIds, $this->inventory_id);
-
-        // Return Full Array
-        return $inventoryIds;
+    public function getProductIds() {
+        return $this->product()->pluck('product_id')->toArray();
     }
 
     /**
@@ -200,6 +234,34 @@ class Lead extends Model
     }
 
     /**
+     * Find Lead Contact Details
+     *
+     * @param type $id
+     * @return type
+     */
+    public static function findLeadContact($id) {
+        $result = Lead::findOrFail($id)->pluck('first_name', 'last_name', 'email_address')->toArray();
+        return array('name' => $result['first_name'] .' '. $result['last_name'], 'email' => $result['email_address']);
+    }
+
+
+    /**
+     * Get Inventory ID's
+     *
+     * @return array
+     */
+    public function getInventoryIdsAttribute() {
+        // Initialize Inventory ID's Array
+        $inventoryIds = $this->units()->pluck('inventory_id')->toArray();
+
+        // Append Current Inventory ID
+        array_unshift($inventoryIds, $this->inventory_id);
+
+        // Return Full Array
+        return $inventoryIds;
+    }
+
+    /**
      * Get the user's full name.
      *
      * @return string
@@ -223,16 +285,32 @@ class Lead extends Model
 
     /**
      * Get the user's text number
-     * 
+     *
      * @return string
      */
     public function getTextPhoneAttribute() {
+        if(empty($this->phone_number)) {
+            return '';
+        }
         return '+' . ((strlen($this->phone_number) === 11) ? $this->phone_number : '1' . $this->phone_number);
     }
 
-    public static function findLeadContact($id) {
-        $result = Lead::findOrFail($id)->pluck('first_name', 'last_name', 'email_address')->toArray();
-        return array('name' => $result['first_name'] .' '. $result['last_name'], 'email' => $result['email_address']);
+    /**
+     * Get lead types array.
+     *
+     * @return array
+     */
+    public function getLeadTypesAttribute() {
+        // Initialize Inventory ID's Array
+        $leadTypes = $this->leadTypes()->pluck('lead_type')->toArray();
+
+        // Append Current Lead Type If Not Already in Array
+        if(!in_array($this->lead_type, $leadTypes)) {
+            array_unshift($leadTypes, $this->lead_type);
+        }
+
+        // Return Full Array
+        return $leadTypes;
     }
 
     /**
@@ -250,7 +328,7 @@ class Lead extends Model
     /**
      * @return string(phone number) number in format (XXX) NNN-NNNN
      */
-    public function getPrettyPhoneNumberAttribute() {        
+    public function getPrettyPhoneNumberAttribute() {
         if(  preg_match( '/^(\d{3})(\d{3})(\d{4})$/', $this->phone_number,  $matches ) ) {
             return '(' . $matches[1] . ')' . ' ' .$matches[2] . '-' . $matches[3];
         } else {
@@ -258,9 +336,18 @@ class Lead extends Model
         }
     }
 
+    public function getPreferredDealerLocationAttribute()
+    {
+        if (empty($this->preferred_location)) {
+            return null;
+        }
+
+        return DealerLocation::where('dealer_location_id', $this->preferred_location)->first();
+    }
+
     /**
      * Get Preferred Location Attribute
-     * 
+     *
      * @return int
      */
     public function getPreferredLocationAttribute() {
@@ -270,8 +357,8 @@ class Lead extends Model
         }
 
         // Return Inventory Location ID Instead
-        if(!empty($lead->inventory->dealer_location_id)) {
-            return $lead->inventory->dealer_location_id;
+        if(!empty($this->inventory->dealer_location_id)) {
+            return $this->inventory->dealer_location_id;
         }
 
         // Return Nothing

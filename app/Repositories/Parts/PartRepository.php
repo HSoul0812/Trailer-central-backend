@@ -100,7 +100,12 @@ class PartRepository implements PartRepositoryInterface {
 
             if (isset($params['images'])) {
                 foreach ($params['images'] as $image) {
-                    $this->storeImage($part->id, $image);
+                    try {
+                        $this->storeImage($part->id, $image);
+                    } catch (ImageNotDownloadedException $ex) {
+
+                    }
+                    
                 }
             }
 
@@ -115,7 +120,7 @@ class PartRepository implements PartRepositoryInterface {
             }
 
              DB::commit();
-        } catch (\ImageNotDownloadedException $ex) {
+        } catch (ImageNotDownloadedException $ex) {
             DB::rollBack();
             throw new ImageNotDownloadedException($ex->getMessage());
         } catch (\Exception $ex) {
@@ -147,13 +152,22 @@ class PartRepository implements PartRepositoryInterface {
     public function get($params) {
         return Part::findOrFail($params['id'])->load('bins.bin');
     }
+    
+    public function getDealerSku($dealerId, $sku) {
+        return Part::where('sku', $sku)->where('dealer_id', $dealerId)->first();
+    }
+    
+    public function getBySku($sku) {
+        return Part::where('sku', $sku)->first();
+    }
 
     public function getAllSearch($params) {
         if (isset($params['naive_search'])) {
             $query = Part::where(function($q) use ($params) {
                 $q->where('sku', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%');
+                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('alternative_part_number', 'LIKE', '%' . $params['search_term'] . '%');                        
             });
         } else {
             $query = Part::search($params['search_term']);
@@ -301,7 +315,11 @@ class PartRepository implements PartRepositoryInterface {
                 if (isset($params['images'])) {
                     $part->images()->delete();
                     foreach($params['images'] as $image) {
-                        $this->storeImage($part->id, $image);
+                        try {
+                            $this->storeImage($part->id, $image);
+                        } catch (\ImageNotDownloadedException $ex) {
+
+                        }
                     }
                 }
 
@@ -330,6 +348,7 @@ class PartRepository implements PartRepositoryInterface {
         try {
             $imageData = file_get_contents($image['url'], false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
         } catch (\Exception $ex) {
+            return;
             throw new ImageNotDownloadedException('Image not accessible: '.$image['url']);
         }
 
@@ -345,6 +364,6 @@ class PartRepository implements PartRepositoryInterface {
     
     protected function getSortOrders() {
         return $this->sortOrders;
-    }
+    }    
 
 }

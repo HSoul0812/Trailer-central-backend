@@ -72,6 +72,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-fp_committed' => [
             'field' => 'fp_committed',
             'direction' => 'ASC'
+        ],
+        'fp_vendor' => [
+            'field' => 'fp_vendor',
+            'direction' => 'DESC'
+        ],
+        '-fp_vendor' => [
+            'field' => 'fp_vendor',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -137,8 +145,10 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $query = Inventory::select('*');
 
+        $query->where('status', '<>', Inventory::STATUS_QUOTE);
+
         if (isset($params['dealer_id'])) {
-            $query = $query->where('dealer_id', $params['dealer_id']);
+            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
 
         if (!isset($params['per_page'])) {
@@ -153,18 +163,22 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
 
+        if (isset($params['floorplan_vendor'])) {
+            $query = $query->where('fp_vendor', $params['floorplan_vendor']);
+        }
+
         if (isset($params['only_floorplanned']) && !empty($params['only_floorplanned'])) {
             /**
              * Filter only floored inventories to pay
              * https://crm.trailercentral.com/accounting/floorplan-payment
              */
-            $query = $query->whereNotNull('bill_id')
-                ->where([
-                    ['is_floorplan_bill', '=', 1],
-                    ['fp_vendor', '>', 0],
-                    ['true_cost', '>', 0],
-                    ['fp_balance', '>', 0]
-                ]);
+            $query->where(function ($q) {
+                $q->whereNotNull('bill_id')
+                        ->where('is_floorplan_bill', 1)
+                        ->where('fp_vendor', '>', 0)
+                        ->where('true_cost', '>', 0)
+                        ->where('fp_balance', '>', 0);
+            });
         }
 
         if (isset($params['search_term'])) {
@@ -172,12 +186,20 @@ class InventoryRepository implements InventoryRepositoryInterface
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%');
+                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhereHas('floorplanVendor', function ($query) use ($params) {
+                            $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
+                        });
             });
         }
 
         if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
+            if ($params['sort'] === 'fp_vendor' || $params['sort'] === '-fp_vendor') {
+                $direction = $params['sort'] === 'fp_vendor' ? 'DESC' : 'ASC';
+                $query = $query->leftJoin('qb_vendors', 'qb_vendors.id', '=', 'inventory.fp_vendor')->orderBy('qb_vendors.name', $direction);
+            } else {
+                $query = $this->addSortQuery($query, $params['sort']);
+            }
         }
 
         if ($paginated) {
