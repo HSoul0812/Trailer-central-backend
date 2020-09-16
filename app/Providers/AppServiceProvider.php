@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\Inventory\FileRepository;
+use App\Repositories\Inventory\FileRepositoryInterface;
+use App\Repositories\Inventory\ImageRepository;
+use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\StatusRepository;
 use App\Repositories\Inventory\StatusRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -201,6 +205,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
+        $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
         $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);

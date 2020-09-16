@@ -125,7 +125,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         DB::transaction(function() use (&$item, $params) {
             $item->attributeValues()->delete();
-            $item->features()->delete();
+            $item->inventoryFeatures()->delete();
             $item->clapps()->delete();
             $item->lotVantageInventory()->delete();
 

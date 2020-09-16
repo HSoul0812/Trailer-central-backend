@@ -4,24 +4,39 @@ namespace App\Http\Controllers\v1\Inventory;
 
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
-use Dingo\Api\Http\Request;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\Inventory\InventoryService;
+use Dingo\Api\Http\Request;
 use App\Http\Requests\Inventory\GetInventoryRequest;
 use App\Transformers\Inventory\InventoryTransformer;
 
+/**
+ * Class InventoryController
+ * @package App\Http\Controllers\v1\Inventory
+ */
 class InventoryController extends RestfulController
 {
+    /**
+     * @var InventoryService
+     */
+    protected $inventoryService;
 
+    /**
+     * @var InventoryRepositoryInterface
+     */
     protected $inventoryRepository;
 
     /**
      * Create a new controller instance.
      *
+     * @param InventoryService $inventoryService
      * @param InventoryRepositoryInterface $inventoryRepository
      */
-    public function __construct(InventoryRepositoryInterface $inventoryRepository)
+    public function __construct(InventoryService $inventoryService, InventoryRepositoryInterface $inventoryRepository)
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
+
+        $this->inventoryService = $inventoryService;
         $this->inventoryRepository = $inventoryRepository;
     }
 
@@ -125,12 +140,15 @@ class InventoryController extends RestfulController
      *         description="Error: Bad request.",
      *     ),
      * )
+     *
+     * @param int $id
+     * @return \Dingo\Api\Http\Response|void
      */
     public function destroy(int $id)
     {
         $request = new DeleteInventoryRequest(['id' => $id]);
 
-        if ($request->validate() && $this->inventoryRepository->delete(['id' => $id])) {
+        if ($request->validate() && $this->inventoryService->delete($id)) {
             return $this->response->noContent();
         }
 

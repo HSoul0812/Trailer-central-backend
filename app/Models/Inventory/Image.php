@@ -5,7 +5,7 @@ namespace App\Models\Inventory;
 use Illuminate\Database\Eloquent\Model;
 
 class Image extends Model {
-    
+
     /**
      * The table associated with the model.
      *
@@ -19,4 +19,9 @@ class Image extends Model {
      * @var string
      */
     protected $primaryKey = 'image_id';
+
+    public function inventoryImages()
+    {
+        return $this->hasMany(InventoryImage::class, 'image_id', 'image_id');
+    }
 }
