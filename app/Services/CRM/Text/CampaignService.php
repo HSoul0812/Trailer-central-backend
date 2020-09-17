@@ -3,10 +3,13 @@
 namespace App\Services\CRM\Text;
 
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
+use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
+use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class CampaignService
@@ -55,32 +58,27 @@ class CampaignService implements CampaignServiceInterface
     /**
      * Send Campaign Text
      * 
-     * @param string $command that was run
      * @param NewDealerUser $dealer
      * @param Campaign $campaign
-     * @return false || array of CampaignSent
+     * @return Collection of CampaignSent
      */
-    public function send($command, $dealer, $campaign) {
+    public function send($dealer, $campaign) {
         // Get From Number
         $from_number = $campaign->from_sms_number;
         if(empty($from_number)) {
             $from_number = $this->dealerLocation->findDealerSmsNumber($dealer->id);
             if(empty($from_number)) {
-                return false;
+                throw new NoCampaignSmsFromNumberException();
             }
         }
 
         // Get Unsent Campaign Leads
         if(count($campaign->leads) < 1) {
-            return false;
+            throw new NoLeadsProcessCampaignException();
         }
 
-        // Get Template!
-        $template = $campaign->template->template;
-
         // Loop Leads for Current Dealer
-        $this->info("{$command} dealer #{$dealer->id} campaign {$campaign->campaign_name} found " . count($campaign->leads) . " leads to process");
-        $sent = array();
+        $sent = collect([]);
         foreach($campaign->leads as $lead) {
             // Not a Valid To Number?!
             if(empty($lead->text_phone)) {
@@ -88,7 +86,8 @@ class CampaignService implements CampaignServiceInterface
             }
 
             // Send Lead
-            $sent[] = $this->sendToLead($command, $from_number, $template, $dealer, $campaign, $lead);
+            $leadSent = $this->sendToLead($from_number, $dealer, $campaign, $lead);
+            $sent->push($leadSent);
         }
 
         // Return Campaign Sent Entries
@@ -98,74 +97,82 @@ class CampaignService implements CampaignServiceInterface
     /**
      * Send Text to Lead
      * 
-     * @param string $command that was run
      * @param string $from_number sms from number
-     * @param string $template text parsed
      * @param NewDealerUser $dealer
      * @param Campaign $campaign
      * @param Lead $lead
-     * @return false || CampaignSent
+     * @return CampaignSent
      */
-    private function sendToLead($command, $from_number, $template, $dealer, $campaign, $lead) {
-        // Initialize Notes Array
-        $leadName = $lead->id_name;
-
-        // Get To Numbers
-        $to_number = $lead->text_phone;
-
+    private function sendToLead($from_number, $dealer, $campaign, $lead) {
         // Get Text Message
-        $textMessage = $this->templates->fillTemplate($template, [
+        $textMessage = $this->templates->fillTemplate($campaign->template->template, [
             'lead_name' => $lead->full_name,
             'title_of_unit_of_interest' => $lead->inventory->title,
             'dealer_name' => $dealer->user->name
         ]);
-        $this->info("{$command} preparing to send text to {$leadName} at {$to_number}");
 
         try {
             // Send Text
-            $this->texts->send($from_number, $to_number, $textMessage, $lead->full_name);
-            $this->info("{$command} send text to {$leadName} at {$to_number}");
-            $status = 'sent';
+            $this->texts->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
+            $status = CampaignSent::STATUS_SENT;
         } catch (CustomerLandlineNumberException $ex) {
-            $status = 'landline';
-            $this->error("{$command} exception returned, phone number {$to_number} cannot receive texts!");
+            $status = CampaignSent::STATUS_LANDLINE;
         } catch (Exception $ex) {
-            $status = 'invalid';
-            $this->error("{$command} exception returned trying to send campaign {$e->getMessage()}: {$e->getTraceAsString()}");
+            $status = CampaignSent::STATUS_INVALID;
         }
 
-        // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
-        try {
-            // Save Lead Status
-            $this->leads->update([
-                'id' => $lead->identifier,
-                'lead_status' => Lead::STATUS_MEDIUM,
-                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-            ]);
-            $this->info("{$command} updated lead {$leadName} status");
-            $status = 'lead';
+        // Return Sent Result
+        return $this->markLeadSent($from_number, $campaign, $lead, $status);
+    }
 
-            // Log SMS
-            $textLog = $this->texts->create([
-                'lead_id'     => $lead->identifier,
-                'from_number' => $from_number,
-                'to_number'   => $to_number,
-                'log_message' => $textMessage
-            ]);
-            $this->info("{$command} logged text for {$leadName} at {$to_number}");
-            $status = 'logged';
-        } catch(\Exception $e) {
-            $this->error("{$command} exception returned after campaign sent {$e->getMessage()}: {$e->getTraceAsString()}");
-        }
+    /**
+     * Mark Lead as Sent
+     * 
+     * @param string $from_number sms from number
+     * @param Campaign $campaign
+     * @param Lead $lead
+     * @param string $textMessage filled text message
+     * @param string $status
+     * @return CampaignSent
+     */
+    private function markLeadSent($from_number, $campaign, $lead, $textMessage, $status) {
+        // Handle Transaction
+        $textLog = null;
+        DB::transaction(function() use ($from_number, $campaign, $lead, $textMessage, &$status, &$textLog) {
+            // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
+            try {
+                // Save Lead Status
+                $this->leads->update([
+                    'id' => $lead->identifier,
+                    'lead_status' => Lead::STATUS_MEDIUM,
+                    'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+                ]);
+                $status = CampaignSent::STATUS_LEAD;
 
-        // Mark Campaign as Sent to Lead
-        $sent = $this->campaigns->sent([
-            'text_campaign_id' => $campaign->id,
-            'lead_id' => $lead->identifier,
-            'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-            'status' => $status
-        ]);
-        $this->info("{$command} inserted campaign sent for lead {$leadName} and campaign {$campaign->id}");
+                // Log SMS
+                $textLog = $this->texts->create([
+                    'lead_id'     => $lead->identifier,
+                    'from_number' => $from_number,
+                    'to_number'   => $lead->text_phone,
+                    'log_message' => $textMessage
+                ]);
+                $status = CampaignSent::STATUS_LOGGED;
+            } catch(\Exception $e) {
+                $this->error("Exception returned marking lead #{$lead->identifier} on campaign #{$campaign->id}: {$e->getMessage()}: {$e->getTraceAsString()}");
+            }
+        });
+
+        // Handle Transaction
+        $sent = null;
+        DB::transaction(function() use ($campaign, $lead, &$status, &$textLog, &$sent) {
+            // Mark Blast as Sent to Lead
+            $sent = $this->campaigns->sent([
+                'text_campaign_id' => $campaign->id,
+                'lead_id' => $lead->identifier,
+                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
+                'status' => $status
+            ]);
+        });
 
         // Return Sent
         return $sent;

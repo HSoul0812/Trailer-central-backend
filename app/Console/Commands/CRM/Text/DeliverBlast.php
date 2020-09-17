@@ -89,7 +89,7 @@ class DeliverBlast extends Command
             // Log Start
             $now = $this->datetime->format("l, F jS, Y");
             $command = "text:deliver-blast" . (!empty($dealerId) ? ' ' . $dealerId : '');
-            $this->info("{$command} started {$now}");
+            $this->debug("{$command} started {$now}");
 
             // Handle Dealer Differently
             if(!empty($dealerId)) {
@@ -97,7 +97,7 @@ class DeliverBlast extends Command
             } else {
                 $dealers = NewDealerUser::has('activeCrmUser')->with('user')->get();
             }
-            $this->info("{$command} found " . count($dealers) . " dealers to process");
+            $this->debug("{$command} found " . count($dealers) . " dealers to process");
 
             // Get Dealers With Active CRM
             foreach($dealers as $dealer) {
@@ -108,10 +108,15 @@ class DeliverBlast extends Command
                 }
 
                 // Loop Blasts for Current Dealer
-                $this->info("{$command} dealer #{$dealer->id} found " . count($blasts) . " active blasts to process");
+                $this->debug("{$command} dealer #{$dealer->id} found " . count($blasts) . " active blasts to process");
                 foreach($blasts as $blast) {
-                    // Send Campaign
-                    $this->service->send($command, $dealer, $blast);
+                    // Try Catching Error for Blast
+                    try {
+                        // Send Campaign
+                        $this->service->send($dealer, $blast);
+                    } catch(\Exception $e) {
+                        $this->error("{$command} exception returned on blast #{$blast->id} {$e->getMessage()}: {$e->getTraceAsString()}");
+                    }
                 }
             }
         } catch(\Exception $e) {
@@ -121,6 +126,6 @@ class DeliverBlast extends Command
         // Log End
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
-        $this->info("{$command} finished on " . $datetime->format("l, F jS, Y"));
+        $this->debug("{$command} finished on " . $datetime->format("l, F jS, Y"));
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\CRM\Text;
 
-use App\Exceptions\CRM\Text\NoLeadsTestDeliverCampaignException;
+use App\Exceptions\CRM\Text\NoLeadsDeliverCampaignException;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
@@ -90,7 +90,7 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverCampaignException();
+            throw new NoLeadsDeliverCampaignException();
         }
 
         // Mock Text Service
@@ -213,7 +213,7 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverCampaignException();
+            throw new NoLeadsDeliverCampaignException();
         }
 
         // Mock Text Service
@@ -342,7 +342,7 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverCampaignException();
+            throw new NoLeadsDeliverCampaignException();
         }
 
         // Mock Text Service
@@ -465,7 +465,7 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverCampaignException();
+            throw new NoLeadsDeliverCampaignException();
         }
 
         // Mock Text Service
@@ -599,7 +599,7 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverCampaignException();
+            throw new NoLeadsDeliverCampaignException();
         }
 
         // Mock Text Service
@@ -734,7 +734,7 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverCampaignException();
+            throw new NoLeadsDeliverCampaignException();
         }
 
         // Mock Text Service

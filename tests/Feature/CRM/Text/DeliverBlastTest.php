@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\CRM\Text;
 
-use App\Exceptions\CRM\Text\NoLeadsTestDeliverBlastException;
+use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
@@ -90,7 +90,7 @@ class DeliverBlastTest extends TestCase
         }
         $leads = $blast->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverBlastException();
+            throw new NoLeadsDeliverBlastException();
         }
 
         // Mock Text Service
@@ -213,7 +213,7 @@ class DeliverBlastTest extends TestCase
         }
         $leads = $blast->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverBlastException();
+            throw new NoLeadsDeliverBlastException();
         }
 
         // Mock Text Service
@@ -342,7 +342,7 @@ class DeliverBlastTest extends TestCase
         }
         $leads = $blast->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverBlastException();
+            throw new NoLeadsDeliverBlastException();
         }
 
         // Mock Text Service
@@ -465,7 +465,7 @@ class DeliverBlastTest extends TestCase
         }
         $leads = $blast->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverBlastException();
+            throw new NoLeadsDeliverBlastException();
         }
 
         // Mock Text Service
@@ -599,7 +599,7 @@ class DeliverBlastTest extends TestCase
         }
         $leads = $blast->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverBlastException();
+            throw new NoLeadsDeliverBlastException();
         }
 
         // Mock Text Service
@@ -734,7 +734,7 @@ class DeliverBlastTest extends TestCase
         }
         $leads = $blast->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsTestDeliverBlastException();
+            throw new NoLeadsDeliverBlastException();
         }
 
         // Mock Text Service

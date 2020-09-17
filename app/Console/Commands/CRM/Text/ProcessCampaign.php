@@ -110,8 +110,13 @@ class ProcessCampaign extends Command
                 // Loop Campaigns for Current Dealer
                 $this->info("{$command} dealer #{$dealer->id} found " . count($campaigns) . " active campaigns to process");
                 foreach($campaigns as $campaign) {
-                    // Send Campaign
-                    $this->service->send($command, $dealer, $campaign);
+                    // Try Catching Error for Campaign
+                    try {
+                        // Send Campaign
+                        $this->service->send($dealer, $campaign);
+                    } catch(\Exception $e) {
+                        $this->error("{$command} exception returned on campaign #{$campaign->id} {$e->getMessage()}: {$e->getTraceAsString()}");
+                    }
                 }
             }
         } catch(\Exception $e) {
