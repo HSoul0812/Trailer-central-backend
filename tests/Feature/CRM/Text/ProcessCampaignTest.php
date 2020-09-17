@@ -143,26 +143,19 @@ class ProcessCampaignTest extends TestCase
 
 
         // Loop Leads
-        /*foreach($leads as $lead) {
+        foreach($leads as $lead) {
             // Get From Number
             $from_number = $campaign->from_sms_number;
             if(empty($from_number)) {
                 $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
             }
 
-            // Get Text Message
-            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
-                'lead_name' => $lead->full_name,
-                'title_of_unit_of_interest' => $lead->inventory->title,
-                'dealer_name' => $dealer->user->name
-            ]);
-
             // Assert a lead status entry was saved...
-            $this->assertDatabaseHas('dealer_texts_log', [
+            /*$this->assertDatabaseHas('dealer_texts_log', [
                 'lead_id'     => $lead->identifier,
                 'from_number' => $from_number,
                 'to_number'   => $lead->text_phone
-            ]);
+            ]);*/
 
             // Assert a text campaign was logged sent
             $this->assertDatabaseHas('crm_text_campaign_sent', [
@@ -170,7 +163,7 @@ class ProcessCampaignTest extends TestCase
                 'lead_id' => $lead->identifier,
                 'status' => 'logged'
             ]);
-        }*/
+        }
     }
 
     /**
@@ -272,13 +265,6 @@ class ProcessCampaignTest extends TestCase
             if(empty($from_number)) {
                 $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
             }
-
-            // Get Text Message
-            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
-                'lead_name' => $lead->full_name,
-                'title_of_unit_of_interest' => $lead->inventory->title,
-                'dealer_name' => $dealer->user->name
-            ]);
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
@@ -402,13 +388,6 @@ class ProcessCampaignTest extends TestCase
                 $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
             }
 
-            // Get Text Message
-            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
-                'lead_name' => $lead->full_name,
-                'title_of_unit_of_interest' => $lead->inventory->title,
-                'dealer_name' => $dealer->user->name
-            ]);
-
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
                 'lead_id'     => $lead->identifier,
@@ -524,13 +503,6 @@ class ProcessCampaignTest extends TestCase
             if(empty($from_number)) {
                 $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
             }
-
-            // Get Text Message
-            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
-                'lead_name' => $lead->full_name,
-                'title_of_unit_of_interest' => $lead->inventory->title,
-                'dealer_name' => $dealer->user->name
-            ]);
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
@@ -659,13 +631,6 @@ class ProcessCampaignTest extends TestCase
                 $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
             }
 
-            // Get Text Message
-            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
-                'lead_name' => $lead->full_name,
-                'title_of_unit_of_interest' => $lead->inventory->title,
-                'dealer_name' => $dealer->user->name
-            ]);
-
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
                 'lead_id'     => $lead->identifier,
@@ -793,13 +758,6 @@ class ProcessCampaignTest extends TestCase
             if(empty($from_number)) {
                 $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
             }
-
-            // Get Text Message
-            $textMessage = $this->templates->fillTemplate($campaign->template->template, [
-                'lead_name' => $lead->full_name,
-                'title_of_unit_of_interest' => $lead->inventory->title,
-                'dealer_name' => $dealer->user->name
-            ]);
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
