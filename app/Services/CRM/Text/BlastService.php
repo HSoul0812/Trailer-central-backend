@@ -180,7 +180,7 @@ class BlastService implements BlastServiceInterface
 
         // Set Logged Status
         if(!empty($textLog->id)) {
-            $status = CampaignSent::STATUS_LOGGED;
+            $status = BlastSent::STATUS_LOGGED;
         }
 
         // Handle Transaction
