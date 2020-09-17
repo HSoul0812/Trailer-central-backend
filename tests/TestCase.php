@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Exceptions\Tests\MissingTestDealerLocationIdException;
 use App\Exceptions\Tests\MissingTestWebsiteIdException;
+use Mockery;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -71,5 +72,31 @@ abstract class TestCase extends BaseTestCase
         $websiteIds = self::getTestWebsiteIds();
         $websiteKey = array_rand($websiteIds);
         return $websiteIds[$websiteKey];
+    }
+
+    public static function getEloquentMock($class)
+    {
+        $mock = Mockery::mock($class);
+
+        $mock->shouldReceive('setAttribute')->passthru();
+        $mock->shouldReceive('getAttribute')->passthru();
+        $mock->shouldReceive('hasSetMutator')->passthru();
+        $mock->shouldReceive('hasCast')->passthru();
+        $mock->shouldReceive('getCasts')->passthru();
+        $mock->shouldReceive('getIncrementing')->passthru();
+        $mock->shouldReceive('getKeyName')->passthru();
+        $mock->shouldReceive('getKeyType')->passthru();
+        $mock->shouldReceive('getDates')->passthru();
+        $mock->shouldReceive('getCreatedAtColumn')->passthru();
+        $mock->shouldReceive('getUpdatedAtColumn')->passthru();
+        $mock->shouldReceive('hasSetMutator')->passthru();
+        $mock->shouldReceive('usesTimestamps')->passthru();
+        $mock->shouldReceive('getAttributeValue')->passthru();
+        $mock->shouldReceive('setAttributeValue')->passthru();
+        $mock->shouldReceive('hasGetMutator')->passthru();
+        $mock->shouldReceive('offsetExists')->passthru();
+        $mock->shouldReceive('offsetGet')->passthru();
+
+        return $mock;
     }
 }

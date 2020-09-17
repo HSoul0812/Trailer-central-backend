@@ -28,8 +28,6 @@ class DeleteFilesJob extends Job
 
     public function handle()
     {
-        Log::info('Starting deleting files');
-
         try {
             foreach ($this->files as $file) {
                 Storage::disk('s3')->delete($file);

@@ -149,7 +149,7 @@ class InventoryController extends RestfulController
         $request = new DeleteInventoryRequest(['id' => $id]);
 
         if ($request->validate() && $this->inventoryService->delete($id)) {
-            return $this->response->noContent();
+            return $this->successResponse();
         }
 
         return $this->response->errorBadRequest();
