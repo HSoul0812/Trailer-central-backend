@@ -115,7 +115,6 @@ class CampaignService implements CampaignServiceInterface
 
         try {
             // Send Text
-            $lead->text_phone = '+2626619236';
             $this->texts->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
             $status = CampaignSent::STATUS_SENT;
         } catch (CustomerLandlineNumberException $ex) {
