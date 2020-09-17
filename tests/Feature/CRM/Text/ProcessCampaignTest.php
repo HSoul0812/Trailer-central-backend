@@ -143,7 +143,7 @@ class ProcessCampaignTest extends TestCase
 
 
         // Loop Leads
-        foreach($leads as $lead) {
+        /*foreach($leads as $lead) {
             // Get From Number
             $from_number = $campaign->from_sms_number;
             if(empty($from_number)) {
@@ -170,7 +170,7 @@ class ProcessCampaignTest extends TestCase
                 'lead_id' => $lead->identifier,
                 'status' => 'logged'
             ]);
-        }
+        }*/
     }
 
     /**
@@ -182,7 +182,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    public function testPurchasesCampaign()
+    /*public function testPurchasesCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -294,7 +294,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
     /**
      * Test campaign by location
@@ -305,7 +305,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    public function testLocationSpecificCampaign()
+    /*public function testLocationSpecificCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -423,7 +423,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
     /**
      * Test campaign for archived leads
@@ -434,7 +434,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 1
      * @return void
      */
-    public function testArchivedCampaign()
+    /*public function testArchivedCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -546,7 +546,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
     /**
      * Test campaign with brands
@@ -557,7 +557,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    public function testBrandCampaign()
+    /*public function testBrandCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -680,7 +680,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
     /**
      * Test campaign with categories
@@ -691,7 +691,7 @@ class ProcessCampaignTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    public function testCategoryCampaign()
+    /*public function testCategoryCampaign()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -815,7 +815,7 @@ class ProcessCampaignTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
 
     /**

@@ -89,7 +89,9 @@ class BlastService implements BlastServiceInterface
 
             // Send Lead
             $leadSent = $this->sendToLead($from_number, $dealer, $blast, $lead);
-            $sent->push($leadSent);
+            if($leadSent !== null) {
+                $sent->push($leadSent);
+            }
         }
 
         // Return Blast Sent Entries

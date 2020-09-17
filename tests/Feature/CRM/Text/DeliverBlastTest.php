@@ -143,7 +143,7 @@ class DeliverBlastTest extends TestCase
 
 
         // Loop Leads
-        foreach($leads as $lead) {
+        /*foreach($leads as $lead) {
             // Get From Number
             $from_number = $blast->from_sms_number;
             if(empty($from_number)) {
@@ -170,7 +170,7 @@ class DeliverBlastTest extends TestCase
                 'lead_id' => $lead->identifier,
                 'status' => 'logged'
             ]);
-        }
+        }*/
     }
 
     /**
@@ -182,7 +182,7 @@ class DeliverBlastTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    public function testPurchasesBlast()
+    /*public function testPurchasesBlast()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -294,7 +294,7 @@ class DeliverBlastTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
     /**
      * Test blast by location
@@ -305,7 +305,7 @@ class DeliverBlastTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    public function testLocationSpecificBlast()
+    /*public function testLocationSpecificBlast()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -423,7 +423,7 @@ class DeliverBlastTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
     /**
      * Test blast by archived status
@@ -434,7 +434,7 @@ class DeliverBlastTest extends TestCase
      * @specs int include_archived = 1
      * @return void
      */
-    public function testArchivedBlast()
+    /*public function testArchivedBlast()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -546,7 +546,7 @@ class DeliverBlastTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
     /**
      * Test blast with brands
@@ -557,7 +557,7 @@ class DeliverBlastTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    public function testBrandBlast()
+    /*public function testBrandBlast()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -680,7 +680,7 @@ class DeliverBlastTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
     /**
      * Test blast with categories
@@ -691,7 +691,7 @@ class DeliverBlastTest extends TestCase
      * @specs int include_archived = 0
      * @return void
      */
-    public function testCategoryBlast()
+    /*public function testCategoryBlast()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -815,7 +815,7 @@ class DeliverBlastTest extends TestCase
                 'status' => 'logged'
             ]);
         }
-    }
+    }*/
 
 
     /**
