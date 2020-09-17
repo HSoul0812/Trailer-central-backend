@@ -125,7 +125,7 @@ class CampaignService implements CampaignServiceInterface
         }
 
         // Return Sent Result
-        return $this->markLeadSent($from_number, $campaign, $lead, $status);
+        return $this->markLeadSent($from_number, $campaign, $lead, $textMessage, $status);
     }
 
     /**
