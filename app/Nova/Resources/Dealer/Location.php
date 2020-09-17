@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Dealer;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
+use App\Nova\Resource;
 
-class ManufacturerBrand extends Resource
+class Location extends Resource 
 {
+    public static $group = 'Dealer';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Inventory\Manufacturers\Brand';
+    public static $model = 'App\Models\User\DealerLocation';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -28,7 +30,7 @@ class ManufacturerBrand extends Resource
      * @var array
      */
     public static $search = [
-        'name'
+        'id', 'name', 'email',
     ];
 
     /**
@@ -40,11 +42,22 @@ class ManufacturerBrand extends Resource
     public function fields(Request $request)
     {
         return [
-            ID::make('Brand ID')->sortable(),
-
+            Text::make('Dealer Location ID')->sortable(),
+            
+            Text::make('Dealer ID')->sortable(),
+            
             Text::make('Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
+
+            Text::make('Phone'),
+            
+            Text::make('Address'),
+            
+            Text::make('City'),
+            
+            Text::make('Region'),
+
         ];
     }
 

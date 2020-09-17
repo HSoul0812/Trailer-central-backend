@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Mapping;
 
 use Epartment\NovaDependencyContainer\HasDependencies;
 use Epartment\NovaDependencyContainer\NovaDependencyContainer;
@@ -8,27 +8,26 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncomingMapping;
+use App\Nova\Resource;
+use App\Nova\Filters\DealerIDMapping;
 
-class DealerIncomingMapping extends Resource
+class ApiEntityReference extends Resource
 {
-    use HasDependencies;
-
-    const MAP_TO_MANUFACTURER = 'map_to_manufacturer';
-    const MAP_TO_BRAND = 'map_to_brand';
-
+    public static $group = 'Mapping';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Feed\Mapping\Incoming\DealerIncomingMapping';
+    public static $model = 'App\Models\Feed\Mapping\Incoming\ApiEntityReference';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'api_entity_reference_id';
 
     /**
      * The pagination per-page options configured for this resource.
@@ -43,9 +42,10 @@ class DealerIncomingMapping extends Resource
      * @var array
      */
     public static $search = [
-        'map_from',
-        'map_to',
-        'dealer_id'
+        'entity_id',
+        'reference_id',
+        'entity_type',
+        'api_key'
     ];
 
     /**
@@ -57,26 +57,13 @@ class DealerIncomingMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Map From', 'map_from')->sortable(),
+            Text::make('Entity ID')->sortable(),
 
-            NovaDependencyContainer::make([
-                Text::make('Map To', 'map_to')->sortable()
-            ])->dependsOnNot('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
-
-            NovaDependencyContainer::make([
-                Text::make('Map To Manufacturer', self::MAP_TO_MANUFACTURER)->sortable()
-            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
-
-            NovaDependencyContainer::make([
-                Text::make('Map To Brand', self::MAP_TO_BRAND)->sortable()
-            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
-
-            Text::make('Dealer ID', 'dealer_id')->sortable(),
-
-            Select::make('Type', 'type')
-                ->options(FeedDealerIncomingMapping::$types)
-                ->displayUsingLabels(),
-
+            Text::make('Reference ID')->sortable(),
+            
+            Text::make('Entity Type')->sortable(),
+            
+            Text::make('API Key')->sortable(),
         ];
     }
 
@@ -99,9 +86,7 @@ class DealerIncomingMapping extends Resource
      */
     public function filters(Request $request)
     {
-        return [
-            new Filters\DealerIDMapping
-        ];
+        return [];
     }
 
     /**

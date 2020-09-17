@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Leads;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
@@ -10,9 +10,12 @@ use App\Nova\Filters\Leads\DateSubmittedBeforeFilter;
 use App\Nova\Actions\Leads\ArchiveLeads;
 use App\Nova\Actions\Leads\DeleteLeads;
 use App\Nova\Filters\Leads\ArchivedFilter;
+use App\Nova\Resource;
 
 class WebsiteLead extends Resource
 { 
+    public static $group = 'Leads';
+    
     /**
      * The model the resource corresponds to.
      *

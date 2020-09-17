@@ -1,21 +1,31 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Mapping;
 
+use Epartment\NovaDependencyContainer\HasDependencies;
+use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping as FeedDealerIncomingPendingMapping;
-use App\Nova\Actions\Mapping\MapData;
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncomingMapping;
+use App\Nova\Resource;
+use App\Nova\Filters\DealerIDMapping;
 
-class DealerIncomingPendingMapping extends Resource
+class DealerIncomingMapping extends Resource
 {
+    use HasDependencies;
+
+    const MAP_TO_MANUFACTURER = 'map_to_manufacturer';
+    const MAP_TO_BRAND = 'map_to_brand';
+
+    public static $group = 'Mapping';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping';
+    public static $model = 'App\Models\Feed\Mapping\Incoming\DealerIncomingMapping';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -37,8 +47,9 @@ class DealerIncomingPendingMapping extends Resource
      * @var array
      */
     public static $search = [
-        'dealer_id',
-        'data'
+        'map_from',
+        'map_to',
+        'dealer_id'
     ];
 
     /**
@@ -50,13 +61,25 @@ class DealerIncomingPendingMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Dealer ID', 'dealer_id')->sortable(),          
-            
+            Text::make('Map From', 'map_from')->sortable(),
+
+            NovaDependencyContainer::make([
+                Text::make('Map To', 'map_to')->sortable()
+            ])->dependsOnNot('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
+
+            NovaDependencyContainer::make([
+                Text::make('Map To Manufacturer', self::MAP_TO_MANUFACTURER)->sortable()
+            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
+
+            NovaDependencyContainer::make([
+                Text::make('Map To Brand', self::MAP_TO_BRAND)->sortable()
+            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
+
+            Text::make('Dealer ID', 'dealer_id')->sortable(),
+
             Select::make('Type', 'type')
-                ->options(FeedDealerIncomingPendingMapping::$types)
+                ->options(FeedDealerIncomingMapping::$types)
                 ->displayUsingLabels(),
-            
-            Text::make('Data', 'data'),
 
         ];
     }
@@ -81,7 +104,7 @@ class DealerIncomingPendingMapping extends Resource
     public function filters(Request $request)
     {
         return [
-            new Filters\DealerIDPendingMapping
+            new DealerIDMapping
         ];
     }
 
@@ -104,13 +127,6 @@ class DealerIncomingPendingMapping extends Resource
      */
     public function actions(Request $request)
     {
-        return [
-            new MapData
-        ];
-    }
-    
-    public function update()
-    {
-        return false;
+        return [];
     }
 }

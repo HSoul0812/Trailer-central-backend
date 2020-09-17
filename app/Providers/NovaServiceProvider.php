@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
+use App\Nova\Resources\Dealer\Dealer;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -91,5 +92,14 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function register()
     {
         //
+    }
+    
+    protected function resources()
+    {
+        Nova::resourcesIn(app_path('Nova'));
+
+        Nova::resources([
+            Dealer::class
+        ]);
     }
 }

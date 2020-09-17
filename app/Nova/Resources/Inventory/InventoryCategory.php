@@ -1,28 +1,28 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Inventory;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Gravatar;
-use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
+use App\Nova\Resource;
 
-class PartVendor extends Resource
-{
+class InventoryCategory extends Resource
+{    
+    public static $group = 'Inventory';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Parts\Vendor';
+    public static $model = 'App\Models\Inventory\Category';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'label';
 
     /**
      * The columns that should be searched.
@@ -30,7 +30,7 @@ class PartVendor extends Resource
      * @var array
      */
     public static $search = [
-        'name'
+        'label'
     ];
 
     /**
@@ -41,10 +41,20 @@ class PartVendor extends Resource
      */
     public function fields(Request $request)
     {
-        return [
-            ID::make()->sortable(),
+        return [            
+            Text::make('Legacy Category')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            
+            Text::make('Category')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            
+            Text::make('Entity Type ID')
+                ->sortable()
+                ->rules('required'),
 
-            Text::make('Name')
+            Text::make('Label')
                 ->sortable()
                 ->rules('required', 'max:255'),
         ];
@@ -92,5 +102,5 @@ class PartVendor extends Resource
     public function actions(Request $request)
     {
         return [];
-    }
+    } 
 }

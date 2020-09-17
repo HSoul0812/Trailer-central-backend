@@ -1,26 +1,28 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Inventory;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
+use App\Nova\Resource;
 
-class InventoryMfg extends Resource
+class InventoryType extends Resource
 {    
-
+    public static $group = 'Inventory';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Inventory\InventoryMfg';
+    public static $model = 'App\Models\Inventory\EntityType';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'label';
+    public static $title = 'title';
 
     /**
      * The columns that should be searched.
@@ -28,7 +30,7 @@ class InventoryMfg extends Resource
      * @var array
      */
     public static $search = [
-        'label'
+        'title'
     ];
 
     /**
@@ -39,14 +41,25 @@ class InventoryMfg extends Resource
      */
     public function fields(Request $request)
     {
-        return [                        
+        return [            
+            Text::make('ID', 'entity_type_id')
+                ->sortable()
+                ->rules('required'),
+            
             Text::make('Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            Text::make('Label')
+            Text::make('Title')
                 ->sortable()
                 ->rules('required', 'max:255'),
+            
+            Text::make('Title Lowercase')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            
+            Text::make('Sort Order')
+                ->sortable()
         ];
     }
 

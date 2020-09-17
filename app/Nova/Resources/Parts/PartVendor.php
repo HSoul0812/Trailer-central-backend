@@ -1,26 +1,31 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Parts;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Gravatar;
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
+use App\Nova\Resource;
 
-class InventoryType extends Resource
-{    
-
+class PartVendor extends Resource
+{
+    public static $group = 'Parts';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Inventory\EntityType';
+    public static $model = 'App\Models\Parts\Vendor';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'title';
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
@@ -28,7 +33,7 @@ class InventoryType extends Resource
      * @var array
      */
     public static $search = [
-        'title'
+        'name'
     ];
 
     /**
@@ -39,25 +44,12 @@ class InventoryType extends Resource
      */
     public function fields(Request $request)
     {
-        return [            
-            Text::make('ID', 'entity_type_id')
-                ->sortable()
-                ->rules('required'),
-            
+        return [
+            ID::make()->sortable(),
+
             Text::make('Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
-
-            Text::make('Title')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            
-            Text::make('Title Lowercase')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            
-            Text::make('Sort Order')
-                ->sortable()
         ];
     }
 
@@ -103,5 +95,5 @@ class InventoryType extends Resource
     public function actions(Request $request)
     {
         return [];
-    } 
+    }
 }

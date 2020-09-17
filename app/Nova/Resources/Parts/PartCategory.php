@@ -1,21 +1,24 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Parts;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
+use App\Nova\Resource;
 
-class PartType extends Resource
+class PartCategory extends Resource
 {
+    public static $group = 'Parts';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Parts\Type';
+    public static $model = 'App\Models\Parts\Category';
 
     /**
      * The single value that should be used to represent the resource when being displayed.

@@ -1,26 +1,29 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Manufacturer;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
+use App\Nova\Resource;
 
-class ClappBalance extends Resource
-{
+class ManufacturerBrand extends Resource
+{    
+    public static $group = 'Manufacturer';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Marketing\Clapp\Balance';
+    public static $model = 'App\Models\Inventory\Manufacturers\Brand';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'dealer_id';
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
@@ -28,7 +31,7 @@ class ClappBalance extends Resource
      * @var array
      */
     public static $search = [
-        'dealer_id'
+        'name'
     ];
 
     /**
@@ -40,17 +43,11 @@ class ClappBalance extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Dealer ID')
-                ->hideWhenUpdating()
-                ->sortable(),
+            ID::make('Brand ID')->sortable(),
 
-            Text::make('Balance')
-                ->sortable(),
-
-            Text::make('Last Updated')
+            Text::make('Name')
                 ->sortable()
-                ->hideWhenCreating()
-                ->hideWhenUpdating(),
+                ->rules('required', 'max:255'),
         ];
     }
 

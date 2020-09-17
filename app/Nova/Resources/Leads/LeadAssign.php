@@ -1,14 +1,18 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Leads;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\DateTime;
+use App\Nova\Resource;
+use App\Nova\Filters\DealerIDAssignedLeads;
 
 class LeadAssign extends Resource 
 {
+    public static $group = 'Leads';
+    
     /**
      * The model the resource corresponds to.
      *
@@ -138,7 +142,7 @@ class LeadAssign extends Resource
     public function filters(Request $request)
     {
         return [
-            new Filters\DealerIDAssignedLeads
+            new DealerIDAssignedLeads
         ];
     }
 

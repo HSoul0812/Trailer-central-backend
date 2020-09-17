@@ -1,29 +1,31 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Showroom;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
+use App\Nova\Resource;
 
-class InventoryCategory extends Resource
-{    
-
+class ShowroomGenericMap extends Resource
+{
+    
+    public static $group = 'Showroom';
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Inventory\Category';
+    public static $model = 'App\Models\Feed\Factory\ShowroomGenericMap';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'label';
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
@@ -31,7 +33,8 @@ class InventoryCategory extends Resource
      * @var array
      */
     public static $search = [
-        'label'
+        'external_mfg_key',
+        'showroom_id'
     ];
 
     /**
@@ -42,20 +45,14 @@ class InventoryCategory extends Resource
      */
     public function fields(Request $request)
     {
-        return [            
-            Text::make('Legacy Category')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            
-            Text::make('Category')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            
-            Text::make('Entity Type ID')
-                ->sortable()
-                ->rules('required'),
+        return [
+            ID::make()->sortable(),
 
-            Text::make('Label')
+            Text::make('external_mfg_key')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            
+            Text::make('showroom_id')
                 ->sortable()
                 ->rules('required', 'max:255'),
         ];
@@ -103,5 +100,5 @@ class InventoryCategory extends Resource
     public function actions(Request $request)
     {
         return [];
-    } 
+    }
 }

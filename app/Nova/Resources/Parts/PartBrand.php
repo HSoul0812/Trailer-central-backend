@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Parts;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
+use App\Nova\Resource;
 
-class ShowroomGenericMap extends Resource
+class PartBrand extends Resource
 {
+    public static $group = 'Parts';
+    
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Feed\Factory\ShowroomGenericMap';
+    public static $model = 'App\Models\Parts\Brand';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -30,8 +31,7 @@ class ShowroomGenericMap extends Resource
      * @var array
      */
     public static $search = [
-        'external_mfg_key',
-        'showroom_id'
+        'name'
     ];
 
     /**
@@ -45,11 +45,7 @@ class ShowroomGenericMap extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make('external_mfg_key')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            
-            Text::make('showroom_id')
+            Text::make('Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
         ];
