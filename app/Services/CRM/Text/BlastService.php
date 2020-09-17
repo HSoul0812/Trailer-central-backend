@@ -6,10 +6,12 @@ use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoBlastSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Text\BlastSent;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class BlastService
@@ -153,7 +155,7 @@ class BlastService implements BlastServiceInterface
                     'lead_status' => Lead::STATUS_MEDIUM,
                     'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
                 ]);
-                $status = CampaignSent::STATUS_LEAD;
+                $status = BlastSent::STATUS_LEAD;
 
                 // Log SMS
                 $textLog = $this->texts->create([
@@ -162,7 +164,7 @@ class BlastService implements BlastServiceInterface
                     'to_number'   => $lead->text_phone,
                     'log_message' => $textMessage
                 ]);
-                $status = CampaignSent::STATUS_LOGGED;
+                $status = BlastSent::STATUS_LOGGED;
             } catch(\Exception $e) {
                 $this->error("Exception returned marking lead #{$lead->identifier} on blast #{$blast->id}: {$e->getMessage()}: {$e->getTraceAsString()}");
             }

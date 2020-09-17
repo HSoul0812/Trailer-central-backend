@@ -6,10 +6,12 @@ use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Text\CampaignSent;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class CampaignService
