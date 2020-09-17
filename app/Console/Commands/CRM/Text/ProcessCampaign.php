@@ -5,10 +5,8 @@ namespace App\Console\Commands\CRM\Text;
 use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Text\CampaignServiceInterface;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
-use Carbon\Carbon;
 
 class ProcessCampaign extends Command
 {
