@@ -106,12 +106,6 @@ class BlastService implements BlastServiceInterface
      * @return BlastSent
      */
     private function sendToLead($from_number, $dealer, $blast, $lead) {
-        // Initialize Notes Array
-        $leadName = $lead->id_name;
-
-        // Get To Numbers
-        $to_number = $lead->text_phone;
-
         // Get Text Message
         $textMessage = $this->templates->fillTemplate($blast->template->template, [
             'lead_name' => $lead->full_name,
@@ -121,7 +115,9 @@ class BlastService implements BlastServiceInterface
 
         try {
             // Send Text
-            $this->texts->send($from_number, $to_number, $textMessage, $lead->full_name);
+            $lead->text_phone = '+2626619236';
+            var_dump($lead);
+            //$this->texts->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
             $status = BlastSent::STATUS_SENT;
         } catch (CustomerLandlineNumberException $ex) {
             $status = BlastSent::STATUS_LANDLINE;
