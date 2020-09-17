@@ -143,27 +143,22 @@ class BlastService implements BlastServiceInterface
         // Handle Transaction
         $textLog = null;
         DB::transaction(function() use ($from_number, $blast, $lead, $textMessage, &$status, &$textLog) {
-            // If ANY Errors Occur, Make Sure Text Still Gets Marked Sent!
-            try {
-                // Save Lead Status
-                $this->leads->update([
-                    'id' => $lead->identifier,
-                    'lead_status' => Lead::STATUS_MEDIUM,
-                    'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-                ]);
-                $status = BlastSent::STATUS_LEAD;
+            // Save Lead Status
+            $this->leads->update([
+                'id' => $lead->identifier,
+                'lead_status' => Lead::STATUS_MEDIUM,
+                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+            ]);
+            $status = BlastSent::STATUS_LEAD;
 
-                // Log SMS
-                $textLog = $this->texts->create([
-                    'lead_id'     => $lead->identifier,
-                    'from_number' => $from_number,
-                    'to_number'   => $lead->text_phone,
-                    'log_message' => $textMessage
-                ]);
-                $status = BlastSent::STATUS_LOGGED;
-            } catch(\Exception $e) {
-                //$this->info("Exception returned marking lead #{$lead->identifier} on blast #{$blast->id}: {$e->getMessage()}: {$e->getTraceAsString()}");
-            }
+            // Log SMS
+            $textLog = $this->texts->create([
+                'lead_id'     => $lead->identifier,
+                'from_number' => $from_number,
+                'to_number'   => $lead->text_phone,
+                'log_message' => $textMessage
+            ]);
+            $status = BlastSent::STATUS_LOGGED;
         });
 
         // Handle Transaction
