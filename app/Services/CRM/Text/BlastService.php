@@ -166,7 +166,7 @@ class BlastService implements BlastServiceInterface
                 ]);
                 $status = BlastSent::STATUS_LOGGED;
             } catch(\Exception $e) {
-                $this->error("Exception returned marking lead #{$lead->identifier} on blast #{$blast->id}: {$e->getMessage()}: {$e->getTraceAsString()}");
+                $this->info("Exception returned marking lead #{$lead->identifier} on blast #{$blast->id}: {$e->getMessage()}: {$e->getTraceAsString()}");
             }
         });
 
