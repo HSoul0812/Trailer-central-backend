@@ -40,6 +40,21 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
 
 
     /**
+     * Get First Dealer SMS Number
+     * 
+     * @param int $dealerId
+     * @return type
+     */
+    public function findDealerSmsNumber($dealerId)
+    {
+        // Get First Dealer Location SMS Numbers
+        return DealerLocation::where('dealer_id', $dealerId)
+                                ->whereNotNull('sms_phone')
+                                ->pluck('sms_phone')
+                                ->first();
+    }
+
+    /**
      * Get All Dealer SMS Numbers
      * 
      * @param int $dealerId

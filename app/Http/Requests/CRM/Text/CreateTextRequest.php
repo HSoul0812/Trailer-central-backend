@@ -12,9 +12,9 @@ use App\Http\Requests\Request;
 class CreateTextRequest extends Request {
 
     protected $rules = [
-        'message' => 'required|string',
-        'from_number' => 'required|string',
-        'to_number' => 'required|string',
-        'date_sent' => 'nullable|string'
+        'log_message' => 'required|string|max:160',
+        'from_number' => 'required|regex:/(0-9)?[0-9]{10}/',
+        'to_number' => 'required|regex:/(0-9)?[0-9]{10}/',
+        'date_sent' => 'nullable|date_format:Y-m-d H:i:s'
     ];
 }

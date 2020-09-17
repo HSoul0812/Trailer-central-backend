@@ -50,14 +50,8 @@ class NumberRepository implements NumberRepositoryInterface {
     }
 
     public function update($params) {
-        $number = Number::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$number, $params) {
-            // Fill Text Details
-            $number->fill($params)->save();
-        });
-
-        return $number;
+        // Save Text Number
+        return Number::findOrFail($params['id'])->fill($params)->save();
     }
 
     /**
@@ -71,7 +65,7 @@ class NumberRepository implements NumberRepositoryInterface {
      */
     public function setPhoneAsUsed($dealerNo, $usedNo, $customerNo, $customerName) {
         // Calculate Expiration
-        $expirationTime = time() + (self::EXPIRATION_TIME * 60 * 60);
+        $expirationTime = time() + (Number::EXPIRATION_TIME * 60 * 60);
 
         // Create Number in DB
         return $this->create([

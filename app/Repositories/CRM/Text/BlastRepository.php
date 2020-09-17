@@ -2,15 +2,13 @@
 
 namespace App\Repositories\CRM\Text;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
-use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\CRM\Text\BlastBrand;
 use App\Models\CRM\Text\BlastCategory;
+use Carbon\Carbon;
 
 class BlastRepository implements BlastRepositoryInterface {
 
@@ -21,14 +19,6 @@ class BlastRepository implements BlastRepositoryInterface {
         ],
         '-name' => [
             'field' => 'campaign_name',
-            'direction' => 'ASC'
-        ],
-        'subject' => [
-            'field' => 'campaign_subject',
-            'direction' => 'DESC'
-        ],
-        '-subject' => [
-            'field' => 'campaign_subject',
             'direction' => 'ASC'
         ],
         'created_at' => [
@@ -86,15 +76,7 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function delete($params) {
-        $blast = Blast::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$blast, $params) {
-            $params['deleted'] = '1';
-
-            $blast->fill($params)->save();
-        });
-
-        return $blast;
+        return Blast::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
     }
 
     public function get($params) {
@@ -112,6 +94,22 @@ class BlastRepository implements BlastRepositoryInterface {
             $query = $query->where('user_id', $params['user_id']);
         }
 
+        if (isset($params['is_delivered'])) {
+            $query = $query->where('is_delivered', !empty($params['is_delivered']) ? 1 : 0);
+        }
+
+        if (isset($params['is_cancelled'])) {
+            $query = $query->where('is_cancelled', !empty($params['is_cancelled']) ? 1 : 0);
+        }
+
+        if (isset($params['send_date'])) {
+            if($params['send_date'] === 'due_now') {
+                $query = $query->where('send_date', '<', Carbon::now()->toDateTimeString());
+            } else {
+                $query = $query->where('send_date', '<', $params['send_date']);
+            }
+        }
+
         if (isset($params['id'])) {
             $query = $query->whereIn('id', $params['id']);
         }
@@ -119,34 +117,25 @@ class BlastRepository implements BlastRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
+
+        // Return All?
+        if($params['per_page'] === 'all') {
+            return $query->get();
+        }
         
         return $query->paginate($params['per_page'])->appends($params);
     }
 
     /**
-     * Get Leads for Blast
+     * Get All Active Blasts For Dealer
      * 
-     * @param array $params
-     * @return Collection
+     * @param int $userId
+     * @return Collection of Blast
      */
-    public function getLeads($params) {
-        // Get Blast
-        $blast = Blast::findOrFail($params['id']);
-        $crmUser = $blast->newDealerUser()->first();
-
-        // Find Blast Leads
-        $query = $this->findBlastLeads($crmUser->id, $blast);
-        
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 100;
-        }
-
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
-        }
-
-        // Return Blast Leads
-        return $query->paginate($params['per_page'])->appends($params);
+    public function getAllActive($userId) {
+        return Blast::where('user_id', $userId)
+                    ->where('is_delivered', 0)->where('is_cancelled', 0)
+                    ->where('send_date', '<', Carbon::now()->toDateTimeString())->get();
     }
 
     public function update($params) {
@@ -260,59 +249,4 @@ class BlastRepository implements BlastRepositoryInterface {
             }
         }
     }
-
-    /**
-     * Find Blast Leads
-     * 
-     * @param int $dealerId
-     * @param Blast $blast
-     * @return Collection of Leads
-     */
-    private function findBlastLeads($dealerId, $blast)
-    {
-        // Find Filtered Leads
-        $query = Lead::select('website_lead.*')
-                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->where('website_lead.dealer_id', $dealerId);
-
-        // Is Archived?!
-        if($blast->included_archived === -1 || $blast->include_archived === '-1') {
-            $query = $query->where('website_lead.is_archived', 0);
-        } elseif($blast->included_archived !== 0 && $blast->include_archived === '0') {
-            $query = $query->where('website_lead.is_archived', $blast->include_archived);
-        }
-
-        // Get Categories
-        if(!empty($blast->categories)) {
-            $categories = array();
-            foreach($blast->categories as $category) {
-                $categories[] = $category->category;
-            }
-
-            // Add IN
-            if(count($categories) > 0) {
-                $query = $query->whereIn('inventory.category', $categories);
-            }
-        }
-
-        // Get Brands
-        if(!empty($blast->brands)) {
-            $brands = array();
-            foreach($blast->brands as $brand) {
-                $brands[] = $brand->brand;
-            }
-
-            // Add IN
-            if(count($brands) > 0) {
-                $query = $query->whereIn('inventory.manufacturer', $brands);
-            }
-        }
-
-        // Return Filtered Query
-        return $query->where(function (Builder $query) use($blast) {
-            return $query->where('website_lead.dealer_location_id', $blast->location_id)
-                    ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$blast->location_id]);
-        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) > NOW()');
-    }
-
 }

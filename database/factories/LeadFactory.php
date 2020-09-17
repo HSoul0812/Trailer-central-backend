@@ -4,6 +4,7 @@
 
 use Tests\TestCase;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Inventory\Inventory;
 use Faker\Generator as Faker;
 
@@ -42,5 +43,13 @@ $factory->define(Lead::class, function (Faker $faker) {
         'comments' => $faker->realText,
         'note' => $faker->realText,
         'date_submitted' => $faker->dateTimeThisMonth
+    ];
+});
+
+$factory->define(LeadStatus::class, function (Faker $faker) {
+    // Return Overrides
+    return [
+        'status' => Lead::STATUS_UNCONTACTED,
+        'contact_type' => LeadStatus::TYPE_CONTACT
     ];
 });
