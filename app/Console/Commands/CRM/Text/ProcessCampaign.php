@@ -32,11 +32,6 @@ class ProcessCampaign extends Command
     protected $service;
 
     /**
-     * @var App\Repositories\CRM\Leads\LeadRepository
-     */
-    protected $leads;
-
-    /**
      * @var App\Repositories\CRM\Text\TextRepository
      */
     protected $texts;
@@ -57,14 +52,12 @@ class ProcessCampaign extends Command
      * @return void
      */
     public function __construct(CampaignServiceInterface $service,
-                                LeadRepositoryInterface $leadRepo,
                                 TextRepositoryInterface $textRepo,
                                 CampaignRepositoryInterface $campaignRepo)
     {
         parent::__construct();
 
         $this->service = $service;
-        $this->leads = $leadRepo;
         $this->texts = $textRepo;
         $this->campaigns = $campaignRepo;
     }

@@ -7,6 +7,9 @@ use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\CampaignSent;
+use App\Services\CRM\Text\TextServiceInterface;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
@@ -22,6 +25,16 @@ class CampaignService implements CampaignServiceInterface
 {
     /**
      * @var App\Services\CRM\Text\TextServiceInterface
+     */
+    protected $textService;
+
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepository
+     */
+    protected $leads;
+
+    /**
+     * @var App\Repositories\CRM\Text\TextRepository
      */
     protected $texts;
 
@@ -44,14 +57,18 @@ class CampaignService implements CampaignServiceInterface
      * CampaignService constructor.
      */
     public function __construct(TextServiceInterface $text,
+                                LeadRepositoryInterface $leadRepo,
+                                TextRepositoryInterface $textRepo,
                                 CampaignRepositoryInterface $campaignRepo,
                                 TemplateRepositoryInterface $templateRepo,
                                 DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         // Initialize Text Service
-        $this->texts = $text;
+        $this->textService = $text;
 
         // Initialize Repositories
+        $this->leads = $leadRepo;
+        $this->texts = $textRepo;
         $this->campaigns = $campaignRepo;
         $this->templates = $templateRepo;
         $this->dealerLocation = $dealerLocationRepo;
@@ -156,8 +173,12 @@ class CampaignService implements CampaignServiceInterface
                 'to_number'   => $lead->text_phone,
                 'log_message' => $textMessage
             ]);
-            $status = CampaignSent::STATUS_LOGGED;
         });
+
+        // Set Logged Status
+        if(!empty($textLog->id)) {
+            $status = CampaignSent::STATUS_LOGGED;
+        }
 
         // Handle Transaction
         $sent = null;

@@ -7,6 +7,9 @@ use App\Exceptions\CRM\Text\NoBlastSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\BlastSent;
+use App\Services\CRM\Text\TextServiceInterface;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
@@ -22,6 +25,16 @@ class BlastService implements BlastServiceInterface
 {
     /**
      * @var App\Services\CRM\Text\TextServiceInterface
+     */
+    protected $textService;
+
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepository
+     */
+    protected $leads;
+
+    /**
+     * @var App\Repositories\CRM\Text\TextRepository
      */
     protected $texts;
 
@@ -44,14 +57,18 @@ class BlastService implements BlastServiceInterface
      * BlastService constructor.
      */
     public function __construct(TextServiceInterface $text,
+                                LeadRepositoryInterface $leadRepo,
+                                TextRepositoryInterface $textRepo,
                                 BlastRepositoryInterface $blastRepo,
                                 TemplateRepositoryInterface $templateRepo,
                                 DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         // Initialize Text Service
-        $this->texts = $text;
+        $this->textService = $text;
 
         // Initialize Repositories
+        $this->leads = $leadRepo;
+        $this->texts = $textRepo;
         $this->blasts = $blastRepo;
         $this->templates = $templateRepo;
         $this->dealerLocation = $dealerLocationRepo;
@@ -158,8 +175,12 @@ class BlastService implements BlastServiceInterface
                 'to_number'   => $lead->text_phone,
                 'log_message' => $textMessage
             ]);
-            $status = BlastSent::STATUS_LOGGED;
         });
+
+        // Set Logged Status
+        if(!empty($textLog->id)) {
+            $status = CampaignSent::STATUS_LOGGED;
+        }
 
         // Handle Transaction
         $sent = null;

@@ -32,11 +32,6 @@ class DeliverBlast extends Command
     protected $service;
 
     /**
-     * @var App\Repositories\CRM\Leads\LeadRepository
-     */
-    protected $leads;
-
-    /**
      * @var App\Repositories\CRM\Text\TextRepository
      */
     protected $texts;
@@ -57,14 +52,12 @@ class DeliverBlast extends Command
      * @return void
      */
     public function __construct(BlastServiceInterface $service,
-                                LeadRepositoryInterface $leadRepo,
                                 TextRepositoryInterface $textRepo,
                                 BlastRepositoryInterface $blastRepo)
     {
         parent::__construct();
 
         $this->service = $service;
-        $this->leads = $leadRepo;
         $this->texts = $textRepo;
         $this->blasts = $blastRepo;
     }
