@@ -160,7 +160,7 @@ class CampaignService implements CampaignServiceInterface
                 ]);
                 $status = CampaignSent::STATUS_LOGGED;
             } catch(\Exception $e) {
-                $this->info("Exception returned marking lead #{$lead->identifier} on campaign #{$campaign->id}: {$e->getMessage()}: {$e->getTraceAsString()}");
+                //$this->info("Exception returned marking lead #{$lead->identifier} on campaign #{$campaign->id}: {$e->getMessage()}: {$e->getTraceAsString()}");
             }
         });
 
