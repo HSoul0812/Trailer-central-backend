@@ -102,7 +102,7 @@ class Campaign extends Model
      * 
      * @return int version of include_archived
      */
-    public function getIncludeArchivedAttribute()
+    public function getArchivedStatusAttribute()
     {
         return (int) $this->include_archived;
     }
@@ -136,10 +136,10 @@ class Campaign extends Model
                      ->whereNull('crm_text_campaign_sent.text_campaign_id');
 
         // Is Archived?!
-        if($campaign->include_archived === -1) {
+        if($campaign->archived_status === -1) {
             $query = $query->where('website_lead.is_archived', 0);
-        } elseif($campaign->include_archived !== 0) {
-            $query = $query->where('website_lead.is_archived', $campaign->include_archived);
+        } elseif($campaign->archived_status !== 0) {
+            $query = $query->where('website_lead.is_archived', $campaign->archived_status);
         }
 
         // Get Categories
