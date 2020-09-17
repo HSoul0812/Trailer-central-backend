@@ -151,11 +151,11 @@ class ProcessCampaignTest extends TestCase
             }
 
             // Assert a lead status entry was saved...
-            /*$this->assertDatabaseHas('dealer_texts_log', [
+            $this->assertDatabaseHas('dealer_texts_log', [
                 'lead_id'     => $lead->identifier,
                 'from_number' => $from_number,
                 'to_number'   => $lead->text_phone
-            ]);*/
+            ]);
 
             // Assert a text campaign was logged sent
             $this->assertDatabaseHas('crm_text_campaign_sent', [
