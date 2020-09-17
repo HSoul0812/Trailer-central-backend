@@ -89,7 +89,7 @@ class DeliverBlast extends Command
             // Log Start
             $now = $this->datetime->format("l, F jS, Y");
             $command = "text:deliver-blast" . (!empty($dealerId) ? ' ' . $dealerId : '');
-            $this->debug("{$command} started {$now}");
+            $this->info("{$command} started {$now}");
 
             // Handle Dealer Differently
             if(!empty($dealerId)) {
@@ -97,7 +97,7 @@ class DeliverBlast extends Command
             } else {
                 $dealers = NewDealerUser::has('activeCrmUser')->with('user')->get();
             }
-            $this->debug("{$command} found " . count($dealers) . " dealers to process");
+            $this->info("{$command} found " . count($dealers) . " dealers to process");
 
             // Get Dealers With Active CRM
             foreach($dealers as $dealer) {
@@ -108,7 +108,7 @@ class DeliverBlast extends Command
                 }
 
                 // Loop Blasts for Current Dealer
-                $this->debug("{$command} dealer #{$dealer->id} found " . count($blasts) . " active blasts to process");
+                $this->info("{$command} dealer #{$dealer->id} found " . count($blasts) . " active blasts to process");
                 foreach($blasts as $blast) {
                     // Try Catching Error for Blast
                     try {
@@ -126,6 +126,6 @@ class DeliverBlast extends Command
         // Log End
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
-        $this->debug("{$command} finished on " . $datetime->format("l, F jS, Y"));
+        $this->info("{$command} finished on " . $datetime->format("l, F jS, Y"));
     }
 }
