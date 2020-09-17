@@ -30,7 +30,7 @@ class Location extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'dealer_id', 'name', 'email',
     ];
 
     /**
