@@ -134,7 +134,7 @@ class BlastService implements BlastServiceInterface
 
         try {
             // Send Text
-            $this->texts->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
+            $this->textService->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
             $status = BlastSent::STATUS_SENT;
         } catch (CustomerLandlineNumberException $ex) {
             $status = BlastSent::STATUS_LANDLINE;

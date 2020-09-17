@@ -132,7 +132,7 @@ class CampaignService implements CampaignServiceInterface
 
         try {
             // Send Text
-            $this->texts->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
+            $this->textService->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
             $status = CampaignSent::STATUS_SENT;
         } catch (CustomerLandlineNumberException $ex) {
             $status = CampaignSent::STATUS_LANDLINE;
