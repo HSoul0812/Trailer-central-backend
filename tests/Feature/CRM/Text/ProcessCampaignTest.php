@@ -81,7 +81,6 @@ class ProcessCampaignTest extends TestCase
         // Build Generic Campaign
         $campaign = factory(Campaign::class)->create();
         $unused = $this->refreshLeads($campaign->id);
-        return false;
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
@@ -205,7 +204,6 @@ class ProcessCampaignTest extends TestCase
         $unused = $this->refreshLeads($campaign->id, [
             'action' => 'purchased'
         ]);
-        return false;
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
@@ -335,7 +333,6 @@ class ProcessCampaignTest extends TestCase
             'location_id' => $locationId,
             'unused_location_id' => $lastLocationId
         ]);
-        return false;
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
@@ -459,7 +456,6 @@ class ProcessCampaignTest extends TestCase
         $unused = $this->refreshLeads($campaign->id, [
             'is_archived' => 1
         ]);
-        return false;
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
@@ -594,7 +590,6 @@ class ProcessCampaignTest extends TestCase
             'brands' => $brands,
             'unused_brands' => $unusedBrands
         ]);
-        return false;
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
@@ -730,7 +725,6 @@ class ProcessCampaignTest extends TestCase
             'categories' => $categories,
             'unused_categories' => $unusedCategories
         ]);
-        return false;
 
         // Get Campaigns for Dealer
         $campaigns = $this->campaigns->getAllActive($dealer->user_id);
