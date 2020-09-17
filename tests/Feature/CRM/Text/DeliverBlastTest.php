@@ -81,6 +81,7 @@ class DeliverBlastTest extends TestCase
         // Build Generic Blast
         $blast = factory(Blast::class)->create();
         $unused = $this->refreshLeads($blast->id);
+        return false;
 
         // Get Blasts for Dealer
         $blasts = $this->blasts->getAllActive($dealer->user_id);
@@ -204,6 +205,7 @@ class DeliverBlastTest extends TestCase
         $unused = $this->refreshLeads($blast->id, [
             'action' => 'purchased'
         ]);
+        return false;
 
         // Get Blasts for Dealer
         $blasts = $this->blasts->getAllActive($dealer->user_id);
@@ -333,6 +335,7 @@ class DeliverBlastTest extends TestCase
             'location_id' => $locationId,
             'unused_location_id' => $lastLocationId
         ]);
+        return false;
 
         // Get Blasts for Dealer
         $blasts = $this->blasts->getAllActive($dealer->user_id);
@@ -456,6 +459,7 @@ class DeliverBlastTest extends TestCase
         $unused = $this->refreshLeads($blast->id, [
             'is_archived' => 1
         ]);
+        return false;
 
         // Get Blasts for Dealer
         $blasts = $this->blasts->getAllActive($dealer->user_id);
@@ -590,6 +594,7 @@ class DeliverBlastTest extends TestCase
             'brands' => $brands,
             'unused_brands' => $unusedBrands
         ]);
+        return false;
 
         // Get Blasts for Dealer
         $blasts = $this->blasts->getAllActive($dealer->user_id);
@@ -725,6 +730,7 @@ class DeliverBlastTest extends TestCase
             'categories' => $categories,
             'unused_categories' => $unusedCategories
         ]);
+        return false;
 
         // Get Blasts for Dealer
         $blasts = $this->blasts->getAllActive($dealer->user_id);
