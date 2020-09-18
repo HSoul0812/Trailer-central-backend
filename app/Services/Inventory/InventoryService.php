@@ -2,7 +2,7 @@
 
 namespace App\Services\Inventory;
 
-use App\Jobs\Files\DeleteFilesJob;
+use App\Jobs\Files\DeleteS3FilesJob;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
@@ -89,7 +89,7 @@ class InventoryService
 
                 $this->imageRepository->delete($deleteImagesParams);
 
-                $this->dispatch((new DeleteFilesJob($imagesFilenames))->onQueue('files'));
+                $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
             }
 
             if (!$filesToDelete->isEmpty()) {
@@ -104,7 +104,7 @@ class InventoryService
 
                 $this->fileRepository->delete($deleteFilesParams);
 
-                $this->dispatch((new DeleteFilesJob($filesFilenames))->onQueue('files'));
+                $this->dispatch((new DeleteS3FilesJob($filesFilenames))->onQueue('files'));
             }
 
             $this->inventoryRepository->delete(['id' => $inventoryId]);

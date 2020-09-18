@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Services\Inventory;
 
-use App\Jobs\Files\DeleteFilesJob;
+use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
 use App\Repositories\Inventory\FileRepositoryInterface;
@@ -109,7 +109,7 @@ class InventoryServiceTest extends TestCase
             ])
             ->once();
 
-        $this->expectsJobs(DeleteFilesJob::class);
+        $this->expectsJobs(DeleteS3FilesJob::class);
 
         $this->fileRepositoryMock
             ->shouldReceive('getAllByInventoryId')
@@ -132,7 +132,7 @@ class InventoryServiceTest extends TestCase
             ->with(['id' => $inventoryId])
             ->andReturn(true);
 
-        $this->expectsJobs(DeleteFilesJob::class);
+        $this->expectsJobs(DeleteS3FilesJob::class);
 
         Log::shouldReceive('info')
             ->with('Item has been successfully deleted', ['inventoryId' => $inventoryId]);
@@ -184,7 +184,7 @@ class InventoryServiceTest extends TestCase
             ->with(['id' => $inventoryId])
             ->andReturn(true);
 
-        $this->doesntExpectJobs(DeleteFilesJob::class);
+        $this->doesntExpectJobs(DeleteS3FilesJob::class);
 
         Log::shouldReceive('info')
             ->with('Item has been successfully deleted', ['inventoryId' => $inventoryId]);
@@ -232,7 +232,7 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('delete')
             ->never();
 
-        $this->doesntExpectJobs(DeleteFilesJob::class);
+        $this->doesntExpectJobs(DeleteS3FilesJob::class);
 
         Log::shouldReceive('error')
             ->with('Item delete error.', $exception->getTrace());

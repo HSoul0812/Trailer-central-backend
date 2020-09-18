@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
  * Class DeleteFiles
  * @package App\Jobs\Files
  */
-class DeleteFilesJob extends Job
+class DeleteS3FilesJob extends Job
 {
     /**
      * @var string[]

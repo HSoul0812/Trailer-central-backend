@@ -2,20 +2,20 @@
 
 namespace Tests\Unit\Jobs\Files;
 
-use App\Jobs\Files\DeleteFilesJob;
+use App\Jobs\Files\DeleteS3FilesJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
- * Test for App\Jobs\Files\DeleteFilesJob
+ * Test for App\Jobs\Files\DeleteS3FilesJob
  *
  * Class DeleteFilesJobTest
  * @package Tests\Unit\Jobs\Files
  *
- * @coversDefaultClass \App\Jobs\Files\DeleteFilesJob
+ * @coversDefaultClass \App\Jobs\Files\DeleteS3FilesJob
  */
-class DeleteFilesJobTest extends TestCase
+class DeleteS3FilesJobTest extends TestCase
 {
     /**
      * @covers ::handle
@@ -23,7 +23,7 @@ class DeleteFilesJobTest extends TestCase
     public function testHandle()
     {
         $files = ['/test/testFile1', '/test/testFile2'];
-        $deleteFilesJob = new DeleteFilesJob($files);
+        $deleteS3FilesJob = new DeleteS3FilesJob($files);
 
         Storage::fake('s3');
 
@@ -32,7 +32,7 @@ class DeleteFilesJobTest extends TestCase
 
         Storage::disk('s3')->assertExists($files);
 
-        $deleteFilesJob->handle();
+        $deleteS3FilesJob->handle();
 
         Storage::disk('s3')->assertMissing($files);
 
@@ -47,11 +47,11 @@ class DeleteFilesJobTest extends TestCase
     public function testHandleWithException()
     {
         $files = [new \stdClass()];
-        $deleteFilesJob = new DeleteFilesJob($files);
+        $deleteS3FilesJob = new DeleteS3FilesJob($files);
 
         Storage::fake('s3');
 
-        $deleteFilesJob->handle();
+        $deleteS3FilesJob->handle();
 
         Log::shouldReceive('error');
 
