@@ -23,6 +23,7 @@ class TemplateController extends RestfulControllerV2
      */
     public function __construct(TemplateRepositoryInterface $templates)
     {
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create']);
         $this->templates = $templates;
     }
 
@@ -139,7 +140,7 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function show(int $userId, int $id) {
+    public function show(int $id) {
         $request = new ShowTemplateRequest(['id' => $id]);
         
         if ( $request->validate() ) {
@@ -187,7 +188,7 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function update(int $userId, int $id, Request $request) {
+    public function update(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateTemplateRequest($requestData);
@@ -222,7 +223,7 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function destroy(int $userId, int $id) {
+    public function destroy(int $id) {
         $request = new DeleteTemplateRequest(['id' => $id]);
         
         if ( $request->validate()) {

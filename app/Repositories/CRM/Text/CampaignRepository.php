@@ -2,11 +2,8 @@
 
 namespace App\Repositories\CRM\Text;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
-use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
 use App\Models\CRM\Text\CampaignBrand;
@@ -21,14 +18,6 @@ class CampaignRepository implements CampaignRepositoryInterface {
         ],
         '-name' => [
             'field' => 'campaign_name',
-            'direction' => 'ASC'
-        ],
-        'subject' => [
-            'field' => 'campaign_subject',
-            'direction' => 'DESC'
-        ],
-        '-subject' => [
-            'field' => 'campaign_subject',
             'direction' => 'ASC'
         ],
         'created_at' => [
@@ -86,15 +75,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function delete($params) {
-        $campaign = Campaign::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$campaign, $params) {
-            $params['deleted'] = '1';
-
-            $campaign->fill($params)->save();
-        });
-
-        return $campaign;
+        return Campaign::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
     }
 
     public function get($params) {
@@ -112,6 +93,10 @@ class CampaignRepository implements CampaignRepositoryInterface {
             $query = $query->where('user_id', $params['user_id']);
         }
 
+        if (isset($params['is_enabled'])) {
+            $query = $query->where('is_enabled', !empty($params['is_enabled']) ? 1 : 0);
+        }
+
         if (isset($params['id'])) {
             $query = $query->whereIn('id', $params['id']);
         }
@@ -124,29 +109,13 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     /**
-     * Get Leads for Campaign
+     * Get All Active Campaigns For Dealer
      * 
-     * @param array $params
-     * @return Collection
+     * @param int $userId
+     * @return Collection of Campaign
      */
-    public function getLeads($params) {
-        // Get Campaign
-        $campaign = Campaign::findOrFail($params['id']);
-        $crmUser = $campaign->newDealerUser()->first();
-
-        // Find Campaign Leads
-        $query = $this->findCampaignLeads($crmUser->id, $campaign);
-        
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 100;
-        }
-
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
-        }
-
-        // Return Campaign Leads
-        return $query->paginate($params['per_page'])->appends($params);
+    public function getAllActive($userId) {
+        return Campaign::where('user_id', $userId)->where('is_enabled', 1)->get();
     }
 
     public function update($params) {
@@ -261,59 +230,5 @@ class CampaignRepository implements CampaignRepositoryInterface {
                 ]);
             }
         }
-    }
-
-    /**
-     * Find Campaign Leads
-     * 
-     * @param int $dealerId
-     * @param Campaign $campaign
-     * @return Collection of Leads
-     */
-    private function findCampaignLeads($dealerId, $campaign)
-    {
-        // Find Filtered Leads
-        $query = Lead::select('website_lead.*')
-                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->where('website_lead.dealer_id', $dealerId);
-
-        // Is Archived?!
-        if($campaign->included_archived === -1 || $campaign->include_archived === '-1') {
-            $query = $query->where('website_lead.is_archived', 0);
-        } elseif($campaign->included_archived !== 0 && $campaign->include_archived === '0') {
-            $query = $query->where('website_lead.is_archived', $campaign->include_archived);
-        }
-
-        // Get Categories
-        if(!empty($campaign->categories)) {
-            $categories = array();
-            foreach($campaign->categories as $category) {
-                $categories[] = $category->category;
-            }
-
-            // Add IN
-            if(count($categories) > 0) {
-                $query = $query->whereIn('inventory.category', $categories);
-            }
-        }
-
-        // Get Brands
-        if(!empty($campaign->brands)) {
-            $brands = array();
-            foreach($campaign->brands as $brand) {
-                $brands[] = $brand->brand;
-            }
-
-            // Add IN
-            if(count($brands) > 0) {
-                $query = $query->whereIn('inventory.manufacturer', $brands);
-            }
-        }
-
-        // Return Filtered Query
-        return $query->where(function (Builder $query) use($campaign) {
-            return $query->where('website_lead.dealer_location_id', $campaign->location_id)
-                    ->orWhereRaw('(website_lead.dealer_location_id = 0 AND inventory.dealer_location_id = ?)', [$campaign->location_id]);
-        })->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) > NOW()');
     }
 }

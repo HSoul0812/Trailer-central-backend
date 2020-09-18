@@ -63,7 +63,7 @@ class NewDealerUser extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'dealer_id', 'id');
+        return $this->belongsTo(User::class, 'id', 'dealer_id');
     }
 
     /**

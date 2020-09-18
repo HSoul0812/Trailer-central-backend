@@ -13,8 +13,7 @@ class StopTransformer extends TransformerAbstract
              'id' => (int)$stop->id,
              'lead_id' => (int)$stop->lead_id,
              'text_id' => (int)$stop->text_id,
-             'response_id' => (int)$stop->response_id,
-             'text_number' => $stop->text_number,
+             'sms_number' => $stop->sms_number,
              'created_at' => $stop->created_at,
              'updated_at' => $stop->updated_at,
          ];
