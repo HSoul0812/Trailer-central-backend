@@ -14,6 +14,7 @@ class FieldMap extends Model
     const MAP_TYPES = [
         'lead' => 'Lead',
         'special_name' => 'Full Name',
+        'special_phone' => 'Phone Number',
         'special_address' => 'Address',
         'trade' => 'Trade',
         'lead_type' => 'Lead Type',
@@ -80,6 +81,7 @@ class FieldMap extends Model
     const MAP_TABLES = [
         'lead' => 'website_lead',
         'special_name' => 'website_lead',
+        'special_phone' => 'website_lead',
         'special_address' => 'website_lead',
         'trade' => 'website_lead_trades',
         'lead_type' => 'website_lead_types',
