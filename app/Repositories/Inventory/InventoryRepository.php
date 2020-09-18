@@ -129,6 +129,14 @@ class InventoryRepository implements InventoryRepositoryInterface
             $item->clapps()->delete();
             $item->lotVantageInventory()->delete();
 
+            if (isset($params['imageIds']) && is_array($params['imageIds'])) {
+                $item->images()->whereIn('image.image_id', $params['imageIds'])->delete();
+            }
+
+            if (isset($params['fileIds']) && is_array($params['fileIds'])) {
+                $item->files()->whereIn('file.id', $params['fileIds'])->delete();
+            }
+
             $item->delete();
         });
 

@@ -116,6 +116,11 @@ class Inventory extends Model
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
     }
 
+    public function files()
+    {
+        return $this->hasManyThrough(File::class, InventoryFile::class, 'inventory_id', 'id', 'inventory_id', 'file_id');
+    }
+
     public function inventoryFeatures()
     {
         return $this->hasMany(InventoryFeature::class, 'inventory_id', 'inventory_id');

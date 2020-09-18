@@ -79,35 +79,33 @@ class InventoryService
 
             if (!$imagesToDelete->isEmpty()) {
                 $imagesFilenames = $imagesToDelete->pluck('filename')->toArray();
-                $imagesIds = $imagesToDelete->pluck('image_id')->toArray();
-
-                $deleteImagesParams = [
-                    Repository::CONDITION_AND_WHERE_IN => [
-                        'image_id' => $imagesIds
-                    ]
-                ];
-
-                $this->imageRepository->delete($deleteImagesParams);
-
-                $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
+                $imageIds = $imagesToDelete->pluck('image_id')->toArray();
             }
 
             if (!$filesToDelete->isEmpty()) {
                 $filesFilenames = $filesToDelete->pluck('path')->toArray();
-                $filesIds = $filesToDelete->pluck('id')->toArray();
-
-                $deleteFilesParams = [
-                    Repository::CONDITION_AND_WHERE_IN => [
-                        'id' => $filesIds
-                    ]
-                ];
-
-                $this->fileRepository->delete($deleteFilesParams);
-
-                $this->dispatch((new DeleteS3FilesJob($filesFilenames))->onQueue('files'));
+                $fileIds = $filesToDelete->pluck('id')->toArray();
             }
 
-            $this->inventoryRepository->delete(['id' => $inventoryId]);
+            $deleteInventoryParams = ['id' => $inventoryId];
+
+            if (isset($imageIds)) {
+                $deleteInventoryParams['imageIds'] = $imageIds;
+            }
+
+            if (isset($fileIds)) {
+                $deleteInventoryParams['fileIds'] = $fileIds;
+            }
+
+            $result = $this->inventoryRepository->delete($deleteInventoryParams);
+
+            if (isset($imagesFilenames) && $result) {
+                $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
+            }
+
+            if (isset($filesFilenames) && $result) {
+                $this->dispatch((new DeleteS3FilesJob($filesFilenames))->onQueue('files'));
+            }
 
             Log::info('Item has been successfully deleted', ['inventoryId' => $inventoryId]);
         } catch (\Exception $e) {
@@ -115,6 +113,6 @@ class InventoryService
             return false;
         }
 
-        return true;
+        return $result;
     }
 }

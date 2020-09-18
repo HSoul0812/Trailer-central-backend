@@ -100,14 +100,11 @@ class InventoryServiceTest extends TestCase
             ->with($inventoryId, $imageParams)
             ->andReturn($imageModels);
 
-        $this->imageRepositoryMock
-            ->shouldReceive('delete')
-            ->with([
-                Repository::CONDITION_AND_WHERE_IN => [
-                    'image_id' => [$imageModel2->image_id]
-                ]
-            ])
-            ->once();
+        $inventoryDeleteParams = [
+            'id' => $inventoryId,
+            'imageIds' => [$imageModel2->image_id],
+            'fileIds' => [$fileModel1->id],
+        ];
 
         $this->expectsJobs(DeleteS3FilesJob::class);
 
@@ -117,19 +114,10 @@ class InventoryServiceTest extends TestCase
             ->with($inventoryId, $fileParams)
             ->andReturn($fileModels);
 
-        $this->fileRepositoryMock
-            ->shouldReceive('delete')
-            ->with([
-                Repository::CONDITION_AND_WHERE_IN => [
-                    'id' => [$fileModel1->id]
-                ]
-            ])
-            ->once();
-
         $this->inventoryRepositoryMock
             ->shouldReceive('delete')
             ->once()
-            ->with(['id' => $inventoryId])
+            ->with($inventoryDeleteParams)
             ->andReturn(true);
 
         $this->expectsJobs(DeleteS3FilesJob::class);
