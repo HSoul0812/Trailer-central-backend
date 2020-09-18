@@ -164,9 +164,12 @@ class AppServiceProvider extends ServiceProvider
 
             // website migrations
             __DIR__ . '/../../database/migrations/website',
-            
+
             // parts migrations
             __DIR__ . '/../../database/migrations/parts',
+
+            // parts crm
+            __DIR__ . '/../../database/migrations/crm',
 
             // add other migration directories here
         ]);
