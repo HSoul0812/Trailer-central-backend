@@ -31,9 +31,9 @@ class FieldMap extends Model
             'lastname' => 'Last Name',
             'special_name' => 'Map to Full Name Type',
             'preferred_contact' => 'Preferred Contact (email/phone)',
-            'dealer_location_id' => 'Preferred Location',
+            'preferred_location' => 'Preferred Location',
             'preferred_salesperson' => 'Directly Choose Sales Person',
-            'phone_number' => 'Phone Number',
+            'special_phone' => 'Phone Number',
             'email_address' => 'Email Address',
             'special_address' => 'Map to Address Type',
             'comments' => 'Comments'
