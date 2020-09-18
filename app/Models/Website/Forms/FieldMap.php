@@ -44,6 +44,11 @@ class FieldMap extends Model
             'middle' => 'Middle Name (Append to First Name)',
             'suffix' => 'Suffix (Append to Last Name)'
         ],
+        'special_phone' => [
+            'phone_number' => 'Main Phone',
+            'area' => 'Area Code',
+            'full' => 'Full Phone'
+        ],
         'special_address' => [
             'address' => 'Address',
             'address2' => 'Address Line 2 (Appends to Address)',
