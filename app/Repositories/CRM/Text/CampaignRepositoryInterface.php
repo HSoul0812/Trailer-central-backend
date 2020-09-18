@@ -6,12 +6,12 @@ use App\Repositories\Repository;
 
 interface CampaignRepositoryInterface extends Repository {
     /**
-     * Get Leads for Campaign
+     * Get All Active Campaigns For Dealer
      * 
-     * @param array $params
-     * @return Collection
+     * @param int $userId
+     * @return Collection of Campaign
      */
-    public function getLeads($params);
+    public function getAllActive($userId);
 
     /**
      * Mark Campaign as Sent

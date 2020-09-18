@@ -72,4 +72,16 @@ abstract class TestCase extends BaseTestCase
         $websiteKey = array_rand($websiteIds);
         return $websiteIds[$websiteKey];
     }
+
+    // Get SMS Number
+    public static function getSMSNumber($type = 'valid') {
+        // Get Valid Magic Numbers
+        $validTypes = array('unavailable', 'unowned', 'full', 'invalid');
+        if(!in_array($type, $validTypes)) {
+            $type = 'valid';
+        }
+
+        // Return Magic Number
+        return env('TEST_SMS_' . strtoupper($type));
+    }
 }

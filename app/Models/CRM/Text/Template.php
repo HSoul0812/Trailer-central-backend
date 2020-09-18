@@ -13,6 +13,9 @@ class Template extends Model
 {
     protected $table = 'crm_text_template';
 
+    // Constant to Handle Reply STOP
+    const REPLY_STOP = "\n\nReply \"STOP\" if you do not want to receive texts and promos from \"{dealer_name}\"";
+
     /**
      * The attributes that are mass assignable.
      *

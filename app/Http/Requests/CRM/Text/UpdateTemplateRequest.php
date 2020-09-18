@@ -12,7 +12,7 @@ use App\Http\Requests\Request;
 class UpdateTemplateRequest extends Request {
     
     protected $rules = [
-        'id' => 'required|integer',
+        'id' => 'required|text_template_exists',
         'name' => 'string',
         'template' => 'string',
     ];

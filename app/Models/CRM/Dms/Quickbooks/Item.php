@@ -22,7 +22,8 @@ class Item extends Model
         'ADD_ON' => 'add_on',
         'DISCOUNT' => 'discount',
         'TAX' => 'tax',
-        'DOWN_PAYMENT' => 'down_payment',
+        'DEPOSIT_DOWN_PAYMENT' => 'deposit_down_payment',
+        'INCOME_DOWN_PAYMENT' => 'income_down_payment',
         'UNDEFINED' => 'undefined'
     ];
 }

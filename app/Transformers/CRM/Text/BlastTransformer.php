@@ -4,9 +4,14 @@ namespace App\Transformers\CRM\Text;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Text\Blast;
+use App\Transformers\CRM\Leads\LeadTransformer;
 
 class BlastTransformer extends TransformerAbstract
 {
+    protected $availableIncludes = [
+        'leads'
+    ];
+
     public function transform(Blast $blast)
     {
 	 return [
@@ -15,7 +20,6 @@ class BlastTransformer extends TransformerAbstract
              'template_id' => (int)$blast->template_id,
              'template' => $blast->template,
              'campaign_name' => $blast->campaign_name,
-             'campaign_subject' => $blast->campaign_subject,
              'from_sms_number' => $blast->from_sms_number,
              'action' => $blast->action,
              'location_id' => (int)$blast->location_id,
@@ -30,5 +34,10 @@ class BlastTransformer extends TransformerAbstract
              'updated_at' => $blast->updated_at,
              'deleted' => (int)$blast->deleted,
          ];
+    }
+
+    public function includeLeads(Blast $blast)
+    {
+        return $this->collection($blast->leads, new LeadTransformer());
     }
 }

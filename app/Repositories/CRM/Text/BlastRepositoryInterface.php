@@ -6,12 +6,12 @@ use App\Repositories\Repository;
 
 interface BlastRepositoryInterface extends Repository {
     /**
-     * Get Leads for Blast
+     * Get All Active Blasts For Dealer
      * 
-     * @param array $params
-     * @return Collection
+     * @param int $userId
+     * @return Collection of Blast
      */
-    public function getLeads($params);
+    public function getAllActive($userId);
 
     /**
      * Mark Blast as Sent

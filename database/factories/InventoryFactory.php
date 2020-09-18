@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 $factory->define(Inventory::class, function (Faker $faker) {
     // Get Entity/Category
-    $entityType = EntityType::inRandomOrder()->first();
+    $entityType = EntityType::where('entity_type_id', '<>', 2)->inRandomOrder()->first();
     $category = Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first();
 
     // Get Showroom Model
@@ -45,7 +45,7 @@ $factory->define(Inventory::class, function (Faker $faker) {
         'updated_at' => $createdAt,
         'updated_at_auto' => $createdAt,
         'active' => 1,
-        'title' => !empty($showroom->title) ? $showroom->title : $faker->title,
+        'title' => !empty($showroom->title) ? $showroom->title : $faker->sentence,
         'stock' => Str::random(10),
         'manufacturer' => $mfg->name,
         'brand' => !empty($showroom->brand) ? $showroom->brand : (!empty($brand->name) ? $brand->name : ''),

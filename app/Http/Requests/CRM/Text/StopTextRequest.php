@@ -12,8 +12,9 @@ use App\Http\Requests\Request;
 class StopTextRequest extends Request {
     
     protected $rules = [
-        'response_id' => 'nullable|integer',
-        'text_number' => 'required|string'
+        'sms_number' => 'required|regex:/(0-9)?[0-9]{10}/',
+        'lead_id' => 'lead_exists',
+        'text_id' => 'text_exists'
     ];
     
 }

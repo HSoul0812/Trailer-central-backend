@@ -53,15 +53,7 @@ class TemplateRepository implements TemplateRepositoryInterface {
     }
 
     public function delete($params) {
-        $template = Template::findOrFail($params['id']);
-
-        DB::transaction(function() use (&$template, $params) {
-            $params['deleted'] = '1';
-
-            $template->fill($params)->save();
-        });
-
-        return $template;
+        return Template::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
     }
 
     public function get($params) {
@@ -99,6 +91,27 @@ class TemplateRepository implements TemplateRepositoryInterface {
         });
 
         return $template;
+    }
+
+    /**
+     * Fill Text Template Body
+     * 
+     * @param string $template
+     * @param array $replaces
+     * @return type
+     */
+    public function fillTemplate($template, $replaces) {
+        // Add Footer
+        $body = $template . Template::REPLY_STOP;
+
+        // Loop Replacements!
+        foreach($replaces as $field => $value) {
+            // Replace Field
+            $body = str_replace('{' . $field . '}', $value, $body);
+        }
+
+        // Return Result Template Body Text
+        return $body;
     }
 
     private function addSortQuery($query, $sort) {
