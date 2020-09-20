@@ -38,6 +38,7 @@ class CreateWebsiteFormFieldMap extends Migration
             ['type' => 'lead', 'form_field' => 'email address', 'map_field' => 'email_address', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead', 'form_field' => 'phone', 'map_field' => 'special_phone', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead', 'form_field' => 'phone number', 'map_field' => 'special_phone', 'db_table' => 'website_lead', 'details' => NULL],
+            ['type' => 'lead', 'form_field' => 'home phone', 'map_field' => 'special_phone', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead', 'form_field' => 'mobile phone', 'map_field' => 'special_phone', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead', 'form_field' => 'work phone', 'map_field' => 'special_phone', 'db_table' => 'website_lead', 'details' => NULL],
             ['type' => 'lead', 'form_field' => 'cell phone', 'map_field' => 'special_phone', 'db_table' => 'website_lead', 'details' => NULL],
