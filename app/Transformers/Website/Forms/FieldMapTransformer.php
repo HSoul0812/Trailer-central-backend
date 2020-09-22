@@ -11,7 +11,7 @@ class FieldMapTransformer extends TransformerAbstract
     {
         return [
             'id' => (int)$fieldMap->id,
-            'map' => $fieldMap->map_field,
+            'field' => $fieldMap->map_field,
             'db' => $fieldMap->db_table
         ];
     }
