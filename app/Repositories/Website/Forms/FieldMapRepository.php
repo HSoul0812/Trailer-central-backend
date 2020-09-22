@@ -40,6 +40,11 @@ class FieldMapRepository implements FieldMapRepositoryInterface
             $params['db_table'] = FieldMap::MAP_TABLES[$params['type']];
         }
 
+        // Map Field Empty?
+        if(empty($params['map_field'])) {
+            $params['map_field'] = '';
+        }
+
         // Create Post
         return FieldMap::create($params);
     }
@@ -61,6 +66,11 @@ class FieldMapRepository implements FieldMapRepositoryInterface
 
         DB::beginTransaction();
         try {
+            // Map Field Empty?
+            if(empty($params['map_field'])) {
+                $params['map_field'] = '';
+            }
+
             // Update Field Map
             $fieldMap->fill($params)->save();
 
