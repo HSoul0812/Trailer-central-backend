@@ -77,7 +77,7 @@ class FieldMapRepository implements FieldMapRepositoryInterface
         $types = array();
         foreach(FieldMap::MAP_TYPES as $type) {
             $fields = $this->getAll(['type' => $type]);
-            $types[$type] = transform($fields, new FieldMapTransformer);
+            $types[$type] = $fields->transform((new FieldMapTransformer)->transform);
         }
 
         // Return Sorted Types Array

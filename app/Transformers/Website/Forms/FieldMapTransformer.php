@@ -14,8 +14,8 @@ class FieldMapTransformer extends TransformerAbstract
                'id' => (int)$fieldMap->id,
                'map' => $fieldMap->map_field,
                'db' => $fieldMap->db_table,
-               'created_at' => $post->created_at,
-               'update_at' => $post->update_at,
+               'created_at' => $fieldMap->created_at,
+               'update_at' => $fieldMap->updated_at,
             ]
         ];
     }
