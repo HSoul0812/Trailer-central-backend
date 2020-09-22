@@ -73,7 +73,7 @@ class FieldMapRepository implements FieldMapRepositoryInterface
      * @param bool $withDefault
      * @return Collection
      */
-    public function getAllSorted($params): Collection
+    public function getAllSorted($params)
     {
         // Get All Sorted by Types
         $types = array();

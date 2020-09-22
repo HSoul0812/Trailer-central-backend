@@ -12,5 +12,5 @@ interface FieldMapRepositoryInterface extends Repository {
      * @param bool $withDefault
      * @return Collection
      */
-    public function getAllSorted($params): Collection;
+    public function getAllSorted($params);
 }
