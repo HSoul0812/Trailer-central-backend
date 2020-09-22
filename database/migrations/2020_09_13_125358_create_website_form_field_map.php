@@ -20,7 +20,7 @@ class CreateWebsiteFormFieldMap extends Migration
             $table->string('form_field', 50);
             $table->enum('map_field', array_keys(FieldMap::getNovaMapFields()))->index();
             $table->enum('db_table', array_values(FieldMap::getUniqueMapTables()))->index();
-            $table->string('details')->nullable();
+            $table->text('details')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
 
