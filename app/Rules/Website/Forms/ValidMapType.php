@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rules\CRM\Website\Forms;
+namespace App\Rules\Website\Forms;
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\Website\Forms\FieldMap;
