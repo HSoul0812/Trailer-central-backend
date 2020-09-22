@@ -18,8 +18,6 @@ class AddShowStockOverlayOnStockPhotosToWebsiteConfigDefaultTable extends Migrat
         'sort_order' => 1070,
     ];
 
-    private const COLTON_WEBSITE_ID = 1090;
-
     /**
      * Run the migrations.
      *
@@ -29,13 +27,39 @@ class AddShowStockOverlayOnStockPhotosToWebsiteConfigDefaultTable extends Migrat
     {
         DB::table('website_config_default')->insert(self::SHOW_STOCK_OVERLAY_ON_STOCK_PHOTOS_OPTION);
 
-        $websiteConfigParams = [
-            'website_id' => self::COLTON_WEBSITE_ID,
-            'key' => self::SHOW_STOCK_OVERLAY_ON_STOCK_PHOTOS_OPTION['key'],
-            'value' => 1
-        ];
+        $result = DB::select(DB::raw("
+            SELECT d.dealer_id, COUNT(i.inventory_id) count_with_3, ii.count_without_3 count_without_3
+            FROM inventory i
+            JOIN dealer d ON d.dealer_id = i.dealer_id
+            JOIN (
+                SELECT dealer_id, COUNT(inventory_id) count_without_3
+                FROM inventory WHERE entity_type_id != 3
+                GROUP BY dealer_id
+            ) ii ON ii.dealer_id = d.dealer_id
+            WHERE i.entity_type_id = 3
+            GROUP BY d.dealer_id
+            HAVING count_with_3 > count_without_3
+        "));
 
-        DB::table('website_config')->insert($websiteConfigParams);
+        $dealerIds = array_column(array_map(function ($item) {
+            return (array)$item;
+        }, $result), 'dealer_id');
+
+        $websiteIds = DB::table('website')
+            ->select('id')
+            ->whereIn('dealer_id', $dealerIds)
+            ->pluck('id');
+
+        foreach ($websiteIds as $websiteId) {
+            $websiteConfigParams = [
+                'website_id' => $websiteId,
+                'key' => self::SHOW_STOCK_OVERLAY_ON_STOCK_PHOTOS_OPTION['key'],
+                'value' => 1
+            ];
+
+            DB::table('website_config')->insert($websiteConfigParams);
+        }
+
     }
 
     /**
