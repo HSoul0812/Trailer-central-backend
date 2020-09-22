@@ -48,6 +48,8 @@ use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
+use App\Repositories\Website\Forms\FieldMapConfigRepositoryInterface;
+use App\Repositories\Website\Forms\FieldMapConfigRepository;
 use App\Repositories\Showroom\ShowroomRepositoryInterface;
 use App\Repositories\Showroom\ShowroomRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
@@ -225,6 +227,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
+        $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(SalesPersonRepositoryInterface::class, SalesPersonRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
