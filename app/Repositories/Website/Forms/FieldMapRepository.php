@@ -5,6 +5,7 @@ namespace App\Repositories\Website\Forms;
 use App\Exceptions\NotImplementedException;
 use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\Website\Forms\FieldMap;
+use App\Transformers\Website\Forms\FieldMapTransformer;
 use Illuminate\Database\Eloquent\Collection;
 
 /**

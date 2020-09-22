@@ -6,7 +6,6 @@ use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
 use App\Http\Requests\Website\Forms\FieldMapPostsRequest;
-use App\Transformers\Website\Forms\FieldMapTransformer;
 
 class FieldMapController extends RestfulController
 {
