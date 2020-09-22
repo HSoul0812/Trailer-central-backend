@@ -15,6 +15,13 @@ use Illuminate\Database\Eloquent\Collection;
 class FieldMapRepository implements FieldMapRepositoryInterface
 {
     /**
+     * Initialize Field Map Transformer
+     */
+    public function __construct(FieldMapTransformer $transformer) {
+        $this->transformer = $transformer;
+    }
+
+    /**
      * @param $params
      * @throws NotImplementedException
      */
@@ -77,7 +84,7 @@ class FieldMapRepository implements FieldMapRepositoryInterface
         $types = array();
         foreach(FieldMap::MAP_TYPES as $type) {
             $fields = $this->getAll(['type' => $type]);
-            $types[$type] = $fields->transform((new FieldMapTransformer)->transform);
+            $types[$type] = $fields->transform($this->transformer);
         }
 
         // Return Sorted Types Array
