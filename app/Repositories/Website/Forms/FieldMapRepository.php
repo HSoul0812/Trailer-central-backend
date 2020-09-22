@@ -27,7 +27,21 @@ class FieldMapRepository implements FieldMapRepositoryInterface
      */
     public function create($params)
     {
-        throw new NotImplementedException;
+        // Find FieldMap Entry
+        $fieldMap = FieldMap::where('type', $params['type'])
+                            ->where('form_field', $params['form_field'])
+                            ->first();
+        if(!empty($fieldMap->id)) {
+            return $this-update($params);
+        }
+
+        // Get DB Table
+        if(!isset($params['db_table'])) {
+            $params['db_table'] = FieldMap::MAP_TABLES[$params['type']];
+        }
+
+        // Create Post
+        return FieldMap::create($params);
     }
 
     /**
@@ -36,7 +50,28 @@ class FieldMapRepository implements FieldMapRepositoryInterface
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        // ID Exists?
+        if(isset($params['id'])) {
+            // Get Field Map
+            $fieldMap = FieldMap::findOrFail($params['id']);
+        } else {
+            // Find FieldMap Entry
+            $fieldMap = FieldMap::where('type', $params['type'])->where('form_field', $params['form_field'])->first();
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update Field Map
+            $fieldMap->fill($params)->save();
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw new \Exception($ex->getMessage());
+        }
+
+        // Return Field Map
+        return $fieldMap;
     }
 
     /**
@@ -45,7 +80,14 @@ class FieldMapRepository implements FieldMapRepositoryInterface
      */
     public function get($params)
     {
-        return FieldMap::findOrFail($params['id']); 
+        // Type and Form Field Exists?
+        if(isset($params['type']) && isset($params['form_field'])) {
+            // Find FieldMap Entry
+            return FieldMap::where('type', $params['type'])->where('form_field', $params['form_field'])->first();
+        }
+
+        // Return Field Map
+        return FieldMap::findOrFail($params['id']);
     }
 
     /**
@@ -54,7 +96,16 @@ class FieldMapRepository implements FieldMapRepositoryInterface
      */
     public function delete($params)
     {
-        throw new NotImplementedException;
+        // Type and Form Field Exists?
+        if(isset($params['type']) && isset($params['form_field'])) {
+            // Find FieldMap Entry
+            return FieldMap::where('type', $params['type'])
+                           ->where('form_field', $params['form_field'])
+                           ->delete();
+        }
+
+        // Return Field Map
+        return FieldMap::where('id', $params['id'])->delete();
     }
 
     /**

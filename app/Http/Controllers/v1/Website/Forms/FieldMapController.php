@@ -6,6 +6,7 @@ use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
 use App\Http\Requests\Website\Forms\GetFieldMapRequest;
+use App\Http\Requests\Website\Forms\CreateFieldMapRequest;
 
 class FieldMapController extends RestfulController
 {
@@ -20,6 +21,54 @@ class FieldMapController extends RestfulController
     public function __construct(FieldMapRepositoryInterface $fields)
     {
         $this->fields = $fields;
+    }
+    
+    /**
+     * @OA\Put(
+     *     path="/api/website/blog/posts",
+     *     description="Create a post",
+     *     tags={"Post"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="Post ID",
+     *         required=true,
+     *         @OA\Schema(@OA\Schema(type="integer"))
+     *     ),
+     *     @OA\Parameter(
+     *         name="title",
+     *         in="query",
+     *         description="Post title",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="post_content",
+     *         in="query",
+     *         description="Post content",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     * 
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of posts",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function create(Request $request) {
+        $request = new CreateFieldMapRequest($request->all());
+        if ( $request->validate() ) {
+            // Create Post
+            return $this->response->item($this->fields->create($request->all()), new FieldMapTransformer());
+        }  
+        
+        return $this->response->errorBadRequest();
     }
 
     /**

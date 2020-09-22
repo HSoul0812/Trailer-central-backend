@@ -10,9 +10,13 @@ class FieldMapTransformer extends TransformerAbstract
     public function transform(FieldMap $fieldMap)
     {
         return [
-            'id' => (int)$fieldMap->id,
-            'field' => $fieldMap->map_field,
-            'db' => $fieldMap->db_table
+            'id'         => (int)$fieldMap->id,
+            'type'       => $fieldMap->type,
+            'field'      => $fieldMap->form_field,
+            'map'        => $fieldMap->map_field,
+            'db'         => $fieldMap->db_table,
+            'created_at' => $fieldMap->created_at,
+            'updated_at' => $fieldMap->updated_at
         ];
     }
 }

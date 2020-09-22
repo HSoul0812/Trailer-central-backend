@@ -137,6 +137,9 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('text_template_exists', 'App\Rules\CRM\Text\TemplateExists@passes');
         \Validator::extend('parts_sku_unique', 'App\Rules\Parts\SkuUnique@validate');
         \Validator::extend('vendor_exists', 'App\Rules\Inventory\VendorExists@passes');
+        \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
+        \Validator::extend('valid_form_map_field', 'App\Rules\Website\Forms\ValidMapField@passes');
+        \Validator::extend('valid_form_map_table', 'App\Rules\Website\Forms\ValidMapTable@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
