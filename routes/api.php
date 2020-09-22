@@ -215,6 +215,12 @@ $api->version('v1', function ($route) {
      */
     $route->put('website/mail/lead/{leadId}/auto-respond', 'App\Http\Controllers\v1\Website\Mail\MailController@autoRespond');
 
+    /**
+     * Website Forms
+     */
+    $route->put('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@index');
+    
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
