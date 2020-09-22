@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Website\Forms;
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
-use App\Http\Requests\Website\Forms\FieldMapPostsRequest;
+use App\Http\Requests\Website\Forms\GetFieldMapRequest;
 
 class FieldMapController extends RestfulController
 {
@@ -131,7 +131,7 @@ class FieldMapController extends RestfulController
      * )
      */
     public function index(Request $request) {
-        $request = new FieldMapPostsRequest($request->all());
+        $request = new GetFieldMapRequest($request->all());
         
         if ( $request->validate() ) {
             $fields = $this->posts->getAll($request->all());
