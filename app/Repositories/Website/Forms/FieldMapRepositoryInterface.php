@@ -6,11 +6,10 @@ use App\Repositories\Repository;
 
 interface FieldMapRepositoryInterface extends Repository {
     /**
-     * Get All Sorted
+     * Get Map of Field Data
      * 
      * @param $params
-     * @param bool $withDefault
      * @return Collection
      */
-    public function getAllSorted($params);
+    public function getMap($params);
 }

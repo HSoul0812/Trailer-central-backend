@@ -52,7 +52,6 @@ class FieldMapRepository implements FieldMapRepositoryInterface
 
     /**
      * @param $params
-     * @param bool $withDefault
      * @return Collection
      */
     public function getAll($params): Collection
@@ -67,13 +66,12 @@ class FieldMapRepository implements FieldMapRepositoryInterface
     }
 
     /**
-     * Get All Sorted
+     * Get Map of Field Data
      * 
      * @param $params
-     * @param bool $withDefault
      * @return Collection
      */
-    public function getAllSorted($params)
+    public function getMap($params)
     {
         // Get All Sorted by Types
         $types = array();

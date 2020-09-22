@@ -134,7 +134,7 @@ class FieldMapController extends RestfulController
         $request = new GetFieldMapRequest($request->all());
         
         if ( $request->validate() ) {
-            $fields = $this->posts->getAll($request->all());
+            $fields = $this->fields->getMap($request->all());
             return $this->response->array([
                 'data' => $fields
             ]);
