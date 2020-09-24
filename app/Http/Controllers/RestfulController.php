@@ -71,4 +71,13 @@ class RestfulController extends Controller {
         throw new NotImplementedException();
     }
 
+    /**
+     * @return \Dingo\Api\Http\Response
+     */
+    protected function successResponse()
+    {
+        return $this->response->array([
+            'response' => ['status' => 'success']
+        ]);
+    }
 }

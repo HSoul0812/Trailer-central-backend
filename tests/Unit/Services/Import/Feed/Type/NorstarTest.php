@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Service\Import\Feed\Type;
+namespace Tests\Unit\Services\Import\Feed\Type;
 
 use App\Repositories\Feed\FeedApiUploadsRepository;
 use App\Services\Import\Feed\Type\Norstar;

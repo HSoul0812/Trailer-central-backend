@@ -2,6 +2,7 @@
 namespace App\Models\Inventory;
 
 use App\Helpers\StringHelper;
+use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
@@ -20,21 +21,21 @@ class Inventory extends Model
     const COLOR_ATTRIBUTE_ID = 11;
 
     const TABLE_NAME = 'inventory';
-    
+
     const STATUS_QUOTE = 6;
     const STATUS_AVAILABLE = 1;
     const STATUS_SOLD = 2;
     const STATUS_ON_ORDER = 3;
     const STATUS_PENDING_SALE = 4;
     const STATUS_SPECIAL_ORDER = 5;
-    
+
     const STATUS_QUOTE_LABEL = 'Quote';
     const STATUS_AVAILABLE_LABEL = 'Available';
     const STATUS_SOLD_LABEL = 'Sold';
     const STATUS_ON_ORDER_LABEL = 'On Order';
     const STATUS_PENDING_SALE_LABEL = 'Pending Sale';
     const STATUS_SPECIAL_ORDER_LABEL = 'Special Order';
-    
+
     const STATUS_MAPPING = [
         self::STATUS_QUOTE          => self::STATUS_QUOTE_LABEL,
         self::STATUS_AVAILABLE      => self::STATUS_AVAILABLE_LABEL,
@@ -115,6 +116,32 @@ class Inventory extends Model
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
     }
 
+    public function files()
+    {
+        return $this->hasManyThrough(File::class, InventoryFile::class, 'inventory_id', 'id', 'inventory_id', 'file_id');
+    }
+
+    public function inventoryFeatures()
+    {
+        return $this->hasMany(InventoryFeature::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function clapps()
+    {
+        return $this->hasMany(InventoryClapp::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function attributeValues()
+    {
+        return $this->hasMany(AttributeValue::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function lotVantageInventory()
+    {
+        return $this->hasOne(DealerInventory::class, 'inventory_id', 'inventory_id');
+    }
+
+
     public function status()
     {
         return $this->belongsTo(Status::class, 'status');
@@ -138,7 +165,7 @@ class Inventory extends Model
 
         return null;
     }
-     
+
     public function getStatusLabelAttribute()
     {
         return isset(self::STATUS_MAPPING[$this->status]) ? self::STATUS_MAPPING[$this->status] : null;

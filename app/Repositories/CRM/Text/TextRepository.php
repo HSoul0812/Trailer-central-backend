@@ -107,6 +107,12 @@ class TextRepository implements TextRepositoryInterface {
      * @return Stop
      */
     public function stop($params) {
+        // Add Type if Empty
+        if(!isset($params['type'])) {
+            $params['type'] = Stop::REPORT_TYPE_DEFAULT;
+        }
+
+        // Insert Stop
         return Stop::create($params);
     }
 

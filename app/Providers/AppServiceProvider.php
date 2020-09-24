@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\Inventory\FileRepository;
+use App\Repositories\Inventory\FileRepositoryInterface;
+use App\Repositories\Inventory\ImageRepository;
+use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\StatusRepository;
 use App\Repositories\Inventory\StatusRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,6 +52,8 @@ use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
+use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
+use App\Repositories\Website\Forms\FieldMapRepository;
 use App\Repositories\Showroom\ShowroomRepositoryInterface;
 use App\Repositories\Showroom\ShowroomRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
@@ -135,6 +141,9 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('text_template_exists', 'App\Rules\CRM\Text\TemplateExists@passes');
         \Validator::extend('parts_sku_unique', 'App\Rules\Parts\SkuUnique@validate');
         \Validator::extend('vendor_exists', 'App\Rules\Inventory\VendorExists@passes');
+        \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
+        \Validator::extend('valid_form_map_field', 'App\Rules\Website\Forms\ValidMapField@passes');
+        \Validator::extend('valid_form_map_table', 'App\Rules\Website\Forms\ValidMapTable@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -220,11 +229,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
+        $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
         $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
+        $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(SalesPersonRepositoryInterface::class, SalesPersonRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
