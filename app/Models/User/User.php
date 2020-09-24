@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
 use App\Models\User\DealerUser;
 use App\Models\User\AuthToken;
+use App\Models\Website\Website;
 
 /**
  * Class User
@@ -43,6 +44,10 @@ class User extends Model implements Authenticatable
         'name',
         'email',
         'password'
+    ];
+
+    protected $casts = [
+        'autoresponder_enable' => 'boolean',
     ];
 
     /**
@@ -100,11 +105,16 @@ class User extends Model implements Authenticatable
      * @return string
      */
     public function getRememberTokenName() {}
-    
+
     public function getAccessTokenAttribute()
     {
         $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
         return $authToken->access_token;
+    }
+
+    public function website()
+    {
+        return $this->hasOne(Website::class, 'dealer_id', 'dealer_id');
     }
 
     /**
@@ -130,7 +140,7 @@ class User extends Model implements Authenticatable
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }

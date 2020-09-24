@@ -4,9 +4,9 @@
 namespace App\Models\CRM\Account;
 
 
-use App\Models\CRM\Dms\Refund;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\CRM\Quickbooks\PaymentMethod;
+use App\Models\CRM\Dms\Refund;
+use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
 
 /**
  * Class Payment

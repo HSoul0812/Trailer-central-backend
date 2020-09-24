@@ -16,7 +16,7 @@ class GetTemplatesRequest extends Request {
         'per_page' => 'integer',
         'sort' => 'in:name,-name,created_at,-created_at,updated_at,-updated_at',
         'id' => 'array',
-        'id.*' => 'integer'
+        'id.*' => 'text_template_exists'
     ];
     
     public function all($keys = null) {

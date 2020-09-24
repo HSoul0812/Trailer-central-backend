@@ -11,21 +11,28 @@ use App\Transformers\Parts\PartsTransformer;
 use App\Http\Requests\Parts\ShowPartRequest;
 use App\Http\Requests\Parts\GetPartsRequest;
 use App\Http\Requests\Parts\UpdatePartRequest;
+use App\Services\Parts\PartServiceInterface;
 
 class PartsController extends RestfulController
 {
     
     protected $parts;
     
+    /**     
+     * @var App\Services\Parts\PartServiceInterface; 
+     */
+    protected $partService;
+    
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(PartRepositoryInterface $parts)
+    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
         $this->parts = $parts;
+        $this->partService = $partService;
     }
     
     /**
@@ -257,9 +264,10 @@ class PartsController extends RestfulController
      */
     public function create(Request $request) {
         $request = new CreatePartRequest($request->all());
+        $requestData = $request->all();
         
         if ( $request->validate() ) {
-            return $this->response->item($this->parts->create($request->all()), new PartsTransformer());
+            return $this->response->item($this->partService->create($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartsTransformer());
         }  
         
         return $this->response->errorBadRequest();
@@ -690,9 +698,10 @@ class PartsController extends RestfulController
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdatePartRequest($requestData);
+        $requestData = $request->all();
         
         if ( $request->validate() ) {
-            return $this->response->item($this->parts->update($request->all()), new PartsTransformer());
+            return $this->response->item($this->partService->update($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartsTransformer());
         }
         
         return $this->response->errorBadRequest();

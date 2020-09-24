@@ -10,6 +10,7 @@ use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
 use App\Http\Requests\CRM\Leads\CreateLeadRequest;
+use App\Http\Requests\CRM\Leads\GetLeadRequest;
 
 class LeadController extends RestfulController
 {
@@ -24,7 +25,7 @@ class LeadController extends RestfulController
      */
     public function __construct(LeadRepositoryInterface $leads)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
         $this->transformer = new LeadTransformer;
@@ -37,6 +38,21 @@ class LeadController extends RestfulController
         if ($request->validate()) {             
             return $this->response->paginator($this->leads->getAll($requestData), $this->transformer)
                         ->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id'], $requestData));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+    
+    /**
+     * Display data about the record in the DB
+     *
+     * @param int $id
+     */
+    public function show(int $id) {
+        $request = new GetLeadRequest(['id' => $id]);
+        
+        if ($request->validate()) {
+            return $this->response->item($this->leads->get(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

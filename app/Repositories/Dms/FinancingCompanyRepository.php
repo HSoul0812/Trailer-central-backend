@@ -27,6 +27,7 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
      */
     public function get($params)
     {
+        // do not use $params with a RequestQueryable -- pagination will not work
         return $this->query()->get();
     }
 
@@ -68,7 +69,7 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
 
     /**
      * @param array $params
-     * @return void
+     * @return bool
      * @throws \Throwable
      */
     public function delete($params)
@@ -78,6 +79,7 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
         if (!$financingCompany->delete()) {
             throw new \Exception("Unable to delete Financing company ID {$params['id']}");
         }
-    }
 
+        return true;
+    }
 }

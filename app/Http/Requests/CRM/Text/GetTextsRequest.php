@@ -12,8 +12,8 @@ use App\Http\Requests\Request;
 class GetTextsRequest extends Request {
     
     protected $rules = [
-        'from_number' => 'string',
-        'to_number' => 'string',
+        'from_number' => 'regex:/(0-9)?[0-9]{10}/',
+        'to_number' => 'regex:/(0-9)?[0-9]{10}/',
         'per_page' => 'integer',
         'sort' => 'in:from_number,-from_number,to_number,-to_number,date_sent,-date_sent',
         'id' => 'array',

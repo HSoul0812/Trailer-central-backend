@@ -63,7 +63,7 @@ class NewDealerUser extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'dealer_id', 'id');
+        return $this->belongsTo(User::class, 'id', 'dealer_id');
     }
 
     /**
@@ -72,6 +72,14 @@ class NewDealerUser extends Model
     public function crmUser()
     {
         return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get active crm user
+     */
+    public function activeCrmUser()
+    {
+        return $this->crmUser()->where('active', 1);
     }
 
     /**

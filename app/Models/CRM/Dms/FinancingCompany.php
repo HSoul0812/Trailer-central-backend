@@ -4,10 +4,11 @@
 namespace App\Models\CRM\Dms;
 
 
+use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class FinancingCompany extends Model
+class FinancingCompany extends Model implements Filterable
 {
     use SoftDeletes;
 
@@ -32,6 +33,11 @@ class FinancingCompany extends Model
         'account_number',
         'gender',
         'dob',
+        'fin'
     ];
 
+    public function jsonApiFilterableColumns(): ?array
+    {
+        return ['display_name'];
+    }
 }

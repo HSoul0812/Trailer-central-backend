@@ -34,6 +34,14 @@ $api->version('v1', function ($route) {
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
     $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
 
+    $route->put('inventory/floorplan/bulk/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create');
+
+    $route->get('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@index');
+    $route->put('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@create');
+    $route->get('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@show')->where('id', '[0-9]+');
+    $route->post('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@update')->where('id', '[0-9]+');
+    $route->delete('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')->where('id', '[0-9]+');
+
     /**
      * Part bins
      */
@@ -81,6 +89,7 @@ $api->version('v1', function ($route) {
      */
     $route->post('parts/bulk/download', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@create');
     $route->get('parts/bulk/file/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@read');
+    $route->get('parts/bulk/status/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@status');
 
     /**
      * Part Bulk
@@ -131,6 +140,14 @@ $api->version('v1', function ($route) {
      * Inventory Manufacturers
      */
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+    /**
+     * Inventory Categories
+     */
+    $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
+    /**
+     * Inventory Statuses
+     */
+    $route->get('inventory/statuses', 'App\Http\Controllers\v1\Inventory\StatusController@index');
 
     /**
      * Inventory
@@ -150,6 +167,11 @@ $api->version('v1', function ($route) {
     |
     |
     */
+
+    /**
+     * Log
+     */
+    $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create');
 
     /**
      * Website Part Filters
@@ -188,6 +210,10 @@ $api->version('v1', function ($route) {
     $route->get('website/towing-capacity/models/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getModels')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
     $route->get('website/towing-capacity/vehicles/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getVehicles')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
 
+    /**
+     * Website mail
+     */
+    $route->put('website/mail/lead/{leadId}/auto-respond', 'App\Http\Controllers\v1\Website\Mail\MailController@autoRespond');
 
     /*
     |--------------------------------------------------------------------------
@@ -219,45 +245,10 @@ $api->version('v1', function ($route) {
         $route->get('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->delete('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@destroy')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('leads/{leadId}/texts/{id}/stop', 'App\Http\Controllers\v1\CRM\Text\TextController@stop')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
     });
 
-    /**
-     * Texts Template
-     */
-    $route->group(['middleware' => 'text.template.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-    });
-
-    /**
-     * Texts Campaign
-     */
-    $route->group(['middleware' => 'text.campaign.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Text\CampaignController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Text\CampaignController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/campaign/{id}/sent', 'App\Http\Controllers\v1\CRM\Text\CampaignController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->get('crm/{userId}/texts/campaign/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\CampaignController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-    });
-
-    /**
-     * Texts Blast
-     */
-    $route->group(['middleware' => 'text.blast.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Text\BlastController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Text\BlastController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/blast/{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->get('crm/{userId}/texts/blast/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\BlastController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-    });
+    // Stop Text!
+    $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
 
 
     /*
@@ -340,6 +331,7 @@ $api->version('v1', function ($route) {
         */
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
+        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
 
@@ -394,6 +386,68 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | User
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'user'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Texts
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'texts'
+            ], function ($route) {
+                // Texts Template
+                $route->group([
+                    'prefix' => 'template',
+                    'middleware' => 'text.template.validate'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Text\TemplateController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Text\TemplateController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@destroy')->where('id', '[0-9]+');
+                });
+
+                // Texts Campaign
+                $route->group([
+                    'prefix' => 'campaign',
+                    'middleware' => 'text.campaign.validate'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Text\CampaignController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Text\CampaignController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@destroy')->where('id', '[0-9]+');
+                    $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\CampaignController@sent')->where('id', '[0-9]+');
+                });
+
+                // Texts Blast
+                $route->group([
+                    'prefix' => 'blast',
+                    'middleware' => 'text.blast.validate'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Text\BlastController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Text\BlastController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@destroy')->where('id', '[0-9]+');
+                    $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
+                });
+            });
+        });
     });
 
 
@@ -453,6 +507,18 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Purchase Orders
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        // Purchase Order Receipts
+        $route->get('po-receipts', 'App\Http\Controllers\v1\Dms\PurchaseOrder\PurchaseOrderReceiptController@index');
+        $route->get('po-receipts/{id}', 'App\Http\Controllers\v1\Dms\PurchaseOrder\PurchaseOrderReceiptController@show');
+
+        /*
+        |--------------------------------------------------------------------------
         | Financing companies
         |--------------------------------------------------------------------------
         |
@@ -479,6 +545,11 @@ $api->version('v1', function ($route) {
          */
         $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
         $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
+
+        /**
+         * Quickbook Approval
+         */
+        $route->get('quickbooks/quickbook-approvals', 'App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController@index');
 
         /*
         |--------------------------------------------------------------------------

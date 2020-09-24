@@ -8,7 +8,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
 use App\Console\Commands\RunBulkUploadCommand;
 use App\Console\Commands\ReplaceYoutubeEmbeds;
-use App\Console\Commands\AdjustFeetAndInches;
+use App\Console\Commands\Inventory\AdjustFeetAndInches;
 use App\Console\Commands\User\CreateAccessToken;
 
 class Kernel extends ConsoleKernel
@@ -40,6 +40,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('user:create-access-token')->daily();
         $schedule->command('leads:assign:auto')->withoutOverlapping();
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
+        $schedule->command('text:process-campaign')->withoutOverlapping();
+        $schedule->command('text:deliver-blast')->withoutOverlapping();
         // $schedule->command('inspire')
         //          ->hourly();
     }

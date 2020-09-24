@@ -5,12 +5,16 @@ namespace App\Http\Controllers\v1\Inventory;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryService;
 use Dingo\Api\Http\Request;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Http\Requests\Inventory\GetInventoryRequest;
 use App\Transformers\Inventory\InventoryTransformer;
 
+/**
+ * Class InventoryController
+ * @package App\Http\Controllers\v1\Inventory
+ */
 class InventoryController extends RestfulController
 {
     /**
@@ -26,13 +30,15 @@ class InventoryController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param InventoryRepositoryInterface $inventoryRepository
      * @param InventoryService $inventoryService
+     * @param InventoryRepositoryInterface $inventoryRepository
      */
-    public function __construct(InventoryRepositoryInterface $inventoryRepository, InventoryService $inventoryService)
+    public function __construct(InventoryService $inventoryService, InventoryRepositoryInterface $inventoryRepository)
     {
-        $this->inventoryRepository = $inventoryRepository;
+        $this->middleware('setDealerIdOnRequest')->only(['index']);
+
         $this->inventoryService = $inventoryService;
+        $this->inventoryRepository = $inventoryRepository;
     }
 
     /**
@@ -157,8 +163,8 @@ class InventoryController extends RestfulController
     {
         $request = new DeleteInventoryRequest(['id' => $id]);
 
-        if ($request->validate() && $this->inventoryRepository->delete(['id' => $id])) {
-            return $this->response->noContent();
+        if ($request->validate() && $this->inventoryService->delete($id)) {
+            return $this->successResponse();
         }
 
         return $this->response->errorBadRequest();

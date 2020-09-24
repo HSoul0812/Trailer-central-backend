@@ -1,16 +1,13 @@
 <?php
 
+namespace Tests;
+
 use App\Mail\InteractionEmail;
 use App\Models\CRM\Leads\Lead;
 use Illuminate\Support\Facades\Mail;
 
 class InteractionsControllerTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
-
     /**
      * Test Interactions Index Works
      */

@@ -4,8 +4,8 @@
 namespace App\Models\Pos;
 
 
-use App\Models\CRM\Quickbooks\Item;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Dms\Quickbooks\Item;
 
 /**
  * Class SaleProducts

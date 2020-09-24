@@ -12,6 +12,7 @@ use App\Models\User\DealerLocation;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\Inventory\Inventory;
+use App\Models\User\User;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
@@ -20,19 +21,19 @@ use App\Models\Traits\TableAware;
 class Lead extends Model
 {
     use TableAware;
-    
+
     const STATUS_WON = 'Closed';
-    const STATUS_WON_CLOSED = 'Closed (Won)';    
+    const STATUS_WON_CLOSED = 'Closed (Won)';
     const STATUS_LOST = 'Closed (Lost)';
     const STATUS_HOT = 'Hot';
     const STATUS_COLD = 'Cold';
     const STATUS_MEDIUM = 'Medium';
     const STATUS_UNCONTACTED = 'Uncontacted';
     const STATUS_NEW_INQUIRY = 'New Inquiry';
-    
-    const NOT_ARCHIVED = 0; 
+
+    const NOT_ARCHIVED = 0;
     const LEAD_ARCHIVED = 1;
-    
+
     const TABLE_NAME = 'website_lead';
 
 
@@ -63,7 +64,7 @@ class Lead extends Model
      * @var string
      */
     const UPDATED_AT = NULL;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -71,10 +72,10 @@ class Lead extends Model
      */
     protected $fillable = [
         'website_id',
+        'inventory_id',
         'dealer_id',
         'dealer_location_id',
         'lead_type',
-        'inventory_id',
         'referral',
         'title',
         'first_name',
@@ -178,6 +179,16 @@ class Lead extends Model
     }
 
     /**
+     * Get user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
      * Return All Product ID's for Current Lead
      *
      * @return array
@@ -224,7 +235,7 @@ class Lead extends Model
 
     /**
      * Find Lead Contact Details
-     * 
+     *
      * @param type $id
      * @return type
      */
@@ -236,7 +247,7 @@ class Lead extends Model
 
     /**
      * Get Inventory ID's
-     * 
+     *
      * @return array
      */
     public function getInventoryIdsAttribute() {
@@ -274,14 +285,16 @@ class Lead extends Model
 
     /**
      * Get the user's text number
-     * 
+     *
      * @return string
      */
     public function getTextPhoneAttribute() {
+        return '+12626619236';
         if(empty($this->phone_number)) {
             return '';
         }
-        return '+' . ((strlen($this->phone_number) === 11) ? $this->phone_number : '1' . $this->phone_number);
+        $phone = preg_replace("/[^0-9]/", "", $this->phone_number);
+        return '+' . ((strlen($phone) === 11) ? $phone : '1' . substr($phone, 0, 10));
     }
 
     /**
@@ -317,7 +330,7 @@ class Lead extends Model
     /**
      * @return string(phone number) number in format (XXX) NNN-NNNN
      */
-    public function getPrettyPhoneNumberAttribute() {        
+    public function getPrettyPhoneNumberAttribute() {
         if(  preg_match( '/^(\d{3})(\d{3})(\d{4})$/', $this->phone_number,  $matches ) ) {
             return '(' . $matches[1] . ')' . ' ' .$matches[2] . '-' . $matches[3];
         } else {
@@ -325,9 +338,18 @@ class Lead extends Model
         }
     }
 
+    public function getPreferredDealerLocationAttribute()
+    {
+        if (empty($this->preferred_location)) {
+            return null;
+        }
+
+        return DealerLocation::where('dealer_location_id', $this->preferred_location)->first();
+    }
+
     /**
      * Get Preferred Location Attribute
-     * 
+     *
      * @return int
      */
     public function getPreferredLocationAttribute() {

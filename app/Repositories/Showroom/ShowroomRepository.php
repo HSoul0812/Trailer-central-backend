@@ -12,9 +12,9 @@ use App\Exceptions\ImageNotDownloadedException;
 use Illuminate\Support\Facades\Storage;
 
 class ShowroomRepository implements ShowroomRepositoryInterface {
-    
+
     private $sortOrders = [
-        'year' => [ 
+        'year' => [
             'field' => 'year',
             'direction' => 'DESC'
         ],
@@ -36,13 +36,13 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
                     if ($image == $params['floorplan']) {
                         $isFloorplan = true;
                     }
-                    
+
                     $this->storeImage($showroom->id, $image, $isFloorplan);
                 }
             }
-            
+
             if (isset($params['files'])) {
-                foreach ($params['files'] as $file) {   
+                foreach ($params['files'] as $file) {
                     $this->storeFile($showroom->id, $file);
                 }
             }
@@ -55,7 +55,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             DB::rollBack();
             throw new \Exception($ex->getMessage());
         }
-        
+
         return $showroom;
     }
 
@@ -70,6 +70,9 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
     public function getAll($params) {
         $query = Showroom::where('id', '>', 0);
 
+        if (isset($params['with_category'])) {
+            $query = $query->with('category');
+        }
         if (isset($params['search_term'])) {
             $query = $query->where('model', 'LIKE', '%' . $params['search_term'] . '%');
         }
@@ -85,7 +88,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
@@ -112,11 +115,11 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             'is_floorplan' => $isFloorplan ? 1 : 0
         ]);
     }
-    
+
      private function storeFile($showroomId, $file) {
         $explodedFile = explode('.', $file);
         $fileExtension = $explodedFile[count($explodedFile) - 1];
-        
+
         $fileName = 'showroom-files/'.md5($showroomId)."/".uniqid().".{$fileExtension}";
 
         try {
@@ -133,7 +136,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             'name' => $this->getFilename($file)
         ]);
     }
-    
+
     private function getFilename($file) {
         $explodedFile = explode('/', $file);
         return $explodedFile[count($explodedFile) - 1];

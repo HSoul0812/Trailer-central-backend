@@ -11,6 +11,6 @@ use App\Http\Requests\Request;
 class DeleteInventoryRequest extends Request
 {
     protected $rules = [
-        'id' => 'required|integer'
+        'id' => 'required|integer|inventory_valid'
     ];
 }
