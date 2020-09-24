@@ -104,7 +104,8 @@ class FieldMap extends Model
         'type',
         'form_field',
         'map_field',
-        'db_table'
+        'db_table',
+        'details'
     ];
 
     /**
