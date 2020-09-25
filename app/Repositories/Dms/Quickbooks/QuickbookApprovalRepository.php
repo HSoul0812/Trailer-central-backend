@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Dms\Quickbooks;
 
+use Illuminate\Support\Facades\DB;
+
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
@@ -113,6 +115,17 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
 
     public function update($params) {
         throw new NotImplementedException;
+    }
+
+    public function getPoInvoiceApprovals($dealerId) {
+        return DB::table('quickbook_approval AS qa')
+            ->leftJoin('qb_invoices AS i', 'qa.tb_primary_id', '=', 'i.id')
+            ->select('qa.*', 'i.id AS invoice_id')
+            ->where('qa.tb_name', '=', 'qb_invoices')
+            ->where('qa.dealer_id', '=', $dealerId)
+            ->where('is_approved', '=', 0)
+            ->whereNotNull('i.po_no')
+            ->get();
     }
 
     private function addSortQuery($query, $sort) {

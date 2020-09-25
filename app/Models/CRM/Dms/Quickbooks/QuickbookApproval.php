@@ -37,6 +37,8 @@ class QuickbookApproval extends Model
 
     protected $appends = ['tb_label'];
 
+    protected $guarded = ['qb_id'];
+
     public $timestamps = false;
 
     public function getTbLabelAttribute()
