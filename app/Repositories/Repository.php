@@ -11,6 +11,9 @@ interface Repository {
 
     const CONDITION_AND_WHERE = 'andWhere';
     const CONDITION_AND_WHERE_RAW = 'andWhereRaw';
+    const CONDITION_AND_WHERE_IN = 'andWhereIn';
+
+    const RELATION_WITH_COUNT = 'withCount';
 
     /**
      * Creates the record

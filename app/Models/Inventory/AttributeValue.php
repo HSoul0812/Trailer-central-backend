@@ -1,9 +1,8 @@
 <?php
 
-
 namespace App\Models\Inventory;
 
-use App\Traits\Models\CompositePrimaryKeys;
+use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -26,5 +25,10 @@ class AttributeValue extends Model
     public function attribute()
     {
         return $this->belongsTo(Attribute::class, 'attribute_id', 'attribute_id');
+    }
+
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 }

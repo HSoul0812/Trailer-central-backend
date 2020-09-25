@@ -6,6 +6,7 @@ use App\Exceptions\NotImplementedException;
 use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class InventoryRepository
@@ -106,33 +107,54 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return Inventory
      */
     public function get($params)
     {
         return Inventory::findOrFail($params['id']);
-    } 
+    }
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return boolean
      */
     public function delete($params)
     {
-        throw new NotImplementedException;
+        /** @var Inventory $item */
+        $item = Inventory::findOrFail($params['id']);
+
+        DB::transaction(function() use (&$item, $params) {
+            $item->attributeValues()->delete();
+            $item->inventoryFeatures()->delete();
+            $item->clapps()->delete();
+            $item->lotVantageInventory()->delete();
+
+            if (isset($params['imageIds']) && is_array($params['imageIds'])) {
+                $item->images()->whereIn('image.image_id', $params['imageIds'])->delete();
+            }
+
+            if (isset($params['fileIds']) && is_array($params['fileIds'])) {
+                $item->files()->whereIn('file.id', $params['fileIds'])->delete();
+            }
+
+            $item->delete();
+        });
+
+        return true;
     }
 
     /**
      * @param $params
      * @param bool $withDefault
+     * @param bool $paginated
      * @return Collection
      */
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
     {
         $query = Inventory::select('*');
-        
+
         $query->where('status', '<>', Inventory::STATUS_QUOTE);
-        
+
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
@@ -148,11 +170,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
-        
+
         if (isset($params['floorplan_vendor'])) {
             $query = $query->where('fp_vendor', $params['floorplan_vendor']);
         }
-        
+
         if (isset($params['only_floorplanned']) && !empty($params['only_floorplanned'])) {
             /**
              * Filter only floored inventories to pay
@@ -164,7 +186,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->where('fp_vendor', '>', 0)
                         ->where('true_cost', '>', 0)
                         ->where('fp_balance', '>', 0);
-            });           
+            });
         }
 
         if (isset($params['search_term'])) {
