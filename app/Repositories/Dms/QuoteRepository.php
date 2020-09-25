@@ -64,6 +64,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
                 $q->where('title', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('total_price', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('inventory_vin', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhereHas('customer', function($q) use($params) {
                         $q->where('display_name', 'LIKE', '%' . $params['search_term'] . '%');
                     });
@@ -103,7 +104,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
                                         ->groupBy('unit_sale_id')
                                         ->havingRaw('paid_amount >= dms_unit_sale.total_price');
                                 });
-                        });                        
+                        });
                     break;
             }
         }
