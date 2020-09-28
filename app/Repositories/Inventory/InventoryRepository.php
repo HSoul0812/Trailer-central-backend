@@ -129,6 +129,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
     {
+        $onlyFloorplanned = isset($params['only_floorplanned']) && !empty($params['only_floorplanned']) ? true : false;
         $query = Inventory::select('*');
         
         $query->where('status', '<>', Inventory::STATUS_QUOTE);
@@ -142,7 +143,15 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($withDefault) {
-            $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
+            $defaultParams = self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE];
+            if ($onlyFloorplanned) {
+                $archivedFilterIndex = array_search('is_archived', array_column($defaultParams, 0));
+                
+                if ($archivedFilterIndex !== false) {
+                    unset($defaultParams[$archivedFilterIndex]);
+                }
+            }
+            $query = $query->where($defaultParams);
         }
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
@@ -153,7 +162,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('fp_vendor', $params['floorplan_vendor']);
         }
         
-        if (isset($params['only_floorplanned']) && !empty($params['only_floorplanned'])) {
+        if ($onlyFloorplanned) {
             /**
              * Filter only floored inventories to pay
              * https://crm.trailercentral.com/accounting/floorplan-payment
@@ -164,7 +173,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->where('fp_vendor', '>', 0)
                         ->where('true_cost', '>', 0)
                         ->where('fp_balance', '>', 0);
-            });           
+            });
         }
 
         if (isset($params['search_term'])) {
