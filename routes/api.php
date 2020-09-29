@@ -171,16 +171,16 @@ $api->version('v1', function ($route) {
     /**
      * Log
      */
-    $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create');
+    $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create'); 
 
     /**
      * Website Part Filters
      */
     $route->get('website/parts/filters', 'App\Http\Controllers\v1\Website\Parts\FilterController@index');
-    $route->put('website/parts/filters', 'App\Http\Controllers\v1\Parts\FilterController@create');
-    $route->get('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@show')->where('id', '[0-9]+');
-    $route->post('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@update')->where('id', '[0-9]+');
-    $route->delete('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@destroy')->where('id', '[0-9]+');
+    $route->put('website/parts/filters', 'App\Http\Controllers\v1\Website\Parts\FilterController@create');
+    $route->get('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@show')->where('id', '[0-9]+');
+    $route->post('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@update')->where('id', '[0-9]+');
+    $route->delete('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@destroy')->where('id', '[0-9]+');
 
     /**
      * Website Blog Posts
