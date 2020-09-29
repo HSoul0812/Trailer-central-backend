@@ -289,7 +289,6 @@ class Lead extends Model
      * @return string
      */
     public function getTextPhoneAttribute() {
-        return '+12626619236';
         if(empty($this->phone_number)) {
             return '';
         }
