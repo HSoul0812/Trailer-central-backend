@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Dms;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Exceptions\NotImplementedException;
@@ -54,6 +55,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
     }
 
     public function getAll($params) {
+        /** @var Builder $query */
         if (isset($params['dealer_id'])) {
             $query = UnitSale::where('dealer_id', '=', $params['dealer_id']);
         } else {
@@ -67,6 +69,10 @@ class QuoteRepository implements QuoteRepositoryInterface {
                     ->orWhere('inventory_vin', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhereHas('customer', function($q) use($params) {
                         $q->where('display_name', 'LIKE', '%' . $params['search_term'] . '%');
+                    })
+                    // also search extra inventory
+                    ->orWhereHas('extraInventory', function($q) use($params) {
+                        $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
                     });
             });
         }
