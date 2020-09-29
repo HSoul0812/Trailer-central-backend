@@ -129,7 +129,6 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
     {
-        $onlyFloorplanned = isset($params['only_floorplanned']) && !empty($params['only_floorplanned']) ? true : false;
         $query = Inventory::select('*');
         
         $query->where('status', '<>', Inventory::STATUS_QUOTE);
@@ -143,11 +142,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($withDefault) {
-            if ($onlyFloorplanned) {
-                $query = $query->where(self::FLOORPLANNED_DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
-            } else {
-                $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
-            }
+            $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
         }
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
@@ -157,21 +152,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['floorplan_vendor'])) {
             $query = $query->where('fp_vendor', $params['floorplan_vendor']);
         }
-        
-        if ($onlyFloorplanned) {
-            /**
-             * Filter only floored inventories to pay
-             * https://crm.trailercentral.com/accounting/floorplan-payment
-             */
-            $query->where(function ($q) {
-                $q->whereNotNull('bill_id')
-                        ->where('is_floorplan_bill', 1)
-                        ->where('fp_vendor', '>', 0)
-                        ->where('true_cost', '>', 0)
-                        ->where('fp_balance', '>', 0);
-            });
-        }
-
+     
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
@@ -198,6 +179,63 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         return $query->get();
+    }
+
+    /**
+     * @param $params
+     * @return Collection
+     */
+    public function getFloorplannedInventory($params)
+    {
+        $query = Inventory::select('*');
+        
+        $query->where([
+            ['status', '<>', Inventory::STATUS_QUOTE],
+            ['is_floorplan_bill', '=', 1],
+            ['active', '=', 1],
+            ['fp_vendor', '>', 0],
+            ['true_cost', '>', 0],
+            ['fp_balance', '>', 0]
+        ])->whereNotNull('bill_id');
+        
+        if (isset($params['dealer_id'])) {
+            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
+        }
+
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query = $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+        
+        if (isset($params['floorplan_vendor'])) {
+            $query = $query->where('fp_vendor', $params['floorplan_vendor']);
+        }
+        
+        if (isset($params['search_term'])) {
+            $query = $query->where(function($q) use ($params) {
+                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhereHas('floorplanVendor', function ($query) use ($params) {
+                            $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
+                        });
+            });
+        }
+
+        if (isset($params['sort'])) {
+            if ($params['sort'] === 'fp_vendor' || $params['sort'] === '-fp_vendor') {
+                $direction = $params['sort'] === 'fp_vendor' ? 'DESC' : 'ASC';
+                $query = $query->leftJoin('qb_vendors', 'qb_vendors.id', '=', 'inventory.fp_vendor')->orderBy('qb_vendors.name', $direction);
+            } else {
+                $query = $this->addSortQuery($query, $params['sort']);
+            }
+        }
+
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     protected function getSortOrders() {

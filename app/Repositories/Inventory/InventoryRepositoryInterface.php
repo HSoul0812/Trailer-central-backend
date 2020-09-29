@@ -13,11 +13,7 @@ interface InventoryRepositoryInterface extends Repository
         ]
     ];
 
-    const FLOORPLANNED_DEFAULT_GET_PARAMS = [
-        self::CONDITION_AND_WHERE => [
-            ['active', '=', 1]
-        ]
-    ];
-
     public function getAll($params, bool $withDefault = true, bool $paginated = false);
+
+    public function getFloorplannedInventory($params);
 }
