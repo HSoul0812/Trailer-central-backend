@@ -143,15 +143,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($withDefault) {
-            $defaultParams = self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE];
             if ($onlyFloorplanned) {
-                $archivedFilterIndex = array_search('is_archived', array_column($defaultParams, 0));
-                
-                if ($archivedFilterIndex !== false) {
-                    unset($defaultParams[$archivedFilterIndex]);
-                }
+                $query = $query->where(self::FLOORPLANNED_DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
+            } else {
+                $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
             }
-            $query = $query->where($defaultParams);
         }
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
