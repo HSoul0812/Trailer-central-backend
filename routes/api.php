@@ -1,7 +1,6 @@
 <?php
 
 use Dingo\Api\Routing\Router;
-use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
