@@ -558,10 +558,6 @@ $api->version('v1', function ($route) {
          * Quickbook Approval
          */
         $route->get('quickbooks/quickbook-approvals', 'App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController@index');
-        $route->get('quickbooks/quickbook-approvals/update-po-invoices', function (Request $request) {
-            $dealerId = $request->input('dealer_id');
-            Artisan::call('crm:dms:update-po-num-ref ' . $dealerId);
-        })->middleware('setDealerIdOnRequest');
 
         /*
         |--------------------------------------------------------------------------

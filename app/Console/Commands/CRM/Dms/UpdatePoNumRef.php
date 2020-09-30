@@ -6,6 +6,7 @@ use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use Illuminate\Console\Command;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 use App\Models\CRM\Dms\Quickbooks\Preference;
+use App\Repositories\User\UserRepositoryInterface;
 
 class UpdatePoNumRef extends Command
 {
@@ -14,7 +15,7 @@ class UpdatePoNumRef extends Command
      *
      * @var string
      */
-    protected $signature = 'crm:dms:update-po-num-ref {dealerId}';
+    protected $signature = 'crm:dms:update-po-num-ref';
 
     /**
      * The console command description.
@@ -28,20 +29,23 @@ class UpdatePoNumRef extends Command
      *
      * @return mixed
      */
-    public function handle(QuickbookApprovalRepositoryInterface $qbApprovalRepository)
+    public function handle(QuickbookApprovalRepositoryInterface $qbApprovalRepository, UserRepositoryInterface $userRepository)
     {
-        $dealerId = $this->argument('dealerId');
-        $approvals = $qbApprovalRepository->getPoInvoiceApprovals($dealerId);
-        $preference = Preference::where('dealer_id', $dealerId)->first();
+        $dmsActiveDealers = $userRepository->getDmsActiveUsers();
+        
+        foreach($dmsActiveDealers as $dealer) {
+            $approvals = $qbApprovalRepository->getPoInvoiceApprovals($dealer->dealer_id);
+            $preference = Preference::where('dealer_id', $dealer->dealer_id)->first();
+            
+            if (!empty($preference)) {
+                foreach($approvals as $approval) {
+                    $qbObj = json_decode($approval->qb_obj, true);
+                    $customField = $qbObj['CustomField'] ?? [];
 
-        if (!empty($preference)) {
-            foreach($approvals as $approval) {
-                $qbObj = json_decode($approval->qb_obj, true);
-                $customField = $qbObj['CustomField'] ?? [];
-
-                if (!empty($customField) && count($customField) > 0) {
-                    $qbObj['CustomField'][0]['DefinitionId'] = $preference->po_num_ref_id;
-                    QuickbookApproval::find($approval->id)->update(['qb_obj' => json_encode($qbObj)]);
+                    if (!empty($customField) && count($customField) > 0) {
+                        $qbObj['CustomField'][0]['DefinitionId'] = $preference->po_num_ref_id;
+                        QuickbookApproval::find($approval->id)->update(['qb_obj' => json_encode($qbObj)]);
+                    }
                 }
             }
         }
