@@ -181,6 +181,7 @@ class AppServiceProvider extends ServiceProvider
             __DIR__ . '/../../database/migrations/crm',
 
             // add other migration directories here
+            __DIR__ . '/../../database/migrations/utilities',
         ]);
 
         // log all queries
