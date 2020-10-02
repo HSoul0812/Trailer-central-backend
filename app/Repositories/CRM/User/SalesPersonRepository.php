@@ -184,7 +184,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @param array $salesPeople
      * @return SalesPerson next sales person
      */
-    public function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson, $salesPeople = array()) {
+    public function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson) {
         // Set Newest ID
         $newestSalesPersonId = 0;
         if(!empty($newestSalesPerson->id)) {
@@ -195,9 +195,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $lastId = 0;
         $dealerLocationId = (int) $dealerLocationId;
         
-        if(empty($salesPeople)) {
-            $salesPeople = $this->getSalesPeopleBy($dealerId, $dealerLocationId, $salesType);
-        }
+        $salesPeople = $this->getSalesPeopleBy($dealerId, $dealerLocationId, $salesType);
         
         // Loop Valid Sales People
         if(count($salesPeople) > 1) {
