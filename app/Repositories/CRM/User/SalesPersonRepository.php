@@ -141,7 +141,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         }
 
         return $all;
-    }
+    } 
 
     
 
@@ -155,8 +155,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      */
     public function findNewestSalesPerson($dealerId, $dealerLocationId, $salesType) {
         // Find Newest Salesperson in DB
-        $query = LeadStatus::select(SalesPerson::getTableName() . '.*')
-                            ->leftJoin(SalesPerson::getTableName(), SalesPerson::getTableName() . '.id', '=', LeadStatus::getTableName() . '.sales_person_id')
+        $query = SalesPerson::select(SalesPerson::getTableName() . '.*')
+                            ->leftJoin(LeadStatus::getTableName(), LeadStatus::getTableName() . '.sales_person_id', '=', SalesPerson::getTableName() . '.id')
                             ->leftJoin(Lead::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
                             ->where(Lead::getTableName() . '.dealer_id', $dealerId)
                             ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
@@ -171,17 +171,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         }
 
         // Get Sales Person ID
-        $salesPerson = $query->first();
-        $salesPersonId = 0;
-        if(!empty($salesPerson->id)) {
-            $salesPersonId = $salesPerson->id;
-        } else {
-            $salesPerson = new \stdclass;
-            $salesPerson->id = $salesPersonId;
-        }
-
-        // Return Sales Person
-        return $salesPerson;
+        return $query->first();
     }
 
     /**
@@ -201,38 +191,19 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             $newestSalesPersonId = $newestSalesPerson->id;
         }
 
-        // Get Sales People for Dealer ID
-        if(empty($salesPeople)) {
-            $salesPeople = $this->findSalesPeople($dealerId);
-        }
-
-        // Loop Sales People
-        $validSalesPeople = [];
         $nextSalesPerson = null;
         $lastId = 0;
         $dealerLocationId = (int) $dealerLocationId;
-        foreach($salesPeople as $k => $salesPerson) {
-            // Search By Location?
-            if($dealerLocationId !== 0) {
-                if($dealerLocationId !== $salesPerson->dealer_location_id) {
-                    continue;
-                }
-            }
-
-            // Search by Type?
-            if($salesPerson->{'is_' . $salesType} !== 1 && $salesPerson->{'is_' . $salesType} !== '1') {
-                continue;
-            }
-
-            // Insert Valid Salespeople
-            $validSalesPeople[] = $salesPerson;
+        
+        if(empty($salesPeople)) {
+            $salesPeople = $this->getSalesPeopleBy($dealerId, $dealerLocationId, $salesType);
         }
-
+        
         // Loop Valid Sales People
-        if(count($validSalesPeople) > 1) {
-            $lastSalesPerson = end($validSalesPeople);
+        if(count($salesPeople) > 1) {
+            $lastSalesPerson = $salesPeople->last();
             $lastId = $lastSalesPerson->id;
-            foreach($validSalesPeople as $salesPerson) {
+            foreach($salesPeople as $salesPerson) {
                 // Compare ID
                 if($lastId === $newestSalesPersonId || $newestSalesPersonId === 0) {
                     $nextSalesPerson = $salesPerson;
@@ -243,11 +214,11 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
             // Still No Next Sales Person?
             if(empty($nextSalesPerson)) {
-                $salesPerson = reset($validSalesPeople);
+                $salesPerson = $salesPeople->first();
                 $nextSalesPerson = $salesPerson;
             }
-        } elseif(count($validSalesPeople) === 1) {
-            $nextSalesPerson = reset($validSalesPeople);
+        } elseif(count($salesPeople) === 1) {
+            $nextSalesPerson = $salesPeople->first();
         }
 
         // Still No Next Sales Person?
@@ -264,12 +235,22 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * 
      * @param type $dealerId
      */
-    public function findSalesPeople($dealerId) {
+    public function getSalesPeopleBy($dealerId, $dealerLocationId = null, $salesType = null) {
         // Get New Sales People By Dealer ID
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
-        return SalesPerson::select('*')
-                          ->where('user_id', $newDealerUser->user_id)
-                          ->orderBy('id', 'asc')->get();
+        $query = SalesPerson::select('*')
+                          ->where('user_id', $newDealerUser->user_id);
+        
+        if ($dealerLocationId) {
+            $query->where('dealer_location_id', $dealerLocationId);
+        }
+        
+        if ($salesType) {
+            $query->where("is_{$salesType}", 1);
+        }
+        
+        return $query->get();
+                           
     }
 
     /**

@@ -41,8 +41,10 @@ interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
      * Find Sales People By Dealer ID
      * 
      * @param type $dealerId
+     * @param null|int $dealerLocationId
+     * @param null|string $salesType
      */
-    public function findSalesPeople($dealerId);
+    public function getSalesPeopleBy($dealerId, $dealerLocationId = null, $salesType = null);
 
     /**
      * Find Sales Person Type
