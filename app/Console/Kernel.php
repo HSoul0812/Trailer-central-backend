@@ -35,14 +35,35 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('run:bulk')->withoutOverlapping();
-        $schedule->command('add:sitemaps')->daily();
-        $schedule->command('user:create-access-token')->daily();
-        $schedule->command('crm:dms:update-po-num-ref')->daily();
-        $schedule->command('leads:assign:auto')->withoutOverlapping();
+        $schedule->command('run:bulk')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('add:sitemaps')
+                ->daily()
+                ->runInBackground();
+        
+        $schedule->command('user:create-access-token')
+                ->daily()
+                ->runInBackground();
+        
+        $schedule->command('crm:dms:update-po-num-ref')
+                ->daily()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
-        $schedule->command('text:process-campaign')->withoutOverlapping();
-        $schedule->command('text:deliver-blast')->withoutOverlapping();
+        
+        $schedule->command('text:process-campaign')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('text:deliver-blast')
+                ->withoutOverlapping()
+                ->runInBackground();
         // $schedule->command('inspire')
         //          ->hourly();
     }

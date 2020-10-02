@@ -114,13 +114,13 @@ class AutoAssignTest extends TestCase
 
 
         // Loop Leads
-        foreach($leads as $lead) {
+        foreach($leads as $lead) {            
             // Assert a message was sent to the given leads...
             $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
             Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
                 if(empty($salesPerson->email)) {
                     return false;
-                }
+                }                
                 return $mail->hasTo($salesPerson->email);
             });
 

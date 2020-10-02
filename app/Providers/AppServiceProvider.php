@@ -100,6 +100,8 @@ use App\Services\Parts\PartServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
+use App\Services\CRM\Leads\AutoAssignService;
+use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Jobs\Mailer\UserMailerJob;
 use App\Rules\CRM\Leads\ValidLeadSource;
 use Laravel\Nova\Nova;
@@ -264,7 +266,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(LogServiceInterface::class, LogService::class);
 
         $this->app->bind(PartServiceInterface::class, PartService::class);
-
+        $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
         $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);
