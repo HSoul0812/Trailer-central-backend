@@ -51,7 +51,19 @@ class Kernel extends ConsoleKernel
                 ->daily()
                 ->runInBackground();
         
-        $schedule->command('leads:assign:auto')
+        $schedule->command('leads:assign:auto 0 2999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 3000 5999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 6000 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
         

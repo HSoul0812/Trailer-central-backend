@@ -12,10 +12,13 @@ class AutoAssign extends Command
 
     /**
      * The name and signature of the console command.
-     *
+     * 
+     * dealer determines that it should only run for the given dealer
+     * boundLower determines the lowest dealer id to process
+     * boundUpper determines the highest dealer id to process
      * @var string
      */
-    protected $signature = 'leads:assign:auto {dealer?}';
+    protected $signature = 'leads:assign:auto {boundLower?} {boundUpper?} {dealer?}';
 
     /**
      * The console command description.
@@ -48,6 +51,16 @@ class AutoAssign extends Command
      * @var int
      */
     protected $dealerId;
+    
+    /**    
+     * @var int
+     */
+    protected $boundLower;
+    
+    /**    
+     * @var int
+     */
+    protected $boundUpper;
 
     /**
      * Create a new command instance.
@@ -76,6 +89,9 @@ class AutoAssign extends Command
     {
         // Get Dealer ID
         $this->dealerId = $dealerId = $this->argument('dealer');
+        
+        $this->boundLower = $this->argument('boundLower');
+        $this->boundUpper = $this->argument('boundUpper');        
         
         $now = $this->datetime->format("l, F jS, Y");
         $command = str_replace('{dealer?}', $dealerId, $this->signature);
@@ -122,6 +138,17 @@ class AutoAssign extends Command
         if(!empty($this->dealerId)) {
             $dealer = NewDealerUser::findOrFail($this->dealerId);
             $dealers[] = $dealer;
+        } else if ($this->boundLower && $this->boundUpper) {            
+            $dealers = NewDealerUser::where('id', '>=', $this->boundLower)
+                            ->where('id', '<=', $this->boundUpper)
+                            ->has('activeCrmUser')
+                            ->has('salespeopleEmails')
+                                ->get();
+        } else if ($this->boundLower) {
+            $dealers = NewDealerUser::where('id', '>=', $this->boundLower)
+                            ->has('activeCrmUser')
+                            ->has('salespeopleEmails')
+                                ->get();
         } else {
             $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
         }

@@ -89,6 +89,10 @@ class AutoAssignService implements AutoAssignServiceInterface {
         if(empty($newestSalesPerson->id)) {
             // Look it up!
             $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+            if (empty($newestSalesPerson)) {
+                $newestSalesPerson = new \stdClass();
+                $newestSalesPerson->id = 0;
+            }
             $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson->id);
         }
         if(!empty($dealerLocationId)) {
