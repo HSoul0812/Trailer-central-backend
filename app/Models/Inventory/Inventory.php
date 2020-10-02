@@ -1,22 +1,23 @@
 <?php
 namespace App\Models\Inventory;
 
-use App\Helpers\StringHelper;
+use App\Helpers\SanitizeHelper;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
 use App\Traits\CompactHelper;
+use App\Traits\GeospatialHelper;
+use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Inventory\InventoryImage;
-use App\Models\Inventory\Image;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
 
 class Inventory extends Model
 {
-    use TableAware;
+    use TableAware, SpatialTrait, GeospatialHelper;
 
     const COLOR_ATTRIBUTE_ID = 11;
 
@@ -93,6 +94,7 @@ class Inventory extends Model
         'width',
         'height',
         'gvwr',
+        'weight',
         'axle_capacity',
         'cost_of_unit',
         'true_cost',
@@ -150,6 +152,7 @@ class Inventory extends Model
         'hidden_price',
         'utc_integration_updated_at',
         'has_stock_images',
+        'qb_sync_processed',
     ];
 
     protected $casts = [
@@ -265,13 +268,28 @@ class Inventory extends Model
      */
     public function getUrl(): string
     {
+        $sanitizeHelper = new SanitizeHelper();
+
         $url = '/';
-        $url .= StringHelper::superSanitize($this->title, '-');
+        $url .= $sanitizeHelper->superSanitize($this->title, '-');
         $url .= '-' . CompactHelper::shorten($this->inventory_id);
 
         $url .= '.html';
 
         return $url;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function save(array $options = [])
+    {
+        if (!empty($this->geolocation) && is_string($this->geolocation)) {
+            $geometry = $this->fromWKB($this->geolocation);
+            $this->geolocation = new Point($geometry['lat'], $geometry['lon']);
+        }
+
+        return parent::save($options);
     }
 
     public static function getTableName() {

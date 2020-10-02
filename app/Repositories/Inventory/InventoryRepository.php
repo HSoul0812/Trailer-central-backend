@@ -2,8 +2,10 @@
 
 namespace App\Repositories\Inventory;
 
-use App\Exceptions\NotImplementedException;
+use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\InventoryFeature;
+use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  */
 class InventoryRepository implements InventoryRepositoryInterface
 {
-    use SortTrait;
+    use SortTrait, Transaction;
 
     private $sortOrders = [
         'title' => [
@@ -85,11 +87,41 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return Inventory
      */
     public function create($params)
     {
-        throw new NotImplementedException;
+        $attributes = $params['attributes'] ?? [];
+        $features = $params['features'] ?? [];
+        $attributeObjs = [];
+        $featureObjs = [];
+
+        unset($params['attributes']);
+        unset($params['features']);
+
+        foreach ($attributes as $attribute) {
+            $attributeObjs[] = new AttributeValue($attribute);
+        }
+
+        foreach ($features as $feature) {
+            $featureObjs[] = new InventoryFeature($feature);
+        }
+
+        $item = new Inventory();
+        $item->fill($params);
+
+
+        $item->save();
+
+        if (!empty($attributeObjs)) {
+            $item->attributeValues()->saveMany($attributeObjs);
+        }
+
+        if (!empty($featureObjs)) {
+            $item->inventoryFeatures()->saveMany($featureObjs);
+        }
+
+        return $item;
     }
 
     /**

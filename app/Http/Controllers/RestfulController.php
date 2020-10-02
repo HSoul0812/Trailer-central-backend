@@ -80,4 +80,21 @@ class RestfulController extends Controller {
             'response' => ['status' => 'success']
         ]);
     }
+
+    /**
+     * @param mixed $id
+     * @return \Dingo\Api\Http\Response
+     */
+    protected function createdResponse($id = null)
+    {
+        $params = [
+            'response' => ['status' => 'success']
+        ];
+
+        if ($id) {
+            $params['response']['data'] = ['id' => $id];
+        }
+
+        return $this->response->array($params);
+    }
 }

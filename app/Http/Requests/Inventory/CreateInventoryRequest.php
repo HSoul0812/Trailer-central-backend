@@ -11,9 +11,9 @@ use App\Http\Requests\Request;
 class CreateInventoryRequest extends Request
 {
     protected $rules = [
-        'entity_type_id' => 'required|integer',
-        'dealer_id' => 'required|integer',
-        'dealer_location_id' => 'required|integer',
+        'entity_type_id' => 'required_without_all:entity_type|integer',
+        'dealer_id' => 'required_without_all:dealer_identifier|integer|exists:App\Models\User\User,dealer_id',
+        'dealer_location_id' => 'required_without_all:dealer_location_identifier|integer|exists:App\Models\User\DealerLocation,dealer_location_id',
         'active' => 'boolean|nullable',
         'title' => 'required|max:255',
         'stock' => 'string|max:50|nullable',
@@ -27,7 +27,7 @@ class CreateInventoryRequest extends Request
         'availability' => 'string|nullable',
         'is_consignment' => 'boolean|nullable',
         'category' => 'string|max:255|nullable',
-        'video_embed_code' => 'string|nullable',
+        'video_embed_code' => 'nullable',
         'vin' => 'string|max:17|nullable',
         'geolocation' => 'string',
         'msrp_min' => 'numeric|nullable',
@@ -76,7 +76,7 @@ class CreateInventoryRequest extends Request
         'height_inches' => 'numeric|nullable',
         'length_inches' => 'numeric|nullable',
         'show_on_rvtrader' => 'boolean|nullable',
-        'chosen_overlay' => 'string|max:255',
+        'chosen_overlay' => 'string|max:255|nullable',
         'fp_committed' => 'date|nullable',
         'fp_vendor' => 'integer|nullable',
         'fp_balance' => 'numeric|nullable',
@@ -103,5 +103,19 @@ class CreateInventoryRequest extends Request
         'hidden_price' => 'numeric|nullable',
         'utc_integration_updated_at' => 'date',
         'has_stock_images' => 'boolean|nullable',
+
+        'dealer_identifier' => 'required_without_all:dealer_id|integer|exists:App\Models\User\User,dealer_id',
+        'entity_type' => 'required_without_all:entity_type_id|integer',
+        'dealer_location_identifier' => 'required_without_all:dealer_location_id|integer|exists:App\Models\User\DealerLocation,dealer_location_id',
+
+        'length_second' => 'numeric|nullable',
+        'length_inches_second' => 'numeric|nullable',
+        'width_second' => 'numeric|nullable',
+        'width_second_inches' => 'numeric|nullable',
+        'height_second' => 'numeric|nullable',
+        'height_second_inches' => 'numeric|nullable',
+
+
+        'add_bill' => 'boolean|nullable',
     ];
 }

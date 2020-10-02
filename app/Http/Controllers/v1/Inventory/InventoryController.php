@@ -35,7 +35,7 @@ class InventoryController extends RestfulController
      */
     public function __construct(InventoryService $inventoryService, InventoryRepositoryInterface $inventoryRepository)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'destroy']);
 
         $this->inventoryService = $inventoryService;
         $this->inventoryRepository = $inventoryRepository;
@@ -124,13 +124,14 @@ class InventoryController extends RestfulController
      */
     public function create(Request $request)
     {
-        $request = new CreateInventoryRequest($request->all());
+        $params = $request->all();
+        $createInventoryRequest = new CreateInventoryRequest($params);
 
-        if ($request->validate() && $this->inventoryService->create($request->all())) {
-            return true;
+        if (!$createInventoryRequest->validate() || !($inventoryId = $this->inventoryService->create($params))) {
+            return $this->response->errorBadRequest();
         }
 
-        return $this->response->errorBadRequest();
+        return $this->createdResponse($inventoryId);
     }
 
     /**

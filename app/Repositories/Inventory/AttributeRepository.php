@@ -4,6 +4,8 @@ namespace App\Repositories\Inventory;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\Inventory\Attribute;
+use App\Models\Inventory\EntityTypeAttribute;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Class AttributeRepository
@@ -11,17 +13,28 @@ use App\Models\Inventory\Attribute;
  */
 class AttributeRepository implements AttributeRepositoryInterface
 {
-
+    /**
+     * @param $params
+     * @throw NotImplementedException
+     */
     public function create($params)
     {
         throw new NotImplementedException;
     }
 
+    /**
+     * @param $params
+     * @throw NotImplementedException
+     */
     public function update($params)
     {
         throw new NotImplementedException;
     }
 
+    /**
+     * @param $params
+     * @throw NotImplementedException
+     */
     public function get($params)
     {
         throw new NotImplementedException;
@@ -48,8 +61,25 @@ class AttributeRepository implements AttributeRepositoryInterface
         return $attribute->delete();
     }
 
+    /**
+     * @param $params
+     * @throw NotImplementedException
+     */
     public function getAll($params)
     {
         throw new NotImplementedException;
+    }
+
+    /**
+     * @param int $entityTypeId
+     */
+    public function getAllByEntityTypeId(int $entityTypeId)
+    {
+        /** @var Builder $query */
+        $query = Attribute::select('*');
+        $query->join(EntityTypeAttribute::getTableName(), Attribute::getTableName().'.attribute_id', '=', EntityTypeAttribute::getTableName().'.attribute_id');
+        $query->where(EntityTypeAttribute::getTableName() . '.entity_type_id', '=', $entityTypeId);
+
+        return $query->get();
     }
 }

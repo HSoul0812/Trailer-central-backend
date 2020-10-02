@@ -14,4 +14,10 @@ interface InventoryRepositoryInterface extends Repository
     ];
 
     public function getAll($params, bool $withDefault = true, bool $paginated = false);
+
+    public function beginTransaction(): void;
+
+    public function commitTransaction(): void;
+
+    public function rollbackTransaction(): void;
 }
