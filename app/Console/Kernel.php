@@ -35,14 +35,47 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('run:bulk')->withoutOverlapping();
-        $schedule->command('add:sitemaps')->daily();
-        $schedule->command('user:create-access-token')->daily();
-        $schedule->command('crm:dms:update-po-num-ref')->daily();
-        $schedule->command('leads:assign:auto')->withoutOverlapping();
+        $schedule->command('run:bulk')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('add:sitemaps')
+                ->daily()
+                ->runInBackground();
+        
+        $schedule->command('user:create-access-token')
+                ->daily()
+                ->runInBackground();
+        
+        $schedule->command('crm:dms:update-po-num-ref')
+                ->daily()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 0 2999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 3000 5999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 6000 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
-        $schedule->command('text:process-campaign')->withoutOverlapping();
-        $schedule->command('text:deliver-blast')->withoutOverlapping();
+        
+        $schedule->command('text:process-campaign')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('text:deliver-blast')
+                ->withoutOverlapping()
+                ->runInBackground();
         // $schedule->command('inspire')
         //          ->hourly();
     }

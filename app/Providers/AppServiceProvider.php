@@ -100,6 +100,8 @@ use App\Services\Parts\PartServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
+use App\Services\CRM\Leads\AutoAssignService;
+use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Jobs\Mailer\UserMailerJob;
 use App\Rules\CRM\Leads\ValidLeadSource;
 use Laravel\Nova\Nova;
@@ -174,6 +176,7 @@ class AppServiceProvider extends ServiceProvider
             __DIR__ . '/../../database/migrations/crm',
 
             // add other migration directories here
+            __DIR__ . '/../../database/migrations/utilities',
         ]);
 
         // log all queries
@@ -245,6 +248,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
         $this->app->bind(LogServiceInterface::class, LogService::class);
+
+        $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
 
     }
 
