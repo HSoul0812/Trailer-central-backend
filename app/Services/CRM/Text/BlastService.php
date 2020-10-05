@@ -129,7 +129,7 @@ class BlastService implements BlastServiceInterface
         // Get Text Message
         $textMessage = $this->templates->fillTemplate($blast->template->template, [
             'lead_name' => $lead->full_name,
-            'title_of_unit_of_interest' => $lead->inventory->title,
+            'title_of_unit_of_interest' => $lead->inventory_title,
             'dealer_name' => $dealer->user->name
         ]);
 
