@@ -76,7 +76,16 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function delete($params) {
-        return Blast::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
+        // Get Blast
+        $blast = Blast::findOrFail($params['id']);
+
+        DB::transaction(function() use (&$blast) {
+            // Mark Deleted
+            $blast->fill(['deleted' => '1'])->save();
+        });
+
+        // Return
+        return $blast;
     }
 
     public function get($params) {
