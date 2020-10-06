@@ -21,6 +21,10 @@ class AuditLog extends Model implements Filterable
 {
     protected $table = 'parts_audit_log';
 
+    protected $fillable = [
+        'part_id', 'bin_id', 'qty', 'balance', 'description'
+    ];
+
     public function part()
     {
         return $this->hasOne(Part::class, 'id', 'part_id');

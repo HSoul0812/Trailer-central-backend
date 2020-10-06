@@ -4,7 +4,6 @@
 namespace App\Repositories\Parts;
 
 
-use App\Exceptions\NotImplementedException;
 use App\Models\Parts\AuditLog;
 use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
@@ -16,6 +15,18 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
     public function getAll($params)
     {
         return $this->query()->get();
+    }
+
+    /**
+     * @param $params
+     * @return AuditLog
+     */
+    public function create($params)
+    {
+        $auditLog = new AuditLog($params);
+        $auditLog->save();
+
+        return $auditLog;
     }
 
     protected function baseQuery()
