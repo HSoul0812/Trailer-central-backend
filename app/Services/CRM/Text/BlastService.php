@@ -139,7 +139,7 @@ class BlastService implements BlastServiceInterface
             $status = BlastSent::STATUS_SENT;
         } catch (CustomerLandlineNumberException $ex) {
             $status = BlastSent::STATUS_LANDLINE;
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $status = BlastSent::STATUS_INVALID;
         }
 
