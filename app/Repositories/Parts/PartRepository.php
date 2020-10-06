@@ -117,11 +117,6 @@ class PartRepository implements PartRepositoryInterface {
                         'bin_id' => $bin['bin_id'],
                         'qty' => $bin['quantity']
                     ]);
-
-                    event(new PartQtyUpdated($part, $binQty, [
-                        'quantity' => $bin['quantity'],
-                        'description' => 'Part created via bulk uploader'
-                    ]));
                 }
             }
 
@@ -338,11 +333,6 @@ class PartRepository implements PartRepositoryInterface {
                             'bin_id' => $bin['bin_id'],
                             'qty' => $bin['quantity']
                         ]);
-
-                        event(new PartQtyUpdated($part, $binQty, [
-                            'quantity' => $bin['quantity'],
-                            'description' => 'Part updated via bulk uploader'
-                        ]));
                     }
                 }
             }

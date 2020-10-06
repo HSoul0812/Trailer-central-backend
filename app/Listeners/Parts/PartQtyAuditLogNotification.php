@@ -33,8 +33,8 @@ class PartQtyAuditLogNotification
         // if part and bin_qty is passed in the event, add an audit log
         if ($event->part && $event->binQuantity) {
             $this->auditLogRepository->create([
-                'partId' => $event->part->id,
-                'binId' => $event->binQuantity->bin_id,
+                'part_id' => $event->part->id,
+                'bin_id' => $event->binQuantity->bin_id,
                 'qty' => $event->details['quantity'] ?? 0,
                 'balance' => $event->binQuantity->qty ?? 0,
                 'description' => $event->details['description'] ?? 'No description',
