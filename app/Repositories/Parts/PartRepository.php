@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Parts;
 
+use App\Events\Parts\PartQtyUpdated;
 use App\Repositories\Repository;
 use App\Models\Parts\Part;
 use App\Models\Parts\PartImage;
@@ -20,7 +21,7 @@ use App\Repositories\Traits\SortTrait;
 class PartRepository implements PartRepositoryInterface {
 
     use SortTrait;
-    
+
     private $sortOrders = [
         'title' => [
             'field' => 'title',
@@ -84,7 +85,7 @@ class PartRepository implements PartRepositoryInterface {
         DB::beginTransaction();
 
         try {
-            $part = Part::create($params);
+            $part = $this->createPart($params);
 
             if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
 
@@ -105,17 +106,22 @@ class PartRepository implements PartRepositoryInterface {
                     } catch (ImageNotDownloadedException $ex) {
 
                     }
-                    
+
                 }
             }
 
             if (isset($params['bins'])) {
                 foreach ($params['bins'] as $bin) {
-                    BinQuantity::create([
+                    $binQty = $this->createBinQuantity([
                         'part_id' => $part->id,
                         'bin_id' => $bin['bin_id'],
                         'qty' => $bin['quantity']
                     ]);
+
+                    event(new PartQtyUpdated($part, $binQty, [
+                        'quantity' => $bin['quantity'],
+                        'description' => 'Part created via bulk uploader'
+                    ]));
                 }
             }
 
@@ -152,11 +158,11 @@ class PartRepository implements PartRepositoryInterface {
     public function get($params) {
         return Part::findOrFail($params['id'])->load('bins.bin');
     }
-    
+
     public function getDealerSku($dealerId, $sku) {
         return Part::where('sku', $sku)->where('dealer_id', $dealerId)->first();
     }
-    
+
     public function getBySku($sku) {
         return Part::where('sku', $sku)->first();
     }
@@ -167,7 +173,7 @@ class PartRepository implements PartRepositoryInterface {
                 $q->where('sku', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('alternative_part_number', 'LIKE', '%' . $params['search_term'] . '%');                        
+                        ->orWhere('alternative_part_number', 'LIKE', '%' . $params['search_term'] . '%');
             });
         } else {
             $query = Part::search($params['search_term']);
@@ -176,7 +182,7 @@ class PartRepository implements PartRepositoryInterface {
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        
+
         if (isset($params['sku'])) {
             $query = $query->whereLike('sku', $params['sku']);
         }
@@ -291,10 +297,11 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function update($params) {
-        $part = Part::findOrFail($params['id']);
+        // $part = Part::findOrFail($params['id']);
+        $part = $this->get($params);
 
-        DB::transaction(function() use (&$part, $params) {            
-            
+        DB::transaction(function() use (&$part, $params) {
+
             if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
                 VehicleSpecific::updateOrCreate([
                     'make' => $params['vehicle_make'],
@@ -326,11 +333,16 @@ class PartRepository implements PartRepositoryInterface {
                 if (isset($params['bins'])) {
                     $part->bins()->delete();
                     foreach ($params['bins'] as $bin) {
-                        BinQuantity::create([
+                        $binQty = $this->createBinQuantity([
                             'part_id' => $part->id,
                             'bin_id' => $bin['bin_id'],
                             'qty' => $bin['quantity']
                         ]);
+
+                        event(new PartQtyUpdated($part, $binQty, [
+                            'quantity' => $bin['quantity'],
+                            'description' => 'Part updated via bulk uploader'
+                        ]));
                     }
                 }
             }
@@ -361,9 +373,20 @@ class PartRepository implements PartRepositoryInterface {
             'position' => $image['position']
         ]);
     }
-    
+
     protected function getSortOrders() {
         return $this->sortOrders;
-    }    
+    }
+
+    /** @return BinQuantity */
+    public function createBinQuantity($params)
+    {
+        return BinQuantity::create($params);
+    }
+
+    public function createPart($params)
+    {
+        return Part::create($params);
+    }
 
 }

@@ -5,7 +5,6 @@ namespace App\Listeners\Parts;
 
 
 use App\Events\Parts\PartQtyUpdated;
-use App\Events\Parts\PartUpdated;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
