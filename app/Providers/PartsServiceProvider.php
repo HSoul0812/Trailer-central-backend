@@ -4,7 +4,7 @@
 namespace App\Providers;
 
 
-use App\Events\Parts\PartUpdated;
+use App\Events\Parts\PartQtyUpdated;
 use App\Listeners\Parts\PartQtyAuditLogNotification;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
@@ -27,7 +27,7 @@ class PartsServiceProvider extends ServiceProvider
      */
     protected $listen = [
         // on part update
-        PartUpdated::class => [
+        PartQtyUpdated::class => [
 
             // parts qty in bins updated
             PartQtyAuditLogNotification::class,

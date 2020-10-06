@@ -48,13 +48,6 @@ class PartRepositoryTest extends TestCase
                 ->andReturns($testPart);
         });
 
-        $this->mock(Part::class, function ($mock) use ($testPart) {
-            /** @var Mock $mock */
-//            $mock->shouldReceive('fill')->once();
-//            $mock->shouldReceive('bins')->once();
-//            $mock->shouldReceive('save')->once()->andReturn(true);
-        });
-
         Event::fake();
 
         /** @var PartRepository $repo */

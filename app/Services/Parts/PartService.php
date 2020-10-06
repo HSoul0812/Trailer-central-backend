@@ -3,7 +3,6 @@
 namespace App\Services\Parts;
 
 use App\Events\Parts\PartQtyUpdated;
-use App\Events\Parts\PartUpdated;
 use App\Models\Parts\BinQuantity;
 use App\Repositories\Parts\CycleCountRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
