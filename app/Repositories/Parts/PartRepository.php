@@ -85,7 +85,7 @@ class PartRepository implements PartRepositoryInterface {
         DB::beginTransaction();
 
         try {
-            $part = Part::create($params);
+            $part = $this->createPart($params);
 
             if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
 
@@ -112,7 +112,7 @@ class PartRepository implements PartRepositoryInterface {
 
             if (isset($params['bins'])) {
                 foreach ($params['bins'] as $bin) {
-                    $binQty = BinQuantity::create([
+                    $binQty = $this->createBinQuantity([
                         'part_id' => $part->id,
                         'bin_id' => $bin['bin_id'],
                         'qty' => $bin['quantity']
@@ -297,7 +297,8 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function update($params) {
-        $part = Part::findOrFail($params['id']);
+        // $part = Part::findOrFail($params['id']);
+        $part = $this->get($params);
 
         DB::transaction(function() use (&$part, $params) {
 
@@ -332,7 +333,7 @@ class PartRepository implements PartRepositoryInterface {
                 if (isset($params['bins'])) {
                     $part->bins()->delete();
                     foreach ($params['bins'] as $bin) {
-                        $binQty = BinQuantity::create([
+                        $binQty = $this->createBinQuantity([
                             'part_id' => $part->id,
                             'bin_id' => $bin['bin_id'],
                             'qty' => $bin['quantity']
@@ -375,6 +376,17 @@ class PartRepository implements PartRepositoryInterface {
 
     protected function getSortOrders() {
         return $this->sortOrders;
+    }
+
+    /** @return BinQuantity */
+    public function createBinQuantity($params)
+    {
+        return BinQuantity::create($params);
+    }
+
+    public function createPart($params)
+    {
+        return Part::create($params);
     }
 
 }
