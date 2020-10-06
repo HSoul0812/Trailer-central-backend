@@ -262,6 +262,25 @@ class Lead extends Model
     }
 
     /**
+     * Get Inventory Title
+     *
+     * @return array
+     */
+    public function getInventoryTitleAttribute() {
+        // Get Inventory Title
+        if(!empty($this->inventory) && !empty($this->inventory->title)) {
+            return $this->inventory->title;
+        }
+
+        // Initialize Inventory Title Array
+        $titles = $this->units()->pluck('title')->toArray();
+        if(count($titles) > 0) {
+            return reset($titles);
+        }
+        return '';
+    }
+
+    /**
      * Get the user's full name.
      *
      * @return string

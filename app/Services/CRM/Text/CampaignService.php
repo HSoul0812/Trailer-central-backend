@@ -127,7 +127,7 @@ class CampaignService implements CampaignServiceInterface
         // Get Text Message
         $textMessage = $this->templates->fillTemplate($campaign->template->template, [
             'lead_name' => $lead->full_name,
-            'title_of_unit_of_interest' => $lead->inventory->title,
+            'title_of_unit_of_interest' => $lead->inventory_title,
             'dealer_name' => $dealer->user->name
         ]);
 
