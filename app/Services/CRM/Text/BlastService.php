@@ -204,12 +204,10 @@ class BlastService implements BlastServiceInterface
 
     private function markDelivered($blast) {
         // Mark as Delivered
-        DB::transaction(function() use (&$blast) {
-            $blast = $this->blasts->update([
-                'id' => $blast->id,
-                'is_delivered' => 1
-            ]);
-        });
+        $blast = $this->blasts->update([
+            'id' => $blast->id,
+            'is_delivered' => 1
+        ]);
 
         // Return Updated Blast
         return $blast;

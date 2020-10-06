@@ -78,10 +78,8 @@ class CampaignRepository implements CampaignRepositoryInterface {
         // Get Campaign
         $campaign = Campaign::findOrFail($params['id']);
 
-        DB::transaction(function() use (&$campaign) {
-            // Mark Deleted
-            $campaign->fill(['deleted' => '1'])->save();
-        });
+        // Mark Deleted
+        $campaign->fill(['deleted' => '1'])->save();
 
         // Return
         return $campaign;
