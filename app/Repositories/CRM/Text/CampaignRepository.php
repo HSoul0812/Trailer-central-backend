@@ -124,7 +124,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
      * @return Collection of Campaign
      */
     public function getAllActive($userId) {
-        return Campaign::where('user_id', $userId)->where('is_enabled', 1)->get();
+        return Campaign::where('user_id', $userId)->where('is_enabled', 1)->where('deleted', 0)->get();
     }
 
     public function update($params) {
