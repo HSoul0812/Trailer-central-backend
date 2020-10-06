@@ -153,13 +153,18 @@ class CsvImportService implements CsvImportServiceInterface
             } catch (\Exception $ex) {  
                 $this->validationErrors[] = $ex->getMessage();
                 $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
-                throw new \Exception("Image inaccesible");
+                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage() . json_encode($this->validationErrors));
+//                throw new \Exception("Image inaccesible");
             }
 
         });
-
-        $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
+        
+        if (empty($this->validationErrors)) {
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
+        } else {
+             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE, 'validation_errors' => json_encode($this->validationErrors)]);            
+        }
+        
     }
 
     /**
