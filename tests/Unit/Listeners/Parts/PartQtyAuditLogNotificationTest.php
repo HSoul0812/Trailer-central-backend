@@ -35,8 +35,8 @@ class PartQtyAuditLogNotificationTest extends TestCase
             $mock->shouldReceive('create')
                 ->once()
                 ->with([
-                    'partId' => 12345,
-                    'binId' => 2,
+                    'part_id' => 12345,
+                    'bin_id' => 2,
                     'qty' => 5,
                     'balance' => 10,
                     'description' => 'Test description 1',
