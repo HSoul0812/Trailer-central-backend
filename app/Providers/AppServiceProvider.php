@@ -115,13 +115,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        \Validator::extend('bin_exists', 'App\Rules\Parts\BinExists@passes');
-        \Validator::extend('type_exists', 'App\Rules\Parts\TypeExists@passes');
-        \Validator::extend('category_exists', 'App\Rules\Parts\CategoryExists@passes');
-        \Validator::extend('brand_exists', 'App\Rules\Parts\BrandExists@passes');
-        \Validator::extend('part_exists', 'App\Rules\Parts\PartExists@passes');
-        \Validator::extend('cycle_count_exists', 'App\Rules\Parts\CycleCountExists@passes');
-        \Validator::extend('manufacturer_exists', 'App\Rules\Parts\ManufacturerExists@passes');
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
@@ -206,17 +199,8 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
-        $this->app->bind('App\Repositories\Parts\PartRepositoryInterface', 'App\Repositories\Parts\PartRepository');
-        $this->app->bind('App\Repositories\Parts\BinRepositoryInterface', 'App\Repositories\Parts\BinRepository');
-        $this->app->bind('App\Repositories\Parts\CycleCountRepositoryInterface', 'App\Repositories\Parts\CycleCountRepository');
-        $this->app->bind('App\Repositories\Parts\BrandRepositoryInterface', 'App\Repositories\Parts\BrandRepository');
-        $this->app->bind('App\Repositories\Parts\CategoryRepositoryInterface', 'App\Repositories\Parts\CategoryRepository');
-        $this->app->bind('App\Repositories\Parts\ManufacturerRepositoryInterface', 'App\Repositories\Parts\ManufacturerRepository');
-        $this->app->bind('App\Repositories\Parts\TypeRepositoryInterface', 'App\Repositories\Parts\TypeRepository');
-        $this->app->bind('App\Repositories\Parts\VendorRepositoryInterface', 'App\Repositories\Parts\VendorRepository');
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
-        $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind(TextServiceInterface::class, TwilioService::class);
         $this->app->bind(BlastServiceInterface::class, BlastService::class);
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
@@ -265,17 +249,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
         $this->app->bind(LogServiceInterface::class, LogService::class);
 
-        $this->app->bind(PartServiceInterface::class, PartService::class);
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
-        // CSV exporter bindings
-        $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
-        $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);
-        $this->app->when(CsvExportService::class)
-            ->needs(Filesystem::class)
-            ->give(function () { return Storage::disk('partsCsvExport');});
-        $this->app->when(CsvExportService::class)
-            ->needs(Filesystem::class)
-            ->give(function () { return Storage::disk('partsCsvExport');});
+
     }
 
 }

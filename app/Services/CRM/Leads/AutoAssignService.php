@@ -112,6 +112,17 @@ class AutoAssignService implements AutoAssignServiceInterface {
             $this->setLeadExplanationNotes($lead->identifier, 'Couldn\'t Find Salesperson ID to Assign Lead #' . $leadName . ' to, skipping temporarily!');
             Log::error("AutoAssignService couldn't find next sales person for lead {$leadName}");
             $status = 'skipped';
+            $this->leadRepository->assign([
+                'dealer_id' => $dealer->id,
+                'lead_id' => $lead->identifier,
+                'dealer_location_id' => $dealerLocationId,
+                'salesperson_type' => $salesType,
+                'found_salesperson_id' => $newestSalesPerson->id,
+                'chosen_salesperson_id' => $salesPerson->id,
+                'assigned_by' => 'autoassign',
+                'status' => $status,
+                'explanation' => $this->getLeadExplanationNotes($lead->identifier)
+            ]);
             return;
         }
         // Process Auto Assign!
