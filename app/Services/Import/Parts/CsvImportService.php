@@ -148,7 +148,7 @@ class CsvImportService implements CsvImportServiceInterface
                 if (!$part) {
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                    Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
+                    Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString());
                     throw new \Exception("Image inaccesible");
                 }
 
@@ -157,9 +157,10 @@ class CsvImportService implements CsvImportServiceInterface
                 ]));
 
             } catch (\Exception $ex) {
-                $this->validationErrors[] = $ex->getMessage();
+                $this->validationErrors[] = $ex->getTraceAsString();
                 $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage() . json_encode($this->validationErrors));
+                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
+                Log::info("Index to header mapping: {$this->indexToheaderMapping}");
 //                throw new \Exception("Image inaccesible");
             }
 
@@ -320,8 +321,8 @@ class CsvImportService implements CsvImportServiceInterface
         $part['description'] = $csvData[$keyToIndexMapping[self::DESCRIPTION]];
         $part['show_on_website'] = strtolower($csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]]) === 'yes' ? true : false;
         $part['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
-        $part['stock_min'] = $csvData[$keyToIndexMapping[self::STOCK_MIN]];
-        $part['stock_max'] = $csvData[$keyToIndexMapping[self::STOCK_MAX]];
+        $part['stock_min'] = isset($csvData[$keyToIndexMapping[self::STOCK_MIN]]) ? $csvData[$keyToIndexMapping[self::STOCK_MIN]] : null;
+        $part['stock_max'] = isset($csvData[$keyToIndexMapping[self::STOCK_MAX]]) ? $csvData[$keyToIndexMapping[self::STOCK_MAX]] : null;
 
         if (isset($keyToIndexMapping[self::VIDEO_EMBED_CODE]) && isset($csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]])) {
             $part['video_embed_code'] = $csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]];
