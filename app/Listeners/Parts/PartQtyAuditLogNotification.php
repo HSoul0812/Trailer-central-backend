@@ -39,6 +39,24 @@ class PartQtyAuditLogNotification
                 'balance' => $event->binQuantity->qty ?? 0,
                 'description' => $event->details['description'] ?? 'No description',
             ]);
+        } else if ($event->part) {
+            $this->handlePartAllBins($event);
+        }
+    }
+
+    private function handlePartAllBins(PartQtyUpdated $event)
+    {
+        if ($event->part->bins && count($event->part->bins) > 0) {
+            foreach ($event->part->bins as $bin) {
+                $this->auditLogRepository->create([
+                    'part_id' => $event->part->id,
+                    'bin_id' => $bin->bin_id,
+                    'qty' => 0, // probably an edit of qty not a transaction
+                    'balance' => $bin->qty ?? 0,
+                    'description' => $event->details['description'] ?? 'No description',
+                ]);
+
+            }
         }
     }
 

@@ -32,7 +32,7 @@ class PartQtyUpdated
      */
     public $details;
 
-    public function __construct(Part $part, BinQuantity $binQuantity, $details = [])
+    public function __construct(Part $part, ?BinQuantity $binQuantity = null, $details = [])
     {
         $this->part = $part;
         $this->binQuantity = $binQuantity;
