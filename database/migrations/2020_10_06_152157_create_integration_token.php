@@ -25,7 +25,7 @@ class CreateIntegrationToken extends Migration
 
             $table->integer('relation_id'); // int(11) NOT NULL,
 
-            $table->string('access_token')->unique(); // string(255) NOT NULL,
+            $table->string('access_token'); // string(255) NOT NULL,
 
             $table->string('id_token'); // int(11) NOT NULL,
 
