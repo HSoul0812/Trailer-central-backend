@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Integration\Auth\AccessToken;
 
-class CreateIntegrationAccessToken extends Migration
+class CreateIntegrationToken extends Migration
 {
     /**
      * Run the migrations.
