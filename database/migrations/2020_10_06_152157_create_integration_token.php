@@ -19,15 +19,15 @@ class CreateIntegrationToken extends Migration
 
             $table->integer('dealer_id')->index(); // int(11) NOT NULL,
 
-            $table->enum('token_type', AccessToken::TOKEN_TYPES); // enum() NOT NULL,
+            $table->enum('token_type', array_keys(AccessToken::TOKEN_TYPES)); // enum() NOT NULL,
 
-            $table->enum('relation_type', AccessToken::RELATION_TYPES); // enum() NOT NULL,
+            $table->enum('relation_type', array_keys(AccessToken::RELATION_TYPES)); // enum() NOT NULL,
 
             $table->integer('relation_id'); // int(11) NOT NULL,
 
-            $table->string('access_token')->index(); // string(255) NOT NULL,
+            $table->string('access_token'); // string(255) NOT NULL,
 
-            $table->integer('id_token'); // int(11) NOT NULL,
+            $table->text('id_token'); // text() NOT NULL,
 
             $table->integer('issued_at'); // datetime NOT NULL,
 
@@ -36,8 +36,6 @@ class CreateIntegrationToken extends Migration
             $table->timestamps();
 
             $table->unique(['token_type', 'relation_type', 'relation_id']);
-
-            $table->index(['token_type', 'id_token']);
         });
         
         Schema::create('integration_token_scopes', function (Blueprint $table) {
