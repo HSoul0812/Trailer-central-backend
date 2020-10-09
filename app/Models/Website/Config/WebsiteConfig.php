@@ -11,7 +11,11 @@ use Illuminate\Database\Eloquent\Model;
  */
 class WebsiteConfig extends Model
 {
+    const INVENTORY_PRINT_LOGO_KEY = 'inventory/print_logo'; 
+    
     protected $table = 'website_config';
+    
+    public $timestamps = false;
 
     public function website()
     {

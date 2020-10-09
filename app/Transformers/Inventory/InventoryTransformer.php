@@ -15,7 +15,7 @@ class InventoryTransformer extends TransformerAbstract
     protected $availableIncludes = [
         'website'
     ];
-    
+
     protected $userTransformer;
 
     protected $dealerLocationTransformer;
@@ -60,6 +60,7 @@ class InventoryTransformer extends TransformerAbstract
              'non_serialized' => $inventory->non_serialized,
              'note' => $inventory->note,
              'price' => $inventory->price,
+             'sales_price' => $inventory->sales_price,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
              'status' => $inventory->status_label,
              'stock' => $inventory->stock,
@@ -76,7 +77,7 @@ class InventoryTransformer extends TransformerAbstract
              'floorplan_vendor' => $inventory->floorplanVendor
          ];
     }
-    
+
     public function includeWebsite($inventory)
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
@@ -89,5 +90,5 @@ class InventoryTransformer extends TransformerAbstract
             $ret[] = $this->imageTransformer->transform($img);
         }
         return $ret;
-    } 
+    }
 }

@@ -83,7 +83,15 @@ class InventoryController extends RestfulController
         $request = new GetInventoryRequest($request->all());
 
         if ( $request->validate() ) {
-            return $this->response->paginator($this->inventoryRepository->getAll($request->all(), true, true), new InventoryTransformer());
+            if ($request->has('only_floorplanned') && !empty($request->input('only_floorplanned'))) {
+                /**
+                 * Filter only floored inventories to pay
+                 * https://crm.trailercentral.com/accounting/floorplan-payment
+                 */
+                return $this->response->paginator($this->inventoryRepository->getFloorplannedInventory($request->all()), new InventoryTransformer());
+            } else {
+                return $this->response->paginator($this->inventoryRepository->getAll($request->all(), true, true), new InventoryTransformer());
+            }
         }
 
         return $this->response->errorBadRequest();

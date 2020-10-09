@@ -2,6 +2,7 @@
 
 namespace App\Services\Import\Parts;
 
+use App\Events\Parts\PartQtyUpdated;
 use App\Services\Import\Parts\CsvImportServiceInterface;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
@@ -138,28 +139,39 @@ class CsvImportService implements CsvImportServiceInterface
             echo 'Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
             Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
 
-            try {      
+            try {
                 // Get Part Data
                 $partData = $this->csvToPartData($csvData);
-                
-                echo "Importing ".json_encode($partData).PHP_EOL;                
+
+                echo "Importing ".json_encode($partData).PHP_EOL;
                 $part = $this->partsRepository->createOrUpdate($partData);
                 if (!$part) {
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                    Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
+                    Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString());
                     throw new \Exception("Image inaccesible");
                 }
-            } catch (\Exception $ex) {  
-                $this->validationErrors[] = $ex->getMessage();
+
+                event(new PartQtyUpdated($part, null, [
+                    'description' => 'Created/updated using bulk uploader'
+                ]));
+
+            } catch (\Exception $ex) {
+                $this->validationErrors[] = $ex->getTraceAsString();
                 $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
-                throw new \Exception("Image inaccesible");
+                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
+                Log::info("Index to header mapping: {$this->indexToheaderMapping}");
+//                throw new \Exception("Image inaccesible");
             }
 
         });
-
-        $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
+        
+        if (empty($this->validationErrors)) {
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
+        } else {
+             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE, 'validation_errors' => json_encode($this->validationErrors)]);            
+        }
+        
     }
 
     /**
@@ -191,7 +203,7 @@ class CsvImportService implements CsvImportServiceInterface
                     }
 
                 // for lines > 1
-                } 
+                }
             }
         });
 
@@ -292,7 +304,7 @@ class CsvImportService implements CsvImportServiceInterface
         }
 
         $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first();
-       
+
         $part = [];
         $part['dealer_id'] = $this->bulkUpload->dealer_id;
         $part['vendor_id'] = !empty($vendor) ? $vendor->id : null;
@@ -309,8 +321,8 @@ class CsvImportService implements CsvImportServiceInterface
         $part['description'] = $csvData[$keyToIndexMapping[self::DESCRIPTION]];
         $part['show_on_website'] = strtolower($csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]]) === 'yes' ? true : false;
         $part['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
-        $part['stock_min'] = $csvData[$keyToIndexMapping[self::STOCK_MIN]];
-        $part['stock_max'] = $csvData[$keyToIndexMapping[self::STOCK_MAX]];
+        $part['stock_min'] = isset($csvData[$keyToIndexMapping[self::STOCK_MIN]]) ? $csvData[$keyToIndexMapping[self::STOCK_MIN]] : null;
+        $part['stock_max'] = isset($csvData[$keyToIndexMapping[self::STOCK_MAX]]) ? $csvData[$keyToIndexMapping[self::STOCK_MAX]] : null;
 
         if (isset($keyToIndexMapping[self::VIDEO_EMBED_CODE]) && isset($csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]])) {
             $part['video_embed_code'] = $csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]];

@@ -14,7 +14,7 @@ use Carbon\Carbon;
  *
  * @package App\Models\Parts
  * @property Collection $images
- * @property Collection $bins
+ * @property Collection<BinQuantity> $bins
  * @property Vendor $vendor
  * @property Brand $brand
  * @property Category $category
@@ -194,8 +194,8 @@ class Part extends Model
     public function bins()
     {
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
-    } 
-    
+    }
+
     /**
      * Inspects the price CostModifier model and determines what the part
      * price should actually be
@@ -204,12 +204,12 @@ class Part extends Model
     {
         $costModifiedRepo = app(CostModifierRepositoryInterface::class);
         $costModifier = $costModifiedRepo->getByDealerId($this->dealer_id);
-        
+
         if ($costModifier && $costModifier->modifier > 0) {
             $newCost = $this->dealer_cost + ($this->dealer_cost * ( $costModifier->modifier / 100 ));
             return (float) $newCost > 0 ? $newCost : $this->price;
         }
-        
+
         return (float) $this->price;
     }
 }

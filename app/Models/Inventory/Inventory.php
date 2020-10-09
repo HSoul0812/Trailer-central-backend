@@ -256,8 +256,8 @@ class Inventory extends Model
 
     public function getStatusLabelAttribute()
     {
-        return self::STATUS_MAPPING[$this->status];
-    }
+        return isset(self::STATUS_MAPPING[$this->status]) ? self::STATUS_MAPPING[$this->status] : null;
+    } 
 
     public function __toString() {
         return $this->title;
