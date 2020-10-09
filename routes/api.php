@@ -171,7 +171,7 @@ $api->version('v1', function ($route) {
     /**
      * Log
      */
-    $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create'); 
+    $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create');
 
     /**
      * Website Part Filters
@@ -220,7 +220,7 @@ $api->version('v1', function ($route) {
      */
     $route->get('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@index');
     $route->put('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@create');
-    
+
 
     /*
     |--------------------------------------------------------------------------
@@ -479,6 +479,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('service-orders', 'App\Http\Controllers\v1\Dms\ServiceOrderController@index');
+        $route->get('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@show');
 
         /*
         |--------------------------------------------------------------------------
