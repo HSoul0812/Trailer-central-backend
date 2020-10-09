@@ -2,29 +2,35 @@
 
 namespace App\Models\Integration\Auth;
 
-use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * Class DealerInventory
- * @package App\Models\Integration\LotVantage
+ * Class AccessToken
+ * @package App\Models\Integration\Auth
  */
 class AccessToken extends Model
 {
     // Define Table Name Constant
-    const TABLE_NAME = 'integration_tokens';
+    const TABLE_NAME = 'integration_token';
 
     // Define Token Types
     const TOKEN_TYPES = [
-        'google',
-        'facebook'
+        'google' => 'Google',
+        'facebook' => 'Facebook'
     ];
+    const TOKEN_GOOGLE = 'google';
+    const TOKEN_FB = 'facebook';
 
     // Define Relation Types
     const RELATION_TYPES = [
-        'sales_person',
-        'fbapp_page'
+        'sales_person' => 'Sales Person',
+        'fbapp_page' => 'Facebook Page'
+    ];
+
+    // Define Supported Token Types
+    const RELATION_TOKENS = [
+        'sales_person' => 'google',
+        'fbapp_page' => 'facebook'
     ];
 
     /**
@@ -36,6 +42,22 @@ class AccessToken extends Model
      * @var string
      */
     protected $primaryKey = 'id';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'dealer_id',
+        'token_type',
+        'relation_type',
+        'relation_id',
+        'access_token',
+        'id_token',
+        'issued_at',
+        'expires_at'
+    ];
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

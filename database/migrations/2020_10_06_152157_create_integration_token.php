@@ -25,9 +25,9 @@ class CreateIntegrationToken extends Migration
 
             $table->integer('relation_id'); // int(11) NOT NULL,
 
-            $table->string('access_token'); // string(255) NOT NULL,
+            $table->string('access_token')->index(); // string(255) NOT NULL,
 
-            $table->string('id_token'); // int(11) NOT NULL,
+            $table->integer('id_token'); // int(11) NOT NULL,
 
             $table->integer('issued_at'); // datetime NOT NULL,
 
@@ -36,6 +36,8 @@ class CreateIntegrationToken extends Migration
             $table->timestamps();
 
             $table->unique(['token_type', 'relation_type', 'relation_id']);
+
+            $table->index(['token_type', 'id_token']);
         });
         
         Schema::create('integration_token_scopes', function (Blueprint $table) {

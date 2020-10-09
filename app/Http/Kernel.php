@@ -16,6 +16,8 @@ use App\Http\Middleware\CRM\Text\TextValidate;
 use App\Http\Middleware\CRM\Text\TemplateValidate;
 use App\Http\Middleware\CRM\Text\BlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate;
+use App\Http\Middleware\CRM\User\SalesPersonValidate;
+use App\Http\Middleware\Integration\AuthValidate;
 
 class Kernel extends HttpKernel
 {
@@ -88,6 +90,8 @@ class Kernel extends HttpKernel
         'text.template.validate' => TemplateValidate::class,
         'text.campaign.validate' => CampaignValidate::class,
         'text.blast.validate' => BlastValidate::class,
+        'integration.auth.validate' => AuthValidate::class,
+        'sales-person.validate' => SalesPersonValidate::class,
     ];
 
     /**

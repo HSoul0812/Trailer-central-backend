@@ -4,11 +4,14 @@ namespace App\Http\Controllers\v1\CRM\User;
 
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Repositories\Integration\Auth\AuthRepositoryInterface;
 use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
+use App\Http\Requests\CRM\User\AuthSalesPeopleRequest;
 use App\Transformers\CRM\User\SalesPersonTransformer;
+use App\Services\Integration\Auth\GoogleServiceInterface;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
@@ -16,13 +19,26 @@ use League\Fractal\Resource\Item;
 
 class SalesPersonController extends RestfulController {
 
+    /**
+     * @var SalesPersonRepository
+     */
     protected $salesPerson;
 
-    protected $transformer;
     /**
      * @var SalesPersonTransformer
      */
     private $salesPersonTransformer;
+
+    /**
+     * @var AccessTokenRepository
+     */
+    protected $auth;
+
+    /**
+     * @var GoogleServiceInterface
+     */
+    protected $gapiService;
+
     /**
      * @var Manager
      */
@@ -31,12 +47,18 @@ class SalesPersonController extends RestfulController {
     public function __construct(
         SalesPersonRepositoryInterface $salesPersonRepo,
         SalesPersonTransformer $salesPersonTransformer,
+        AuthRepositoryInterface $auth,
+        GoogleServiceInterface $googleService,
         Manager $fractal
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'salesReport']);
+        $this->auth = $auth;
+
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'auth', 'salesReport']);
 
         $this->salesPerson = $salesPersonRepo;
         $this->salesPersonTransformer = $salesPersonTransformer;
+        $this->auth = $auth;
+        $this->googleService = $googleService;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -65,6 +87,40 @@ class SalesPersonController extends RestfulController {
         return $this->response->array(
             $response
         );
+    }
+
+    /**
+     * Validate Auth for Sales Person
+     * 
+     * @param Request $request
+     * @return type
+     */
+    public function auth(Request $request)
+    {
+        // Handle Auth Sales People Request
+        $request = new AuthSalesPeopleRequest($request->all());
+        if ($request->validate()) {
+            // Adjust Request
+            $params = $request->all();
+            $params['relation_type'] = 'sales_person';
+            $params['relation_id'] = $params['id'];
+            unset($params['id']);
+
+            // Create Access Token
+            $accessToken = $this->auth->create($params);
+
+            // Validate Access Token
+            $validate = ['is_valid' => false];
+            if($params['token_type'] === 'google') {
+                $validate = $this->googleService->validate($accessToken);
+            }
+
+            // Return Auth
+            return $this->response->array([
+                'data' => new Item($accessToken, new AuthTransformer(), 'data'),
+                'validate' => $validate
+            ]);
+        }
     }
 
     public function salesReport(Request $request)
