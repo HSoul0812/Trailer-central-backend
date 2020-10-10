@@ -83,6 +83,14 @@ class SalesPerson extends Model implements Filterable
         return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get new dealer user
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'id', 'dealer_id');
+    }
+
     public function posSales()
     {
         return $this->hasMany(Sale::class, 'sales_person_id');

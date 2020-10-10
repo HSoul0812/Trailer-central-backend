@@ -30,9 +30,9 @@ class SalesPersonController extends RestfulController {
     private $salesPersonTransformer;
 
     /**
-     * @var AccessTokenRepository
+     * @var TokenRepository
      */
-    protected $auth;
+    protected $tokens;
 
     /**
      * @var GoogleServiceInterface
@@ -47,17 +47,17 @@ class SalesPersonController extends RestfulController {
     public function __construct(
         SalesPersonRepositoryInterface $salesPersonRepo,
         SalesPersonTransformer $salesPersonTransformer,
-        TokenRepositoryInterface $auth,
+        TokenRepositoryInterface $tokens,
         GoogleServiceInterface $googleService,
         Manager $fractal
     ) {
-        $this->auth = $auth;
+        $this->tokens = $tokens;
 
         $this->middleware('setDealerIdOnRequest')->only(['index', 'auth', 'salesReport']);
 
         $this->salesPerson = $salesPersonRepo;
         $this->salesPersonTransformer = $salesPersonTransformer;
-        $this->auth = $auth;
+        $this->tokens = $tokens;
         $this->googleService = $googleService;
         $this->fractal = $fractal;
 
@@ -107,7 +107,7 @@ class SalesPersonController extends RestfulController {
             unset($params['id']);
 
             // Create Access Token
-            $accessToken = $this->auth->create($params);
+            $accessToken = $this->tokens->create($params);
 
             // Validate Access Token
             $validate = ['is_valid' => false];

@@ -58,6 +58,14 @@ class AccessToken extends Model
         'issued_at',
         'expires_at'
     ];
+
+    /**
+     * Get new dealer user
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'id', 'dealer_id');
+    }
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
