@@ -439,10 +439,10 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
                 $route->put('/', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@create');
-                $route->put('/auth', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@auth');
                 $route->get('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
+                $route->put('/{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@auth')->where('id', '[0-9]+');
             });
 
             /*
