@@ -212,6 +212,14 @@ class PartRepository implements PartRepositoryInterface {
             $query = $query->where('price', $params['price']);
         }
 
+        if (isset($params['with_cost'])) {
+            if (empty($params['with_cost'])) {
+                $query = $query->whereRaw('(dealer_cost IS NULL or dealer_cost=0)');
+            } else {
+                $query = $query->where('dealer_cost', '>', 0);
+            }
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
@@ -271,6 +279,14 @@ class PartRepository implements PartRepositoryInterface {
             $query = $query->whereBetween('price', [$params['price_min'], $params['price_max']]);
         } else if (isset($params['price'])) {
             $query = $query->where('price', $params['price']);
+        }
+
+        if (isset($params['with_cost'])) {
+            if (empty($params['with_cost'])) {
+                $query = $query->whereRaw('(dealer_cost IS NULL or dealer_cost=0)');
+            } else {
+                $query = $query->where('dealer_cost', '>', 0);
+            }
         }
 
         if (isset($params['sort'])) {
