@@ -5,6 +5,7 @@ namespace App\Models\CRM\User;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 

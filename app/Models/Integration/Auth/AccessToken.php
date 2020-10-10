@@ -2,6 +2,7 @@
 
 namespace App\Models\Integration\Auth;
 
+use App\Models\User\NewDealerUser;
 use Illuminate\Database\Eloquent\Model;
 
 /**
