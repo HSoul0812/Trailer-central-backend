@@ -4,7 +4,7 @@ namespace App\Repositories\Integration\Auth;
 
 use App\Repositories\Repository;
 
-interface AuthRepositoryInterface extends Repository {
+interface TokenRepositoryInterface extends Repository {
     /**
      * Find Exact Match Access Token
      * 

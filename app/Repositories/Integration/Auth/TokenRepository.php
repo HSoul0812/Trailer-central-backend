@@ -7,7 +7,7 @@ use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Auth\AccessToken;
 use Carbon\Carbon;
 
-class AuthRepository implements AuthRepositoryInterface {
+class TokenRepository implements TokenRepositoryInterface {
     /**
      * Define Sort Orders
      *

@@ -86,6 +86,8 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepository;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Export\Parts\CsvExportService;
 use App\Services\Export\Parts\CsvExportServiceInterface;
 use App\Services\CRM\Text\TwilioService;
@@ -102,8 +104,8 @@ use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Services\CRM\Leads\AutoAssignService;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
-use App\Jobs\Mailer\UserMailerJob;
-use App\Rules\CRM\Leads\ValidLeadSource;
+use App\Services\Integration\Auth\GoogleService;
+use App\Services\Integration\Auth\GoogleServiceInterface;
 use Laravel\Nova\Nova;
 
 class AppServiceProvider extends ServiceProvider
@@ -221,6 +223,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BlastServiceInterface::class, BlastService::class);
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
+        $this->app->bind(GoogleServiceInterface::class, GoogleService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind('App\Repositories\Dms\QuoteRepositoryInterface', 'App\Repositories\Dms\QuoteRepository');
@@ -248,6 +251,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
+        $this->app->bind(TokenRepositoryInterface::class, TokenRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);

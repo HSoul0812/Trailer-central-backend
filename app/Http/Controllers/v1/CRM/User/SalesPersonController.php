@@ -4,7 +4,7 @@ namespace App\Http\Controllers\v1\CRM\User;
 
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
-use App\Repositories\Integration\Auth\AuthRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
@@ -47,7 +47,7 @@ class SalesPersonController extends RestfulController {
     public function __construct(
         SalesPersonRepositoryInterface $salesPersonRepo,
         SalesPersonTransformer $salesPersonTransformer,
-        AuthRepositoryInterface $auth,
+        TokenRepositoryInterface $auth,
         GoogleServiceInterface $googleService,
         Manager $fractal
     ) {
@@ -117,7 +117,7 @@ class SalesPersonController extends RestfulController {
 
             // Return Auth
             return $this->response->array([
-                'data' => new Item($accessToken, new AuthTransformer(), 'data'),
+                'data' => new Item($accessToken, new TokenTransformer(), 'data'),
                 'validate' => $validate
             ]);
         }
