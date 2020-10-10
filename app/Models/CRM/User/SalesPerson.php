@@ -89,7 +89,7 @@ class SalesPerson extends Model implements Filterable
      */
     public function newDealerUser()
     {
-        return $this->belongsTo(NewDealerUser::class, 'id', 'dealer_id');
+        return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
     }
 
     public function posSales()
