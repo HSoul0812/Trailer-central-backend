@@ -90,12 +90,12 @@ class SalesPersonController extends RestfulController {
     }
 
     /**
-     * Validate Auth for Sales Person
+     * Validate Access Token for Sales Person
      * 
      * @param Request $request
      * @return type
      */
-    public function auth(Request $request)
+    public function token(Request $request)
     {
         // Handle Auth Sales People Request
         $request = new AuthSalesPeopleRequest($request->all());
