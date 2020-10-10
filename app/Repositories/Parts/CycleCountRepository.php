@@ -41,16 +41,6 @@ class CycleCountRepository implements CycleCountRepositoryInterface
                         'qty' => $cycleCountPart['count_on_hand']
                     ]);
                 }
-
-                $difference = $cycleCountPart['count_on_hand'] - $cycleCountPart['starting_qty'];
-                event(new PartQtyUpdated(
-                    Part::find($cycleCountPart['part_id']),
-                    $binQty,
-                    [
-                        'quantity' => $difference,
-                        'description' => 'Updated via cycle count',
-                    ]
-                ));
             }
         }
     }
@@ -103,6 +93,10 @@ class CycleCountRepository implements CycleCountRepositoryInterface
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * @param array $params
+     * @return CycleCount
+     */
     public function update($params)
     {
         $cycleCount = CycleCount::findOrFail($params['id']);
