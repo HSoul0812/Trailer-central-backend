@@ -22,7 +22,8 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Construct Google Client
      */
-    public function _construct() {
+    public function __construct(NumberRepositoryInterface $numberRepo)
+    {
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
             throw new MissingGapiClientIdException;
