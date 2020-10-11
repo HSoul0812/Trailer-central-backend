@@ -17,7 +17,7 @@ class UpdateAuthRequest extends Request {
         'relation_type' => 'valid_relation_type',
         'relation_id' => 'valid_relation_id',
         'access_token' => 'string|max:255',
-        'id_token' => 'string|max:255',
+        'id_token' => 'string',
         'issued_at' => 'integer',
         'expires_at' => 'integer'
     ];
