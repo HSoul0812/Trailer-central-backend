@@ -139,7 +139,7 @@ class TokenRepository implements TokenRepositoryInterface {
      * @return AccessToken
      */
     public function update($params) {
-        $token = $this->find($params['id']);
+        $token = $this->find($params);
 
         DB::transaction(function() use (&$token, $params) {
             // Fill Text Details
