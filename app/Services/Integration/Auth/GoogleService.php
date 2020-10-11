@@ -5,6 +5,7 @@ namespace App\Services\Integration\Auth;
 use App\Exceptions\Integration\Auth\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Auth\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Auth\MissingGapiClientIdException;
+use App\Exceptions\Integration\Auth\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Auth\FailedConnectGapiClientException;
 
 /**
@@ -54,9 +55,14 @@ class GoogleService implements GoogleServiceInterface
         ];
 
         // Validate ID Token
-        $payload = $this->client->verifyIdToken($accessToken->id_token);
-        if ($payload) {
-            $result['is_valid'] = true;
+        try {
+            $payload = $this->client->verifyIdToken($accessToken->id_token);
+            if ($payload) {
+                $result['is_valid'] = true;
+            }
+        }
+        catch (\Exception $e) {
+            throw new InvalidGapiIdTokenException;
         }
 
         // Return Payload Results
