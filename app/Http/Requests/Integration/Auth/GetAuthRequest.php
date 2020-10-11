@@ -15,8 +15,6 @@ class GetAuthRequest extends Request {
         'token_type' => 'valid_token_type',
         'relation_type' => 'valid_relation_type',
         'relation_id' => 'valid_relation_id',
-        'access_token' => 'string|max:255',
-        'id_token' => 'string',
         'per_page' => 'integer',
         'sort' => 'in:issued_at,-issued_at,expires_at,-expires_at,created_at,-created_at,updated_at,-updated_at',
         'id' => 'array',

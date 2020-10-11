@@ -56,10 +56,10 @@ class TokenRepository implements TokenRepositoryInterface {
      */
     public function create($params) {
         // Access Token Already Exists?
-        $accessToken = $this->find($params);
+        $token = $this->find($params);
 
         // Access Token Found?
-        if($accessToken->count() > 0) {
+        if(!empty($token->id)) {
             return $this->update($params);
         }
 
@@ -84,7 +84,16 @@ class TokenRepository implements TokenRepositoryInterface {
      * @return AccessToken
      */
     public function get($params) {
-        return AccessToken::findOrFail($params['id']);
+        // Find Token ID
+        $token = $this->find($params);
+
+        // Exists?!
+        if(!empty($token->id)) {
+            return $token;
+        }
+
+        // Return Empty
+        throw new NoTokenFoundException();
     }
 
     /**
@@ -104,14 +113,6 @@ class TokenRepository implements TokenRepositoryInterface {
             $query = $query->where('token_type', $params['token_type'])
                            ->where('relation_type', $params['relation_type'])
                            ->where('relation_id', $params['relation_id']);
-        }
-
-        if (isset($params['access_token'])) {
-            $query = $query->where('access_token', $params['access_token']);
-        }
-
-        if (isset($params['id_token'])) {
-            $query = $query->where('id_token', $params['id_token']);
         }
 
         if (isset($params['id'])) {
@@ -158,26 +159,17 @@ class TokenRepository implements TokenRepositoryInterface {
         if (isset($params['token_type']) && isset($params['relation_type']) && isset($params['relation_id'])) {
             $accessToken = AccessToken::where('token_type', $params['token_type'])
                                       ->where('relation_type', $params['relation_type'])
-                                      ->where('relation_id', $params['relation_id']);
+                                      ->where('relation_id', $params['relation_id'])
+                                      ->first();
 
             // Return Access Token
-            if($accessToken->count() > 0) {
-                return $accessToken;
-            }
-        }
-
-        // Access Token Exists?
-        if (isset($params['access_token'])) {
-            $accessToken = AccessToken::where('access_token', $params['access_token']);
-
-            // Return Access Token
-            if($accessToken->count() > 0) {
+            if(!empty($accessToken->id)) {
                 return $accessToken;
             }
         }
 
         // Return Empty
-        return AccessToken::where('id', '<', 1);
+        return null;
     }
 
 
