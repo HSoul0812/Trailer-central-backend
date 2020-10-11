@@ -53,7 +53,7 @@ class GoogleService implements GoogleServiceInterface
         ];
 
         // Validate ID Token
-        $this->client = new \Google_Client(['client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID']]);
+        $this->client = new Google_Client(['client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID']]);
         $payload = $this->client->verifyIdToken($accessToken->id_token);
         if ($payload) {
             $result['is_valid'] = true;
