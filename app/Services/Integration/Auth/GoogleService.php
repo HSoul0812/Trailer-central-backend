@@ -2,6 +2,11 @@
 
 namespace App\Services\Integration\Auth;
 
+use App\Exceptions\Integration\Auth\MissingGapiAccessTokenException;
+use App\Exceptions\Integration\Auth\MissingGapiIdTokenException;
+use App\Exceptions\Integration\Auth\MissingGapiClientIdException;
+use App\Exceptions\Integration\Auth\FailedConnectGapiClientException;
+
 /**
  * Class GoogleService
  * 
@@ -18,7 +23,16 @@ class GoogleService implements GoogleServiceInterface
      * Construct Google Client
      */
     public function _construct() {
+        // No Client ID?!
+        if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
+            throw new MissingGapiClientIdException;
+        }
+
+        // Initialize Client
         $this->client = new \Google_Client(['client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID']]);
+        if(empty($this->client)) {
+            throw new FailedConnectGapiClientException;
+        }
     }
 
     /**
@@ -28,9 +42,9 @@ class GoogleService implements GoogleServiceInterface
      * @return array of validation info
      */
     public function validate($accessToken) {
-        // Access Token Exists?
-        if(empty($accessToken->access_token)) {
-            throw new MissingGapiAccessTokenException;
+        // ID Token Exists?
+        if(empty($accessToken->id_token)) {
+            throw new MissingGapiIdTokenException;
         }
 
         // Initialize Vars
