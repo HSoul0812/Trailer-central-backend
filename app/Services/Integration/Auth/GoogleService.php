@@ -22,7 +22,7 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct(NumberRepositoryInterface $numberRepo)
+    public function __construct()
     {
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
