@@ -84,16 +84,22 @@ class TokenRepository implements TokenRepositoryInterface {
      * @return AccessToken
      */
     public function get($params) {
-        // Find Token ID
-        $token = $this->find($params);
+        // Find Token By ID
+        return AccessToken::findOrFail($params['id']);
+    }
 
-        // Exists?!
-        if(!empty($token->id)) {
-            return $token;
-        }
-
-        // Return Empty
-        throw new NoTokenFoundException();
+    /**
+     * Get Access Token Via Relation
+     * 
+     * @param array $params
+     * @return AccessToken
+     */
+    public function getRelation($params) {
+        // Find Token From Relation
+        return AccessToken::where('token_type', $params['token_type'])
+                          ->where('relation_type', $params['relation_type'])
+                          ->where('relation_id', $params['relation_id'])
+                          ->first();
     }
 
     /**
