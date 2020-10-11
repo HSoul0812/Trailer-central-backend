@@ -16,7 +16,7 @@ class Scope extends Model
     /**
      * @var string
      */
-    protected $table = TABLE_NAME;
+    protected $table = self::TABLE_NAME;
 
     /**
      * @var string
