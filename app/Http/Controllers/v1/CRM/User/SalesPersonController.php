@@ -12,6 +12,7 @@ use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
 use App\Http\Requests\CRM\User\AccessSalesPeopleRequest;
 use App\Http\Requests\CRM\User\TokenSalesPeopleRequest;
 use App\Transformers\CRM\User\SalesPersonTransformer;
+use App\Transformers\Integration\Auth\TokenTransformer;
 use App\Services\Integration\Auth\GoogleServiceInterface;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
@@ -54,7 +55,7 @@ class SalesPersonController extends RestfulController {
     ) {
         $this->tokens = $tokens;
 
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'auth', 'salesReport']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'token', 'salesReport']);
 
         $this->salesPerson = $salesPersonRepo;
         $this->salesPersonTransformer = $salesPersonTransformer;

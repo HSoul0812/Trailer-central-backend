@@ -5,11 +5,11 @@ namespace App\Http\Requests\Integration\Auth;
 use App\Http\Requests\Request;
 
 /**
- * Get Auth Request
+ * Get Token Request
  * 
  * @author David A Conway Jr.
  */
-class GetAuthRequest extends Request {
+class GetTokenRequest extends Request {
     
     protected $rules = [
         'token_type' => 'valid_token_type',

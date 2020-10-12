@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\v1\Integration\Auth;
 
 use App\Http\Controllers\RestfulControllerV2;
-use App\Repositories\Integration\Auth\AuthRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\Integration\Auth\GetAuthRequest;
-use App\Http\Requests\Integration\Auth\CreateAuthRequest;
-use App\Http\Requests\Integration\Auth\ShowAuthRequest;
-use App\Http\Requests\Integration\Auth\UpdateAuthRequest;
-use App\Transformers\Integration\Auth\AuthTransformer;
+use App\Http\Requests\Integration\Auth\GetTokenRequest;
+use App\Http\Requests\Integration\Auth\CreateTokenRequest;
+use App\Http\Requests\Integration\Auth\ShowTokenRequest;
+use App\Http\Requests\Integration\Auth\UpdateTokenRequest;
+use App\Transformers\Integration\Auth\TokenTransformer;
 
 class AuthController extends RestfulControllerV2
 {
@@ -20,7 +20,7 @@ class AuthController extends RestfulControllerV2
      *
      * @param Repository $auth
      */
-    public function __construct(AuthRepositoryInterface $auth)
+    public function __construct(TokenRepositoryInterface $auth)
     {
         $this->auth = $auth;
 
@@ -59,10 +59,10 @@ class AuthController extends RestfulControllerV2
      * )
      */
     public function index(Request $request) {
-        $request = new GetAuthRequest($request->all());
+        $request = new GetTokenRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->auth->getAll($request->all()), new AuthTransformer());
+            return $this->response->paginator($this->auth->getAll($request->all()), new TokenTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -107,10 +107,10 @@ class AuthController extends RestfulControllerV2
      * )
      */
     public function create(Request $request) {
-        $request = new CreateAuthRequest($request->all());
+        $request = new CreateTokenRequest($request->all());
         if ( $request->validate() ) {
             // Create Text
-            return $this->response->item($this->auth->create($request->all()), new AuthTransformer());
+            return $this->response->item($this->auth->create($request->all()), new TokenTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -145,10 +145,10 @@ class AuthController extends RestfulControllerV2
         $params = ['id' => $type];
 
         // Show Auth Request 
-        $request = new ShowAuthRequest($params);
+        $request = new ShowTokenRequest($params);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->auth->get($params), new AuthTransformer());
+            return $this->response->item($this->auth->get($params), new TokenTransformer());
         }
         
         return $this->response->errorBadRequest();
@@ -197,10 +197,10 @@ class AuthController extends RestfulControllerV2
         $requestData['id'] = $id;
 
         // Update Auth Request
-        $request = new UpdateAuthRequest($requestData);
+        $request = new UpdateTokenRequest($requestData);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->auth->update($request->all()), new AuthTransformer());
+            return $this->response->item($this->auth->update($request->all()), new TokenTransformer());
         }
         
         return $this->response->errorBadRequest();
