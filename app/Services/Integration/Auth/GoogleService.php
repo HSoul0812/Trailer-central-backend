@@ -62,7 +62,10 @@ class GoogleService implements GoogleServiceInterface
             }
         }
         catch (\Exception $e) {
-            throw new InvalidGapiIdTokenException;
+            // We actually just want to verify this is true or false
+            // If it throws an exception, that means its false, the token isn't valid
+            // This exception can be used for other processes but isn't needed in this method
+            //throw new InvalidGapiIdTokenException;
         }
 
         // Return Payload Results

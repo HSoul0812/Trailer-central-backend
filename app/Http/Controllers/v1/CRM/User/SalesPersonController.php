@@ -9,7 +9,8 @@ use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
-use App\Http\Requests\CRM\User\AuthSalesPeopleRequest;
+use App\Http\Requests\CRM\User\AccessSalesPeopleRequest;
+use App\Http\Requests\CRM\User\TokenSalesPeopleRequest;
 use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Services\Integration\Auth\GoogleServiceInterface;
 use League\Fractal\Manager;
@@ -90,6 +91,40 @@ class SalesPersonController extends RestfulController {
     }
 
     /**
+     * Get Access Token for Sales Person
+     * 
+     * @param Request $request
+     * @return type
+     */
+    public function access(Request $request)
+    {
+        // Handle Auth Sales People Request
+        $request = new AccessSalesPeopleRequest($request->all());
+        if ($request->validate()) {
+            // Adjust Request
+            $params = $request->all();
+            $params['relation_type'] = 'sales_person';
+            $params['relation_id'] = $params['id'];
+            unset($params['id']);
+
+            // Get Access Token
+            $accessToken = $this->tokens->getRelation($params);
+
+            // Validate Access Token
+            $validate = ['is_valid' => false];
+            if($params['token_type'] === 'google') {
+                $validate = $this->googleService->validate($accessToken);
+            }
+
+            // Return Auth
+            return $this->response->array([
+                'data' => new Item($accessToken, new TokenTransformer(), 'data'),
+                'validate' => $validate
+            ]);
+        }
+    }
+
+    /**
      * Validate Access Token for Sales Person
      * 
      * @param Request $request
@@ -98,7 +133,7 @@ class SalesPersonController extends RestfulController {
     public function token(Request $request)
     {
         // Handle Auth Sales People Request
-        $request = new AuthSalesPeopleRequest($request->all());
+        $request = new TokenSalesPeopleRequest($request->all());
         if ($request->validate()) {
             // Adjust Request
             $params = $request->all();

@@ -75,4 +75,12 @@ class AccessToken extends Model
     {
         return $this->hasMany(Scope::class);
     }
+    
+    /**
+     * @return array
+     */
+    public function scope()
+    {
+        return $this->scopes()->pluck('scope')->toArray();
+    }
 }
