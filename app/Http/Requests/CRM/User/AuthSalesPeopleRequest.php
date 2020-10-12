@@ -12,7 +12,9 @@ class AuthSalesPeopleRequest extends Request {
         'access_token' => 'required|string',
         'id_token' => 'required|string',
         'issued_at' => 'integer',
-        'expires_at' => 'integer'
+        'expires_at' => 'integer',
+        'scopes' => 'required|array',
+        'scopes.*' => 'required|string|max:80'
     ];
 
 }

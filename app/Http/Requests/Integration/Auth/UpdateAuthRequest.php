@@ -19,7 +19,9 @@ class UpdateAuthRequest extends Request {
         'access_token' => 'string|max:255',
         'id_token' => 'string',
         'issued_at' => 'integer',
-        'expires_at' => 'integer'
+        'expires_at' => 'integer',
+        'scopes' => 'array',
+        'scopes.*' => 'string|max:80'
     ];
     
 }

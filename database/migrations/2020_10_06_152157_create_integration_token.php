@@ -43,7 +43,7 @@ class CreateIntegrationToken extends Migration
 
             $table->integer('integration_token_id'); // int(11) NOT NULL,
 
-            $table->string('scope', 50); // string(50) NOT NULL,
+            $table->string('scope', 80); // string(80) NOT NULL,
 
             $table->timestamps();
 

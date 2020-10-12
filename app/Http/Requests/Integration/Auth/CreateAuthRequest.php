@@ -18,6 +18,8 @@ class CreateAuthRequest extends Request {
         'access_token' => 'required|string|max:255',
         'id_token' => 'required|string',
         'issued_at' => 'integer',
-        'expires_at' => 'integer'
+        'expires_at' => 'integer',
+        'scopes' => 'required|array',
+        'scopes.*' => 'required|string|max:80'
     ];
 }
