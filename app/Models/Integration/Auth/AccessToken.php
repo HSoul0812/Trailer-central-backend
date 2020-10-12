@@ -79,7 +79,7 @@ class AccessToken extends Model
     /**
      * @return array
      */
-    public function scope()
+    public function getScopeAttribute()
     {
         return $this->scopes()->pluck('scope')->toArray();
     }
