@@ -151,11 +151,13 @@ class SalesPersonController extends RestfulController {
                 $validate = $this->googleService->validate($accessToken);
             }
 
+            // Convert Token to Array
+            $data = new Item($accessToken, new TokenTransformer(), 'data');
+            $response = $this->fractal->createData($data)->toArray();
+            $response['validate'] = $validate;
+
             // Return Auth
-            return $this->response->array([
-                'data' => new Item($accessToken, new TokenTransformer(), 'data'),
-                'validate' => $validate
-            ]);
+            return $this->response->array($response);
         }
     }
 

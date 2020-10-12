@@ -73,7 +73,7 @@ class AccessToken extends Model
      */
     public function scopes()
     {
-        return $this->hasMany(Scope::class);
+        return $this->hasMany(Scope::class, 'integration_token_id');
     }
     
     /**
