@@ -268,7 +268,7 @@ class AuthController extends RestfulControllerV2
         $request = new UpdateTokenRequest($requestData);
         if ( $request->validate() ) {
             // Update Access Token
-            $accessToken = $this->tokens->update($request->all());
+            $accessToken = $this->tokens->update($requestData);
 
             // Validate Access Token
             $validate = ['is_valid' => false];
