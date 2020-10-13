@@ -161,8 +161,12 @@ class AuthController extends RestfulControllerV2
             }
 
             // Convert Token to Array
-            $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
+            if(!empty($accessToken)) {
+                $data = new Item($accessToken, new TokenTransformer(), 'data');
+                $response = $this->fractal->createData($data)->toArray();
+            } else {
+                $response = ['data' => null];
+            }
             $response['validate'] = $validate;
 
             // Return Auth
@@ -212,8 +216,12 @@ class AuthController extends RestfulControllerV2
             }
 
             // Convert Token to Array
-            $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
+            if(!empty($accessToken)) {
+                $data = new Item($accessToken, new TokenTransformer(), 'data');
+                $response = $this->fractal->createData($data)->toArray();
+            } else {
+                $response = ['data' => null];
+            }
             $response['validate'] = $validate;
 
             // Return Auth
@@ -279,8 +287,12 @@ class AuthController extends RestfulControllerV2
             }
 
             // Convert Token to Array
-            $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
+            if(!empty($accessToken)) {
+                $data = new Item($accessToken, new TokenTransformer(), 'data');
+                $response = $this->fractal->createData($data)->toArray();
+            } else {
+                $response = ['data' => null];
+            }
             $response['validate'] = $validate;
 
             // Return Auth
@@ -331,8 +343,12 @@ class AuthController extends RestfulControllerV2
             }
 
             // Convert Token to Array
-            $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
+            if(!empty($accessToken)) {
+                $data = new Item($accessToken, new TokenTransformer(), 'data');
+                $response = $this->fractal->createData($data)->toArray();
+            } else {
+                $response = ['data' => null];
+            }
             $response['validate'] = $validate;
 
             // Return Auth

@@ -87,13 +87,17 @@ class SalesAuthController extends RestfulControllerV2 {
             $salesPerson = $this->salesPerson->get([
                 'sales_person_id' => $params['relation_id']
             ]);
-            $item = new Item($salesPerson, new SalesPersonTransformer(), 'data');
-            $sales = $this->fractal->createData($item)->toArray();
+            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales-person');
+            $response = $this->fractal->createData($item)->toArray();
 
             // Convert Token to Array
-            $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
-            $response['sales-person'] = $sales['data'];
+            if(!empty($accessToken)) {
+                $data = new Item($accessToken, new TokenTransformer(), 'data');
+                $token = $this->fractal->createData($data)->toArray();
+                $response['data'] = $token['data'];
+            } else {
+                $response['data'] = null;
+            }
             $response['validate'] = $validate;
 
             // Return Auth
@@ -133,13 +137,17 @@ class SalesAuthController extends RestfulControllerV2 {
             $salesPerson = $this->salesPerson->get([
                 'sales_person_id' => $params['relation_id']
             ]);
-            $item = new Item($salesPerson, new SalesPersonTransformer(), 'data');
-            $sales = $this->fractal->createData($item)->toArray();
+            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales-person');
+            $response = $this->fractal->createData($item)->toArray();
 
             // Convert Token to Array
-            $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
-            $response['sales-person'] = $sales['data'];
+            if(!empty($accessToken)) {
+                $data = new Item($accessToken, new TokenTransformer(), 'data');
+                $token = $this->fractal->createData($data)->toArray();
+                $response['data'] = $token['data'];
+            } else {
+                $response['data'] = null;
+            }
             $response['validate'] = $validate;
 
             // Return Auth
@@ -181,13 +189,17 @@ class SalesAuthController extends RestfulControllerV2 {
             $salesPerson = $this->salesPerson->get([
                 'sales_person_id' => $params['relation_id']
             ]);
-            $item = new Item($salesPerson, new SalesPersonTransformer(), 'data');
-            $sales = $this->fractal->createData($item)->toArray();
+            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales-person');
+            $response = $this->fractal->createData($item)->toArray();
 
             // Convert Token to Array
-            $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
-            $response['sales-person'] = $sales['data'];
+            if(!empty($accessToken)) {
+                $data = new Item($accessToken, new TokenTransformer(), 'data');
+                $token = $this->fractal->createData($data)->toArray();
+                $response['data'] = $token['data'];
+            } else {
+                $response['data'] = null;
+            }
             $response['validate'] = $validate;
 
             // Return Auth
