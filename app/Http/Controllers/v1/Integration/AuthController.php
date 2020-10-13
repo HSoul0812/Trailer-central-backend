@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\Integration;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use Dingo\Api\Http\Request;
+use App\Models\Integration\Auth\AccessToken;
 use App\Http\Requests\Integration\Auth\GetTokenRequest;
 use App\Http\Requests\Integration\Auth\CreateTokenRequest;
 use App\Http\Requests\Integration\Auth\ShowTokenRequest;
