@@ -12,10 +12,7 @@ use App\Http\Requests\Request;
 class ShowTokenRequest extends Request {
     
     protected $rules = [
-        'id' => 'required|integer',
-        'token_type' => 'valid_token_type',
-        'relation_type' => 'valid_relation_type',
-        'relation_id' => 'valid_relation_id',
+        'id' => 'required|integer'
     ];
-    
+
 }

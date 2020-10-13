@@ -9,7 +9,6 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\User\ShowSalesAuthRequest;
 use App\Http\Requests\CRM\User\UpdateSalesAuthRequest;
-use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use App\Services\Integration\Auth\GoogleServiceInterface;
 use League\Fractal\Manager;
@@ -23,11 +22,6 @@ class SalesAuthController extends RestfulController {
     protected $salesPerson;
 
     /**
-     * @var SalesPersonTransformer
-     */
-    private $salesPersonTransformer;
-
-    /**
      * @var TokenRepository
      */
     protected $tokens;
@@ -35,7 +29,7 @@ class SalesAuthController extends RestfulController {
     /**
      * @var GoogleServiceInterface
      */
-    protected $gapiService;
+    protected $google;
 
     /**
      * @var Manager
@@ -44,17 +38,15 @@ class SalesAuthController extends RestfulController {
 
     public function __construct(
         SalesPersonRepositoryInterface $salesPersonRepo,
-        SalesPersonTransformer $salesPersonTransformer,
         TokenRepositoryInterface $tokens,
-        GoogleServiceInterface $googleService,
+        GoogleServiceInterface $google,
         Manager $fractal
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['create']);
 
         $this->salesPerson = $salesPersonRepo;
-        $this->salesPersonTransformer = $salesPersonTransformer;
         $this->tokens = $tokens;
-        $this->googleService = $googleService;
+        $this->google = $google;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -83,7 +75,7 @@ class SalesAuthController extends RestfulController {
             // Validate Access Token
             $validate = ['is_valid' => false];
             if($params['token_type'] === 'google') {
-                $validate = $this->googleService->validate($accessToken);
+                $validate = $this->google->validate($accessToken);
             }
 
             // Get Sales Person
@@ -127,7 +119,7 @@ class SalesAuthController extends RestfulController {
             // Validate Access Token
             $validate = ['is_valid' => false];
             if($params['token_type'] === 'google') {
-                $validate = $this->googleService->validate($accessToken);
+                $validate = $this->google->validate($accessToken);
             }
 
             // Get Sales Person
@@ -172,7 +164,7 @@ class SalesAuthController extends RestfulController {
             // Validate Access Token
             $validate = ['is_valid' => false];
             if($params['token_type'] === 'google') {
-                $validate = $this->googleService->validate($accessToken);
+                $validate = $this->google->validate($accessToken);
             }
 
             // Get Sales Person

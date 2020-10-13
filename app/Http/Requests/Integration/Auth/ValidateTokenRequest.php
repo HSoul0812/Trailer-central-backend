@@ -5,15 +5,17 @@ namespace App\Http\Requests\Integration\Auth;
 use App\Http\Requests\Request;
 
 /**
- * Get Token Request
+ * Validate Token Request
  * 
  * @author David A Conway Jr.
  */
-class GetTokenRequest extends Request {
-    
+class ValidateTokenRequest extends Request {
+
     protected $rules = [
         'token_type' => 'required|valid_token_type',
         'relation_type' => 'required|valid_relation_type',
-        'relation_id' => 'required|valid_relation_id'
+        'relation_id' => 'required|integer',
+        'access_token' => 'required|string|max:255',
+        'id_token' => 'required|string'
     ];
 }

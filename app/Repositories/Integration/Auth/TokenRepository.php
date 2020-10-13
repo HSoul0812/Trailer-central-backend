@@ -109,27 +109,7 @@ class TokenRepository implements TokenRepositoryInterface {
      * @return Collection of Access Token
      */
     public function getAll($params) {
-        $query = AccessToken::where('id', '>', 0);
-        
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 100;
-        }
-
-        if (isset($params['token_type']) && isset($params['relation_type']) && isset($params['relation_id'])) {
-            $query = $query->where('token_type', $params['token_type'])
-                           ->where('relation_type', $params['relation_type'])
-                           ->where('relation_id', $params['relation_id']);
-        }
-
-        if (isset($params['id'])) {
-            $query = $query->whereIn('id', $params['id']);
-        }
-
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
-        }
-        
-        return $query->paginate($params['per_page'])->appends($params);
+        throw new NotImplementedException();
     }
 
     /**

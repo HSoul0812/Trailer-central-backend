@@ -9,22 +9,42 @@ use App\Http\Requests\Integration\Auth\GetTokenRequest;
 use App\Http\Requests\Integration\Auth\CreateTokenRequest;
 use App\Http\Requests\Integration\Auth\ShowTokenRequest;
 use App\Http\Requests\Integration\Auth\UpdateTokenRequest;
+use App\Http\Requests\Integration\Auth\ValidateTokenRequest;
 use App\Transformers\Integration\Auth\TokenTransformer;
+use App\Services\Integration\Auth\GoogleServiceInterface;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Item;
 
 class AuthController extends RestfulControllerV2
 {
-    protected $auth;
 
     /**
-     * Create a new controller instance.
-     *
-     * @param Repository $auth
+     * @var TokenRepository
      */
-    public function __construct(TokenRepositoryInterface $auth)
-    {
-        $this->auth = $auth;
+    protected $tokens;
 
+    /**
+     * @var GoogleServiceInterface
+     */
+    protected $google;
+
+    /**
+     * @var Manager
+     */
+    private $fractal;
+
+    public function __construct(
+        TokenRepositoryInterface $tokens,
+        GoogleServiceInterface $googleService,
+        Manager $fractal
+    ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'create']);
+
+        $this->tokens = $tokens;
+        $this->google = $googleService;
+        $this->fractal = $fractal;
+
+        $this->fractal->setSerializer(new NoDataArraySerializer());
     }
 
 
@@ -59,10 +79,27 @@ class AuthController extends RestfulControllerV2
      * )
      */
     public function index(Request $request) {
+        // Get Token Request
         $request = new GetTokenRequest($request->all());
-        
         if ($request->validate()) {
-            return $this->response->paginator($this->auth->getAll($request->all()), new TokenTransformer());
+            // Get Access Token
+            $accessToken = $this->tokens->getRelation($request->all());
+
+            // Validate Access Token
+            $validate = ['is_valid' => false];
+            if(!empty($accessToken->toke_type)) {
+                if($accessToken->token_type === 'google') {
+                    $validate = $this->google->validate($accessToken);
+                }
+            }
+
+            // Convert Token to Array
+            $data = new Item($accessToken, new TokenTransformer(), 'data');
+            $response = $this->fractal->createData($data)->toArray();
+            $response['validate'] = $validate;
+
+            // Return Auth
+            return $this->response->array($response);
         }
         
         return $this->response->errorBadRequest();
@@ -107,10 +144,27 @@ class AuthController extends RestfulControllerV2
      * )
      */
     public function create(Request $request) {
+        // Create Auth Request
         $request = new CreateTokenRequest($request->all());
         if ( $request->validate() ) {
-            // Create Text
-            return $this->response->item($this->auth->create($request->all()), new TokenTransformer());
+            // Get Access Token
+            $accessToken = $this->tokens->create($request->all());
+
+            // Validate Access Token
+            $validate = ['is_valid' => false];
+            if(!empty($accessToken->toke_type)) {
+                if($accessToken->token_type === 'google') {
+                    $validate = $this->google->validate($accessToken);
+                }
+            }
+
+            // Convert Token to Array
+            $data = new Item($accessToken, new TokenTransformer(), 'data');
+            $response = $this->fractal->createData($data)->toArray();
+            $response['validate'] = $validate;
+
+            // Return Auth
+            return $this->response->array($response);
         }
         
         return $this->response->errorBadRequest();
@@ -141,14 +195,27 @@ class AuthController extends RestfulControllerV2
      * )
      */
     public function show(int $id) {
-        // Adjust Results
-        $params = ['id' => $type];
-
-        // Show Auth Request 
-        $request = new ShowTokenRequest($params);
-        
+        // Show Auth Request
+        $request = new ShowTokenRequest(['id' => $id]);
         if ( $request->validate() ) {
-            return $this->response->item($this->auth->get($params), new TokenTransformer());
+            // Get Access Token
+            $accessToken = $this->tokens->get(['id' => $id]);
+
+            // Validate Access Token
+            $validate = ['is_valid' => false];
+            if(!empty($accessToken->toke_type)) {
+                if($accessToken->token_type === 'google') {
+                    $validate = $this->google->validate($accessToken);
+                }
+            }
+
+            // Convert Token to Array
+            $data = new Item($accessToken, new TokenTransformer(), 'data');
+            $response = $this->fractal->createData($data)->toArray();
+            $response['validate'] = $validate;
+
+            // Return Auth
+            return $this->response->array($response);
         }
         
         return $this->response->errorBadRequest();
@@ -193,14 +260,81 @@ class AuthController extends RestfulControllerV2
      * )
      */
     public function update(int $id, Request $request) {
+        // Update Auth Request
         $requestData = $request->all();
         $requestData['id'] = $id;
-
-        // Update Auth Request
         $request = new UpdateTokenRequest($requestData);
-        
         if ( $request->validate() ) {
-            return $this->response->item($this->auth->update($request->all()), new TokenTransformer());
+            // Update Access Token
+            $accessToken = $this->tokens->update($request->all());
+
+            // Validate Access Token
+            $validate = ['is_valid' => false];
+            if(!empty($accessToken->toke_type)) {
+                if($accessToken->token_type === 'google') {
+                    $validate = $this->google->validate($accessToken);
+                }
+            }
+
+            // Convert Token to Array
+            $data = new Item($accessToken, new TokenTransformer(), 'data');
+            $response = $this->fractal->createData($data)->toArray();
+            $response['validate'] = $validate;
+
+            // Return Auth
+            return $this->response->array($response);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/leads/{leadId}/texts/{id}",
+     *     description="Retrieve a text",
+     
+     *     tags={"Post"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="Post ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a post",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function validate(int $id) {
+        // Validate Auth Request
+        $request = new ValidateTokenRequest($request->all());
+        if ( $request->validate() ) {
+            // Get Access Token
+            $accessToken = new AccessToken();
+            $accessToken->fill($request->all());
+
+            // Validate Access Token
+            $validate = ['is_valid' => false];
+            if(!empty($accessToken->toke_type)) {
+                if($accessToken->token_type === 'google') {
+                    $validate = $this->google->validate($accessToken);
+                }
+            }
+
+            // Convert Token to Array
+            $data = new Item($accessToken, new TokenTransformer(), 'data');
+            $response = $this->fractal->createData($data)->toArray();
+            $response['validate'] = $validate;
+
+            // Return Auth
+            return $this->response->array($response);
         }
         
         return $this->response->errorBadRequest();
