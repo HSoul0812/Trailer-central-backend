@@ -89,7 +89,7 @@ class AuthController extends RestfulControllerV2
 
             // Validate Access Token
             $validate = ['is_valid' => false];
-            if(!empty($accessToken->toke_type)) {
+            if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);
                 }
@@ -154,7 +154,7 @@ class AuthController extends RestfulControllerV2
 
             // Validate Access Token
             $validate = ['is_valid' => false];
-            if(!empty($accessToken->toke_type)) {
+            if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);
                 }
@@ -205,7 +205,7 @@ class AuthController extends RestfulControllerV2
 
             // Validate Access Token
             $validate = ['is_valid' => false];
-            if(!empty($accessToken->toke_type)) {
+            if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);
                 }
@@ -272,7 +272,7 @@ class AuthController extends RestfulControllerV2
 
             // Validate Access Token
             $validate = ['is_valid' => false];
-            if(!empty($accessToken->toke_type)) {
+            if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);
                 }
@@ -324,7 +324,7 @@ class AuthController extends RestfulControllerV2
 
             // Validate Access Token
             $validate = ['is_valid' => false];
-            if(!empty($accessToken->toke_type)) {
+            if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);
                 }
