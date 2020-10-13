@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1\Integration\Auth;
+namespace App\Http\Controllers\v1\Integration;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
