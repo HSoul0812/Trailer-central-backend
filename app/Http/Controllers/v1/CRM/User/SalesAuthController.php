@@ -9,6 +9,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\User\ShowSalesAuthRequest;
 use App\Http\Requests\CRM\User\UpdateSalesAuthRequest;
+use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use App\Services\Integration\Auth\GoogleServiceInterface;
 use League\Fractal\Manager;
