@@ -3,8 +3,12 @@
 namespace App\Repositories\Inventory;
 
 use App\Models\Inventory\AttributeValue;
+use App\Models\Inventory\File;
+use App\Models\Inventory\Image;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryFeature;
+use App\Models\Inventory\InventoryFile;
+use App\Models\Inventory\InventoryImage;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
@@ -93,11 +97,18 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $attributes = $params['attributes'] ?? [];
         $features = $params['features'] ?? [];
+        $newImages = $params['new_images'] ?? [];
+        $newFiles = $params['new_files'] ?? [];
+
         $attributeObjs = [];
         $featureObjs = [];
+        $inventoryImageObjs = [];
+        $inventoryFilesObjs = [];
 
         unset($params['attributes']);
         unset($params['features']);
+        unset($params['new_images']);
+        unset($params['new_files']);
 
         foreach ($attributes as $attribute) {
             $attributeObjs[] = new AttributeValue($attribute);
@@ -107,9 +118,27 @@ class InventoryRepository implements InventoryRepositoryInterface
             $featureObjs[] = new InventoryFeature($feature);
         }
 
-        $item = new Inventory();
-        $item->fill($params);
+        foreach ($newImages as $newImage) {
+            $imageObj = new Image($newImage);
+            $imageObj->save();
 
+            $inventoryImageObj = new InventoryImage($newImage);
+            $inventoryImageObj->image_id = $imageObj->image_id;
+
+            $inventoryImageObjs[] = $inventoryImageObj;
+        }
+
+        foreach ($newFiles as $newFile) {
+            $fileObj = new File($newFile);
+            $fileObj->save();
+
+            $inventoryFileObj = new InventoryFile($newFile);
+            $inventoryFileObj->file_id = $fileObj->id;
+
+            $inventoryFilesObjs[] = $inventoryFileObj;
+        }
+
+        $item = new Inventory($params);
 
         $item->save();
 
@@ -119,6 +148,14 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (!empty($featureObjs)) {
             $item->inventoryFeatures()->saveMany($featureObjs);
+        }
+
+        if (!empty($inventoryImageObjs)) {
+            $item->inventoryImages()->saveMany($inventoryImageObjs);
+        }
+
+        if (!empty($inventoryFilesObjs)) {
+            $item->inventoryFiles()->saveMany($inventoryFilesObjs);
         }
 
         return $item;
@@ -242,7 +279,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function getFloorplannedInventory($params)
     {
         $query = Inventory::select('*');
-        
+
         $query->where([
             ['status', '<>', Inventory::STATUS_QUOTE],
             ['is_floorplan_bill', '=', 1],
@@ -251,7 +288,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             ['true_cost', '>', 0],
             ['fp_balance', '>', 0]
         ])->whereNotNull('bill_id');
-        
+
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
@@ -263,11 +300,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
-        
+
         if (isset($params['floorplan_vendor'])) {
             $query = $query->where('fp_vendor', $params['floorplan_vendor']);
         }
-        
+
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')

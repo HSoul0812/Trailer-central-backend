@@ -115,6 +115,17 @@ class CreateInventoryRequest extends Request
         'height_second' => 'numeric|nullable',
         'height_second_inches' => 'numeric|nullable',
 
+        'new_images' => 'array|nullable',
+        'new_images.*.position' => 'integer|nullable',
+        'new_images.*.primary' => 'boolean|nullable',
+        'new_images.*.is_default' => 'boolean|nullable',
+        'new_images.*.secondary' => 'boolean|nullable',
+        'new_images.*.is_secondary' => 'boolean|nullable',
+        
+        'new_files' => 'array|nullable',
+        'new_files.*.title' => 'string|nullable',
+        'new_files.*.path' => 'string|nullable',
+        'new_files.*.position' => 'integer|nullable',
 
         'add_bill' => 'boolean|nullable',
     ];

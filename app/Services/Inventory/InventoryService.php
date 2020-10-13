@@ -152,7 +152,7 @@ class InventoryService
             }
 
             if (isset($params['add_bill']) && $params['add_bill']) {
-                $this->addBill($params);
+                //$this->addBill($params);
             }
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
@@ -328,14 +328,8 @@ class InventoryService
             }
         }
 
-        print_r($createParams);
-        exit();
-
         foreach ($createParams as $createParamKey => $createParamValue) {
             if (in_array($createParamKey, $defaultAttributes) && !empty($createParamValue)) {
-                print_r($createParamKey);
-                print_r($createParamValue);
-                exit();
                 if (!isset($createParams['ignore_attributes']) || $createParams['ignore_attributes'] != 1) {
                     $attributeId = array_search($createParamKey, $defaultAttributes);
                     $attributes[] = [

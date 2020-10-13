@@ -199,9 +199,19 @@ class Inventory extends Model
         return $this->hasMany('App\Models\Inventory\Floorplan\Payment', 'inventory_id', 'inventory_id');
     }
 
+    public function inventoryImages()
+    {
+        return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
+    }
+
     public function images()
     {
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
+    }
+
+    public function inventoryFiles()
+    {
+        return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
     }
 
     public function files()
@@ -257,7 +267,7 @@ class Inventory extends Model
     public function getStatusLabelAttribute()
     {
         return isset(self::STATUS_MAPPING[$this->status]) ? self::STATUS_MAPPING[$this->status] : null;
-    } 
+    }
 
     public function __toString() {
         return $this->title;
