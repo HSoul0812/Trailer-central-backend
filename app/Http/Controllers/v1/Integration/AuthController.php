@@ -312,7 +312,7 @@ class AuthController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function validate(int $id) {
+    public function valid(int $id) {
         // Validate Auth Request
         $request = new ValidateTokenRequest($request->all());
         if ( $request->validate() ) {
