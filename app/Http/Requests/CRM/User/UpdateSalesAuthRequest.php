@@ -14,8 +14,7 @@ class UpdateSalesAuthRequest extends Request {
         'issued_at' => 'integer',
         'expires_at' => 'integer',
         'scopes' => 'required|array',
-        'scopes.*' => 'required|string|max:80',
-        'smtp_email' => 'email'
+        'scopes.*' => 'required|string|max:80'
     ];
 
 }
