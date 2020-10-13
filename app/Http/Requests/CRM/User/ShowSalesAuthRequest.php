@@ -4,7 +4,7 @@ namespace App\Http\Requests\CRM\User;
 
 use App\Http\Requests\Request;
 
-class AccessSalesPeopleRequest extends Request {
+class ShowSalesAuthRequest extends Request {
 
     protected $rules = [
         'id' => 'required|integer',

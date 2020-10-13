@@ -19,9 +19,32 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
     {
         $this->withQuery(SalesPerson::query());
     }
-    
+
+    /**
+     * Create Sales Person
+     * 
+     * @param array $params
+     * @return SalesPerson
+     */
     public function create($params) {
-        throw NotImplementedException;
+        return SalesPerson::create($params);
+    }
+
+    /**
+     * Update Sales Person
+     * 
+     * @param array $params
+     * @return SalesPerson
+     */
+    public function update($params) {
+        $salesPerson = SalesPerson::findOrFail($params['id']);
+
+        DB::transaction(function() use (&$salesPerson, $params) {
+            // Fill Text Details
+            $salesPerson->fill($params)->save();
+        });
+
+        return $salesPerson;
     }
 
     /**
@@ -69,6 +92,12 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * Get Sales Report
+     * 
+     * @param array $params
+     * @return array
+     */
     public function salesReport($params)
     {
         $dbParams = ['dealerId1' => $params['dealer_id']];

@@ -4,7 +4,7 @@ namespace App\Http\Requests\CRM\User;
 
 use App\Http\Requests\Request;
 
-class TokenSalesPeopleRequest extends Request {
+class UpdateSalesAuthRequest extends Request {
 
     protected $rules = [
         'id' => 'required|integer',
@@ -14,7 +14,8 @@ class TokenSalesPeopleRequest extends Request {
         'issued_at' => 'integer',
         'expires_at' => 'integer',
         'scopes' => 'required|array',
-        'scopes.*' => 'required|string|max:80'
+        'scopes.*' => 'required|string|max:80',
+        'smtp_email' => 'email'
     ];
 
 }

@@ -442,8 +442,12 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
-                $route->get('/{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@access')->where('id', '[0-9]+');
-                $route->put('/{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@token')->where('id', '[0-9]+');
+
+                // Sales People w/Auth
+                $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
+                $route->post('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@valid');
+                $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');
+                $route->post('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@update')->where('id', '[0-9]+');
             });
 
             /*
