@@ -82,7 +82,7 @@ class SalesAuthController extends RestfulControllerV2 {
 
             // Get Sales Person
             $salesPerson = $this->salesPerson->get([
-                'sales_person_id' => $params['id']
+                'sales_person_id' => $params['relation_id']
             ]);
             $item = new Item($salesPerson, new SalesPersonTransformer(), 'data');
             $sales = $this->fractal->createData($item)->toArray();
