@@ -9,6 +9,11 @@ use App\Models\CRM\User\Customer;
 use App\Models\User\DealerLocation;
 
 
+/**
+ * Class ServiceOrder
+ * @package App\Models\CRM\Dms
+ * @property Invoice $invoice
+ */
 class ServiceOrder extends Model
 {
 
