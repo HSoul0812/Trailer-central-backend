@@ -214,7 +214,9 @@ class PartRepository implements PartRepositoryInterface {
 
         if (isset($params['with_cost'])) {
             if (empty($params['with_cost'])) {
-                $query = $query->whereRaw('(dealer_cost IS NULL or dealer_cost=0)');
+                $query = $query->where(function($q) {
+                    $q->whereNull('dealer_cost')->orWhere('dealer_cost', '=', 0);
+                });
             } else {
                 $query = $query->where('dealer_cost', '>', 0);
             }
@@ -283,7 +285,9 @@ class PartRepository implements PartRepositoryInterface {
 
         if (isset($params['with_cost'])) {
             if (empty($params['with_cost'])) {
-                $query = $query->whereRaw('(dealer_cost IS NULL or dealer_cost=0)');
+                $query = $query->where(function($q) {
+                    $q->whereNull('dealer_cost')->orWhere('dealer_cost', '=', 0);
+                });
             } else {
                 $query = $query->where('dealer_cost', '>', 0);
             }
