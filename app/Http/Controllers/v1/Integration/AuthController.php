@@ -12,6 +12,7 @@ use App\Http\Requests\Integration\Auth\UpdateTokenRequest;
 use App\Http\Requests\Integration\Auth\ValidateTokenRequest;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use App\Services\Integration\Auth\GoogleServiceInterface;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
