@@ -104,7 +104,7 @@ class NewDealerUser extends Model
      * @return HasMany
      */
     public function salespeople() {
-        return $this->hasMany(SalesPerson::class, 'user_id', 'user_id');
+        return $this->hasMany(SalesPerson::class, 'user_id', 'user_id')->where('deleted', 0);
     }
 
     /**
