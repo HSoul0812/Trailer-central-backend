@@ -77,8 +77,10 @@ class SalesAuthController extends RestfulControllerV2 {
 
             // Validate Access Token
             $validate = ['is_valid' => false];
-            if($params['token_type'] === 'google') {
-                $validate = $this->google->validate($accessToken);
+            if(!empty($accessToken->token_type)) {
+                if($accessToken->token_type === 'google') {
+                    $validate = $this->google->validate($accessToken);
+                }
             }
 
             // Get Sales Person
@@ -121,8 +123,10 @@ class SalesAuthController extends RestfulControllerV2 {
 
             // Validate Access Token
             $validate = ['is_valid' => false];
-            if($params['token_type'] === 'google') {
-                $validate = $this->google->validate($accessToken);
+            if(!empty($accessToken->token_type)) {
+                if($accessToken->token_type === 'google') {
+                    $validate = $this->google->validate($accessToken);
+                }
             }
 
             // Get Sales Person
@@ -167,8 +171,10 @@ class SalesAuthController extends RestfulControllerV2 {
 
             // Validate Access Token
             $validate = ['is_valid' => false];
-            if($params['token_type'] === 'google') {
-                $validate = $this->google->validate($accessToken);
+            if(!empty($accessToken->token_type)) {
+                if($accessToken->token_type === 'google') {
+                    $validate = $this->google->validate($accessToken);
+                }
             }
 
             // Get Sales Person
