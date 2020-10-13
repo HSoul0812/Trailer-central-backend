@@ -2,6 +2,8 @@
 
 namespace App\Services\Parts;
 
+use App\Events\Parts\PartQtyUpdated;
+use App\Models\Parts\BinQuantity;
 use App\Repositories\Parts\CycleCountRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Services\Parts\PartServiceInterface;
@@ -10,11 +12,11 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Parts\Part;
 
 /**
- * 
+ *
  *
  * @author Eczek
  */
-class PartService implements PartServiceInterface 
+class PartService implements PartServiceInterface
 {
     /**
      * @var App\Services\Parts\PartsServiceInterface
@@ -24,27 +26,27 @@ class PartService implements PartServiceInterface
      * @var App\Repositories\Parts\CycleCountRepositoryInterface
      */
     protected $cycleCountRepository;
-    
-    public function __construct(PartRepositoryInterface $partRepository, CycleCountRepositoryInterface $cycleCountRepository) 
+
+    public function __construct(PartRepositoryInterface $partRepository, CycleCountRepositoryInterface $cycleCountRepository)
     {
         $this->partRepository = $partRepository;
         $this->cycleCountRepository = $cycleCountRepository;
     }
-    
-    public function create($partData, $bins) : Part 
+
+    public function create($partData, $bins) : Part
     {
         $part = null;
-        
-        DB::transaction(function() use ($partData, $bins, &$part) {            
-            
+
+        DB::transaction(function() use ($partData, $bins, &$part) {
+
             $part = $this->partRepository->create($partData);
-        
+
             foreach($bins as $bin) {
-                
+
                 if (empty($bin['old_quantity']) || empty($bin['quantity'])) {
                     continue;
                 }
-                
+
                 $this->cycleCountRepository->create([
                     'bin_id' => $bin['bin_id'],
                     'dealer_id' => $part->dealer_id,
@@ -58,27 +60,37 @@ class PartService implements PartServiceInterface
                         ]
                     ]
                 ]);
+
+                $binQuantity = BinQuantity::where([
+                    'part_id' => $part->id,
+                    'bin_id' => $bin['bin_id'],
+                ])->first();
+
+                event(new PartQtyUpdated($part, $binQuantity, [
+                    'quantity' => ($bin['quantity'] - $bin['old_quantity']),
+                    'description' => 'Part created'
+                ]));
             }
 
         });
-        
-        
-        return $part; 
+
+
+        return $part;
     }
-    
-    public function update($partData, $bins) : Part 
+
+    public function update($partData, $bins) : Part
     {
         $part = null;
-        
-        DB::transaction(function() use ($partData, $bins, &$part) {   
+
+        DB::transaction(function() use ($partData, $bins, &$part) {
             $part = $this->partRepository->update($partData);
-        
+
             foreach($bins as $bin) {
-                
+
                 if (empty($bin['old_quantity']) || empty($bin['quantity'])) {
                     continue;
                 }
-                
+
                 $this->cycleCountRepository->create([
                     'bin_id' => $bin['bin_id'],
                     'dealer_id' => $part->dealer_id,
@@ -92,10 +104,22 @@ class PartService implements PartServiceInterface
                         ]
                     ]
                 ]);
+
+                if ($bin['quantity'] != $bin['old_quantity']) {
+                    $binQuantity = BinQuantity::where([
+                        'part_id' => $part->id,
+                        'bin_id' => $bin['bin_id'],
+                    ])->first();
+
+                    event(new PartQtyUpdated($part, $binQuantity, [
+                        'quantity' => ($bin['quantity'] - $bin['old_quantity']),
+                        'description' => 'Part updated'
+                    ]));
+                }
             }
         });
-        
+
         return $part;
     }
-    
+
 }

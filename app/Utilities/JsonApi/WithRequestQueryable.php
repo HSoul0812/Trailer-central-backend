@@ -61,6 +61,10 @@ trait WithRequestQueryable
      */
     public function buildQuery()
     {
+        if (!$this->requestQueryableQuery && method_exists($this, 'baseQuery')) {
+            $this->requestQueryableQuery = $this->baseQuery();
+        }
+
         $this->query = $this->queryBuilder()
             ->withRequest($this->requestQueryableRequest)
             ->withQuery($this->requestQueryableQuery)

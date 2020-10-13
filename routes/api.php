@@ -612,6 +612,22 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Parts related
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+
+        /**
+         * Parts audit logs
+         */
+        $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
+
     });
 
 });

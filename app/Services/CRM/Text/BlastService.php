@@ -112,6 +112,9 @@ class BlastService implements BlastServiceInterface
             }
         }
 
+        // Mark Blast as Delivered
+        $this->markDelivered($blast);
+
         // Return Blast Sent Entries
         return $sent;
     }
@@ -129,7 +132,7 @@ class BlastService implements BlastServiceInterface
         // Get Text Message
         $textMessage = $this->templates->fillTemplate($blast->template->template, [
             'lead_name' => $lead->full_name,
-            'title_of_unit_of_interest' => $lead->inventory->title,
+            'title_of_unit_of_interest' => $lead->inventory_title,
             'dealer_name' => $dealer->user->name
         ]);
 
@@ -139,7 +142,7 @@ class BlastService implements BlastServiceInterface
             $status = BlastSent::STATUS_SENT;
         } catch (CustomerLandlineNumberException $ex) {
             $status = BlastSent::STATUS_LANDLINE;
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $status = BlastSent::STATUS_INVALID;
         }
 
@@ -197,5 +200,16 @@ class BlastService implements BlastServiceInterface
 
         // Return Sent
         return $sent;
+    }
+
+    private function markDelivered($blast) {
+        // Mark as Delivered
+        $blast = $this->blasts->update([
+            'id' => $blast->id,
+            'is_delivered' => 1
+        ]);
+
+        // Return Updated Blast
+        return $blast;
     }
 }

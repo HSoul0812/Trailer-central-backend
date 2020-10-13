@@ -43,7 +43,8 @@
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
-        "twilio/sdk": "^5.31"
+        "twilio/sdk": "^5.31",
+        "grimzy/laravel-mysql-spatial": "^1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

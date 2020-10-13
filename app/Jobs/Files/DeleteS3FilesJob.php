@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
  */
 class DeleteS3FilesJob extends Job
 {
+    const SHOWROOM_FILES_KEY = 'showroom-files';
     /**
      * @var string[]
      */
@@ -30,7 +31,10 @@ class DeleteS3FilesJob extends Job
     {
         try {
             foreach ($this->files as $file) {
-                Storage::disk('s3')->delete($file);
+                // Should not delete showroom files because this deletes images from FactoryVantage.com
+                if (stripos($file, self::SHOWROOM_FILES_KEY) === false) {
+                    Storage::disk('s3')->delete($file);
+                }                
             }
         } catch (\Exception $e) {
             Log::error('Files delete error.', $e->getTrace());

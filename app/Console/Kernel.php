@@ -6,10 +6,11 @@ use App\Console\Commands\Website\AddSitemaps;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
-use App\Console\Commands\RunBulkUploadCommand;
+use App\Console\Commands\Parts\Import\RunBulkUploadCommand;
 use App\Console\Commands\ReplaceYoutubeEmbeds;
 use App\Console\Commands\Inventory\AdjustFeetAndInches;
 use App\Console\Commands\User\CreateAccessToken;
+use App\Console\Commands\Parts\Import\StocksExistsCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -24,7 +25,8 @@ class Kernel extends ConsoleKernel
         RunBulkUploadCommand::class,
         AddSitemaps::class,
         AdjustFeetAndInches::class,
-        CreateAccessToken::class
+        CreateAccessToken::class,
+        StocksExistsCommand::class
     ];
 
     /**
@@ -37,7 +39,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('run:bulk')
                 ->withoutOverlapping()
-                ->runInBackground();
+                ->runInBackground(); 
         
         $schedule->command('add:sitemaps')
                 ->daily()

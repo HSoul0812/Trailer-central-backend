@@ -7,16 +7,15 @@ use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
 use App\Traits\CompactHelper;
+use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Inventory\InventoryImage;
-use App\Models\Inventory\Image;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
 
 class Inventory extends Model
 {
-    use TableAware;
+    use TableAware, SpatialTrait;
 
     const COLOR_ATTRIBUTE_ID = 11;
 
@@ -83,6 +82,10 @@ class Inventory extends Model
     ];
 
     protected $hidden = [
+        'geolocation'
+    ];
+
+    protected $spatialFields = [
         'geolocation'
     ];
 
@@ -169,7 +172,7 @@ class Inventory extends Model
     public function getStatusLabelAttribute()
     {
         return isset(self::STATUS_MAPPING[$this->status]) ? self::STATUS_MAPPING[$this->status] : null;
-    } 
+    }
 
     public function __toString() {
         return $this->title;
