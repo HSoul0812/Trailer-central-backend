@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\v1\CRM\User;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -14,7 +14,7 @@ use App\Services\Integration\Auth\GoogleServiceInterface;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
-class SalesAuthController extends RestfulController {
+class SalesAuthController extends RestfulControllerV2 {
 
     /**
      * @var SalesPersonRepository
