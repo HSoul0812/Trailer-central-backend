@@ -58,10 +58,12 @@ class SalesAuthController extends RestfulController {
      * @param Request $request
      * @return type
      */
-    public function show(int $id)
+    public function show(int $id, Request $request)
     {
         // Handle Auth Sales People Request
-        $request = new ShowSalesAuthRequest(['id' => $id]);
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new ShowSalesAuthRequest($requestData);
         if ($request->validate()) {
             // Adjust Request
             $params = $request->all();
