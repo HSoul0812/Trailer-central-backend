@@ -143,7 +143,6 @@ return [
         ],
 
         'dealer-proxy' => [
-            'url' => env('DEALER_PROXY_REDIS_URL'),
             'host' => env('DEALER_PROXY_REDIS_HOST', '127.0.0.1'),
             'password' => env('DEALER_PROXY_REDIS_PASSWORD', null),
             'port' => env('DEALER_PROXY_REDIS_PORT', '6379'),
