@@ -162,7 +162,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                             ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
                             ->where(SalesPerson::getTableName() . '.id', '<>', 0)
                             ->where(SalesPerson::getTableName() . '.id', '<>', '')
-                            ->where(SalesPerson::getTableName() . '.deleted', '=', 0)
                             ->whereNotNull(SalesPerson::getTableName() . '.id')
                             ->orderBy(Lead::getTableName() . '.date_submitted', 'DESC');
 
