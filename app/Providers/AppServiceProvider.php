@@ -207,7 +207,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
-        $this->app->bind('App\Repositories\Dms\QuoteRepositoryInterface', 'App\Repositories\Dms\QuoteRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
@@ -232,17 +231,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
-        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
-        $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
-        $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
-        $this->app->bind(PurchaseOrderReceiptRepositoryInterface::class, PurchaseOrderReceiptRepository::class);
-        $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
-        $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
-        $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
 
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
-        $this->app->bind(FinancingCompanyRepositoryInterface::class, FinancingCompanyRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);

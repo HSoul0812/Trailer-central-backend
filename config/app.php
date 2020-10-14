@@ -176,6 +176,7 @@ return [
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\PartsServiceProvider::class,
+        App\Providers\DmsServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
 
         /*
