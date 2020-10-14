@@ -65,7 +65,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $dealerId = $params['dealer_id'] ?? $this->requestQueryableRequest->input('dealer_id');
         if ($dealerId) {
             $newDealerUser = NewDealerUser::findOrFail($dealerId);
-            $query = $query->WHERE('user_id', $newDealerUser->user_id);
+            $query = $query->WHERE('user_id', $newDealerUser->user_id)->where('deleted', 0);
         }
 
         return $query->get();
@@ -78,7 +78,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @return type
      */
     public function getAll($params) {
-        $query = SalesPerson::SELECT('*');
+        $query = SalesPerson::SELECT('*')->where('deleted', 0);
 
         if (isset($params['dealer_id'])) {
             $newDealerUser = NewDealerUser::findOrFail($params['dealer_id']);
@@ -158,7 +158,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 {$dateFromClause2}
                 GROUP BY ps.id) sales ON sales.sales_person_id=sp.id
             LEFT JOIN new_dealer_user ndu ON ndu.user_id=sp.user_id
-            WHERE ndu.id=:dealerId3
+            WHERE ndu.id=:dealerId3 AND sp.deleted = 0
             ORDER BY sales.sale_date DESC";
 
         $result = DB::select($sql, $dbParams);
@@ -191,6 +191,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                             ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
                             ->where(SalesPerson::getTableName() . '.id', '<>', 0)
                             ->where(SalesPerson::getTableName() . '.id', '<>', '')
+                            ->where(SalesPerson::getTableName() . '.deleted', '=', 0)
                             ->whereNotNull(SalesPerson::getTableName() . '.id')
                             ->orderBy(Lead::getTableName() . '.date_submitted', 'DESC');
 
@@ -266,7 +267,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         // Get New Sales People By Dealer ID
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
         $query = SalesPerson::select('*')
-                          ->where('user_id', $newDealerUser->user_id);
+                          ->where('user_id', $newDealerUser->user_id)
+                          ->where('deleted', 0);
         
         if ($dealerLocationId) {
             $query->where('dealer_location_id', $dealerLocationId);
