@@ -42,7 +42,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $dealerId = $params['dealer_id'] ?? $this->requestQueryableRequest->input('dealer_id');
         if ($dealerId) {
             $newDealerUser = NewDealerUser::findOrFail($dealerId);
-            $query = $query->WHERE('user_id', $newDealerUser->user_id)->where('deleted', 0);
+            $query = $query->WHERE('user_id', $newDealerUser->user_id);
         }
 
         return $query->get();
@@ -55,7 +55,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @return type
      */
     public function getAll($params) {
-        $query = SalesPerson::SELECT('*')->where('deleted', 0);
+        $query = SalesPerson::SELECT('*');
 
         if (isset($params['dealer_id'])) {
             $newDealerUser = NewDealerUser::findOrFail($params['dealer_id']);
@@ -237,9 +237,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
     public function getSalesPeopleBy($dealerId, $dealerLocationId = null, $salesType = null) {
         // Get New Sales People By Dealer ID
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
-        $query = SalesPerson::select('*')
-                          ->where('user_id', $newDealerUser->user_id)
-                          ->where('deleted', 0);
+        $query = SalesPerson::select('*')->where('user_id', $newDealerUser->user_id);
         
         if ($dealerLocationId) {
             $query->where('dealer_location_id', $dealerLocationId);
