@@ -45,7 +45,7 @@ class WebsiteController extends RestfulController
      *     ),
      *     @OA\Response(
      *         response="200",
-     *         description="Confirms part was deleted",
+     *         description="Confirms proxied domain for ssl was enabled",
      *         @OA\JsonContent(
      *              @OA\Property(
      *                  property="status",
