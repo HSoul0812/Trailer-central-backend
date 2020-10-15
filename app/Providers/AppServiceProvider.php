@@ -8,6 +8,8 @@ use App\Repositories\Inventory\ImageRepository;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\StatusRepository;
 use App\Repositories\Inventory\StatusRepositoryInterface;
+use App\Repositories\Website\DealerProxyRedisRepository;
+use App\Repositories\Website\DealerProxyRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
@@ -242,6 +244,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
 
+        $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
     }
 
 }
