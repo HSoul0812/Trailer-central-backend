@@ -29,9 +29,11 @@ class CreateIntegrationToken extends Migration
 
             $table->text('id_token'); // text() NOT NULL,
 
-            $table->integer('issued_at'); // datetime NOT NULL,
+            $table->integer('expires_in'); // int(11) NOT NULL,
 
-            $table->integer('expires_at'); // datetime NOT NULL,
+            $table->integer('expires_at'); // int(11) NOT NULL,
+
+            $table->integer('issued_at'); // int(11) NOT NULL,
 
             $table->timestamps();
 

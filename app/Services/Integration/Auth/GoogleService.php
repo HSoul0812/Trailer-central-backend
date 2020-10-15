@@ -56,6 +56,7 @@ class GoogleService implements GoogleServiceInterface
         $this->client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
+            'expires_in' => $accessToken->expires_in,
             'created' => $accessToken->issued_at
         ]);
         $this->client->setScopes($accessToken->scope);
@@ -64,7 +65,8 @@ class GoogleService implements GoogleServiceInterface
         $result = [
             'access_token' => $accessToken->access_token,
             'is_valid' => false,
-            'is_expired' => true
+            'is_expired' => true,
+            'errors' => []
         ];
 
         // Validate ID Token
@@ -80,14 +82,15 @@ class GoogleService implements GoogleServiceInterface
             // If it throws an exception, that means its false, the token isn't valid
             // This exception can be used for other processes but isn't needed in this method
             //throw new InvalidGapiIdTokenException;
+            $result['errors'][] = $e->getMessage() . ': ' . $e->getTraceAsString();
         }
 
         // Validate If Expired
         try {
             // If there is no previous token or it's expired.
-            if ($client->isAccessTokenExpired()) {
+            if ($this->client->isAccessTokenExpired()) {
                 // Refresh the token if possible, else fetch a new one.
-                if ($client->getRefreshToken()) {
+                if ($this->client->getRefreshToken()) {
                     $result['access_token'] = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                     $result['is_expired'] = false;
                 }
@@ -101,6 +104,7 @@ class GoogleService implements GoogleServiceInterface
             // If it throws an exception, that means its false, the token is expired
             // This exception can be used for other processes but isn't needed in this method
             //throw new InvalidGapiIdTokenException;
+            $result['errors'][] = $e->getMessage() . ': ' . $e->getTraceAsString();
         }
 
         // Return Payload Results
