@@ -129,7 +129,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 {$dateFromClause2}
                 GROUP BY ps.id) sales ON sales.sales_person_id=sp.id
             LEFT JOIN new_dealer_user ndu ON ndu.user_id=sp.user_id
-            WHERE ndu.id=:dealerId3
+            WHERE ndu.id=:dealerId3 AND sp.deleted_at IS NULL
             ORDER BY sales.sale_date DESC";
 
         $result = DB::select($sql, $dbParams);
@@ -236,8 +236,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
     public function getSalesPeopleBy($dealerId, $dealerLocationId = null, $salesType = null) {
         // Get New Sales People By Dealer ID
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
-        $query = SalesPerson::select('*')
-                          ->where('user_id', $newDealerUser->user_id);
+        $query = SalesPerson::select('*')->where('user_id', $newDealerUser->user_id);
         
         if ($dealerLocationId) {
             $query->where('dealer_location_id', $dealerLocationId);
