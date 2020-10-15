@@ -14,6 +14,7 @@ use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\ArraySerializer;
+use OpenApi\Annotations as OA;
 
 /**
  * @author Marcel
@@ -45,7 +46,9 @@ class ServiceOrderController extends RestfulControllerV2
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->serviceOrders = $serviceOrders;
+
         $this->fractal = $fractal;
+        $this->fractal->setSerializer(new NoDataArraySerializer());
         $this->transformer = $transformer;
     }
 
@@ -96,6 +99,7 @@ class ServiceOrderController extends RestfulControllerV2
     public function index(Request $request)
     {
         $request = new GetServiceOrdersRequest($request->all());
+        $this->fractal->parseIncludes($request->query('with', ''));
 
         if ($request->validate()) {
           return $this->response->paginator($this->serviceOrders->getAll($request->all()), new ServiceOrderTransformer);

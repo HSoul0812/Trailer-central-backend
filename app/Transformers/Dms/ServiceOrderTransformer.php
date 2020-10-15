@@ -13,7 +13,7 @@ use App\Models\CRM\Dms\ServiceOrder;
 class ServiceOrderTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'serviceItems', 'partItems', 'miscPartItems', 'otherItems',
+        'serviceItems', 'partItems', 'miscPartItems', 'otherItems', 'invoice'
     ];
 
     public function transform($serviceOrder)
@@ -52,6 +52,11 @@ class ServiceOrderTransformer extends TransformerAbstract
     public function includeOtherItems(ServiceOrder $serviceOrder)
     {
         return $this->collection($serviceOrder->otherItems, new OtherItemTransformer());
+    }
+
+    public function withInvoice(ServiceOrder $serviceOrder)
+    {
+        return $this->item($serviceOrder->invoice, new InvoiceTransformer());
     }
 
 }

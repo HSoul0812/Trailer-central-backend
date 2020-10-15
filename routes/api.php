@@ -584,6 +584,18 @@ $api->version('v1', function ($route) {
          */
         $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Others
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+
+        $route->get('settings', 'App\Http\Controllers\v1\Dms\SettingsController@show');
+        $route->put('settings', 'App\Http\Controllers\v1\Dms\SettingsController@update');
+
     });
 
 });

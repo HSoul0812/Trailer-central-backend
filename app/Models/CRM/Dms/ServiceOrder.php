@@ -21,6 +21,7 @@ use App\Models\User\DealerLocation;
  * @property Collection<MiscPartItem> $miscPartItems
  * @property Collection<ServiceItem> $serviceItems
  * @property Collection<OtherItem> $otherItems
+ * @property Invoice $invoice
  */
 class ServiceOrder extends Model
 {
