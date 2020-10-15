@@ -5,6 +5,7 @@ namespace App\Repositories\Integration\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Auth\AccessToken;
+use App\Models\Integration\Auth\Scope;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 
