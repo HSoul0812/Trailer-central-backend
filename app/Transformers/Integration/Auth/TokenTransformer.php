@@ -19,6 +19,7 @@ class TokenTransformer extends TransformerAbstract
             'id_token' => $token->id_token,
             'scope' => $token->scope,
             'issued_at' => $token->issued_at,
+            'expires_in' => $token->expires_in,
             'expires_at' => $token->expires_at,
             'created_at' => $token->created_at,
             'updated_at' => $token->updated_at

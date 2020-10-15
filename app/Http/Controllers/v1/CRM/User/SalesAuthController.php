@@ -76,7 +76,10 @@ class SalesAuthController extends RestfulControllerV2 {
             $accessToken = $this->tokens->getRelation($params);
 
             // Validate Access Token
-            $validate = ['is_valid' => false];
+            $validate = [
+                'is_valid' => false,
+                'is_expired' => true
+            ];
             if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);
@@ -126,7 +129,10 @@ class SalesAuthController extends RestfulControllerV2 {
             $accessToken = $this->tokens->create($params);
 
             // Validate Access Token
-            $validate = ['is_valid' => false];
+            $validate = [
+                'is_valid' => false,
+                'is_expired' => true
+            ];
             if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);
@@ -178,7 +184,10 @@ class SalesAuthController extends RestfulControllerV2 {
             $accessToken = $this->tokens->create($params);
 
             // Validate Access Token
-            $validate = ['is_valid' => false];
+            $validate = [
+                'is_valid' => false,
+                'is_expired' => true
+            ];
             if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);
