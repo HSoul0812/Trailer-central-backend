@@ -88,7 +88,10 @@ class AuthController extends RestfulControllerV2
             $accessToken = $this->tokens->getRelation($request->all());
 
             // Validate Access Token
-            $validate = ['is_valid' => false];
+            $validate = [
+                'is_valid' => false,
+                'is_expired' => true
+            ];
             if(!empty($accessToken->token_type)) {
                 if($accessToken->token_type === 'google') {
                     $validate = $this->google->validate($accessToken);

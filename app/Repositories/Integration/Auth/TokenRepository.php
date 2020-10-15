@@ -5,6 +5,7 @@ namespace App\Repositories\Integration\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Auth\AccessToken;
+use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 
 class TokenRepository implements TokenRepositoryInterface {
@@ -64,7 +65,15 @@ class TokenRepository implements TokenRepositoryInterface {
         }
 
         // Return Access Token
-        return AccessToken::create($params);
+        $accessToken = AccessToken::create($params);
+
+        // Update Scopes
+        if(isset($params['scopes'])) {
+            $this->updateScopes($accessToken->id, $params['scopes']);
+        }
+
+        // Return Access Token
+        return $this->find($params);
     }
 
     /**
@@ -124,9 +133,14 @@ class TokenRepository implements TokenRepositoryInterface {
         DB::transaction(function() use (&$token, $params) {
             // Fill Text Details
             $token->fill($params)->save();
+
+            // Update Scopes
+            if(isset($params['scopes'])) {
+                $this->updateScopes($token->id, $params['scopes']);
+            }
         });
 
-        return $token;
+        return $this->find($params);
     }
 
     /**
@@ -158,6 +172,29 @@ class TokenRepository implements TokenRepositoryInterface {
         return null;
     }
 
+    /**
+     * Delete Access Token Scopes
+     * 
+     * @param int $tokenId
+     * @param array $scopes
+     * @return Collection of Scopes
+     */
+    private function updateScopes($tokenId, $scopes) {
+        // Delete Scopes From Token
+        Scope::where('integration_token_id', $tokenId)->delete();
+
+        // Loop Scopes
+        $tokenScopes = [];
+        foreach($scopes as $scope) {
+            $tokenScopes[] = Scope::create([
+                'integration_token_id' => $tokenId,
+                'scope' => $scope
+            ]);
+        }
+
+        // Find Token From Relation
+        return collect($tokenScopes);
+    }
 
     /**
      * Add Sort Query
