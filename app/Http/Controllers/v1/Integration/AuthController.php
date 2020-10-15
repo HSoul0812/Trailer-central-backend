@@ -40,7 +40,7 @@ class AuthController extends RestfulControllerV2
         GoogleServiceInterface $googleService,
         Manager $fractal
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'valid']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'valid']);
 
         $this->tokens = $tokens;
         $this->google = $googleService;

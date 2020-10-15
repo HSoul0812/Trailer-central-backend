@@ -43,7 +43,7 @@ class SalesAuthController extends RestfulControllerV2 {
         GoogleServiceInterface $google,
         Manager $fractal
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['create']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
 
         $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
