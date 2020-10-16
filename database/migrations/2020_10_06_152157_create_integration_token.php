@@ -27,13 +27,15 @@ class CreateIntegrationToken extends Migration
 
             $table->string('access_token'); // string(255) NOT NULL,
 
-            $table->text('id_token'); // text() NOT NULL,
+            $table->text('refresh_token')->nullable(); // text() NOT NULL,
+
+            $table->text('id_token')->nullable(); // text() NOT NULL,
 
             $table->integer('expires_in'); // int(11) NOT NULL,
 
-            $table->integer('expires_at'); // int(11) NOT NULL,
+            $table->timestamp('expires_at'); // int(11) NOT NULL,
 
-            $table->integer('issued_at'); // int(11) NOT NULL,
+            $table->timestamp('issued_at'); // int(11) NOT NULL,
 
             $table->timestamps();
 

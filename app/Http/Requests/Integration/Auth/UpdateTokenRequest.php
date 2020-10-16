@@ -17,9 +17,10 @@ class UpdateTokenRequest extends Request {
         'relation_type' => 'valid_relation_type',
         'relation_id' => 'valid_relation_id',
         'access_token' => 'string|max:255',
+        'refresh_token' => 'string',
         'id_token' => 'string',
-        'issued_at' => 'integer',
-        'expires_at' => 'integer',
+        'issued_at' => 'date_format:Y-m-d H:i:s',
+        'expires_at' => 'date_format:Y-m-d H:i:s',
         'scopes' => 'array',
         'scopes.*' => 'string|max:80'
     ];

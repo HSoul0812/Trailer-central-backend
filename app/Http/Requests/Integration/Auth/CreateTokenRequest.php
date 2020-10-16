@@ -16,9 +16,10 @@ class CreateTokenRequest extends Request {
         'relation_type' => 'required|valid_relation_type',
         'relation_id' => 'required|integer',
         'access_token' => 'required|string|max:255',
-        'id_token' => 'required|string',
-        'issued_at' => 'integer',
-        'expires_at' => 'integer',
+        'refresh_token' => 'string',
+        'id_token' => 'string',
+        'issued_at' => 'date_format:Y-m-d H:i:s',
+        'expires_at' => 'date_format:Y-m-d H:i:s',
         'scopes' => 'required|array',
         'scopes.*' => 'required|string|max:80'
     ];
