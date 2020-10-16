@@ -266,7 +266,21 @@ class PartRepository implements PartRepositoryInterface {
         }
 
         if (isset($params['subcategory'])) {
-            $query = $query->where('subcategory', 'LIKE', '%'.$params['subcategory'].'%');
+            if (isset($params['subcategory']['eq'])) {
+                $query = $query->where(function ($query) use ($params) {
+                    foreach ($params['subcategory']['eq'] as $subcategory) {
+                        $query->orWhere('subcategory', 'LIKE', '%' . $subcategory . '%');
+                    }
+                });
+            } elseif (isset($params['subcategory']['neq'])) {
+                $query = $query->where(function ($query) use ($params) {
+                    foreach ($params['subcategory']['neq'] as $subcategory) {
+                        $query->orWhere('subcategory', 'NOT LIKE', '%' . $subcategory . '%');
+                    }
+                });
+            } else {
+                $query = $query->where('subcategory', 'LIKE', '%' . $params['subcategory'] . '%');
+            }
         }
 
         if (isset($params['sku'])) {
