@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Services\Integration\Auth\GmailServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
