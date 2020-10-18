@@ -89,7 +89,7 @@ class GmailService implements GmailServiceInterface
         try {
             // Create Message
             $message = $this->prepareMessage($params);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new FailedInitializeGmailMessage();
         }
 
@@ -104,7 +104,7 @@ class GmailService implements GmailServiceInterface
                 // No Message Exists So It Didn't Get Sent?!
                 throw new MissingGmailMessage();
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new FailedSendGmailMessage();
         }
 
