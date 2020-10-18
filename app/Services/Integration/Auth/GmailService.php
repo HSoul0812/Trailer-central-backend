@@ -58,6 +58,9 @@ class GmailService implements GmailServiceInterface
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
+
+        // Setup Gmail
+        $this->gmail = new \Google_Service_Gmail($this->client);
     }
 
     /**
@@ -81,9 +84,6 @@ class GmailService implements GmailServiceInterface
         ]);
         $this->client->setScopes($accessToken->scope);
 
-        // Setup Gmail
-        $this->gmail = new \Google_Service_Gmail($this->client);
-
 
         // Insert Gmail
         try {
@@ -98,7 +98,7 @@ class GmailService implements GmailServiceInterface
             // Message Exists?!
             if(!empty($message)) {
                 // Send Message
-                $sent = $this->gmail->user_messages->send('me', $message);
+                $sent = $this->gmail->users_messages->send('me', $message);
                 $params['message_id'] = $this->messageId;
             } else {
                 // No Message Exists So It Didn't Get Sent?!
