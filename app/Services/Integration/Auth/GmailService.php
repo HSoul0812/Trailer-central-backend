@@ -58,9 +58,6 @@ class GmailService implements GmailServiceInterface
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
-
-        // Setup Gmail
-        $this->gmail = new \Google_Service_Gmail($this->client);
     }
 
     /**
@@ -83,6 +80,9 @@ class GmailService implements GmailServiceInterface
             'created' => strtotime($accessToken->issued_at) * 1000
         ]);
         $this->client->setScopes($accessToken->scope);
+
+        // Setup Gmail
+        $this->gmail = new \Google_Service_Gmail($this->client);
 
 
         // Insert Gmail
