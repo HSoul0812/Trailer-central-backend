@@ -7,7 +7,7 @@ namespace App\Exceptions\Integration\Auth;
  *
  * Use this instead of \Exception to throw any kind of failed to connect to Google API
  *
- * @package App\Exceptions\CRM\Text
+ * @package App\Exceptions\Integration\Auth
  */
 class FailedConnectGapiClientException extends \Exception
 {

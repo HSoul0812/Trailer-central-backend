@@ -7,7 +7,7 @@ namespace App\Exceptions\Integration\Auth;
  *
  * Use this instead of \Exception to throw any kind of missing access token on Google API
  *
- * @package App\Exceptions\CRM\Text
+ * @package App\Exceptions\Integration\Auth
  */
 class MissingGapiAccessTokenException extends \Exception
 {

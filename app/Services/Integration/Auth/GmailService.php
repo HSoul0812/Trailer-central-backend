@@ -6,7 +6,10 @@ use App\Exceptions\Integration\Auth\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Auth\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Auth\MissingGapiClientIdException;
 use App\Exceptions\Integration\Auth\InvalidGapiIdTokenException;
+use App\Exceptions\Integration\Auth\InvalidGmailAuthMessageException;
 use App\Exceptions\Integration\Auth\FailedConnectGapiClientException;
+use App\Exceptions\Integration\Auth\FailedInitializeGmailMessageException;
+use App\Exceptions\Integration\Auth\FailedSendGmailMessageException;
 use App\Services\Integration\Auth\GmailServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 
@@ -90,22 +93,25 @@ class GmailService implements GmailServiceInterface
             // Create Message
             $message = $this->prepareMessage($params);
         } catch (\Exception $e) {
-            throw new FailedInitializeGmailMessage();
+            throw new FailedInitializeGmailMessageException($e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+        if(empty($message)) {
+            throw new FailedInitializeGmailMessageException();
         }
 
         // Send Gmail Message
         try {
-            // Message Exists?!
-            if(!empty($message)) {
-                // Send Message
-                $sent = $this->gmail->users_messages->send('me', $message);
-                $params['message_id'] = $this->messageId;
-            } else {
-                // No Message Exists So It Didn't Get Sent?!
-                throw new MissingGmailMessage();
-            }
+            // Send Message
+            $sent = $this->gmail->users_messages->send('me', $message);
+            $params['message_id'] = $this->messageId;
         } catch (\Exception $e) {
-            throw new FailedSendGmailMessage();
+            // Get Message
+            $error = $e->getMessage();
+            if(strpos($error, "invalid authentication") !== FALSE) {
+                throw new InvalidGmailAuthMessageException();
+            } else {
+                throw new FailedSendGmailMessageException();
+            }
         }
 
         // Store Attachments
