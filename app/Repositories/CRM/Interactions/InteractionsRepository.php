@@ -21,8 +21,10 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     use SortTrait;
 
     /**
+     * @var GmailServiceInterface
      * @var InteractionEmailServiceInterface
      */
+    private $gmail;
     private $interactionEmail;
 
     /**
@@ -55,8 +57,12 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * 
      * @param EmailHistoryRepositoryInterface
      */
-    public function __construct(InteractionEmailServiceInterface $service, EmailHistoryRepositoryInterface $emailHistory)
-    {
+    public function __construct(
+        GmailServiceInterface $gmail,
+        InteractionEmailServiceInterface $service,
+        EmailHistoryRepositoryInterface $emailHistory
+    ) {
+        $this->gmail = $gmail;
         $this->interactionEmail = $service;
         $this->emailHistory = $emailHistory;
     }
@@ -188,10 +194,18 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         // Find Lead/Sales Person
         $lead = Lead::findOrFail($leadId);
         $user = Auth::user();
+        $accessToken = null;
         if(!empty($user->sales_person)) {
-            $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
+            // Set From Name/Email
             $params['from_email'] = $user->sales_person->smtp_email;
             $params['from_name'] = $user->sales_person->full_name ?? '';
+
+            // Get Sales Person Auth
+            $accessToken = $this->tokens->getRelation('google', 'sales_person', $user->sales_person->id);
+            if(empty($accessToken->id)) {
+                // Set Sales Person Config
+                $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
+            }
         } else {
             $params['from_email'] = $user->email;
             $params['from_name'] = $user->name ?? '';
@@ -215,7 +229,11 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $params['to_name']  = $lead->full_name;
 
         // Send Email
-        $email = $this->interactionEmail->send($lead->dealer_id, $params);
+        if(!empty($accessToken->id)) {
+            $email = $this->gmail->send($accessToken, $params);
+        } else {
+            $email = $this->interactionEmail->send($lead->dealer_id, $params);
+        }
 
         // Save Email
         return $this->saveEmail($leadId, $user->newDealerUser->user_id, $email);
