@@ -30,8 +30,10 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
 
     /**
      * @var EmailHistoryRepositoryInterface
+     * @var TokenRepositoryInterface
      */
     private $emailHistory;
+    private $tokens;
     
     private $sortOrders = [
         'created_at' => [
@@ -61,11 +63,13 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     public function __construct(
         GmailServiceInterface $gmail,
         InteractionEmailServiceInterface $service,
-        EmailHistoryRepositoryInterface $emailHistory
+        EmailHistoryRepositoryInterface $emailHistory,
+        TokenRepositoryInterface $tokens
     ) {
         $this->gmail = $gmail;
         $this->interactionEmail = $service;
         $this->emailHistory = $emailHistory;
+        $this->tokens = $tokens;
     }
     
     public function create($params) {
