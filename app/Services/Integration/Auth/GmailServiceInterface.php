@@ -2,15 +2,7 @@
 
 namespace App\Services\Integration\Auth;
 
-interface GoogleServiceInterface {
-    /**
-     * Set Access Token in Google API
-     * 
-     * @param AccessToken $accessToken
-     * @return void
-     */
-    public function setAccessToken($accessToken);
-
+interface GmailServiceInterface {
     /**
      * Validate Google API Access Token Exists
      * 

@@ -118,6 +118,18 @@ class GmailService implements GmailServiceInterface
     }
 
     /**
+     * Get All Messages in Specific Folder
+     * 
+     * @param array $params
+     * @param string $folder folder name to get messages from; defaults to inbox
+     * @return whether the email was sent successfully or not
+     */
+    public function getFolder($params, $inbox = 'INBOX') {
+        return null;
+    }
+
+
+    /**
      * Prepare Message to Send to Gmail
      * 
      * 
