@@ -124,7 +124,20 @@ class GmailService implements GmailServiceInterface
      * @param string $folder folder name to get messages from; defaults to inbox
      * @return whether the email was sent successfully or not
      */
-    public function getFolder($params, $inbox = 'INBOX') {
+    public function getFolder($accessToken, $params, $inbox = 'INBOX') {
+        // ID Token Exists?
+        if(empty($accessToken->id_token)) {
+            throw new MissingGapiIdTokenException;
+        }
+
+        // Configure Client
+        $this->client->setAccessToken([
+            'access_token' => $accessToken->access_token,
+            'id_token' => $accessToken->id_token,
+            'expires_in' => $accessToken->expires_in,
+            'created' => strtotime($accessToken->issued_at) * 1000
+        ]);
+        $this->client->setScopes($accessToken->scope);
         return null;
     }
 

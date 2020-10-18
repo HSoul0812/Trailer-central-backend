@@ -6,10 +6,11 @@ interface GmailServiceInterface {
     /**
      * Validate Google API Access Token Exists
      * 
+     * @param AccessToken $accessToken
      * @param array $params
      * @return message ID of successfully sent email
      */
-    public function send($params);
+    public function send($accessToken, $params);
 
     /**
      * Get All Messages in Specific Folder
