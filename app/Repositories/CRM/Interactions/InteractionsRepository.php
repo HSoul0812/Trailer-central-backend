@@ -207,7 +207,11 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             $params['from_name'] = $user->sales_person->full_name ?? '';
 
             // Get Sales Person Auth
-            $accessToken = $this->tokens->getRelation('google', 'sales_person', $user->sales_person->id);
+            $accessToken = $this->tokens->getRelation([
+                'token_type' => 'google',
+                'relation_type' => 'sales_person',
+                'relation_id' => $user->sales_person->id
+            ]);
             if(empty($accessToken->id)) {
                 // Set Sales Person Config
                 $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
