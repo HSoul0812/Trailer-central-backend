@@ -106,6 +106,8 @@ use App\Services\CRM\Leads\AutoAssignService;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Services\Integration\Auth\GoogleService;
 use App\Services\Integration\Auth\GoogleServiceInterface;
+use App\Services\Integration\Auth\GmailService;
+use App\Services\Integration\Auth\GmailServiceInterface;
 use Laravel\Nova\Nova;
 
 class AppServiceProvider extends ServiceProvider
@@ -210,6 +212,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
         $this->app->bind(GoogleServiceInterface::class, GoogleService::class);
+        $this->app->bind(GmailServiceInterface::class, GmailService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);

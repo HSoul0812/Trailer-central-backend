@@ -7,6 +7,7 @@ use App\Exceptions\Integration\Auth\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Auth\MissingGapiClientIdException;
 use App\Exceptions\Integration\Auth\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Auth\FailedConnectGapiClientException;
+use App\Services\Integration\Auth\GmailServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 
 /**
