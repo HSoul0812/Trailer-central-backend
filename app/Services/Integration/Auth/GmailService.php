@@ -98,7 +98,7 @@ class GmailService implements GmailServiceInterface
             // Message Exists?!
             if(!empty($message)) {
                 // Send Message
-                $sent = $this->gmail->send('me', $message);
+                $sent = $this->gmail->user_messages->send('me', $message);
                 $params['message_id'] = $this->messageId;
             } else {
                 // No Message Exists So It Didn't Get Sent?!
