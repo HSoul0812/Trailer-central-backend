@@ -15,9 +15,10 @@ interface GmailServiceInterface {
     /**
      * Get All Messages in Specific Folder
      * 
+     * @param AccessToken $accessToken
      * @param array $params
      * @param string $folder folder name to get messages from; defaults to inbox
      * @return whether the email was sent successfully or not
      */
-    public function getFolder($params, $folder = 'INBOX');
+    public function getFolder($accessToken, $params, $folder = 'INBOX');
 }
