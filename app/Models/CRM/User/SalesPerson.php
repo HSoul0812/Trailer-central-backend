@@ -44,7 +44,27 @@ class SalesPerson extends Model implements Filterable
         'perms',
         'first_name',
         'last_name',
-        'email'
+        'email',
+        'is_default',
+        'is_inventory',
+        'is_financing',
+        'is_trade',
+        'signature',
+        'dealer_location_id',
+        'smtp_email',
+        'smtp_password',
+        'smtp_server',
+        'smtp_port',
+        'smtp_security',
+        'smtp_auth',
+        'smtp_failed',
+        'smtp_error',
+        'imap_email',
+        'imap_password',
+        'imap_server',
+        'imap_port',
+        'imap_security',
+        'imap_failed'
     ];
 
     /**
@@ -100,6 +120,11 @@ class SalesPerson extends Model implements Filterable
     public function unitSales()
     {
         return $this->hasMany(UnitSale::class, 'sales_person_id');
+    }
+
+    public function folders()
+    {
+        return $this->hasMany(EmailFolder::class, 'sales_person_id')->where('deleted', 0);
     }
 
     /**
