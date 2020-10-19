@@ -2,14 +2,13 @@
 
 namespace App\Models\CRM\User;
 
-use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class EmailFolder
  * @package App\Models\CRM\User
  */
-class EmailFolder extends Model implements Filterable
+class EmailFolder extends Model
 {
     const TABLE_NAME = 'crm_email_folders';
 
