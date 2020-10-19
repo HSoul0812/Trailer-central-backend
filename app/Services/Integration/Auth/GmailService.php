@@ -12,6 +12,7 @@ use App\Exceptions\Integration\Auth\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Auth\FailedSendGmailMessageException;
 use App\Services\Integration\Auth\GmailServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Traits\MailHelper;
 
 /**
  * Class GoogleService
@@ -20,6 +21,8 @@ use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
  */
 class GmailService implements GmailServiceInterface
 {
+    use MailHelper;
+
     /**
      * @var App\Services\CRM\Interactions\InteractionEmailServiceInterface
      */
@@ -34,11 +37,6 @@ class GmailService implements GmailServiceInterface
      * @var Google_Service_Gmail_Message
      */
     protected $message;
-
-    /**
-     * @var string
-     */
-    protected $messageId;
 
     /**
      * Construct Google Client
@@ -61,6 +59,7 @@ class GmailService implements GmailServiceInterface
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
+        $this->client->setAccessType('offline');
 
         // Setup Gmail
         $this->gmail = new \Google_Service_Gmail($this->client);
@@ -77,6 +76,14 @@ class GmailService implements GmailServiceInterface
         if(empty($accessToken->id_token)) {
             throw new MissingGapiIdTokenException;
         }
+
+        // Create Message ID
+        if(empty($params['message_id'])) {
+            $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
+        } else {
+            $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
+        }
+        $params['message_id'] = $messageId;
 
         // Configure Client
         $this->client->setAccessToken([
@@ -103,7 +110,6 @@ class GmailService implements GmailServiceInterface
         try {
             // Send Message
             $sent = $this->gmail->users_messages->send('me', $message);
-            $params['message_id'] = $this->messageId;
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
@@ -151,7 +157,8 @@ class GmailService implements GmailServiceInterface
     /**
      * Prepare Message to Send to Gmail
      * 
-     * 
+     * @param array $params
+     * @return Google_Service_Gmail_Message
      */
     private function prepareMessage($params) {
         // Get From
@@ -168,6 +175,9 @@ class GmailService implements GmailServiceInterface
             ->setCharset('utf-8')
             ->setBody($params['body']);
 
+        // Set Message ID
+        $message->getHeaders()->get('Message-ID')->setId($params['message_id']);
+
         // Add Attachments
         if(isset($params['attachments'])) {
             $attachments = $this->interactionEmail->getAttachments($params['attachments']);
@@ -177,12 +187,10 @@ class GmailService implements GmailServiceInterface
             }
         }
 
-        // Get Message ID
-        $this->messageId = $message->getHeaders()->get('Message-ID');
-
         // Get Raw Message
         $msg_base64 = (new \Swift_Mime_ContentEncoder_Base64ContentEncoder())
-            ->encodeString($message->toString());
+                        ->encodeString($message->toString());
+        $msg_base64 = preg_replace('/(\s|\r)*/', '', $msg_base64);
 
         // Set Message and Return
         $this->message = new \Google_Service_Gmail_Message();
