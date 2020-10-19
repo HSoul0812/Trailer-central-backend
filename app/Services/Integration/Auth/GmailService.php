@@ -83,7 +83,7 @@ class GmailService implements GmailServiceInterface
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'expires_in' => $accessToken->expires_in,
-            'created' => strtotime($accessToken->issued_at) * 1000
+            'created' => strtotime($accessToken->issued_at)
         ]);
         $this->client->setScopes($accessToken->scope);
 

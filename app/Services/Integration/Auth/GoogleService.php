@@ -57,7 +57,7 @@ class GoogleService implements GoogleServiceInterface
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'expires_in' => $accessToken->expires_in,
-            'created' => strtotime($accessToken->issued_at) * 1000
+            'created' => strtotime($accessToken->issued_at)
         ]);
         $this->client->setScopes($accessToken->scope);
 
@@ -88,8 +88,9 @@ class GoogleService implements GoogleServiceInterface
         // Validate If Expired
         try {
             // If there is no previous token or it's expired.
+            $expired = $this->client->isAccessTokenExpired();
+            var_dump($expired);
             if ($this->client->isAccessTokenExpired()) {
-                
                 // Refresh the token if possible, else fetch a new one.
                 if ($refreshToken = $this->client->getRefreshToken()) {
                     var_dump($refreshToken);
