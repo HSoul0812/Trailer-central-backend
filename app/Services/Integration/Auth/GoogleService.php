@@ -89,11 +89,9 @@ class GoogleService implements GoogleServiceInterface
         try {
             // If there is no previous token or it's expired.
             $expired = $this->client->isAccessTokenExpired();
-            var_dump($expired);
             if ($this->client->isAccessTokenExpired()) {
                 // Refresh the token if possible, else fetch a new one.
                 if ($refreshToken = $this->client->getRefreshToken()) {
-                    var_dump($refreshToken);
                     if($newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken)) {
                         $result['access_token'] = $newToken;
                         $result['is_expired'] = false;
