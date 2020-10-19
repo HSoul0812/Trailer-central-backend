@@ -122,7 +122,7 @@ class GmailService implements GmailServiceInterface
 
         // Store Attachments
         if(isset($params['attachments'])) {
-            $params['attachments'] = $this->interactionEmail->storeAttachments($params['attachments'], $accessToken->dealerId, $this->messageId);
+            $params['attachments'] = $this->interactionEmail->storeAttachments($params['attachments'], $accessToken->dealerId, $params['message_id']);
         }
 
         // Return Results
