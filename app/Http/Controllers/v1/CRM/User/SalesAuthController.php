@@ -90,7 +90,7 @@ class SalesAuthController extends RestfulControllerV2 {
             $salesPerson = $this->salesPerson->get([
                 'sales_person_id' => $params['relation_id']
             ]);
-            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales-person');
+            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
             $response = $this->fractal->createData($item)->toArray();
 
             // Convert Token to Array
@@ -143,7 +143,7 @@ class SalesAuthController extends RestfulControllerV2 {
             $salesPerson = $this->salesPerson->get([
                 'sales_person_id' => $params['relation_id']
             ]);
-            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales-person');
+            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
             $response = $this->fractal->createData($item)->toArray();
 
             // Convert Token to Array
@@ -198,7 +198,7 @@ class SalesAuthController extends RestfulControllerV2 {
             $salesPerson = $this->salesPerson->get([
                 'sales_person_id' => $params['relation_id']
             ]);
-            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales-person');
+            $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
             $response = $this->fractal->createData($item)->toArray();
 
             // Convert Token to Array
