@@ -56,7 +56,7 @@ class SalesPersonTransformer extends TransformerAbstract
         ];
     }
 
-    public function includeFolders(EmailFolder $salesPerson)
+    public function includeFolders(SalesPerson $salesPerson)
     {
         return $this->collection($salesPerson->folders, new EmailFolderTransformer());
     }
