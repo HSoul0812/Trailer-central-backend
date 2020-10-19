@@ -10,7 +10,7 @@ class EmailFolderTransformer extends TransformerAbstract
     public function transform(EmailFolder $folder)
     {
         return [
-            'folder_id' => $folder->id,
+            'folder_id' => $folder->folder_id,
             'sales_person_id' => $folder->sales_person_id,
             'user_id' => $folder->user_id,
             'name' => $folder->name,
