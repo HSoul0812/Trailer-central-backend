@@ -194,9 +194,10 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * 
      * @param int $leadId
      * @param array $params
+     * @param array $attachments
      * @return Interaction || error
      */
-    public function sendEmail($leadId, $params) {
+    public function sendEmail($leadId, $params, $attachments = array()) {
         // Find Lead/Sales Person
         $lead = Lead::findOrFail($leadId);
         $user = Auth::user();
@@ -237,6 +238,12 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         // Set Lead Details
         $params['to_email'] = $lead->email_address;
         $params['to_name']  = $lead->full_name;
+
+        // Append Attachments
+        if(!isset($params['attachments'])) {
+            $params['attachments'] = array();
+        }
+        $params['attachments'] = array_merge($params['attachments'], $attachments);
 
         // Send Email
         if(!empty($accessToken->id)) {

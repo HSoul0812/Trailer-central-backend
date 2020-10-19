@@ -171,7 +171,8 @@ class GmailService implements GmailServiceInterface
         $message = (new \Swift_Message($params['subject']))
             ->setFrom($from)
             ->setTo([$params['to_email'] => $params['to_name']])
-            ->setContentType('text/html')
+            //->setContentType('text/html')
+            ->setContentType('Multipart/Mixed')
             ->setCharset('utf-8')
             ->setBody($params['body']);
 
@@ -186,11 +187,14 @@ class GmailService implements GmailServiceInterface
                 $message->attach(Swift_Attachment::fromPath($attachment['path']));
             }
         }
+        var_dump($attachments);
 
         // Get Raw Message
         $msg_base64 = (new \Swift_Mime_ContentEncoder_Base64ContentEncoder())
                         ->encodeString($message->toString());
         $msg_base64 = preg_replace('/(\s|\r)*/', '', $msg_base64);
+        var_dump($msg_base64);
+        die;
 
         // Set Message and Return
         $this->message = new \Google_Service_Gmail_Message();
