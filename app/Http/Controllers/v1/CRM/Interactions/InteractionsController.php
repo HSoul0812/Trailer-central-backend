@@ -202,7 +202,6 @@ class InteractionsController extends RestfulControllerV2
     {
         $params = $request->all();
         $request = new SendEmailRequest($params);
-        
         if ( $request->validate()) {
             // Get Results
             $result = $this->interactions->sendEmail($leadId, $params, $request->allFiles());

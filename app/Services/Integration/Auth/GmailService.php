@@ -184,17 +184,14 @@ class GmailService implements GmailServiceInterface
             $attachments = $this->interactionEmail->getAttachments($params['attachments']);
             foreach($attachments as $attachment) {
                 // Optionally add any attachments
-                $message->attach(Swift_Attachment::fromPath($attachment['path']));
+                $message->attach(\Swift_Attachment::fromPath($attachment['path']));
             }
         }
-        var_dump($attachments);
 
         // Get Raw Message
         $msg_base64 = (new \Swift_Mime_ContentEncoder_Base64ContentEncoder())
                         ->encodeString($message->toString());
         $msg_base64 = preg_replace('/(\s|\r)*/', '', $msg_base64);
-        var_dump($msg_base64);
-        die;
 
         // Set Message and Return
         $this->message = new \Google_Service_Gmail_Message();
