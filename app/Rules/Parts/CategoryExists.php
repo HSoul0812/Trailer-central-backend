@@ -17,7 +17,21 @@ class CategoryExists implements Rule
      */
     public function passes($attribute, $value)
     {
-        return Category::where('id', $value)->count() > 0;
+        if (is_array($value)) {
+            foreach ($value as $type) {
+                if (!is_numeric($type)) {
+                    return false;
+                }
+            }
+
+            return Category::whereIn('id', $value)->count() === count($value);
+        } else {
+            if (!is_numeric($value)) {
+                return false;
+            }
+
+            return Category::where('id', $value)->count() > 0;
+        }
     }
 
     /**
