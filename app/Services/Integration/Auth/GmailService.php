@@ -183,7 +183,7 @@ class GmailService implements GmailServiceInterface
             $attachments = $this->interactionEmail->getAttachments($params['attachments']);
             foreach($attachments as $attachment) {
                 // Optionally add any attachments
-                $message->attach(\Swift_Attachment::fromPath($attachment['path']))->setFilename($attachment['as']);
+                $message->attach(\Swift_Attachment::fromPath($attachment['path'])->setFilename($attachment['as']));
             }
         }
 
