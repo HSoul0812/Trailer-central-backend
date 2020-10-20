@@ -10,6 +10,7 @@ use App\Services\Parts\PartServiceInterface;
 use App\Exceptions\NotImplementedException;
 use Illuminate\Support\Facades\DB;
 use App\Models\Parts\Part;
+use Illuminate\Support\Facades\Log;
 
 /**
  *
@@ -43,7 +44,9 @@ class PartService implements PartServiceInterface
 
             foreach($bins as $bin) {
 
-                if (empty($bin['old_quantity']) || empty($bin['quantity'])) {
+                if (!isset($bin['old_quantity']) || !isset($bin['quantity'])) {
+                    // log why this part was skipped
+                    Log::warning("Quantities not specified, skipping", ['bin' => $bin]);
                     continue;
                 }
 
@@ -87,7 +90,9 @@ class PartService implements PartServiceInterface
 
             foreach($bins as $bin) {
 
-                if (empty($bin['old_quantity']) || empty($bin['quantity'])) {
+                if (!isset($bin['old_quantity']) || !isset($bin['quantity'])) {
+                    // log why this part was skipped
+                    Log::warning("Quantities not specified, skipping", ['bin' => $bin]);
                     continue;
                 }
 
