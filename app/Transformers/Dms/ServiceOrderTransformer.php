@@ -7,9 +7,10 @@ use App\Models\CRM\Dms\ServiceOrder;
 
 class ServiceOrderTransformer extends TransformerAbstract
 {
+    protected $availableIncludes = ['invoice'];
 
     public function transform($serviceOrder)
-    {   
+    {
         return [
             'id' => $serviceOrder->id,
             'dealer_id' => $serviceOrder->dealer_id,
@@ -25,4 +26,9 @@ class ServiceOrderTransformer extends TransformerAbstract
             'status_name' => ServiceOrder::SERVICE_ORDER_STATUS[$serviceOrder->status],
         ];
     }
-} 
+
+    public function withInvoice(ServiceOrder $serviceOrder)
+    {
+        return $this->item($serviceOrder->invoice, new InvoiceTransformer());
+    }
+}

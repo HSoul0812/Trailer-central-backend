@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Parts\Import;
 
 use Illuminate\Console\Command;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;

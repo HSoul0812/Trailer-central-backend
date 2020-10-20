@@ -76,7 +76,14 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function delete($params) {
-        return Blast::findOrFail($params['id'])->fill(['deleted' => '1'])->save();
+        // Get Blast
+        $blast = Blast::findOrFail($params['id']);
+
+        // Mark Deleted
+        $blast->fill(['deleted' => '1'])->save();
+
+        // Return
+        return $blast;
     }
 
     public function get($params) {
@@ -134,7 +141,7 @@ class BlastRepository implements BlastRepositoryInterface {
      */
     public function getAllActive($userId) {
         return Blast::where('user_id', $userId)
-                    ->where('is_delivered', 0)->where('is_cancelled', 0)
+                    ->where('is_delivered', 0)->where('is_cancelled', 0)->where('deleted', 0)
                     ->where('send_date', '<', Carbon::now()->toDateTimeString())->get();
     }
 

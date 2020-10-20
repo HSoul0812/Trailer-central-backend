@@ -13,6 +13,6 @@ class SendTextRequest extends Request {
 
     protected $rules = [
         'lead_id' => 'required|integer',
-        'log_message' => 'required|string|max:160',
+        'log_message' => 'required|string',
     ];
 }

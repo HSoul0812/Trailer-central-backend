@@ -186,7 +186,8 @@ class LeadRepository implements LeadRepositoryInterface {
         $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
         $query = $query->leftJoin(SalesPerson::getTableName(), function ($join) {
             $join->on(LeadStatus::getTableName().'.sales_person_id', '=', SalesPerson::getTableName().'.id')
-                 ->on(SalesPerson::getTableName().'.user_id', '=', NewDealerUser::getTableName().'.user_id');
+                 ->on(SalesPerson::getTableName().'.user_id', '=', NewDealerUser::getTableName().'.user_id')
+                 ->whereNull(SalesPerson::getTableName().'.deleted_at');
         });
 
         // Require Sales Person ID NULL or 0

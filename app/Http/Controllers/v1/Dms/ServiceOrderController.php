@@ -3,34 +3,51 @@
 namespace App\Http\Controllers\v1\Dms;
 
 use App\Http\Controllers\RestfulController;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Transformers\Dms\ServiceOrderTransformer;
 use App\Http\Requests\Dms\GetServiceOrdersRequest;
+use League\Fractal\Manager;
+use OpenApi\Annotations as OA;
 
 /**
  * @author Marcel
  */
 class ServiceOrderController extends RestfulController
 {
-    
+
     protected $serviceOrders;
-    
+    /**
+     * @var Manager
+     */
+    private $fractal;
+    /**
+     * @var ServiceOrderTransformer
+     */
+    private $transformer;
+
     /**
      * Create a new controller instance.
      *
-     * @return void
+     * @param  ServiceOrderRepositoryInterface  $serviceOrders
+     * @param  ServiceOrderTransformer  $transformer
+     * @param  Manager  $fractal
      */
-    public function __construct(ServiceOrderRepositoryInterface $serviceOrders)
+    public function __construct(ServiceOrderRepositoryInterface $serviceOrders, ServiceOrderTransformer $transformer, Manager $fractal)
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->serviceOrders = $serviceOrders;
+
+        $this->fractal = $fractal;
+        $this->fractal->setSerializer(new NoDataArraySerializer());
+        $this->transformer = $transformer;
     }
-    
+
     /**
      * @OA\Get(
      *     path="/api/dms/service-orders",
-     *     description="Retrieve a list of service orders",     
+     *     description="Retrieve a list of service orders",
      *     tags={"Service Orders"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -71,15 +88,16 @@ class ServiceOrderController extends RestfulController
      *     ),
      * )
      */
-    public function index(Request $request) 
+    public function index(Request $request)
     {
         $request = new GetServiceOrdersRequest($request->all());
-        
+        $this->fractal->parseIncludes($request->query('with', ''));
+
         if ($request->validate()) {
           return $this->response->paginator($this->serviceOrders->getAll($request->all()), new ServiceOrderTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
 }

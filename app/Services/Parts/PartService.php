@@ -110,16 +110,17 @@ class PartService implements PartServiceInterface
                     ]
                 ]);
 
-                $binQuantity = BinQuantity::where([
-                    'part_id' => $part->id,
-                    'bin_id' => $bin['bin_id'],
-                ])->first();
+                if ($bin['quantity'] != $bin['old_quantity']) {
+                    $binQuantity = BinQuantity::where([
+                        'part_id' => $part->id,
+                        'bin_id' => $bin['bin_id'],
+                    ])->first();
 
-                event(new PartQtyUpdated($part, $binQuantity, [
-                    'quantity' => ($bin['quantity'] - $bin['old_quantity']),
-                    'description' => 'Part updated'
-                ]));
-
+                    event(new PartQtyUpdated($part, $binQuantity, [
+                        'quantity' => ($bin['quantity'] - $bin['old_quantity']),
+                        'description' => 'Part updated'
+                    ]));
+                }
             }
         });
 

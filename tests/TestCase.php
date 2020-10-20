@@ -108,6 +108,10 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('hasGetMutator')->passthru();
         $mock->shouldReceive('offsetExists')->passthru();
         $mock->shouldReceive('offsetGet')->passthru();
+        $mock->shouldReceive('fromDateTime')->passthru();
+        $mock->shouldReceive('getDateFormat')->passthru();
+        $mock->shouldReceive('getRelationValue')->passthru();
+        $mock->shouldReceive('relationLoaded')->passthru();
 
         return $mock;
     }
