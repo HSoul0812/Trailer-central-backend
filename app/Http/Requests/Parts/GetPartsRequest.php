@@ -25,7 +25,7 @@ class GetPartsRequest extends Request {
         'dealer_id' => 'array',
         'dealer_id.*' => 'integer',
         'show_on_website' => 'boolean',
-        'sku' => 'min:1',
+        'sku' => 'min:1|sku_type',
         'id' => 'array',
         'id.*' => 'integer'
     ];
