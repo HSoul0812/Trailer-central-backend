@@ -70,6 +70,7 @@ class FilterTransformer extends TransformerAbstract
              'id' => (int)$filter->id,
              'attribute' => $filter->attribute,
              'label' => ($filter->attribute == 'brand') ? 'Brand' : $filter->label,
+             'field' => $filter->field,
              'type' => ($filter->attribute == 'brand') ? 'select' : $filter->type,
              'is_eav' => 0,
              'position' => $filter->position,
