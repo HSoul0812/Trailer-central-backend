@@ -15,14 +15,14 @@ use App\Services\Parts\PartServiceInterface;
 
 class PartsController extends RestfulController
 {
-    
+
     protected $parts;
-    
-    /**     
-     * @var App\Services\Parts\PartServiceInterface; 
+
+    /**
+     * @var App\Services\Parts\PartServiceInterface;
      */
     protected $partService;
-    
+
     /**
      * Create a new controller instance.
      *
@@ -34,7 +34,7 @@ class PartsController extends RestfulController
         $this->parts = $parts;
         $this->partService = $partService;
     }
-    
+
     /**
      * @OA\Put(
      *     path="/api/parts/",
@@ -60,14 +60,14 @@ class PartsController extends RestfulController
      *         description="Vehicle Specific ID",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     ),     * 
+     *     ),     *
      *     @OA\Parameter(
      *         name="brand_id",
      *         in="query",
      *         description="Part brand",
      *         required=true,
      *         @OA\Schema(type="integer")
-     *     ),          
+     *     ),
      *    @OA\Parameter(
      *         name="manufacturer_id",
      *         in="query",
@@ -250,7 +250,7 @@ class PartsController extends RestfulController
      *            description="Bin array with bin_id and name"
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of parts",
@@ -265,18 +265,18 @@ class PartsController extends RestfulController
     public function create(Request $request) {
         $request = new CreatePartRequest($request->all());
         $requestData = $request->all();
-        
+
         if ( $request->validate() ) {
             return $this->response->item($this->partService->create($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartsTransformer());
-        }  
-        
+        }
+
         return $this->response->errorBadRequest();
     }
 
     /**
      * @OA\Delete(
      *     path="/api/parts/{id}",
-     *     description="Delete a part",     
+     *     description="Delete a part",
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
@@ -298,20 +298,20 @@ class PartsController extends RestfulController
      */
     public function destroy(int $id) {
         $request = new DeletePartRequest(['id' => $id]);
-        
+
         if ( $request->validate() && $this->parts->delete(['id' => $id])) {
             return $this->response->noContent();
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
 
     /**
      * @OA\Get(
      *     path="/api/parts",
      *     description="Retrieve a list of parts",
-     
+
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -340,7 +340,7 @@ class PartsController extends RestfulController
      *            ),
      *            description="Type ID arra"
      *         )
-     *     ),     
+     *     ),
      *     @OA\Parameter(
      *         name="category_id",
      *         in="query",
@@ -431,18 +431,11 @@ class PartsController extends RestfulController
      */
     public function index(Request $request) {
         $request = new GetPartsRequest($request->all());
-        
-        if ( $request->validate() ) {
-            
-            if ($request->has('search_term')) {
-                $parts = $this->parts->getAllSearch($request->all());
-            } else {
-                $parts = $this->parts->getAll($request->all());
-            }
-            
-            return $this->response->paginator($parts, new PartsTransformer());
+
+        if ($request->validate()) {
+            return $this->response->paginator($this->parts->getAll($request->all()), new PartsTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
@@ -450,7 +443,7 @@ class PartsController extends RestfulController
      * @OA\Get(
      *     path="/api/parts/{id}",
      *     description="Retrieve a part",
-     
+
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
@@ -472,19 +465,19 @@ class PartsController extends RestfulController
      */
     public function show(int $id) {
         $request = new ShowPartRequest(['id' => $id]);
-        
+
         if ( $request->validate() ) {
             return $this->response->item($this->parts->get(['id' => $id]), new PartsTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     /**
      * @OA\Post(
      *     path="/api/parts/{id}",
      *     description="Update a part",
-     
+
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
@@ -506,14 +499,14 @@ class PartsController extends RestfulController
      *         description="Vehicle Specific ID",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     ),     * 
+     *     ),     *
      *     @OA\Parameter(
      *         name="brand_id",
      *         in="query",
      *         description="Part brand",
      *         required=true,
      *         @OA\Schema(type="integer")
-     *     ),          
+     *     ),
      *    @OA\Parameter(
      *         name="manufacturer_id",
      *         in="query",
@@ -682,7 +675,7 @@ class PartsController extends RestfulController
      *            description="Image URL array"
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of parts",
@@ -699,11 +692,11 @@ class PartsController extends RestfulController
         $requestData['id'] = $id;
         $request = new UpdatePartRequest($requestData);
         $requestData = $request->all();
-        
+
         if ( $request->validate() ) {
             return $this->response->item($this->partService->update($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartsTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
