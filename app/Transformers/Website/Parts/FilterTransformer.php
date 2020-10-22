@@ -4,11 +4,11 @@ namespace App\Transformers\Website\Parts;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Filter;
-use Illuminate\Support\Facades\Cache;
 use App\Models\Parts\Part;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Category;
 use App\Models\Parts\Type;
+
 class FilterTransformer extends TransformerAbstract
 {
     
@@ -43,7 +43,7 @@ class FilterTransformer extends TransformerAbstract
                     }
                 }
            }
-           
+
            if (is_array($value)) {
                foreach($value as $index => $val) {
                    if ($key == 'type_id') {
@@ -147,7 +147,11 @@ class FilterTransformer extends TransformerAbstract
                     } 
                 }
             }
-            
+
+            if ($filter->attribute === 'subcategory' && isset($requestData['subcategory']) && in_array($part->subcategory, $requestData['subcategory'])) {
+                $status = 'selected';
+            }
+
             if ($filter->attribute == 'subcategory') {
                 $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute});
             } else {
@@ -211,18 +215,20 @@ class FilterTransformer extends TransformerAbstract
     }
     
     private function addFiltersToQuery($query, $requestData, $attribute) {
-        $query = $query->whereIn('dealer_id', $requestData['dealer_id']);
+
         foreach($this->attributeModelIdMapping as $value) {
-            if (isset($requestData[$value]) && $value != $attribute) {               
-                if ($value != 'dealer_id') {
+            if (isset($requestData[$value]) && $value != $attribute) {
+                if ($value != 'dealer_id' && isset($this->mappedTypes[$value])) {
                     $query = $query->whereIn($value, $this->mappedTypes[$value]);
+                } else {
+                    $query = $query->whereIn($value, $requestData[$value]);
                 }
             }
-        }        
-        
+        }
+
         return $query;
     }
-    
+
     private function getMaxPriceFilter(Filter $filter) {
         if ($filter->attribute != 'price') {
             return null;
