@@ -48,6 +48,10 @@ class Part extends Model
         'price',
         'dealer_cost',
         'msrp',
+        'shipping_fee',
+        'use_handling_fee',
+        'handling_fee',
+        'fulfillment_type',
         'weight',
         'weight_rating',
         'description',
@@ -211,5 +215,18 @@ class Part extends Model
         }
 
         return (float) $this->price;
+    }
+
+    /**
+     * Get Website Shipping
+     */
+    public function getWebsiteShippingAttribute() {
+        // Use Handling Fee?
+        if(!empty($this->use_handling_fee) && !empty($this->handling_fee)) {
+            return $this->handling_fee;
+        }
+
+        // Return Standard
+        return !empty($this->shipping_fee) ? $this->shipping_fee : '0.00';
     }
 }

@@ -14,7 +14,9 @@ class Manufacturer extends Model
      * @var array
      */
     protected $fillable = [
-        'name'
+        'name',
+        'postalcode',
+        'handling_fee'
     ];
 
     /**
