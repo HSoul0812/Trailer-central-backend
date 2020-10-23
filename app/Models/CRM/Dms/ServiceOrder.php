@@ -2,6 +2,11 @@
 
 namespace App\Models\CRM\Dms;
 
+use App\Models\CRM\Dms\ServiceOrder\MiscPartItem;
+use App\Models\CRM\Dms\ServiceOrder\OtherItem;
+use App\Models\CRM\Dms\ServiceOrder\PartItem;
+use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
@@ -12,6 +17,10 @@ use App\Models\User\DealerLocation;
 /**
  * Class ServiceOrder
  * @package App\Models\CRM\Dms
+ * @property Collection<PartItem> $partItems
+ * @property Collection<MiscPartItem> $miscPartItems
+ * @property Collection<ServiceItem> $serviceItems
+ * @property Collection<OtherItem> $otherItems
  * @property Invoice $invoice
  */
 class ServiceOrder extends Model
@@ -64,6 +73,26 @@ class ServiceOrder extends Model
     public function getPaidAmountAttribute()
     {
         return $this->hasManyThrough(Payment::class, Invoice::class, 'repair_order_id')->sum('amount');
+    }
+
+    public function partItems()
+    {
+        return $this->hasMany(PartItem::class, 'repair_order_id', 'id');
+    }
+
+    public function miscPartItems()
+    {
+        return $this->hasMany(MiscPartItem::class, 'repair_order_id', 'id');
+    }
+
+    public function serviceItems()
+    {
+        return $this->hasMany(ServiceItem::class, 'repair_order_id', 'id');
+    }
+
+    public function otherItems()
+    {
+        return $this->hasMany(OtherItem::class, 'repair_order_id', 'id');
     }
 
 }

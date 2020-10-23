@@ -169,6 +169,11 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Website
+     */
+    $route->put('website/{websiteId}/enable-proxied-domain-ssl', 'App\Http\Controllers\v1\Website\WebsiteController@enableProxiedDomainSsl');
+
+    /**
      * Log
      */
     $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create');
@@ -479,6 +484,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('service-orders', 'App\Http\Controllers\v1\Dms\ServiceOrderController@index');
+        $route->get('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@show');
 
         /*
         |--------------------------------------------------------------------------

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCrmSalesPersonDeletedColumn extends Migration
+class AddLocationIdToDealerLocation extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddCrmSalesPersonDeletedColumn extends Migration
      */
     public function up()
     {
-        Schema::table('crm_sales_person', function (Blueprint $table) {
-            $table->softDeletes();
+        Schema::table('dealer_location', function (Blueprint $table) {
+            $table->string('location_id');
         });
     }
 
@@ -25,8 +25,8 @@ class AddCrmSalesPersonDeletedColumn extends Migration
      */
     public function down()
     {
-        Schema::table('crm_sales_person', function (Blueprint $table) {
-            $table->dropSoftDeletes();
+        Schema::table('dealer_location', function (Blueprint $table) {
+            $table->dropColumn('location_id');
         });
     }
 }
