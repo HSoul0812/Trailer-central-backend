@@ -174,6 +174,10 @@ class Inventory extends Model
         'geolocation'
     ];
 
+    protected $spatialFields = [
+        'geolocation'
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');

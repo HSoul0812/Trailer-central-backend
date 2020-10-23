@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ValidWebsite implements Rule
 {
-            
+
     /**
      * Determine if the validation rule passes.
      *
@@ -27,6 +27,11 @@ class ValidWebsite implements Rule
         // Get Valid Website!
         $website = Website::find($value);
         if(empty($website)) {
+            return false;
+        }
+
+        // Does Inventory Belong to Dealer?!
+        if($website->dealer_id !== $user->dealer_id) {
             return false;
         }
 

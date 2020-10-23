@@ -14,7 +14,7 @@ use App\Models\CRM\Account\Payment;
 class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
 
     private $sortOrders = [
-        'user_defined_id' => [ 
+        'user_defined_id' => [
             'field' => 'user_defined_id',
             'direction' => 'DESC'
         ],
@@ -66,14 +66,14 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        return ServiceOrder::findOrFail($params['id']);
     }
 
     public function getAll($params) {
         if (isset($params['dealer_id'])) {
             $query = ServiceOrder::where('dealer_id', '=', $params['dealer_id']);
         } else {
-            $query = ServiceOrder::where('id', '>', 0);  
+            $query = ServiceOrder::where('id', '>', 0);
         }
         // Filter out service orders which location doesn't exist
         $query = $query->where('location', '>', 0);
@@ -110,7 +110,7 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 

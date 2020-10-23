@@ -15,6 +15,8 @@ interface InventoryRepositoryInterface extends Repository
 
     public function getAll($params, bool $withDefault = true, bool $paginated = false);
 
+    public function getAllWithHavingCount($params, bool $withDefault = true);
+
     public function getFloorplannedInventory($params);
 
     public function beginTransaction(): void;

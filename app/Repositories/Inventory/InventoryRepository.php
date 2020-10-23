@@ -12,6 +12,9 @@ use App\Models\Inventory\InventoryImage;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -216,13 +219,16 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param $params
      * @param bool $withDefault
      * @param bool $paginated
-     * @return Collection
+     * @return Collection|LengthAwarePaginator
      */
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
     {
+        /** @var Builder $query */
         $query = Inventory::select('*');
 
-        $query->where('status', '<>', Inventory::STATUS_QUOTE);
+        if ($withDefault) {
+            $query->where('status', '<>', Inventory::STATUS_QUOTE);
+        }
 
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
@@ -238,6 +244,12 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE_IN]) && is_array($params[self::CONDITION_AND_WHERE_IN])) {
+            foreach ($params[self::CONDITION_AND_WHERE_IN] as $field => $values) {
+                $query = $query->whereIn($field, $values);
+            }
         }
 
         if (isset($params['floorplan_vendor'])) {
@@ -267,6 +279,33 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if ($paginated) {
             return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * @param $params
+     * @param bool $withDefault
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getAllWithHavingCount($params, bool $withDefault = true)
+    {
+        $select = $params[self::SELECT] ? implode(',', $params[self::SELECT]) : '*';
+
+        /** @var Builder $query */
+        $query = Inventory::select($select);
+
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query = $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+
+        $havingCount = $params[self::CONDITION_AND_HAVING_COUNT];
+
+        $query = $query->having(DB::raw('count(' . $havingCount[0] . ')'), $havingCount[1], $havingCount[2]);
+
+        if (isset($params[self::GROUP_BY])) {
+            $query = $query->groupBy($params[self::GROUP_BY]);
         }
 
         return $query->get();

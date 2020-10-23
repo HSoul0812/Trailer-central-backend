@@ -7,6 +7,7 @@ use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class SalesPerson
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class SalesPerson extends Model implements Filterable
 {
+    use SoftDeletes;
+
     const TABLE_NAME = 'crm_sales_person';
 
     /**

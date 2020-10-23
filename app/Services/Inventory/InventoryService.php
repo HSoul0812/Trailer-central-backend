@@ -406,4 +406,72 @@ class InventoryService
             $pdoDb->query("UPDATE inventory SET send_to_quickbooks=1, bill_id={$billId}, is_floorplan_bill=1 WHERE inventory_id={$inventoryId}");
         }
     }
+
+    /**
+     * The method removes stock item duplicates. A not archived item is kept, the one that was created/updated last.
+     *
+     * @param int $dealerId
+     * @return array
+     */
+    public function deleteDuplicates(int $dealerId): array
+    {
+        $deletedDuplicates = 0;
+        $couldNotDeleteDuplicates = [];
+
+        $params = [
+            InventoryRepositoryInterface::SELECT => ['stock'],
+            InventoryRepositoryInterface::CONDITION_AND_WHERE => [['dealer_id', '=', $dealerId]],
+            InventoryRepositoryInterface::CONDITION_AND_HAVING_COUNT => ['inventory_id', '>', 1],
+            InventoryRepositoryInterface::GROUP_BY => ['stock'],
+        ];
+
+        $inventory = $this->inventoryRepository->getAllWithHavingCount($params, false);
+
+        if ($inventory->isEmpty()) {
+            return compact(['deletedDuplicates', 'couldNotDeleteDuplicates']);
+        }
+
+        $duplicatedInventoryParams = [
+            InventoryRepositoryInterface::CONDITION_AND_WHERE => [['dealer_id', '=', $dealerId]],
+            InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => ['stock' => $inventory->pluck('stock')->toArray()],
+        ];
+
+        $duplicatedInventory = $this->inventoryRepository->getAll($duplicatedInventoryParams, false);
+
+        /** @var Collection $duplicateInventory */
+        foreach ($duplicatedInventory->groupBy('stock') as $duplicateInventory) {
+            if ($duplicateInventory->count() < 2) {
+                continue;
+            }
+
+            $filteredInventory = $duplicateInventory->filter(function ($item, $key) {
+                return $item->is_archived != 1;
+            });
+
+            if ($filteredInventory->isEmpty()) {
+                $filteredInventory = $duplicateInventory;
+            }
+
+            $maxUpdatedAt = $filteredInventory->sortByDesc('updated_at')->first();
+            $maxCreatedAt = $filteredInventory->sortByDesc('created_at')->first();
+
+            $notDeletingItem = $maxUpdatedAt->updated_at > $maxCreatedAt->created_at ? $maxUpdatedAt : $maxCreatedAt;
+
+            $itemsToDelete = $duplicateInventory->reject(function ($item, $key) use ($notDeletingItem) {
+                return $item->inventory_id === $notDeletingItem->inventory_id;
+            });
+
+            foreach ($itemsToDelete as $itemToDelete) {
+                $result = $this->delete($itemToDelete->inventory_id);
+
+                if ($result) {
+                    $deletedDuplicates++;
+                } else {
+                    $couldNotDeleteDuplicates[] = $itemToDelete->inventory_id;
+                }
+            }
+        }
+
+        return compact(['deletedDuplicates', 'couldNotDeleteDuplicates']);
+    }
 }
