@@ -20,12 +20,6 @@ class AddPartsV1ShippingHandlingPrice extends Migration
             $table->decimal('handling_fee', 9, 2)->after('use_handling_fee')->nullable();
             $table->tinyInteger('fulfillment_type')->after('handling_fee')->nullable();
         });
-
-        // Add Columns to Part Manufacturer
-        Schema::table('part_manufacturers', function (Blueprint $table) {
-            $table->string('postalcode', 30)->after('name')->nullable();
-            $table->decimal('handling_fee', 9, 2)->after('postalcode')->nullable();
-        });
     }
 
     /**
@@ -41,12 +35,6 @@ class AddPartsV1ShippingHandlingPrice extends Migration
             $table->dropColumn('use_handling_fee');
             $table->dropColumn('handling_fee');
             $table->dropColumn('fulfillment_type');
-        });
-
-        // Add Columns to Part Manufacturer
-        Schema::table('part_manufacturers', function (Blueprint $table) {
-            $table->dropColumn('postalcode');
-            $table->dropColumn('handling_fee');
         });
     }
 }
