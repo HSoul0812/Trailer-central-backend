@@ -24,7 +24,9 @@ use Illuminate\Support\Facades\Log;
  */
 class CsvImportService implements CsvImportServiceInterface
 {
-
+    
+    const MAX_VALIDATION_ERROR_CHAR_COUNT = 3072;    
+    
     const VENDOR = 'Vendor';
     const BRAND = 'Brand';
     const TYPE = 'Type';
@@ -46,6 +48,8 @@ class CsvImportService implements CsvImportServiceInterface
 
     const BIN_ID = '/Bin\s+\d+\s+ID/i';
     const BIN_QTY = '/Bin\s+\d+\s+qty/i';
+    
+    private const S3_VALIDATION_ERRORS_PATH = 'parts/validation-errors/%s';
 
     protected $bulkUploadRepository;
     protected $partsRepository;
@@ -103,12 +107,12 @@ class CsvImportService implements CsvImportServiceInterface
         try {
            if (!$this->validate()) {
                 Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
-                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
                 return false;
             }
         } catch (\Exception $ex) {
              Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
-            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
             return false;
         }
 
@@ -203,6 +207,10 @@ class CsvImportService implements CsvImportServiceInterface
                     }
 
                 // for lines > 1
+                } else {
+                    if ($errorMessage = $this->isDataInvalid($this->indexToheaderMapping[$index], $value)) {
+                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, $errorMessage);
+                    }
                 }
             }
         });
@@ -353,7 +361,7 @@ class CsvImportService implements CsvImportServiceInterface
      * @param string $value
      * @return bool|string
      */
-    private function isDataValid($type, $value)
+    private function isDataInvalid($type, $value)
     {
         switch($type) {
             case self::VENDOR:
@@ -403,11 +411,6 @@ class CsvImportService implements CsvImportServiceInterface
                 if (empty($value)) {
                     return "SKU cannot be empty.";
                 }
-
-                $part = Part::where('sku', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
-                if (!empty($part)) {
-                    return "SKU {$value} already exists in the system.";
-                }
                 break;
             case self::SHOW_ON_WEBSITE:
                 if (!empty($value)) {
@@ -453,5 +456,20 @@ class CsvImportService implements CsvImportServiceInterface
                 }
                 break;
         }
+        
+        return false;
     }
+    
+    private function outputValidationErrors()
+    {
+        $jsonEncodedValidationErrors = json_encode($this->validationErrors);
+        if (strlen($jsonEncodedValidationErrors) > self::MAX_VALIDATION_ERROR_CHAR_COUNT) {
+            $filePath = sprintf(self::S3_VALIDATION_ERRORS_PATH, uniqid().'.txt');
+            Storage::disk('s3')->put($filePath, implode(PHP_EOL, $this->validationErrors), 'public');
+            return json_encode(Storage::disk('s3')->url($filePath));
+        }
+        return $jsonEncodedValidationErrors;
+    }
+    
+    
 }

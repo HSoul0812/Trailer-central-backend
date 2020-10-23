@@ -17,24 +17,42 @@ class PriceFormat implements Rule
      */
     public function passes($attribute, $value)
     {
-        $explodedPrice = explode('TO', str_replace(']', '', str_replace('[', '', $value)));
-        
-        foreach($explodedPrice as $index => $price) {
-            $explodedPrice[$index] = (double)trim($price);
-        }        
-        
-        if (!isset($explodedPrice[0])) {
-            return false;
-        }        
-        
-        if (!is_numeric($explodedPrice[0]) || (isset($explodedPrice[1]) && !is_numeric($explodedPrice[1])) ) {
-            return false;
+        if (isset($value['gt'])) {
+            foreach ($value['gt'] as $price) {
+                if (!is_numeric($price)) {
+                    return false;
+                }
+            }
         }
-        
-        if (isset($explodedPrice[1]) && ($explodedPrice[1] <= $explodedPrice[0])) {
-            return false;
+
+        if (isset($value['lt'])) {
+            foreach ($value['lt'] as $price) {
+                if (!is_numeric($price)) {
+                    return false;
+                }
+            }
         }
-        
+
+        if (!isset($value['gt']) && !isset($value['lt'])) {
+            $explodedPrice = explode('TO', str_replace(']', '', str_replace('[', '', $value)));
+
+            foreach ($explodedPrice as $index => $price) {
+                $explodedPrice[$index] = (double)trim($price);
+            }
+
+            if (!isset($explodedPrice[0])) {
+                return false;
+            }
+
+            if (!is_numeric($explodedPrice[0]) || (isset($explodedPrice[1]) && !is_numeric($explodedPrice[1]))) {
+                return false;
+            }
+
+            if (isset($explodedPrice[1]) && ($explodedPrice[1] <= $explodedPrice[0])) {
+                return false;
+            }
+        }
+
         return true;
     }
 
