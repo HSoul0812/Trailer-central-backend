@@ -32,4 +32,14 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
             })
             ->get();
     }
+
+    public function findByDealer($dealerId)
+    {
+        return $this->query()
+            ->with(['serviceItem', 'serviceItem.serviceOrder'])
+            ->whereHas('serviceItem.serviceOrder', function($query) use ($dealerId) {
+                $query->where('dealer_id', '=', $dealerId);
+            })
+            ->get();
+    }
 }

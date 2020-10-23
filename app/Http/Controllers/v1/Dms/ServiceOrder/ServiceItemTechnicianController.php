@@ -40,7 +40,7 @@ class ServiceItemTechnicianController extends RestfulControllerV2
         $this->transformer = $transformer;
         $this->fractal = $fractal;
 
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'byDealer']);
         $this->fractal->setSerializer(new NoDataArraySerializer());
     }
 
@@ -69,4 +69,18 @@ class ServiceItemTechnicianController extends RestfulControllerV2
 
         return $this->response->array($this->fractal->createData($data)->toArray());
     }
+
+    public function byDealer(Request $request)
+    {
+        $this->fractal->parseIncludes($request->query('with', ''));
+        $technicians = $this->serviceItemTechnicians
+            ->withRequest($request)
+            ->findByDealer($request->all('dealer_id'));
+
+        $data = new Collection($technicians, $this->transformer, 'data');
+        $data->setPaginator(new IlluminatePaginatorAdapter($this->serviceItemTechnicians->getPaginator()));
+
+        return $this->response->array($this->fractal->createData($data)->toArray());
+    }
+
 }
