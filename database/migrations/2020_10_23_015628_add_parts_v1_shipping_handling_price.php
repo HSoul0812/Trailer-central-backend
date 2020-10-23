@@ -22,7 +22,7 @@ class AddPartsV1ShippingHandlingPrice extends Migration
         });
 
         // Add Columns to Part Manufacturer
-        Schema::table('part_manufacturer', function (Blueprint $table) {
+        Schema::table('part_manufacturers', function (Blueprint $table) {
             $table->string('postalcode', 30)->after('name')->nullable();
             $table->decimal('handling_fee', 9, 2)->after('postalcode')->nullable();
         });
@@ -44,7 +44,7 @@ class AddPartsV1ShippingHandlingPrice extends Migration
         });
 
         // Add Columns to Part Manufacturer
-        Schema::table('part_manufacturer', function (Blueprint $table) {
+        Schema::table('part_manufacturers', function (Blueprint $table) {
             $table->dropColumn('postalcode');
             $table->dropColumn('handling_fee');
         });
