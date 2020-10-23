@@ -121,4 +121,14 @@ class ServiceOrderController extends RestfulControllerV2
         ]);
     }
 
+    /**
+     * Service for create/update invoice for an RO
+     * @param $id
+     * @param  Request  $request
+     */
+    public function createInvoice($id, Request $request)
+    {
+
+    }
+
 }

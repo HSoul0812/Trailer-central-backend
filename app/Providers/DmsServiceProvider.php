@@ -4,6 +4,7 @@
 namespace App\Providers;
 
 
+use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
@@ -18,6 +19,8 @@ use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Dms\QuoteRepository;
 use App\Repositories\Dms\QuoteRepositoryInterface;
+use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepository;
+use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepositoryInterface;
 use App\Repositories\Dms\ServiceOrderRepository;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Repositories\Dms\SettingsRepository;
@@ -40,5 +43,9 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(FinancingCompanyRepositoryInterface::class, FinancingCompanyRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+
+        $this->app->bind(ServiceItemTechnicianRepositoryInterface::class, function () {
+            return new ServiceItemTechnicianRepository(ServiceItemTechnician::query());
+        });
     }
 }

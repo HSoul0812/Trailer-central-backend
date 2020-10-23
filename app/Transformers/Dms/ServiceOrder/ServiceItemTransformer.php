@@ -5,12 +5,13 @@ namespace App\Transformers\Dms\ServiceOrder;
 
 
 use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
+use App\Transformers\Dms\ServiceOrderTransformer;
 use League\Fractal\TransformerAbstract;
 
 class ServiceItemTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'laborCode', 'technicians'
+        'laborCode', 'technicians', 'serviceOrder',
     ];
 
     public function transform(ServiceItem $item)
@@ -37,7 +38,12 @@ class ServiceItemTransformer extends TransformerAbstract
 
     public function includeTechnicians(ServiceItem $item)
     {
-        return $this->collection($item->technicians, new ServiceItemTechniciansTransformer());
+        return $this->collection($item->technicians, new ServiceItemTechnicianTransformer());
+    }
+
+    public function includeServiceOrder(ServiceItem $item)
+    {
+        return $this->item($item->serviceOrder, new ServiceOrderTransformer());
     }
 
 }

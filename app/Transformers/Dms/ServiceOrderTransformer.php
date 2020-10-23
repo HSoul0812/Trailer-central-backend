@@ -5,7 +5,7 @@ namespace App\Transformers\Dms;
 use App\Transformers\Dms\ServiceOrder\MiscPartItemTransformer;
 use App\Transformers\Dms\ServiceOrder\OtherItemTransformer;
 use App\Transformers\Dms\ServiceOrder\PartItemTransformer;
-use App\Transformers\Dms\ServiceOrder\ServiceItemTechniciansTransformer;
+use App\Transformers\Dms\ServiceOrder\ServiceItemTechnicianTransformer;
 use App\Transformers\Dms\ServiceOrder\ServiceItemTransformer;
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Dms\ServiceOrder;
@@ -24,6 +24,9 @@ class ServiceOrderTransformer extends TransformerAbstract
             'user_defined_id' => $serviceOrder->user_defined_id,
             'customer' => $serviceOrder->customer,
             'created_at' => $serviceOrder->created_at,
+            'notified_at' => $serviceOrder->notified_at,
+            'date_in' => $serviceOrder->date_in,
+            'date_out' => $serviceOrder->date_out,
             'closed_at' => $serviceOrder->closed_at,
             'total_price' => $serviceOrder->total_price,
             'invoice' => $serviceOrder->invoice,
