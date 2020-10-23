@@ -484,6 +484,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('service-orders', 'App\Http\Controllers\v1\Dms\ServiceOrderController@index');
+        $route->get('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@show');
 
         /*
         |--------------------------------------------------------------------------

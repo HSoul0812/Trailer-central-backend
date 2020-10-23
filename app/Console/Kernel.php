@@ -11,6 +11,7 @@ use App\Console\Commands\ReplaceYoutubeEmbeds;
 use App\Console\Commands\Inventory\AdjustFeetAndInches;
 use App\Console\Commands\User\CreateAccessToken;
 use App\Console\Commands\Parts\Import\StocksExistsCommand;
+use App\Console\Commands\CRM\Leads\AutoAssign; 
 
 class Kernel extends ConsoleKernel
 {
@@ -26,7 +27,8 @@ class Kernel extends ConsoleKernel
         AddSitemaps::class,
         AdjustFeetAndInches::class,
         CreateAccessToken::class,
-        StocksExistsCommand::class
+        StocksExistsCommand::class,
+        AutoAssign::class
     ];
 
     /**

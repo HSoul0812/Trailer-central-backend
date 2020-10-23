@@ -3,18 +3,23 @@
 namespace App\Http\Controllers\v1\Dms;
 
 use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Transformers\Dms\ServiceOrderTransformer;
 use App\Http\Requests\Dms\GetServiceOrdersRequest;
 use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
+use League\Fractal\Serializer\ArraySerializer;
 use OpenApi\Annotations as OA;
 
 /**
  * @author Marcel
  */
-class ServiceOrderController extends RestfulController
+class ServiceOrderController extends RestfulControllerV2
 {
 
     protected $serviceOrders;
@@ -30,12 +35,15 @@ class ServiceOrderController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param  ServiceOrderRepositoryInterface  $serviceOrders
-     * @param  ServiceOrderTransformer  $transformer
-     * @param  Manager  $fractal
+     * @param ServiceOrderRepositoryInterface $serviceOrders
+     * @param ServiceOrderTransformer $transformer
+     * @param Manager $fractal
      */
-    public function __construct(ServiceOrderRepositoryInterface $serviceOrders, ServiceOrderTransformer $transformer, Manager $fractal)
-    {
+    public function __construct(
+        ServiceOrderRepositoryInterface $serviceOrders,
+        ServiceOrderTransformer $transformer,
+        Manager $fractal
+    ) {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->serviceOrders = $serviceOrders;
 
@@ -98,6 +106,19 @@ class ServiceOrderController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    public function show($id, Request $request)
+    {
+        $this->fractal->setSerializer(new NoDataArraySerializer());
+        $this->fractal->parseIncludes($request->query('with', ''));
+
+        $serviceOrder = $this->serviceOrders->get(['id' => $id]);
+        $data = new Item($serviceOrder, $this->transformer);
+
+        return $this->response->array([
+            'data' => $this->fractal->createData($data)->toArray()
+        ]);
     }
 
 }
