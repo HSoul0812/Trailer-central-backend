@@ -220,7 +220,7 @@ class Part extends Model
     /**
      * Get Website Shipping
      */
-    public function getWebsiteShippingAttribute() {
+    public function getWebsiteFeeAttribute() {
         // Use Handling Fee?
         if(!empty($this->use_handling_fee) && !empty($this->handling_fee)) {
             return $this->handling_fee;
