@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
+use App\Transformers\Inventory\SaveInventoryTransformer;
 
 /**
  * Class CreateInventoryRequest
@@ -58,7 +59,7 @@ class CreateInventoryRequest extends Request
         'show_on_ksl' => 'boolean|nullable',
         'show_on_racingjunk' => 'boolean|nullable',
         'show_on_website' => 'boolean|nullable',
-        'overlay_enabled' => 'boolean|nullable',
+        'overlay_enabled' => 'in:0,1,2|nullable',
         'is_special' => 'boolean|nullable',
         'is_featured' => 'boolean|nullable',
         'latitude' => 'numeric|nullable',
@@ -116,12 +117,14 @@ class CreateInventoryRequest extends Request
         'height_second_inches' => 'numeric|nullable',
 
         'new_images' => 'array|nullable',
+        'new_images.*.url' => 'string|required',
         'new_images.*.position' => 'integer|nullable',
         'new_images.*.primary' => 'boolean|nullable',
         'new_images.*.is_default' => 'boolean|nullable',
         'new_images.*.secondary' => 'boolean|nullable',
         'new_images.*.is_secondary' => 'boolean|nullable',
-        
+        'new_images.*.removed' => 'boolean|nullable',
+
         'new_files' => 'array|nullable',
         'new_files.*.title' => 'string|nullable',
         'new_files.*.path' => 'string|nullable',
@@ -129,4 +132,17 @@ class CreateInventoryRequest extends Request
 
         'add_bill' => 'boolean|nullable',
     ];
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function all($keys = null)
+    {
+        /** @var SaveInventoryTransformer $transformer */
+        $transformer = app()->make(SaveInventoryTransformer::class);
+
+        return $transformer->transform(parent::all());
+    }
 }

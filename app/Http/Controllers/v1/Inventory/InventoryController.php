@@ -133,9 +133,9 @@ class InventoryController extends RestfulController
     public function create(Request $request)
     {
         $params = $request->all();
-        $createInventoryRequest = new CreateInventoryRequest($params);
+        $inventoryRequest = new CreateInventoryRequest($params);
 
-        if (!$createInventoryRequest->validate() || !($inventoryId = $this->inventoryService->create($params))) {
+        if (!$inventoryRequest->validate() || !($inventoryId = $this->inventoryService->create($inventoryRequest->all()))) {
             return $this->response->errorBadRequest();
         }
 

@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
