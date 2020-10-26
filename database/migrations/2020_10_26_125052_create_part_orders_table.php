@@ -22,7 +22,7 @@ class CreatePartOrdersTable extends Migration
             $table->text('shipto_address');
             $table->text('cart_items');
             $table->enum('status', PartOrder::STATUS_FIELDS);
-            $table->enum('fulfillment', PartOrder::FULFILLMENT_TYPE);
+            $table->enum('fulfillment', PartOrder::FULFILLMENT_TYPES);
             $table->string('email_address');
             $table->string('phone_number', 20);
             $table->decimal('subtotal', 9, 2);
