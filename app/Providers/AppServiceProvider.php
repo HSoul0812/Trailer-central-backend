@@ -141,6 +141,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
         \Validator::extend('valid_form_map_field', 'App\Rules\Website\Forms\ValidMapField@passes');
         \Validator::extend('valid_form_map_table', 'App\Rules\Website\Forms\ValidMapTable@passes');
+        \Validator::extend('valid_part_order_status', 'App\Rules\Parts\ValidOrderStatus@passes');
+        \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {

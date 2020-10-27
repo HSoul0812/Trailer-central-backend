@@ -17,9 +17,9 @@ class GetPartOrdersRequest extends Request {
         'per_page' => 'integer',
         'sort' => 'in:status,-status,fulfillment,-fulfillment,email,-email,phone,-phone,shipto,-shipto,created_at,-created_at,updated_at,-updated_at',
         'status' => 'array',
-        'status.*' => 'valid_order_status',
+        'status.*' => 'valid_part_order_status',
         'fulfillment' => 'array',
-        'fulfillment.*' => 'valid_fulfillment',
+        'fulfillment.*' => 'valid_part_fulfillment',
         'id' => 'array',
         'id.*' => 'integer'
     ];
