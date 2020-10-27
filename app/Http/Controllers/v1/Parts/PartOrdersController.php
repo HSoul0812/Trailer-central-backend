@@ -32,7 +32,7 @@ class PartOrdersController extends RestfulController
      */
     public function __construct(PartOrderRepositoryInterface $partOrders)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
         $this->middleware('setWebsiteIdOnRequest')->only(['create', 'update']);
         $this->partOrders = $partOrders;
     }
