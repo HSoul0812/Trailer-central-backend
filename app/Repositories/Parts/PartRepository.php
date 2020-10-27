@@ -354,6 +354,11 @@ class PartRepository implements PartRepositoryInterface {
 
         return $query->paginate($params['per_page'])->appends($params);
     }
+    
+    public function getAllByDealerId($dealerId)
+    {
+        return Part::where('dealer_id', $dealerId)->get();
+    }
 
     /**
      * Get all rows by dealerId.

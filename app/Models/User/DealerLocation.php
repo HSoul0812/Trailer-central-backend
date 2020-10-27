@@ -38,6 +38,7 @@ class DealerLocation extends Model
         "contact",
         "website",
         "phone",
+        "location_id" 
         // TODO: Add fields
     ];
 
