@@ -84,7 +84,7 @@ class PartOrderRepository implements PartOrderRepositoryInterface {
     }
 
     public function get($params) {
-        return PartOrder::findOrFail($params['id'])->load('bins.bin');
+        return PartOrder::findOrFail($params['id']);
     }
 
     public function getAll($params)

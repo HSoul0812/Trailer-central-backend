@@ -50,55 +50,6 @@ class PartOrdersController extends RestfulController
      *         @OA\Schema(@OA\Schema(type="integer"))
      *     ),
      *     @OA\Parameter(
-     *         name="vendor_id",
-     *         in="query",
-     *         description="Vendor ID",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_specific_id",
-     *         in="query",
-     *         description="Vehicle Specific ID",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),     *
-     *     @OA\Parameter(
-     *         name="brand_id",
-     *         in="query",
-     *         description="Part brand",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *    @OA\Parameter(
-     *         name="manufacturer_id",
-     *         in="query",
-     *         description="Part manufacturers",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="type_id",
-     *         in="query",
-     *         description="Part type",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *   @OA\Parameter(
-     *         name="category_id",
-     *         in="path",
-     *         description="Part category",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *    @OA\Parameter(
-     *         name="qb_id",
-     *         in="query",
-     *         description="Part quickbooks id",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
      *         name="subcategory",
      *         in="query",
      *         description="Part subcategory",
@@ -238,20 +189,6 @@ class PartOrdersController extends RestfulController
      *            description="Image URL array"
      *         )
      *     ),
-     *    @OA\Parameter(
-     *         name="bins",
-     *         in="query",
-     *         description="Part bins",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Bin array with bin_id and name"
-     *         )
-     *     ),
      *
      *     @OA\Response(
      *         response="200",
@@ -269,7 +206,7 @@ class PartOrdersController extends RestfulController
         $requestData = $request->all();
 
         if ( $request->validate() ) {
-            return $this->response->item($this->partOrders->create($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartOrdersTransformer());
+            return $this->response->item($this->partOrders->create($requestData), new PartOrdersTransformer());
         }
 
         return $this->response->errorBadRequest();
@@ -328,76 +265,6 @@ class PartOrdersController extends RestfulController
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="type_id",
-     *         in="query",
-     *         description="Part types",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Type ID arra"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="category_id",
-     *         in="query",
-     *         description="Part categories",
-     *         required=false,
-     *          @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Category ID array"
-     *         )
-     *     ),
-     *    @OA\Parameter(
-     *         name="manufacturer_id",
-     *         in="query",
-     *         description="Part manufacturers",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Manufacturer ID array"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="brand_id",
-     *         in="query",
-     *         description="Part brands",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Brand ID array"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="bin_id",
-     *         in="query",
-     *         description="Part Bins",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="An array of bin IDs"
-     *         )
      *     ),
      *     @OA\Parameter(
      *         name="id",
@@ -486,55 +353,6 @@ class PartOrdersController extends RestfulController
      *         in="query",
      *         description="Part ID",
      *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vendor_id",
-     *         in="query",
-     *         description="Vendor ID",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="vehicle_specific_id",
-     *         in="query",
-     *         description="Vehicle Specific ID",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),     *
-     *     @OA\Parameter(
-     *         name="brand_id",
-     *         in="query",
-     *         description="Part brand",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *    @OA\Parameter(
-     *         name="manufacturer_id",
-     *         in="query",
-     *         description="Part manufacturers",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="type_id",
-     *         in="query",
-     *         description="Part type",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *   @OA\Parameter(
-     *         name="category_id",
-     *         in="path",
-     *         description="Part category",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *    @OA\Parameter(
-     *         name="qb_id",
-     *         in="query",
-     *         description="Part quickbooks id",
-     *         required=false,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
@@ -696,7 +514,7 @@ class PartOrdersController extends RestfulController
         $requestData = $request->all();
 
         if ( $request->validate() ) {
-            return $this->response->item($this->partOrders->update($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartOrdersTransformer());
+            return $this->response->item($this->partOrders->update($requestData), new PartOrdersTransformer());
         }
 
         return $this->response->errorBadRequest();
