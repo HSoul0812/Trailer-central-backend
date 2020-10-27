@@ -15,7 +15,10 @@ class DealerLocationTransformer extends TransformerAbstract
             'county' => $dealerLocation->county,
             'phone' => $dealerLocation->phone,
             'federal_id' => $dealerLocation->federal_id,
-            'sales_tax' => $dealerLocation->salesTax
+            'sales_tax' => $dealerLocation->salesTax,
+            'location_id' => $dealerLocation->location_id,
+            'dealer_location_no' => $dealerLocation->dealer_license_no,
+            'federal_id' => $dealerLocation->federal_id	
         ];
     }
 }

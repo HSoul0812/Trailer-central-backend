@@ -8,8 +8,12 @@ use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use League\Fractal\TransformerAbstract;
 
-class ServiceItemTechniciansTransformer extends TransformerAbstract
+class ServiceItemTechnicianTransformer extends TransformerAbstract
 {
+    public $availableIncludes = [
+        'serviceItem', 'technician',
+    ];
+
     public function transform(ServiceItemTechnician $item)
     {
         return [
@@ -27,4 +31,15 @@ class ServiceItemTechniciansTransformer extends TransformerAbstract
             'miles_out' => (float)$item->miles_out,
         ];
     }
+
+    public function includeServiceItem(ServiceItemTechnician $item)
+    {
+        return $this->item($item->serviceItem, new ServiceItemTransformer());
+    }
+
+    public function includeTechnician(ServiceItemTechnician $item)
+    {
+        return $this->item($item->technician, new TechnicianTransformer());
+    }
+
 }
