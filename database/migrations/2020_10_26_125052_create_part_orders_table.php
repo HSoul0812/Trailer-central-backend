@@ -18,8 +18,8 @@ class CreatePartOrdersTable extends Migration
             $table->bigIncrements('id');
             $table->integer('dealer_id');
             $table->integer('website_id');
-            $table->enum('status', PartOrder::STATUS_FIELDS);
-            $table->enum('fulfillment_type', PartOrder::FULFILLMENT_TYPES);
+            $table->enum('status', PartOrder::STATUS_FIELDS)->index();
+            $table->enum('fulfillment_type', PartOrder::FULFILLMENT_TYPES)->index();
             $table->string('email_address')->nullable();
             $table->string('phone_number', 20)->nullable();
             $table->string('shipto_name')->nullable();
@@ -30,6 +30,8 @@ class CreatePartOrdersTable extends Migration
             $table->decimal('shipping', 9, 2);
             $table->string('order_key')->nullable();
             $table->timestamps();
+
+            $table->index(['dealer_id', 'website_id']);
         });
     }
 

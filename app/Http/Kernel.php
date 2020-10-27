@@ -16,6 +16,7 @@ use App\Http\Middleware\CRM\Text\TextValidate;
 use App\Http\Middleware\CRM\Text\TemplateValidate;
 use App\Http\Middleware\CRM\Text\BlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate;
+use App\Http\Middleware\Parts\PartOrderValidate;
 
 class Kernel extends HttpKernel
 {
@@ -88,6 +89,7 @@ class Kernel extends HttpKernel
         'text.template.validate' => TemplateValidate::class,
         'text.campaign.validate' => CampaignValidate::class,
         'text.blast.validate' => BlastValidate::class,
+        'parts.orders.validate' => PartOrderValidate::class,
     ];
 
     /**
