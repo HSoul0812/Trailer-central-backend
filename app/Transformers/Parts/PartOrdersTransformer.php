@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Transformers\PartOrders;
+namespace App\Transformers\Parts;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\PartOrder;
