@@ -17,52 +17,44 @@ class PartOrderRepository implements PartOrderRepositoryInterface {
     use SortTrait;
 
     private $sortOrders = [
-        'title' => [
-            'field' => 'title',
+        'status' => [
+            'field' => 'status',
             'direction' => 'DESC'
         ],
-        '-title' => [
-            'field' => 'title',
+        '-status' => [
+            'field' => 'status',
             'direction' => 'ASC'
         ],
-        'price' => [
-            'field' => 'price',
+        'fulfillment' => [
+            'field' => 'fulfillment_type',
             'direction' => 'DESC'
         ],
-        '-price' => [
-            'field' => 'price',
+        '-fulfillment' => [
+            'field' => 'fulfillment_type',
             'direction' => 'ASC'
         ],
-        'sku' => [
-            'field' => 'sku',
+        'email' => [
+            'field' => 'email_address',
             'direction' => 'DESC'
         ],
-        '-sku' => [
-            'field' => 'sku',
+        '-email' => [
+            'field' => 'email_address',
             'direction' => 'ASC'
         ],
-        'dealer_cost' => [
-            'field' => 'dealer_cost',
+        'phone' => [
+            'field' => 'phone_number',
             'direction' => 'DESC'
         ],
-        '-dealer_cost' => [
-            'field' => 'dealer_cost',
+        '-phone' => [
+            'field' => 'phone_number',
             'direction' => 'ASC'
         ],
-        'msrp' => [
-            'field' => 'msrp',
+        'shipto' => [
+            'field' => 'shipto_name',
             'direction' => 'DESC'
         ],
-        '-msrp' => [
-            'field' => 'msrp',
-            'direction' => 'ASC'
-        ],
-        'subcategory' => [
-            'field' => 'subcategory',
-            'direction' => 'DESC'
-        ],
-        '-subcategory' => [
-            'field' => 'subcategory',
+        '-shipto' => [
+            'field' => 'shipto_name',
             'direction' => 'ASC'
         ],
         'created_at' => [
@@ -73,14 +65,14 @@ class PartOrderRepository implements PartOrderRepositoryInterface {
             'field' => 'created_at',
             'direction' => 'ASC'
         ],
-        'stock' => [
-            'field' => 'stock',
+        'updated_at' => [
+            'field' => 'updated_at',
             'direction' => 'DESC'
         ],
-        '-stock' => [
-            'field' => 'stock',
+        '-updated_at' => [
+            'field' => 'updated_at',
             'direction' => 'ASC'
-        ]
+        ],
     ];
 
     public function create($params) {
@@ -98,18 +90,22 @@ class PartOrderRepository implements PartOrderRepositoryInterface {
     public function getAll($params)
     {
         /** @var Builder $query */
-        $query = PartOrder::where('id', '>', 0);
+        $query = PartOrder::where('dealer_id', $params['dealer_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
+        }
+
+        if (isset($params['website_id'])) {
+            $query = $query->whereIn('website_id', $params['website_id']);
         }
 
         if (isset($params['status'])) {
             $query = $query->whereIn('status', $params['status']);
         }
 
-        if (isset($params['dealer_id'])) {
-            $query = $query->whereIn('dealer_id', $params['dealer_id']);
+        if (isset($params['fulfillment'])) {
+            $query = $query->whereIn('fulfillment_type', $params['fulfillment']);
         }
 
         if (isset($params['sort'])) {

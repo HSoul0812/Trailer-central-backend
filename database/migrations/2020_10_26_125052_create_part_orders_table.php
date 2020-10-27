@@ -16,7 +16,7 @@ class CreatePartOrdersTable extends Migration
     {
         Schema::create('part_orders', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('dealer_id');
+            $table->integer('dealer_id')->index();
             $table->integer('website_id');
             $table->enum('status', PartOrder::STATUS_FIELDS)->index();
             $table->enum('fulfillment_type', PartOrder::FULFILLMENT_TYPES)->index();

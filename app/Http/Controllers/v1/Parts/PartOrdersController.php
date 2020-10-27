@@ -5,11 +5,11 @@ namespace App\Http\Controllers\v1\Parts;
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Repositories\Parts\PartOrderRepositoryInterface;
-use App\Http\Requests\Parts\CreatePartOrderRequest;
-use App\Http\Requests\Parts\DeletePartOrderRequest;
+//use App\Http\Requests\Parts\CreatePartOrderRequest;
+//use App\Http\Requests\Parts\DeletePartOrderRequest;
 use App\Http\Requests\Parts\ShowPartOrderRequest;
 use App\Http\Requests\Parts\GetPartOrdersRequest;
-use App\Http\Requests\Parts\UpdatePartOrderRequest;
+//use App\Http\Requests\Parts\UpdatePartOrderRequest;
 use App\Transformers\Parts\PartOrdersTransformer;
 
 class PartOrdersController extends RestfulController
