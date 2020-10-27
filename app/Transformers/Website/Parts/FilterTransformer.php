@@ -33,32 +33,36 @@ class FilterTransformer extends TransformerAbstract
             if ($key === 'dealer_id') {
                 continue;
             }
-            
+
             if (is_array($value)) {
                 foreach($value as $index => $val) {
-                    if ($index === 0 && empty($this->queryString)) {
-                        $this->queryString .= "?{$key}[]=".urlencode($val);
-                    } else {
-                        $this->queryString .= "&{$key}[]=".urlencode($val);
+                    $delimiter = empty($this->queryString) ? '?' : '&';
+
+                    if (!is_array($val)) {
+                        $this->queryString .= "{$delimiter}{$key}[]=".urlencode($val);
+                        continue;
+                    }
+
+                    foreach ($val as $param) {
+                        $this->queryString .= "{$delimiter}{$key}[]=".urlencode($param);
                     }
                 }
            }
 
            if (is_array($value)) {
                foreach($value as $index => $val) {
+                   $param = is_array($val) ? reset($val) : $val;
+
                    if ($key == 'type_id') {
-                       
-                       $this->mappedTypes[$key][] = Type::where('name', $val)->first()->id;
-                       
+                       $this->mappedTypes[$key][] = Type::where('name', $param)->first()->id;
                    } else if ($key == 'brand_id') {
-                       $this->mappedTypes[$key][] = Brand::where('name', $val)->first()->id;
+                       $this->mappedTypes[$key][] = Brand::where('name', $param)->first()->id;
                    } else if ($key == 'category_id') {
-                       $this->mappedTypes[$key][] = Category::where('name', $val)->first()->id;
+                       $this->mappedTypes[$key][] = Category::where('name', $param)->first()->id;
                    }
                }
            }
         }
-
     }
         
     
@@ -168,9 +172,11 @@ class FilterTransformer extends TransformerAbstract
                     $queryString = str_replace($actionQuery, '', $queryString);  
                 } else {
                     $queryString = $this->queryString."&$actionQuery";
-                }                
-            }                        
-            
+                }
+            }
+
+            $queryString = empty($queryString) ? '?' : $queryString;
+
             if ($filter->attribute == 'subcategory') {
                 if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
                     if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}])) {

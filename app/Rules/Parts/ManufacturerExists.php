@@ -18,6 +18,8 @@ class ManufacturerExists implements Rule
     public function passes($attribute, $value)
     {
         if (is_array($value)) {
+            $value = array_unique($value);
+
             foreach ($value as $type) {
                 if (!is_numeric($type)) {
                     return false;
