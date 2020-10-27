@@ -118,16 +118,18 @@ $api->version('v1', function ($route) {
     $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
 
-    // Parts Orders
-    $route->group([
-        'middleware' => 'parts.orders.validate'
-    ], function ($route) {
+    /**
+     * Part orders
+     */
         // Get Order
         $route->get('parts/orders', 'App\Http\Controllers\v1\Parts\PartOrdersController@index');
         $route->put('parts/orders', 'App\Http\Controllers\v1\Parts\PartOrdersController@create');
         $route->get('parts/orders/{id}', 'App\Http\Controllers\v1\Parts\PartOrdersController@show')->where('id', '[0-9]+');
         $route->post('parts/orders/{id}', 'App\Http\Controllers\v1\Parts\PartOrdersController@update')->where('id', '[0-9]+');
         $route->delete('parts/orders/{id}', 'App\Http\Controllers\v1\Parts\PartOrdersController@destroy')->where('id', '[0-9]+');
+    $route->group([
+        'middleware' => 'parts.orders.validate'
+    ], function ($route) {
     });
 
     /**
