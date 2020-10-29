@@ -44,6 +44,7 @@ class PartsServiceProvider extends ServiceProvider
         \Validator::extend('part_exists', 'App\Rules\Parts\PartExists@passes');
         \Validator::extend('cycle_count_exists', 'App\Rules\Parts\CycleCountExists@passes');
         \Validator::extend('manufacturer_exists', 'App\Rules\Parts\ManufacturerExists@passes');
+        \Validator::extend('sku_type', 'App\Rules\Parts\SkuType@passes');
 
         // register events and listeners
         foreach ($this->listen as $event => $listeners) {

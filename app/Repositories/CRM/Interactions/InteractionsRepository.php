@@ -99,7 +99,16 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      */
     public function getAll($params) {
         // Get User ID
-        $query = Interaction::where('tc_lead_id', $params['lead_id']);
+        $query = Interaction::select(
+                ['interaction_id', 
+                 'lead_product_id', 
+                 'tc_lead_id', 
+                 'user_id', 
+                 'interaction_type',
+                 'interaction_notes',
+                 'interaction_time',
+                 'sent_by',
+                 'from_email'])->where('tc_lead_id', $params['lead_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -302,7 +311,9 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             DB::raw($lead->newDealerUser->user_id . ' AS user_id'),
             DB::raw('"TEXT" AS interaction_type'),
             'log_message AS interaction_notes',
-            'date_sent AS interaction_time'
+            'date_sent AS interaction_time',
+            DB::raw('from_number AS from_email'),
+            DB::raw('"" AS sent_by')
         ])->where('lead_id', $params['lead_id']);
 
         // Initialize TextLog Query

@@ -4,11 +4,11 @@ namespace App\Transformers\Website\Parts;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Filter;
-use Illuminate\Support\Facades\Cache;
 use App\Models\Parts\Part;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Category;
 use App\Models\Parts\Type;
+
 class FilterTransformer extends TransformerAbstract
 {
     
@@ -33,32 +33,36 @@ class FilterTransformer extends TransformerAbstract
             if ($key === 'dealer_id') {
                 continue;
             }
-            
+
             if (is_array($value)) {
                 foreach($value as $index => $val) {
-                    if ($index === 0 && empty($this->queryString)) {
-                        $this->queryString .= "?{$key}[]=".urlencode($val);
-                    } else {
-                        $this->queryString .= "&{$key}[]=".urlencode($val);
+                    $delimiter = empty($this->queryString) ? '?' : '&';
+
+                    if (!is_array($val)) {
+                        $this->queryString .= "{$delimiter}{$key}[]=".urlencode($val);
+                        continue;
+                    }
+
+                    foreach ($val as $param) {
+                        $this->queryString .= "{$delimiter}{$key}[]=".urlencode($param);
                     }
                 }
            }
-           
+
            if (is_array($value)) {
                foreach($value as $index => $val) {
+                   $param = is_array($val) ? reset($val) : $val;
+
                    if ($key == 'type_id') {
-                       
-                       $this->mappedTypes[$key][] = Type::where('name', $val)->first()->id;
-                       
+                       $this->mappedTypes[$key][] = Type::where('name', $param)->first()->id;
                    } else if ($key == 'brand_id') {
-                       $this->mappedTypes[$key][] = Brand::where('name', $val)->first()->id;
+                       $this->mappedTypes[$key][] = Brand::where('name', $param)->first()->id;
                    } else if ($key == 'category_id') {
-                       $this->mappedTypes[$key][] = Category::where('name', $val)->first()->id;
+                       $this->mappedTypes[$key][] = Category::where('name', $param)->first()->id;
                    }
                }
            }
         }
-
     }
         
     
@@ -70,6 +74,7 @@ class FilterTransformer extends TransformerAbstract
              'id' => (int)$filter->id,
              'attribute' => $filter->attribute,
              'label' => ($filter->attribute == 'brand') ? 'Brand' : $filter->label,
+             'field' => $filter->field,
              'type' => ($filter->attribute == 'brand') ? 'select' : $filter->type,
              'is_eav' => 0,
              'position' => $filter->position,
@@ -146,7 +151,11 @@ class FilterTransformer extends TransformerAbstract
                     } 
                 }
             }
-            
+
+            if ($filter->attribute === 'subcategory' && isset($requestData['subcategory']) && in_array($part->subcategory, $requestData['subcategory'])) {
+                $status = 'selected';
+            }
+
             if ($filter->attribute == 'subcategory') {
                 $actionQuery = "{$this->attributeModelIdMapping[$filter->attribute]}[]=".urlencode($part->{$filter->attribute});
             } else {
@@ -163,9 +172,11 @@ class FilterTransformer extends TransformerAbstract
                     $queryString = str_replace($actionQuery, '', $queryString);  
                 } else {
                     $queryString = $this->queryString."&$actionQuery";
-                }                
-            }                        
-            
+                }
+            }
+
+            $queryString = empty($queryString) ? '?' : $queryString;
+
             if ($filter->attribute == 'subcategory') {
                 if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
                     if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]][$part->{$filter->attribute}])) {
@@ -210,18 +221,20 @@ class FilterTransformer extends TransformerAbstract
     }
     
     private function addFiltersToQuery($query, $requestData, $attribute) {
-        $query = $query->whereIn('dealer_id', $requestData['dealer_id']);
+
         foreach($this->attributeModelIdMapping as $value) {
-            if (isset($requestData[$value]) && $value != $attribute) {               
-                if ($value != 'dealer_id') {
+            if (isset($requestData[$value]) && $value != $attribute) {
+                if ($value != 'dealer_id' && isset($this->mappedTypes[$value])) {
                     $query = $query->whereIn($value, $this->mappedTypes[$value]);
+                } else {
+                    $query = $query->whereIn($value, $requestData[$value]);
                 }
             }
-        }        
-        
+        }
+
         return $query;
     }
-    
+
     private function getMaxPriceFilter(Filter $filter) {
         if ($filter->attribute != 'price') {
             return null;

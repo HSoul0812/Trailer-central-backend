@@ -3,7 +3,7 @@
 namespace App\Console\Commands\Parts\Import;
 
 use Illuminate\Console\Command;
-use App\Repositories\Bulk\Parts\BulkUploadRepository;
+use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Models\Parts\Part;
 use Illuminate\Support\Facades\Redis;
@@ -19,17 +19,23 @@ class RunBulkUploadCommand extends Command
      *
      * @var string
      */
-    protected $signature = "run:bulk";
+    protected $signature = "run:bulk {bulk-id?}";
 
     /**
      * Execute the console command.
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(BulkUploadRepositoryInterface $bulkUploadRepo)
     { 
-        $bulkUploadRepo = new BulkUploadRepository;
-        $bulk = $bulkUploadRepo->get(['status' => BulkUpload::PROCESSING]);
+        $bulkId = $this->s3Bucket = $this->argument('bulk-id');
+        
+        if ($bulkId) {
+            $bulk = $bulkUploadRepo->get(['id' => $bulkId]);
+        } else {
+            $bulk = $bulkUploadRepo->get(['status' => BulkUpload::PROCESSING]);
+        }
+        
         if (empty($bulk)) {
             return;
         }        

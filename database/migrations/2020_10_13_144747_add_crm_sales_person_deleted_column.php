@@ -14,7 +14,7 @@ class AddCrmSalesPersonDeletedColumn extends Migration
     public function up()
     {
         Schema::table('crm_sales_person', function (Blueprint $table) {
-            $table->tinyInteger('deleted')->default(0)->nullable()->index();
+            $table->softDeletes();
         });
     }
 
@@ -26,7 +26,7 @@ class AddCrmSalesPersonDeletedColumn extends Migration
     public function down()
     {
         Schema::table('crm_sales_person', function (Blueprint $table) {
-            $table->dropColumn('deleted');
+            $table->dropSoftDeletes();
         });
     }
 }

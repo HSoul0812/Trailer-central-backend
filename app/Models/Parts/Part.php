@@ -105,6 +105,10 @@ class Part extends Model
             'brand_id' => null
         ]
     ];
+    
+    protected $casts = [
+        'dealer_cost' => 'float'
+    ];
 
     public static function boot() {
         parent::boot();

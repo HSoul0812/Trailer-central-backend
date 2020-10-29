@@ -17,7 +17,23 @@ class BrandExists implements Rule
      */
     public function passes($attribute, $value)
     {
-        return Brand::where('id', $value)->count() > 0;
+        if (is_array($value)) {
+            $value = array_unique($value);
+
+            foreach ($value as $type) {
+                if (!is_numeric($type)) {
+                    return false;
+                }
+            }
+
+            return Brand::whereIn('id', $value)->count() === count($value);
+        } else {
+            if (!is_numeric($value)) {
+                return false;
+            }
+
+            return Brand::where('id', $value)->count() > 0;
+        }
     }
 
     /**

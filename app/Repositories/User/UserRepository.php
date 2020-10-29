@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
 
 class UserRepository implements UserRepositoryInterface {
-    
+
     public function create($params) {
         throw new NotImplementedException;
     }
@@ -31,23 +31,30 @@ class UserRepository implements UserRepositoryInterface {
     }
 
     public function findUserByEmailAndPassword($email, $password) {
-        $user = User::where('email', $email)->first();        
+        $user = User::where('email', $email)->first();
         if ( $user && ( $user->password == crypt($password, $user->salt) ) ) {
             return $user;
         }
-        
+
         // Check dealer users
-        $dealerUser = DealerUser::where('email', $email)->first(); 
-        
+        $dealerUser = DealerUser::where('email', $email)->first();
+
         if ( $dealerUser && ( $dealerUser->password == crypt($password, $dealerUser->salt) ) ) {
             return $dealerUser;
         }
-        
+
         throw new ModelNotFoundException;
     }
 
     public function getDmsActiveUsers() {
         return User::where('is_dms_active', 1)->get();
+    }
+
+    public function setAdminPasswd($dealerId, $passwd)
+    {
+        return User::where('dealer_id', $dealerId)->update([
+            'admin_passwd' => sha1($passwd)
+        ]);
     }
 
 }

@@ -17,7 +17,23 @@ class ManufacturerExists implements Rule
      */
     public function passes($attribute, $value)
     {
-        return Manufacturer::where('id', $value)->count() > 0;
+        if (is_array($value)) {
+            $value = array_unique($value);
+
+            foreach ($value as $type) {
+                if (!is_numeric($type)) {
+                    return false;
+                }
+            }
+
+            return Manufacturer::whereIn('id', $value)->count() === count($value);
+        } else {
+            if (!is_numeric($value)) {
+                return false;
+            }
+
+            return Manufacturer::where('id', $value)->count() > 0;
+        }
     }
 
     /**
