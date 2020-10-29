@@ -24,7 +24,7 @@ class PartOrdersTransformer extends TransformerAbstract
              'subtotal' => number_format($order->subtotal, 2),
              'tax' => number_format($order->tax, 2),
              'shipping' => number_format($order->shipping, 2),
-             'total' => $order->total,
+             'total' => number_format($order->total, 2),
              'order_key' => $order->order_key,
              'created_at' => date('Y-m-d H:i', strtotime($order->created_at)),
              'updated_at' => date('Y-m-d H:i', strtotime($order->updated_at))
