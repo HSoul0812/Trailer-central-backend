@@ -86,7 +86,7 @@ class PartOrder extends Model
      */
     public function getTotalAttribute()
     {
-        return $this->subtotal + $this->tax + $this->shipping;
+        return round($this->subtotal + $this->tax + $this->shipping, 2);
     }
 
     /**
