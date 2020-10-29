@@ -79,4 +79,21 @@ class PartOrder extends Model
     {
         return $this->belongsTo(Website::class);
     }
+
+
+    /**
+     * Get Total
+     */
+    public function getTotalAttribute()
+    {
+        return $this->subtotal + $this->tax + $this->shipping;
+    }
+
+    /**
+     * Get Ship To
+     */
+    public function getShiptoAttribute()
+    {
+        return $this->shipto_name . '<br>' . $this->shipto_address;
+    }
 }

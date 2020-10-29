@@ -19,10 +19,12 @@ class PartOrdersTransformer extends TransformerAbstract
              'phone' => $order->phone_number,
              'shipto_name' => $order->shipto_name,
              'shipto_address' => $order->shipto_address,
+             'shipto' => $order->shipto_full,
              'cart_items' => $order->cart_items,
              'subtotal' => number_format($order->subtotal, 2),
              'tax' => number_format($order->tax, 2),
              'shipping' => number_format($order->shipping, 2),
+             'total' => $order->total,
              'order_key' => $order->order_key,
              'created_at' => date('Y-m-d H:i', strtotime($order->created_at)),
              'updated_at' => date('Y-m-d H:i', strtotime($order->updated_at))
