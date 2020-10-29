@@ -4,11 +4,16 @@
 namespace App\Providers;
 
 
+use App\Models\CRM\Account\Invoice;
+use App\Models\CRM\Dms\FinancingCompany;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
+use App\Repositories\CRM\User\SalesPersonRepository;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Dms\FinancingCompanyRepository;
 use App\Repositories\Dms\FinancingCompanyRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
@@ -43,6 +48,18 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(FinancingCompanyRepositoryInterface::class, FinancingCompanyRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+
+        $this->app->bind(InvoiceRepositoryInterface::class, function() {
+            return new InvoiceRepository(Invoice::query());
+        });
+
+        $this->app->bind(SalesPersonRepositoryInterface::class, function() {
+            return new SalesPersonRepository(SalesPerson::query());
+        });
+
+        $this->app->bind(FinancingCompanyRepositoryInterface::class, function() {
+            return new FinancingCompanyRepository(FinancingCompany::query());
+        });
 
         $this->app->bind(ServiceItemTechnicianRepositoryInterface::class, function () {
             return new ServiceItemTechnicianRepository(ServiceItemTechnician::query());

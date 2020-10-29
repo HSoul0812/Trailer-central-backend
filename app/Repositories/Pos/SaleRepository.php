@@ -20,10 +20,10 @@ class SaleRepository extends RepositoryAbstract implements SaleRepositoryInterfa
      */
     private $queryBuilder;
 
-    public function __construct()
+    public function __construct(Builder $baseQuery)
     {
         // assign the initial model to the query builder
-        $this->withQuery(Sale::query()); // todo may need to be injected here some other way
+        $this->withQuery($baseQuery);
     }
 
     /**

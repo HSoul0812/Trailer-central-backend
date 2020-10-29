@@ -9,6 +9,7 @@ use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\QueryBuilder;
 use App\Utilities\JsonApi\WithRequestQueryable;
 use Dingo\Api\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class InvoiceRepository extends RepositoryAbstract implements InvoiceRepositoryInterface
@@ -24,10 +25,10 @@ class InvoiceRepository extends RepositoryAbstract implements InvoiceRepositoryI
      */
     private $queryBuilder;
 
-    public function __construct()
+    public function __construct(Builder $baseQuery)
     {
         // assign the initial model to the query builder
-        $this->withQuery(Invoice::query()); // todo may need to be injected here some other way
+        $this->withQuery($baseQuery);
     }
 
     /**
