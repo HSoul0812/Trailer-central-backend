@@ -139,7 +139,6 @@ class FilterTransformer extends TransformerAbstract
         $values = [];
           
         foreach($parts as $part) {
-            
             $count = $this->getPartsCount($filter, $part);
             $status = 'selectable';
             
@@ -276,12 +275,12 @@ class FilterTransformer extends TransformerAbstract
         
         return 0;
     }
-    
-    private function getPartsCount($filter, $part) {        
-        
-        $requestData = app('request')->only('category_id', 'type_id', 'dealer_id', 'brand_id');
-        $dealerId = $requestData['dealer_id'];        
-        
+
+    private function getPartsCount($filter, $part)
+    {
+        $requestData = app('request')->only('category_id', 'type_id', 'dealer_id', 'brand_id', 'show_on_website');
+        $dealerId = $requestData['dealer_id'];
+
         if ($filter->attribute == 'subcategory') {
             $query = Part::whereIn('dealer_id', $dealerId)
                     ->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute});
@@ -289,7 +288,11 @@ class FilterTransformer extends TransformerAbstract
             $query = Part::whereIn('dealer_id', $dealerId)
                     ->where($this->attributeModelIdMapping[$filter->attribute], $part->{$filter->attribute}->id);
         }
-        
+
+        if (isset($requestData['show_on_website'])) {
+            $query->where('show_on_website', $requestData['show_on_website']);
+        }
+
         foreach ($this->mappedTypes as $attributeName => $attributeValues) {
             if ( ($this->attributeModelIdMapping[$filter->attribute] == $attributeName) ) {
                 continue;
