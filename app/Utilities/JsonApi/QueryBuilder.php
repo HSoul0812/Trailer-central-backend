@@ -306,9 +306,18 @@ class QueryBuilder implements QueryBuilderInterface
                 return function ($column, $value, Builder $query) {
                     $query->where($column, '<>', $value);
                 };
+            case 'between':
+                return function ($column, $value, Builder $query) {
+                    list($valueFrom, $valueTo) = explode(',', $value);
+                    $query->whereBetween($column, $valueFrom, $valueTo);
+                };
             case 'contains':
                 return function ($column, $value, Builder $query) {
                     $query->where($column, 'LIKE', "%{$value}%");
+                };
+            case 'notcontains':
+                return function ($column, $value, Builder $query) {
+                    $query->where($column, 'NOT LIKE', "%{$value}%");
                 };
             case 'startswith':
                 return function ($column, $value, Builder $query) {

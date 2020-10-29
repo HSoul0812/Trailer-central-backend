@@ -355,6 +355,11 @@ class PartRepository implements PartRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    public function getAllByDealerId($dealerId)
+    {
+        return Part::where('dealer_id', $dealerId)->get();
+    }
+
     /**
      * Get all rows by dealerId.
      * note: used by csv export
@@ -367,7 +372,7 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function update($params) {
-        // $part = Part::findOrFail($params['id']);
+        /** @var Part $part */
         $part = $this->get($params);
 
         DB::transaction(function() use (&$part, $params) {
@@ -402,12 +407,15 @@ class PartRepository implements PartRepositoryInterface {
 
                 if (isset($params['bins'])) {
                     $part->bins()->delete();
+                    $part->load('bins');
+
                     foreach ($params['bins'] as $bin) {
                         $binQty = $this->createBinQuantity([
                             'part_id' => $part->id,
                             'bin_id' => $bin['bin_id'],
                             'qty' => $bin['quantity']
                         ]);
+                        $part->bins->add($binQty);
                     }
                 }
             }
