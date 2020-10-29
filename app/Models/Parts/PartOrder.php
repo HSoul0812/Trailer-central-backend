@@ -92,7 +92,7 @@ class PartOrder extends Model
     /**
      * Get Ship To
      */
-    public function getShiptoAttribute()
+    public function getShipToAttribute()
     {
         return $this->shipto_name . '<br>' . $this->shipto_address;
     }

@@ -19,7 +19,7 @@ class PartOrdersTransformer extends TransformerAbstract
              'phone' => $order->phone_number,
              'shipto_name' => $order->shipto_name,
              'shipto_address' => $order->shipto_address,
-             'shipto' => $order->shipto_full,
+             'shipto' => $order->ship_to,
              'cart_items' => $order->cart_items,
              'subtotal' => number_format($order->subtotal, 2),
              'tax' => number_format($order->tax, 2),
