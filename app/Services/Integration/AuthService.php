@@ -47,17 +47,31 @@ class AuthService implements AuthServiceInterface
     }
 
     /**
-     * Show Sales Auth Response
+     * Get Sales Auth Response
      * 
      * @param array $params
      * @return Fractal
      */
-    public function show($params) {
+    public function index($params) {
         // Get Access Token
         $accessToken = $this->tokens->getRelation($params);
 
         // Return Response
-        return $this->response($accessToken, $params);
+        return $this->response($accessToken);
+    }
+
+    /**
+     * Show Sales Auth Response
+     * 
+     * @param int $id
+     * @return Fractal
+     */
+    public function show($id) {
+        // Get Access Token
+        $accessToken = $this->tokens->get(['id' => $id]);
+
+        // Return Response
+        return $this->response($accessToken);
     }
 
     /**
@@ -71,7 +85,7 @@ class AuthService implements AuthServiceInterface
         $accessToken = $this->tokens->create($params);
 
         // Return Response
-        return $this->response($accessToken, $params);
+        return $this->response($accessToken);
     }
 
     /**
@@ -85,7 +99,7 @@ class AuthService implements AuthServiceInterface
         $accessToken = $this->tokens->update($params);
 
         // Return Response
-        return $this->response($accessToken, $params);
+        return $this->response($accessToken);
     }
 
 

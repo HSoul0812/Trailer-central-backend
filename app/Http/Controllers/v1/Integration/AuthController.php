@@ -12,6 +12,7 @@ use App\Http\Requests\Integration\Auth\ShowTokenRequest;
 use App\Http\Requests\Integration\Auth\UpdateTokenRequest;
 use App\Http\Requests\Integration\Auth\ValidateTokenRequest;
 use App\Transformers\Integration\Auth\TokenTransformer;
+use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Auth\GoogleServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
@@ -26,6 +27,11 @@ class AuthController extends RestfulControllerV2
     protected $tokens;
 
     /**
+     * @var AuthServiceInterface
+     */
+    protected $auth;
+
+    /**
      * @var GoogleServiceInterface
      */
     protected $google;
@@ -37,12 +43,14 @@ class AuthController extends RestfulControllerV2
 
     public function __construct(
         TokenRepositoryInterface $tokens,
+        AuthServiceInterface $authService,
         GoogleServiceInterface $googleService,
         Manager $fractal
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'valid']);
 
         $this->tokens = $tokens;
+        $this->auth = $authService;
         $this->google = $googleService;
         $this->fractal = $fractal;
 
@@ -84,27 +92,8 @@ class AuthController extends RestfulControllerV2
         // Get Token Request
         $request = new GetTokenRequest($request->all());
         if ($request->validate()) {
-            // Get Access Token
-            $accessToken = $this->tokens->getRelation($request->all());
-
-            // Validate Access Token
-            $validate = [
-                'is_valid' => false,
-                'is_expired' => true
-            ];
-            if(!empty($accessToken->token_type)) {
-                if($accessToken->token_type === 'google') {
-                    $validate = $this->google->validate($accessToken);
-                }
-            }
-
-            // Convert Token to Array
-            $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
-            $response['validate'] = $validate;
-
             // Return Auth
-            return $this->response->array($response);
+            return $this->response->array($this->auth->index($request->all()));
         }
         
         return $this->response->errorBadRequest();
@@ -152,31 +141,8 @@ class AuthController extends RestfulControllerV2
         // Create Auth Request
         $request = new CreateTokenRequest($request->all());
         if ( $request->validate() ) {
-            // Get Access Token
-            $accessToken = $this->tokens->create($request->all());
-
-            // Validate Access Token
-            $validate = [
-                'is_valid' => false,
-                'is_expired' => true
-            ];
-            if(!empty($accessToken->token_type)) {
-                if($accessToken->token_type === 'google') {
-                    $validate = $this->google->validate($accessToken);
-                }
-            }
-
-            // Convert Token to Array
-            if(!empty($accessToken)) {
-                $data = new Item($accessToken, new TokenTransformer(), 'data');
-                $response = $this->fractal->createData($data)->toArray();
-            } else {
-                $response = ['data' => null];
-            }
-            $response['validate'] = $validate;
-
             // Return Auth
-            return $this->response->array($response);
+            return $this->response->array($this->auth->create($request->all()));
         }
         
         return $this->response->errorBadRequest();
@@ -210,31 +176,8 @@ class AuthController extends RestfulControllerV2
         // Show Auth Request
         $request = new ShowTokenRequest(['id' => $id]);
         if ( $request->validate() ) {
-            // Get Access Token
-            $accessToken = $this->tokens->get(['id' => $id]);
-
-            // Validate Access Token
-            $validate = [
-                'is_valid' => false,
-                'is_expired' => true
-            ];
-            if(!empty($accessToken->token_type)) {
-                if($accessToken->token_type === 'google') {
-                    $validate = $this->google->validate($accessToken);
-                }
-            }
-
-            // Convert Token to Array
-            if(!empty($accessToken)) {
-                $data = new Item($accessToken, new TokenTransformer(), 'data');
-                $response = $this->fractal->createData($data)->toArray();
-            } else {
-                $response = ['data' => null];
-            }
-            $response['validate'] = $validate;
-
             // Return Auth
-            return $this->response->array($response);
+            return $this->response->array($this->auth->show($id));
         }
         
         return $this->response->errorBadRequest();
@@ -284,31 +227,8 @@ class AuthController extends RestfulControllerV2
         $requestData['id'] = $id;
         $request = new UpdateTokenRequest($requestData);
         if ( $request->validate() ) {
-            // Update Access Token
-            $accessToken = $this->tokens->update($requestData);
-
-            // Validate Access Token
-            $validate = [
-                'is_valid' => false,
-                'is_expired' => true
-            ];
-            if(!empty($accessToken->token_type)) {
-                if($accessToken->token_type === 'google') {
-                    $validate = $this->google->validate($accessToken);
-                }
-            }
-
-            // Convert Token to Array
-            if(!empty($accessToken)) {
-                $data = new Item($accessToken, new TokenTransformer(), 'data');
-                $response = $this->fractal->createData($data)->toArray();
-            } else {
-                $response = ['data' => null];
-            }
-            $response['validate'] = $validate;
-
             // Return Auth
-            return $this->response->array($response);
+            return $this->response->array($this->auth->update($request->all()));
         }
         
         return $this->response->errorBadRequest();
@@ -346,28 +266,8 @@ class AuthController extends RestfulControllerV2
             $accessToken = new AccessToken();
             $accessToken->fill($request->all());
 
-            // Validate Access Token
-            $validate = [
-                'is_valid' => false,
-                'is_expired' => true
-            ];
-            if(!empty($accessToken->token_type)) {
-                if($accessToken->token_type === 'google') {
-                    $validate = $this->google->validate($accessToken);
-                }
-            }
-
-            // Convert Token to Array
-            if(!empty($accessToken)) {
-                $data = new Item($accessToken, new TokenTransformer(), 'data');
-                $response = $this->fractal->createData($data)->toArray();
-            } else {
-                $response = ['data' => null];
-            }
-            $response['validate'] = $validate;
-
             // Return Auth
-            return $this->response->array($response);
+            return $this->response->array($this->auth->validate($accessToken));
         }
         
         return $this->response->errorBadRequest();
