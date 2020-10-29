@@ -86,14 +86,19 @@ class PartService implements PartServiceInterface
         $part = null;
 
         DB::transaction(function() use ($partData, $bins, &$part) {
+            /** @var Part $part */
             $part = $this->partRepository->update($partData);
 
             foreach($bins as $bin) {
 
-                if (!isset($bin['old_quantity']) || !isset($bin['quantity'])) {
+                if (!isset($bin['quantity'])) {
                     // log why this part was skipped
                     Log::warning("Quantities not specified, skipping", ['bin' => $bin]);
                     continue;
+                }
+
+                if (!isset($bin['old_quantity'])) {
+                    $bin['old_quantity'] = 0;
                 }
 
                 $this->cycleCountRepository->create([
@@ -111,10 +116,8 @@ class PartService implements PartServiceInterface
                 ]);
 
                 if ($bin['quantity'] != $bin['old_quantity']) {
-                    $binQuantity = BinQuantity::where([
-                        'part_id' => $part->id,
-                        'bin_id' => $bin['bin_id'],
-                    ])->first();
+                    // get the updated bin qty
+                    $binQuantity = $part->bins->where('bin_id', $bin['bin_id'])->first();
 
                     event(new PartQtyUpdated($part, $binQuantity, [
                         'quantity' => ($bin['quantity'] - $bin['old_quantity']),
