@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\User\NewDealerUser;
 use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -15,9 +16,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 {
     use WithRequestQueryable;
 
-    public function __construct()
+    public function __construct(Builder $baseQuery)
     {
-        $this->withQuery(SalesPerson::query());
+        $this->withQuery($baseQuery);
     }
 
     /**
@@ -73,7 +74,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
     /**
      * Get All Salespeople
-     * 
+     *
      * @param int $params
      * @return type
      */
@@ -170,13 +171,13 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         }
 
         return $all;
-    } 
+    }
 
-    
+
 
     /**
      * Find Newest Sales Person From Vars or Check DB
-     * 
+     *
      * @param int $dealerId
      * @param int $dealerLocationId
      * @param string $salesType
@@ -205,7 +206,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
     /**
      * Round Robin to Next Sales Person
-     * 
+     *
      * @param int $dealerId
      * @param int $dealerLocationId
      * @param string $salesType
@@ -223,9 +224,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $nextSalesPerson = null;
         $lastId = 0;
         $dealerLocationId = (int) $dealerLocationId;
-        
+
         $salesPeople = $this->getSalesPeopleBy($dealerId, $dealerLocationId, $salesType);
-        
+
         // Loop Valid Sales People
         if(count($salesPeople) > 1) {
             $lastSalesPerson = $salesPeople->last();
@@ -259,29 +260,29 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
     /**
      * Find Sales People By Dealer ID
-     * 
+     *
      * @param type $dealerId
      */
     public function getSalesPeopleBy($dealerId, $dealerLocationId = null, $salesType = null) {
         // Get New Sales People By Dealer ID
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
         $query = SalesPerson::select('*')->where('user_id', $newDealerUser->user_id);
-        
+
         if ($dealerLocationId) {
             $query->where('dealer_location_id', $dealerLocationId);
         }
-        
+
         if ($salesType) {
             $query->where("is_{$salesType}", 1);
         }
-        
+
         return $query->get();
-                           
+
     }
 
     /**
      * Find Sales Person Type
-     * 
+     *
      * @param string $leadType
      * @return string
      */
