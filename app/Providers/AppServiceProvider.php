@@ -106,6 +106,8 @@ use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Services\CRM\Leads\AutoAssignService;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
+use App\Services\CRM\User\SalesAuthService;
+use App\Services\CRM\User\SalesAuthServiceInterface;
 use App\Services\Integration\Auth\GoogleService;
 use App\Services\Integration\Auth\GoogleServiceInterface;
 use App\Services\Integration\Auth\GmailService;
@@ -216,6 +218,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BlastServiceInterface::class, BlastService::class);
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
+        $this->app->bind(SalesAuthInterface::class, SalesAuthService::class);
         $this->app->bind(GoogleServiceInterface::class, GoogleService::class);
         $this->app->bind(GmailServiceInterface::class, GmailService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
