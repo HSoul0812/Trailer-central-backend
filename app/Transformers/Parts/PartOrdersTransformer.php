@@ -23,7 +23,9 @@ class PartOrdersTransformer extends TransformerAbstract
              'subtotal' => number_format($order->subtotal, 2),
              'tax' => number_format($order->tax, 2),
              'shipping' => number_format($order->shipping, 2),
-             'order_key' => $order->order_key
+             'order_key' => $order->order_key,
+             'created_at' => $order->created_at,
+             'updated_at' => $order->updated_at
          ];
     }
 }

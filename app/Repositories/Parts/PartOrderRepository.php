@@ -57,6 +57,30 @@ class PartOrderRepository implements PartOrderRepositoryInterface {
             'field' => 'shipto_name',
             'direction' => 'ASC'
         ],
+        'subtotal' => [
+            'field' => 'subtotal',
+            'direction' => 'DESC'
+        ],
+        '-subtotal' => [
+            'field' => 'subtotal',
+            'direction' => 'ASC'
+        ],
+        'tax' => [
+            'field' => 'tax',
+            'direction' => 'DESC'
+        ],
+        '-tax' => [
+            'field' => 'tax',
+            'direction' => 'ASC'
+        ],
+        'shipping' => [
+            'field' => 'shipping',
+            'direction' => 'DESC'
+        ],
+        '-shipping' => [
+            'field' => 'shipping',
+            'direction' => 'ASC'
+        ],
         'created_at' => [
             'field' => 'created_at',
             'direction' => 'DESC'
