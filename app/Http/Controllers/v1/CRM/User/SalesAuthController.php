@@ -37,6 +37,8 @@ class SalesAuthController extends RestfulControllerV2 {
             // Return Auth
             return $this->response->array($this->service->show($request->all()));
         }
+        
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -53,6 +55,8 @@ class SalesAuthController extends RestfulControllerV2 {
             // Return Auth
             return $this->response->array($this->service->create($request->all()));
         }
+        
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -71,5 +75,7 @@ class SalesAuthController extends RestfulControllerV2 {
             // Return Auth
             return $this->response->array($this->service->update($request->all()));
         }
+        
+        return $this->response->errorBadRequest();
     }
 }
