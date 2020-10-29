@@ -7,6 +7,7 @@ use App\Exceptions\Integration\Auth\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Auth\MissingGapiClientIdException;
 use App\Exceptions\Integration\Auth\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Auth\FailedConnectGapiClientException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class GoogleService
@@ -65,56 +66,87 @@ class GoogleService implements GoogleServiceInterface
         // Initialize Vars
         $result = [
             'access_token' => $accessToken->access_token,
-            'is_valid' => false,
-            'is_expired' => true,
-            'errors' => []
+            'is_valid' => $this->validateIdToken($accessToken->id_token),
+            'is_expired' => true
         ];
+
+        // Only if Valid!
+        if(!empty($result['is_valid'])) {
+            $refresh = $this->refreshAccessToken();
+            $result['is_expired'] = $refresh['expired'];
+            if(isset($refresh['access_token'])) {
+                $result['access_token'] = $refresh['access_token'];
+            }
+        }
+
+        // Return Payload Results
+        return $result;
+    }
+
+
+    /**
+     * Validate ID Token
+     * 
+     * @param AccessToken $accessToken
+     * @return boolean
+     */
+    private function validateIdToken($accessToken) {
+        // Invalid
+        $validate = false;
 
         // Validate ID Token
         try {
             // Verify ID Token is Valid
             $payload = $this->client->verifyIdToken($accessToken->id_token);
             if ($payload) {
-                $result['is_valid'] = true;
+                $validate = true;
             }
         }
         catch (\Exception $e) {
             // We actually just want to verify this is true or false
             // If it throws an exception, that means its false, the token isn't valid
-            // This exception can be used for other processes but isn't needed in this method
-            //throw new InvalidGapiIdTokenException;
-            $result['errors'][] = $e->getMessage() . ': ' . $e->getTraceAsString();
+            Log::error('Exception returned for Google Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
-        // Only if Valid!
-        if(!empty($result['is_valid'])) {
-            // Validate If Expired
-            try {
-                // If there is no previous token or it's expired.
-                $expired = $this->client->isAccessTokenExpired();
-                if ($this->client->isAccessTokenExpired()) {
-                    // Refresh the token if possible, else fetch a new one.
-                    if ($refreshToken = $this->client->getRefreshToken()) {
-                        if($newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken)) {
-                            $result['access_token'] = $newToken;
-                            $result['is_expired'] = false;
-                        }
+        // Return Validate
+        return $validate;
+    }
+
+    /**
+     * Refresh Access Token
+     * 
+     * @return array of expired status, also return new token if available
+     */
+    private function refreshAccessToken() {
+        // Set Expired
+        $result = [
+            'expired' => true
+        ];
+
+        // Validate If Expired
+        try {
+            // If there is no previous token or it's expired.
+            $this->client->isAccessTokenExpired();
+            if ($this->client->isAccessTokenExpired()) {
+                // Refresh the token if possible, else fetch a new one.
+                if ($refreshToken = $this->client->getRefreshToken()) {
+                    if($newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken)) {
+                        $result['access_token'] = $newToken;
+                        $result['expired'] = false;
                     }
                 }
-                // Its Not Expired!
-                else {
-                    $result['is_expired'] = false;
-                }
-            } catch (\Exception $e) {
-                // We actually just want to verify this is true or false
-                // If it throws an exception, that means its false, the token is expired
-                // This exception can be used for other processes but isn't needed in this method
-                //throw new InvalidGapiIdTokenException;
-                $result['errors'][] = $e->getMessage() . ': ' . $e->getTraceAsString();
             }
+            // Its Not Expired!
+            else {
+                $result['expired'] = false;
+            }
+        } catch (\Exception $e) {
+            // We actually just want to verify this is true or false
+            // If it throws an exception, that means its false, the token isn't valid
+            Log::error('Exception returned for Google Refresh Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
-        // Return Payload Results
+        // Return Result
         return $result;
     }
 }
