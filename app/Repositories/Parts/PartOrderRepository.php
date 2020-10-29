@@ -16,7 +16,7 @@ class PartOrderRepository implements PartOrderRepositoryInterface {
 
     use SortTrait;
 
-    private $sorts = [
+    private $sortOrders = [
         'status' => [
             'field' => 'status',
             'direction' => 'DESC'
@@ -141,5 +141,9 @@ class PartOrderRepository implements PartOrderRepositoryInterface {
 
     public function update($params) {
         throw new NotImplementedException();
+    }
+
+    protected function getSortOrders() {
+        return $this->sortOrders;
     }
 }
