@@ -218,7 +218,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BlastServiceInterface::class, BlastService::class);
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
-        $this->app->bind(SalesAuthInterface::class, SalesAuthService::class);
+        $this->app->bind(SalesAuthServiceInterface::class, SalesAuthService::class);
         $this->app->bind(GoogleServiceInterface::class, GoogleService::class);
         $this->app->bind(GmailServiceInterface::class, GmailService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
