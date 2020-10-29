@@ -1,36 +1,30 @@
 <?php
 
-namespace App\Services\CRM\User;
+namespace App\Services\Integration;
 
-use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Services\Integration\AuthServiceInterface;
+use App\Services\Integration\Auth\GoogleServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
-use App\Transformers\CRM\User\SalesPersonTransformer;
+use App\Transformers\Integration\Auth\TokenTransformer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
 /**
- * Class SalesAuthService
+ * Class AuthService
  * 
- * @package App\Services\CRM\User
+ * @package App\Services\Integration
  */
-class SalesAuthService implements SalesAuthServiceInterface
+class AuthService implements AuthServiceInterface
 {
-    /**
-     * @var SalesPersonRepository
-     */
-    protected $salesPerson;
-
     /**
      * @var TokenRepository
      */
     protected $tokens;
 
     /**
-     * @var AuthServiceInterface
+     * @var GoogleServiceInterface
      */
-    protected $auth;
+    protected $google;
 
     /**
      * @var Manager
@@ -38,17 +32,15 @@ class SalesAuthService implements SalesAuthServiceInterface
     private $fractal;
 
     /**
-     * Construct Sales Auth Service
+     * Construct Google Client
      */
     public function __construct(
-        SalesPersonRepositoryInterface $salesPersonRepo,
         TokenRepositoryInterface $tokens,
-        AuthServiceInterface $auth,
+        GoogleServiceInterface $google,
         Manager $fractal
     ) {
-        $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
-        $this->auth = $auth;
+        $this->google = $google;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -61,11 +53,6 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return Fractal
      */
     public function show($params) {
-        // Adjust Request
-        $params['relation_type'] = 'sales_person';
-        $params['relation_id'] = $params['id'];
-        unset($params['id']);
-
         // Get Access Token
         $accessToken = $this->tokens->getRelation($params);
 
@@ -80,11 +67,6 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return Fractal
      */
     public function create($params) {
-        // Adjust Request
-        $params['relation_type'] = 'sales_person';
-        $params['relation_id'] = $params['id'];
-        unset($params['id']);
-
         // Create Access Token
         $accessToken = $this->tokens->create($params);
 
@@ -99,11 +81,6 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return Fractal
      */
     public function update($params) {
-        // Adjust Request
-        $params['relation_type'] = 'sales_person';
-        $params['relation_id'] = $params['id'];
-        unset($params['id']);
-
         // Create Access Token
         $accessToken = $this->tokens->update($params);
 
@@ -113,21 +90,50 @@ class SalesAuthService implements SalesAuthServiceInterface
 
 
     /**
+     * Validate Access Token
+     * 
+     * @param AccessToken $accessToken
+     * @return array of validation
+     */
+    public function validate($accessToken) {
+        // Initialize Access Token
+        $validate = [
+            'is_valid' => false,
+            'is_expired' => true
+        ];
+
+        // Validate Access Token
+        if(!empty($accessToken->token_type)) {
+            if($accessToken->token_type === 'google') {
+                $validate = $this->google->validate($accessToken);
+            }
+        }
+
+        // Return Validation
+        return $validate;
+    }
+
+    /**
      * Return Response
      * 
      * @param AccessToken $accessToken
-     * @param array $params
+     * @param array $response
      * @return array
      */
-    public function response($accessToken, $params) {
-        // Get Sales Person
-        $salesPerson = $this->salesPerson->get([
-            'sales_person_id' => $params['relation_id']
-        ]);
-        $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
-        $response = $this->fractal->createData($item)->toArray();
+    public function response($accessToken, $response = array()) {
+        // Convert Token to Array
+        if(!empty($accessToken)) {
+            $data = new Item($accessToken, new TokenTransformer(), 'data');
+            $token = $this->fractal->createData($data)->toArray();
+            $response['data'] = $token['data'];
+        } else {
+            $response['data'] = null;
+        }
+
+        // Set Validate
+        $response['validate'] = $this->validate($accessToken);
 
         // Return Response
-        return $this->auth->response($accessToken, $response);
+        return $response;
     }
 }

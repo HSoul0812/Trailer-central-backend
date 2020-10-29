@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\CRM\User;
+namespace App\Services\Integration;
 
-interface SalesAuthServiceInterface {
+interface AuthServiceInterface {
     /**
      * Show Sales Auth Response
      * 
@@ -27,13 +27,21 @@ interface SalesAuthServiceInterface {
      */
     public function update($params);
 
+    
+    /**
+     * Validate Access Token
+     * 
+     * @param AccessToken $accessToken
+     * @return array of validation
+     */
+    public function validate($accessToken);
 
     /**
      * Return Response
      * 
      * @param AccessToken $accessToken
-     * @param array $params
+     * @param array $validate
      * @return array
      */
-    public function response($accessToken, $params);
+    public function response($accessToken, $validate);
 }
