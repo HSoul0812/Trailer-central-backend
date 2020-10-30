@@ -44,7 +44,8 @@
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
-        "grimzy/laravel-mysql-spatial": "^1.0"
+        "grimzy/laravel-mysql-spatial": "^1.0",
+        "facebook/php-business-sdk": "5.0.5"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
