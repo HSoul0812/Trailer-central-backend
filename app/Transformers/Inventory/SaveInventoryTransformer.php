@@ -5,14 +5,14 @@ namespace App\Transformers\Inventory;
 use App\Helpers\ConvertHelper;
 use App\Helpers\SanitizeHelper;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
+use App\Transformers\TransformerInterface;
 use Illuminate\Support\Facades\Log;
-use League\Fractal\TransformerAbstract;
 
 /**
  * Class SaveInventoryTransformer
  * @package App\Transformers\Inventory
  */
-class SaveInventoryTransformer extends TransformerAbstract
+class SaveInventoryTransformer implements TransformerInterface
 {
     private const FEET_SECOND_FORMAT = '%s_second';
     private const INCHES_SECOND_FORMAT = '%s_inches_second';
@@ -231,31 +231,56 @@ class SaveInventoryTransformer extends TransformerAbstract
             $createParams['attributes'] = $attributes;
             $createParams['features'] = $features;
 
-            foreach (self::IMAGES_FIELDS as $imagesField) {
-                if (!isset($params[$imagesField])) {
-                    continue;
-                }
-
-                if ($imagesField === 'new_images') {
-                    
-                }
-
-                foreach ($params[$imagesField] as $imageKey => $image) {
-                    foreach (self::IMAGE_FIELDS_MAPPING as $paramsImageField => $modelImageField) {
-                        if (isset($params[$imagesField][$imageKey][$modelImageField]) || !isset($params[$imagesField][$imageKey][$paramsImageField])) {
-                            continue;
-                        }
-
-                        $createParams[$imagesField][$imageKey][$modelImageField] = $params[$imagesField][$imageKey][$paramsImageField];
-                        unset($createParams[$imagesField][$imageKey][$paramsImageField]);
-                    }
-                }
-            }
+            $createParams = array_merge($createParams, $this->transformImages($createParams));
 
             return $createParams;
         } catch (\Exception $e) {
             Log::error('Item transform error.', $e->getTrace());
             return null;
         }
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    private function transformImages(array $params): array
+    {
+        $images = [];
+
+        foreach (self::IMAGES_FIELDS as $imagesField) {
+            if (!isset($params[$imagesField])) {
+                continue;
+            }
+
+            $paramsImages = $params[$imagesField];
+
+            if ($imagesField === 'new_images') {
+                $paramsImages = array_filter($paramsImages, function ($image) {
+                    return empty($image['remove']);
+                });
+
+                if (isset($params['source']) && $params['source'] === 'dashboard') {
+                    array_walk($paramsImages, function (&$image) {
+                        $image['was_manually_added'] = true;
+                    });
+                }
+            }
+
+            $images[$imagesField] = $paramsImages;
+
+            foreach ($paramsImages as $imageKey => $image) {
+                foreach (self::IMAGE_FIELDS_MAPPING as $paramsImageField => $modelImageField) {
+                    if (isset($paramsImages[$imageKey][$modelImageField]) || !isset($paramsImages[$imageKey][$paramsImageField])) {
+                        continue;
+                    }
+
+                    $images[$imagesField][$imageKey][$modelImageField] = $paramsImages[$imageKey][$paramsImageField];
+                    unset($images[$imagesField][$imageKey][$paramsImageField]);
+                }
+            }
+        }
+
+        return $images;
     }
 }

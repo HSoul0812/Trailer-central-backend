@@ -313,4 +313,17 @@ END;
 
         return $ret;
     }
+
+    /**
+     * @param string $filename
+     * @return string
+     */
+    public function cleanFilename(string $filename):string
+    {
+        return preg_replace(array( '/\s/', '/\.[\.]+/', '/[^\w_\.\-]/' ), array(
+            '_',
+            '.',
+            ''
+        ), $filename);
+    }
 }

@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
-use App\Transformers\Inventory\SaveInventoryTransformer;
+use App\Transformers\TransformerInterface;
 
 /**
  * Class CreateInventoryRequest
@@ -119,11 +119,11 @@ class CreateInventoryRequest extends Request
         'new_images' => 'array|nullable',
         'new_images.*.url' => 'string|required',
         'new_images.*.position' => 'integer|nullable',
-        'new_images.*.primary' => 'boolean|nullable',
-        'new_images.*.is_default' => 'boolean|nullable',
-        'new_images.*.secondary' => 'boolean|nullable',
-        'new_images.*.is_secondary' => 'boolean|nullable',
-        'new_images.*.removed' => 'boolean|nullable',
+        'new_images.*.primary' => 'checkbox|nullable',
+        'new_images.*.is_default' => 'checkbox|nullable',
+        'new_images.*.secondary' => 'checkbox|nullable',
+        'new_images.*.is_secondary' => 'checkbox|nullable',
+        'new_images.*.remove' => 'checkbox|nullable',
 
         'new_files' => 'array|nullable',
         'new_files.*.title' => 'string|nullable',
@@ -134,15 +134,25 @@ class CreateInventoryRequest extends Request
     ];
 
     /**
+     * @var TransformerInterface
+     */
+    private $transformer;
+
+    /**
      * {@inheritDoc}
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function all($keys = null)
     {
-        /** @var SaveInventoryTransformer $transformer */
-        $transformer = app()->make(SaveInventoryTransformer::class);
+        return $this->transformer->transform(parent::all());
+    }
 
-        return $transformer->transform(parent::all());
+    /**
+     * @param TransformerInterface $transformer
+     */
+    public function setTransformer(TransformerInterface $transformer): void
+    {
+        $this->transformer = $transformer;
     }
 }

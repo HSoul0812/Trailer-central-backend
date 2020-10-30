@@ -118,6 +118,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
+        \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
@@ -176,7 +177,7 @@ class AppServiceProvider extends ServiceProvider
 
             // parts crm
             __DIR__ . '/../../database/migrations/crm',
-            
+
             // dealer migrations
             __DIR__ . '/../../database/migrations/dealer',
 

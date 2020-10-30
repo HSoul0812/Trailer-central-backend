@@ -2,15 +2,13 @@
 
 namespace App\Services\Inventory;
 
-use App\Helpers\ConvertHelper;
-use App\Helpers\SanitizeHelper;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\Inventory\Inventory;
-use App\Repositories\Inventory\AttributeRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
+use App\Services\File\ImageService;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +20,16 @@ use Illuminate\Support\Facades\Log;
 class InventoryService
 {
     use DispatchesJobs;
+
+    const OVERLAY_ENABLED_PRIMARY = 1;
+    const OVERLAY_ENABLED_ALL = 2;
+
+    const OVERLAY_CODES = [
+        self::OVERLAY_ENABLED_PRIMARY,
+        self::OVERLAY_ENABLED_ALL,
+    ];
+
+    private const SOURCE_DASHBOARD = 'dashboard';
 
     /**
      * @var InventoryRepositoryInterface
@@ -37,20 +45,30 @@ class InventoryService
     private $fileRepository;
 
     /**
+     * @var ImageService
+     */
+    private $imageService;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
      * @param FileRepositoryInterface $fileRepository
+     * @param ImageService $imageService
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
         ImageRepositoryInterface $imageRepository,
-        FileRepositoryInterface $fileRepository
+        FileRepositoryInterface $fileRepository,
+        ImageService $imageService
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
         $this->fileRepository = $fileRepository;
+
+        $this->imageService = $imageService;
     }
+
 
     /**
      * @param array $params
@@ -58,10 +76,18 @@ class InventoryService
      */
     public function create(array $params): int
     {
-        //try {
+        try {
             $this->inventoryRepository->beginTransaction();
 
+            if (isset($params['new_images'])) {
+                $params['new_images'] = $this->uploadImages($params, 'new_images');
+            }
+
+            print_r($params);
+            exit();
+
             $inventory = $this->inventoryRepository->create($params);
+
 
             if (!$inventory instanceof Inventory) {
                 Log::error('Item hasn\'t been created.', ['params' => $params]);
@@ -76,12 +102,15 @@ class InventoryService
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
             $this->inventoryRepository->commitTransaction();
-/*        } catch (\Exception $e) {
+        } catch (\Exception $e) {
+            print_r($e->getMessage());
+            print_r($e->getTraceAsString());
+            exit();
             Log::error('Item create error.', $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             return false;
-        }*/
+        }
 
         return $inventory->inventory_id;
     }
@@ -266,5 +295,59 @@ class InventoryService
         }
 
         return compact(['deletedDuplicates', 'couldNotDeleteDuplicates']);
+    }
+
+    /**
+     * @param array $params
+     * @param string $imagesKey
+     * @return array
+     *
+     * @throws \App\Exceptions\File\FileUploadException
+     * @throws \App\Exceptions\File\ImageUploadException
+     */
+    private function uploadImages(array $params, string $imagesKey): array
+    {
+        $images = $params[$imagesKey];
+
+        $isOverlayEnabled = isset($params['overlay_enabled']) && in_array($params['overlay_enabled'], self::OVERLAY_CODES);
+        $overlayEnabledParams = ['overlayText' => $params['stock']];
+
+        $withOverlay = [];
+        $withoutOverlay = [];
+
+        if ($isOverlayEnabled && $params['overlay_enabled'] == self::OVERLAY_ENABLED_ALL) {
+            $withOverlay = $images;
+
+        } elseif ($isOverlayEnabled && $params['overlay_enabled'] == self::OVERLAY_ENABLED_PRIMARY) {
+            $withOverlay = array_filter($images, function ($image) {
+                return isset($image['position']) && $image['position'] == 0;
+            });
+
+            $withoutOverlay = array_filter($images, function ($image) {
+                return !isset($image['position']) || $image['position'] != 0;
+            });
+
+        } else {
+            $withoutOverlay = $images;
+        }
+
+        foreach ($withoutOverlay as &$image) {
+            $result = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
+
+            $image['filename'] = $result['filename'];
+            $image['filename_noverlay'] = '';
+            $image['hash'] = $result['hash'];
+        }
+
+        foreach ($withOverlay as &$image) {
+            $noOverlayResult = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
+            $overlayResult = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
+
+            $image['filename'] = $overlayResult['filename'];
+            $image['filename_noverlay'] = $noOverlayResult['filename'];
+            $image['hash'] = $overlayResult['hash'];
+        }
+
+        return array_merge($withOverlay, $withoutOverlay);
     }
 }

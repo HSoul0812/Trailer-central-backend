@@ -7,6 +7,7 @@ use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryService;
+use App\Transformers\Inventory\SaveInventoryTransformer;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\Inventory\GetInventoryRequest;
 use App\Transformers\Inventory\InventoryTransformer;
@@ -132,8 +133,10 @@ class InventoryController extends RestfulController
      */
     public function create(Request $request)
     {
-        $params = $request->all();
-        $inventoryRequest = new CreateInventoryRequest($params);
+        $inventoryRequest = new CreateInventoryRequest($request->all());
+
+        $transformer = app()->make(SaveInventoryTransformer::class);
+        $inventoryRequest->setTransformer($transformer);
 
         if (!$inventoryRequest->validate() || !($inventoryId = $this->inventoryService->create($inventoryRequest->all()))) {
             return $this->response->errorBadRequest();
