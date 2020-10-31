@@ -1,0 +1,215 @@
+<?php
+
+namespace App\Services\Integration\Auth;
+
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Class FacebookService
+ * 
+ * @package App\Services\Integration\Auth
+ */
+class FacebookService implements FacebookServiceInterface
+{
+    /**
+     * @var FacebookCatalogRepositoryInterface
+     */
+    protected $catalog;
+
+    /**
+     * @var TokenRepository
+     */
+    protected $tokens;
+
+    /**
+     * @var GoogleServiceInterface
+     */
+    protected $google;
+
+    /**
+     * @var Manager
+     */
+    private $fractal;
+
+    /**
+     * Construct Facebook Service
+     */
+    public function __construct(
+        FacebookCatalogRepositoryInterface $catalog,
+        TokenRepositoryInterface $tokens,
+        AuthServiceInterface $auth,
+        Manager $fractal
+    ) {
+        $this->catalog = $catalog;
+        $this->tokens = $tokens;
+        $this->auth = $auth;
+        $this->fractal = $fractal;
+
+        $this->fractal->setSerializer(new NoDataArraySerializer());
+    }
+
+    /**
+     * Get Sales Auth Response
+     * 
+     * @param array $params
+     * @return Fractal
+     */
+    public function index($params) {
+        // Get Access Token
+        $accessToken = $this->tokens->getRelation($params);
+
+        // Return Response
+        return $this->response($accessToken);
+    }
+
+    /**
+     * Show Sales Auth Response
+     * 
+     * @param int $id
+     * @return Fractal
+     */
+    public function show($id) {
+        // Get Access Token
+        $accessToken = $this->tokens->get(['id' => $id]);
+
+        // Return Response
+        return $this->response($accessToken);
+    }
+
+    /**
+     * Create Sales Auth
+     * 
+     * @param array $params
+     * @return Fractal
+     */
+    public function create($params) {
+        // Create Access Token
+        $accessToken = $this->tokens->create($params);
+
+        // Return Response
+        return $this->response($accessToken);
+    }
+
+    /**
+     * Update Sales Auth
+     * 
+     * @param array $params
+     * @return Fractal
+     */
+    public function update($params) {
+        // Create Access Token
+        $accessToken = $this->tokens->update($params);
+
+        // Return Response
+        return $this->response($accessToken);
+    }
+
+
+    /**
+     * Validate Facebook SDK Access Token Exists and Refresh if Possible
+     * 
+     * @param AccessToken $accessToken
+     * @return array of validation info
+     */
+    public function validate($accessToken) {
+        // ID Token Exists?
+        if(empty($accessToken->id_token)) {
+            throw new MissingFacebookIdTokenException;
+        }
+
+        // Configure Client
+        $this->client->setAccessToken([
+            'access_token' => $accessToken->access_token,
+            'id_token' => $accessToken->id_token,
+            'expires_in' => $accessToken->expires_in,
+            'created' => strtotime($accessToken->issued_at)
+        ]);
+        $this->client->setScopes($accessToken->scope);
+
+        // Initialize Vars
+        $result = [
+            'access_token' => $accessToken->access_token,
+            'is_valid' => $this->validateIdToken($accessToken->id_token),
+            'is_expired' => true
+        ];
+
+        // Only if Valid!
+        if(!empty($result['is_valid'])) {
+            $refresh = $this->refreshAccessToken();
+            $result['is_expired'] = $refresh['expired'];
+            if(isset($refresh['access_token'])) {
+                $result['access_token'] = $refresh['access_token'];
+            }
+        }
+
+        // Return Payload Results
+        return $result;
+    }
+
+
+    /**
+     * Validate ID Token
+     * 
+     * @param AccessToken $accessToken
+     * @return boolean
+     */
+    private function validateIdToken($accessToken) {
+        // Invalid
+        $validate = false;
+
+        // Validate ID Token
+        try {
+            // Verify ID Token is Valid
+            $payload = $this->client->verifyIdToken($accessToken->id_token);
+            if ($payload) {
+                $validate = true;
+            }
+        }
+        catch (\Exception $e) {
+            // We actually just want to verify this is true or false
+            // If it throws an exception, that means its false, the token isn't valid
+            Log::error('Exception returned for Google Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+
+        // Return Validate
+        return $validate;
+    }
+
+    /**
+     * Refresh Access Token
+     * 
+     * @return array of expired status, also return new token if available
+     */
+    private function refreshAccessToken() {
+        // Set Expired
+        $result = [
+            'expired' => true
+        ];
+
+        // Validate If Expired
+        try {
+            // If there is no previous token or it's expired.
+            $this->client->isAccessTokenExpired();
+            if ($this->client->isAccessTokenExpired()) {
+                // Refresh the token if possible, else fetch a new one.
+                if ($refreshToken = $this->client->getRefreshToken()) {
+                    if($newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken)) {
+                        $result['access_token'] = $newToken;
+                        $result['expired'] = false;
+                    }
+                }
+            }
+            // Its Not Expired!
+            else {
+                $result['expired'] = false;
+            }
+        } catch (\Exception $e) {
+            // We actually just want to verify this is true or false
+            // If it throws an exception, that means its false, the token isn't valid
+            Log::error('Exception returned for Google Refresh Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+
+        // Return Result
+        return $result;
+    }
+}

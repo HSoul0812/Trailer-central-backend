@@ -120,6 +120,8 @@ class AuthService implements AuthServiceInterface
         if(!empty($accessToken->token_type)) {
             if($accessToken->token_type === 'google') {
                 $validate = $this->google->validate($accessToken);
+            } elseif($accessToken->token_type === 'facebook') {
+                $validate = $this->facebook->validate($accessToken);
             }
         }
 
