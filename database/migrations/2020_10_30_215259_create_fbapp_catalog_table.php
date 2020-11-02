@@ -27,9 +27,8 @@ class CreateFbappCatalogTable extends Migration
             $table->index(['dealer_id', 'dealer_location_id']);
         });
 
-        Schema::table('integration_token', function (Blueprint $table) {
-            $table->enum('relation_type', array_keys(AccessToken::RELATION_TYPES));
-        });
+        // Update Integration Token Relation Type
+        DB::statement("ALTER TABLE integration_token MODIFY COLUMN relation_type ENUM('" . implode("', '", array_keys(AccessToken::RELATION_TYPES)) . "')");
     }
 
     /**
