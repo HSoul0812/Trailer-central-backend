@@ -438,7 +438,7 @@ $api->version('v1', function ($route) {
             */
             $route->group([
                 'prefix' => 'facebook',
-                'middleware' => 'integration.facebook.validate'
+                'middleware' => 'facebook.catalog.validate'
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\Integration\FacebookController@index');
                 $route->put('/', 'App\Http\Controllers\v1\Integration\FacebookController@create');
