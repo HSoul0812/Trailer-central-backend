@@ -10,13 +10,14 @@ use App\Models\CRM\User\EmailFolder;
 
 class SalesPersonTransformer extends TransformerAbstract
 {
-    protected $defaultIncludes = [
-        'folders'
-    ];
+    protected $defaultIncludes = [];
 
     protected $availableIncludes = [
         'posSales',
-        'allSales'
+        'allSales',
+        'smtp',
+        'imap',
+        'folders'
     ];
 
     public function transform(SalesPerson $salesPerson)
@@ -34,25 +35,33 @@ class SalesPersonTransformer extends TransformerAbstract
             'is_financing' => $salesPerson->is_financing,
             'is_trade' => $salesPerson->is_trade,
             'signature' => $salesPerson->signature,
-            'dealer_location_id' => $salesPerson->dealer_location_id,
-            'smtp' => [
-                'email' => !empty($salesPerson->smtp_email) ? $salesPerson->smtp_email : $salesPerson->email,
-                'password' => $salesPerson->smtp_password,
-                'host' => $salesPerson->smtp_server,
-                'port' => $salesPerson->smtp_port,
-                'security' => $salesPerson->smtp_security,
-                'auth' => $salesPerson->smtp_auth,
-                'failed' => $salesPerson->smtp_failed,
-                'error' => $salesPerson->smtp_error
-            ],
-            'imap' => [
-                'email' => !empty($salesPerson->imap_email) ? $salesPerson->imap_email : $salesPerson->email,
-                'password' => $salesPerson->imap_password,
-                'host' => $salesPerson->imap_server,
-                'port' => $salesPerson->imap_port,
-                'security' => $salesPerson->imap_security,
-                'failed' => $salesPerson->imap_failed
-            ]
+            'dealer_location_id' => $salesPerson->dealer_location_id
+        ];
+    }
+
+    public function includeSmtp(SalesPerson $salesPerson)
+    {
+        return [
+            'email' => !empty($salesPerson->smtp_email) ? $salesPerson->smtp_email : $salesPerson->email,
+            'password' => $salesPerson->smtp_password,
+            'host' => $salesPerson->smtp_server,
+            'port' => $salesPerson->smtp_port,
+            'security' => $salesPerson->smtp_security,
+            'auth' => $salesPerson->smtp_auth,
+            'failed' => $salesPerson->smtp_failed,
+            'error' => $salesPerson->smtp_error
+        ];
+    }
+
+    public function includeImap(SalesPerson $salesPerson)
+    {
+        return [
+            'email' => !empty($salesPerson->imap_email) ? $salesPerson->imap_email : $salesPerson->email,
+            'password' => $salesPerson->imap_password,
+            'host' => $salesPerson->imap_server,
+            'port' => $salesPerson->imap_port,
+            'security' => $salesPerson->imap_security,
+            'failed' => $salesPerson->imap_failed
         ];
     }
 
