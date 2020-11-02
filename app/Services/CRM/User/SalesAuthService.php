@@ -125,7 +125,9 @@ class SalesAuthService implements SalesAuthServiceInterface
             'sales_person_id' => $params['relation_id']
         ]);
         $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
-        $response = $this->fractal->createData($item)->toArray();
+        $response = $this->fractal->createData($item)
+                         ->includeSmtp()->includeImap()
+                         ->includeFolders()->toArray();
 
         // Return Response
         return $this->auth->response($accessToken, $response);
