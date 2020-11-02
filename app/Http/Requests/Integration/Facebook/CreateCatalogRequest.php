@@ -21,7 +21,7 @@ class CreateCatalogRequest extends Request {
         'scopes' => 'required|array',
         'scopes.*' => 'required|string|max:80',
         'account_name' => 'required|string',
-        'account_id' => 'required|integer',
+        'user_id' => 'required|integer',
         'filters' => 'string'
     ];
 }

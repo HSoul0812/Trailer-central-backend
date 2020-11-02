@@ -22,7 +22,7 @@ class UpdateCatalogRequest extends Request {
         'scopes' => 'array',
         'scopes.*' => 'string|max:80',
         'account_name' => 'string',
-        'account_id' => 'string',
+        'user_id' => 'integer',
         'filters' => 'string'
     ];
     
