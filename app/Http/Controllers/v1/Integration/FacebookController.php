@@ -10,6 +10,7 @@ use App\Http\Requests\Integration\Auth\CreateCatalogRequest;
 use App\Http\Requests\Integration\Auth\UpdateCatalogRequest;
 use App\Http\Requests\Integration\Auth\PayloadCatalogRequest;
 use App\Services\Integration\Facebook\CatalogServiceInterface;
+use App\Transformers\Integration\Facebook\CatalogTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
