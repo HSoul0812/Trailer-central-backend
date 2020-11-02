@@ -22,7 +22,7 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function transform(SalesPerson $salesPerson)
     {
-        return return [
+        return [
             'id' => $salesPerson->id,
             'user_id' => $salesPerson->user_id,
             'name' => $salesPerson->full_name,
