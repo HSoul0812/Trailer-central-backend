@@ -28,7 +28,7 @@ class CreateFbappCatalogTable extends Migration
         });
 
         Schema::table('integration_token', function (Blueprint $table) {
-            $table->enum('relation_type', array_keys(AccessToken::RELATION_TYPES))->change();
+            $table->enum('relation_type', array_keys(AccessToken::RELATION_TYPES));
         });
     }
 
