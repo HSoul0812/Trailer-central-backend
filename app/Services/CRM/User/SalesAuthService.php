@@ -7,6 +7,7 @@ use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
+use Dingo\Api\Http\Request;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\ArraySerializer;
@@ -59,7 +60,7 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * Show Sales Auth Response
      * 
-     * @param array $params
+     * @param Request $request
      * @return Fractal
      */
     public function show(Request $request) {
@@ -83,7 +84,7 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * Create Sales Auth
      * 
-     * @param array $params
+     * @param Request $request
      * @return Fractal
      */
     public function create(Request $request) {
@@ -107,7 +108,7 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * Update Sales Auth
      * 
-     * @param array $params
+     * @param Request $request
      * @return Fractal
      */
     public function update(Request $request) {
