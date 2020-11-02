@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Facebook;
 
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -20,6 +21,11 @@ class CatalogService implements CatalogServiceInterface
     protected $catalogs;
 
     /**
+     * @var TokenRepositoryInterface
+     */
+    protected $tokens;
+
+    /**
      * @var AuthServiceInterface
      */
     protected $auth;
@@ -34,10 +40,12 @@ class CatalogService implements CatalogServiceInterface
      */
     public function __construct(
         CatalogRepositoryInterface $catalog,
+        TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
         Manager $fractal
     ) {
         $this->catalogs = $catalog;
+        $this->tokens = $tokens;
         $this->auth = $auth;
         $this->fractal = $fractal;
 
