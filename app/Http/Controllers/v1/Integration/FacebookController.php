@@ -4,11 +4,11 @@ namespace App\Http\Controllers\v1\Integration;
 
 use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\Integration\Auth\GetCatalogRequest;
-use App\Http\Requests\Integration\Auth\ShowCatalogRequest;
-use App\Http\Requests\Integration\Auth\CreateCatalogRequest;
-use App\Http\Requests\Integration\Auth\UpdateCatalogRequest;
-use App\Http\Requests\Integration\Auth\PayloadCatalogRequest;
+use App\Http\Requests\Integration\Facebook\GetCatalogRequest;
+use App\Http\Requests\Integration\Facebook\ShowCatalogRequest;
+use App\Http\Requests\Integration\Facebook\CreateCatalogRequest;
+use App\Http\Requests\Integration\Facebook\UpdateCatalogRequest;
+use App\Http\Requests\Integration\Facebook\PayloadCatalogRequest;
 use App\Services\Integration\Facebook\CatalogServiceInterface;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
 
