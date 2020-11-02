@@ -22,7 +22,7 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function transform(SalesPerson $salesPerson)
     {
-        return [
+        return return [
             'id' => $salesPerson->id,
             'user_id' => $salesPerson->user_id,
             'name' => $salesPerson->full_name,
@@ -41,7 +41,7 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function includeSmtp(SalesPerson $salesPerson)
     {
-        return [
+        return $this->array([
             'email' => !empty($salesPerson->smtp_email) ? $salesPerson->smtp_email : $salesPerson->email,
             'password' => $salesPerson->smtp_password,
             'host' => $salesPerson->smtp_server,
@@ -50,19 +50,19 @@ class SalesPersonTransformer extends TransformerAbstract
             'auth' => $salesPerson->smtp_auth,
             'failed' => $salesPerson->smtp_failed,
             'error' => $salesPerson->smtp_error
-        ];
+        ]);
     }
 
     public function includeImap(SalesPerson $salesPerson)
     {
-        return [
+        return $this->array([
             'email' => !empty($salesPerson->imap_email) ? $salesPerson->imap_email : $salesPerson->email,
             'password' => $salesPerson->imap_password,
             'host' => $salesPerson->imap_server,
             'port' => $salesPerson->imap_port,
             'security' => $salesPerson->imap_security,
             'failed' => $salesPerson->imap_failed
-        ];
+        ]);
     }
 
     public function includeFolders(SalesPerson $salesPerson)

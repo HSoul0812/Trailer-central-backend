@@ -2,8 +2,6 @@
 
 namespace App\Services\CRM\User;
 
-use Dingo\Api\Http\Request;
-
 interface SalesAuthServiceInterface {
     /**
      * Show Sales Auth Response
@@ -11,7 +9,7 @@ interface SalesAuthServiceInterface {
      * @param array $params
      * @return Fractal
      */
-    public function show(Request $request);
+    public function show($params);
 
     /**
      * Create Sales Auth
@@ -19,7 +17,7 @@ interface SalesAuthServiceInterface {
      * @param array $params
      * @return Fractal
      */
-    public function create(Request $request);
+    public function create($params);
 
     /**
      * Update Sales Auth
@@ -27,7 +25,7 @@ interface SalesAuthServiceInterface {
      * @param array $params
      * @return Fractal
      */
-    public function update(Request $request);
+    public function update($params);
 
 
     /**

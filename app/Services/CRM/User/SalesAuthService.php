@@ -7,10 +7,8 @@ use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
-use Dingo\Api\Http\Request;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
-use League\Fractal\Serializer\ArraySerializer;
 
 /**
  * Class SalesAuthService
@@ -51,25 +49,19 @@ class SalesAuthService implements SalesAuthServiceInterface
         $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
         $this->auth = $auth;
-
-        // Initialize Fractal
         $this->fractal = $fractal;
+
         $this->fractal->setSerializer(new NoDataArraySerializer());
     }
 
     /**
      * Show Sales Auth Response
      * 
-     * @param Request $request
+     * @param array $params
      * @return Fractal
      */
-    public function show(Request $request) {
-        // Append Includes
-        $this->fractal->setSerializer(new ArraySerializer());
-        $this->fractal->parseIncludes($request->query('with', ''));
-
+    public function show($params) {
         // Adjust Request
-        $params = $request->all();
         $params['relation_type'] = 'sales_person';
         $params['relation_id'] = $params['id'];
         unset($params['id']);
@@ -84,16 +76,11 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * Create Sales Auth
      * 
-     * @param Request $request
+     * @param array $params
      * @return Fractal
      */
-    public function create(Request $request) {
-        // Append Includes
-        $this->fractal->setSerializer(new ArraySerializer());
-        $this->fractal->parseIncludes($request->query('with', ''));
-
+    public function create($params) {
         // Adjust Request
-        $params = $request->all();
         $params['relation_type'] = 'sales_person';
         $params['relation_id'] = $params['id'];
         unset($params['id']);
@@ -108,16 +95,11 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * Update Sales Auth
      * 
-     * @param Request $request
+     * @param array $params
      * @return Fractal
      */
-    public function update(Request $request) {
-        // Append Includes
-        $this->fractal->setSerializer(new ArraySerializer());
-        $this->fractal->parseIncludes($request->query('with', ''));
-
+    public function update($params) {
         // Adjust Request
-        $params = $request->all();
         $params['relation_type'] = 'sales_person';
         $params['relation_id'] = $params['id'];
         unset($params['id']);

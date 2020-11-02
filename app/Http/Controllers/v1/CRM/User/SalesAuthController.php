@@ -35,7 +35,7 @@ class SalesAuthController extends RestfulControllerV2 {
         $request = new ShowSalesAuthRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->service->show($request));
+            return $this->response->array($this->service->show($request->all()));
         }
         
         return $this->response->errorBadRequest();
@@ -53,7 +53,7 @@ class SalesAuthController extends RestfulControllerV2 {
         $request = new CreateSalesAuthRequest($request->all());
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->service->create($request));
+            return $this->response->array($this->service->create($request->all()));
         }
         
         return $this->response->errorBadRequest();
@@ -73,7 +73,7 @@ class SalesAuthController extends RestfulControllerV2 {
         $request = new UpdateSalesAuthRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->service->update($request));
+            return $this->response->array($this->service->update($request->all()));
         }
         
         return $this->response->errorBadRequest();
