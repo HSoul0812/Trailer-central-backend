@@ -77,14 +77,13 @@ class CatalogService implements CatalogServiceInterface
         // Adjust Request
         $params['token_type'] = 'facebook';
         $params['relation_type'] = 'fbapp_catalog';
-        $params['relation_id'] = $params['id'];
-        unset($params['id']);
-
-        // Get Access Token
-        $accessToken = $this->tokens->create($params);
 
         // Create Token
         $catalog = $this->catalogs->create($params);
+        $params['relation_id'] = $catalog->id;
+
+        // Get Access Token
+        $accessToken = $this->tokens->create($params);
 
         // Return Response
         return $this->response($catalog, $accessToken);
