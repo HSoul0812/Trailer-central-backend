@@ -50,6 +50,9 @@ class SalesAuthService implements SalesAuthServiceInterface
         $this->tokens = $tokens;
         $this->auth = $auth;
         $this->fractal = $fractal;
+        if (isset($_GET['include'])) {
+            $this->fractal->parseIncludes($_GET['include']);
+        }
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
     }
