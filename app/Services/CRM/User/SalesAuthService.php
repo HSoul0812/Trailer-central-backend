@@ -9,6 +9,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
+use League\Fractal\Serializer\ArraySerializer;
 
 /**
  * Class SalesAuthService
@@ -49,11 +50,9 @@ class SalesAuthService implements SalesAuthServiceInterface
         $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
         $this->auth = $auth;
-        $this->fractal = $fractal;
-        if (isset($_GET['include'])) {
-            $this->fractal->parseIncludes($_GET['include']);
-        }
 
+        // Initialize Fractal
+        $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
     }
 
@@ -63,8 +62,13 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @param array $params
      * @return Fractal
      */
-    public function show($params) {
+    public function show(Request $request) {
+        // Append Includes
+        $this->fractal->setSerializer(new ArraySerializer());
+        $this->fractal->parseIncludes($request->query('with', ''));
+
         // Adjust Request
+        $params = $request->all();
         $params['relation_type'] = 'sales_person';
         $params['relation_id'] = $params['id'];
         unset($params['id']);
@@ -82,8 +86,13 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @param array $params
      * @return Fractal
      */
-    public function create($params) {
+    public function create(Request $request) {
+        // Append Includes
+        $this->fractal->setSerializer(new ArraySerializer());
+        $this->fractal->parseIncludes($request->query('with', ''));
+
         // Adjust Request
+        $params = $request->all();
         $params['relation_type'] = 'sales_person';
         $params['relation_id'] = $params['id'];
         unset($params['id']);
@@ -101,8 +110,13 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @param array $params
      * @return Fractal
      */
-    public function update($params) {
+    public function update(Request $request) {
+        // Append Includes
+        $this->fractal->setSerializer(new ArraySerializer());
+        $this->fractal->parseIncludes($request->query('with', ''));
+
         // Adjust Request
+        $params = $request->all();
         $params['relation_type'] = 'sales_person';
         $params['relation_id'] = $params['id'];
         unset($params['id']);
