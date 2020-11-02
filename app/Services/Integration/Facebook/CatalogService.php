@@ -2,9 +2,10 @@
 
 namespace App\Services\Integration\Facebook;
 
-use App\Services\Integration\Auth\FacebookServiceInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
-use Illuminate\Support\Facades\Log;
+use App\Services\Integration\AuthServiceInterface;
+use App\Utilities\Fractal\NoDataArraySerializer;
+use League\Fractal\Manager;
 
 /**
  * Class CatalogService
@@ -14,14 +15,14 @@ use Illuminate\Support\Facades\Log;
 class CatalogService implements CatalogServiceInterface
 {
     /**
-     * @var FacebookServiceInterface
-     */
-    protected $sdk;
-
-    /**
      * @var CatalogRepositoryInterface
      */
     protected $catalogs;
+
+    /**
+     * @var AuthServiceInterface
+     */
+    protected $auth;
 
     /**
      * @var Manager
@@ -32,29 +33,15 @@ class CatalogService implements CatalogServiceInterface
      * Construct Facebook Service
      */
     public function __construct(
-        FacebookServiceInterface $sdk,
         CatalogRepositoryInterface $catalog,
         AuthServiceInterface $auth,
         Manager $fractal
     ) {
-        $this->sdk = $sdk;
         $this->catalogs = $catalog;
         $this->auth = $auth;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
-    }
-
-    /**
-     * Get Catalog Response
-     * 
-     * @param array $params
-     * @return Fractal
-     */
-    public function index($params) {
-        // Get Catalogs
-        $data = new Collection($this->catalogs->getAll($params), new CatalogTransformer(), 'data');
-        return $this->fractal->createData($data)->toArray();
     }
 
     /**
@@ -88,15 +75,19 @@ class CatalogService implements CatalogServiceInterface
      */
     public function create($params) {
         // Adjust Request
+        $params['token_type'] = 'facebook';
         $params['relation_type'] = 'fbapp_catalog';
         $params['relation_id'] = $params['id'];
         unset($params['id']);
 
-        // Create Access Token
-        $accessToken = $this->catalogs->create($params);
+        // Get Access Token
+        $accessToken = $this->tokens->create($params);
+
+        // Create Token
+        $catalog = $this->catalogs->create($params);
 
         // Return Response
-        return $this->response($accessToken);
+        return $this->response($catalog, $accessToken);
     }
 
     /**
@@ -106,34 +97,41 @@ class CatalogService implements CatalogServiceInterface
      * @return Fractal
      */
     public function update($params) {
+        // Adjust Request
+        $params['token_type'] = 'facebook';
+        $params['relation_type'] = 'fbapp_catalog';
+        $params['relation_id'] = $params['id'];
+        unset($params['id']);
+
+        // Get Access Token
+        $accessToken = $this->tokens->update($params);
+
         // Create Access Token
-        $accessToken = $this->catalogs->update($params);
+        $catalog = $this->catalogs->update($params);
 
         // Return Response
-        return $this->response($accessToken);
+        return $this->response($catalog, $accessToken);
     }
 
     /**
      * Return Response
      * 
+     * @param Catalog $catalog
      * @param AccessToken $accessToken
      * @param array $response
      * @return array
      */
-    public function response($accessToken, $response = array()) {
+    public function response($catalog, $accessToken, $response = array()) {
         // Convert Token to Array
-        if(!empty($accessToken)) {
-            $data = new Item($accessToken, new CatalogTransformer(), 'catalog');
-            $token = $this->fractal->createData($data)->toArray();
-            $response['data'] = $token['data'];
+        if(!empty($catalog)) {
+            $data = new Item($catalog, new CatalogTransformer(), 'data');
+            $item = $this->fractal->createData($data)->toArray();
+            $response['catalog'] = $item['data'];
         } else {
-            $response['data'] = null;
+            $response['catalog'] = null;
         }
 
-        // Set Validate
-        $response['validate'] = $this->validate($accessToken);
-
         // Return Response
-        return $response;
+        return $this->auth->response($accessToken, $response);
     }
 }
