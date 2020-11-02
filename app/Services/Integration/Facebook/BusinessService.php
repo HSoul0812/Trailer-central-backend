@@ -65,7 +65,7 @@ class BusinessService implements BusinessServiceInterface
      */
     private function initApi($accessToken) {
         // Return SDK
-        $this->sdk = Api::init($_ENV['FB_SDK_API_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
+        $this->sdk = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
     }
 
     /**
