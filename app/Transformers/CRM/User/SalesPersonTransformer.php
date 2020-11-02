@@ -41,7 +41,7 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function includeSmtp(SalesPerson $salesPerson)
     {
-        return $this->array([
+        return $this->item([
             'email' => !empty($salesPerson->smtp_email) ? $salesPerson->smtp_email : $salesPerson->email,
             'password' => $salesPerson->smtp_password,
             'host' => $salesPerson->smtp_server,
@@ -55,7 +55,7 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function includeImap(SalesPerson $salesPerson)
     {
-        return $this->array([
+        return $this->item([
             'email' => !empty($salesPerson->imap_email) ? $salesPerson->imap_email : $salesPerson->email,
             'password' => $salesPerson->imap_password,
             'host' => $salesPerson->imap_server,
