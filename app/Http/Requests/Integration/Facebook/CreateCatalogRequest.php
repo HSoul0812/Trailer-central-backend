@@ -13,7 +13,7 @@ class CreateCatalogRequest extends Request {
 
     protected $rules = [
         'access_token' => 'required|string|max:255',
-        'refresh_token' => 'string',
+        'refresh_token' => 'nullable|string',
         'id_token' => 'string',
         'issued_at' => 'date_format:Y-m-d H:i:s',
         'expires_at' => 'date_format:Y-m-d H:i:s',
