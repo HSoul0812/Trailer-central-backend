@@ -6,6 +6,7 @@ use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use App\Transformers\Integration\Facebook\CatalogTransformer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
