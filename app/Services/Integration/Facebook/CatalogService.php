@@ -51,6 +51,9 @@ class CatalogService implements CatalogServiceInterface
      * @return Fractal
      */
     public function show($params) {
+        // Get Access Token
+        $catalog = $this->catalogs->get($params);
+
         // Adjust Request
         $params['token_type'] = 'facebook';
         $params['relation_type'] = 'fbapp_catalog';
@@ -59,9 +62,6 @@ class CatalogService implements CatalogServiceInterface
 
         // Get Access Token
         $accessToken = $this->tokens->getRelation($params);
-
-        // Get Access Token
-        $catalog = $this->catalogs->get(['id' => $params['relation_id']]);
 
         // Return Response
         return $this->response($catalog, $accessToken);
@@ -74,12 +74,12 @@ class CatalogService implements CatalogServiceInterface
      * @return Fractal
      */
     public function create($params) {
+        // Create Token
+        $catalog = $this->catalogs->create($params);
+
         // Adjust Request
         $params['token_type'] = 'facebook';
         $params['relation_type'] = 'fbapp_catalog';
-
-        // Create Token
-        $catalog = $this->catalogs->create($params);
         $params['relation_id'] = $catalog->id;
 
         // Get Access Token
@@ -96,6 +96,9 @@ class CatalogService implements CatalogServiceInterface
      * @return Fractal
      */
     public function update($params) {
+        // Create Access Token
+        $catalog = $this->catalogs->update($params);
+
         // Adjust Request
         $params['token_type'] = 'facebook';
         $params['relation_type'] = 'fbapp_catalog';
@@ -103,10 +106,7 @@ class CatalogService implements CatalogServiceInterface
         unset($params['id']);
 
         // Get Access Token
-        $accessToken = $this->tokens->update($params);
-
-        // Create Access Token
-        $catalog = $this->catalogs->update($params);
+        $accessToken = $this->tokens->create($params);
 
         // Return Response
         return $this->response($catalog, $accessToken);
