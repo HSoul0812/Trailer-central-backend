@@ -35,24 +35,14 @@ class BusinessService implements BusinessServiceInterface
         }
 
         // Configure Client
-        $sdk = $this->initApi($accessToken);
-        var_dump($sdk);
+        $this->initApi($accessToken);
 
         // Initialize Vars
         $result = [
             'access_token' => $accessToken->access_token,
-            'is_valid' => $this->validateIdToken($accessToken->id_token),
-            'is_expired' => true
+            'is_valid' => !empty($this->sdk) ? true : false,
+            'is_expired' => !empty($this->sdk) ? false : true
         ];
-
-        // Only if Valid!
-        if(!empty($result['is_valid'])) {
-            $refresh = $this->refreshAccessToken();
-            $result['is_expired'] = $refresh['expired'];
-            if(isset($refresh['access_token'])) {
-                $result['access_token'] = $refresh['access_token'];
-            }
-        }
 
         // Return Payload Results
         return $result;
@@ -65,11 +55,19 @@ class BusinessService implements BusinessServiceInterface
      * @return API
      */
     private function initApi($accessToken) {
-        // Return SDK
-        $this->sdk = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
+        // Try to Get SDK!
+        try {
+            // Return SDK
+            $sdk = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
+        } catch(\Exception $e) {
+            $sdk = null;
+        }
+
+        // Get SDK
+        $this->sdk = $sdk;
 
         // Return SDK
-        return $this->sdk;
+        return $sdk;
     }
 
     /**
