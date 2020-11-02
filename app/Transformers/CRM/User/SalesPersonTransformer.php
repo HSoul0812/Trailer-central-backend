@@ -41,28 +41,32 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function includeSmtp(SalesPerson $salesPerson)
     {
-        return $this->item([
-            'email' => !empty($salesPerson->smtp_email) ? $salesPerson->smtp_email : $salesPerson->email,
-            'password' => $salesPerson->smtp_password,
-            'host' => $salesPerson->smtp_server,
-            'port' => $salesPerson->smtp_port,
-            'security' => $salesPerson->smtp_security,
-            'auth' => $salesPerson->smtp_auth,
-            'failed' => $salesPerson->smtp_failed,
-            'error' => $salesPerson->smtp_error
-        ]);
+        return $this->item($salesPerson, function($salesPerson) {
+            return [
+                'email' => !empty($salesPerson->smtp_email) ? $salesPerson->smtp_email : $salesPerson->email,
+                'password' => $salesPerson->smtp_password,
+                'host' => $salesPerson->smtp_server,
+                'port' => $salesPerson->smtp_port,
+                'security' => $salesPerson->smtp_security,
+                'auth' => $salesPerson->smtp_auth,
+                'failed' => $salesPerson->smtp_failed,
+                'error' => $salesPerson->smtp_error
+            ];
+        });
     }
 
     public function includeImap(SalesPerson $salesPerson)
     {
-        return $this->item([
-            'email' => !empty($salesPerson->imap_email) ? $salesPerson->imap_email : $salesPerson->email,
-            'password' => $salesPerson->imap_password,
-            'host' => $salesPerson->imap_server,
-            'port' => $salesPerson->imap_port,
-            'security' => $salesPerson->imap_security,
-            'failed' => $salesPerson->imap_failed
-        ]);
+        return $this->item($salesPerson, function($salesPerson) {
+            return [
+                'email' => !empty($salesPerson->imap_email) ? $salesPerson->imap_email : $salesPerson->email,
+                'password' => $salesPerson->imap_password,
+                'host' => $salesPerson->imap_server,
+                'port' => $salesPerson->imap_port,
+                'security' => $salesPerson->imap_security,
+                'failed' => $salesPerson->imap_failed
+            ];
+        });
     }
 
     public function includeFolders(SalesPerson $salesPerson)
