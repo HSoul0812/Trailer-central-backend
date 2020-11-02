@@ -442,10 +442,10 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\Integration\FacebookController@index');
                 $route->put('/', 'App\Http\Controllers\v1\Integration\FacebookController@create');
-                $route->post('/', 'App\Http\Controllers\v1\Integration\FacebookController@valid');
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
                 $route->put('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@payload')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@delete')->where('id', '[0-9]+');
             });
         });
 

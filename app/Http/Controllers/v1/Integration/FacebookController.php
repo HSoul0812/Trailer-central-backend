@@ -14,7 +14,7 @@ use App\Transformers\Integration\Facebook\CatalogTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
-     * @var App\Services\Integration\FacebookServiceInterface
+     * @var App\Services\Integration\CatalogServiceInterface
      */
     private $service;
 

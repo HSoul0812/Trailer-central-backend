@@ -4,6 +4,7 @@ namespace App\Services\Integration;
 
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Auth\GoogleServiceInterface;
+use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use League\Fractal\Manager;
@@ -27,6 +28,11 @@ class AuthService implements AuthServiceInterface
     protected $google;
 
     /**
+     * @var BusinessServiceInterface
+     */
+    protected $facebook;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -37,10 +43,12 @@ class AuthService implements AuthServiceInterface
     public function __construct(
         TokenRepositoryInterface $tokens,
         GoogleServiceInterface $google,
+        BusinessServiceInterface $facebook,
         Manager $fractal
     ) {
         $this->tokens = $tokens;
         $this->google = $google;
+        $this->facebook = $facebook;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());

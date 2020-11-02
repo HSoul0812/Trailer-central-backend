@@ -114,6 +114,10 @@ use App\Services\Integration\Auth\GoogleService;
 use App\Services\Integration\Auth\GoogleServiceInterface;
 use App\Services\Integration\Auth\GmailService;
 use App\Services\Integration\Auth\GmailServiceInterface;
+use App\Services\Integration\Facebook\CatalogService;
+use App\Services\Integration\Facebook\CatalogServiceInterface;
+use App\Services\Integration\Facebook\BusinessService;
+use App\Services\Integration\Facebook\BusinessServiceInterface;
 use Laravel\Nova\Nova;
 
 class AppServiceProvider extends ServiceProvider
@@ -226,6 +230,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->bind(GoogleServiceInterface::class, GoogleService::class);
         $this->app->bind(GmailServiceInterface::class, GmailService::class);
+        $this->app->bind(CatalogServiceInterface::class, CatalogService::class);
+        $this->app->bind(BusinessServiceInterface::class, BusinessService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\Integration\Auth;
+namespace App\Services\Integration\Facebook;
 
-interface FacebookServiceInterface {
+interface BusinessServiceInterface {
     /**
      * Validate Facebook SDK Access Token Exists
      * 

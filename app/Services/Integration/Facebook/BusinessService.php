@@ -1,108 +1,25 @@
 <?php
 
-namespace App\Services\Integration\Auth;
+namespace App\Services\Integration\Facebook;
 
+use FacebookAds\Api;
+use FacebookAds\Logger\CurlLogger;
+use FacebookAds\Object\AdAccount;
+use FacebookAds\Object\Campaign;
+use FacebookAds\Object\Fields\CampaignFields;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Class FacebookService
+ * Class BusinessService
  * 
- * @package App\Services\Integration\Auth
+ * @package App\Services\Integration\Facebook
  */
-class FacebookService implements FacebookServiceInterface
+class BusinessService implements BusinessServiceInterface
 {
     /**
-     * @var FacebookCatalogRepositoryInterface
+     * @var FacebookAds\Api
      */
-    protected $catalog;
-
-    /**
-     * @var TokenRepository
-     */
-    protected $tokens;
-
-    /**
-     * @var GoogleServiceInterface
-     */
-    protected $google;
-
-    /**
-     * @var Manager
-     */
-    private $fractal;
-
-    /**
-     * Construct Facebook Service
-     */
-    public function __construct(
-        FacebookCatalogRepositoryInterface $catalog,
-        TokenRepositoryInterface $tokens,
-        AuthServiceInterface $auth,
-        Manager $fractal
-    ) {
-        $this->catalog = $catalog;
-        $this->tokens = $tokens;
-        $this->auth = $auth;
-        $this->fractal = $fractal;
-
-        $this->fractal->setSerializer(new NoDataArraySerializer());
-    }
-
-    /**
-     * Get Sales Auth Response
-     * 
-     * @param array $params
-     * @return Fractal
-     */
-    public function index($params) {
-        // Get Access Token
-        $accessToken = $this->tokens->getRelation($params);
-
-        // Return Response
-        return $this->response($accessToken);
-    }
-
-    /**
-     * Show Sales Auth Response
-     * 
-     * @param int $id
-     * @return Fractal
-     */
-    public function show($id) {
-        // Get Access Token
-        $accessToken = $this->tokens->get(['id' => $id]);
-
-        // Return Response
-        return $this->response($accessToken);
-    }
-
-    /**
-     * Create Sales Auth
-     * 
-     * @param array $params
-     * @return Fractal
-     */
-    public function create($params) {
-        // Create Access Token
-        $accessToken = $this->tokens->create($params);
-
-        // Return Response
-        return $this->response($accessToken);
-    }
-
-    /**
-     * Update Sales Auth
-     * 
-     * @param array $params
-     * @return Fractal
-     */
-    public function update($params) {
-        // Create Access Token
-        $accessToken = $this->tokens->update($params);
-
-        // Return Response
-        return $this->response($accessToken);
-    }
+    protected $sdk;
 
 
     /**
@@ -118,13 +35,7 @@ class FacebookService implements FacebookServiceInterface
         }
 
         // Configure Client
-        $this->client->setAccessToken([
-            'access_token' => $accessToken->access_token,
-            'id_token' => $accessToken->id_token,
-            'expires_in' => $accessToken->expires_in,
-            'created' => strtotime($accessToken->issued_at)
-        ]);
-        $this->client->setScopes($accessToken->scope);
+        $sdk = $this->initApi($accessToken);
 
         // Initialize Vars
         $result = [
@@ -146,6 +57,16 @@ class FacebookService implements FacebookServiceInterface
         return $result;
     }
 
+    /**
+     * Initialize API
+     * 
+     * @param AccessToken $accessToken
+     * @return API
+     */
+    private function initApi($accessToken) {
+        // Return SDK
+        $this->sdk = Api::init($_ENV['FB_SDK_API_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
+    }
 
     /**
      * Validate ID Token
