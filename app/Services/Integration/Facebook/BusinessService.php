@@ -36,6 +36,7 @@ class BusinessService implements BusinessServiceInterface
 
         // Configure Client
         $sdk = $this->initApi($accessToken);
+        var_dump($sdk);
 
         // Initialize Vars
         $result = [
