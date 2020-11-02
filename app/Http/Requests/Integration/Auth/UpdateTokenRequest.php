@@ -21,6 +21,7 @@ class UpdateTokenRequest extends Request {
         'id_token' => 'string',
         'issued_at' => 'date_format:Y-m-d H:i:s',
         'expires_at' => 'date_format:Y-m-d H:i:s',
+        'expires_in' => 'integer',
         'scopes' => 'array',
         'scopes.*' => 'string|max:80'
     ];

@@ -14,8 +14,20 @@ class CreateFbappCatalogTable extends Migration
     public function up()
     {
         Schema::create('fbapp_catalog', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id');
+            $table->integer('dealer_id')->index();
+            $table->integer('dealer_location_id');
+            $table->string('account_name');
+            $table->integer('user_id')->index();
+            $table->text('filters');
+            $table->boolean('is_active')->default(false);
             $table->timestamps();
+
+            $table->index(['dealer_id', 'dealer_location_id']);
+        });
+
+        Schema::table('integration_token', function (Blueprint $table) {
+            $table->enum('relation_type', array_keys(AccessToken::RELATION_TYPES))->change();
         });
     }
 

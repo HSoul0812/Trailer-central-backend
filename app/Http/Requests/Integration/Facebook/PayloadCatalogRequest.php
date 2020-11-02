@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Requests\Integration\Auth;
+namespace App\Http\Requests\Integration\Facebook;
 
 use App\Http\Requests\Request;
 
 /**
- * Receive Facebook Payload Request
+ * Receive Facebook Catalog Payload Request
  * 
  * @author David A Conway Jr.
  */
-class PayloadFacebookRequest extends Request {
+class PayloadCatalogRequest extends Request {
 
     protected $rules = [
         'id' => 'required|int',

@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Requests\Integration\Auth;
+namespace App\Http\Requests\Integration\Facebook;
 
 use App\Http\Requests\Request;
 
 /**
- * Show Facebook Request
+ * Show Facebook Catalog Request
  * 
  * @author David A Conway Jr.
  */
-class ShowFacebookRequest extends Request {
+class ShowCatalogRequest extends Request {
     
     protected $rules = [
         'id' => 'required|integer'

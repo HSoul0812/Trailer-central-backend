@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\v1\Integration\Auth;
+namespace App\Http\Controllers\v1\Integration;
 
 use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\Integration\Auth\GetFacebookRequest;
-use App\Http\Requests\Integration\Auth\ShowFacebookRequest;
-use App\Http\Requests\Integration\Auth\CreateFacebookRequest;
-use App\Http\Requests\Integration\Auth\UpdateFacebookRequest;
-use App\Http\Requests\Integration\Auth\PayloadFacebookRequest;
-use App\Services\Integration\FacebookServiceInterface;
+use App\Http\Requests\Integration\Auth\GetCatalogRequest;
+use App\Http\Requests\Integration\Auth\ShowCatalogRequest;
+use App\Http\Requests\Integration\Auth\CreateCatalogRequest;
+use App\Http\Requests\Integration\Auth\UpdateCatalogRequest;
+use App\Http\Requests\Integration\Auth\PayloadCatalogRequest;
+use App\Services\Integration\Facebook\CatalogServiceInterface;
 
 class FacebookController extends RestfulControllerV2 {
     /**
@@ -17,24 +17,44 @@ class FacebookController extends RestfulControllerV2 {
      */
     private $service;
 
-    public function __construct(FacebookServiceInterface $service) {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
+    public function __construct(CatalogServiceInterface $service) {
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
 
         $this->service = $service;
     }
 
     /**
-     * Get Facebook Credentials and Access Token
+     * Get Facebook Catalogs With Access Tokens
+     * 
+     * @param Request $request
+     * @return type
+     */
+    public function index(Request $request)
+    {
+        // Handle Facebook Catalog Request
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new GetCatalogRequest($requestData);
+        if ($request->validate()) {
+            // Get Catalogs
+            return $this->response->paginator($this->catalogs->getAll($request->all()), new CatalogTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Get Facebook Catalog and Access Token
      * 
      * @param Request $request
      * @return type
      */
     public function show(int $id, Request $request)
     {
-        // Handle Auth Sales People Request
+        // Handle Facebook Catalog Request
         $requestData = $request->all();
         $requestData['id'] = $id;
-        $request = new ShowFacebookRequest($requestData);
+        $request = new ShowCatalogRequest($requestData);
         if ($request->validate()) {
             // Return Auth
             return $this->response->array($this->service->show($request->all()));
@@ -44,15 +64,15 @@ class FacebookController extends RestfulControllerV2 {
     }
 
     /**
-     * Create Facebook Credentials and Access Token
+     * Create Facebook Catalog and Access Token
      * 
      * @param Request $request
      * @return type
      */
     public function create(Request $request)
     {
-        // Handle Auth Sales People Request
-        $request = new CreateFacebookRequest($request->all());
+        // Handle Facebook Catalog Request
+        $request = new CreateCatalogRequest($request->all());
         if ($request->validate()) {
             // Return Auth
             return $this->response->array($this->service->create($request->all()));
@@ -62,17 +82,17 @@ class FacebookController extends RestfulControllerV2 {
     }
 
     /**
-     * Update Facebook Credentials and Access Token
+     * Update Facebook Catalog and Access Token
      * 
      * @param Request $request
      * @return type
      */
     public function update(int $id, Request $request)
     {
-        // Handle Auth Sales People Request
+        // Handle Facebook Catalog Request
         $requestData = $request->all();
         $requestData['id'] = $id;
-        $request = new UpdateFacebookRequest($requestData);
+        $request = new UpdateCatalogRequest($requestData);
         if ($request->validate()) {
             // Return Auth
             return $this->response->array($this->service->update($request->all()));
@@ -89,10 +109,10 @@ class FacebookController extends RestfulControllerV2 {
      */
     public function payload(int $id, Request $request)
     {
-        // Handle Auth Sales People Request
+        // Handle Facebook Catalog Request
         $requestData = $request->all();
         $requestData['id'] = $id;
-        $request = new PayloadFacebookRequest($requestData);
+        $request = new PayloadCatalogRequest($requestData);
         if ($request->validate()) {
             // Return Auth
             return $this->response->array($this->service->update($request->all()));

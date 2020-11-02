@@ -25,13 +25,15 @@ class AccessToken extends Model
     // Define Relation Types
     const RELATION_TYPES = [
         'sales_person' => 'Sales Person',
-        'fbapp_page' => 'Facebook Page'
+        'fbapp_page' => 'Facebook Page',
+        'fbapp_catalog' => 'Facebook Catalog'
     ];
 
     // Define Supported Token Types
     const RELATION_TOKENS = [
         'sales_person' => 'google',
-        'fbapp_page' => 'facebook'
+        'fbapp_page' => 'facebook',
+        'fbapp_catalog' => 'facebook'
     ];
 
     /**

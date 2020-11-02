@@ -20,6 +20,7 @@ class CreateTokenRequest extends Request {
         'id_token' => 'string',
         'issued_at' => 'date_format:Y-m-d H:i:s',
         'expires_at' => 'date_format:Y-m-d H:i:s',
+        'expires_in' => 'integer',
         'scopes' => 'required|array',
         'scopes.*' => 'required|string|max:80'
     ];
