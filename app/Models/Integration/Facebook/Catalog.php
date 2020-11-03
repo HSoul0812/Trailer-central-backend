@@ -34,7 +34,8 @@ class Catalog extends Model
         'dealer_location_id',
         'account_name',
         'user_id',
-        'filters'
+        'filters',
+        'is_active'
     ];
 
     /**

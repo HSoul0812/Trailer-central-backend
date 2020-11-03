@@ -49,6 +49,11 @@ class CatalogRepository implements CatalogRepositoryInterface {
      * @return Catalog
      */
     public function create($params) {
+        // Active Not Set?
+        if(!isset($params['is_active'])) {
+            $params['is_active'] = 1;
+        }
+
         // Does User ID Already Exist?
         if(isset($params['user_id'])) {
             $catalog = $this->getByFBId($params);

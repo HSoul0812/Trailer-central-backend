@@ -21,6 +21,7 @@ class CatalogTransformer extends TransformerAbstract
             'account_name' => $catalog->account_name,
             'user_id' => $catalog->user_id,
             'filters' => $catalog->filters,
+            'is_active' => $catalog->is_active,
             'created_at' => $catalog->created_at,
             'updated_at' => $catalog->updated_at
         ];
