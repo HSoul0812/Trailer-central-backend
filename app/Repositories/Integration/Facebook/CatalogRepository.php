@@ -103,7 +103,7 @@ class CatalogRepository implements CatalogRepositoryInterface {
      * @return Collection of Catalogs
      */
     public function getAll($params) {
-        $query = Catalog::where('dealer_id', '>', $params['dealer_id']);
+        $query = Catalog::where('dealer_id', '=', $params['dealer_id']);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -124,9 +124,6 @@ class CatalogRepository implements CatalogRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        $catalogs = $query->get();
-        var_dump($catalogs);
-        die;
         
         return $query->paginate($params['per_page'])->appends($params);
     }
