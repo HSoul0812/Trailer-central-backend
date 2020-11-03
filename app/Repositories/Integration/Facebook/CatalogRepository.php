@@ -110,7 +110,7 @@ class CatalogRepository implements CatalogRepositoryInterface {
         }
 
         if (isset($params['dealer_location_id'])) {
-            $query = $query->where('dealer_location_id_id', $params['dealer_location_id']);
+            $query = $query->where('dealer_location_id', $params['dealer_location_id']);
         }
 
         if (isset($params['user_id'])) {
@@ -124,6 +124,8 @@ class CatalogRepository implements CatalogRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
+        var_dump($params);
+        die;
         
         return $query->paginate($params['per_page'])->appends($params);
     }
