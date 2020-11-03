@@ -19,7 +19,7 @@ class CreateFbappCatalogTable extends Migration
             $table->integer('dealer_id')->index();
             $table->integer('dealer_location_id');
             $table->string('account_name');
-            $table->integer('user_id')->index();
+            $table->bigInteger('user_id')->index();
             $table->text('filters');
             $table->boolean('is_active')->default(false)->index();
             $table->timestamps();
