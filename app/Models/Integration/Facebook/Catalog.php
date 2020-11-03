@@ -42,7 +42,7 @@ class Catalog extends Model
      */
     public function accessToken()
     {
-        return $this->hasOne(Catalog::class)->wherePivot('token_type', 'facebook')
+        return $this->hasOne(AccessToken::class)->wherePivot('token_type', 'facebook')
                     ->wherePivot('relation_type', 'fbapp_catalog')
                     ->wherePivot('relation_id', $this->id);
     }
