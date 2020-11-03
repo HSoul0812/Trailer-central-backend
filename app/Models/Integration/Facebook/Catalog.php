@@ -38,16 +38,12 @@ class Catalog extends Model
     ];
 
     /**
-     * Get Access Token
-     * 
-     * @return AccessToken
+     * Get the access token associated with the Catalog.
      */
-    public function getAccessTokenAttribute()
+    public function accessToken()
     {
-        // Find Token From Relation
-        return AccessToken::where('token_type', 'facebook')
-                          ->where('relation_type', 'fbapp_catalog')
-                          ->where('relation_id', $this->id)
-                          ->first();
+        return $this->hasOne(Catalog::class)->wherePivot('token_type', 'facebook')
+                    ->wherePivot('relation_type', 'fbapp_catalog')
+                    ->wherePivot('relation_id', $this->id);
     }
 }
