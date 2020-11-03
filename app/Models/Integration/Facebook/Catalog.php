@@ -3,6 +3,7 @@
 namespace App\Models\Integration\Facebook;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Integration\Auth\AccessToken;
 
 /**
  * Class Catalog
