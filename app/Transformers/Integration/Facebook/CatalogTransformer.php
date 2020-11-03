@@ -28,6 +28,6 @@ class CatalogTransformer extends TransformerAbstract
 
     public function includeAccessToken(SalesPerson $salesPerson)
     {
-        return $this->item($salesPerson->token, new TokenTransformer());
+        return $this->item($salesPerson->access_token, new TokenTransformer());
     }
 }
