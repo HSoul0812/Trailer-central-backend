@@ -28,8 +28,6 @@ class CatalogTransformer extends TransformerAbstract
 
     public function includeAccessToken(Catalog $catalog)
     {
-        var_dump($catalog->accessToken);
-        die;
-        return $this->item($catalog->access_token, new TokenTransformer());
+        return $this->item($catalog->accessToken, new TokenTransformer());
     }
 }
