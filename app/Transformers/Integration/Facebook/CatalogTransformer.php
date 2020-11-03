@@ -9,7 +9,7 @@ use App\Transformers\Integration\Auth\TokenTransformer;
 class CatalogTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'accessToken'
+        'access_token'
     ];
 
     public function transform(Catalog $catalog)
