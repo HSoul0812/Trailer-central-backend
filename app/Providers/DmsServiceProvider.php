@@ -40,13 +40,11 @@ class DmsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(QuoteRepositoryInterface::class, QuoteRepository::class);
-        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(PurchaseOrderReceiptRepositoryInterface::class, PurchaseOrderReceiptRepository::class);
         $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
-        $this->app->bind(FinancingCompanyRepositoryInterface::class, FinancingCompanyRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
 
         $this->app->bind(SaleRepositoryInterface::class, function () {
