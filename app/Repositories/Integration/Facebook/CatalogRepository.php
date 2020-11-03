@@ -54,8 +54,6 @@ class CatalogRepository implements CatalogRepositoryInterface {
             $catalog = $this->getByFBId($params);
 
             // Exists?
-            var_dump($catalog);
-            var_dump($params);
             if(!empty($catalog->id)) {
                 $params['id'] = $catalog->id;
                 return $this->update($params);
