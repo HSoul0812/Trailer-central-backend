@@ -4,9 +4,14 @@ namespace App\Transformers\Integration\Facebook;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\Integration\Facebook\Catalog;
+use App\Transformers\Integration\Auth\TokenTransformer;
 
 class CatalogTransformer extends TransformerAbstract
 {
+    protected $availableIncludes = [
+        'accessToken'
+    ];
+
     public function transform(Catalog $catalog)
     {
         return [
@@ -19,5 +24,10 @@ class CatalogTransformer extends TransformerAbstract
             'created_at' => $catalog->created_at,
             'updated_at' => $catalog->updated_at
         ];
+    }
+
+    public function includeAccessToken(SalesPerson $salesPerson)
+    {
+        return $this->item($salesPerson->access_token, new TokenTransformer());
     }
 }

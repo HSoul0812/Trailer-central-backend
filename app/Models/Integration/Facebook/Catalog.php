@@ -35,4 +35,18 @@ class Catalog extends Model
         'user_id',
         'filters'
     ];
+
+    /**
+     * Get Access Token
+     * 
+     * @return AccessToken
+     */
+    public function getAccessTokenAttribute()
+    {
+        // Find Token From Relation
+        return AccessToken::where('token_type', 'facebook')
+                          ->where('relation_type', 'fbapp_catalog')
+                          ->where('relation_id', $this->id)
+                          ->first();
+    }
 }
