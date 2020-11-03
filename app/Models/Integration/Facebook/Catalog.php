@@ -42,7 +42,7 @@ class Catalog extends Model
      * 
      * @return AccessToken
      */
-    public function getTokenAttribute()
+    public function getAccessTokenAttribute()
     {
         // Find Token From Relation
         return AccessToken::where('token_type', 'facebook')
