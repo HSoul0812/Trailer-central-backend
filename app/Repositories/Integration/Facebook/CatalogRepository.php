@@ -49,6 +49,17 @@ class CatalogRepository implements CatalogRepositoryInterface {
      * @return Catalog
      */
     public function create($params) {
+        // Does User ID Already Exist?
+        if(isset($params['user_id'])) {
+            $catalog = $this->getByFBId($params);
+
+            // Exists?
+            if(!empty($catalog->id)) {
+                $params['id'] = $catalog->id;
+                return $this->update($params);
+            }
+        }
+
         // Create Catalog
         return Catalog::create($params);
     }
@@ -82,7 +93,7 @@ class CatalogRepository implements CatalogRepositoryInterface {
      */
     public function getByFBId($params) {
         // Find Token By ID
-        return Catalog::where('user_id', $params['id'])->first();
+        return Catalog::where('user_id', $params['user_id'])->first();
     }
 
     /**
