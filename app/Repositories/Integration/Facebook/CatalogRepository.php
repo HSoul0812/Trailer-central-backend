@@ -24,6 +24,14 @@ class CatalogRepository implements CatalogRepositoryInterface {
             'field' => 'account_name',
             'direction' => 'ASC'
         ],
+        'page_title' => [
+            'field' => 'page_title',
+            'direction' => 'DESC'
+        ],
+        '-page_title' => [
+            'field' => 'page_title',
+            'direction' => 'ASC'
+        ],
         'created_at' => [
             'field' => 'created_at',
             'direction' => 'DESC'
@@ -55,7 +63,7 @@ class CatalogRepository implements CatalogRepositoryInterface {
         }
 
         // Does User ID Already Exist?
-        if(isset($params['user_id'])) {
+        if(isset($params['page_id'])) {
             $catalog = $this->getByFBId($params);
 
             // Exists?
@@ -91,14 +99,14 @@ class CatalogRepository implements CatalogRepositoryInterface {
     }
 
     /**
-     * Get By Facebook User ID
+     * Get By Facebook Page ID
      * 
      * @param array $params
      * @return AccessToken
      */
-    public function getByFBId($params) {
+    public function getByPageId($params) {
         // Find Token By ID
-        return Catalog::where('user_id', $params['user_id'])->first();
+        return Catalog::where('page_id', $params['page_id'])->first();
     }
 
     /**
@@ -120,6 +128,10 @@ class CatalogRepository implements CatalogRepositoryInterface {
 
         if (isset($params['user_id'])) {
             $query = $query->where('user_id', $params['user_id']);
+        }
+
+        if (isset($params['page_id'])) {
+            $query = $query->where('page_id', $params['page_id']);
         }
 
         if (isset($params['id'])) {

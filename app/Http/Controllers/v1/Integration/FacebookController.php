@@ -108,7 +108,7 @@ class FacebookController extends RestfulControllerV2 {
      * @param Request $request
      * @return type
      */
-    public function payload(int $id, Request $request)
+    public function payload(Request $request)
     {
         // Handle Facebook Catalog Request
         $requestData = $request->all();

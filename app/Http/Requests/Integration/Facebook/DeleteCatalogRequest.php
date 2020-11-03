@@ -5,13 +5,14 @@ namespace App\Http\Requests\Integration\Facebook;
 use App\Http\Requests\Request;
 
 /**
- * Receive Facebook Catalog Payload Request
- * 
+ * Delete Catalog Request
+ *
  * @author David A Conway Jr.
  */
-class PayloadCatalogRequest extends Request {
-
+class DeleteBlastRequest extends Request {
+    
     protected $rules = [
-        'payload' => 'required|json'
+        'id' => 'required|integer'
     ];
+    
 }

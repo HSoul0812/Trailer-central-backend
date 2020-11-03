@@ -17,11 +17,13 @@ class CatalogTransformer extends TransformerAbstract
         return [
             'id' => $catalog->id,
             'dealer_id' => $catalog->dealer_id,
-            'dealer_location_id' => $catalog->dealer_location_id,
+            'account_id' => $catalog->account_id,
             'account_name' => $catalog->account_name,
-            'user_id' => $catalog->user_id,
+            'page_id' => $catalog->page_id,
+            'page_title' => $catalog->page_title,
             'filters' => json_decode($catalog->filters),
-            'is_active' => $catalog->is_active,
+            'is_active' => (boolean) $catalog->is_active,
+            'is_scheduled' => (boolean) $catalog->is_scheduled,
             'created_at' => $catalog->created_at,
             'updated_at' => $catalog->updated_at
         ];

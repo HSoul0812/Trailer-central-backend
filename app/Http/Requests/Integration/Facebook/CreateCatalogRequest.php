@@ -12,6 +12,11 @@ use App\Http\Requests\Request;
 class CreateCatalogRequest extends Request {
 
     protected $rules = [
+        'dealer_location_id' => 'required|integer',
+        'account_name' => 'required|string',
+        'account_id' => 'required|integer',
+        'page_title' => 'required|string',
+        'page_id' => 'required|integer',
         'access_token' => 'required|string|max:255',
         'refresh_token' => 'nullable|string',
         'id_token' => 'string',
@@ -20,8 +25,8 @@ class CreateCatalogRequest extends Request {
         'expires_in' => 'integer',
         'scopes' => 'required|array',
         'scopes.*' => 'required|string|max:80',
-        'account_name' => 'required|string',
-        'user_id' => 'required|integer',
-        'filters' => 'string'
+        'is_active' => 'nullable|boolean',
+        'is_scheduled' => 'nullable|boolean',
+        'filters' => 'nullable|json'
     ];
 }

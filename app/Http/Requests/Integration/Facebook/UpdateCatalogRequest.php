@@ -13,6 +13,11 @@ class UpdateCatalogRequest extends Request {
     
     protected $rules = [
         'id' => 'required|integer',
+        'dealer_location_id' => 'integer',
+        'account_name' => 'string',
+        'account_id' => 'integer',
+        'page_title' => 'string',
+        'page_id' => 'integer',
         'access_token' => 'string|max:255',
         'refresh_token' => 'nullable|string',
         'id_token' => 'string',
@@ -21,9 +26,9 @@ class UpdateCatalogRequest extends Request {
         'expires_in' => 'integer',
         'scopes' => 'array',
         'scopes.*' => 'string|max:80',
-        'account_name' => 'string',
-        'user_id' => 'integer',
-        'filters' => 'string'
+        'is_active' => 'nullable|boolean',
+        'is_scheduled' => 'nullable|boolean',
+        'filters' => 'nullable|json'
     ];
     
 }

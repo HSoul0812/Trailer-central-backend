@@ -16,7 +16,7 @@ class GetCatalogRequest extends Request {
         'dealer_location_id' => 'integer',
         'user_id' => 'integer',
         'per_page' => 'integer',
-        'sort' => 'in:account_name,-account_name,created_at,-created_at,updated_at,-updated_at',
+        'sort' => 'in:account_name,-account_name,page_title,-page_title,created_at,-created_at,updated_at,-updated_at',
         'id' => 'array',
         'id.*' => 'integer'
     ];
