@@ -9,6 +9,7 @@ use App\Http\Requests\Integration\Facebook\ShowCatalogRequest;
 use App\Http\Requests\Integration\Facebook\CreateCatalogRequest;
 use App\Http\Requests\Integration\Facebook\UpdateCatalogRequest;
 use App\Http\Requests\Integration\Facebook\PayloadCatalogRequest;
+use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Services\Integration\Facebook\CatalogServiceInterface;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
 
@@ -18,9 +19,10 @@ class FacebookController extends RestfulControllerV2 {
      */
     private $service;
 
-    public function __construct(CatalogServiceInterface $service) {
+    public function __construct(CatalogRepositoryInterface $catalogs, CatalogServiceInterface $service) {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
 
+        $this->catalogs = $catalogs;
         $this->service = $service;
     }
 
@@ -33,9 +35,7 @@ class FacebookController extends RestfulControllerV2 {
     public function index(Request $request)
     {
         // Handle Facebook Catalog Request
-        $requestData = $request->all();
-        $requestData['id'] = $id;
-        $request = new GetCatalogRequest($requestData);
+        $request = new GetCatalogRequest($request->all());
         if ($request->validate()) {
             // Get Catalogs
             return $this->response->paginator($this->catalogs->getAll($request->all()), new CatalogTransformer());
