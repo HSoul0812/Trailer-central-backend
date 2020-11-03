@@ -8,6 +8,7 @@ use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Dms\FinancingCompany;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
+use App\Models\Pos\Sale;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
@@ -39,15 +40,16 @@ class DmsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(QuoteRepositoryInterface::class, QuoteRepository::class);
-        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
-        $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(PurchaseOrderReceiptRepositoryInterface::class, PurchaseOrderReceiptRepository::class);
         $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
-        $this->app->bind(FinancingCompanyRepositoryInterface::class, FinancingCompanyRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+
+        $this->app->bind(SaleRepositoryInterface::class, function () {
+            return new SaleRepository(Sale::query());
+        });
 
         $this->app->bind(InvoiceRepositoryInterface::class, function() {
             return new InvoiceRepository(Invoice::query());
