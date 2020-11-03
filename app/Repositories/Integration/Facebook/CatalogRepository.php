@@ -124,7 +124,8 @@ class CatalogRepository implements CatalogRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        var_dump($params);
+        $catalogs = $query->get();
+        var_dump($catalogs);
         die;
         
         return $query->paginate($params['per_page'])->appends($params);
