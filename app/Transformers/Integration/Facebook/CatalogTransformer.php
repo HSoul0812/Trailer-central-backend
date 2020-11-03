@@ -22,15 +22,12 @@ class CatalogTransformer extends TransformerAbstract
             'user_id' => $catalog->user_id,
             'filters' => $catalog->filters,
             'created_at' => $catalog->created_at,
-            'updated_at' => $catalog->updated_at,
-            'access_token' => $catalog->access_token
+            'updated_at' => $catalog->updated_at
         ];
     }
 
     public function includeAccessToken(Catalog $catalog)
     {
-        var_dump($catalog);
-        die;
         return $this->item($catalog->access_token, new TokenTransformer());
     }
 }
