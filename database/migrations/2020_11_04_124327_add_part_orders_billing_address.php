@@ -14,7 +14,6 @@ class AddPartOrdersBillingAddress extends Migration
     public function up()
     {
         Schema::table('part_orders', function (Blueprint $table) {
-            $table->string('shipto_address')->nullable()->change();
             $table->string('shipto_city', 50)->nullable()->after('shipto_address');
             $table->string('shipto_region', 20)->nullable()->after('shipto_city');
             $table->string('shipto_postal', 10)->nullable()->after('shipto_region');
@@ -26,6 +25,8 @@ class AddPartOrdersBillingAddress extends Migration
             $table->string('billto_postal', 10)->nullable()->after('billto_region');
             $table->string('billto_country')->nullable()->after('billto_postal');
         });
+
+        DB::statement('ALTER TABLE part_orders CHANGE shipto_address VARCHAR(255)');
     }
 
     /**
