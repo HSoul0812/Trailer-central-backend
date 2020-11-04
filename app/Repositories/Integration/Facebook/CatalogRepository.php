@@ -64,7 +64,7 @@ class CatalogRepository implements CatalogRepositoryInterface {
 
         // Does User ID Already Exist?
         if(isset($params['page_id'])) {
-            $catalog = $this->getByFBId($params);
+            $catalog = $this->getByPageId($params);
 
             // Exists?
             if(!empty($catalog->id)) {
