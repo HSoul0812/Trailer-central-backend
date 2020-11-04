@@ -3,6 +3,8 @@
 namespace App\Models\Integration\Facebook;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User\User;
+use App\Models\User\DealerLocation;
 use App\Models\Integration\Auth\AccessToken;
 
 /**
@@ -187,7 +189,7 @@ class Catalog extends Model
      */
     public function user()
     {
-        return $this->belongsTo(Dealer::class, 'dealer_id', 'dealer_id');
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 
     /**
