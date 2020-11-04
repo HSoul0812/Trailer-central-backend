@@ -33,6 +33,11 @@ class CatalogService implements CatalogServiceInterface
     protected $auth;
 
     /**
+     * @var BusinessServiceInterface
+     */
+    protected $sdk;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -44,11 +49,13 @@ class CatalogService implements CatalogServiceInterface
         CatalogRepositoryInterface $catalog,
         TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
+        BusinessServiceInterface $sdk,
         Manager $fractal
     ) {
         $this->catalogs = $catalog;
         $this->tokens = $tokens;
         $this->auth = $auth;
+        $this->sdk = $sdk;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -114,6 +121,48 @@ class CatalogService implements CatalogServiceInterface
         $params['relation_type'] = 'fbapp_catalog';
         $params['relation_id'] = $params['id'];
         unset($params['id']);
+
+        // Get Access Token
+        $accessToken = $this->tokens->create($params);
+
+        // Return Response
+        return $this->response($catalog, $accessToken);
+    }
+
+    /**
+     * Process Payload
+     * 
+     * @param array $params
+     * @return Fractal
+     */
+    public function payload($params) {
+        // Parse Payload Data
+        $payload = $params['payload'];
+        foreach($payload as $integration) {
+            // Validate Payload
+            if(empty($integration['page_id'])) {
+                continue;
+            }
+
+            // Get Catalog
+            $catalog = $this->catalogs->getByPageId(['page_id' => $integration['page_id']]);
+
+            // Feed ID Exists?
+            $validate = false;
+            if(!empty($catalog->feed_id)) {
+                $validate = $this->sdk->validateFeed($catalog->feed_id);
+            }
+
+            // Feed Doesn't Exist?
+            if(!$validate) {
+                $feed = $this->sdk->scheduleFeed($catalog->access_token, $catalog->feed_url, $catalog->feed_name);
+            }
+
+            // Update Feed in Catalog
+            var_dump($feed);
+
+            // Create Job
+        }
 
         // Get Access Token
         $accessToken = $this->tokens->create($params);

@@ -17,6 +17,11 @@ class Catalog extends Model
     const TABLE_NAME = 'fbapp_catalog';
 
     /**
+     * Define Catalog URL Prefix
+     */
+    const CATALOG_URL_PREFIX = 'facebook/catalog';
+
+    /**
      * Specific Dealer ID Overrides
      */
     const SOUTHERN_RV_DEALER_ID = 8338;
@@ -177,9 +182,9 @@ class Catalog extends Model
         'page_id',
         'page_title',
         'page_token',
+        'feed_id',
         'filters',
-        'is_active',
-        'is_scheduled'
+        'is_active'
     ];
 
     /**
@@ -212,5 +217,26 @@ class Catalog extends Model
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('facebook')
                     ->whereRelationType('fbapp_catalog');
+    }
+
+
+    /**
+     * Get Field Url
+     * 
+     * @return string of calculated feed url
+     */
+    public function getFeedUrlAttribute()
+    {
+        return '/' . $_ENV['AWS_BUCKET'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page_id . '.csv';
+    }
+
+    /**
+     * Get Feed Name
+     * 
+     * @return string of calculated feed name
+     */
+    public function getFeedNameAttribute()
+    {
+        return $this->account_name . "'s Feed for " . $this->page_title;
     }
 }

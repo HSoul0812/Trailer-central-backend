@@ -112,11 +112,10 @@ class FacebookController extends RestfulControllerV2 {
     {
         // Handle Facebook Catalog Request
         $requestData = $request->all();
-        $requestData['id'] = $id;
         $request = new PayloadCatalogRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->service->update($request->all()));
+            return $this->response->array($this->service->payload($request->all()));
         }
         
         return $this->response->errorBadRequest();

@@ -7,6 +7,10 @@ use FacebookAds\Logger\CurlLogger;
 use FacebookAds\Object\AdAccount;
 use FacebookAds\Object\Campaign;
 use FacebookAds\Object\Fields\CampaignFields;
+use FacebookAds\Object\ProductCatalog;
+use FacebookAds\Object\ProductFeed;
+use FacebookAds\Api;
+use FacebookAds\Logger\CurlLogger;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -29,11 +33,6 @@ class BusinessService implements BusinessServiceInterface
      * @return array of validation info
      */
     public function validate($accessToken) {
-        // ID Token Exists?
-        if(empty($accessToken->id_token)) {
-            throw new MissingFacebookIdTokenException;
-        }
-
         // Configure Client
         $this->initApi($accessToken);
 
@@ -49,12 +48,54 @@ class BusinessService implements BusinessServiceInterface
     }
 
     /**
+     * Schedule a Feed
+     */
+    public function scheduleFeed($accessToken, $filename) {
+        // Configure Client
+        $this->initApi($accessToken);
+
+        // Get Product Catalog
+        try {
+            // Get Catalog
+            $catalog = new ProductCatalog($_ENV['FB_SDK_CATALOG_ID']);
+
+            // Create Product Feed
+            $data = $catalog->createProductFeed(
+                array(),
+                array(
+                    'name' => 'Test Feed',
+                    'schedule' => array(
+                        'interval' => 'DAILY',
+                        'url' => $filename,
+                        'hour' => '22'
+                    )
+                )
+            )->exportAllData();
+
+            // Return Data Result
+            return $data;
+        } catch (Exception $ex) {
+            echo $ex->getMessage() . PHP_EOL . PHP_EOL;
+            echo $ex->getTraceAsString();
+        }
+
+        // Return Null
+        return null;
+    }
+
+
+    /**
      * Initialize API
      * 
      * @param AccessToken $accessToken
      * @return API
      */
     private function initApi($accessToken) {
+        // ID Token Missing?
+        if(empty($accessToken->id_token)) {
+            throw new MissingFacebookIdTokenException;
+        }
+
         // Try to Get SDK!
         try {
             // Return SDK

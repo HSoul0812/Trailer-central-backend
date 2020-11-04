@@ -23,9 +23,9 @@ class CreateFbappCatalogTable extends Migration
             $table->bigInteger('page_id')->unique();
             $table->string('page_title');
             $table->string('page_token');
+            $table->bigInteger('feed_id')->index()->nullable();
             $table->text('filters');
             $table->boolean('is_active')->default(true)->index();
-            $table->boolean('is_scheduled')->default(false);
             $table->timestamps();
 
             $table->index(['dealer_id', 'dealer_location_id']);
