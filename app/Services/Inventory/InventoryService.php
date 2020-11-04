@@ -8,6 +8,7 @@ use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
+use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Collection;
@@ -29,8 +30,6 @@ class InventoryService
         self::OVERLAY_ENABLED_ALL,
     ];
 
-    private const SOURCE_DASHBOARD = 'dashboard';
-
     /**
      * @var InventoryRepositoryInterface
      */
@@ -48,6 +47,10 @@ class InventoryService
      * @var ImageService
      */
     private $imageService;
+    /**
+     * @var FileService
+     */
+    private $fileService;
 
     /**
      * InventoryService constructor.
@@ -55,18 +58,21 @@ class InventoryService
      * @param ImageRepositoryInterface $imageRepository
      * @param FileRepositoryInterface $fileRepository
      * @param ImageService $imageService
+     * @param FileService $fileService
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
         ImageRepositoryInterface $imageRepository,
         FileRepositoryInterface $fileRepository,
-        ImageService $imageService
+        ImageService $imageService,
+        FileService $fileService
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
         $this->fileRepository = $fileRepository;
 
         $this->imageService = $imageService;
+        $this->fileService = $fileService;
     }
 
 
@@ -77,11 +83,22 @@ class InventoryService
     public function create(array $params): int
     {
         try {
-            $this->inventoryRepository->beginTransaction();
+            $newImages = $params['new_images'] ?? [];
+            $newFiles = $params['new_files'] ?? [];
+            $hiddenFiles = $params['hidden_files'] ?? [];
 
-            if (isset($params['new_images'])) {
+            if (!empty($newImages)) {
                 $params['new_images'] = $this->uploadImages($params, 'new_images');
             }
+
+            $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
+            unset($params['hidden_files']);
+
+            if (!empty($newFiles)) {
+                $params['new_files'] = $this->uploadFiles($params, 'new_files');
+            }
+
+            $this->inventoryRepository->beginTransaction();
 
             $inventory = $this->inventoryRepository->create($params);
 
@@ -330,7 +347,7 @@ class InventoryService
         foreach ($withoutOverlay as &$image) {
             $result = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
 
-            $image['filename'] = $result['filename'];
+            $image['filename'] = $result['path'];
             $image['filename_noverlay'] = '';
             $image['hash'] = $result['hash'];
         }
@@ -339,11 +356,31 @@ class InventoryService
             $noOverlayResult = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
             $overlayResult = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
 
-            $image['filename'] = $overlayResult['filename'];
-            $image['filename_noverlay'] = $noOverlayResult['filename'];
+            $image['filename'] = $overlayResult['path'];
+            $image['filename_noverlay'] = $noOverlayResult['path'];
             $image['hash'] = $overlayResult['hash'];
         }
 
         return array_merge($withOverlay, $withoutOverlay);
+    }
+
+    /**
+     * @param array $params
+     * @param string $filesKey
+     * @return array
+     * @throws \App\Exceptions\File\FileUploadException
+     */
+    private function uploadFiles(array $params, string $filesKey): array
+    {
+        $files = $params[$filesKey];
+
+        foreach ($files as &$file) {
+            $result = $this->fileService->upload($file['url'], $file['title'], $params['dealer_id']);
+
+            $file['path'] = $result['path'];
+            $file['type'] = $result['type'];
+        }
+
+        return $files;
     }
 }

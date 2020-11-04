@@ -17,6 +17,16 @@ class File extends Model {
      */
     protected $table = 'file';
 
+    public $timestamps = true;
+
+    protected $fillable = [
+        'title',
+        'path',
+        'type',
+        'size',
+        'is_active',
+    ];
+
     public function inventoryFiles()
     {
         return $this->hasMany(InventoryFile::class);

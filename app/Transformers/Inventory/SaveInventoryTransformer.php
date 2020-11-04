@@ -79,6 +79,14 @@ class SaveInventoryTransformer implements TransformerInterface
         'primary' => 'is_default',
     ];
 
+    private const FILES_FIELDS = [
+        'new_files',
+        'hidden_files',
+    ];
+
+    private const FILE_TITLE = 'title';
+    private const FILE_URL = 'url';
+
     /**
      * @var AttributeRepositoryInterface
      */
@@ -232,6 +240,7 @@ class SaveInventoryTransformer implements TransformerInterface
             $createParams['features'] = $features;
 
             $createParams = array_merge($createParams, $this->transformImages($createParams));
+            $createParams = array_merge($createParams, $this->transformFiles($createParams));
 
             return $createParams;
         } catch (\Exception $e) {
@@ -254,7 +263,6 @@ class SaveInventoryTransformer implements TransformerInterface
             }
 
             $paramsImages = $params[$imagesField];
-
             $images[$imagesField] = $paramsImages;
 
             foreach ($paramsImages as $imageKey => $image) {
@@ -270,5 +278,40 @@ class SaveInventoryTransformer implements TransformerInterface
         }
 
         return $images;
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    private function transformFiles(array $params): array
+    {
+        $files = [];
+
+        foreach (self::FILES_FIELDS as $filesField) {
+            if (!isset($params[$filesField])) {
+                continue;
+            }
+
+            $paramsFiles = $params[$filesField];
+            $files[$filesField] = $paramsFiles;
+
+            foreach ($paramsFiles as $fileKey => $file) {
+                if (empty($file[self::FILE_TITLE])) {
+                    $bits = explode('/', $file[self::FILE_URL]);
+                    $title = $bits[count($bits) - 1];
+                } else {
+                    $title = $file[self::FILE_TITLE];
+                }
+
+                if ($filesField === 'hidden_files') {
+                    $title = strpos($title, 'hidden') === false ? 'hidden-' . $title : $title;
+                }
+
+                $files[$filesField][$fileKey][self::FILE_TITLE] = $title;
+            }
+        }
+
+        return $files;
     }
 }

@@ -78,7 +78,7 @@ class ImageService extends AbstractFileService
         unlink($localFilename);
 
         return [
-            'filename' => $s3Path,
+            'path' => $s3Path,
             'hash' => $hash,
         ];
     }

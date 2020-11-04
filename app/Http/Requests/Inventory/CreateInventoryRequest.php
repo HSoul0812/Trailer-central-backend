@@ -127,8 +127,15 @@ class CreateInventoryRequest extends Request
 
         'new_files' => 'array|nullable',
         'new_files.*.title' => 'string|nullable',
-        'new_files.*.path' => 'string|nullable',
+        'new_files.*.url' => 'string|required',
         'new_files.*.position' => 'integer|nullable',
+        'new_files.*.is_manual' => 'checkbox|nullable',
+
+        'hidden_files' => 'array|nullable',
+        'hidden_files.*.title' => 'string|nullable',
+        'hidden_files.*.url' => 'string|required',
+        'hidden_files.*.position' => 'integer|nullable',
+        'hidden_files.*.is_manual' => 'checkbox|nullable',
 
         'add_bill' => 'boolean|nullable',
     ];

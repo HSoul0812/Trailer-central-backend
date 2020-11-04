@@ -17,4 +17,13 @@ class InventoryFile extends Model {
      * @var string
      */
     protected $table = 'inventory_file';
+
+    public $timestamps = false;
+
+    protected $fillable = [
+        'file_id',
+        'inventory_id',
+        'position',
+        'is_manual',
+    ];
 }

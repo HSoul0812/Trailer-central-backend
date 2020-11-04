@@ -160,16 +160,19 @@ abstract class AbstractFileService
      * @param string $newFilename
      * @param int|null $dealerId
      * @param int|null $identifier
+     * @param array $uploadParams
      * @return string
      *
      * @throws FileUploadException
      */
-    protected function uploadToS3(string $localFilename, string $newFilename, ?int $dealerId = null, ?int $identifier = null): string
+    protected function uploadToS3(string $localFilename, string $newFilename, ?int $dealerId = null, ?int $identifier = null, array $uploadParams = []): string
     {
         $dealerId = $dealerId ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
         $identifier = $identifier ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
 
         $s3Filename = DIRECTORY_SEPARATOR . $this->getS3Path($newFilename, [$dealerId, $identifier]);
+
+        $uploadParams = array_merge(['visibility' => 'public'], $uploadParams);
 
         $result = Storage::disk('s3')->put($s3Filename, file_get_contents($localFilename), 'public');
 
@@ -179,4 +182,14 @@ abstract class AbstractFileService
 
         return $s3Filename;
     }
+
+    /**
+     * @param string $url
+     * @param string $title
+     * @param int|null $dealerId
+     * @param int|null $identifier
+     * @param array $params
+     * @return array|null
+     */
+    abstract public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?array;
 }
