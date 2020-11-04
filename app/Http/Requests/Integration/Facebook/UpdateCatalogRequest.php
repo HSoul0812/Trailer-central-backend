@@ -18,6 +18,7 @@ class UpdateCatalogRequest extends Request {
         'account_id' => 'integer',
         'page_title' => 'string',
         'page_id' => 'integer',
+        'page_token' => 'string|max:255',
         'access_token' => 'string|max:255',
         'refresh_token' => 'nullable|string',
         'id_token' => 'string',

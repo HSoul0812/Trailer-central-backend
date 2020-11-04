@@ -17,6 +17,7 @@ class CreateCatalogRequest extends Request {
         'account_id' => 'required|integer',
         'page_title' => 'required|string',
         'page_id' => 'required|integer',
+        'page_token' => 'required|string|max:255',
         'access_token' => 'required|string|max:255',
         'refresh_token' => 'nullable|string',
         'id_token' => 'string',

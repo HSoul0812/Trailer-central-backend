@@ -174,6 +174,7 @@ class Catalog extends Model
         'account_id',
         'page_id',
         'page_title',
+        'page_token',
         'filters',
         'is_active',
         'is_scheduled'

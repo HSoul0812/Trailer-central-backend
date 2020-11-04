@@ -22,6 +22,7 @@ class CreateFbappCatalogTable extends Migration
             $table->string('account_name');
             $table->bigInteger('page_id')->unique();
             $table->string('page_title');
+            $table->string('page_token');
             $table->text('filters');
             $table->boolean('is_active')->default(true)->index();
             $table->boolean('is_scheduled')->default(false);
