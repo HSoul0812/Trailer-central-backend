@@ -41,9 +41,11 @@ class CatalogTransformer extends TransformerAbstract
             'page_id' => $catalog->page_id,
             'page_title' => $catalog->page_title,
             'page_token' => $catalog->page_token,
+            'feed_name' => $catalog->feed_name,
+            'feed_url' => $catalog->feed_url,
+            'feed_id' => $catalog->feed_id,
             'filters' => json_decode($catalog->filters),
             'is_active' => (boolean) $catalog->is_active,
-            'is_scheduled' => (boolean) $catalog->is_scheduled,
             'created_at' => $catalog->created_at,
             'updated_at' => $catalog->updated_at
         ];

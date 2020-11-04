@@ -28,7 +28,6 @@ class UpdateCatalogRequest extends Request {
         'scopes' => 'array',
         'scopes.*' => 'string|max:80',
         'is_active' => 'nullable|boolean',
-        'is_scheduled' => 'nullable|boolean',
         'filters' => 'nullable|json'
     ];
     
