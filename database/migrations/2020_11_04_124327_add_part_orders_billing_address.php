@@ -26,7 +26,7 @@ class AddPartOrdersBillingAddress extends Migration
             $table->string('billto_country')->nullable()->after('billto_postal');
         });
 
-        DB::statement('ALTER TABLE part_orders CHANGE shipto_address VARCHAR(255)');
+        DB::statement('ALTER TABLE part_orders CHANGE shipto_address shipto_address VARCHAR(255)');
     }
 
     /**
