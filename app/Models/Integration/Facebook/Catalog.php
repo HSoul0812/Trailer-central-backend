@@ -181,6 +181,26 @@ class Catalog extends Model
     ];
 
     /**
+     * Get User
+     * 
+     * @return BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(Dealer::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Dealer location
+     * 
+     * @return BelongsTo
+     */
+    public function dealerLocation()
+    {
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
      * Access Token
      * 
      * @return HasOne
