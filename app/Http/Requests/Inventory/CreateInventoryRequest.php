@@ -17,7 +17,7 @@ class CreateInventoryRequest extends Request
         'dealer_location_id' => 'required_without_all:dealer_location_identifier|integer|exists:App\Models\User\DealerLocation,dealer_location_id',
         'active' => 'boolean|nullable',
         'title' => 'required|max:255',
-        'stock' => 'string|max:50|nullable',
+        'stock' => 'string|max:50',
         'manufacturer' => 'string|max:255|nullable',
         'brand' => 'string|max:255|nullable',
         'model' => 'string|max:255|nullable',
@@ -123,7 +123,7 @@ class CreateInventoryRequest extends Request
         'new_images.*.is_default' => 'checkbox|nullable',
         'new_images.*.secondary' => 'checkbox|nullable',
         'new_images.*.is_secondary' => 'checkbox|nullable',
-        'new_images.*.remove' => 'checkbox|nullable',
+        'new_images.*.was_manually_added' => 'checkbox|nullable',
 
         'new_files' => 'array|nullable',
         'new_files.*.title' => 'string|nullable',

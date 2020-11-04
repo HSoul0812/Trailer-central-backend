@@ -83,11 +83,7 @@ class InventoryService
                 $params['new_images'] = $this->uploadImages($params, 'new_images');
             }
 
-            print_r($params);
-            exit();
-
             $inventory = $this->inventoryRepository->create($params);
-
 
             if (!$inventory instanceof Inventory) {
                 Log::error('Item hasn\'t been created.', ['params' => $params]);

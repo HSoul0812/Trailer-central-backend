@@ -255,18 +255,6 @@ class SaveInventoryTransformer implements TransformerInterface
 
             $paramsImages = $params[$imagesField];
 
-            if ($imagesField === 'new_images') {
-                $paramsImages = array_filter($paramsImages, function ($image) {
-                    return empty($image['remove']);
-                });
-
-                if (isset($params['source']) && $params['source'] === 'dashboard') {
-                    array_walk($paramsImages, function (&$image) {
-                        $image['was_manually_added'] = true;
-                    });
-                }
-            }
-
             $images[$imagesField] = $paramsImages;
 
             foreach ($paramsImages as $imageKey => $image) {
