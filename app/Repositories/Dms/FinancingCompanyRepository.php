@@ -14,10 +14,10 @@ class FinancingCompanyRepository extends RepositoryAbstract implements Financing
 {
     use WithRequestQueryable;
 
-    public function __construct()
+    public function __construct(Builder $baseQuery)
     {
         // assign the initial model to the query builder
-        $this->withQuery(FinancingCompany::query()); // todo may need to be injected here some other way
+        $this->withQuery($baseQuery);
     }
 
     /**

@@ -142,6 +142,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
         \Validator::extend('valid_form_map_field', 'App\Rules\Website\Forms\ValidMapField@passes');
         \Validator::extend('valid_form_map_table', 'App\Rules\Website\Forms\ValidMapTable@passes');
+        \Validator::extend('valid_part_order_status', 'App\Rules\Parts\ValidOrderStatus@passes');
+        \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -233,7 +235,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
-        $this->app->bind(SalesPersonRepositoryInterface::class, SalesPersonRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);

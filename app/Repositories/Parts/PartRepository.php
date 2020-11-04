@@ -239,19 +239,11 @@ class PartRepository implements PartRepositoryInterface {
 
         if (isset($params['subcategory'])) {
             if (isset($params['subcategory']['eq'])) {
-                $query = $query->where(function ($query) use ($params) {
-                    foreach ($params['subcategory']['eq'] as $subcategory) {
-                        $query->orWhere('subcategory', 'LIKE', '%' . $subcategory . '%');
-                    }
-                });
+                $query = $query->whereIn('subcategory', $params['subcategory']['eq']);
             }
 
             if (isset($params['subcategory']['neq'])) {
-                $query = $query->where(function ($query) use ($params) {
-                    foreach ($params['subcategory']['neq'] as $subcategory) {
-                        $query->where('subcategory', 'NOT LIKE', '%' . $subcategory . '%');
-                    }
-                });
+                $query = $query->whereNotIn('subcategory', $params['subcategory']['neq']);
             }
 
             if (!isset($params['subcategory']['eq']) && !isset($params['subcategory']['neq'])) {
