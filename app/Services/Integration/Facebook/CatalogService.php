@@ -139,6 +139,7 @@ class CatalogService implements CatalogServiceInterface
         // Parse Payload Data
         $payload = json_decode($params['payload']);
         $success = false;
+        $feeds = array();
         foreach($payload as $integration) {
             // Validate Payload
             if(empty($integration->page_id)) {
