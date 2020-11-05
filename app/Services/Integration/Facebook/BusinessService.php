@@ -162,7 +162,7 @@ class BusinessService implements BusinessServiceInterface
         $this->request->setPath('/debug_token');
 
         // Get URL
-        $response = $this->request->getUrl();
+        $response = $this->client->sendRequest($this->request);
         var_dump($response);
     }
 
