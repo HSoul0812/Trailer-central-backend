@@ -106,7 +106,7 @@ class CatalogRepository implements CatalogRepositoryInterface {
      */
     public function getByPageId($params) {
         // Find Token By ID
-        return Catalog::where('page_id', $params['page_id'])->first();
+        return Catalog::where('page_id', $params['page_id'])->with('accessToken')->first();
     }
 
     /**
