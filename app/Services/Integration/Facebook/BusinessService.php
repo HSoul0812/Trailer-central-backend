@@ -9,7 +9,6 @@ use FacebookAds\Object\Campaign;
 use FacebookAds\Object\Fields\CampaignFields;
 use FacebookAds\Object\ProductCatalog;
 use FacebookAds\Object\ProductFeed;
-use FacebookAds\Logger\CurlLogger;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -98,7 +97,7 @@ class BusinessService implements BusinessServiceInterface
         // Try to Get SDK!
         try {
             // Return SDK
-            $this->sdk = FacebookAds\Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
+            $this->sdk = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
         } catch(\Exception $e) {
             $this->sdk = null;
         }
