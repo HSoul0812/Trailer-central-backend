@@ -138,6 +138,7 @@ class CatalogService implements CatalogServiceInterface
     public function payload($params) {
         // Parse Payload Data
         $payload = json_decode($params['payload']);
+        $success = false;
         foreach($payload as $integration) {
             // Validate Payload
             if(empty($integration->page_id)) {
@@ -148,14 +149,19 @@ class CatalogService implements CatalogServiceInterface
             $catalog = $this->catalogs->getByPageId(['page_id' => $integration->page_id]);
 
             // Feed ID Exists?
-            $validate = false;
+            $feed = null;
             if(!empty($catalog->feed_id)) {
-                $validate = $this->sdk->validateFeed($catalog->feed_id);
+                $feed = $this->sdk->validateFeed($catalog->feed_id);
             }
 
             // Feed Doesn't Exist?
-            if(!$validate) {
+            if(empty($feed)) {
                 $feed = $this->sdk->scheduleFeed($catalog->access_token, $catalog->feed_url, $catalog->feed_name);
+            }
+
+            // Feed Exists?
+            if(!empty($feed)) {
+                $feeds[] = $feed;
             }
 
             // Update Feed in Catalog
@@ -164,11 +170,16 @@ class CatalogService implements CatalogServiceInterface
             // Create Job
         }
 
-        // Get Access Token
-        $accessToken = $this->tokens->create($params);
+        // Validate Feeds Exist?
+        if(count($feeds) > 0) {
+            $success = true;
+        }
 
         // Return Response
-        return $this->response($catalog, $accessToken);
+        return [
+            'success' => $success,
+            'feeds' => count($feeds)
+        ];
     }
 
     /**
