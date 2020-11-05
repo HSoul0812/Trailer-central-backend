@@ -303,6 +303,31 @@ class PartRepository implements PartRepositoryInterface {
             }
         }
 
+        if (isset($params['vendor_id']) && !empty($params['vendor_id'])) {
+            $query = $query->whereHas('vendor', function($query) use($params) {
+                $query->where('id', '=', $params['vendor_id']);
+            });
+        }
+
+        if (isset($params['in_stock'])) {
+            if (empty($params['in_stock'])) {
+                $query = $query->where(function($query) {
+                    $query->whereHas('bins', function($query) {
+                        $query->select(DB::raw('sum(qty) as total_qty'))
+                            ->groupBy('part_id')
+                            ->havingRaw('total_qty <= 0');
+                    })
+                    ->orDoesntHave('bins');
+                });
+            } else {
+                $query = $query->whereHas('bins', function($query) {
+                    $query->select(DB::raw('sum(qty) as total_qty'))
+                        ->groupBy('part_id')
+                        ->havingRaw('total_qty > 0');
+                });
+            }
+        }
+
         if (isset($params['search_term'])) {
             if (isset($params['search_term']['contain'])) {
                 $query = $query->where(function ($query) use ($params) {
