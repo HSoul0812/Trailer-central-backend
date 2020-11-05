@@ -148,8 +148,6 @@ class CatalogService implements CatalogServiceInterface
 
             // Get Catalog
             $catalog = $this->catalogs->getByPageId(['page_id' => $integration->page_id]);
-            $catArray = (array) $catalog;
-            var_dump($catalog);
 
             // Feed ID Exists?
             $feed = null;
@@ -159,7 +157,7 @@ class CatalogService implements CatalogServiceInterface
 
             // Feed Doesn't Exist?
             if(empty($feed)) {
-                $feed = $this->sdk->scheduleFeed($catalog->access_token, $catalog->feed_url, $catalog->feed_name);
+                $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->feed_url, $catalog->feed_name);
             }
 
             // Feed Exists?
