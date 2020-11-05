@@ -6,6 +6,7 @@ use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\ExpiredFacebookAccessTokenException;
 use FacebookAds\Api;
+use FacebookAds\Http\Client;
 use FacebookAds\Http\Request;
 use FacebookAds\Logger\CurlLogger;
 use FacebookAds\Object\AdAccount;
@@ -14,7 +15,6 @@ use FacebookAds\Object\Fields\CampaignFields;
 use FacebookAds\Object\ProductCatalog;
 use FacebookAds\Object\ProductFeed;
 use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Client as GuzzleHttpClient;
 
 /**
  * Class BusinessService
@@ -29,9 +29,24 @@ class BusinessService implements BusinessServiceInterface
     protected $api;
 
     /**
+     * @var FacebookAds\Http\Client
+     */
+    protected $client;
+
+    /**
      * @var FacebookAds\Http\Request
      */
     protected $request;
+
+
+    /**
+     * Construct Http Client/Request
+     */
+    public function __construct() {
+        // Init Request
+        $this->client = new Client();
+        $this->request = new Request($this->client);
+    }
 
 
     /**
@@ -120,9 +135,6 @@ class BusinessService implements BusinessServiceInterface
         try {
             // Return SDK
             $this->api = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
-
-            // Init Request
-            $this->request = new Request($this->api);
         } catch(\Exception $e) {
             $this->api = null;
         }
