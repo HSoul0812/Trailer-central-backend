@@ -156,7 +156,7 @@ class BusinessService implements BusinessServiceInterface
         $params->enhance([
             'input_token' => $accessToken
         ]);
-        $this->request->setParameters($params);
+        $this->request->setQueryParams($params);
 
         // Set Path to Validate Access Token
         $this->request->setPath('/debug_token');
