@@ -57,6 +57,14 @@ class PartOrderRepository implements PartOrderRepositoryInterface {
             'field' => 'shipto_name',
             'direction' => 'ASC'
         ],
+        'billto' => [
+            'field' => 'billto_name',
+            'direction' => 'DESC'
+        ],
+        '-billto' => [
+            'field' => 'billto_name',
+            'direction' => 'ASC'
+        ],
         'subtotal' => [
             'field' => 'subtotal',
             'direction' => 'DESC'
