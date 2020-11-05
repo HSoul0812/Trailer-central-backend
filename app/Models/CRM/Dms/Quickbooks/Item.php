@@ -24,6 +24,7 @@ class Item extends Model
         'TAX' => 'tax',
         'DEPOSIT_DOWN_PAYMENT' => 'deposit_down_payment',
         'INCOME_DOWN_PAYMENT' => 'income_down_payment',
+        'TRADE_IN' => 'trade_in',
         'UNDEFINED' => 'undefined'
     ];
 }
