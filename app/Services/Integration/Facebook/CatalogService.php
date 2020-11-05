@@ -138,16 +138,14 @@ class CatalogService implements CatalogServiceInterface
     public function payload($params) {
         // Parse Payload Data
         $payload = json_decode($params['payload']);
-        var_dump($payload);
-        die;
         foreach($payload as $integration) {
             // Validate Payload
-            if(empty($integration['page_id'])) {
+            if(empty($integration->page_id)) {
                 continue;
             }
 
             // Get Catalog
-            $catalog = $this->catalogs->getByPageId(['page_id' => $integration['page_id']]);
+            $catalog = $this->catalogs->getByPageId(['page_id' => $integration->page_id]);
 
             // Feed ID Exists?
             $validate = false;
