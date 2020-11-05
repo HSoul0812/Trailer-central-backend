@@ -21,7 +21,7 @@ class BusinessService implements BusinessServiceInterface
     /**
      * @var FacebookAds\Api
      */
-    protected $sdk;
+    protected $api;
 
 
     /**
@@ -37,8 +37,8 @@ class BusinessService implements BusinessServiceInterface
         // Initialize Vars
         $result = [
             'access_token' => $accessToken->access_token,
-            'is_valid' => !empty($this->sdk) ? true : false,
-            'is_expired' => !empty($this->sdk) ? false : true
+            'is_valid' => !empty($this->api) ? true : false,
+            'is_expired' => !empty($this->api) ? false : true
         ];
 
         // Return Payload Results
@@ -97,13 +97,13 @@ class BusinessService implements BusinessServiceInterface
         // Try to Get SDK!
         try {
             // Return SDK
-            $this->sdk = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
+            $this->api = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
         } catch(\Exception $e) {
-            $this->sdk = null;
+            $this->api = null;
         }
 
         // Return SDK
-        return $sdk;
+        return $this->api;
     }
 
     /**
