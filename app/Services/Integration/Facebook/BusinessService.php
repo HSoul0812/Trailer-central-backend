@@ -8,6 +8,7 @@ use App\Exceptions\Integration\Facebook\ExpiredFacebookAccessTokenException;
 use FacebookAds\Api;
 use FacebookAds\Http\Client;
 use FacebookAds\Http\Request;
+use FacebookAds\Http\Parameters;
 use FacebookAds\Logger\CurlLogger;
 use FacebookAds\Object\AdAccount;
 use FacebookAds\Object\Campaign;
@@ -150,8 +151,15 @@ class BusinessService implements BusinessServiceInterface
      * @return boolean
      */
     private function validateAccessToken($accessToken) {
+        // Create Parameters
+        $params = new Parameters();
+        $params->enhance([
+            'input_token' => $accessToken
+        ]);
+        $this->request->setParameters($params);
+
         // Set Path to Validate Access Token
-        $this->request->setPath('/debug_token?input_token=' + $accessToken);
+        $this->request->setPath('/debug_token');
 
         // Get URL
         $response = $this->request->getUrl();
