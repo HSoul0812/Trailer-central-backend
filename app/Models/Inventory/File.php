@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class File
  * @package App\Models\Inventory
+ *
+ * @property int $id
+ * @property string $title,
+ * @property string $path,
+ * @property string $type,
+ * @property int $size,
+ * @property \DateTimeInterface $created_at,
+ * @property \DateTimeInterface $updated_at,
+ * @property bool $is_active
  */
 class File extends Model {
 

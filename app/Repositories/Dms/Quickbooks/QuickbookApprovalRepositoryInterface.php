@@ -14,5 +14,6 @@ interface QuickbookApprovalRepositoryInterface extends Repository {
      * @return Collection
      */
     public function getPoInvoiceApprovals($dealerId);
-    
+
+    public function deleteByTbPrimaryId(int $tbPrimaryId);
 }

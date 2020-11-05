@@ -4,6 +4,19 @@ namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class InventoryImage
+ * @package App\Models\Inventory
+ *
+ * @property int $image_id,
+ * @property int $inventory_id,
+ * @property bool $is_default,
+ * @property bool $is_secondary,
+ * @property int $position,
+ * @property string $showroom_image,
+ * @property bool $was_manually_added,
+ * @property bool $is_stock,
+ */
 class InventoryImage extends Model {
     /**
      * The table associated with the model.

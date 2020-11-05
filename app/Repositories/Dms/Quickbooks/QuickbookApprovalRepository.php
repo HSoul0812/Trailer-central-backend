@@ -57,7 +57,7 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         if (isset($params['dealer_id'])) {
             $query = QuickbookApproval::where('dealer_id', '=', $params['dealer_id']);
         } else {
-            $query = QuickbookApproval::where('id', '>', 0);  
+            $query = QuickbookApproval::where('id', '>', 0);
         }
         if (isset($params['status'])) {
             switch ($params['status']) {
@@ -135,4 +135,19 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
+    /**
+     * @param int $tbPrimaryId
+     * @return bool
+     * @throws \Exception
+     */
+    public function deleteByTbPrimaryId(int $tbPrimaryId)
+    {
+        $quickbookApproval = QuickbookApproval::where('tb_primary_id', '=', $tbPrimaryId)->first();
+
+        if ($quickbookApproval instanceof QuickbookApproval) {
+            return $quickbookApproval->delete();
+        } else {
+            return false;
+        }
+    }
 }

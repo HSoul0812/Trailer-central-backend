@@ -3,7 +3,11 @@
 namespace App\Services\Inventory;
 
 use App\Jobs\Files\DeleteS3FilesJob;
+use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
+use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
@@ -22,14 +26,6 @@ class InventoryService
 {
     use DispatchesJobs;
 
-    const OVERLAY_ENABLED_PRIMARY = 1;
-    const OVERLAY_ENABLED_ALL = 2;
-
-    const OVERLAY_CODES = [
-        self::OVERLAY_ENABLED_PRIMARY,
-        self::OVERLAY_ENABLED_ALL,
-    ];
-
     /**
      * @var InventoryRepositoryInterface
      */
@@ -42,6 +38,14 @@ class InventoryService
      * @var FileRepositoryInterface
      */
     private $fileRepository;
+    /**
+     * @var BillRepositoryInterface
+     */
+    private $billRepository;
+    /**
+     * @var QuickbookApprovalRepositoryInterface
+     */
+    private $quickbookApprovalRepository;
 
     /**
      * @var ImageService
@@ -57,6 +61,8 @@ class InventoryService
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
      * @param FileRepositoryInterface $fileRepository
+     * @param BillRepositoryInterface $billRepository
+     * @param QuickbookApprovalRepositoryInterface $quickbookApprovalRepository
      * @param ImageService $imageService
      * @param FileService $fileService
      */
@@ -64,12 +70,16 @@ class InventoryService
         InventoryRepositoryInterface $inventoryRepository,
         ImageRepositoryInterface $imageRepository,
         FileRepositoryInterface $fileRepository,
+        BillRepositoryInterface $billRepository,
+        QuickbookApprovalRepositoryInterface $quickbookApprovalRepository,
         ImageService $imageService,
         FileService $fileService
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
         $this->fileRepository = $fileRepository;
+        $this->billRepository = $billRepository;
+        $this->quickbookApprovalRepository = $quickbookApprovalRepository;
 
         $this->imageService = $imageService;
         $this->fileService = $fileService;
@@ -78,14 +88,16 @@ class InventoryService
 
     /**
      * @param array $params
-     * @return int
+     * @return Inventory|null
      */
-    public function create(array $params): int
+    public function create(array $params): ?Inventory
     {
         try {
             $newImages = $params['new_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
             $hiddenFiles = $params['hidden_files'] ?? [];
+
+            $addBill = $params['add_bill'] ?? false;
 
             if (!empty($newImages)) {
                 $params['new_images'] = $this->uploadImages($params, 'new_images');
@@ -98,7 +110,7 @@ class InventoryService
                 $params['new_files'] = $this->uploadFiles($params, 'new_files');
             }
 
-            $this->inventoryRepository->beginTransaction();
+            //$this->inventoryRepository->beginTransaction();
 
             $inventory = $this->inventoryRepository->create($params);
 
@@ -106,15 +118,18 @@ class InventoryService
                 Log::error('Item hasn\'t been created.', ['params' => $params]);
                 $this->inventoryRepository->rollbackTransaction();
 
-                return false;
+                return null;
             }
 
-            if (isset($params['add_bill']) && $params['add_bill']) {
-                //$this->addBill($params);
+            if ($addBill) {
+                $this->addBill($params, $inventory);
             }
+
+
+
+            //$this->inventoryRepository->commitTransaction();
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
-            $this->inventoryRepository->commitTransaction();
         } catch (\Exception $e) {
             print_r($e->getMessage());
             print_r($e->getTraceAsString());
@@ -122,10 +137,10 @@ class InventoryService
             Log::error('Item create error.', $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
-            return false;
+            return null;
         }
 
-        return $inventory->inventory_id;
+        return $inventory;
     }
 
     /**
@@ -197,49 +212,6 @@ class InventoryService
         }
 
         return $result;
-    }
-
-    /**
-     * @param array $params
-     * @return array
-     */
-    private function addBill(array $params): array
-    {
-        $billInfo = [
-            'vendor_id' => $_POST['b_vendorId'],
-            'status' => $_POST['b_status'],
-            'doc_num' => $_POST['b_docNum'],
-            'received_date' => $_POST['b_receivedDate'],
-            'due_date' => $_POST['b_dueDate'],
-            'memo' => $_POST['b_memo'],
-            'id' => $_POST['b_id'],
-            'is_floor_plan' => isset($_POST['b_isFloorPlan']) ? $_POST['b_isFloorPlan'] : 0
-        ];
-        $vendorId = (int) $billInfo['vendor_id'];
-        $trueCost = (float) $inventory['true_cost'];
-        $fpBalance = (float) $inventory['fp_balance'];
-        $fpVendor = (int) $inventory['fp_vendor'];
-        if (!empty($vendorId) || !empty($billInfo['is_floor_plan'])) {
-            if (empty($billInfo['id'])) {
-                insertBill($inventoryId, $billInfo, $numericalDealerId);
-            } else {
-                updateBill($inventoryId, $billInfo);
-            }
-        } else if (
-            empty($inventory['bill_id']) &&
-            !empty($trueCost) &&
-            !empty($fpVendor) &&
-            !empty($fpBalance)
-        ) {
-            $billStatus = $trueCost > $fpBalance ? 'due' : 'paid';
-            $billNo = 'fp_auto_' . $inventoryId;
-            $query = $pdoDb->query("
-                            INSERT INTO qb_bills (dealer_id, total, vendor_id, status, doc_num)
-                                VALUES (". $numericalDealerId .", 0, ". $fpVendor .", '". $billStatus ."', '". $billNo ."')
-                        ");
-            $billId = (int) $pdoDb->lastInsertId();
-            $pdoDb->query("UPDATE inventory SET send_to_quickbooks=1, bill_id={$billId}, is_floorplan_bill=1 WHERE inventory_id={$inventoryId}");
-        }
     }
 
     /**
@@ -322,16 +294,16 @@ class InventoryService
     {
         $images = $params[$imagesKey];
 
-        $isOverlayEnabled = isset($params['overlay_enabled']) && in_array($params['overlay_enabled'], self::OVERLAY_CODES);
+        $isOverlayEnabled = isset($params['overlay_enabled']) && in_array($params['overlay_enabled'], Inventory::OVERLAY_CODES);
         $overlayEnabledParams = ['overlayText' => $params['stock']];
 
         $withOverlay = [];
         $withoutOverlay = [];
 
-        if ($isOverlayEnabled && $params['overlay_enabled'] == self::OVERLAY_ENABLED_ALL) {
+        if ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_ALL) {
             $withOverlay = $images;
 
-        } elseif ($isOverlayEnabled && $params['overlay_enabled'] == self::OVERLAY_ENABLED_PRIMARY) {
+        } elseif ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_PRIMARY) {
             $withOverlay = array_filter($images, function ($image) {
                 return isset($image['position']) && $image['position'] == 0;
             });
@@ -382,5 +354,89 @@ class InventoryService
         }
 
         return $files;
+    }
+
+    /**
+     * @param array $params
+     * @param Inventory $inventory
+     * @return void
+     *
+     * Get current inventory and check if it's floor planned
+     * if so, we have to auto-generate a new bill and associate this inventory to a new bill
+     *
+     * @todo I believe it should be an event
+     */
+    private function addBill(array $params, Inventory $inventory): void
+    {
+        $billInfo = [
+            'dealer_id' => $inventory->dealer_id,
+            'inventory_id' => $inventory->inventory_id,
+            'vendor_id' => $params['b_vendorId'] ?? null,
+            'status' => $params['b_status'] ?? null,
+            'doc_num' => $params['b_docNum'] ?? null,
+            'received_date' => $params['b_receivedDate'] ?? null,
+            'due_date' => $params['b_dueDate'] ?? null,
+            'memo' => $params['b_memo'] ?? null,
+            'id' => $params['b_id'] ?? null,
+            'is_floor_plan' => $params['b_isFloorPlan'] ?? 0
+        ];
+
+        $vendorId = (int)$billInfo['vendor_id'];
+        $trueCost = $inventory->true_cost;
+        $fpBalance = $inventory->fp_balance;
+        $fpVendor = (int)$inventory['fp_vendor'];
+
+        if (!empty($vendorId) || !empty($billInfo['is_floor_plan'])) {
+            if (empty($billInfo['id'])) {
+                $billInfo['total'] = 0;
+                $bill = $this->billRepository->create($billInfo);
+
+                $inventoryParams = [
+                    'inventory_id' => $inventory->inventory_id,
+                    'send_to_quickbooks' => 1,
+                    'bill_id' => $bill->id,
+                    'is_floorplan_bill'=> $billInfo['is_floor_plan']
+                ];
+
+                $this->inventoryRepository->update($inventoryParams);
+            } else {
+                $bill = $this->billRepository->update($billInfo);
+
+                $this->quickbookApprovalRepository->deleteByTbPrimaryId($bill->id);
+
+                $inventoryParams = [
+                    'inventory_id' => $inventory->inventory_id,
+                    'send_to_quickbooks' => 1,
+                    'bill_id' => $bill->id,
+                    'is_floorplan_bill' => $billInfo['is_floor_plan'],
+                    'qb_sync_processed' => 0,
+                ];
+
+                $this->inventoryRepository->update($inventoryParams);
+            }
+
+        } else if (empty($inventory->bill_id) && !empty($trueCost) && !empty($fpVendor) && !empty($fpBalance)) {
+            $billStatus = $trueCost > $fpBalance ? Bill::STATUS_DUE : Bill::STATUS_PAID;
+            $billNo = 'fp_auto_' . $inventory->inventory_id;
+
+            $billParams = [
+                'dealer_id' => $inventory->dealer_id,
+                'total' => 0,
+                'vendor_id' => $params['b_vendorId'],
+                'status' => $billStatus,
+                'doc_num' => $billNo
+            ];
+
+            $bill = $this->billRepository->create($billParams);
+
+            $inventoryParams = [
+                'inventory_id' => $inventory->inventory_id,
+                'send_to_quickbooks' => 1,
+                'bill_id' => $bill->id,
+                'is_floorplan_bill'=> $billInfo['is_floor_plan']
+            ];
+
+            $this->inventoryRepository->update($inventoryParams);
+        }
     }
 }

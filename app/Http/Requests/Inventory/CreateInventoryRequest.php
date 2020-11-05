@@ -138,6 +138,14 @@ class CreateInventoryRequest extends Request
         'hidden_files.*.is_manual' => 'checkbox|nullable',
 
         'add_bill' => 'boolean|nullable',
+        'b_id' => 'int|exists:qb_bills|nullable',
+        'b_vendorId' => 'int|nullable',
+        'b_status' => 'string|in:due,paid|nullable',
+        'b_docNum' => 'string|nullable',
+        'b_receivedDate' => 'date|nullable',
+        'b_dueDate' => 'date|nullable',
+        'b_memo' => 'string|nullable',
+        'b_isFloorPlan' => 'bool|nullable',
     ];
 
     /**

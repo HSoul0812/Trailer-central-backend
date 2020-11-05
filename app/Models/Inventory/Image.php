@@ -7,6 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class Image
  * @package App\Models\Inventory
+ *
+ * @property int $image_id,
+ * @property \DateTimeInterface $created_at,
+ * @property \DateTimeInterface $updated_at,
+ * @property string $filename,
+ * @property string $filename_noverlay,
+ * @property string $hash,
+ * @property string $program,
  */
 class Image extends Model
 {

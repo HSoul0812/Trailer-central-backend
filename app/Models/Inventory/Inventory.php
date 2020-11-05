@@ -15,6 +15,105 @@ use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
 
+/**
+ * Class Inventory
+ * @package App\Models\Inventory
+ *
+ * @property int $inventory_id,
+ * @property int $entity_type_id,
+ * @property int $dealer_id,
+ * @property int $dealer_location_id,
+ * @property bool $active,
+ * @property string $title,
+ * @property string $stock,
+ * @property string $manufacturer,
+ * @property string $brand,
+ * @property string $model,
+ * @property int $qb_item_category_id,
+ * @property string $description,
+ * @property string $description_html,
+ * @property int $status,
+ * @property string $availability,
+ * @property bool $is_consignment,
+ * @property string $category,
+ * @property string $video_embed_code,
+ * @property string $vin,
+ * @property array $geolocation,
+ * @property double $msrp_min,
+ * @property double $msrp,
+ * @property double $price,
+ * @property double $sales_price,
+ * @property double $use_website_price,
+ * @property double $website_price,
+ * @property double $dealer_price,
+ * @property double $monthly_payment,
+ * @property int $year,
+ * @property string $condition,
+ * @property double $length,
+ * @property double $width,
+ * @property double $height,
+ * @property double $gvwr,
+ * @property double $weight,
+ * @property double $axle_capacity,
+ * @property string $cost_of_unit,
+ * @property double $true_cost,
+ * @property string $cost_of_shipping,
+ * @property string $cost_of_prep,
+ * @property string $total_of_cost,
+ * @property double $pac_amount,
+ * @property string $pac_type,
+ * @property double $minimum_selling_price,
+ * @property string $notes,
+ * @property bool $show_on_ksl,
+ * @property bool $show_on_racingjunk,
+ * @property bool $show_on_website,
+ * @property bool $overlay_enabled,
+ * @property bool $is_special,
+ * @property bool $is_featured,
+ * @property double $latitude,
+ * @property double $longitude,
+ * @property \DateTimeInterface $archived_at,
+ * @property bool $broken_video_embed_code,
+ * @property int $showroom_id,
+ * @property int $coordinates_updated,
+ * @property double $payload_capacity,
+ * @property string $height_display_mode,
+ * @property string $width_display_mode,
+ * @property string $length_display_mode,
+ * @property double $width_inches,
+ * @property double $height_inches,
+ * @property double $length_inches,
+ * @property bool $show_on_rvtrader,
+ * @property string $chosen_overlay,
+ * @property \DateTimeInterface $fp_committed,
+ * @property int $fp_vendor,
+ * @property double $fp_balance,
+ * @property bool $fp_paid,
+ * @property double $fp_interest_paid,
+ * @property string $l_holder,
+ * @property string $l_attn,
+ * @property string $l_name_on_account,
+ * @property string $l_address,
+ * @property string $l_account,
+ * @property string $l_city,
+ * @property string $l_state,
+ * @property string $l_zip_code,
+ * @property double $l_payoff,
+ * @property string $l_phone,
+ * @property bool $l_paid,
+ * @property string $l_fax,
+ * @property string $bill_id,
+ * @property bool $send_to_quickbooks,
+ * @property bool $is_floorplan_bill,
+ * @property string $integration_item_hash,
+ * @property string $integration_images_hash,
+ * @property bool $non_serialized,
+ * @property double $hidden_price,
+ * @property \DateTimeInterface $utc_integration_updated_at,
+ * @property bool $has_stock_images,
+ * @property bool $qb_sync_processed,
+ * @property string $changed_fields_in_dashboard
+ */
 class Inventory extends Model
 {
     use TableAware, SpatialTrait, GeospatialHelper;
@@ -44,6 +143,14 @@ class Inventory extends Model
         self::STATUS_ON_ORDER       => self::STATUS_ON_ORDER_LABEL,
         self::STATUS_PENDING_SALE   => self::STATUS_PENDING_SALE_LABEL,
         self::STATUS_SPECIAL_ORDER  => self::STATUS_SPECIAL_ORDER_LABEL
+    ];
+
+    const OVERLAY_ENABLED_PRIMARY = 1;
+    const OVERLAY_ENABLED_ALL = 2;
+
+    const OVERLAY_CODES = [
+        self::OVERLAY_ENABLED_PRIMARY,
+        self::OVERLAY_ENABLED_ALL,
     ];
 
     /**
@@ -153,6 +260,7 @@ class Inventory extends Model
         'utc_integration_updated_at',
         'has_stock_images',
         'qb_sync_processed',
+        'changed_fields_in_dashboard'
     ];
 
     protected $casts = [
@@ -167,7 +275,8 @@ class Inventory extends Model
         'true_cost' => 'float',
         'price' => 'float',
         'msrp' => 'float',
-        'gvwr' => 'float'
+        'gvwr' => 'float',
+        'fp_balance' => 'float'
     ];
 
     protected $hidden = [

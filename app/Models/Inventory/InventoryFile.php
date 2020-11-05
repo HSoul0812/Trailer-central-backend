@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class InventoryFile
  * @package App\Models\Inventory
+ *
+ * @property int $id
+ * @property int $file_id,
+ * @property int $inventory_id,
+ * @property int $position,
+ * @property bool $is_manual,
  */
 class InventoryFile extends Model {
 

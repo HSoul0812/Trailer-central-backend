@@ -20,6 +20,8 @@ use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\AccountRepository;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\BillRepository;
+use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Dms\QuoteRepository;
@@ -48,6 +50,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(FinancingCompanyRepositoryInterface::class, FinancingCompanyRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+        $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
 
         $this->app->bind(InvoiceRepositoryInterface::class, function() {
             return new InvoiceRepository(Invoice::query());
