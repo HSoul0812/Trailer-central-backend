@@ -157,7 +157,7 @@ class CatalogService implements CatalogServiceInterface
 
             // Feed Doesn't Exist?
             if(empty($feed)) {
-                $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->feed_url, $catalog->feed_name);
+                $feed = $this->sdk->scheduleFeed($catalog, $catalog->feed_url, $catalog->feed_name);
             }
 
             // Feed Exists?
