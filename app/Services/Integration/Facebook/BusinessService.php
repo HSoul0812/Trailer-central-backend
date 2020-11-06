@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Facebook;
 
+use App\Exceptions\Integration\Facebook\FailedGetProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedValidateAccessTokenException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
@@ -98,7 +99,7 @@ class BusinessService implements BusinessServiceInterface
             $feed = new ProductFeed($feedId);
 
             // Create Product Feed
-            $data = $catalog->getSelf();
+            $data = $feed->getSelf();
             var_dump($data);
             die;
 
@@ -107,11 +108,11 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            Log::error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
-                throw new FailedCreateProductFeedException;
+                throw new FailedGetProductFeedException;
             }
         }
 
