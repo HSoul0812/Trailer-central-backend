@@ -142,7 +142,6 @@ class CatalogService implements CatalogServiceInterface
         $feeds = array();
         foreach($payload as $integration) {
             // Validate Payload
-            var_dump($integration);
             if(empty($integration->page_id)) {
                 continue;
             }
