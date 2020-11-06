@@ -142,12 +142,14 @@ class CatalogService implements CatalogServiceInterface
         $feeds = array();
         foreach($payload as $integration) {
             // Validate Payload
+            var_dump($integration);
             if(empty($integration->page_id)) {
                 continue;
             }
 
             // Get Catalog
             $catalog = $this->catalogs->getByPageId(['page_id' => $integration->page_id]);
+            var_dump($catalog);
             if(empty($catalog->id)) {
                 continue;
             }
@@ -155,6 +157,7 @@ class CatalogService implements CatalogServiceInterface
             // Feed ID Exists?
             $feed = null;
             if(!empty($catalog->feed_id)) {
+                var_dump($catalog->feed_id);
                 try {
                     $feed = $this->sdk->validateFeed($catalog->feed_id);
                 } catch(\Exception $ex) {
@@ -166,6 +169,7 @@ class CatalogService implements CatalogServiceInterface
             if(empty($feed)) {
                 try {
                     $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->feed_url, $catalog->feed_name);
+                    var_dump($feed);
                 } catch(\Exception $ex) {
                     Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
                     continue;
