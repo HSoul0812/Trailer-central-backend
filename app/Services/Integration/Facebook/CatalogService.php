@@ -217,7 +217,7 @@ class CatalogService implements CatalogServiceInterface
         if(!empty($response['validate']['refresh_token'])) {
             // Get Values
             $token = $response['validate']['refresh_token'];
-            $refreshToken = $token['refresh_token'];
+            $refreshToken = $token['access_token'];
             $expiresIn = $token['expires_in'];
             $expiresAt = gmdate("Y-m-d H:i:s", (time() + $token['expires_in']));
 
