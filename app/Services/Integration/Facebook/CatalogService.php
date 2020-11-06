@@ -158,7 +158,7 @@ class CatalogService implements CatalogServiceInterface
                 try {
                     $feed = $this->sdk->validateFeed($catalog->feed_id);
                 } catch(\Exception $ex) {
-                    
+                    Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
                 }
             }
 
@@ -167,6 +167,7 @@ class CatalogService implements CatalogServiceInterface
                 try {
                     $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->feed_url, $catalog->feed_name);
                 } catch(\Exception $ex) {
+                    Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
                     continue;
                 }
             }
