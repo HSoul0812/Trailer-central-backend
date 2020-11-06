@@ -66,16 +66,11 @@ class BusinessService implements BusinessServiceInterface
         $this->initApi($accessToken);
 
         // Initialize Vars
-        $result = [
-            'refresh_token' => NULL,
-            'is_valid' => $this->validateAccessToken($accessToken->access_token),
-            'is_expired' => true
-        ];
+        $result = $this->validateAccessToken($accessToken);
+        $result['refresh_token'] = null;
 
         // Access Token is Valid?
         if($result['is_valid']) {
-            $result['is_expired'] = $this->isAccessTokenExpired($accessToken->access_token);
-
             // Get Long-Lived Access Token
             if(empty($accessToken->refresh_token)) {
                 $result['refresh_token'] = $this->getLongLivedAccessToken($accessToken->access_token);
@@ -157,15 +152,15 @@ class BusinessService implements BusinessServiceInterface
     /**
      * Validate Access Token
      * 
-     * @param string $accessToken
+     * @param AccessToken $accessToken
      * @return boolean
      */
     private function validateAccessToken($accessToken) {
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
-            'access_token' => $accessToken,
-            'input_token' => $accessToken
+            'access_token' => $accessToken->access_token,
+            'input_token' => $accessToken->access_token
         ]);
         $this->request->setQueryParams($params);
 
@@ -176,23 +171,33 @@ class BusinessService implements BusinessServiceInterface
         try {
             // Get URL
             $response = $this->client->sendRequest($this->request);
-            var_dump($response->getContent());
+
+            // Validate!
+            $content = $response->getContent();
+            $validate = [
+                'is_valid' => $content['is_valid'],
+                'is_expired' => (time() > ($content['expires_at'] - 30))
+            ];
+
+            // Check Valid Scopes!
+            foreach($content['scopes'] as $scope) {
+                if(!in_array($scope, $accessToken->scopes)) {
+                    $validate['is_valid'] = false;
+                }
+            }
 
             // Return Response;
-            return $response->getContent();
+            return $validate;
         } catch (\Exception $ex) {
             // Expired Exception?
-            $msg = $ex->getMessage();
-            Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
-            if(strpos($msg, 'Session has expired')) {
-                throw new ExpiredFacebookAccessTokenException;
-            } else {
-                throw new FailedValidateAccessTokenException;
-            }
+            Log::error("Exception returned trying to validate access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
         }
 
-        // Return Null
-        return null;
+        // Return Defaults
+        return [
+            'is_valid' => false,
+            'is_expired' => true
+        ];
     }
 
     /**
@@ -200,13 +205,40 @@ class BusinessService implements BusinessServiceInterface
      * 
      * @return array of expired status, also return new token if available
      */
-    private function refreshAccessToken($accessToken) {
-        // Set Expired
-        $result = [
-            'expired' => true
-        ];
+    private function getLongLivedAccessToken($accessToken) {
+        // Set Access Token
+        $params = new Parameters();
+        $params->enhance([
+            'access_token' => $accessToken->access_token,
+            'grant_type' => 'fb_exchange_token',
+            'client_id' => $_ENV['FB_SDK_APP_ID'],
+            'client_secret' => $_ENV['FB_SDK_APP_SECRET'],
+            'fb_exchange_token' => $accessToken->access_token
+        ]);
+        $this->request->setQueryParams($params);
 
-        // Return Result
-        return $result;
+        // Set Path to Validate Access Token
+        $this->request->setPath('/oauth/access_token');
+
+        // Catch Error
+        try {
+            // Get URL
+            $response = $this->client->sendRequest($this->request);
+
+            // Return Access Token
+            return $response->getContent();
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            Log::error("Exception returned trying to get long-lived access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedReceivingLongLivedTokenException;
+            }
+        }
+
+        // Return Null
+        return null;
     }
 }

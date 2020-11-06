@@ -201,7 +201,34 @@ class CatalogService implements CatalogServiceInterface
             $response['catalog'] = null;
         }
 
-        // Return Response
-        return $this->auth->response($accessToken, $response);
+        // Handle Refresh Token and Return Response
+        return $this->updateRefreshToken($this->auth->response($accessToken, $response));
+    }
+
+
+    /**
+     * Update Refresh Token
+     * 
+     * @param array $response
+     * @return array updated response data to return
+     */
+    private function updateRefreshToken($response) {
+        // Refresh Token Exists?
+        if(!empty($response['validate']['refresh_token'])) {
+            // Update Refresh Token
+            $this->tokens->update([
+                'id' => $response['data']['id'],
+                'refresh_token' => $response['validate']['refresh_token']
+            ]);
+
+            // Fix Refresh Token on Results
+            $response['data']['refresh_token'] = $response['validate']['refresh_token'];
+        }
+
+        // Remove Refresh Token
+        unset($response['validate']['refresh_token']);
+
+        // Return Final Result
+        return $response;
     }
 }
