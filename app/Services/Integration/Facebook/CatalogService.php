@@ -8,6 +8,7 @@ use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
@@ -163,6 +164,7 @@ class CatalogService implements CatalogServiceInterface
                     $feed = $this->sdk->validateFeed($catalog->accessToken, $catalog->feed_id);
                 } catch(\Exception $ex) {
                     Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                    continue;
                 }
             }
 
