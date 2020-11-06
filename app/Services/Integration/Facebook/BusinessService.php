@@ -99,7 +99,7 @@ class BusinessService implements BusinessServiceInterface
             $feed = new ProductFeed($feedId);
 
             // Create Product Feed
-            $data = $feed->getSelf();
+            $data = $feed->getUploadSchedules();
             var_dump($data);
             die;
 
