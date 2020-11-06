@@ -132,14 +132,18 @@ class BusinessService implements BusinessServiceInterface
      */
     private function initApi($accessToken) {
         // ID Token Missing?
-        if(empty($accessToken->access_token)) {
+        if(empty($accessToken->refresh_token) && empty($accessToken->access_token)) {
             throw new MissingFacebookAccessTokenException;
         }
 
         // Try to Get SDK!
         try {
             // Return SDK
-            $this->api = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
+            $this->api = Api::init(
+                $_ENV['FB_SDK_APP_ID'],
+                $_ENV['FB_SDK_APP_SECRET'],
+                !empty($accessToken->refresh_token) ? $accessToken->refresh_token : $accessToken->access_token
+            );
         } catch(\Exception $e) {
             $this->api = null;
             Log::error("Exception returned initializing facebook api: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
@@ -159,8 +163,8 @@ class BusinessService implements BusinessServiceInterface
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
-            'access_token' => $accessToken->access_token,
-            'input_token' => $accessToken->access_token
+            'access_token' => !empty($accessToken->refresh_token) ? $accessToken->refresh_token : $accessToken->access_token,
+            'input_token' => !empty($accessToken->refresh_token) ? $accessToken->refresh_token : $accessToken->access_token
         ]);
         $this->request->setQueryParams($params);
 
