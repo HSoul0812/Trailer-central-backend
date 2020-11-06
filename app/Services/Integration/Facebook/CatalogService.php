@@ -164,12 +164,11 @@ class CatalogService implements CatalogServiceInterface
                     $feed = $this->sdk->validateFeed($catalog->accessToken, $catalog->feed_id);
                 } catch(\Exception $ex) {
                     Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
-                    continue;
                 }
             }
 
             // Feed Doesn't Exist?
-            if(empty($feed)) {
+            if(empty($feed['id'])) {
                 try {
                     $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->feed_url, $catalog->feed_name);
                 } catch(\Exception $ex) {

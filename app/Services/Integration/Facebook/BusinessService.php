@@ -108,7 +108,6 @@ class BusinessService implements BusinessServiceInterface
                     break;
                 }
             }
-            var_dump($data);
 
             // Return Data Result
             return $data;
