@@ -3,8 +3,10 @@
 namespace App\Services\Integration\Facebook;
 
 use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
+use App\Exceptions\Integration\Facebook\FailedValidateAccessTokenException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\ExpiredFacebookAccessTokenException;
+use App\Exceptions\Integration\Facebook\FailedReceivingLongLivedTokenException;
 use FacebookAds\Api;
 use FacebookAds\Http\Client;
 use FacebookAds\Http\Request;
@@ -173,6 +175,8 @@ class BusinessService implements BusinessServiceInterface
         // Catch Error
         try {
             // Get URL
+            echo $this->request->getUrl();
+            die;
             $response = $this->client->sendRequest($this->request);
 
             // Return Response;
@@ -184,7 +188,7 @@ class BusinessService implements BusinessServiceInterface
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
-                throw new FailedCreateProductFeedException;
+                throw new FailedValidateAccessTokenException;
             }
         }
 

@@ -5,7 +5,7 @@ namespace App\Exceptions\Integration\Facebook;
 /**
  * Class MissingFacebookAccessTokenException
  *
- * Use this instead of \Exception to throw any kind of missing access token on Google API
+ * Use this instead of \Exception to throw any kind of missing access token on Facebook SDK
  *
  * @package App\Exceptions\Integration\Facebook
  */
