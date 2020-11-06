@@ -2,11 +2,12 @@
 
 namespace App\Services\Inventory;
 
+use App\Helpers\ArrayHelper;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
+use App\Models\User\Interfaces\PermissionsInterface as Permissions;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
-use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
@@ -16,6 +17,7 @@ use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -25,6 +27,29 @@ use Illuminate\Support\Facades\Log;
 class InventoryService
 {
     use DispatchesJobs;
+
+    const SUPER_ADMIN_FIELDS = [
+        'true_cost',
+        'pac_amount',
+        'pac_type',
+        'fp_balance',
+        'fp_committed',
+        'fp_paid',
+        'fp_interest_paid',
+        'fp_vendor',
+        'l_holder',
+        'l_attn',
+        'l_name_on_account',
+        'l_address',
+        'l_account',
+        'l_city',
+        'l_state',
+        'l_zip_code',
+        'l_payoff',
+        'l_phone',
+        'l_paid',
+        'l_fax',
+    ];
 
     /**
      * @var InventoryRepositoryInterface
@@ -57,6 +82,11 @@ class InventoryService
     private $fileService;
 
     /**
+     * @var ArrayHelper
+     */
+    private $arrayHelper;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -65,6 +95,7 @@ class InventoryService
      * @param QuickbookApprovalRepositoryInterface $quickbookApprovalRepository
      * @param ImageService $imageService
      * @param FileService $fileService
+     * @param ArrayHelper $arrayHelper
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
@@ -73,7 +104,8 @@ class InventoryService
         BillRepositoryInterface $billRepository,
         QuickbookApprovalRepositoryInterface $quickbookApprovalRepository,
         ImageService $imageService,
-        FileService $fileService
+        FileService $fileService,
+        ArrayHelper $arrayHelper
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -83,6 +115,8 @@ class InventoryService
 
         $this->imageService = $imageService;
         $this->fileService = $fileService;
+
+        $this->arrayHelper = $arrayHelper;
     }
 
 
@@ -93,11 +127,18 @@ class InventoryService
     public function create(array $params): ?Inventory
     {
         try {
+            /** @var Permissions $user */
+            $user = Auth::user();
+
             $newImages = $params['new_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
             $hiddenFiles = $params['hidden_files'] ?? [];
 
             $addBill = $params['add_bill'] ?? false;
+
+            if (!$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)) {
+                $params = $this->arrayHelper->deleteKeys($params, self::SUPER_ADMIN_FIELDS);
+            }
 
             if (!empty($newImages)) {
                 $params['new_images'] = $this->uploadImages($params, 'new_images');
@@ -124,8 +165,6 @@ class InventoryService
             if ($addBill) {
                 $this->addBill($params, $inventory);
             }
-
-
 
             //$this->inventoryRepository->commitTransaction();
 
