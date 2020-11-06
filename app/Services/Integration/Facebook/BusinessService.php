@@ -176,10 +176,10 @@ class BusinessService implements BusinessServiceInterface
         try {
             // Get URL
             $response = $this->client->sendRequest($this->request);
-            var_dump($response);
+            var_dump($response->getContent());
 
             // Return Response;
-            return $response;
+            return $response->getContent();
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
