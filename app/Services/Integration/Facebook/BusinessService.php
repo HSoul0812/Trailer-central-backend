@@ -162,6 +162,7 @@ class BusinessService implements BusinessServiceInterface
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
+            'access_token' => $accessToken,
             'input_token' => $accessToken
         ]);
         $this->request->setQueryParams($params);
