@@ -24,6 +24,8 @@ use Illuminate\Support\Facades\Log;
  */
 class BusinessService implements BusinessServiceInterface
 {
+    const GRAPH_API_VERSION = 8;
+
     /**
      * @var FacebookAds\Api
      */
@@ -47,6 +49,7 @@ class BusinessService implements BusinessServiceInterface
         // Init Request
         $this->client = new Client();
         $this->request = new Request($this->client);
+        $this->request->setGraphVersion(self::GRAPH_API_VERSION);
     }
 
 
@@ -62,16 +65,20 @@ class BusinessService implements BusinessServiceInterface
 
         // Initialize Vars
         $result = [
-            'access_token' => $accessToken->access_token,
+            'refresh_token' => NULL,
             'is_valid' => $this->validateAccessToken($accessToken->access_token),
             'is_expired' => true
         ];
 
-        // Get Refresh Token
-        $result['is_expired'] = $this->isAccessTokenExpired($accessToken->access_token);
+        // Access Token is Valid?
+        if($result['is_valid']) {
+            $result['is_expired'] = $this->isAccessTokenExpired($accessToken->access_token);
 
-        // Get Long-Lived Access Token
-        $result['access_token'] = $this->getLongLivedAccessToken($accessToken->access_token);
+            // Get Long-Lived Access Token
+            if(empty($accessToken->refresh_token)) {
+                $result['refresh_token'] = $this->getLongLivedAccessToken($accessToken->access_token);
+            }
+        }
 
         // Return Payload Results
         return $result;
@@ -128,7 +135,7 @@ class BusinessService implements BusinessServiceInterface
      */
     private function initApi($accessToken) {
         // ID Token Missing?
-        if(empty($accessToken->id_token)) {
+        if(empty($accessToken->access_token)) {
             throw new MissingFacebookAccessTokenException;
         }
 
@@ -138,6 +145,7 @@ class BusinessService implements BusinessServiceInterface
             $this->api = Api::init($_ENV['FB_SDK_APP_ID'], $_ENV['FB_SDK_APP_SECRET'], $accessToken->access_token);
         } catch(\Exception $e) {
             $this->api = null;
+            Log::error("Exception returned initializing facebook api: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
         }
 
         // Return SDK
@@ -147,11 +155,11 @@ class BusinessService implements BusinessServiceInterface
     /**
      * Validate Access Token
      * 
-     * @param AccessToken $accessToken
+     * @param string $accessToken
      * @return boolean
      */
     private function validateAccessToken($accessToken) {
-        // Create Parameters
+        // Set Access Token
         $params = new Parameters();
         $params->enhance([
             'input_token' => $accessToken
