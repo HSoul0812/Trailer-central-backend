@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Log;
  */
 class BusinessService implements BusinessServiceInterface
 {
-    const GRAPH_API_VERSION = 8;
+    const GRAPH_API_VERSION = '8.0';
 
     /**
      * @var FacebookAds\Api
@@ -175,8 +175,6 @@ class BusinessService implements BusinessServiceInterface
         // Catch Error
         try {
             // Get URL
-            echo $this->request->getUrl();
-            die;
             $response = $this->client->sendRequest($this->request);
 
             // Return Response;
