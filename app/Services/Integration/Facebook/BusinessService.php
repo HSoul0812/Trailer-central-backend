@@ -102,8 +102,9 @@ class BusinessService implements BusinessServiceInterface
             $feeds = $catalog->getProductFeeds();
             $data = ['id' => null];
             foreach($feeds as $feed) {
-                if($feed->assureId() === $feed) {
-                    $data['id'] = $feed->assureId();
+                $item = $feed->exportData();
+                if($item->id === $feed) {
+                    $data['id'] = $item->id;
                     break;
                 }
             }
