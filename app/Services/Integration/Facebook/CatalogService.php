@@ -148,6 +148,7 @@ class CatalogService implements CatalogServiceInterface
 
             // Get Catalog
             $catalog = $this->catalogs->getByPageId(['page_id' => $integration->page_id]);
+            var_dump($catalog);
 
             // Feed ID Exists?
             $feed = null;
