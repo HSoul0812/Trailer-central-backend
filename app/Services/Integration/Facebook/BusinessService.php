@@ -174,6 +174,7 @@ class BusinessService implements BusinessServiceInterface
 
             // Validate!
             $content = $response->getContent();
+            var_dump($content);
             $validate = [
                 'is_valid' => $content['is_valid'],
                 'is_expired' => (time() > ($content['expires_at'] - 30))
