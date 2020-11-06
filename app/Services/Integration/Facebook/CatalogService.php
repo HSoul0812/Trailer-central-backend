@@ -215,14 +215,24 @@ class CatalogService implements CatalogServiceInterface
     private function updateRefreshToken($response) {
         // Refresh Token Exists?
         if(!empty($response['validate']['refresh_token'])) {
+            // Get Values
+            $token = $response['validate']['refresh_token'];
+            $refreshToken = $token['refresh_token'];
+            $expiresIn = $token['expires_in'];
+            $expiresAt = gmdate("Y-m-d H:i:s", (time() + $token['expires_in']));
+
             // Update Refresh Token
             $this->tokens->update([
                 'id' => $response['data']['id'],
-                'refresh_token' => $response['validate']['refresh_token']
+                'refresh_token' => $response['validate']['refresh_token'],
+                'expires_in' => $response['validate']['expires_in'],
+                'expires_at' => $response['validate']['expires_at']
             ]);
 
             // Fix Refresh Token on Results
-            $response['data']['refresh_token'] = $response['validate']['refresh_token'];
+            $response['data']['refresh_token'] = $refreshToken;
+            $response['data']['expires_in'] = $expiresIn;
+            $response['data']['expires_at'] = $expiresAt;
         }
 
         // Remove Refresh Token
