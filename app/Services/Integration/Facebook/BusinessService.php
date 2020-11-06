@@ -82,6 +82,44 @@ class BusinessService implements BusinessServiceInterface
     }
 
     /**
+     * Validate a Feed Exists
+     * 
+     * @param AccessToken $accessToken
+     * @param int $feedId
+     * @return $catalog->createProductFeed || null
+     */
+    public function validateFeed($accessToken, $feedId) {
+        // Configure Client
+        $this->initApi($accessToken);
+
+        // Get Product Catalog
+        try {
+            // Get Feed
+            $feed = new ProductFeed($feedId);
+
+            // Create Product Feed
+            $data = $catalog->getSelf();
+            var_dump($data);
+            die;
+
+            // Return Data Result
+            return $data;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedCreateProductFeedException;
+            }
+        }
+
+        // Return Null
+        return null;
+    }
+
+    /**
      * Schedule a Feed
      * 
      * @param AccessToken $accessToken
