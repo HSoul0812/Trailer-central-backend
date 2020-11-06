@@ -178,6 +178,7 @@ class CatalogService implements CatalogServiceInterface
 
             // Update Feed in Catalog
             var_dump($feed);
+            die;
 
             // Create Job
         }
