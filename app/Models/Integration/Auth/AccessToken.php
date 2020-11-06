@@ -57,6 +57,7 @@ class AccessToken extends Model
         'relation_type',
         'relation_id',
         'access_token',
+        'refresh_token',
         'id_token',
         'expires_in',
         'expires_at',
