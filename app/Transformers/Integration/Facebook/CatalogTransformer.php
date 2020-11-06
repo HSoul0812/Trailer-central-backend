@@ -42,6 +42,7 @@ class CatalogTransformer extends TransformerAbstract
             'page_title' => $catalog->page_title,
             'page_token' => $catalog->page_token,
             'feed_name' => $catalog->feed_name,
+            'feed_path' => $catalog->feed_path,
             'feed_url' => $catalog->feed_url,
             'feed_id' => $catalog->feed_id,
             'filters' => json_decode($catalog->filters),

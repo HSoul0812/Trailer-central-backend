@@ -221,13 +221,23 @@ class Catalog extends Model
 
 
     /**
-     * Get Field Url
+     * Get Feed Path
+     * 
+     * @return string of calculated feed path
+     */
+    public function getFeedPathAttribute()
+    {
+        return '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page_id . '.csv';
+    }
+
+    /**
+     * Get Feed Url
      * 
      * @return string of calculated feed url
      */
     public function getFeedUrlAttribute()
     {
-        return '/' . $_ENV['AWS_BUCKET'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page_id . '.csv';
+        return $ENV['AWS_URL'] . '/' . $_ENV['AWS_BUCKET'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page_id . '.csv';
     }
 
     /**
