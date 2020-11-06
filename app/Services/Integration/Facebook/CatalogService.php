@@ -224,9 +224,9 @@ class CatalogService implements CatalogServiceInterface
             // Update Refresh Token
             $this->tokens->update([
                 'id' => $response['data']['id'],
-                'refresh_token' => $response['validate']['refresh_token'],
-                'expires_in' => $response['validate']['expires_in'],
-                'expires_at' => $response['validate']['expires_at']
+                'refresh_token' => $refreshToken,
+                'expires_in' => $expiresIn,
+                'expires_at' => $expiresAt
             ]);
 
             // Fix Refresh Token on Results
