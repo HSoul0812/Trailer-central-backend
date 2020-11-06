@@ -103,7 +103,7 @@ class BusinessService implements BusinessServiceInterface
             $data = ['id' => null];
             foreach($feeds as $feed) {
                 $item = $feed->exportAllData();
-                if($item['id'] === $feedId) {
+                if($item['id'] == $feedId) {
                     $data['id'] = $item['id'];
                     break;
                 }
