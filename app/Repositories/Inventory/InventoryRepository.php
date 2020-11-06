@@ -6,6 +6,7 @@ use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\InventoryClapp;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryFile;
 use App\Models\Inventory\InventoryImage;
@@ -101,16 +102,19 @@ class InventoryRepository implements InventoryRepositoryInterface
         $features = $params['features'] ?? [];
         $newImages = $params['new_images'] ?? [];
         $newFiles = $params['new_files'] ?? [];
+        $clapps = $params['clapps'] ?? [];
 
         $attributeObjs = [];
         $featureObjs = [];
         $inventoryImageObjs = [];
         $inventoryFilesObjs = [];
+        $clappObjs = [];
 
         unset($params['attributes']);
         unset($params['features']);
         unset($params['new_images']);
         unset($params['new_files']);
+        unset($params['clapps']);
 
         foreach ($attributes as $attribute) {
             $attributeObjs[] = new AttributeValue($attribute);
@@ -140,6 +144,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $inventoryFilesObjs[] = $inventoryFileObj;
         }
 
+        foreach (array_filter($clapps) as $field => $value) {
+            $clappObjs[] = new InventoryClapp(['field' => $field, 'value' => $value]);
+        }
+
         $item = new Inventory($params);
 
         $item->save();
@@ -158,6 +166,10 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (!empty($inventoryFilesObjs)) {
             $item->inventoryFiles()->saveMany($inventoryFilesObjs);
+        }
+
+        if (!empty($clappObjs)) {
+            $item->clapps()->saveMany($clappObjs);
         }
 
         return $item;

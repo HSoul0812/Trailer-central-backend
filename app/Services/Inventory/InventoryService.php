@@ -133,6 +133,7 @@ class InventoryService
             $newImages = $params['new_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
             $hiddenFiles = $params['hidden_files'] ?? [];
+            $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
             $addBill = $params['add_bill'] ?? false;
 
@@ -151,6 +152,11 @@ class InventoryService
                 $params['new_files'] = $this->uploadFiles($params, 'new_files');
             }
 
+            if (!empty($clappsDefaultImage)) {
+                $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
+                $params['clapps']['default-image'] = $clappImage['path'];
+            }
+
             //$this->inventoryRepository->beginTransaction();
 
             $inventory = $this->inventoryRepository->create($params);
@@ -165,6 +171,9 @@ class InventoryService
             if ($addBill) {
                 $this->addBill($params, $inventory);
             }
+
+            print_r($params);
+            exit();
 
             //$this->inventoryRepository->commitTransaction();
 

@@ -39,6 +39,7 @@ abstract class AbstractFileService
     /**
      * ImageService constructor.
      * @param Client $httpClient
+     * @param SanitizeHelper $sanitizeHelper
      */
     public function __construct(Client $httpClient, SanitizeHelper $sanitizeHelper)
     {
@@ -174,7 +175,7 @@ abstract class AbstractFileService
 
         $uploadParams = array_merge(['visibility' => 'public'], $uploadParams);
 
-        $result = Storage::disk('s3')->put($s3Filename, file_get_contents($localFilename), 'public');
+        $result = Storage::disk('s3')->put($s3Filename, file_get_contents($localFilename), $uploadParams);
 
         if (!$result) {
             throw new FileUploadException("Can't upload file to s3. File - {$localFilename}");

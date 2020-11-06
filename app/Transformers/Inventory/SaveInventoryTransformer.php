@@ -46,6 +46,7 @@ class SaveInventoryTransformer implements TransformerInterface
         'dealer_location_identifier' => 'dealer_location_id',
         'external_color' => 'color',
         'exterior_color' => 'color',
+        'craigslist' => 'clapps'
     ];
 
     private const SANITIZE_UTF8_FIELDS = [
@@ -82,6 +83,10 @@ class SaveInventoryTransformer implements TransformerInterface
     private const FILES_FIELDS = [
         'new_files',
         'hidden_files',
+    ];
+
+    private const ARRAY_VALUES = [
+        'craigslist'
     ];
 
     private const FILE_TITLE = 'title';
@@ -135,7 +140,7 @@ class SaveInventoryTransformer implements TransformerInterface
             $features = [];
 
             foreach ($createParams as $key => $value) {
-                if (is_array($value)) {
+                if (is_array($value) && !in_array($key, self::ARRAY_VALUES)) {
                     $createParams = array_merge($value, $createParams);
                 }
             }
@@ -150,6 +155,7 @@ class SaveInventoryTransformer implements TransformerInterface
             foreach (self::FIELDS_MAPPING as $paramsField => $modelField) {
                 if (!isset($createParams[$modelField]) && isset($createParams[$paramsField])) {
                     $createParams[$modelField] = $createParams[$paramsField];
+                    unset($createParams[$paramsField]);
                 }
             }
 

@@ -138,11 +138,11 @@ class InventoryController extends RestfulController
         $transformer = app()->make(SaveInventoryTransformer::class);
         $inventoryRequest->setTransformer($transformer);
 
-        if (!$inventoryRequest->validate() || !($inventoryId = $this->inventoryService->create($inventoryRequest->all()))) {
+        if (!$inventoryRequest->validate() || !($inventory = $this->inventoryService->create($inventoryRequest->all()))) {
             return $this->response->errorBadRequest();
         }
 
-        return $this->createdResponse($inventoryId);
+        return $this->createdResponse($inventory->inventory_id);
     }
 
     /**

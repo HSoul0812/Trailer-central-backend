@@ -17,9 +17,9 @@ class CreateInventoryRequest extends Request
         'dealer_location_id' => 'required_without_all:dealer_location_identifier|integer|exists:App\Models\User\DealerLocation,dealer_location_id',
         'active' => 'boolean|nullable',
         'title' => 'required|max:255',
-        'stock' => 'string|max:50',
-        'manufacturer' => 'string|max:255|nullable',
-        'brand' => 'string|max:255|nullable',
+        'stock' => 'string|max:50|inventory_unique_stock',
+        'manufacturer' => 'inventory_inventory_mfg_valid|nullable',
+        'brand' => 'inventory_brand_valid|nullable',
         'model' => 'string|max:255|nullable',
         'qb_item_category_id' => 'integer|nullable',
         'description' => 'string|nullable',
@@ -27,7 +27,7 @@ class CreateInventoryRequest extends Request
         'status' => 'integer|nullable',
         'availability' => 'string|nullable',
         'is_consignment' => 'boolean|nullable',
-        'category' => 'string|max:255|nullable',
+        'category' => 'inventory_cat_valid',
         'video_embed_code' => 'nullable',
         'vin' => 'string|max:17|nullable',
         'geolocation' => 'string',
@@ -146,6 +146,11 @@ class CreateInventoryRequest extends Request
         'b_dueDate' => 'date|nullable',
         'b_memo' => 'string|nullable',
         'b_isFloorPlan' => 'bool|nullable',
+
+        'craigslist' => 'array|nullable',
+        'craigslist.default_image' => 'array|nullable',
+        'craigslist.default_image.new' => 'checkbox|nullable',
+        'craigslist.default_image.url' => 'string|nullable',
     ];
 
     /**
