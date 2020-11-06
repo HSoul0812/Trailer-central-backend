@@ -83,8 +83,13 @@ class BusinessService implements BusinessServiceInterface
 
     /**
      * Schedule a Feed
+     * 
+     * @param AccessToken $accessToken
+     * @param string $feedUrl
+     * @param string $feedName
+     * @return $catalog->createProductFeed || null
      */
-    public function scheduleFeed($accessToken, $filename) {
+    public function scheduleFeed($accessToken, $feedUrl, $feedName) {
         // Configure Client
         $this->initApi($accessToken);
 
@@ -97,10 +102,10 @@ class BusinessService implements BusinessServiceInterface
             $data = $catalog->createProductFeed(
                 array(),
                 array(
-                    'name' => 'Test Feed',
+                    'name' => $feedName,
                     'schedule' => array(
                         'interval' => 'DAILY',
-                        'url' => $filename,
+                        'url' => $feedUrl,
                         'hour' => '22'
                     )
                 )
@@ -131,7 +136,7 @@ class BusinessService implements BusinessServiceInterface
      * @return API
      */
     private function initApi($accessToken) {
-        // ID Token Missing?
+        // Access Token Missing?
         if(empty($accessToken->refresh_token) && empty($accessToken->access_token)) {
             throw new MissingFacebookAccessTokenException;
         }
