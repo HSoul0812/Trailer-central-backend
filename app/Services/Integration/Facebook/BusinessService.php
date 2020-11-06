@@ -170,10 +170,26 @@ class BusinessService implements BusinessServiceInterface
         // Set Path to Validate Access Token
         $this->request->setPath('/debug_token');
 
-        // Get URL
-        var_dump($this->request->getUrl());
-        $response = $this->client->sendRequest($this->request);
-        var_dump($response);
+        // Catch Error
+        try {
+            // Get URL
+            $response = $this->client->sendRequest($this->request);
+
+            // Return Response;
+            return $response;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedCreateProductFeedException;
+            }
+        }
+
+        // Return Null
+        return null;
     }
 
     /**
