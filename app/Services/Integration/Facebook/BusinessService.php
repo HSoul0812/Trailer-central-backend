@@ -95,11 +95,18 @@ class BusinessService implements BusinessServiceInterface
 
         // Get Product Catalog
         try {
-            // Get Feed
-            $feed = new ProductFeed($feedId);
+            // Get Catalog
+            $catalog = new ProductCatalog($_ENV['FB_SDK_CATALOG_ID']);
 
-            // Create Product Feed
-            $data = $feed->getSelf()->getResponse();
+            // Get Feeds
+            $feeds = $catalog->getProductFeeds();
+            $data = ['id' => null];
+            foreach($feeds as $feed) {
+                if($feed->id === $feed) {
+                    $data['id'] = $feed->id;
+                    break;
+                }
+            }
             var_dump($data);
             die;
 
