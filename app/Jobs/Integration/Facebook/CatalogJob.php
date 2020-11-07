@@ -2,6 +2,9 @@
 
 namespace App\Jobs\Integration\Facebook;
 
+use App\Exceptions\Integration\Facebook\EmptyCatalogPayloadListingsException;
+use App\Exceptions\Integration\Facebook\FailedCreateTempCatalogCsvException;
+use App\Exceptions\Integration\Facebook\MissingCatalogFeedPathException;
 use App\Jobs\Job;
 use App\Models\Inventory\Inventory;
 use App\Models\Integration\Facebook\Catalog;
