@@ -8,6 +8,7 @@ use App\Http\Requests\Integration\Facebook\GetCatalogRequest;
 use App\Http\Requests\Integration\Facebook\ShowCatalogRequest;
 use App\Http\Requests\Integration\Facebook\CreateCatalogRequest;
 use App\Http\Requests\Integration\Facebook\UpdateCatalogRequest;
+use App\Http\Requests\Integration\Facebook\DeleteCatalogRequest;
 use App\Http\Requests\Integration\Facebook\PayloadCatalogRequest;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Services\Integration\Facebook\CatalogServiceInterface;
