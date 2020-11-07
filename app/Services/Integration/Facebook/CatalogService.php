@@ -170,6 +170,7 @@ class CatalogService implements CatalogServiceInterface
             // Feed Doesn't Exist?
             if(empty($feed['id'])) {
                 try {
+                    $catalog->feed_id = 0;
                     $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->feed_url, $catalog->feed_name);
                 } catch(\Exception $ex) {
                     Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
