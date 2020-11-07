@@ -142,7 +142,7 @@ class CatalogService implements CatalogServiceInterface
      */
     public function delete($id) {
         // Get Catalog
-        $catalog = $this->catalogs->get($id);
+        $catalog = $this->catalogs->get(['id' => $id]);
 
         // Feed ID Exists?!
         if(!empty($catalog->feed_id)) {
