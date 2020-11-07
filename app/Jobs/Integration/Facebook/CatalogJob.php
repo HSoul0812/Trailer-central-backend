@@ -117,7 +117,7 @@ class CatalogJob extends Job
         'vehicle_upright' => self::SPORT,
         'other' => self::COMMERCIAL,
         'park-model' => self::TRAILER,
-        'personal_watercraft' => self::WATERCRAFT,
+        'personal_watercraft' => self::BOAT,
         'equip_snow_blower' => self::COMMERCIAL,
         'pontoon_boat' => self::BOAT,
         'powerboat' => self::BOAT,
