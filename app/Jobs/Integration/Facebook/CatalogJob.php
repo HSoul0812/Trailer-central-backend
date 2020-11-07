@@ -324,64 +324,64 @@ class CatalogJob extends Job
      */
     private function cleanCsvRow($listing) {
         // Get Inventory URL
-        $listing['url'] = $this->getInventoryUrl($listing['vehicle_id']);
+        $listing->url = $this->getInventoryUrl($listing->vehicle_id);
 
         // Append Brand to Manufacturer
-        if(isset($listing['brand'])) {
-            $listing['make'] .= ' ' . $listing['brand'];
-            unset($listing['brand']);
+        if(isset($listing->brand)) {
+            $listing->make .= ' ' . $listing->brand;
+            unset($listing->brand);
         }
 
         // Fix Mileage
-        $listing['mileage.value'] = $listing['mileage_value'];
-        $listing['mileage.unit'] = $listing['mileage_unit'];
-        unset($listing['mileage_value']);
-        unset($listing['mileage_unit']);
+        $listing->mileage.value = $listing->mileage_value;
+        $listing->mileage.unit = $listing->mileage_unit;
+        unset($listing->mileage_value);
+        unset($listing->mileage_unit);
 
         // Encode Images
-        if(is_array($listing['image'])) {
-            $listing['image'] = json_encode($listing['image']);
+        if(is_array($listing->image)) {
+            $listing->image = json_encode($listing->image);
         }
 
         // Fix Transmission
-        if(empty($listing['transmission'])) {
-            $listing['transmission'] = 'other';
+        if(empty($listing->transmission)) {
+            $listing->transmission = 'other';
         }
-        $listing['transmission'] = strtoupper($listing['transmission']);
+        $listing->transmission = strtoupper($listing->transmission);
 
         // Handle Mapping
-        $listing['vehicle_type'] = $this->mapVehicleType($listing['vehicle_type']);
-        $listing['body_style'] = $this->mapBodyStyle($listing['body_style']);
-        $listing['drivetrain'] = $this->mapDriveTrain($listing['drivetrain']);
-        $listing['fuel_type'] = $this->mapFuelType($listing['fuel_type']);
+        $listing->vehicle_type = $this->mapVehicleType($listing->vehicle_type);
+        $listing->body_style = $this->mapBodyStyle($listing->body_style);
+        $listing->drivetrain = $this->mapDriveTrain($listing->drivetrain);
+        $listing->fuel_type = $this->mapFuelType($listing->fuel_type);
 
         // Fix State of Vehicle
-        if(!empty($listing['state_of_vehicle']) && $listing['state_of_vehicle'] !== 'New') {
-            $listing['state_of_vehicle'] = 'Used';
+        if(!empty($listing->state_of_vehicle) && $listing->state_of_vehicle !== 'New') {
+            $listing->state_of_vehicle = 'Used';
         } else {
-            $listing['state_of_vehicle'] = 'New';
+            $listing->state_of_vehicle = 'New';
         }
 
         // Handle Address
-        $listing['address'] = json_encode([
-            'addr1' => $listing['address_addr1'],
-            'city' => $listing['address_city'],
-            'region' => $listing['address_region'],
-            'country' => $listing['address_country'],
-            'postal' => $listing['address_postal']
+        $listing->address = json_encode([
+            'addr1' => $listing->address_addr1,
+            'city' => $listing->address_city,
+            'region' => $listing->address_region,
+            'country' => $listing->address_country,
+            'postal' => $listing->address_postal
         ]);
 
         // Remove Address Columns
-        unset($listing['address_addr1']);
-        unset($listing['address_city']);
-        unset($listing['address_region']);
-        unset($listing['address_country']);
-        unset($listing['address_postal']);
+        unset($listing->address_addr1);
+        unset($listing->address_city);
+        unset($listing->address_region);
+        unset($listing->address_country);
+        unset($listing->address_postal);
 
         // Append Description
-        $listing['description'] = isset($listing['description']) ? trim($listing['description']) : '';
-        if($listing['dealer_id'] == 8757) {
-            $listing['description'] .= 'In some cases, pricing may not include freight, prep, doc/title fees, additional equipment, or sales tax';
+        $listing->description = isset($listing->description) ? trim($listing->description) : '';
+        if($listing->dealer_id == 8757) {
+            $listing->description .= 'In some cases, pricing may not include freight, prep, doc/title fees, additional equipment, or sales tax';
         }
 
         // Return Cleaned Up Listing Array
