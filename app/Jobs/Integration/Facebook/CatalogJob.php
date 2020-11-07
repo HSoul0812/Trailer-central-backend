@@ -309,8 +309,17 @@ class CatalogJob extends Job
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
 
+        // Create Row
+        $row = array();
+        foreach($this->csvColumns as $column) {
+            if(isset($clean->{$column})) {
+                $row[$column] = $clean->{$column};
+            }
+        }
+        
+
         // Add Cleaned Results to CSV
-        fputcsv($file, $clean);
+        fputcsv($file, $row);
 
         // Return Result
         return $file;
@@ -335,8 +344,6 @@ class CatalogJob extends Job
         // Fix Mileage
         $listing->{'mileage.value'} = $listing->mileage_value;
         $listing->{'mileage.unit'} = $listing->mileage_unit;
-        unset($listing->mileage_value);
-        unset($listing->mileage_unit);
 
         // Encode Images
         if(is_array($listing->image)) {
@@ -370,13 +377,6 @@ class CatalogJob extends Job
             'country' => $listing->address_country,
             'postal' => $listing->address_postal
         ]);
-
-        // Remove Address Columns
-        unset($listing->address_addr1);
-        unset($listing->address_city);
-        unset($listing->address_region);
-        unset($listing->address_country);
-        unset($listing->address_postal);
 
         // Append Description
         $listing->description = isset($listing->description) ? trim($listing->description) : '';
