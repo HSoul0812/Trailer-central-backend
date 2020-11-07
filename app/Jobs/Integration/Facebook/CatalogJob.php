@@ -263,7 +263,7 @@ class CatalogJob extends Job
     public function handle()
     {
         // Integration Empty?
-        if(empty($this->integration) || empty($this->integration['listings'])) {
+        if(empty($this->integration) || empty($this->integration->listings)) {
             // We shouldn't be here if the integration has no listings, but throw an error just in case!
             throw new EmptyCatalogPayloadListingsException;
         }
@@ -272,7 +272,7 @@ class CatalogJob extends Job
         $file = $this->createCsv();
 
         // Process Integration
-        foreach($this->integration['listings'] as $listing) {
+        foreach($this->integration->listings as $listing) {
             $this->insertCsvRow($file, $listing);
         }
 
