@@ -6,8 +6,7 @@ use App\Jobs\Job;
 use App\Models\Inventory\Inventory;
 use App\Models\Integration\Facebook\Catalog;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Filesystem\Filesystem;
-use League\Csv\Writer;
+use Illuminate\Support\Facades\Storage;
 
 class CatalogJob extends Job
 {
