@@ -333,8 +333,8 @@ class CatalogJob extends Job
         }
 
         // Fix Mileage
-        $listing->mileage.value = $listing->mileage_value;
-        $listing->mileage.unit = $listing->mileage_unit;
+        $listing->{'mileage.value'} = $listing->mileage_value;
+        $listing->{'mileage.unit'} = $listing->mileage_unit;
         unset($listing->mileage_value);
         unset($listing->mileage_unit);
 
