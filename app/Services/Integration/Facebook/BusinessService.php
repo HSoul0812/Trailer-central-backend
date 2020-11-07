@@ -127,6 +127,50 @@ class BusinessService implements BusinessServiceInterface
     }
 
     /**
+     * Delete a Feed
+     * 
+     * @param AccessToken $accessToken
+     * @param int $feedId
+     * @return delete
+     */
+    public function deleteFeed($accessToken, $feedId) {
+        // Configure Client
+        $this->initApi($accessToken);
+
+        // Get Product Catalog
+        try {
+            // Get Catalog
+            $catalog = new ProductCatalog($_ENV['FB_SDK_CATALOG_ID']);
+
+            // Get Feeds
+            $feeds = $catalog->getProductFeeds();
+            $data = ['id' => null];
+            foreach($feeds as $feed) {
+                $item = $feed->exportAllData();
+                if($item['id'] == $feedId) {
+                    $feed->deleteSelf();
+                    break;
+                }
+            }
+
+            // Return Data Result
+            return true;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            Log::error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedDeleteProductFeedException;
+            }
+        }
+
+        // Return Null
+        return false;
+    }
+
+    /**
      * Schedule a Feed
      * 
      * @param AccessToken $accessToken

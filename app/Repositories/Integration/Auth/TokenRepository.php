@@ -81,10 +81,10 @@ class TokenRepository implements TokenRepositoryInterface {
      * Delete Access Token
      * 
      * @param array $params
-     * @throws NotImplementedException
      */
     public function delete($params) {
-        throw new NotImplementedException;
+        // Find Token
+        return $this->find($params)->delete();
     }
 
     /**

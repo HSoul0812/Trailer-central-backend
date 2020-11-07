@@ -80,11 +80,12 @@ class CatalogRepository implements CatalogRepositoryInterface {
     /**
      * Delete Catalog
      * 
-     * @param array $params
+     * @param int $id
      * @throws NotImplementedException
      */
-    public function delete($params) {
-        throw new NotImplementedException;
+    public function delete($id) {
+        // Delete Catalog
+        return Catalog::findOrFail($id)->delete();
     }
 
     /**

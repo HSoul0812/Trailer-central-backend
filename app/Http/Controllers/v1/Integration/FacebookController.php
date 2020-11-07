@@ -103,6 +103,23 @@ class FacebookController extends RestfulControllerV2 {
     }
 
     /**
+     * Delete Facebook Catalog and Access Token
+     * 
+     * @param int $id
+     * @return type
+     */
+    public function destroy(int $id)
+    {
+        // Handle Facebook Catalog Request
+        $request = new DeleteCatalogRequest(['id' => $id]);
+        if ($request->validate() && $this->service->delete($id)) {
+            return $this->successResponse();
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
      * Receive Facebook Payload
      * 
      * @param Request $request

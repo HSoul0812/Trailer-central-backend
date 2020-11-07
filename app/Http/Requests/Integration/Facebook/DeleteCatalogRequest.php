@@ -9,7 +9,7 @@ use App\Http\Requests\Request;
  *
  * @author David A Conway Jr.
  */
-class DeleteBlastRequest extends Request {
+class DeleteCatalogRequest extends Request {
     
     protected $rules = [
         'id' => 'required|integer'

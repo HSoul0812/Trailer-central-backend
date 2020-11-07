@@ -135,6 +135,32 @@ class CatalogService implements CatalogServiceInterface
     }
 
     /**
+     * Delete Catalog
+     * 
+     * @param int $id
+     * @return boolean
+     */
+    public function delete($id) {
+        // Get Catalog
+        $catalog = $this->catalogs->get($id);
+
+        // Feed ID Exists?!
+        if(!empty($catalog->feed_id)) {
+            $this->sdk->deleteFeed($catalog->accessToken, $catalog->feed_id);
+        }
+
+        // Delete Access Token
+        $this->tokens->delete([
+            'token_type' => 'facebook',
+            'relation_type' => 'fbapp_catalog',
+            'relation_id' => $id
+        ]);
+
+        // Delete Catalog
+        return $this->catalogs->delete($id);
+    }
+
+    /**
      * Process Payload
      * 
      * @param array $params
