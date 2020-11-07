@@ -268,6 +268,11 @@ class CatalogJob extends Job
             throw new EmptyCatalogPayloadListingsException;
         }
 
+        // No Feed URL?
+        if(empty($this->catalog->feed_path)) {
+            throw new MissingCatalogFeedPathException;
+        }
+
         // Create Filename With Headers
         $file = $this->createCsv();
 
@@ -277,7 +282,7 @@ class CatalogJob extends Job
         }
 
         // Store Final CSV
-        return $this->storeCsv($file, $this->catalog->file_path);
+        return $this->storeCsv($file, $this->catalog->feed_path);
     }
 
 
@@ -316,7 +321,6 @@ class CatalogJob extends Job
                 $row[$column] = $clean->{$column};
             }
         }
-        
 
         // Add Cleaned Results to CSV
         fputcsv($file, $row);
@@ -395,7 +399,7 @@ class CatalogJob extends Job
      * @param File $file temporary file to store results for
      * @return string
      */
-    private function storeCsv($filename, $file) {
+    private function storeCsv($file, $filename) {
         // Get Temp File Contents
         rewind($file);
         $csv = stream_get_contents($file);
