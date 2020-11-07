@@ -248,7 +248,7 @@ class CatalogJob extends Job
      *
      * @return void
      */
-    public function __construct(Catalog $catalog, array $integration)
+    public function __construct(Catalog $catalog, \stdclass $integration)
     {
         // Set Catalog/Integration to Process
         $this->catalog = $catalog;
