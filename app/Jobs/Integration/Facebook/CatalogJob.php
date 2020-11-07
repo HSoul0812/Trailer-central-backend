@@ -405,7 +405,7 @@ class CatalogJob extends Job
         fclose($file); // releases the memory (or tempfile)
 
         // Return Stored File
-        return Storage::disk('s3')->put($filename, $csv);
+        return Storage::disk('s3')->put($filename, $csv, 'public');
     }
 
 
