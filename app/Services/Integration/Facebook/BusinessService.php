@@ -59,7 +59,7 @@ class BusinessService implements BusinessServiceInterface
     /**
      * Validate Facebook SDK Access Token Exists and Refresh if Possible
      * 
-     * @param AccessToken $accessToken
+     * @param string || AccessToken $accessToken
      * @return array of validation info
      */
     public function validate($accessToken) {
@@ -74,7 +74,12 @@ class BusinessService implements BusinessServiceInterface
         if($result['is_valid']) {
             // Get Long-Lived Access Token
             if(empty($accessToken->refresh_token)) {
-                $result['refresh_token'] = $this->getLongLivedAccessToken($accessToken->access_token);
+                // Get Page Long Lived Token
+                if(is_string($accessToken)) {
+                    $result['refresh_token'] = $this->getLongLivedAccessToken($accessToken);
+                } else {
+                    $result['refresh_token'] = $this->getLongLivedAccessToken($accessToken->access_token);
+                }
             }
         }
 
@@ -221,22 +226,31 @@ class BusinessService implements BusinessServiceInterface
     /**
      * Initialize API
      * 
-     * @param AccessToken $accessToken
+     * @param string || AccessToken $accessToken
      * @return API
      */
     private function initApi($accessToken) {
         // Access Token Missing?
-        if(empty($accessToken->refresh_token) && empty($accessToken->access_token)) {
+        if(!is_string($accessToken) && empty($accessToken->refresh_token) && empty($accessToken->access_token)) {
             throw new MissingFacebookAccessTokenException;
         }
 
         // Try to Get SDK!
         try {
+            // Get Final Token
+            $apiToken = $accessToken; // Assuming this is a Page Token
+            if(!empty($accessToken->refresh_token)) {
+                $apiToken = $accessToken->refresh_token;
+            }
+            elseif(!empty($accessToken->access_token)) {
+                $apiToken = $accessToken->access_token;
+            }
+
             // Return SDK
             $this->api = Api::init(
                 $_ENV['FB_SDK_APP_ID'],
                 $_ENV['FB_SDK_APP_SECRET'],
-                !empty($accessToken->refresh_token) ? $accessToken->refresh_token : $accessToken->access_token
+                $apiToken
             );
         } catch(\Exception $e) {
             $this->api = null;
@@ -250,15 +264,24 @@ class BusinessService implements BusinessServiceInterface
     /**
      * Validate Access Token
      * 
-     * @param AccessToken $accessToken
+     * @param string || AccessToken $accessToken
      * @return boolean
      */
     private function validateAccessToken($accessToken) {
+        // Get Final Token
+        $inputToken = $accessToken; // Assuming this is a Page Token
+        if(!empty($accessToken->refresh_token)) {
+            $inputToken = $accessToken->refresh_token;
+        }
+        elseif(!empty($accessToken->access_token)) {
+            $inputToken = $accessToken->access_token;
+        }
+
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
             'access_token' => ($_ENV['FB_SDK_APP_ID'] . '|' . $_ENV['FB_SDK_APP_SECRET']),
-            'input_token' => !empty($accessToken->refresh_token) ? $accessToken->refresh_token : $accessToken->access_token
+            'input_token' => $inputToken
         ]);
         $this->request->setQueryParams($params);
 

@@ -96,6 +96,14 @@ class CatalogService implements CatalogServiceInterface
      * @return Fractal
      */
     public function create($params) {
+        // Page Token Exists?
+        if(isset($params['page_token'])) {
+            $validate = $this->sdk->validate($params['page_token']);
+            if(!empty($validate['refresh_token'])) {
+                $params['page_token'] = $validate['refresh_token'];
+            }
+        }
+
         // Create Token
         $catalog = $this->catalogs->create($params);
 
