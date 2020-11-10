@@ -307,7 +307,7 @@ class BusinessService implements BusinessServiceInterface
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
-            'access_token' => $accessToken,
+            'access_token' => ($_ENV['FB_SDK_APP_ID'] . '|' . $_ENV['FB_SDK_APP_SECRET']),
             'grant_type' => 'fb_exchange_token',
             'client_id' => $_ENV['FB_SDK_APP_ID'],
             'client_secret' => $_ENV['FB_SDK_APP_SECRET'],
