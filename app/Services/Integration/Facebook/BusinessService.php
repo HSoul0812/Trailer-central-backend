@@ -267,7 +267,7 @@ class BusinessService implements BusinessServiceInterface
      * @param string || AccessToken $accessToken
      * @return boolean
      */
-    private function validateAccessToken($accessToken) {
+    private function validateAccessToken($accessToken, $scopes = array()) {
         // Get Final Token
         $inputToken = $accessToken; // Assuming this is a Page Token
         if(!empty($accessToken->refresh_token)) {
@@ -275,6 +275,11 @@ class BusinessService implements BusinessServiceInterface
         }
         elseif(!empty($accessToken->access_token)) {
             $inputToken = $accessToken->access_token;
+        }
+
+        // Scopes Don't Exist on Access Token?
+        if(!empty($accessToken->scopes)) {
+            $scopes = $accessToken->scopes;
         }
 
         // Set Access Token
@@ -299,13 +304,10 @@ class BusinessService implements BusinessServiceInterface
                 'is_valid' => $content['data']['is_valid'],
                 'is_expired' => (time() > ($content['data']['expires_at'] - 30))
             ];
-            if(is_string($accessToken)) {
-                var_dump($content);
-            }
 
             // Check Valid Scopes!
             foreach($content['data']['scopes'] as $scope) {
-                if(!in_array($scope, $accessToken->scope)) {
+                if(!in_array($scope, $scopes)) {
                     $validate['is_valid'] = false;
                 }
             }
