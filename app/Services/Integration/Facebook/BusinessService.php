@@ -278,8 +278,8 @@ class BusinessService implements BusinessServiceInterface
         }
 
         // Scopes Don't Exist on Access Token?
-        if(!empty($accessToken->scopes)) {
-            $scopes = $accessToken->scopes;
+        if(!empty($accessToken->scope)) {
+            $scopes = $accessToken->scope;
         }
 
         // Set Access Token
