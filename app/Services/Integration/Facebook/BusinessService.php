@@ -257,7 +257,7 @@ class BusinessService implements BusinessServiceInterface
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
-            'access_token' => !empty($accessToken->refresh_token) ? $accessToken->refresh_token : $accessToken->access_token,
+            'access_token' => ($_ENV['FB_SDK_APP_ID'] . '|' . $_ENV['FB_SDK_APP_SECRET']),
             'input_token' => !empty($accessToken->refresh_token) ? $accessToken->refresh_token : $accessToken->access_token
         ]);
         $this->request->setQueryParams($params);
