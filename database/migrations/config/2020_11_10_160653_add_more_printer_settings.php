@@ -9,7 +9,8 @@ class AddMorePrinterSettings extends Migration
     const LABEL_ORIENTATION = [
         'landscape',
         'portrait'
-    ]
+    ];
+    
     /**
      * Run the migrations.
      *
@@ -19,9 +20,9 @@ class AddMorePrinterSettings extends Migration
     {
         Schema::table('dealer_printer_settings', function (Blueprint $table) {
             $table->enum('label_orientation', self::LABEL_ORIENTATION)->default('landscape');
-            $table->tinyInt('barcode_width')->default(6);
+            $table->tinyInteger('barcode_width')->default(6);
             $table->integer('barcode_height')->default(250);
-            $table->tinyInt('sku_price_font_size')->default(40);
+            $table->tinyInteger('sku_price_font_size')->default(40);
             $table->integer('sku_price_x_position')->default(350);
             $table->integer('sku_price_y_position')->default(255);
             $table->integer('barcode_x_position')->default(65);
