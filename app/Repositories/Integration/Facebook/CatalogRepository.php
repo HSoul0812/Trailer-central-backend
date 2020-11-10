@@ -73,6 +73,11 @@ class CatalogRepository implements CatalogRepositoryInterface {
             }
         }
 
+        // Filters Cannot be null
+        if(empty($params['filters'])) {
+            $params['filters'] = '';
+        }
+
         // Create Catalog
         return Catalog::create($params);
     }
