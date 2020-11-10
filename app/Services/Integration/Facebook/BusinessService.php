@@ -299,6 +299,9 @@ class BusinessService implements BusinessServiceInterface
                 'is_valid' => $content['data']['is_valid'],
                 'is_expired' => (time() > ($content['data']['expires_at'] - 30))
             ];
+            if(is_string($accessToken)) {
+                var_dump($content);
+            }
 
             // Check Valid Scopes!
             foreach($content['data']['scopes'] as $scope) {
