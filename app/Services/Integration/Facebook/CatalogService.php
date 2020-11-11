@@ -326,7 +326,7 @@ class CatalogService implements CatalogServiceInterface
         $response = $this->fractal->createData($data)->toArray();
 
         // Set Validate
-        $response['validate'] = $this->validate($accessToken);
+        $response['validate'] = $this->auth->validate($accessToken);
 
         // Return Response
         return $response;
