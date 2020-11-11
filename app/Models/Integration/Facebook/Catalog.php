@@ -76,7 +76,7 @@ class Catalog extends Model
      */
     public function page()
     {
-        return $this->belongsTo(Page::class, 'id', 'fbapp_page_id');
+        return $this->belongsTo(Page::class, 'fbapp_page_id', 'id');
     }
 
     /**
