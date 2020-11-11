@@ -153,6 +153,7 @@ class AuthService implements AuthServiceInterface
                 $validate = $this->google->validate($accessToken);
             } elseif($accessToken->token_type === 'facebook') {
                 $validate = $this->facebook->validate($accessToken);
+                unset($validate['refresh_token']);
             }
         }
 
