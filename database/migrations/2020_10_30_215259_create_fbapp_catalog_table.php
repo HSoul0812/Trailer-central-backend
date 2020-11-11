@@ -39,9 +39,6 @@ class CreateFbappCatalogTable extends Migration
         if (Schema::hasTable('fbapp_pages')) {
             // Add Timestamps and Drop Unnecessary Columns
             Schema::table('fbapp_pages', function (Blueprint $table) {
-                // Make Big Integer
-                $table->bigInteger('page_id', 20)->change();
-
                 // Add Timestamps
                 $table->timestamps();
 
