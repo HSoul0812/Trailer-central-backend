@@ -8,6 +8,7 @@ use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use App\Transformers\Integration\Facebook\PageTransformer;
 use App\Transformers\Integration\Auth\TokenTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 
 class CatalogTransformer extends TransformerAbstract
 {
