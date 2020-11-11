@@ -75,6 +75,7 @@ class BusinessService implements BusinessServiceInterface
             // Find Current Page
             foreach($pages as $page) {
                 $item = $page->exportAllData();
+                var_dump($item);
                 if($item['id'] == $params['relation_id']) {
                     $refresh = $item['access_token'];
                     break;

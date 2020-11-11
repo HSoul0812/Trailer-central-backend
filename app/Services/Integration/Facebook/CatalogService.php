@@ -135,13 +135,12 @@ class CatalogService implements CatalogServiceInterface
             $params['token_type'] = 'facebook';
             $params['relation_type'] = 'fbapp_page';
             $params['relation_id'] = $page->id;
+            $params['refresh_token'] = NULL;
 
             // Get Refresh Token
             $refresh = $this->auth->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh;
-            } else {
-                unset($params['refresh_token']);
             }
             unset($params['id_token']);
             unset($params['page_token']);
