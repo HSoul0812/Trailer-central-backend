@@ -3,6 +3,7 @@
 namespace App\Transformers\Integration\Facebook;
 
 use League\Fractal\TransformerAbstract;
+use League\Fractal\Manager;
 use App\Models\Integration\Facebook\Catalog;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
@@ -31,6 +32,9 @@ class CatalogTransformer extends TransformerAbstract
     {
         $this->userTransformer = new UserTransformer();
         $this->dealerLocationTransformer = new DealerLocationTransformer();
+
+        $manager = new Manager();
+        $manager->setSerializer(new NoDataArraySerializer());
     }
 
     public function transform(Catalog $catalog)
@@ -54,17 +58,17 @@ class CatalogTransformer extends TransformerAbstract
 
     public function includePage(Catalog $catalog)
     {
-        return $this->item($catalog->page, new PageTransformer(), new NoDataArraySerializer());
+        return $this->item($catalog->page, new PageTransformer());
     }
 
     public function includeAccessToken(Catalog $catalog)
     {
         // Access Token Exists on Catalog?
         if(!empty($catalog->accessToken)) {
-            return $this->item($catalog->accessToken, new TokenTransformer(), new NoDataArraySerializer());
+            return $this->item($catalog->accessToken, new TokenTransformer());
         }
         return $this->item(null, function() {
             return [null];
-        }, new NoDataArraySerializer());
+        });
     }
 }
