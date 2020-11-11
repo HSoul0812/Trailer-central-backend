@@ -96,15 +96,11 @@ class CatalogService implements CatalogServiceInterface
      * @return Fractal
      */
     public function create($params) {
-        // Page Token Exists?
-        if(isset($params['page_token'])) {
-            $validate = $this->sdk->validate($params['page_token'], $params['scopes']);
-            if(!empty($validate['refresh_token'])) {
-                $params['page_token'] = $validate['refresh_token'];
-            }
-        }
+        // Create Facebook Page
+        $page = $this->pages->create($params);
 
         // Create Token
+        $params['fbapp_page_id'] = $page->id;
         $catalog = $this->catalogs->create($params);
 
         // Adjust Request
@@ -112,8 +108,32 @@ class CatalogService implements CatalogServiceInterface
         $params['relation_type'] = 'fbapp_catalog';
         $params['relation_id'] = $catalog->id;
 
+        // Find Refresh Token
+        $refresh = $this->refresh($params);
+        if(!empty($refresh)) {
+            $params['refresh_token'] = $refresh;
+        }
+
         // Get Access Token
         $accessToken = $this->tokens->create($params);
+
+        // Page Token Exists?
+        if(isset($params['page_token'])) {
+            // Adjust Request
+            $params['token_type'] = 'facebook';
+            $params['relation_type'] = 'fbapp_catalog';
+            $params['relation_id'] = $catalog->id;
+            $params['access_token'] = $params['page_token'];
+
+            // Get Refresh Token
+            $refresh = $this->refresh($params);
+            if(!empty($refresh)) {
+                $params['refresh_token'] = $refresh;
+            }
+
+            // Get Access Token
+            $this->tokens->create($params);
+        }
 
         // Return Response
         return $this->response($catalog, $accessToken);

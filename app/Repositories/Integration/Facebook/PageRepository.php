@@ -4,10 +4,10 @@ namespace App\Repositories\Integration\Facebook;
 
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
-use App\Models\Integration\Facebook\Catalog;
+use App\Models\Integration\Facebook\Page;
 use App\Repositories\Traits\SortTrait;
 
-class CatalogRepository implements CatalogRepositoryInterface {
+class PageRepository implements PageRepositoryInterface {
     use SortTrait;
 
     /**
@@ -16,20 +16,12 @@ class CatalogRepository implements CatalogRepositoryInterface {
      * @var array
      */
     private $sortOrders = [
-        'location' => [
-            'field' => 'dealer_location_id',
+        'page_title' => [
+            'field' => 'title',
             'direction' => 'DESC'
         ],
-        '-location' => [
-            'field' => 'dealer_location_id',
-            'direction' => 'ASC'
-        ],
-        'account_name' => [
-            'field' => 'account_name',
-            'direction' => 'DESC'
-        ],
-        '-account_name' => [
-            'field' => 'account_name',
+        '-page_title' => [
+            'field' => 'title',
             'direction' => 'ASC'
         ],
         'created_at' => [
@@ -51,10 +43,10 @@ class CatalogRepository implements CatalogRepositoryInterface {
     ];
 
     /**
-     * Create Facebook Catalog
+     * Create Facebook Page
      * 
      * @param array $params
-     * @return Catalog
+     * @return Page
      */
     public function create($params) {
         // Active Not Set?
@@ -62,45 +54,73 @@ class CatalogRepository implements CatalogRepositoryInterface {
             $params['is_active'] = 1;
         }
 
+        // Page Title Exists?
+        if(isset($params['page_title'])) {
+            $params['title'] = $params['page_title'];
+            unset($params['page_title']);
+        }
+
+        // Does User ID Already Exist?
+        if(isset($params['page_id'])) {
+            $page = $this->getByPageId($params);
+
+            // Exists?
+            if(!empty($page->id)) {
+                $params['id'] = $page->id;
+                return $this->update($params);
+            }
+        }
+
         // Filters Cannot be null
         if(empty($params['filters'])) {
             $params['filters'] = '';
         }
 
-        // Create Catalog
-        return Catalog::create($params);
+        // Create Page
+        return Page::create($params);
     }
 
     /**
-     * Delete Catalog
+     * Delete Page
      * 
      * @param int $id
      * @throws NotImplementedException
      */
     public function delete($id) {
-        // Delete Catalog
-        return Catalog::findOrFail($id)->delete();
+        // Delete Page
+        return Page::findOrFail($id)->delete();
     }
 
     /**
-     * Get Catalog
+     * Get Page
      * 
      * @param array $params
-     * @return Catalog
+     * @return Page
      */
     public function get($params) {
-        // Find Catalog By ID
-        return Catalog::findOrFail($params['id']);
+        // Find Page By ID
+        return Page::findOrFail($params['id']);
     }
 
     /**
-     * Get All Catalogs That Match Params
+     * Get By Facebook Page ID
      * 
      * @param array $params
-     * @return Collection of Catalogs
+     * @return AccessToken
+     */
+    public function getByPageId($params) {
+        // Find Token By ID
+        return Page::where('page_id', $params['page_id'])->first();
+    }
+
+    /**
+     * Get All Pages That Match Params
+     * 
+     * @param array $params
+     * @return Collection of Pages
      */
     public function getAll($params) {
-        $query = Catalog::where('dealer_id', '=', $params['dealer_id']);
+        $query = Page::where('dealer_id', '=', $params['dealer_id']);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -110,8 +130,12 @@ class CatalogRepository implements CatalogRepositoryInterface {
             $query = $query->where('dealer_location_id', $params['dealer_location_id']);
         }
 
-        if (isset($params['account_id'])) {
-            $query = $query->where('account_id', $params['account_id']);
+        if (isset($params['user_id'])) {
+            $query = $query->where('user_id', $params['user_id']);
+        }
+
+        if (isset($params['page_id'])) {
+            $query = $query->where('page_id', $params['page_id']);
         }
 
         if (isset($params['id'])) {
@@ -126,20 +150,26 @@ class CatalogRepository implements CatalogRepositoryInterface {
     }
 
     /**
-     * Update Catalog
+     * Update Page
      * 
      * @param array $params
-     * @return Catalog
+     * @return Page
      */
     public function update($params) {
-        $catalog = Catalog::findOrFail($params['id']);
+        $page = Page::findOrFail($params['id']);
 
-        DB::transaction(function() use (&$catalog, $params) {
-            // Fill Catalog Details
-            $catalog->fill($params)->save();
+        DB::transaction(function() use (&$page, $params) {
+            // Page Title Exists?
+            if(isset($params['page_title'])) {
+                $params['title'] = $params['page_title'];
+                unset($params['page_title']);
+            }
+
+            // Fill Page Details
+            $page->fill($params)->save();
         });
 
-        return $catalog;
+        return $page;
     }
 
     protected function getSortOrders() {

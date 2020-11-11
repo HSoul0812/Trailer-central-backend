@@ -39,11 +39,11 @@ class Catalog extends Model
     protected $fillable = [
         'dealer_id',
         'dealer_location_id',
+        'fbapp_page_id',
+        'business_user_id',
+        'catalog_id',
         'account_name',
         'account_id',
-        'page_id',
-        'page_title',
-        'page_token',
         'feed_id',
         'filters',
         'is_active'
@@ -60,13 +60,23 @@ class Catalog extends Model
     }
 
     /**
-     * Get Dealer location
+     * Get Dealer Location
      * 
      * @return BelongsTo
      */
     public function dealerLocation()
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * Get Page
+     * 
+     * @return BelongsTo
+     */
+    public function page()
+    {
+        return $this->belongsTo(Page::class, 'id', 'fbapp_page_id');
     }
 
     /**
