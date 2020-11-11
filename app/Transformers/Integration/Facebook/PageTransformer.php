@@ -55,7 +55,7 @@ class PageTransformer extends TransformerAbstract
         }
         return $this->item(array(), function() {
             return [null];
-        });
+        }, new NoDataArraySerializer());
     }
 
     public function includeCatalogs(Page $page)

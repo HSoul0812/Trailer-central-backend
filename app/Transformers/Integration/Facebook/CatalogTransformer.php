@@ -65,6 +65,6 @@ class CatalogTransformer extends TransformerAbstract
         }
         return $this->item(null, function() {
             return [null];
-        });
+        }, new NoDataArraySerializer());
     }
 }
