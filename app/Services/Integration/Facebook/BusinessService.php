@@ -373,10 +373,7 @@ class BusinessService implements BusinessServiceInterface
             $app = new Application($accountId);
 
             // Get All Pages
-            $data = $app->getAccounts()->exportAllData();
-
-            // Return Data Result
-            return $data;
+            return $app->getAccounts();
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
