@@ -57,6 +57,36 @@ class BusinessService implements BusinessServiceInterface
 
 
     /**
+     * Get Refresh Token
+     * 
+     * @param array $params
+     * @return array of validation info
+     */
+    public function refresh($params) {
+        // Relation Type is FB Page?
+        if(!empty($params['relation_type']) && $params['relation_type'] === 'fbapp_page') {
+            // Get Long-Lived Access Tokens for All Pages
+            $pages = $this->getPages($params['refresh_token']);
+
+            // Find Current Page
+            foreach($pages as $page) {
+                if($params['relation_id'] === $page->page_id) {
+                    $refresh = $page['access_token'];
+                    break;
+                }
+            }
+        }
+        // Get Standard Long-Lived Access Token
+        else {
+            // Get Long-Lived Access Token for User
+            $refresh = $this->getLongLivedAccessToken($params['access_token']);
+        }
+
+        // Return Payload Results
+        return $refresh;
+    }
+
+    /**
      * Validate Facebook SDK Access Token Exists and Refresh if Possible
      * 
      * @param string || AccessToken $accessToken
@@ -324,6 +354,41 @@ class BusinessService implements BusinessServiceInterface
             'is_valid' => false,
             'is_expired' => true
         ];
+    }
+
+    /**
+     * Get Pages
+     * 
+     * @param string || AccessToken $accessToken
+     * @return boolean
+     */
+    private function getPages($accessToken) {
+        // Configure Client
+        $this->initApi($accessToken);
+
+        // Get Product Catalog
+        try {
+            // Get Application
+            $app = new Application();
+
+            // Get All Pages
+            $data = $app->getAccounts()->exportAllData();
+
+            // Return Data Result
+            return $data;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            Log::error("Exception returned getting accounts: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedGetPagesException;
+            }
+        }
+
+        // Return Null
+        return null;
     }
 
     /**

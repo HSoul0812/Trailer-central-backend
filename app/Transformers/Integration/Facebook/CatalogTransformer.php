@@ -6,10 +6,15 @@ use League\Fractal\TransformerAbstract;
 use App\Models\Integration\Facebook\Catalog;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
+use App\Transformers\Integration\Facebook\PageTransformer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 
 class CatalogTransformer extends TransformerAbstract
 {
+    protected $defaultIncludes = [
+        'page'
+    ];
+
     protected $availableIncludes = [
         'accessToken'
     ];
@@ -50,6 +55,11 @@ class CatalogTransformer extends TransformerAbstract
             'created_at' => $catalog->created_at,
             'updated_at' => $catalog->updated_at
         ];
+    }
+
+    public function includePage(Catalog $catalog)
+    {
+        return $this->item($catalog->page, new PageTransformer());
     }
 
     public function includeAccessToken(Catalog $catalog)

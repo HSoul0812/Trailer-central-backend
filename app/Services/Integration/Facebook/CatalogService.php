@@ -5,6 +5,7 @@ namespace App\Services\Integration\Facebook;
 use App\Jobs\Integration\Facebook\CatalogJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
+use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -26,6 +27,11 @@ class CatalogService implements CatalogServiceInterface
      * @var CatalogRepositoryInterface
      */
     protected $catalogs;
+
+    /**
+     * @var PageRepositoryInterface
+     */
+    protected $pages;
 
     /**
      * @var TokenRepositoryInterface
@@ -51,13 +57,15 @@ class CatalogService implements CatalogServiceInterface
      * Construct Facebook Service
      */
     public function __construct(
-        CatalogRepositoryInterface $catalog,
+        CatalogRepositoryInterface $catalogs,
+        PageRepositoryInterface $pages,
         TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
         BusinessServiceInterface $sdk,
         Manager $fractal
     ) {
-        $this->catalogs = $catalog;
+        $this->catalogs = $catalogs;
+        $this->pages = $pages;
         $this->tokens = $tokens;
         $this->auth = $auth;
         $this->sdk = $sdk;
@@ -109,7 +117,7 @@ class CatalogService implements CatalogServiceInterface
         $params['relation_id'] = $catalog->id;
 
         // Find Refresh Token
-        $refresh = $this->refresh($params);
+        $refresh = $this->auth->refresh($params);
         if(!empty($refresh)) {
             $params['refresh_token'] = $refresh;
         }
@@ -121,13 +129,13 @@ class CatalogService implements CatalogServiceInterface
         if(isset($params['page_token'])) {
             // Adjust Request
             $params['token_type'] = 'facebook';
-            $params['relation_type'] = 'fbapp_catalog';
-            $params['relation_id'] = $catalog->id;
-            $params['access_token'] = $params['page_token'];
+            $params['relation_type'] = 'fbapp_page';
+            $params['relation_id'] = $page->id;
 
             // Get Refresh Token
-            $refresh = $this->refresh($params);
+            $refresh = $this->auth->refresh($params);
             if(!empty($refresh)) {
+                $params['access_token'] = $params['page_token'];
                 $params['refresh_token'] = $refresh;
             }
 
@@ -146,17 +154,47 @@ class CatalogService implements CatalogServiceInterface
      * @return Fractal
      */
     public function update($params) {
+        // Update Facebook Page
+        $page = $this->pages->create($params);
+
         // Create Access Token
         $catalog = $this->catalogs->update($params);
 
-        // Adjust Request
-        $params['token_type'] = 'facebook';
-        $params['relation_type'] = 'fbapp_catalog';
-        $params['relation_id'] = $params['id'];
-        unset($params['id']);
+        // Access Token is Set?
+        if(isset($params['access_token'])) {
+            // Adjust Request
+            $params['token_type'] = 'facebook';
+            $params['relation_type'] = 'fbapp_catalog';
+            $params['relation_id'] = $params['id'];
+            unset($params['id']);
 
-        // Get Access Token
-        $accessToken = $this->tokens->create($params);
+            // Find Refresh Token
+            $refresh = $this->auth->refresh($params);
+            if(!empty($refresh)) {
+                $params['refresh_token'] = $refresh;
+            }
+
+            // Get Access Token
+            $accessToken = $this->tokens->create($params);
+        }
+
+        // Page Token Exists?
+        if(isset($params['page_token'])) {
+            // Adjust Request
+            $params['token_type'] = 'facebook';
+            $params['relation_type'] = 'fbapp_page';
+            $params['relation_id'] = $page->id;
+
+            // Get Refresh Token
+            $refresh = $this->auth->refresh($params);
+            if(!empty($refresh)) {
+                $params['access_token'] = $params['page_token'];
+                $params['refresh_token'] = $refresh;
+            }
+
+            // Get Access Token
+            $this->tokens->update($params);
+        }
 
         // Return Response
         return $this->response($catalog, $accessToken);

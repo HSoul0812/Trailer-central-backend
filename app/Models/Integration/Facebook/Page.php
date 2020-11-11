@@ -4,7 +4,7 @@ namespace App\Models\Integration\Facebook;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
-use App\Models\User\DealerLocation;
+use App\Models\Integration\Facebook\Catalog;
 use App\Models\Integration\Auth\AccessToken;
 
 /**
@@ -46,6 +46,16 @@ class Catalog extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Catalog
+     * 
+     * @return HasMany
+     */
+    public function catalogs()
+    {
+        return $this->hasMany(Catalog::class, 'fbapp_page_id', 'id');
     }
 
     /**

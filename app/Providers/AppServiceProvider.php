@@ -92,6 +92,8 @@ use App\Repositories\Integration\Auth\TokenRepository;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepository;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
+use App\Repositories\Integration\Facebook\PageRepository;
+use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\Export\Parts\CsvExportService;
 use App\Services\Export\Parts\CsvExportServiceInterface;
 use App\Services\CRM\Text\TwilioService;
@@ -261,6 +263,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
         $this->app->bind(TokenRepositoryInterface::class, TokenRepository::class);
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
+        $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
