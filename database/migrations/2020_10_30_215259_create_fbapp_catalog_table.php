@@ -18,7 +18,7 @@ class CreateFbappCatalogTable extends Migration
             $table->increments('id');
             $table->integer('dealer_id')->index();
             $table->integer('dealer_location_id')->index();
-            $table->integer('fbapp_page_id')->unique();
+            $table->integer('fbapp_page_id')->index();
             $table->bigInteger('business_id')->nullable()->index();
             $table->bigInteger('catalog_id')->nullable()->index();
             $table->bigInteger('account_id')->index();
