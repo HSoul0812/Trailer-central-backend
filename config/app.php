@@ -186,6 +186,7 @@ return [
         \Laravel\Scout\ScoutServiceProvider::class,
         \Dingo\Api\Provider\LaravelServiceProvider::class,
         Spatie\Sitemap\SitemapServiceProvider::class,
+        App\Providers\SpatialServiceProvider::class,
 
         /*
          * Nova stuff
