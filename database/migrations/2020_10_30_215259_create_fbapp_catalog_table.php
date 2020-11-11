@@ -40,7 +40,7 @@ class CreateFbappCatalogTable extends Migration
             // Add Timestamps and Drop Unnecessary Columns
             Schema::table('fbapp_pages', function (Blueprint $table) {
                 // Make Big Integer
-                $table->bigInteger('page_id')->change();
+                $table->bigInteger('page_id', 20)->change();
 
                 // Add Timestamps
                 $table->timestamps();
@@ -51,6 +51,9 @@ class CreateFbappCatalogTable extends Migration
                 $table->dropColumn('is_active');
                 $table->dropColumn('is_auto');
             });
+
+            // Convert Page ID to Big INT
+            DB::statement('ALTER TABLE fbapp_pages CHANGE page_id page_id BIGINT(20)');
 
             // Update Integration Token Relation Type
             DB::statement("UPDATE fbapp_pages SET `created_at` = `timestamp`, `updated_at` = `timestamp`");
