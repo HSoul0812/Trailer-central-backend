@@ -67,7 +67,7 @@ class BusinessService implements BusinessServiceInterface
         // Relation Type is FB Page?
         if(!empty($params['relation_type']) && $params['relation_type'] === 'fbapp_page') {
             // Get Long-Lived Access Tokens for All Pages
-            $pages = $this->getPages($params['refresh_token']);
+            $pages = $this->getPages($params['account_id'], $params['refresh_token']);
 
             // Find Current Page
             foreach($pages as $page) {
@@ -363,7 +363,7 @@ class BusinessService implements BusinessServiceInterface
      * @param string || AccessToken $accessToken
      * @return boolean
      */
-    private function getPages($accessToken) {
+    private function getPages($accountId, $accessToken) {
         // Configure Client
         $this->initApi($accessToken);
 
@@ -373,7 +373,7 @@ class BusinessService implements BusinessServiceInterface
             $app = new Application();
 
             // Get All Pages
-            $data = $app->getAccounts()->exportAllData();
+            $data = $app->getAccounts(array(), array('id' => $accountId))->exportAllData();
 
             // Return Data Result
             return $data;
