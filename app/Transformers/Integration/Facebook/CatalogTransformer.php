@@ -62,9 +62,20 @@ class CatalogTransformer extends TransformerAbstract
 
     public function includeAccessToken(Catalog $catalog)
     {
-        // Access Token Exists on Page?
+        // Access Token Exists on Catalog?
         if(!empty($catalog->accessToken)) {
             return $this->item($catalog->accessToken, new TokenTransformer());
+        }
+        return $this->item(null, function() {
+            return [null];
+        });
+    }
+
+    public function includePageToken(Catalog $catalog)
+    {
+        // Access Token Exists on Page?
+        if(!empty($catalog->page->accessToken)) {
+            return $this->item($catalog->page->accessToken, new TokenTransformer());
         }
         return $this->item(null, function() {
             return [null];
