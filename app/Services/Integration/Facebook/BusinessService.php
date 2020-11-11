@@ -64,6 +64,9 @@ class BusinessService implements BusinessServiceInterface
      * @return array of validation info
      */
     public function refresh($params) {
+        // Initialize Vars
+        $refresh = null;
+
         // Relation Type is FB Page?
         if(!empty($params['relation_type']) && $params['relation_type'] === 'fbapp_page') {
             // Get Long-Lived Access Tokens for All Pages
@@ -71,8 +74,10 @@ class BusinessService implements BusinessServiceInterface
 
             // Find Current Page
             foreach($pages as $page) {
-                if($params['relation_id'] === $page->id) {
-                    $refresh = $page['access_token'];
+                $item = $page->exportAllData();
+                var_dump($item);
+                if($item['id'] == $params['relation_id']) {
+                    $refresh = $item['access_token'];
                     break;
                 }
             }
