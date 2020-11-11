@@ -49,8 +49,8 @@ class PageTransformer extends TransformerAbstract
         if(!empty($page->accessToken)) {
             return $this->item($page->accessToken, new TokenTransformer());
         }
-        return $this->item(null, function() {
-            return null;
+        return $this->item(array(), function() {
+            return [null];
         });
     }
 

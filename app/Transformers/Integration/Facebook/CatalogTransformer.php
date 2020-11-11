@@ -67,7 +67,7 @@ class CatalogTransformer extends TransformerAbstract
             return $this->item($catalog->accessToken, new TokenTransformer());
         }
         return $this->item(null, function() {
-            return null;
+            return [null];
         });
     }
 }
