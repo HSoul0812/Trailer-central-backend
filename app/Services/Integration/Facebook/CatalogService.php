@@ -118,6 +118,7 @@ class CatalogService implements CatalogServiceInterface
 
         // Find Refresh Token
         $refresh = $this->auth->refresh($params);
+        var_dump($refresh);
         if(!empty($refresh)) {
             $params['refresh_token'] = $refresh;
         }
@@ -134,6 +135,7 @@ class CatalogService implements CatalogServiceInterface
 
             // Get Refresh Token
             $refresh = $this->auth->refresh($params);
+            var_dump($refresh);
             if(!empty($refresh)) {
                 $params['access_token'] = $params['page_token'];
                 $params['refresh_token'] = $refresh;
