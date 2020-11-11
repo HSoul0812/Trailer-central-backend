@@ -381,7 +381,7 @@ class BusinessService implements BusinessServiceInterface
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
-                throw new FailedGetPagesException;
+                throw new FailedGetFacebookAccountsException;
             }
         }
 
