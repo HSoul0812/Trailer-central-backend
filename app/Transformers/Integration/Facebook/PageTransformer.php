@@ -10,8 +10,11 @@ use App\Transformers\Integration\Auth\TokenTransformer;
 
 class PageTransformer extends TransformerAbstract
 {
+    protected $defaultIncludes = [
+        'accessToken'
+    ];
+
     protected $availableIncludes = [
-        'accessToken',
         'catalogs'
     ];
 
