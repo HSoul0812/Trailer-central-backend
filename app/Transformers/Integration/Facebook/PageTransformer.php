@@ -45,7 +45,11 @@ class PageTransformer extends TransformerAbstract
 
     public function includeAccessToken(Page $page)
     {
-        return $this->item($page->accessToken, new TokenTransformer());
+        // Access Token Exists on Page?
+        if(!empty($catalog->page->accessToken)) {
+            return $this->item($catalog->page->accessToken, new TokenTransformer());
+        }
+        return $this->item(null);
     }
 
     public function includeCatalogs(Page $page)
