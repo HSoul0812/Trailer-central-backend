@@ -320,17 +320,15 @@ class CatalogService implements CatalogServiceInterface
      * @param array $response
      * @return array
      */
-    public function response($catalog, $accessToken, $response = array()) {
-        // Convert Token to Array
-        if(!empty($catalog)) {
-            $data = new Item($catalog, new CatalogTransformer(), 'data');
-            $item = $this->fractal->createData($data)->toArray();
-            $response['catalog'] = $item['data'];
-        } else {
-            $response['catalog'] = null;
-        }
+    public function response($catalog, $accessToken) {
+        // Convert Catalog to Array
+        $data = new Item($catalog, new CatalogTransformer(), 'data');
+        $response = $this->fractal->createData($data)->toArray();
+
+        // Set Validate
+        $response['validate'] = $this->validate($accessToken);
 
         // Return Response
-        return $this->auth->response($accessToken, $response);
+        return $response;
     }
 }
