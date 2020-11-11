@@ -7,6 +7,7 @@ use App\Models\Integration\Facebook\Page;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
 use App\Transformers\Integration\Auth\TokenTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 
 class PageTransformer extends TransformerAbstract
 {
@@ -50,7 +51,7 @@ class PageTransformer extends TransformerAbstract
     {
         // Access Token Exists on Page?
         if(!empty($page->accessToken)) {
-            return $this->item($page->accessToken, new TokenTransformer());
+            return $this->item($page->accessToken, new TokenTransformer(), new NoDataArraySerializer());
         }
         return $this->item(array(), function() {
             return [null];
@@ -59,6 +60,6 @@ class PageTransformer extends TransformerAbstract
 
     public function includeCatalogs(Page $page)
     {
-        return $this->collect($page->catalogs, new CatalogTransformer());
+        return $this->collect($page->catalogs, new CatalogTransformer(), new NoDataArraySerializer());
     }
 }

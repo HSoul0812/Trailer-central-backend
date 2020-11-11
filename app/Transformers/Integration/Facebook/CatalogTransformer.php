@@ -53,14 +53,14 @@ class CatalogTransformer extends TransformerAbstract
 
     public function includePage(Catalog $catalog)
     {
-        return $this->item($catalog->page, new PageTransformer());
+        return $this->item($catalog->page, new PageTransformer(), new NoDataArraySerializer());
     }
 
     public function includeAccessToken(Catalog $catalog)
     {
         // Access Token Exists on Catalog?
         if(!empty($catalog->accessToken)) {
-            return $this->item($catalog->accessToken, new TokenTransformer());
+            return $this->item($catalog->accessToken, new TokenTransformer(), new NoDataArraySerializer());
         }
         return $this->item(null, function() {
             return [null];
