@@ -119,11 +119,7 @@ class CatalogService implements CatalogServiceInterface
         // Find Refresh Token
         $refresh = $this->auth->refresh($params);
         if(!empty($refresh)) {
-            $params['refresh_token'] = $refresh['access_token'];
-            if(isset($refresh['expires_in'])) {
-                $params['expires_in'] = $refresh['expires_in'];
-                $params['expires_at'] = gmdate("Y-m-d H:i:s", (time() + $refresh['expires_in']));
-            }
+            $params['refresh_token'] = $refresh;
         }
 
         // Get Access Token
