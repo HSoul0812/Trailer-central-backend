@@ -370,10 +370,10 @@ class BusinessService implements BusinessServiceInterface
         // Get Product Catalog
         try {
             // Get Application
-            $app = new Application();
+            $app = new Application($accountId);
 
             // Get All Pages
-            $data = $app->getAccounts(array(), array('id' => $accountId))->exportAllData();
+            $data = $app->getAccounts()->exportAllData();
 
             // Return Data Result
             return $data;
