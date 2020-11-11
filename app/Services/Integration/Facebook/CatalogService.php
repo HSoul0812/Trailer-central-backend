@@ -145,7 +145,6 @@ class CatalogService implements CatalogServiceInterface
             }
             unset($params['id_token']);
             unset($params['page_token']);
-            var_dump($refresh);
 
             // Get Access Token
             $this->tokens->create($params);
