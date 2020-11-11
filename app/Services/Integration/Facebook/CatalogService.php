@@ -244,7 +244,7 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Get Catalog
-            $catalog = $this->catalogs->getByPageId(['page_id' => $integration->page_id]);
+            $catalog = $this->catalogs->get(['id' => $integration->catalog_id]);
             if(empty($catalog->id)) {
                 continue;
             }
