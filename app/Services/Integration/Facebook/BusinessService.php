@@ -12,6 +12,7 @@ use FacebookAds\Api;
 use FacebookAds\Http\Client;
 use FacebookAds\Http\Request;
 use FacebookAds\Http\Parameters;
+use FacebookAds\Object\Application;
 use FacebookAds\Logger\CurlLogger;
 use FacebookAds\Object\AdAccount;
 use FacebookAds\Object\Campaign;
