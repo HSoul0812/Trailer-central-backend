@@ -80,11 +80,19 @@ class TokenRepository implements TokenRepositoryInterface {
     /**
      * Delete Access Token
      * 
-     * @param array $params
+     * @param boolean
      */
     public function delete($params) {
         // Find Token
-        return $this->find($params)->delete();
+        $token = $this->find($params);
+
+        // Token Exists?
+        if(!empty($token->id)) {
+            return $token->delete();
+        }
+
+        // Already Deleted
+        return true;
     }
 
     /**
