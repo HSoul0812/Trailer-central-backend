@@ -16,7 +16,8 @@ class CatalogTransformer extends TransformerAbstract
     ];
 
     protected $availableIncludes = [
-        'accessToken'
+        'accessToken',
+        'pageToken'
     ];
 
     /**
@@ -43,9 +44,6 @@ class CatalogTransformer extends TransformerAbstract
             'dealer_location' => $this->dealerLocationTransformer->transform($catalog->dealerLocation),
             'account_id' => $catalog->account_id,
             'account_name' => $catalog->account_name,
-            'page_id' => $catalog->page_id,
-            'page_title' => $catalog->page_title,
-            'page_token' => $catalog->page_token,
             'feed_name' => $catalog->feed_name,
             'feed_path' => $catalog->feed_path,
             'feed_url' => $catalog->feed_url,
@@ -65,5 +63,10 @@ class CatalogTransformer extends TransformerAbstract
     public function includeAccessToken(Catalog $catalog)
     {
         return $this->item($catalog->accessToken, new TokenTransformer());
+    }
+
+    public function includePageToken(Catalog $catalog)
+    {
+        return $this->item($catalog->page->accessToken, new TokenTransformer());
     }
 }
