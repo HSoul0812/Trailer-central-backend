@@ -77,7 +77,7 @@ class CreateFbappCatalogTable extends Migration
 
         Schema::table('fbapp_pages', function (Blueprint $table) {
             // Drop Timestamps
-            $table->dropTimestamps();
+            //$table->dropTimestamps();
         });
     }
 }
