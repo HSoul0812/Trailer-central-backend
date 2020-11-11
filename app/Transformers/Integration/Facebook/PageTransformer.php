@@ -3,7 +3,7 @@
 namespace App\Transformers\Integration\Facebook;
 
 use League\Fractal\TransformerAbstract;
-use App\Models\Integration\Facebook\Catalog;
+use App\Models\Integration\Facebook\Page;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
 use App\Transformers\Integration\Auth\TokenTransformer;
