@@ -190,6 +190,7 @@ return [
         ElasticScoutDriver\ServiceProvider::class,
         ElasticScoutDriverPlus\ServiceProvider::class,
         ElasticMigrations\ServiceProvider::class,
+        App\Providers\SpatialServiceProvider::class,
 
         /*
          * Nova stuff

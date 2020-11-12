@@ -94,5 +94,12 @@
         }
     ],
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "dont-discover": [
+                "Grimzy\\LaravelMysqlSpatial\\SpatialServiceProvider"
+            ]
+        }
+    }
 }

@@ -91,47 +91,126 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             FROM crm_sales_person sp
             JOIN (
                 /* unit sales */
-                SELECT us.id sale_id, i.id invoice_id, 'unit_sale' sale_type, us.created_at sale_date, us.sales_person_id, c.display_name customer_name,
-                    SUM(us.subtotal) sale_amount, /* how much the item was sold, minus discounts */
-                    SUM(ii.qty *
-                        COALESCE(qi.cost, inv.price, usa.misc_dealer_cost, pa.dealer_cost)
-                    ) cost_amount /* how much the item cost */
+                SELECT
+                    us.id sale_id, i.id invoice_id, i.doc_num as doc_num, i.total invoice_total,
+                    (CASE WHEN(i.unit_sale_id IS NOT NULL) THEN 'unit_sale'
+                        WHEN(i.repair_order_id IS NOT NULL) THEN 'repair_order'
+                        ELSE 'pos' /* todo must have a clear marker in invoice that it is a pos sale */
+                        END
+                    ) sale_type,
+                    i.invoice_date sale_date, us.sales_person_id, c.display_name customer_name,
+
+                    SUM(sales_units.sale_amount) unit_sale_amount,
+                    SUM(sales_units.cost_amount) unit_cost_amount,
+
+                    SUM(sales_parts.sale_amount) part_sale_amount,
+                    SUM(sales_parts.cost_amount) part_cost_amount,
+
+                    SUM(sales_labor.sale_amount) labor_sale_amount,
+                    SUM(sales_labor.cost_amount) labor_cost_amount
+
                 FROM dms_unit_sale us
                 LEFT JOIN dms_unit_sale_accessory usa ON usa.unit_sale_id=us.id
                 LEFT JOIN dms_customer c ON us.buyer_id=c.id
                 LEFT JOIN qb_invoices i ON i.unit_sale_id=us.id
-                LEFT JOIN qb_invoice_items ii ON ii.invoice_id=i.id
-                LEFT JOIN qb_items qi ON qi.id=ii.item_id
-                LEFT JOIN inventory inv ON qi.item_primary_id=inv.inventory_id AND qi.type='trailer'
-                LEFT JOIN parts_v1 pa ON qi.item_primary_id=pa.id AND qi.type='part'
-                WHERE qi.type IN ('trailer', 'part')
-                AND us.dealer_id=:dealerId1
+
+                /* use this to prevent getting DP invoices */
+                JOIN qb_invoice_items ii ON i.id=ii.invoice_id
+
+                LEFT JOIN (
+                    SELECT
+                       ii.invoice_id,
+                       SUM(ii.unit_price * ii.qty) sale_amount,
+                       SUM(COALESCE(qi.cost, inv.true_cost, 0)) cost_amount
+                    FROM qb_invoice_items ii
+                    LEFT JOIN qb_items qi ON qi.id=ii.item_id
+                    LEFT JOIN inventory inv ON qi.item_primary_id=inv.inventory_id
+                    WHERE qi.type = 'trailer'
+                    GROUP BY ii.invoice_id
+                ) sales_units ON i.id = sales_units.invoice_id
+
+                LEFT JOIN (
+                    SELECT
+                       ii.invoice_id,
+                       SUM(ii.unit_price * ii.qty) sale_amount,
+                       SUM(COALESCE(qi.cost, pa.dealer_cost, 0)) cost_amount
+                    FROM qb_invoice_items ii
+                    LEFT JOIN qb_items qi ON qi.id=ii.item_id
+                    LEFT JOIN parts_v1 pa ON qi.item_primary_id=pa.id
+                    WHERE qi.type = 'part'
+                    GROUP BY ii.invoice_id
+                ) sales_parts ON i.id = sales_parts.invoice_id
+
+                LEFT JOIN (
+                    SELECT
+                       ii.invoice_id,
+                       SUM(ii.unit_price * ii.qty) sale_amount,
+                       SUM(COALESCE(qi.cost, 0)) cost_amount
+                    FROM qb_invoice_items ii
+                    LEFT JOIN qb_items qi ON qi.id=ii.item_id
+                    WHERE qi.type = 'labor'
+                    GROUP BY ii.invoice_id
+                ) sales_labor ON i.id = sales_labor.invoice_id
+
+                WHERE us.dealer_id=:dealerId1
                 {$dateFromClause1}
                 GROUP BY us.id
 
                 UNION
 
-                /* POS sales */
-                SELECT ps.id sale_id, ps.id invoice_id, 'pos' sale_type, ps.created_at sale_date, ps.sales_person_id, c.display_name customer_name,
-                    SUM(COALESCE(
-                        psp.subtotal - ps.discount,
-                        (psp.qty * psp.price) - ps.discount,
-                        (psp.qty * i.unit_price) - ps.discount
-                        )) sale_amount,
-                    SUM(psp.qty * i.cost) cost_amount
+                /* POS sales via crm_pos_sales */
+                SELECT ps.id sale_id, ps.id invoice_id, ps.id doc_num, ps.total ,'pos' sale_type, ps.created_at sale_date, ps.sales_person_id, c.display_name customer_name,
+                    SUM(sales_unit.sale_amount) as unit_sale_amount,
+                    SUM(sales_unit.cost_amount) as unit_cost_amount,
+                    SUM(sales_part.sale_amount) as part_sale_amount,
+                    SUM(sales_part.cost_amount) as part_cost_amount,
+                    SUM(sales_labor.sale_amount) as labor_sale_amount,
+                    SUM(sales_labor.cost_amount) as labor_cost_amount
+
                 FROM crm_pos_sales ps
-                JOIN crm_pos_sale_products psp ON psp.sale_id=ps.id
-                JOIN dms_customer c ON ps.customer_id=c.id
-                LEFT JOIN qb_items i ON i.id=psp.item_id
-                JOIN crm_pos_register pr ON ps.register_id=pr.id
-                JOIN crm_pos_outlet po ON pr.outlet_id=po.id
-                WHERE i.type <> 'tax'
-                AND po.dealer_id=:dealerId2
-                {$dateFromClause2}
+                    LEFT JOIN dms_customer c ON ps.customer_id=c.id
+                    LEFT JOIN crm_pos_register pr ON ps.register_id=pr.id
+                    LEFT JOIN crm_pos_outlet po ON pr.outlet_id=po.id
+                    LEFT JOIN (
+                        SELECT
+                            psp.sale_id,
+                            SUM(psp.subtotal) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM crm_pos_sale_products psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'part'
+                        GROUP BY psp.sale_id
+                    ) sales_part ON ps.id = sales_part.sale_id
+
+                    LEFT JOIN (
+                        SELECT
+                            psp.sale_id,
+                            SUM(psp.subtotal) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM crm_pos_sale_products psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'trailer'
+                        GROUP BY psp.sale_id
+                    ) sales_unit ON ps.id = sales_unit.sale_id
+
+                    LEFT JOIN (
+                        SELECT
+                            psp.sale_id,
+                            SUM(psp.subtotal) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM crm_pos_sale_products psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'labor'
+                        GROUP BY psp.sale_id
+                    ) sales_labor ON ps.id = sales_labor.sale_id
+
+                WHERE po.dealer_id=:dealerId2
+                  AND DATE(ps.created_at) BETWEEN :fromDate2 AND :toDate2
                 GROUP BY ps.id) sales ON sales.sales_person_id=sp.id
+
             LEFT JOIN new_dealer_user ndu ON ndu.user_id=sp.user_id
-            WHERE ndu.id=:dealerId3 AND sp.deleted_at IS NULL
-            ORDER BY sales.sale_date DESC";
+            WHERE ndu.id=:dealerId3
+              AND sp.deleted_at IS NULL";
 
         $result = DB::select($sql, $dbParams);
 
