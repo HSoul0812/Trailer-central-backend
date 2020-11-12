@@ -167,14 +167,14 @@ class CatalogService implements CatalogServiceInterface
         // Create Access Token
         $catalog = $this->catalogs->update($params);
 
-        // Access Token is Set?
-        if(isset($params['access_token'])) {
-            // Adjust Request
-            $params['token_type'] = 'facebook';
-            $params['relation_type'] = 'fbapp_catalog';
-            $params['relation_id'] = $params['id'];
-            unset($params['id']);
+        // Adjust Request
+        $params['token_type'] = 'facebook';
+        $params['relation_type'] = 'fbapp_catalog';
+        $params['relation_id'] = $params['id'];
+        unset($params['id']);
 
+        // Access Token is Set?
+        if(isset($params['access_token']) && empty($params['refresh_token'])) {
             // Find Refresh Token
             $refresh = $this->auth->refresh($params);
             if(!empty($refresh)) {
@@ -185,8 +185,11 @@ class CatalogService implements CatalogServiceInterface
                 }
             }
 
-            // Get Access Token
+            // Create Access Token
             $accessToken = $this->tokens->create($params);
+        } else {
+            // Get Access Token
+            $accessToken = $this->tokens->getRelation($params);
         }
 
         // Page Token Exists?
