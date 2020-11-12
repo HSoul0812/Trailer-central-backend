@@ -193,7 +193,7 @@ class CatalogService implements CatalogServiceInterface
         }
 
         // Page Token Exists?
-        if(isset($params['page_token'])) {
+        if(isset($params['page_token']) && empty($params['page_refresh_token'])) {
             // Adjust Request
             $params['token_type'] = 'facebook';
             $params['relation_type'] = 'fbapp_page';
