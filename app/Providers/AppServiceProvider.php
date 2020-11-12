@@ -200,8 +200,11 @@ class AppServiceProvider extends ServiceProvider
             // dealer migrations
             __DIR__ . '/../../database/migrations/dealer',
 
-            // add other migration directories here
+            // utilities
             __DIR__ . '/../../database/migrations/utilities',
+            
+            // configuration tables
+            __DIR__ . '/../../database/migrations/config',
         ]);
 
         // log all queries
