@@ -29,7 +29,7 @@ class PosService
             $search->must('multi_match', [
                 'query' => $queryTerm,
                 'fuzziness' => 'AUTO',
-                'fields' => ['title^1.3', 'sku^3', 'model', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2']
+                'fields' => ['title^1.3', 'sku^3', 'model', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5']
             ]);
 
         // if no query supplied but is allowed
