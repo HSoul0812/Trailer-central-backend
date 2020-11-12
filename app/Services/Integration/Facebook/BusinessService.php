@@ -127,16 +127,17 @@ class BusinessService implements BusinessServiceInterface
      * 
      * @param AccessToken $accessToken
      * @param int $feedId
+     * @param int $catalogId if NULL, defaults to env FB_SDK_CATALOG_ID
      * @return $catalog->createProductFeed || null
      */
-    public function validateFeed($accessToken, $feedId) {
+    public function validateFeed($accessToken, $feedId, $catalogId = null) {
         // Configure Client
         $this->initApi($accessToken);
 
         // Get Product Catalog
         try {
             // Get Catalog
-            $catalog = new ProductCatalog($_ENV['FB_SDK_CATALOG_ID']);
+            $catalog = new ProductCatalog(!empty($catalogId) ? $catalogId : $_ENV['FB_SDK_CATALOG_ID']);
 
             // Get Feeds
             $feeds = $catalog->getProductFeeds();
@@ -171,16 +172,17 @@ class BusinessService implements BusinessServiceInterface
      * 
      * @param AccessToken $accessToken
      * @param int $feedId
+     * @param int $catalogId if NULL, defaults to env FB_SDK_CATALOG_ID
      * @return delete
      */
-    public function deleteFeed($accessToken, $feedId) {
+    public function deleteFeed($accessToken, $feedId, $catalogId = null) {
         // Configure Client
         $this->initApi($accessToken);
 
         // Get Product Catalog
         try {
             // Get Catalog
-            $catalog = new ProductCatalog($_ENV['FB_SDK_CATALOG_ID']);
+            $catalog = new ProductCatalog(!empty($catalogId) ? $catalogId : $_ENV['FB_SDK_CATALOG_ID']);
 
             // Get Feeds
             $feeds = $catalog->getProductFeeds();
@@ -216,16 +218,17 @@ class BusinessService implements BusinessServiceInterface
      * @param AccessToken $accessToken
      * @param string $feedUrl
      * @param string $feedName
+     * @param int $catalogId if NULL, defaults to env FB_SDK_CATALOG_ID
      * @return $catalog->createProductFeed || null
      */
-    public function scheduleFeed($accessToken, $feedUrl, $feedName) {
+    public function scheduleFeed($accessToken, $feedUrl, $feedName, $catalogId = null) {
         // Configure Client
         $this->initApi($accessToken);
 
         // Get Product Catalog
         try {
             // Get Catalog
-            $catalog = new ProductCatalog($_ENV['FB_SDK_CATALOG_ID']);
+            $catalog = new ProductCatalog(!empty($catalogId) ? $catalogId : $_ENV['FB_SDK_CATALOG_ID']);
 
             // Create Product Feed
             $data = $catalog->createProductFeed(
