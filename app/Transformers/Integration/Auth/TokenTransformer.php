@@ -16,6 +16,7 @@ class TokenTransformer extends TransformerAbstract
             'relation_type' => $token->relation_type,
             'relation_id' => $token->relation_id,
             'access_token' => $token->access_token,
+            'refresh_token' => $token->refresh_token,
             'id_token' => $token->id_token,
             'scope' => $token->scope,
             'issued_at' => $token->issued_at,
