@@ -479,4 +479,43 @@ class PartRepository implements PartRepositoryInterface {
         return Part::create($params);
     }
 
+    /**
+     * @param $query
+     * @param $dealerId
+     * @param  false  $allowAll
+     * @return mixed
+     */
+    public function search($query, $dealerId, $options = [])
+    {
+        $search = Part::boolSearch();
+
+        if ($query) { // if a query is specified
+            $search->must('multi_match', [
+                'query' => $query,
+                'fuzziness' => 'AUTO',
+                'fields' => ['title', 'sku', 'brand', 'manufacturer', 'type', 'category', 'description',]
+            ]);
+
+        } else if (!$query && ($options['allowAll'] ?? false)) { // if no query supplied but is allowed
+            $search->must('match_all', []);
+
+        } else {
+            throw new \Exception('Query is required');
+        }
+
+        $search
+            // filter by dealer
+            ->filter('term', ['dealer_id' => $dealerId])
+            // load relations
+            ->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins']);
+
+        if ($size = $options['size'] ?? 50) {
+            $search->size($size);
+        }
+
+        return $search->execute()
+            ->models();
+    }
+
+
 }

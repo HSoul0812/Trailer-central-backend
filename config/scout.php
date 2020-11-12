@@ -34,8 +34,8 @@ return [
     | all automatic data syncing will get queued for better performance.
     |
     */
-    'queue' => true,
-    
+    'queue' => env('SCOUT_QUEUE', false),
+
     /*
     |--------------------------------------------------------------------------
     | Algolia Configuration

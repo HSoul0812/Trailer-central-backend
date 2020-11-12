@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulController;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Http\Requests\Parts\CreatePartRequest;
@@ -12,6 +13,9 @@ use App\Http\Requests\Parts\ShowPartRequest;
 use App\Http\Requests\Parts\GetPartsRequest;
 use App\Http\Requests\Parts\UpdatePartRequest;
 use App\Services\Parts\PartServiceInterface;
+use Illuminate\Support\Facades\Log;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Collection;
 
 class PartsController extends RestfulController
 {
@@ -19,20 +23,32 @@ class PartsController extends RestfulController
     protected $parts;
 
     /**
-     * @var App\Services\Parts\PartServiceInterface;
+     * @var \App\Services\Parts\PartServiceInterface;
      */
     protected $partService;
+    /**
+     * @var Manager
+     */
+    private $fractal;
+    /**
+     * @var PartsTransformer
+     */
+    private $partsTransformer;
 
     /**
      * Create a new controller instance.
      *
-     * @return void
+     * @param  PartRepositoryInterface  $parts
+     * @param  PartServiceInterface  $partService
+     * @param  Manager  $fractal
      */
-    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService)
+    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformer $partsTransformer)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'search', 'update']);
         $this->parts = $parts;
         $this->partService = $partService;
+        $this->fractal = $fractal;
+        $this->partsTransformer = $partsTransformer;
     }
 
     /**
@@ -698,6 +714,27 @@ class PartsController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    public function search(Request $request)
+    {
+        try {
+            $this->fractal->setSerializer(new NoDataArraySerializer());
+            $this->fractal->parseIncludes($request->query('with', ''));
+            $query = $request->get('query');
+
+            $result = $this->parts->search($query, $request->input('dealer_id'), ['allowAll' => true]);
+            $data = new Collection($result, $this->partsTransformer, 'data');// $data->setPaginator(new IlluminatePaginatorAdapter($this->auditLogRepository->getPaginator()));
+            $result = (array) $this->fractal->createData($data)->toArray();
+
+            return $this->response->array($result);
+
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return $this->response->errorBadRequest();
+        }
     }
 
 }

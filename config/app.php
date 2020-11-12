@@ -186,6 +186,10 @@ return [
         \Laravel\Scout\ScoutServiceProvider::class,
         \Dingo\Api\Provider\LaravelServiceProvider::class,
         Spatie\Sitemap\SitemapServiceProvider::class,
+        ElasticClient\ServiceProvider::class,
+        ElasticScoutDriver\ServiceProvider::class,
+        ElasticScoutDriverPlus\ServiceProvider::class,
+        ElasticMigrations\ServiceProvider::class,
 
         /*
          * Nova stuff
