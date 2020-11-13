@@ -323,6 +323,7 @@ class CatalogJob extends Job
                 $row[$k] = $clean->{$column};
             }
         }
+        ksort($row);
 
         // Add Cleaned Results to CSV
         fputcsv($file, $row);
