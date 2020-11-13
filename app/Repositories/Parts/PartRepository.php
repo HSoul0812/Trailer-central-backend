@@ -493,7 +493,7 @@ class PartRepository implements PartRepositoryInterface {
             $search->must('multi_match', [
                 'query' => $query,
                 'fuzziness' => 'AUTO',
-                'fields' => ['title^1.3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5']
+                'fields' => ['title^1.3', 'id^3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5']
             ]);
 
         } else if (!$query && ($options['allowAll'] ?? false)) { // if no query supplied but is allowed
