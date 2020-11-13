@@ -2,6 +2,7 @@
 
 namespace App\Models\Parts;
 
+use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
@@ -23,7 +24,7 @@ use Carbon\Carbon;
 class Part extends Model
 {
 
-    use Searchable;
+    use Searchable, CustomSearch;
 
     protected $table = 'parts_v1';
 
@@ -109,7 +110,7 @@ class Part extends Model
             'brand_id' => null
         ]
     ];
-    
+
     protected $casts = [
         'dealer_cost' => 'float'
     ];
@@ -132,7 +133,7 @@ class Part extends Model
 
     public function searchableAs()
     {
-        return env('PARTS_ALGOLIA_INDEX', '');
+        return env('INDEX_PARTS', 'parts');
     }
 
     public function toSearchableArray()
@@ -146,6 +147,8 @@ class Part extends Model
 
         $array['images'] = $this->images->toArray();
         $array['vehicle_specific'] = $this->vehicleSpecifc;
+
+        $array['price'] = (string)$this->modified_cost;
 
         return $array;
     }
