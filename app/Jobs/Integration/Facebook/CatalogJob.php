@@ -320,7 +320,7 @@ class CatalogJob extends Job
         $row = array();
         foreach($this->csvColumns as $k => $column) {
             $row[$k] = '';
-            if(isset($clean->{$column}) && !empty($clean->{$column})) {
+            if(isset($clean->{$column}) && $clean->{$column} !== null) {
                 $row[$k] = $clean->{$column};
             }
         }
