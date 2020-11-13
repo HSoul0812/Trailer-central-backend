@@ -43,6 +43,13 @@ class CatalogJob extends Job
     const OTHER = 'OTHER';
 
     /**
+     * Facebook Availability
+     */
+    const AVAILABLE = 'AVAILABLE';
+    const UNAVAILABLE = 'NOT_AVAILABLE';
+    const PENDING = 'PENDING';
+
+    /**
      * Vehicle Type Map
      *
      * @var type 
@@ -358,6 +365,13 @@ class CatalogJob extends Job
             $listing->image = json_encode($listing->image);
         }
 
+        // Fix Availability
+        if($listing->availability === '4') {
+            $listing->availability = self::PENDING;
+        } else {
+            $listing->availability = self::AVAILABLE;
+        }
+
         // Fix Transmission
         if(empty($listing->transmission)) {
             $listing->transmission = 'other';
@@ -391,6 +405,9 @@ class CatalogJob extends Job
         if($listing->dealer_id == 8757) {
             $listing->description .= 'In some cases, pricing may not include freight, prep, doc/title fees, additional equipment, or sales tax';
         }
+
+        // Fix Privacy Policy
+        $listing->dealer_privacy_policy_url = 'https://' . $listing->dealer_privacy_policy_url;
 
         // Return Cleaned Up Listing Array
         return $listing;
