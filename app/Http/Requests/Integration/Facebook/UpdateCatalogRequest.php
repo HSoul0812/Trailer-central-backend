@@ -14,6 +14,8 @@ class UpdateCatalogRequest extends Request {
     protected $rules = [
         'id' => 'required|integer',
         'dealer_location_id' => 'integer',
+        'business_id' => 'integer',
+        'catalog_id' => 'integer',
         'account_name' => 'string',
         'account_id' => 'integer',
         'page_title' => 'string',

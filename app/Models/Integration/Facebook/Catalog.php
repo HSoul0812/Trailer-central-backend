@@ -40,7 +40,7 @@ class Catalog extends Model
         'dealer_id',
         'dealer_location_id',
         'fbapp_page_id',
-        'business_user_id',
+        'business_id',
         'catalog_id',
         'account_name',
         'account_id',
