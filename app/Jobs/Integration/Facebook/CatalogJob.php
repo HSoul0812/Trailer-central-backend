@@ -315,6 +315,8 @@ class CatalogJob extends Job
     private function insertCsvRow($file, $listing) {
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
+        var_dump($clean);
+        die;
 
         // Create Row
         $row = array();
