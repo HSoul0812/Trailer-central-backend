@@ -315,8 +315,6 @@ class CatalogJob extends Job
     private function insertCsvRow($file, $listing) {
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
-        var_dump($clean);
-        die;
 
         // Create Row
         $row = array();
@@ -352,7 +350,7 @@ class CatalogJob extends Job
         }
 
         // Fix Mileage
-        $listing->{'mileage.value'} = $listing->mileage_value;
+        $listing->{'mileage.value'} = !empty($listing->mileage_value) ? $listing->mileage_value : '0';
         $listing->{'mileage.unit'} = $listing->mileage_unit;
 
         // Encode Images
