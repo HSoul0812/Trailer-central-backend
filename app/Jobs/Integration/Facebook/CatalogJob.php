@@ -319,6 +319,7 @@ class CatalogJob extends Job
         // Create Row
         $row = array();
         foreach($this->csvColumns as $k => $column) {
+            $row[$k] = '';
             if(isset($clean->{$column})) {
                 $row[$k] = $clean->{$column};
             }
