@@ -140,6 +140,8 @@ class Part extends Model
     {
         $array = $this->toArray();
 
+        $array['part_id'] = (string)$this->id;
+
         $array['brand'] = (string)$this->brand;
         $array['manufacturer'] = (string)$this->manufacturer;
         $array['category'] = (string)$this->category;
