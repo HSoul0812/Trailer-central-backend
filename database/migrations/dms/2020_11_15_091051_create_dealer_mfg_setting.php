@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCustomerToBrand extends Migration
+class CreateDealerMfgSetting extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,12 @@ class AddCustomerToBrand extends Migration
      */
     public function up()
     {
-        Schema::table('inventory_mfg', function (Blueprint $table) {
+        Schema::create('dealer_mfg_setting', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedInteger('dealer_id');
+            $table->unsignedInteger('inventory_mfg_id');
             $table->unsignedInteger('customer_id')->nullable();
+            $table->unsignedInteger('vendor_id')->nullable();
         });
     }
 
@@ -25,8 +29,6 @@ class AddCustomerToBrand extends Migration
      */
     public function down()
     {
-        Schema::table('inventory_mfg', function (Blueprint $table) {
-            $table->dropColumn('customer_id');
-        });
+        Schema::dropIfExists('dealer_mfg_setting');
     }
 }
