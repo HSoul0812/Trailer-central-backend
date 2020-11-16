@@ -147,10 +147,19 @@ class Part extends Model
         $array['category'] = (string)$this->category;
         $array['type'] = (string)$this->type;
 
-        $array['images'] = $this->images->toArray();
+        // $array['images'] = $this->images->toArray();
+
         $array['vehicle_specific'] = $this->vehicleSpecifc;
 
+        //
         $array['price'] = (string)$this->modified_cost;
+
+        // bin qty
+        $array['bins'] = $this->bins;
+        $array['bins_total_qty'] = ($this->bins instanceof Collection)?
+            $this->bins->reduce(function ($total, $item) {
+                return $total + $item->qty;
+            }, 0): 0;
 
         return $array;
     }

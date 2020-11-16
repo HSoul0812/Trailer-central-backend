@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Events\Parts\PartQtyUpdated;
 use App\Listeners\Parts\PartQtyAuditLogNotification;
+use App\Listeners\Parts\PartReindexNotification;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
 use App\Repositories\Parts\AuditLogRepository;
@@ -31,6 +32,9 @@ class PartsServiceProvider extends ServiceProvider
 
             // parts qty in bins updated
             PartQtyAuditLogNotification::class,
+
+            // part should be reindexed
+            PartReindexNotification::class,
         ],
     ];
 
