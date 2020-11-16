@@ -13,8 +13,11 @@ use App\Http\Requests\Parts\ShowPartRequest;
 use App\Http\Requests\Parts\GetPartsRequest;
 use App\Http\Requests\Parts\UpdatePartRequest;
 use App\Services\Parts\PartServiceInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
 
 class PartsController extends RestfulController
@@ -44,7 +47,7 @@ class PartsController extends RestfulController
      */
     public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformer $partsTransformer)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'search', 'update']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
         $this->parts = $parts;
         $this->partService = $partService;
         $this->fractal = $fractal;
@@ -721,20 +724,52 @@ class PartsController extends RestfulController
         try {
             $this->fractal->setSerializer(new NoDataArraySerializer());
             $this->fractal->parseIncludes($request->query('with', ''));
-            $query = $request->get('query');
+            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock');
+            $paginator = new \stdClass(); // this will hold the paginator produced by search
+            $dealerId = $this->getRequestDealerId($request, Auth::user());
 
-            $result = $this->parts->search($query, $request->input('dealer_id'), ['allowAll' => true]);
-            $data = new Collection($result, $this->partsTransformer, 'data');// $data->setPaginator(new IlluminatePaginatorAdapter($this->auditLogRepository->getPaginator()));
+            // do the search
+            $result = $this->parts->search(
+                $query, $dealerId, [
+                    'allowAll' => true,
+                    'page' => $request->get('page'),
+                    'per_page' => $request->get('per_page', 10),
+                ], $paginator
+            );
+            $data = new Collection($result, $this->partsTransformer, 'data');
+
+            // if a paginator is requested
+            if ($request->get('page')) {
+                $data->setPaginator(new IlluminatePaginatorAdapter($paginator));
+            }
+
+            // build the api response
             $result = (array) $this->fractal->createData($data)->toArray();
-
             return $this->response->array($result);
 
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
 
-            return $this->response->errorBadRequest();
+            return $this->response->errorBadRequest($e->getMessage());
         }
+    }
+
+    private function getRequestDealerId(Request $request, $user, $required = true)
+    {
+        if ($dealerId = $request->get('dealer_id', null)) {
+            return $dealerId;
+        }
+
+        if (!empty($user) && !empty($user->dealer_id)) {
+            return $user->dealer_id;
+        }
+
+        if ($required) {
+            throw new \Exception('Dealer is required');
+        }
+
+        return null;
     }
 
 }

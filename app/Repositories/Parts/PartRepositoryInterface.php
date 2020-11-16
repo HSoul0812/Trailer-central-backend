@@ -17,6 +17,6 @@ interface PartRepositoryInterface extends Repository {
 
     public function getAllByDealerId($dealerId);
 
-    public function search($query, $dealerId, $allowAll = false);
+    public function search($query, $dealerId, $allowAll = false, &$paginator = null);
 
 }
