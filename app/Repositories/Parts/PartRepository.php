@@ -91,6 +91,13 @@ class PartRepository implements PartRepositoryInterface {
         ]
     ];
 
+    private $indexKeywordFields = [
+        'subcategory' => 'subcategory.keyword',
+        'title' => 'title.keyword',
+        'sku' => 'sku.keyword',
+        'price' => 'price.keyword',
+    ];
+
     public function create($params) {
         DB::beginTransaction();
 
@@ -532,6 +539,17 @@ class PartRepository implements PartRepositoryInterface {
 
         // filter by dealer
         $search->filter('term', ['dealer_id' => $dealerId]);
+
+        // sort order
+        if ($query['sort'] ?? null) {
+            $sortDir = substr($query['sort'], 0, 1) === '-'? 'asc': 'desc';
+            $field = str_replace('-', '', $query['sort']);
+            if (array_key_exists($field, $this->indexKeywordFields)) {
+                $field = $this->indexKeywordFields[$field];
+            }
+
+            $search->sort($field, $sortDir);
+        }
 
         // load relations
         $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins']);

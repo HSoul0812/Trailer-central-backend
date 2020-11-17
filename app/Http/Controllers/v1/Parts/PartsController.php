@@ -724,7 +724,7 @@ class PartsController extends RestfulController
         try {
             $this->fractal->setSerializer(new NoDataArraySerializer());
             $this->fractal->parseIncludes($request->query('with', ''));
-            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock');
+            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort');
             $paginator = new \stdClass(); // this will hold the paginator produced by search
             $dealerId = $this->getRequestDealerId($request, Auth::user());
 
