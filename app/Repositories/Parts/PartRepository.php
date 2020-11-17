@@ -252,7 +252,7 @@ class PartRepository implements PartRepositoryInterface {
                 $query = $query->where('subcategory', 'LIKE', '%' . $params['subcategory'] . '%');
             }
         }
-
+        
         if (isset($params['sku'])) {
             if (isset($params['sku']['contain'])) {
                 $query = $query->where(function ($query) use ($params) {
