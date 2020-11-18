@@ -115,6 +115,8 @@ use App\Services\Integration\Auth\GoogleServiceInterface;
 use App\Services\Integration\Auth\GmailService;
 use App\Services\Integration\Auth\GmailServiceInterface;
 use Laravel\Nova\Nova;
+use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
+use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -192,8 +194,11 @@ class AppServiceProvider extends ServiceProvider
             // dealer migrations
             __DIR__ . '/../../database/migrations/dealer',
 
-            // add other migration directories here
+            // utilities
             __DIR__ . '/../../database/migrations/utilities',
+            
+            // configuration tables
+            __DIR__ . '/../../database/migrations/config',
         ]);
 
         // log all queries
@@ -260,7 +265,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
-
+        $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
+        
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);

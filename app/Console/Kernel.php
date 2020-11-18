@@ -73,6 +73,10 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
         
+        $schedule->command('leads:assign:auto 0 0 8770')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
         
         $schedule->command('text:process-campaign')

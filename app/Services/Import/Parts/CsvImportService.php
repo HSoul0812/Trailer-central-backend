@@ -45,6 +45,7 @@ class CsvImportService implements CsvImportServiceInterface
     const STOCK_MIN = 'Stock Minimum';
     const STOCK_MAX = 'Stock Maximum';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
+    const ALTERNATE_PART_NUMBER = 'Alternate Part Number';
 
     const BIN_ID = '/Bin\s+\d+\s+ID/i';
     const BIN_QTY = '/Bin\s+\d+\s+qty/i';
@@ -74,7 +75,8 @@ class CsvImportService implements CsvImportServiceInterface
         self::IMAGE => true,
         self::STOCK_MIN => true,
         self::STOCK_MAX => true,
-        self::VIDEO_EMBED_CODE => true
+        self::VIDEO_EMBED_CODE => true,
+        self::ALTERNATE_PART_NUMBER => true
     ];
 
     protected $optionalHeaderValues = [
@@ -331,7 +333,8 @@ class CsvImportService implements CsvImportServiceInterface
         $part['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
         $part['stock_min'] = isset($csvData[$keyToIndexMapping[self::STOCK_MIN]]) ? $csvData[$keyToIndexMapping[self::STOCK_MIN]] : null;
         $part['stock_max'] = isset($csvData[$keyToIndexMapping[self::STOCK_MAX]]) ? $csvData[$keyToIndexMapping[self::STOCK_MAX]] : null;
-
+        $part['alternative_part_number'] = isset($csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]]) ? $csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]] : null;
+        
         if (isset($keyToIndexMapping[self::VIDEO_EMBED_CODE]) && isset($csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]])) {
             $part['video_embed_code'] = $csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]];
         }
@@ -411,6 +414,8 @@ class CsvImportService implements CsvImportServiceInterface
                 if (empty($value)) {
                     return "SKU cannot be empty.";
                 }
+                break;
+            case self::ALTERNATE_PART_NUMBER:
                 break;
             case self::SHOW_ON_WEBSITE:
                 if (!empty($value)) {

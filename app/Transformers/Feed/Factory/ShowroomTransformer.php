@@ -15,11 +15,13 @@ class ShowroomTransformer extends TransformerAbstract
             'manufacturer' => $showroom->manufacturer,
             'category' => $showroom->type,
             'inventoryCategory' => $showroom->category,
-            'model' => $showroom->model,
+            'model' => "{$showroom->model} {$showroom->brand}",
+            'real_model' => $showroom->model,
             'year' => $showroom->year,
             'msrp' => $showroom->msrp,
             'description' => $showroom->description,
             'description_txt' => $showroom->description_txt,
+            'dry_weight' => $showroom->dry_weight            
         ];
     }
 }

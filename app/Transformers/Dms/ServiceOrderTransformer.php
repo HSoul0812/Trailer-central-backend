@@ -30,6 +30,7 @@ class ServiceOrderTransformer extends TransformerAbstract
             'closed_at' => $serviceOrder->closed_at,
             'total_price' => $serviceOrder->total_price,
             'invoice' => $serviceOrder->invoice,
+            'receipts' => $this->getReceipts($serviceOrder),
             'location' => $serviceOrder->dealerLocation ? $serviceOrder->dealerLocation->name : null,
             'paid_amount' => (float) $serviceOrder->paid_amount,
             'status' => $serviceOrder->status,
@@ -60,6 +61,19 @@ class ServiceOrderTransformer extends TransformerAbstract
     public function withInvoice(ServiceOrder $serviceOrder)
     {
         return $this->item($serviceOrder->invoice, new InvoiceTransformer());
+    }
+    
+    private function getReceipts(ServiceOrder $serviceOrder)
+    {
+        $receipts = [];
+        
+        if ($serviceOrder->invoice && $serviceOrder->invoice->payments) {
+            foreach($serviceOrder->invoice->payments as $payment) {
+                $receipts[] = $payment->receipts;
+            }
+        }
+        
+        return $receipts;
     }
 
 }
