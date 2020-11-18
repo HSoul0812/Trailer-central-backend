@@ -8,12 +8,14 @@ use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
+use ElasticScoutDriverPlus\CustomSearch;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
+use Laravel\Scout\Searchable;
 
 /**
  * Class Inventory
@@ -116,7 +118,7 @@ use App\Models\Traits\TableAware;
  */
 class Inventory extends Model
 {
-    use TableAware, SpatialTrait, GeospatialHelper;
+    use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
 
     const COLOR_ATTRIBUTE_ID = 11;
 
@@ -417,5 +419,16 @@ class Inventory extends Model
 
     public static function getTableName() {
         return self::TABLE_NAME;
+    }
+
+    public function searchableAs()
+    {
+        return env('INDEX_INVENTORY', 'inventory');
+    }
+
+    public function toSearchableArray()
+    {
+        $array = $this->toArray();
+        return $array;
     }
 }

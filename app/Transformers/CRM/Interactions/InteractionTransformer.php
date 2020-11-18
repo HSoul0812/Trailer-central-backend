@@ -4,12 +4,11 @@ namespace App\Transformers\CRM\Interactions;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Interactions\Interaction;
-use App\Transformers\CRM\Interactions\EmailHistoryTransformer;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
 use Carbon\Carbon;
 
-class InteractionTransformer extends TransformerAbstract 
+class InteractionTransformer extends TransformerAbstract
 {
     protected $defaultIncludes = [
         'lead',
@@ -19,12 +18,12 @@ class InteractionTransformer extends TransformerAbstract
 
     /**
      * Transform Interaction
-     * 
+     *
      * @param Interaction $interaction
      * @return type
      */
     public function transform(Interaction $interaction)
-    {       
+    {
         return [
             'id' => $interaction->interaction_id,
             'type' => $interaction->interaction_type,
@@ -42,7 +41,11 @@ class InteractionTransformer extends TransformerAbstract
 
     public function includeSalesPerson(Interaction $interaction)
     {
-        return $this->item($interaction->leadStatus->salesPerson, new SalesPersonTransformer());
+        if ($interaction->leadStatus) {
+            return $this->item($interaction->leadStatus->salesPerson, new SalesPersonTransformer());
+        } else {
+            return $this->null();
+        }
     }
 
     public function includeEmailHistory(Interaction $interaction)

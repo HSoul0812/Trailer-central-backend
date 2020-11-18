@@ -7,6 +7,7 @@ namespace App\Models\CRM\Account;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\Refund;
 use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
+use App\Models\CRM\Dms\Payment\DealerSalesReceipt;
 
 /**
  * Class Payment
@@ -49,5 +50,10 @@ class Payment extends Model
     public function refunds()
     {
         return $this->hasMany(Refund::class, 'tb_primary_id');
+    }
+    
+    public function getReceiptsAttribute()
+    {
+        return DealerSalesReceipt::where('tb_name', 'qb_payment')->where('tb_primary_id', $this->id)->get();
     }
 }
