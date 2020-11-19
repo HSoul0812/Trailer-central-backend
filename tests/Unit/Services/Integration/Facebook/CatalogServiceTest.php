@@ -350,7 +350,7 @@ class CatalogServiceTest extends TestCase
         $payload = $this->getTestPayload();
 
         // Parse Payload Data
-        $integrations = json_decode($payload);
+        $integrations = (array) json_decode($payload);
         $integration = reset($integrations);
         $catalog = Catalog::find($integration->catalog_id);
 
