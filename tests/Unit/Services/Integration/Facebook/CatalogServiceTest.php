@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Mockery;
 use Mockery\LegacyMockInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use League\Fractal\Manager;
 use Tests\TestCase;
 
 /**
@@ -72,6 +73,16 @@ class CatalogServiceTest extends TestCase
 
         $this->catalogRepositoryMock = Mockery::mock(CatalogRepositoryInterface::class);
         $this->app->instance(CatalogRepositoryInterface::class, $this->catalogRepositoryMock);
+
+        // Catalog Service Mock
+        $this->catalogServiceMock = Mockery::mock(CatalogService::class, [
+            $this->catalogRepositoryMock,
+            $this->pageRepositoryMock,
+            $this->tokenRepositoryMock,
+            $this->authServiceMock,
+            $this->businessServiceMock,
+            new Manager()
+        ]);
     }
 
     /**
@@ -111,7 +122,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show(['id' => $catalogId]);
+        $result = $this->catalogServiceMock->show(['id' => $catalogId]);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $catalogId);
@@ -220,7 +231,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Create Catalog Result
-        $result = $service->create($createRequestParams);
+        $result = $this->catalogServiceMock->create($createRequestParams);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $catalogId);
