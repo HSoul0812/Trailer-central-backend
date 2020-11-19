@@ -227,7 +227,7 @@ class CatalogService implements CatalogServiceInterface
 
         // Feed ID Exists?!
         if(!empty($catalog->feed_id)) {
-            $this->sdk->deleteFeed($catalog->page->accessToken, $catalog->catalog_id, $catalog->feed_id);
+            $this->sdk->deleteFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_id);
         }
 
         // Delete Access Token
@@ -268,7 +268,7 @@ class CatalogService implements CatalogServiceInterface
             $feed = null;
             if(!empty($catalog->feed_id)) {
                 try {
-                    $feed = $this->sdk->validateFeed($catalog->page->accessToken, $catalog->catalog_id, $catalog->feed_id);
+                    $feed = $this->sdk->validateFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_id);
                 } catch(\Exception $ex) {
                     Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
                 }
@@ -278,7 +278,7 @@ class CatalogService implements CatalogServiceInterface
             if(empty($feed['id'])) {
                 try {
                     $catalog->feed_id = 0;
-                    $feed = $this->sdk->scheduleFeed($catalog->page->accessToken, $catalog->catalog_id, $catalog->feed_url, $catalog->feed_name);
+                    $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_url, $catalog->feed_name);
                 } catch(\Exception $ex) {
                     Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
                     continue;
