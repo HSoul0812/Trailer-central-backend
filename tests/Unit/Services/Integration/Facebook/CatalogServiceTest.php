@@ -10,7 +10,7 @@ use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Repositories\Repository;
 use App\Services\Integration\Facebook\AuthServiceInterface;
 use App\Services\Integration\Facebook\CatalogService;
-use App\Services\Integration\Facebook\CatalogServiceInterface;
+use App\Services\Integration\Facebook\BusinessServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
