@@ -166,8 +166,19 @@ class CatalogServiceTest extends TestCase
             ->with($createCatalogParams)
             ->andReturn($catalog);
 
-        // Mock Create Catalog Access Token
+        // Mock Get Auth Refresh Token
         $this->authServiceMock
+            ->shouldReceive('refresh')
+            ->once()
+            ->with($refreshAuthParams)
+            ->andReturn([
+                'refresh_token' => $catalog->accessToken->refresh_token,
+                'expires_in' => $catalog->accessToken->expires_in,
+                'expires_at' => $catalog->accessToken->expires_at
+            ]);
+
+        // Mock Get FB Refresh Token
+        $this->businessServiceMock
             ->shouldReceive('refresh')
             ->once()
             ->with($refreshAuthParams)
