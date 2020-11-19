@@ -58,20 +58,20 @@ class CatalogServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->catalogRepositoryMock = Mockery::mock(CatalogRepositoryInterface::class);
-        $this->app->instance(CatalogRepositoryInterface::class, $this->catalogRepositoryMock);
-
-        $this->pageRepositoryMock = Mockery::mock(PageRepositoryInterface::class);
-        $this->app->instance(PageRepositoryInterface::class, $this->pageRepositoryMock);
-
-        $this->tokenRepositoryMock = Mockery::mock(TokenRepositoryInterface::class);
-        $this->app->instance(TokenRepositoryInterface::class, $this->tokenRepositoryMock);
+        $this->businessServiceMock = Mockery::mock(BusinessServiceInterface::class);
+        $this->app->instance(BusinessServiceInterface::class, $this->businessServiceMock);
 
         $this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
         $this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
 
-        $this->businessServiceMock = Mockery::mock(BusinessServiceInterface::class);
-        $this->app->instance(BusinessServiceInterface::class, $this->businessServiceMock);
+        $this->tokenRepositoryMock = Mockery::mock(TokenRepositoryInterface::class);
+        $this->app->instance(TokenRepositoryInterface::class, $this->tokenRepositoryMock);
+
+        $this->pageRepositoryMock = Mockery::mock(PageRepositoryInterface::class);
+        $this->app->instance(PageRepositoryInterface::class, $this->pageRepositoryMock);
+
+        $this->catalogRepositoryMock = Mockery::mock(CatalogRepositoryInterface::class);
+        $this->app->instance(CatalogRepositoryInterface::class, $this->catalogRepositoryMock);
     }
 
     /**
