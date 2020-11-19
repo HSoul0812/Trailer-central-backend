@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulController;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Http\Requests\Parts\CreatePartRequest;
@@ -12,6 +13,12 @@ use App\Http\Requests\Parts\ShowPartRequest;
 use App\Http\Requests\Parts\GetPartsRequest;
 use App\Http\Requests\Parts\UpdatePartRequest;
 use App\Services\Parts\PartServiceInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
 
 class PartsController extends RestfulController
 {
@@ -19,20 +26,32 @@ class PartsController extends RestfulController
     protected $parts;
 
     /**
-     * @var App\Services\Parts\PartServiceInterface;
+     * @var \App\Services\Parts\PartServiceInterface;
      */
     protected $partService;
+    /**
+     * @var Manager
+     */
+    private $fractal;
+    /**
+     * @var PartsTransformer
+     */
+    private $partsTransformer;
 
     /**
      * Create a new controller instance.
      *
-     * @return void
+     * @param  PartRepositoryInterface  $parts
+     * @param  PartServiceInterface  $partService
+     * @param  Manager  $fractal
      */
-    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService)
+    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformer $partsTransformer)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
         $this->parts = $parts;
         $this->partService = $partService;
+        $this->fractal = $fractal;
+        $this->partsTransformer = $partsTransformer;
     }
 
     /**
@@ -698,6 +717,59 @@ class PartsController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    public function search(Request $request)
+    {
+        try {
+            $this->fractal->setSerializer(new NoDataArraySerializer());
+            $this->fractal->parseIncludes($request->query('with', ''));
+            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort');
+            $paginator = new \stdClass(); // this will hold the paginator produced by search
+            $dealerId = $this->getRequestDealerId($request, Auth::user());
+
+            // do the search
+            $result = $this->parts->search(
+                $query, $dealerId, [
+                    'allowAll' => true,
+                    'page' => $request->get('page'),
+                    'per_page' => $request->get('per_page', 10),
+                ], $paginator
+            );
+            $data = new Collection($result, $this->partsTransformer, 'data');
+
+            // if a paginator is requested
+            if ($request->get('page')) {
+                $data->setPaginator(new IlluminatePaginatorAdapter($paginator));
+            }
+
+            // build the api response
+            $result = (array) $this->fractal->createData($data)->toArray();
+            return $this->response->array($result);
+
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return $this->response->errorBadRequest($e->getMessage());
+        }
+    }
+
+    private function getRequestDealerId(Request $request, $user, $required = true)
+    {
+        if ($dealerId = $request->get('dealer_id', null)) {
+            return $dealerId;
+        }
+
+        if (!empty($user) && !empty($user->dealer_id)) {
+            return $user->dealer_id;
+        }
+
+        if ($required) {
+            throw new \Exception('Dealer is required');
+        }
+
+        return null;
     }
 
 }

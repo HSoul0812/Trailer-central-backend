@@ -7,6 +7,8 @@ use App\Repositories\Repository;
 use App\Models\Parts\Part;
 use App\Models\Parts\PartImage;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
@@ -87,6 +89,13 @@ class PartRepository implements PartRepositoryInterface {
             'field' => 'stock',
             'direction' => 'ASC'
         ]
+    ];
+
+    private $indexKeywordFields = [
+        'subcategory' => 'subcategory.keyword',
+        'title' => 'title.keyword',
+        'sku' => 'sku.keyword',
+        'price' => 'price.keyword',
     ];
 
     public function create($params) {
@@ -250,7 +259,7 @@ class PartRepository implements PartRepositoryInterface {
                 $query = $query->where('subcategory', 'LIKE', '%' . $params['subcategory'] . '%');
             }
         }
-
+        
         if (isset($params['sku'])) {
             if (isset($params['sku']['contain'])) {
                 $query = $query->where(function ($query) use ($params) {
@@ -477,6 +486,103 @@ class PartRepository implements PartRepositoryInterface {
     public function createPart($params)
     {
         return Part::create($params);
+    }
+
+    /**
+     * @param $query
+     * @param $dealerId
+     * @param  array  $options Options: allowAll
+     * @param  LengthAwarePaginator|null  $paginator Put a avr here, it will be given a paginator if `page` param is set
+     * @return mixed
+     * @throws \Exception
+     */
+    public function search($query, $dealerId, $options = [], &$paginator = null)
+    {
+        $search = Part::boolSearch();
+
+        if ($query['query'] ?? null) { // if a query is specified
+            $search->must('multi_match', [
+                'query' => $query['query'],
+                'fuzziness' => 'AUTO',
+                'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5']
+            ]);
+
+        } else if ($options['allowAll'] ?? false) { // if no query supplied but is allowed
+            $search->must('match_all', []);
+
+        } else {
+            throw new \Exception('Query is required');
+        }
+
+        // vendor id
+        if ($query['vendor_id'] ?? null) {
+            $search->filter('term', ['vendor_id' => $query['vendor_id']]);
+        }
+
+        // if part has dealer cost
+        if ($query['with_cost'] ?? false) {
+            if ($query['with_cost'] == 1) {
+                $search->filter('range', ['dealer_cost' => ['gt' => 0]]);
+            } else if ($query['with_cost'] == 2) {
+                $search->filter('term', ['dealer_cost' => 0]);
+            }
+        }
+
+        // if part is in stock
+        if ($query['in_stock'] ?? false) {
+            if ($query['in_stock'] == 1) {
+                $search->filter('range', ['bins_total_qty' => ['gt' => 0]]);
+            } else if ($query['in_stock'] == 2) {
+                $search->filter('range', ['bins_total_qty' => ['lte' => 0]]);
+            }
+        }
+
+        // filter by dealer
+        $search->filter('term', ['dealer_id' => $dealerId]);
+
+        // sort order
+        if ($query['sort'] ?? null) {
+            $sortDir = substr($query['sort'], 0, 1) === '-'? 'asc': 'desc';
+            $field = str_replace('-', '', $query['sort']);
+            if (array_key_exists($field, $this->indexKeywordFields)) {
+                $field = $this->indexKeywordFields[$field];
+            }
+
+            $search->sort($field, $sortDir);
+        }
+
+        // load relations
+        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins']);
+
+        // if a paginator is requested
+        if ($options['page'] ?? null) {
+            $page = $options['page'];
+            $perPage = $options['per_page'] ?? 10;
+
+            $search->from(($page - 1) * $perPage);
+            $search->size($perPage);
+
+            $searchResult = $search->execute();
+
+            $paginator = new LengthAwarePaginator(
+                $searchResult->models(),
+                $searchResult->total(),
+                $perPage,
+                $page,
+                [
+                    'path' => Paginator::resolveCurrentPath(),
+                    'pageName' => 'page',
+                ]
+            );
+
+            return $searchResult->models();
+        }
+
+        // if no paginator, set a default return size
+        $size = $options['size'] ?? 50;
+        $search->size($size);
+
+        return $search->execute()->models();
     }
 
 }

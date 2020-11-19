@@ -2,6 +2,7 @@
 
 namespace App\Models\Parts;
 
+use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
@@ -23,7 +24,7 @@ use Carbon\Carbon;
 class Part extends Model
 {
 
-    use Searchable;
+    use Searchable, CustomSearch;
 
     protected $table = 'parts_v1';
 
@@ -109,7 +110,7 @@ class Part extends Model
             'brand_id' => null
         ]
     ];
-    
+
     protected $casts = [
         'dealer_cost' => 'float'
     ];
@@ -132,20 +133,33 @@ class Part extends Model
 
     public function searchableAs()
     {
-        return env('PARTS_ALGOLIA_INDEX', '');
+        return env('INDEX_PARTS', 'parts');
     }
 
     public function toSearchableArray()
     {
         $array = $this->toArray();
 
+        $array['part_id'] = (string)$this->id;
+
         $array['brand'] = (string)$this->brand;
         $array['manufacturer'] = (string)$this->manufacturer;
         $array['category'] = (string)$this->category;
         $array['type'] = (string)$this->type;
 
-        $array['images'] = $this->images->toArray();
+        // $array['images'] = $this->images->toArray();
+
         $array['vehicle_specific'] = $this->vehicleSpecifc;
+
+        //
+        $array['price'] = (string)$this->modified_cost;
+
+        // bin qty
+        $array['bins'] = $this->bins;
+        $array['bins_total_qty'] = ($this->bins instanceof Collection)?
+            $this->bins->reduce(function ($total, $item) {
+                return $total + $item->qty;
+            }, 0): 0;
 
         return $array;
     }

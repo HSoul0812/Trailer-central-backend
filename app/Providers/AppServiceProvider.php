@@ -123,6 +123,8 @@ use App\Services\Integration\Facebook\CatalogServiceInterface;
 use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use Laravel\Nova\Nova;
+use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
+use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -275,7 +277,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
-
+        $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
+        
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
