@@ -238,12 +238,8 @@ class CatalogServiceTest extends TestCase
             'is_active' => 1
         ];
 
-        // Update Catalog Params
-        $updateCatalogParams = $updateRequestParams;
-        $updateCatalogParams['fbapp_page_id'] = $catalog->page->id;
-
         // Relation Auth Params
-        $relationAuthParams = $updateCatalogParams;
+        $relationAuthParams = $updateRequestParams;
         $relationAuthParams['token_type'] = 'facebook';
         $relationAuthParams['relation_type'] = 'fbapp_catalog';
         $relationAuthParams['relation_id'] = $catalog->id;
@@ -266,7 +262,7 @@ class CatalogServiceTest extends TestCase
         $this->catalogRepositoryMock
             ->shouldReceive('update')
             ->once()
-            ->with($updateCatalogParams)
+            ->with($updateRequestParams)
             ->andReturn($catalog);
 
         // Mock Get Relation Token
@@ -323,7 +319,7 @@ class CatalogServiceTest extends TestCase
             ->with($catalog->accessToken, $catalog->catalog_id, $catalog->feed_id);
 
         // Mock Delete Access Token
-        $this->authServiceMock
+        $this->tokenRepositoryMock
             ->shouldReceive('delete')
             ->once()
             ->with([
@@ -333,7 +329,7 @@ class CatalogServiceTest extends TestCase
             ]);
 
         // Mock Delete Catalog
-        $this->catalogServiceMock
+        $this->catalogRepositoryMock
             ->shouldReceive('delete')
             ->once()
             ->with($catalogId)
