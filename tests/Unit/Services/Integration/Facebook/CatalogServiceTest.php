@@ -107,7 +107,7 @@ class CatalogServiceTest extends TestCase
         $result = $service->show($catalogId);
 
         // Assert Match
-        $this->assertSame($result['catalog']['id'], $catalogId);
+        $this->assertSame($result['data']['id'], $catalogId);
 
         // Assert Match
         $this->assertSame($result['validate'], $validate);
