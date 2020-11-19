@@ -71,7 +71,7 @@ class CatalogServiceTest extends TestCase
         $this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
 
         $this->businessServiceMock = Mockery::mock(CatalogServiceInterface::class);
-        $this->app->instance(CatalogServiceInterface::class, $this->businessServiceMock);        
+        $this->app->instance(CatalogServiceInterface::class, $this->businessServiceMock);
     }
 
     /**
@@ -82,7 +82,7 @@ class CatalogServiceTest extends TestCase
     public function testShow()
     {
         // Get Test Catalog
-        $catalogId = $_ENV['TEST_FB_CATALOG_ID'];
+        $catalogId = (int) $_ENV['TEST_FB_CATALOG_ID'];
         $catalog = Catalog::find($catalogId);
         $validate = ['is_valid' => true, 'is_expired' => true];
 
