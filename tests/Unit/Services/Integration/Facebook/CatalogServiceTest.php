@@ -220,7 +220,7 @@ class CatalogServiceTest extends TestCase
 
         // Update Request Params
         $updateRequestParams = [
-            'id' => $catalogId,
+            'id' => $catalog->id,
             'dealer_id' => $catalog->dealer_id,
             'dealer_location_id' => $catalog->dealer_location_id,
             'access_token' => $catalog->accessToken->access_token,
@@ -242,6 +242,7 @@ class CatalogServiceTest extends TestCase
 
         // Relation Auth Params
         $relationAuthParams = $updateRequestParams;
+        unset($relationAuthParams['id']);
         $relationAuthParams['token_type'] = 'facebook';
         $relationAuthParams['relation_type'] = 'fbapp_catalog';
         $relationAuthParams['relation_id'] = $catalog->id;
