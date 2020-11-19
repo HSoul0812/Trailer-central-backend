@@ -84,7 +84,7 @@ class CatalogServiceTest extends TestCase
         // Get Test Catalog
         $catalogId = (int) $_ENV['TEST_FB_CATALOG_ID'];
         $catalog = Catalog::find($catalogId);
-        $validate = ['is_valid' => true, 'is_expired' => true];
+        $validate = ['is_valid' => true, 'is_expired' => false];
 
         /** @var CatalogService $service */
         $service = $this->app->make(CatalogService::class);
@@ -123,7 +123,7 @@ class CatalogServiceTest extends TestCase
         // Get Test Catalog
         $catalogId = $_ENV['TEST_FB_CATALOG_ID'];
         $catalog = Catalog::find($catalogId);
-        $validate = ['is_valid' => true, 'is_expired' => true];
+        $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Page Params
         $createPageParams = [
