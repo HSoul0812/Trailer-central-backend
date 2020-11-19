@@ -156,7 +156,7 @@ class CatalogServiceTest extends TestCase
         $this->pageRepositoryMock
             ->shouldReceive('create')
             ->once()
-            ->with($createPageParams)
+            ->with($createRequestParams)
             ->andReturn($catalog->page);
 
         // Mock Create Catalog
