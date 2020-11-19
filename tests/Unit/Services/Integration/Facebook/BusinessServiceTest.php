@@ -3,7 +3,7 @@
 namespace Tests\Unit\Services\Integration\Facebook;
 
 use App\Models\Integration\Auth\AccessToken;
-use App\Services\Inventory\BusinessService;
+use App\Services\Integration\Facebook\BusinessService;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tests\TestCase;
 
