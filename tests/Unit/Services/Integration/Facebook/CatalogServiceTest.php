@@ -225,6 +225,7 @@ class CatalogServiceTest extends TestCase
             'dealer_location_id' => $catalog->dealer_location_id,
             'access_token' => $catalog->accessToken->access_token,
             'id_token' => $catalog->accessToken->id_token,
+            'refresh_token' => $catalog->accessToken->refresh_token,
             'expires_in' => $catalog->accessToken->expires_in,
             'expires_at' => $catalog->accessToken->expires_at,
             'issued_at' => $catalog->accessToken->issued_at,
@@ -244,10 +245,6 @@ class CatalogServiceTest extends TestCase
         $relationAuthParams['token_type'] = 'facebook';
         $relationAuthParams['relation_type'] = 'fbapp_catalog';
         $relationAuthParams['relation_id'] = $catalog->id;
-
-        // Update Auth Params
-        $updateAuthParams = $relationAuthParams;
-        $updateAuthParams['refresh_token'] = $catalog->accessToken->refresh_token;
 
         /** @var CatalogService $service */
         $service = $this->app->make(CatalogService::class);
