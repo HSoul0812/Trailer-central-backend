@@ -139,9 +139,9 @@ class CatalogServiceTest extends TestCase
 
         // Create Auth Params
         $refreshAuthParams = $createCatalogParams;
-        $createAuthParams['token_type'] = 'facebook';
-        $createAuthParams['relation_type'] = 'fbapp_catalog';
-        $createAuthParams['relation_id'] = $catalog->id;
+        $refreshAuthParams['token_type'] = 'facebook';
+        $refreshAuthParams['relation_type'] = 'fbapp_catalog';
+        $refreshAuthParams['relation_id'] = $catalog->id;
 
         // Create Auth Params
         $createAuthParams = $refreshAuthParams;
