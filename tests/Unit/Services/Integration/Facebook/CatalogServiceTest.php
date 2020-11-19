@@ -93,7 +93,7 @@ class CatalogServiceTest extends TestCase
         $this->catalogRepositoryMock
             ->shouldReceive('get')
             ->once()
-            ->with($catalogId)
+            ->with(['id' => $catalogId])
             ->andReturn($catalog);
 
         // Mock Validate Access Token
@@ -104,7 +104,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show($catalogId);
+        $result = $service->show(['id' => $catalogId]);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $catalogId);
