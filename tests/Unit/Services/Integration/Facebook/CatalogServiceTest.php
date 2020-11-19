@@ -186,9 +186,7 @@ class CatalogServiceTest extends TestCase
             ->once()
             ->with($refreshAuthParams)
             ->andReturn([
-                'access_token' => $catalog->accessToken->refresh_token,
-                'expires_in' => $catalog->accessToken->expires_in,
-                'expires_at' => $catalog->accessToken->expires_at
+                'access_token' => $catalog->accessToken->refresh_token
             ]);
 
         // Mock Get FB Refresh Token
@@ -197,9 +195,7 @@ class CatalogServiceTest extends TestCase
             ->once()
             ->with($refreshAuthParams)
             ->andReturn([
-                'access_token' => $catalog->accessToken->refresh_token,
-                'expires_in' => $catalog->accessToken->expires_in,
-                'expires_at' => $catalog->accessToken->expires_at
+                'access_token' => $catalog->accessToken->refresh_token
             ]);
 
         // Mock Create Catalog Access Token
