@@ -19,7 +19,7 @@ class CreateCatalogRequest extends Request {
         'account_id' => 'required|integer',
         'page_title' => 'required|string',
         'page_id' => 'required|integer',
-        'page_token' => 'required|string|max:255',
+        'page_token' => 'nullable|string|max:255',
         'access_token' => 'required|string|max:255',
         'id_token' => 'string',
         'issued_at' => 'date_format:Y-m-d H:i:s',

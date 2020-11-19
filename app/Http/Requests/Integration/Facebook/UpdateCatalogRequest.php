@@ -20,7 +20,7 @@ class UpdateCatalogRequest extends Request {
         'account_id' => 'integer',
         'page_title' => 'string',
         'page_id' => 'integer',
-        'page_token' => 'string|max:255',
+        'page_token' => 'nullable|string|max:255',
         'page_refresh_token' => 'nullable|string|max:255',
         'access_token' => 'string|max:255',
         'refresh_token' => 'nullable|string|max:255',
