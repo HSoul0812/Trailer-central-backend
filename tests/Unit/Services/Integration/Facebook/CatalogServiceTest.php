@@ -135,6 +135,8 @@ class CatalogServiceTest extends TestCase
             'dealer_location_id' => $catalog->dealer_location_id,
             'access_token' => $catalog->accessToken->access_token,
             'id_token' => $catalog->accessToken->id_token,
+            'expires_in' => $catalog->accessToken->expires_in,
+            'expires_at' => $catalog->accessToken->expires_at,
             'issued_at' => $catalog->accessToken->issued_at,
             'business_id' => $catalog->business_id,
             'catalog_id' => $catalog->catalog_id,
@@ -160,8 +162,6 @@ class CatalogServiceTest extends TestCase
         // Create Auth Params
         $createAuthParams = $refreshAuthParams;
         $createAuthParams['refresh_token'] = $catalog->accessToken->refresh_token;
-        $createAuthParams['expires_in'] = $catalog->accessToken->expires_in;
-        $createAuthParams['expires_at'] = $catalog->accessToken->expires_at;
 
         /** @var CatalogService $service */
         $service = $this->app->make(CatalogService::class);
