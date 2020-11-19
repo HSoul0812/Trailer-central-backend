@@ -174,7 +174,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($catalog);
 
         // Mock Get FB Refresh Token
-        $this->businessServiceMock
+        $this->authServiceMock
             ->shouldReceive('refresh')
             ->once()
             ->with($refreshAuthParams)
