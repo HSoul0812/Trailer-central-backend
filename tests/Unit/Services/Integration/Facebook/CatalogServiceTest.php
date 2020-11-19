@@ -26,7 +26,7 @@ use Tests\TestCase;
  *
  * @coversDefaultClass \App\Services\Inventory\BusinessService
  */
-class BusinessServiceTest extends TestCase
+class CatalogServiceTest extends TestCase
 {
     /**
      * @var LegacyMockInterface|TokenRepositoryInterface
