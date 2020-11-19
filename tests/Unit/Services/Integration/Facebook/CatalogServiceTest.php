@@ -212,6 +212,13 @@ class CatalogServiceTest extends TestCase
             ->with($catalog->accessToken)
             ->andReturn($validate);
 
+        // Mock Validate Access Token
+        $this->businessServiceMock
+            ->shouldReceive('validate')
+            ->once()
+            ->with($catalog->accessToken)
+            ->andReturn($validate);
+
         // Validate Create Catalog Result
         $result = $service->create($createRequestParams);
 
