@@ -97,7 +97,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($catalog);
 
         // Mock Validate Access Token
-        $this->businessRepositoryMock
+        $this->businessServiceMock
             ->shouldReceive('validate')
             ->once()
             ->with($catalog->accessToken)
@@ -179,7 +179,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($catalog);
 
         // Mock Create Catalog Access Token
-        $this->authRepositoryMock
+        $this->authServiceMock
             ->shouldReceive('refresh')
             ->once()
             ->with($refreshAuthParams)
@@ -190,14 +190,14 @@ class CatalogServiceTest extends TestCase
             ]);
 
         // Mock Create Catalog Access Token
-        $this->authRepositoryMock
+        $this->authServiceMock
             ->shouldReceive('create')
             ->once()
             ->with($createAuthParams)
             ->andReturn($catalog->accessToken);
 
         // Mock Validate Access Token
-        $this->businessRepositoryMock
+        $this->businessServiceMock
             ->shouldReceive('validate')
             ->once()
             ->with($catalog->accessToken)
