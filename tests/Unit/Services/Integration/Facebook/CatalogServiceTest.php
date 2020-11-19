@@ -111,49 +111,43 @@ class CatalogServiceTest extends TestCase
     public function testCreate()
     {
         // Get Test Catalog
-        $catalogId = $_ENV['TEST_FB_CATALOG_ID'];
+        $catalogId = (int) $_ENV['TEST_FB_CATALOG_ID'];
         $catalog = Catalog::find($catalogId);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
-        // Create Page Params
-        $createPageParams = [
-            'page_title' => $catalog->page->title,
-            'page_id' => $catalog->page->page_id
-        ];
-
-        // Create Catalog Params
-        $createCatalogParams = [
+        // Create Request Params
+        $createRequestParams = [
             'dealer_id' => $catalog->dealer_id,
             'dealer_location_id' => $catalog->dealer_location_id,
-            'fbapp_page_id' => $catalog->page->id,
+            'access_token' => $catalog->accessToken->access_token,
+            'id_token' => $catalog->accessToken->id_token,
+            'issued_at' => $catalog->accessToken->issued_at,
             'business_id' => $catalog->business_id,
             'catalog_id' => $catalog->catalog_id,
             'account_name' => $catalog->account_name,
             'account_id' => $catalog->account_id,
+            'page_title' => $catalog->page->title,
+            'page_id' => $catalog->page->page_id,
             'feed_id' => $catalog->feed_id,
             'filters' => '',
             'is_active' => 1
         ];
 
-        // Create Auth Params
-        $refreshAuthParams = [
-            'token_type' => 'facebook',
-            'relation_type' => 'fbapp_catalog',
-            'relation_id' => $catalog->id,
-            'access_token' => $catalog->accessToken->access_token
-        ];
+        // Create Catalog Params
+        $createCatalogParams = $createRequestParams;
+        $createCatalogParams['fbapp_page_id'] = $catalog->page->id;
 
-        // Create Request Params
-        $createRequestParams = array_merge($createPageParams, $createCatalogParams);
-        $createRequestParams['access_token'] = $catalog->accessToken->access_token;
-        $createRequestParams['issued_at'] = $catalog->accessToken->issued_at;
+        // Create Auth Params
+        $refreshAuthParams = $createRequestParams;
+        $createAuthParams['token_type'] = 'facebook';
+        $createAuthParams['relation_type'] = 'fbapp_catalog';
+        $createAuthParams['relation_id'] = $catalog->id;
 
         // Create Auth Params
         $createAuthParams = $refreshAuthParams;
         $createAuthParams['refresh_token'] = $catalog->accessToken->refresh_token;
         $createAuthParams['expires_in'] = $catalog->accessToken->expires_in;
         $createAuthParams['expires_at'] = $catalog->accessToken->expires_at;
-        $createAuthParams['issued_at'] = $catalog->accessToken->issued_at;
 
         /** @var CatalogService $service */
         $service = $this->app->make(CatalogService::class);
