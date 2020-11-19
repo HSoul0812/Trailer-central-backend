@@ -269,9 +269,7 @@ class CatalogServiceTest extends TestCase
             ->shouldReceive('getRelation')
             ->once()
             ->with($relationAuthParams)
-            ->andReturn([
-                'access_token' => $catalog->accessToken->refresh_token
-            ]);
+            ->andReturn($catalog->accessToken);
 
         // Mock Validate Access Token
         $this->authServiceMock
