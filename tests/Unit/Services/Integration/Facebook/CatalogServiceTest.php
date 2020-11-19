@@ -50,7 +50,7 @@ class CatalogServiceTest extends TestCase
     private $authServiceMock;
 
     /**
-     * @var LegacyMockInterface|CatalogServiceInterface
+     * @var LegacyMockInterface|BusinessServiceInterface
      */
     private $businessServiceMock;
 
@@ -70,8 +70,8 @@ class CatalogServiceTest extends TestCase
         $this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
         $this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
 
-        $this->businessServiceMock = Mockery::mock(CatalogServiceInterface::class);
-        $this->app->instance(CatalogServiceInterface::class, $this->businessServiceMock);
+        $this->businessServiceMock = Mockery::mock(BusinessServiceInterface::class);
+        $this->app->instance(BusinessServiceInterface::class, $this->businessServiceMock);
     }
 
     /**
