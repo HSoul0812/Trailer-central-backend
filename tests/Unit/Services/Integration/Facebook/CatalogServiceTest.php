@@ -96,6 +96,13 @@ class CatalogServiceTest extends TestCase
             ->with(['id' => $catalogId])
             ->andReturn($catalog);
 
+        // Mock Validate Access Token
+        $this->authServiceMock
+            ->shouldReceive('validate')
+            ->once()
+            ->with($catalog->accessToken)
+            ->andReturn($validate);
+
         // Validate Show Catalog Result
         $result = $service->show(['id' => $catalogId]);
 
@@ -172,7 +179,7 @@ class CatalogServiceTest extends TestCase
             ->once()
             ->with($refreshAuthParams)
             ->andReturn([
-                'refresh_token' => $catalog->accessToken->refresh_token,
+                'access_token' => $catalog->accessToken->refresh_token,
                 'expires_in' => $catalog->accessToken->expires_in,
                 'expires_at' => $catalog->accessToken->expires_at
             ]);
@@ -183,7 +190,7 @@ class CatalogServiceTest extends TestCase
             ->once()
             ->with($refreshAuthParams)
             ->andReturn([
-                'refresh_token' => $catalog->accessToken->refresh_token,
+                'access_token' => $catalog->accessToken->refresh_token,
                 'expires_in' => $catalog->accessToken->expires_in,
                 'expires_at' => $catalog->accessToken->expires_at
             ]);
