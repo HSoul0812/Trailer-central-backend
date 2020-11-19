@@ -96,21 +96,11 @@ class CatalogServiceTest extends TestCase
             ->with(['id' => $catalogId])
             ->andReturn($catalog);
 
-        // Mock Validate Access Token
-        $this->authServiceMock
-            ->shouldReceive('validate')
-            ->once()
-            ->with($catalog->accessToken)
-            ->andReturn($validate);
-
         // Validate Show Catalog Result
         $result = $service->show(['id' => $catalogId]);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $catalogId);
-
-        // Assert Match
-        $this->assertSame($result['validate'], $validate);
     }
 
     /**
