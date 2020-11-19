@@ -97,7 +97,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($catalog);
 
         // Mock Validate Access Token
-        $this->businessServiceMock
+        $this->authServiceMock
             ->shouldReceive('validate')
             ->once()
             ->with($catalog->accessToken)
@@ -128,8 +128,7 @@ class CatalogServiceTest extends TestCase
         // Create Page Params
         $createPageParams = [
             'page_title' => $catalog->page->title,
-            'page_id' => $catalog->page->page_id,
-            'is_active' => 1
+            'page_id' => $catalog->page->page_id
         ];
 
         // Create Catalog Params
@@ -153,6 +152,11 @@ class CatalogServiceTest extends TestCase
             'relation_id' => $catalog->id,
             'access_token' => $catalog->accessToken->access_token
         ];
+
+        // Create Request Params
+        $createRequestParams = array_merge($createPageParams, $createCatalogParams);
+        $createRequestParams['access_token'] = $catalog->accessToken->access_token;
+        $createRequestParams['issued_at'] = $catalog->accessToken->issued_at;
 
         // Create Auth Params
         $createAuthParams = $refreshAuthParams;
@@ -197,20 +201,20 @@ class CatalogServiceTest extends TestCase
             ->andReturn($catalog->accessToken);
 
         // Mock Validate Access Token
-        $this->businessServiceMock
+        $this->authServiceMock
             ->shouldReceive('validate')
             ->once()
             ->with($catalog->accessToken)
             ->andReturn($validate);
 
-        // Validate Show Catalog Result
-        $result = $service->show($catalogId);
+        // Validate Create Catalog Result
+        $result = $service->create($createRequestParams);
 
         // Assert Match
-        $this->assertSame($result, [
-            'data' => $catalog,
-            'validate' => $validate
-        ]);
+        $this->assertSame($result['data']['id'], $catalogId);
+
+        // Assert Match
+        $this->assertSame($result['validate'], $validate);
     }
 
     /**
