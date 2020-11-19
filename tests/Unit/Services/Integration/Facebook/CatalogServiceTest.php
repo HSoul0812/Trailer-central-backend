@@ -382,7 +382,7 @@ class CatalogServiceTest extends TestCase
         // Mock Update Catalog
         $this->catalogRepositoryMock
             ->shouldReceive('update')
-            ->once()
+            ->never()
             ->with([
                 'id' => $catalog->id,
                 'feed' => $catalog->feed_id
