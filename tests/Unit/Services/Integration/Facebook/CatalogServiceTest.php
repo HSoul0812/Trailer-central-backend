@@ -220,6 +220,7 @@ class CatalogServiceTest extends TestCase
 
         // Update Request Params
         $updateRequestParams = [
+            'id' => $catalogId,
             'dealer_id' => $catalog->dealer_id,
             'dealer_location_id' => $catalog->dealer_location_id,
             'access_token' => $catalog->accessToken->access_token,
