@@ -67,7 +67,7 @@ class CatalogServiceTest extends TestCase
         $this->app->instance(TokenRepositoryInterface::class, $this->tokenRepositoryMock);
 
         $this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
-        $this->app->instance(TokenRepositoryInterface::class, $this->authServiceMock);
+        $this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
 
         $this->businessServiceMock = Mockery::mock(BusinessServiceInterface::class);
         $this->app->instance(BusinessServiceInterface::class, $this->businessServiceMock);        
