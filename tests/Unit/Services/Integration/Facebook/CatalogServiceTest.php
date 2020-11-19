@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Services\Integration\Facebook;
 
-use App\Jobs\Files\DeleteS3FilesJob;
-use App\Models\Integration\Auth\AccessToken;
-use App\Repositories\Inventory\FileRepositoryInterface;
-use App\Repositories\Inventory\ImageRepositoryInterface;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Jobs\Integration\Facebook\CatalogJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Repositories\Integration\Facebook\PageRepositoryInterface;
+use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Repositories\Repository;
-use App\Services\Inventory\BusinessService;
+use App\Services\Integration\Facebook\AuthServiceInterface;
+use App\Services\Integration\Facebook\CatalogService;
+use App\Services\Integration\Facebook\BusinessServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -29,23 +29,71 @@ use Tests\TestCase;
 class CatalogServiceTest extends TestCase
 {
     /**
+     * @var LegacyMockInterface|CatalogRepositoryInterface
+     */
+    private $catalogRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|PageRepositoryInterface
+     */
+    private $pageRepositoryMock;
+
+    /**
      * @var LegacyMockInterface|TokenRepositoryInterface
      */
     private $tokenRepositoryMock;
 
     /**
-     * @var int
+     * @var LegacyMockInterface|AuthServiceInterface
      */
-    private $testTokenId = 0;
+    private $authServiceMock;
+
+    /**
+     * @var LegacyMockInterface|BusinessServiceInterface
+     */
+    private $businessServiceMock;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->testTokenId = $_ENV['TEST_TOKEN_ID'];
+        $this->catalogRepositoryMock = Mockery::mock(CatalogRepositoryInterface::class);
+        $this->app->instance(CatalogRepositoryInterface::class, $this->catalogRepositoryMock);
+
+        $this->pageRepositoryMock = Mockery::mock(PageRepositoryInterface::class);
+        $this->app->instance(PageRepositoryInterface::class, $this->pageRepositoryMock);
 
         $this->tokenRepositoryMock = Mockery::mock(TokenRepositoryInterface::class);
         $this->app->instance(TokenRepositoryInterface::class, $this->tokenRepositoryMock);
+
+        $this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
+        $this->app->instance(TokenRepositoryInterface::class, $this->authServiceMock);
+
+        $this->businessServiceMock = Mockery::mock(BusinessServiceInterface::class);
+        $this->app->instance(BusinessServiceInterface::class, $this->businessServiceMock);        
+    }
+
+    /**
+     * @covers ::show
+     *
+     * @throws BindingResolutionException
+     */
+    public function testShow()
+    {
+        // Get Test Catalog ID
+        $catalogId = $_ENV['TEST_FB_CATALOG_ID'];
+
+        /** @var BusinessService $service */
+        $service = $this->app->make(CatalogService::class);
+
+        // Validate Show Catalog Result
+        $result = $service->show($catalogId);
+
+        // Assert is Valid
+        $this->assertTrue($result['validate']['is_valid']);
+
+        // Assert Is Not Expired
+        $this->assertFalse($result['validate']['is_expired']);
     }
 
     /**
@@ -56,7 +104,7 @@ class CatalogServiceTest extends TestCase
      * @param $fileParams
      * @throws BindingResolutionException
      */
-    public function testValidate($imageParams, $fileParams)
+    /*public function testValidate($imageParams, $fileParams)
     {
         $inventoryId = PHP_INT_MAX;
         $imageModels = new Collection();
@@ -93,11 +141,11 @@ class CatalogServiceTest extends TestCase
         Log::shouldReceive('info')
             ->with('Item has been successfully deleted', ['inventoryId' => $inventoryId]);
 
-        /** @var BusinessService $service */
+        // @var BusinessService $service
         $service = $this->app->make(BusinessService::class);
 
         $result = $service->delete($inventoryId);
 
         $this->assertTrue($result);
-    }
+    }*/
 }
