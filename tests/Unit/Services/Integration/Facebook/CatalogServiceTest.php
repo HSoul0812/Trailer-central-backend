@@ -61,8 +61,8 @@ class CatalogServiceTest extends TestCase
         $this->businessServiceMock = Mockery::mock(BusinessServiceInterface::class);
         $this->app->instance(BusinessServiceInterface::class, $this->businessServiceMock);
 
-        //$this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
-        //$this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
+        $this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
+        $this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
 
         $this->tokenRepositoryMock = Mockery::mock(TokenRepositoryInterface::class);
         $this->app->instance(TokenRepositoryInterface::class, $this->tokenRepositoryMock);
@@ -97,7 +97,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($catalog);
 
         // Mock Validate Access Token
-        $this->businessServiceMock
+        $this->authServiceMock
             ->shouldReceive('validate')
             ->once()
             ->with($catalog->accessToken)
@@ -190,7 +190,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($catalog->accessToken);
 
         // Mock Validate Access Token
-        $this->businessServiceMock
+        $this->authServiceMock
             ->shouldReceive('validate')
             ->once()
             ->with($catalog->accessToken)
@@ -274,7 +274,7 @@ class CatalogServiceTest extends TestCase
             ]);
 
         // Mock Validate Access Token
-        $this->businessServiceMock
+        $this->authServiceMock
             ->shouldReceive('validate')
             ->once()
             ->with($catalog->accessToken)
