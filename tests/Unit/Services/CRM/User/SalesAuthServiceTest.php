@@ -1,25 +1,33 @@
 <?php
 
-namespace Tests\Unit\Services\Integration\Auth;
+namespace Tests\Unit\Services\CRM\User;
 
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Services\Integration\AuthService;
+use App\Services\CRM\User\SalesAuthService;
+use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
+use App\Models\CRM\User\SalesPerson;;
 use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Mockery;
 use Tests\TestCase;
 
 /**
- * Test for App\Services\Integration\AuthService
+ * Test for App\Services\CRM\User\SalesAuthService
  *
- * Class AuthServiceTest
+ * Class SalesAuthServiceTest
  * @package Tests\Unit\Services\Auth
  *
- * @coversDefaultClass \App\Services\Integration\AuthService
+ * @coversDefaultClass \App\Services\CRM\User\SalesAuthService
  */
-class AuthServiceTest extends TestCase
+class SalesAuthServiceTest extends TestCase
 {
+    /**
+     * @var LegacyMockInterface|SalesPersonRepositoryInterface
+     */
+    private $salesPersonRepositoryMock;
+
     /**
      * @var LegacyMockInterface|TokenRepositoryInterface
      */
@@ -30,58 +38,26 @@ class AuthServiceTest extends TestCase
      */
     private $googleServiceMock;
 
+    /**
+     * @var LegacyMockInterface|AuthServiceInterface
+     */
+    private $authServiceMock;
+
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
+        $this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
 
         $this->googleServiceMock = Mockery::mock(GoogleServiceInterface::class);
         $this->app->instance(GoogleServiceInterface::class, $this->googleServiceMock);
 
         $this->tokenRepositoryMock = Mockery::mock(TokenRepositoryInterface::class);
         $this->app->instance(TokenRepositoryInterface::class, $this->tokenRepositoryMock);
-    }
 
-    /**
-     * @covers ::index
-     *
-     * @throws BindingResolutionException
-     */
-    public function testIndex()
-    {
-        // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
-        $validate = ['is_valid' => true, 'is_expired' => false];
-
-        // Index Request Params
-        $indexRequestParams = [
-            'token_type' => $accessToken->token_type,
-            'relation_type' => $accessToken->relation_type,
-            'relation_id' => $tokenId
-        ];
-
-        /** @var AuthService $service */
-        $service = $this->app->make(AuthService::class);
-
-        // Mock Get Token
-        $this->tokenRepositoryMock
-            ->shouldReceive('getRelation')
-            ->once()
-            ->with($indexRequestParams)
-            ->andReturn($accessToken);
-
-        // Mock Validate Access Token
-        $this->googleServiceMock
-            ->shouldReceive('validate')
-            ->once()
-            ->with($accessToken)
-            ->andReturn($validate);
-
-        // Validate Show Catalog Result
-        $result = $service->index($indexRequestParams);
-
-        // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->salesPersonRepositoryMock = Mockery::mock(SalesPersonRepositoryInterface::class);
+        $this->app->instance(SalesPersonRepositoryInterface::class, $this->salesPersonRepositoryMock);
     }
 
     /**
@@ -91,19 +67,27 @@ class AuthServiceTest extends TestCase
      */
     public function testShow()
     {
+        // Get Test Sales Person
+        $salesId = (int) $_ENV['TEST_AUTH_SALES_ID'];
+        $salesPerson = SalesPerson::find($salesId);
+
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $salesRelation = [
+            'token_type' => 'google',
+            'relation_type' => 'sales_person',
+            'relation_id' => $salesId
+        ];
+        $accessToken = AccessToken::getRelation($salesRelation);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
-        /** @var AuthService $service */
-        $service = $this->app->make(AuthService::class);
+        /** @var SalesAuthService $service */
+        $service = $this->app->make(SalesAuthService::class);
 
         // Mock Get Token
         $this->tokenRepositoryMock
-            ->shouldReceive('get')
+            ->shouldReceive('getRelation')
             ->once()
-            ->with(['id' => $tokenId])
+            ->with($salesRelation)
             ->andReturn($accessToken);
 
         // Mock Validate Access Token
@@ -114,10 +98,16 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show($tokenId);
+        $result = $service->index(['id' => $salesId]);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['sales_person']['id'], $salesId);
+
+        // Assert Match
+        $this->assertSame($result['data']['id'], $accessToken->id);
+
+        // Assert Match
+        $this->assertSame($result['validate'], $validate);
     }
 
     /**
@@ -127,13 +117,22 @@ class AuthServiceTest extends TestCase
      */
     public function testCreate()
     {
-        // Get Test Catalog
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        // Get Test Sales Person
+        $salesId = (int) $_ENV['TEST_AUTH_SALES_ID'];
+        $salesPerson = SalesPerson::find($salesId);
+
+        // Get Test Token
+        $salesRelation = [
+            'token_type' => 'google',
+            'relation_type' => 'sales_person',
+            'relation_id' => $salesId
+        ];
+        $accessToken = AccessToken::getRelation($salesRelation);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Request Params
         $createRequestParams = [
+            'id' => $salesId,
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'refresh_token' => $accessToken->refresh_token,
@@ -142,8 +141,8 @@ class AuthServiceTest extends TestCase
             'issued_at' => $accessToken->issued_at
         ];
 
-        /** @var AuthService $service */
-        $service = $this->app->make(AuthService::class);
+        /** @var SalesAuthService $service */
+        $service = $this->app->make(SalesAuthService::class);
 
         // Mock Create Catalog Access Token
         $this->tokenRepositoryMock
@@ -163,7 +162,10 @@ class AuthServiceTest extends TestCase
         $result = $service->create($createRequestParams);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['sales_person']['id'], $salesId);
+
+        // Assert Match
+        $this->assertSame($result['data']['id'], $accessToken->id);
 
         // Assert Match
         $this->assertSame($result['validate'], $validate);
@@ -176,14 +178,22 @@ class AuthServiceTest extends TestCase
      */
     public function testUpdate()
     {
-        // Get Test Catalog
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        // Get Test Sales Person
+        $salesId = (int) $_ENV['TEST_AUTH_SALES_ID'];
+        $salesPerson = SalesPerson::find($salesId);
+
+        // Get Test Token
+        $salesRelation = [
+            'token_type' => 'google',
+            'relation_type' => 'sales_person',
+            'relation_id' => $salesId
+        ];
+        $accessToken = AccessToken::getRelation($salesRelation);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Update Request Params
         $updateRequestParams = [
-            'id' => $accessToken->id,
+            'id' => $salesId,
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'refresh_token' => $accessToken->refresh_token,
@@ -192,8 +202,8 @@ class AuthServiceTest extends TestCase
             'issued_at' => $accessToken->issued_at
         ];
 
-        /** @var AuthService $service */
-        $service = $this->app->make(AuthService::class);
+        /** @var SalesAuthService $service */
+        $service = $this->app->make(SalesAuthService::class);
 
         // Mock Update Access Token
         $this->tokenRepositoryMock
@@ -213,38 +223,12 @@ class AuthServiceTest extends TestCase
         $result = $service->update($updateRequestParams);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['sales_person']['id'], $salesId);
+
+        // Assert Match
+        $this->assertSame($result['data']['id'], $accessToken->id);
 
         // Assert Match
         $this->assertSame($result['validate'], $validate);
-    }
-
-    /**
-     * @covers ::validate
-     *
-     * @throws BindingResolutionException
-     */
-    public function testValidate()
-    {
-        // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
-        $validate = ['is_valid' => true, 'is_expired' => false];
-
-        /** @var AuthService $service */
-        $service = $this->app->make(AuthService::class);
-
-        // Mock Validate Access Token
-        $this->googleServiceMock
-            ->shouldReceive('validate')
-            ->once()
-            ->with($accessToken)
-            ->andReturn($validate);
-
-        // Validate Show Catalog Result
-        $result = $service->validate($accessToken);
-
-        // Assert Match
-        $this->assertSame($result, $validate);
     }
 }
