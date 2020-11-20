@@ -62,6 +62,13 @@ class AuthServiceTest extends TestCase
         $accessToken = AccessToken::find($tokenId);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
+        // Index Request Params
+        $indexRequestParams = [
+            'token_type' => $accessToken->token_type,
+            'relation_type' => $accessToken->relation_type,
+            'relation_id' => $tokenId
+        ];
+
         /** @var AuthService $service */
         $service = $this->app->make(AuthService::class);
 
@@ -69,11 +76,7 @@ class AuthServiceTest extends TestCase
         $this->tokenRepositoryMock
             ->shouldReceive('getRelation')
             ->once()
-            ->with([
-                'token_type' => $accessToken->token_type,
-                'relation_type' => $accessToken->relation_type,
-                'relation_id' => $tokenId
-            ])
+            ->with($indexRequestParams)
             ->andReturn($accessToken);
 
         // Mock Validate Access Token
@@ -84,7 +87,7 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->index(['id' => $tokenId]);
+        $result = $service->index($indexRequestParams);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $tokenId);
