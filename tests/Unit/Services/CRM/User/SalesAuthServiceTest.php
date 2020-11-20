@@ -73,7 +73,7 @@ class SalesAuthServiceTest extends TestCase
 
         // Get Test Token
         $accessToken = AccessToken::where('token_type', 'google')
-                                  ->where('relation_tyoe', 'sales_person')
+                                  ->where('relation_type', 'sales_person')
                                   ->where('relation_id', $salesId)->first();
         $validate = ['is_valid' => true, 'is_expired' => false];
         
@@ -127,7 +127,7 @@ class SalesAuthServiceTest extends TestCase
 
         // Get Test Token
         $accessToken = AccessToken::where('token_type', 'google')
-                                  ->where('relation_tyoe', 'sales_person')
+                                  ->where('relation_type', 'sales_person')
                                   ->where('relation_id', $salesId)->first();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
@@ -185,7 +185,7 @@ class SalesAuthServiceTest extends TestCase
 
         // Get Test Token
         $accessToken = AccessToken::where('token_type', 'google')
-                                  ->where('relation_tyoe', 'sales_person')
+                                  ->where('relation_type', 'sales_person')
                                   ->where('relation_id', $salesId)->first();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
