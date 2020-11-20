@@ -3,7 +3,6 @@
 namespace App\Transformers\Dms\PurchaseOrder;
 
 use League\Fractal\TransformerAbstract;
-use Illuminate\Database\Eloquent\Collection;
 
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderReceipt;
 use App\Transformers\Dms\PurchaseOrder\PurchaseOrderPartReceivedTransformer;
@@ -11,45 +10,32 @@ use App\Transformers\Dms\PurchaseOrder\PurchaseOrderInventoryTransformer;
 
 class PurchaseOrderReceiptTransformer extends TransformerAbstract
 {
-
-    protected $partReceivedTransformer;
-    protected $poInventoryTransformer;
-
-    public function __construct()
-    {
-        $this->partReceivedTransformer = new PurchaseOrderPartReceivedTransformer();
-        $this->poInventoryTransformer = new PurchaseOrderInventoryTransformer();
-    }
+    protected $defualtIncludes = ['partsReceived', 'inventoriesReceived'];
 
     public function transform(PurchaseOrderReceipt $poReceipt)
     {
         return [
             'id' => $poReceipt->id,
-            // 'purchase_order' => $poReceipt->purchaseOrder,
             'ref_num' => $poReceipt->ref_num,
             'memo' => $poReceipt->memo,
-            'created_at' => $poReceipt->created_at,
-            'partsReceived' => $poReceipt->receivedParts ? $this->transformPartReceived($poReceipt->receivedParts) : [],
-            'inventoriesReceived' => $poReceipt->receivedInventories ? $this->transformPoInventory($poReceipt->receivedInventories) : []
+            'created_at' => $poReceipt->created_at
         ];
     }
 
-    private function transformPartReceived(Collection $partsReceived)
+    public function includePartsReceived(PurchaseOrderReceipt $poReceipt)
     {
-        $ret = [];
-        foreach($partsReceived as $part) {
-            $ret[] = $this->partReceivedTransformer->transform($part);
+        if (!empty($poReceipt->receivedParts)) {
+            return $this->collection($poReceipt->receivedParts, new PurchaseOrderPartReceivedTransformer());
         }
-        return $ret;
+        return [];
     }
 
-    private function transformPoInventory(Collection $inventoriesReceived)
+    public function includeInventoriesReceived(PurchaseOrderReceipt $poReceipt)
     {
-        $ret = [];
-        foreach($inventoriesReceived as $poInventory) {
-            $ret[] = $this->poInventoryTransformer->transform($poInventory);
+        if (!empty($poReceipt->receivedInventories)) {
+            return $this->collection($poReceipt->receivedInventories, new PurchaseOrderInventoryTransformer());
         }
-        return $ret;
+        return [];
     }
 
 } 
