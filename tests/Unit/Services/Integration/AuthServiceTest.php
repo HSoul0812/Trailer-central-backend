@@ -84,7 +84,7 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show(['id' => $tokenId]);
+        $result = $service->index(['id' => $tokenId]);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $tokenId);
@@ -120,7 +120,7 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show(['id' => $tokenId]);
+        $result = $service->show($tokenId);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $tokenId);
@@ -248,9 +248,9 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show(['id' => $tokenId]);
+        $result = $service->validate($accessToken);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result, $validate);
     }
 }
