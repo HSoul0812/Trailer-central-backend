@@ -6,7 +6,6 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\User\SalesAuthService;
 use App\Services\Integration\AuthServiceInterface;
-use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Models\CRM\User\SalesPerson;;
 use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -34,11 +33,6 @@ class SalesAuthServiceTest extends TestCase
     private $tokenRepositoryMock;
 
     /**
-     * @var LegacyMockInterface|GoogleServiceInterface
-     */
-    private $googleServiceMock;
-
-    /**
      * @var LegacyMockInterface|AuthServiceInterface
      */
     private $authServiceMock;
@@ -49,9 +43,6 @@ class SalesAuthServiceTest extends TestCase
 
         $this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
         $this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
-
-        $this->googleServiceMock = Mockery::mock(GoogleServiceInterface::class);
-        $this->app->instance(GoogleServiceInterface::class, $this->googleServiceMock);
 
         $this->tokenRepositoryMock = Mockery::mock(TokenRepositoryInterface::class);
         $this->app->instance(TokenRepositoryInterface::class, $this->tokenRepositoryMock);
@@ -93,13 +84,6 @@ class SalesAuthServiceTest extends TestCase
             ->once()
             ->with($getRelationParams)
             ->andReturn($accessToken);
-
-        // Mock Validate Access Token
-        $this->googleServiceMock
-            ->shouldReceive('validate')
-            ->once()
-            ->with($accessToken)
-            ->andReturn($validate);
 
         // Mock Sales Person Repository
         $this->salesPersonRepositoryMock
@@ -180,13 +164,6 @@ class SalesAuthServiceTest extends TestCase
             ->with($createAuthParams)
             ->andReturn($accessToken);
 
-        // Mock Validate Access Token
-        $this->googleServiceMock
-            ->shouldReceive('validate')
-            ->once()
-            ->with($accessToken)
-            ->andReturn($validate);
-
         // Mock Sales Person Repository
         $this->salesPersonRepositoryMock
             ->shouldReceive('get')
@@ -262,13 +239,6 @@ class SalesAuthServiceTest extends TestCase
             ->once()
             ->with($updateAuthParams)
             ->andReturn($accessToken);
-
-        // Mock Validate Access Token
-        $this->googleServiceMock
-            ->shouldReceive('validate')
-            ->once()
-            ->with($accessToken)
-            ->andReturn($validate);
 
         // Mock Sales Person Repository
         $this->salesPersonRepositoryMock
