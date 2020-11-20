@@ -1,23 +1,22 @@
 <?php
 
-namespace App\Services\Integration\Auth;
+namespace App\Services\Integration\Google;
 
-use App\Exceptions\Integration\Auth\MissingGapiAccessTokenException;
-use App\Exceptions\Integration\Auth\MissingGapiIdTokenException;
-use App\Exceptions\Integration\Auth\MissingGapiClientIdException;
-use App\Exceptions\Integration\Auth\InvalidGapiIdTokenException;
-use App\Exceptions\Integration\Auth\InvalidGmailAuthMessageException;
-use App\Exceptions\Integration\Auth\FailedConnectGapiClientException;
-use App\Exceptions\Integration\Auth\FailedInitializeGmailMessageException;
-use App\Exceptions\Integration\Auth\FailedSendGmailMessageException;
-use App\Services\Integration\Auth\GmailServiceInterface;
+use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
+use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
+use App\Exceptions\Integration\Google\MissingGapiClientIdException;
+use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
+use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
+use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
+use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
+use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
 
 /**
  * Class GoogleService
  * 
- * @package App\Services\Integration\Auth
+ * @package App\Services\Integration\Google
  */
 class GmailService implements GmailServiceInterface
 {

@@ -3,7 +3,7 @@
 namespace App\Services\Integration;
 
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Services\Integration\Auth\GoogleServiceInterface;
+use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use League\Fractal\Manager;
