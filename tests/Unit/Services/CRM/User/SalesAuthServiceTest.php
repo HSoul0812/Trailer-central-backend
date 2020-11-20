@@ -108,6 +108,17 @@ class SalesAuthServiceTest extends TestCase
             ->with(['sales_person_id' => $salesId])
             ->andReturn($salesPerson);
 
+        // Mock Sales Person Repository
+        $this->authServiceMock
+            ->shouldReceive('response')
+            ->once()
+            ->with($accessToken, ['sales_person' => $salesPerson])
+            ->andReturn([
+                'sales_person' => $salesPerson,
+                'data' => $accessToken,
+                'validate' => $validate
+            ]);
+
         // Validate Show Catalog Result
         $result = $service->show([
             'token_type' => 'google',
@@ -184,6 +195,17 @@ class SalesAuthServiceTest extends TestCase
             ->with(['sales_person_id' => $salesId])
             ->andReturn($salesPerson);
 
+        // Mock Sales Person Repository
+        $this->authServiceMock
+            ->shouldReceive('response')
+            ->once()
+            ->with($accessToken, ['sales_person' => $salesPerson])
+            ->andReturn([
+                'sales_person' => $salesPerson,
+                'data' => $accessToken,
+                'validate' => $validate
+            ]);
+
         // Validate Create Catalog Result
         $result = $service->create($createRequestParams);
 
@@ -256,6 +278,17 @@ class SalesAuthServiceTest extends TestCase
             ->once()
             ->with(['sales_person_id' => $salesId])
             ->andReturn($salesPerson);
+
+        // Mock Sales Person Repository
+        $this->authServiceMock
+            ->shouldReceive('response')
+            ->once()
+            ->with($accessToken, ['sales_person' => $salesPerson])
+            ->andReturn([
+                'sales_person' => $salesPerson,
+                'data' => $accessToken,
+                'validate' => $validate
+            ]);
 
         // Validate Update Catalog Result
         $result = $service->update($updateRequestParams);
