@@ -72,13 +72,17 @@ class SalesAuthServiceTest extends TestCase
         $salesPerson = SalesPerson::find($salesId);
 
         // Get Test Token
-        $salesRelation = [
+        $accessToken = AccessToken::where('token_type', 'google')
+                                  ->where('relation_tyoe', 'sales_person')
+                                  ->where('relation_id', $salesId);
+        $validate = ['is_valid' => true, 'is_expired' => false];
+        
+        // Show Request Params
+        $getRelationParams = [
             'token_type' => 'google',
             'relation_type' => 'sales_person',
             'relation_id' => $salesId
         ];
-        $accessToken = AccessToken::getRelation($salesRelation);
-        $validate = ['is_valid' => true, 'is_expired' => false];
 
         /** @var SalesAuthService $service */
         $service = $this->app->make(SalesAuthService::class);
@@ -87,7 +91,7 @@ class SalesAuthServiceTest extends TestCase
         $this->tokenRepositoryMock
             ->shouldReceive('getRelation')
             ->once()
-            ->with($salesRelation)
+            ->with($getRelationParams)
             ->andReturn($accessToken);
 
         // Mock Validate Access Token
@@ -122,12 +126,9 @@ class SalesAuthServiceTest extends TestCase
         $salesPerson = SalesPerson::find($salesId);
 
         // Get Test Token
-        $salesRelation = [
-            'token_type' => 'google',
-            'relation_type' => 'sales_person',
-            'relation_id' => $salesId
-        ];
-        $accessToken = AccessToken::getRelation($salesRelation);
+        $accessToken = AccessToken::where('token_type', 'google')
+                                  ->where('relation_tyoe', 'sales_person')
+                                  ->where('relation_id', $salesId);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Request Params
@@ -183,12 +184,9 @@ class SalesAuthServiceTest extends TestCase
         $salesPerson = SalesPerson::find($salesId);
 
         // Get Test Token
-        $salesRelation = [
-            'token_type' => 'google',
-            'relation_type' => 'sales_person',
-            'relation_id' => $salesId
-        ];
-        $accessToken = AccessToken::getRelation($salesRelation);
+        $accessToken = AccessToken::where('token_type', 'google')
+                                  ->where('relation_tyoe', 'sales_person')
+                                  ->where('relation_id', $salesId);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Update Request Params
