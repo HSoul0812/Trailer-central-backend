@@ -102,7 +102,10 @@ class SalesAuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show(['id' => $salesId]);
+        $result = $service->show([
+            'token_type' => 'google',
+            'id' => $salesId
+        ]);
 
         // Assert Match
         $this->assertSame($result['sales_person']['id'], $salesId);
@@ -134,6 +137,7 @@ class SalesAuthServiceTest extends TestCase
         // Create Request Params
         $createRequestParams = [
             'id' => $salesId,
+            'token_type' => 'google',
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'refresh_token' => $accessToken->refresh_token,
@@ -199,6 +203,7 @@ class SalesAuthServiceTest extends TestCase
         // Update Request Params
         $updateRequestParams = [
             'id' => $salesId,
+            'token_type' => 'google',
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'refresh_token' => $accessToken->refresh_token,
@@ -208,7 +213,7 @@ class SalesAuthServiceTest extends TestCase
         ];
 
         // Update Auth Params
-        $updateAuthParams = $updateeRequestParams;
+        $updateAuthParams = $updateRequestParams;
         unset($updateAuthParams['id']);
         $updateAuthParams['token_type'] = 'google';
         $updateAuthParams['relation_type'] = 'sales_person';
