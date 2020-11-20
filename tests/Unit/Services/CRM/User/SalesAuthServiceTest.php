@@ -101,6 +101,13 @@ class SalesAuthServiceTest extends TestCase
             ->with($accessToken)
             ->andReturn($validate);
 
+        // Mock Sales Person Repository
+        $this->salesPersonRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['sales_person_id' => $salesId])
+            ->andReturn($salesPerson);
+
         // Validate Show Catalog Result
         $result = $service->show([
             'token_type' => 'google',
@@ -170,6 +177,13 @@ class SalesAuthServiceTest extends TestCase
             ->with($accessToken)
             ->andReturn($validate);
 
+        // Mock Sales Person Repository
+        $this->salesPersonRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['sales_person_id' => $salesId])
+            ->andReturn($salesPerson);
+
         // Validate Create Catalog Result
         $result = $service->create($createRequestParams);
 
@@ -235,6 +249,13 @@ class SalesAuthServiceTest extends TestCase
             ->once()
             ->with($accessToken)
             ->andReturn($validate);
+
+        // Mock Sales Person Repository
+        $this->salesPersonRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['sales_person_id' => $salesId])
+            ->andReturn($salesPerson);
 
         // Validate Update Catalog Result
         $result = $service->update($updateRequestParams);
