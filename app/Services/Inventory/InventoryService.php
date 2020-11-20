@@ -28,29 +28,6 @@ class InventoryService
 {
     use DispatchesJobs;
 
-    const SUPER_ADMIN_FIELDS = [
-        'true_cost',
-        'pac_amount',
-        'pac_type',
-        'fp_balance',
-        'fp_committed',
-        'fp_paid',
-        'fp_interest_paid',
-        'fp_vendor',
-        'l_holder',
-        'l_attn',
-        'l_name_on_account',
-        'l_address',
-        'l_account',
-        'l_city',
-        'l_state',
-        'l_zip_code',
-        'l_payoff',
-        'l_phone',
-        'l_paid',
-        'l_fax',
-    ];
-
     /**
      * @var InventoryRepositoryInterface
      */
@@ -126,20 +103,16 @@ class InventoryService
      */
     public function create(array $params): ?Inventory
     {
-        try {
-            /** @var Permissions $user */
-            $user = Auth::user();
+        print_r(123456);
+        exit();
 
+        try {
             $newImages = $params['new_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
             $hiddenFiles = $params['hidden_files'] ?? [];
             $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
             $addBill = $params['add_bill'] ?? false;
-
-            if (!$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)) {
-                $params = $this->arrayHelper->deleteKeys($params, self::SUPER_ADMIN_FIELDS);
-            }
 
             if (!empty($newImages)) {
                 $params['new_images'] = $this->uploadImages($params, 'new_images');

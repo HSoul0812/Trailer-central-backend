@@ -165,7 +165,7 @@ class CreateInventoryRequest extends Request
      */
     public function all($keys = null)
     {
-        return $this->transformer->transform(parent::all());
+        return $this->transformer->transform(parent::all($keys));
     }
 
     /**

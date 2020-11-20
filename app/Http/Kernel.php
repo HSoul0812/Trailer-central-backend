@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
@@ -33,7 +34,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        AccessToken::class        
+        AccessToken::class
     ];
 
     /**
@@ -90,6 +91,7 @@ class Kernel extends HttpKernel
         'text.campaign.validate' => CampaignValidate::class,
         'text.blast.validate' => BlastValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
+        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
     ];
 
     /**
