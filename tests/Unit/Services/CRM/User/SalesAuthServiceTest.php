@@ -102,7 +102,7 @@ class SalesAuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->index(['id' => $salesId]);
+        $result = $service->show(['id' => $salesId]);
 
         // Assert Match
         $this->assertSame($result['sales_person']['id'], $salesId);
@@ -142,6 +142,13 @@ class SalesAuthServiceTest extends TestCase
             'issued_at' => $accessToken->issued_at
         ];
 
+        // Create Auth Params
+        $createAuthParams = $createRequestParams;
+        unset($createAuthParams['id']);
+        $createAuthParams['token_type'] = 'google';
+        $createAuthParams['relation_type'] = 'sales_person';
+        $createAuthParams['relation_id'] = $salesId;
+
         /** @var SalesAuthService $service */
         $service = $this->app->make(SalesAuthService::class);
 
@@ -149,7 +156,7 @@ class SalesAuthServiceTest extends TestCase
         $this->tokenRepositoryMock
             ->shouldReceive('create')
             ->once()
-            ->with($createRequestParams)
+            ->with($createAuthParams)
             ->andReturn($accessToken);
 
         // Mock Validate Access Token
@@ -200,6 +207,13 @@ class SalesAuthServiceTest extends TestCase
             'issued_at' => $accessToken->issued_at
         ];
 
+        // Update Auth Params
+        $updateAuthParams = $updateeRequestParams;
+        unset($updateAuthParams['id']);
+        $updateAuthParams['token_type'] = 'google';
+        $updateAuthParams['relation_type'] = 'sales_person';
+        $updateAuthParams['relation_id'] = $salesId;
+
         /** @var SalesAuthService $service */
         $service = $this->app->make(SalesAuthService::class);
 
@@ -207,7 +221,7 @@ class SalesAuthServiceTest extends TestCase
         $this->tokenRepositoryMock
             ->shouldReceive('update')
             ->once()
-            ->with($updateRequestParams)
+            ->with($updateAuthParams)
             ->andReturn($accessToken);
 
         // Mock Validate Access Token
