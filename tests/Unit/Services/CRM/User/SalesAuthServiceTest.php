@@ -112,7 +112,6 @@ class SalesAuthServiceTest extends TestCase
         $this->authServiceMock
             ->shouldReceive('response')
             ->once()
-            ->with($accessToken)
             ->andReturn([
                 'sales_person' => $salesPerson,
                 'data' => $accessToken,
@@ -199,7 +198,6 @@ class SalesAuthServiceTest extends TestCase
         $this->authServiceMock
             ->shouldReceive('response')
             ->once()
-            ->with($accessToken)
             ->andReturn([
                 'sales_person' => $salesPerson,
                 'data' => $accessToken,
@@ -283,7 +281,6 @@ class SalesAuthServiceTest extends TestCase
         $this->authServiceMock
             ->shouldReceive('response')
             ->once()
-            ->with($accessToken)
             ->andReturn([
                 'sales_person' => $salesPerson,
                 'data' => $accessToken,
