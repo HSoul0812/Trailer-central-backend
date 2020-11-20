@@ -8,7 +8,7 @@ use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Services\Integration\Auth\GmailServiceInterface;
+use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;

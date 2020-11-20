@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Integration\Auth;
+namespace App\Services\Integration\Google;
 
 interface GmailServiceInterface {
     /**

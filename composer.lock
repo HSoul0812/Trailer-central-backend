@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5b28f811b6fcaf3f48b6a5dfdcf117b7",
+    "content-hash": "9cf5848ff0c347e1207fa188d1b6e8c6",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -78,16 +78,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.163.0",
+            "version": "3.163.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d3f51c57f17581d79151c9b5265e131391bd191f"
+                "reference": "7b6948915654f0f94847ccaf51172fa1a7f1cc59"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d3f51c57f17581d79151c9b5265e131391bd191f",
-                "reference": "d3f51c57f17581d79151c9b5265e131391bd191f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7b6948915654f0f94847ccaf51172fa1a7f1cc59",
+                "reference": "7b6948915654f0f94847ccaf51172fa1a7f1cc59",
                 "shasum": ""
             },
             "require": {
@@ -159,7 +159,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2020-11-18T19:12:41+00:00"
+            "time": "2020-11-19T19:26:10+00:00"
         },
         {
             "name": "babenkoivan/elastic-adapter",
@@ -2105,16 +2105,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.153",
+            "version": "v0.154",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "db62bb19f32f81c9551f223c72be0682eb58ebd8"
+                "reference": "7f44a314836c444b7894d648c1c49f83fb9d37ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/db62bb19f32f81c9551f223c72be0682eb58ebd8",
-                "reference": "db62bb19f32f81c9551f223c72be0682eb58ebd8",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/7f44a314836c444b7894d648c1c49f83fb9d37ca",
+                "reference": "7f44a314836c444b7894d648c1c49f83fb9d37ca",
                 "shasum": ""
             },
             "require": {
@@ -2138,7 +2138,7 @@
             "keywords": [
                 "google"
             ],
-            "time": "2020-11-01T00:25:23+00:00"
+            "time": "2020-11-19T19:01:11+00:00"
         },
         {
             "name": "google/auth",
@@ -5444,16 +5444,16 @@
         },
         {
             "name": "swagger-api/swagger-ui",
-            "version": "v3.36.2",
+            "version": "v3.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swagger-api/swagger-ui.git",
-                "reference": "69518cf5e5554b3d7fa731892efe1f05a60682f9"
+                "reference": "f0b7e7b0412d89b20a3f7def8397b60ca2ee5041"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swagger-api/swagger-ui/zipball/69518cf5e5554b3d7fa731892efe1f05a60682f9",
-                "reference": "69518cf5e5554b3d7fa731892efe1f05a60682f9",
+                "url": "https://api.github.com/repos/swagger-api/swagger-ui/zipball/f0b7e7b0412d89b20a3f7def8397b60ca2ee5041",
+                "reference": "f0b7e7b0412d89b20a3f7def8397b60ca2ee5041",
                 "shasum": ""
             },
             "type": "library",
@@ -5497,7 +5497,7 @@
                 "swagger",
                 "ui"
             ],
-            "time": "2020-11-06T17:40:21+00:00"
+            "time": "2020-11-19T23:36:32+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",

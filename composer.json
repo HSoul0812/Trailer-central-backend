@@ -96,14 +96,12 @@
             "url": "./nova-components/EditMapping"
         }
     ],
-    "extra": {
-        "google/apiclient-services": [
-            "Gmail"
-        ]
-    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "extra": {
+        "google/apiclient-services": [
+            "Gmail"
+        ],
         "laravel": {
             "dont-discover": [
                 "Grimzy\\LaravelMysqlSpatial\\SpatialServiceProvider"
