@@ -59,11 +59,6 @@ class InventoryService
     private $fileService;
 
     /**
-     * @var ArrayHelper
-     */
-    private $arrayHelper;
-
-    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -72,7 +67,6 @@ class InventoryService
      * @param QuickbookApprovalRepositoryInterface $quickbookApprovalRepository
      * @param ImageService $imageService
      * @param FileService $fileService
-     * @param ArrayHelper $arrayHelper
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
@@ -81,8 +75,7 @@ class InventoryService
         BillRepositoryInterface $billRepository,
         QuickbookApprovalRepositoryInterface $quickbookApprovalRepository,
         ImageService $imageService,
-        FileService $fileService,
-        ArrayHelper $arrayHelper
+        FileService $fileService
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -92,8 +85,6 @@ class InventoryService
 
         $this->imageService = $imageService;
         $this->fileService = $fileService;
-
-        $this->arrayHelper = $arrayHelper;
     }
 
 
@@ -103,9 +94,6 @@ class InventoryService
      */
     public function create(array $params): ?Inventory
     {
-        print_r(123456);
-        exit();
-
         try {
             $newImages = $params['new_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
@@ -130,7 +118,7 @@ class InventoryService
                 $params['clapps']['default-image'] = $clappImage['path'];
             }
 
-            //$this->inventoryRepository->beginTransaction();
+            $this->inventoryRepository->beginTransaction();
 
             $inventory = $this->inventoryRepository->create($params);
 
@@ -145,16 +133,10 @@ class InventoryService
                 $this->addBill($params, $inventory);
             }
 
-            print_r($params);
-            exit();
-
-            //$this->inventoryRepository->commitTransaction();
+            $this->inventoryRepository->commitTransaction();
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            print_r($e->getMessage());
-            print_r($e->getTraceAsString());
-            exit();
             Log::error('Item create error.', $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 

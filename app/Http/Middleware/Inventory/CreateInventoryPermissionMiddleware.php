@@ -35,7 +35,7 @@ class CreateInventoryPermissionMiddleware
 
         if (
             !$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)
-            || !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
+            && !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
         ) {
             return response('Invalid access token.', 403);
         }
