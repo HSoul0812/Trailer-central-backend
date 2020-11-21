@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
 use App\Models\CRM\User\Customer;
+use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
 
 
@@ -93,6 +94,11 @@ class ServiceOrder extends Model
     public function otherItems()
     {
         return $this->hasMany(OtherItem::class, 'repair_order_id', 'id');
+    }
+
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
 }
