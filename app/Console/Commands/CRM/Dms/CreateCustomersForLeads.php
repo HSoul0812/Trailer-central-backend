@@ -15,7 +15,7 @@ class CreateCustomersForLeads extends Command
 {
     const BATCH_SIZE = 500;
 
-    protected $signature = 'crm:dms:create-customers';
+    protected $signature = 'crm:dms:create-customers-for-leads';
 
     protected $description = 'Create customer objects for leads without customers';
 
