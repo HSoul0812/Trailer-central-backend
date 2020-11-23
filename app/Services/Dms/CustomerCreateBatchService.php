@@ -39,7 +39,7 @@ class CustomerCreateBatchService
                 } else {
                     Log::error("Could not create customer from Lead [{$leadId}]");
                 }
-            } catch (CustomerAlreadyExistsException $e) {
+            } catch (\Exception $e) {
                 Log::warning($e->getMessage());
             }
         }
