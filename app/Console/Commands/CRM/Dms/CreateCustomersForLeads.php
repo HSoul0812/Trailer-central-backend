@@ -52,5 +52,7 @@ class CreateCustomersForLeads extends Command
                 $chunk = 0;
             }
        }
+
+        return true;
     }
 }

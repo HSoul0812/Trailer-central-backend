@@ -21,6 +21,6 @@ class CustomerCreateBatchJob extends Job
 
     public function handle(CustomerCreateBatchService $service)
     {
-        $service->run($this->data);
+        return $service->run($this->data);
     }
 }

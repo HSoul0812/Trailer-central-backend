@@ -47,17 +47,6 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function createFromLead(Lead $lead)
     {
-        $customer = Customer::where([
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'dealer_id' => $lead->dealer_id,
-        ])->get();
-
-        // if conflicts are found
-        if ($customer->count() > 0) {
-            throw new CustomerAlreadyExistsException("Customer already exists {$lead->dealer_id}-{$lead->first_name} {$lead->last_name}");
-        }
-
         $customer = new Customer([
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
