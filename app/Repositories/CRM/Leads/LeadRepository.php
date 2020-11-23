@@ -676,6 +676,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     /**
      * Find all leads without an associated customer record
+     * note: this will skip all leads with matching dealer id, first name and last name
      */
     public function getLeadsWithoutCustomers()
     {
@@ -690,8 +691,7 @@ class LeadRepository implements LeadRepositoryInterface {
             })
             ->where('dealer.is_dms_active', '=', 1)
             ->where('website_lead.is_spam', 0)
-            ->where('customers.id', null)
-            ->orderBy('website_lead.identifier');
+            ->where('customers.id', null);
 
         return $query->get();
     }

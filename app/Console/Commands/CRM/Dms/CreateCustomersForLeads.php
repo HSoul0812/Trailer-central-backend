@@ -51,7 +51,13 @@ class CreateCustomersForLeads extends Command
                 $batch = [];
                 $chunk = 0;
             }
-       }
+        }
+
+        // see if any batch unsent
+        if (count($batch) > 0) {
+            $job = new CustomerCreateBatchJob($batch);
+            dispatch($job);
+        }
 
         return true;
     }
