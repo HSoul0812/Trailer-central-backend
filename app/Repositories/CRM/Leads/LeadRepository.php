@@ -690,7 +690,11 @@ class LeadRepository implements LeadRepositoryInterface {
                 ;
             })
             ->where('dealer.is_dms_active', '=', 1)
-            ->where('website_lead.is_spam', 0)
+            ->where('website_lead.is_spam', '=', 0)
+            ->where('website_lead.first_name', '<>', '')
+            ->whereNotNull('website_lead.first_name')
+            ->where('website_lead.last_name', '<>', '')
+            ->whereNotNull('website_lead.last_name')
             ->where('customers.id', null);
 
         return $query->get();
