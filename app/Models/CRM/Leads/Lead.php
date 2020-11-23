@@ -18,6 +18,42 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\Traits\TableAware;
 
+/**
+ * Class Lead
+ * @package App\Models\CRM\Leads
+ *
+ * @property $identifier
+ * @property $website_id
+ * @property $lead_type
+ * @property $inventory_id
+ * @property $referral
+ * @property $title
+ * @property $first_name
+ * @property $last_name
+ * @property $email_address
+ * @property $address
+ * @property $city
+ * @property $state
+ * @property $zip
+ * @property $preferred_contact
+ * @property $phone_number
+ * @property $status
+ * @property $comments
+ * @property $next_followup
+ * @property $date_submitted
+ * @property $is_spam
+ * @property $contact_email_sent
+ * @property $adf_email_sent
+ * @property $cdk_email_sent
+ * @property $metadata
+ * @property $newsletter
+ * @property $note
+ * @property $is_from_classifieds
+ * @property $dealer_id
+ * @property $dealer_location_id
+ * @property $is_archived
+ * @property $unique_id
+ */
 class Lead extends Model
 {
     use TableAware;
