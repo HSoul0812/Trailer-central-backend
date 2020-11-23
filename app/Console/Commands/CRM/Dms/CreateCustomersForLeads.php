@@ -50,7 +50,6 @@ class CreateCustomersForLeads extends Command
 
                 $batch = [];
                 $chunk = 0;
-                $added = false;
             }
         }
 
