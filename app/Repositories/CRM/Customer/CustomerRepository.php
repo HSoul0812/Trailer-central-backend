@@ -47,6 +47,10 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function createFromLead(Lead $lead)
     {
+        if (empty($lead->first_name) || empty($lead->last_name)) {
+            throw new \Exception('Lead first name or last name is empty');
+        }
+
         $customer = new Customer([
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
