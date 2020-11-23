@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Leads;
 
+use App\Models\CRM\User\Customer;
 use App\Models\Website\Website;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
@@ -681,11 +682,16 @@ class LeadRepository implements LeadRepositoryInterface {
         $query = Lead::query()
             ->select('website_lead.identifier')
             ->join('dealer', 'website_lead.dealer_id', '=', 'dealer.dealer_id')
-            ->whereRaw("website_lead.identifier not in (
-                select dc.website_lead_id
-                from dms_customer dc
-                where dc.website_lead_id is not null)")
-            ->where('dealer.is_dms_active', '=', 1);
+            ->leftJoinSub(Customer::query()->select(['id', 'dealer_id', 'first_name', 'last_name', 'website_lead_id']), 'customers', function($join) {
+                $join->on('customers.dealer_id', '=', 'website_lead.dealer_id')
+                    ->on('customers.first_name', '=', 'website_lead.first_name')
+                    ->on('customers.last_name', '=', 'website_lead.last_name')
+                ;
+            })
+            ->where('dealer.is_dms_active', '=', 1)
+            ->where('website_lead.is_spam', 0)
+            ->where('customers.id', null)
+            ->orderBy('website_lead.identifier');
 
         return $query->get();
     }
