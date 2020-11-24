@@ -19,27 +19,16 @@ use Tests\TestCase;
  */
 class GoogleServiceTest extends TestCase
 {
-    /**
-     * @var LegacyMockInterface|Google_Client
-     */
-    private $googleClientMock;
-
     public function setUp(): void
     {
         parent::setUp();
 
-        class_alias(
-            'Google_Client',
-            'Tests\Unit\Services\Integration\Google\Google_Client',
-            true
-        );
-
-        $this->googleClientMock = Mockery::mock(Google_Client::class);
+        $googleClientMock = Mockery::mock(Google_Client::class);
         
         $this->app->when(GoogleService::class)
             ->needs(Google_Client::class)
-            ->give(function () {
-                return $this->googleClientMock;
+            ->give(function () use($googleClientMock) {
+                return $googleClientMock;
             });
     }
 
