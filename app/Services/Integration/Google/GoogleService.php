@@ -25,18 +25,20 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct()
-    {
+    public function __construct(
+        GoogleClientInterface $client
+    ) {
+        // Set Interfaces
+        $this->client = $client;
+
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
             throw new MissingGapiClientIdException;
         }
 
         // Initialize Client
-        $this->client = new Google_Client([
-            'application_name' => $_ENV['GOOGLE_OAUTH_APP_NAME'],
-            'client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID']
-        ]);
+        $this->client->setApplicationName($_ENV['GOOGLE_OAUTH_APP_NAME']);
+        $this->client->setClientId($_ENV['GOOGLE_OAUTH_CLIENT_ID']);
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
