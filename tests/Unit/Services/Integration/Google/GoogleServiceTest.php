@@ -69,7 +69,7 @@ class GoogleServiceTest extends TestCase
 
         // Mock Validate ID Token
         $this->googleClientMock
-            ->shouldReceive('validateIdToken')
+            ->shouldReceive('verifyIdToken')
             ->once()
             ->with($accessToken->id_token)
             ->andReturn(true);
