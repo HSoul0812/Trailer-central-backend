@@ -9,14 +9,6 @@ use Mockery;
 use Tests\TestCase;
 
 /**
- * Test for App\Services\Integration\GoogleService
- *
- * Class GoogleServiceTest
- * @package Tests\Unit\Services\Integration
- *
- * @coversDefaultClass \App\Services\Integration\Auth\GoogleService
- */
-/**
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
