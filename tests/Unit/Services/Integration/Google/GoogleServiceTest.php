@@ -6,6 +6,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Google\GoogleService;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Mockery;
+use Google_Client;
 use Tests\TestCase;
 
 /**
@@ -33,7 +34,13 @@ class GoogleServiceTest extends TestCase
             true
         );
 
-        $this->googleClientMock = Mockery::mock('overload:Tests\Unit\Services\Integration\Google\Google_Client');
+        $this->googleClientMock = Mockery::mock(Google_Client::class);
+        
+        $this->app->when(GoogleService::class)
+            ->needs(Google_Client::class)
+            ->give(function () {
+                return $this->googleClientMock;
+            });
     }
 
     /**
