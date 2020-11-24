@@ -91,6 +91,9 @@ class PartRepository implements PartRepositoryInterface {
         ]
     ];
 
+    /**
+     * list if ES index fields that have a 'keyword' field
+     */
     private $indexKeywordFields = [
         'subcategory' => 'subcategory.keyword',
         'title' => 'title.keyword',
@@ -259,7 +262,7 @@ class PartRepository implements PartRepositoryInterface {
                 $query = $query->where('subcategory', 'LIKE', '%' . $params['subcategory'] . '%');
             }
         }
-        
+
         if (isset($params['sku'])) {
             if (isset($params['sku']['contain'])) {
                 $query = $query->where(function ($query) use ($params) {
