@@ -9,8 +9,12 @@ use Mockery;
 use Tests\TestCase;
 
 /**
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
+ * Test for App\Services\Integration\GoogleService
+ *
+ * Class GoogleServiceTest
+ * @package Tests\Unit\Services\Integration
+ *
+ * @coversDefaultClass \App\Services\Integration\Auth\GoogleService
  */
 class GoogleServiceTest extends TestCase
 {
@@ -30,6 +34,8 @@ class GoogleServiceTest extends TestCase
      * @covers ::index
      *
      * @throws BindingResolutionException
+     * @runTestsInSeparateProcesses
+     * @preserveGlobalState disabled
      */
     public function testValidate()
     {
