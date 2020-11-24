@@ -2,10 +2,8 @@
 
 namespace Tests\Unit\Services\Integration\Google;
 
-use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Services\Integration\AuthService;
-use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\Integration\Google\GoogleService;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Google_Client;
 use Mockery;
