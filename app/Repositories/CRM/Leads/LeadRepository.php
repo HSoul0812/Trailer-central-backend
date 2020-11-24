@@ -707,13 +707,16 @@ class LeadRepository implements LeadRepositoryInterface {
         $query = Lead::query()
             ->select('website_lead.*')
             ->join('dealer', 'website_lead.dealer_id', '=', 'dealer.dealer_id')
+
+            ->whereNull('website_lead.customer_id')
             ->where('dealer.is_dms_active', '=', 1)
             ->where('website_lead.is_spam', '=', 0)
+
             ->where('website_lead.first_name', '<>', '')
             ->whereNotNull('website_lead.first_name')
+
             ->where('website_lead.last_name', '<>', '')
-            ->whereNotNull('website_lead.last_name')
-            ->where('website_lead.customer_id', null);
+            ->whereNotNull('website_lead.last_name');
 
         if ($callback !== null) {
             $query->chunkById($chunkSize, $callback);
