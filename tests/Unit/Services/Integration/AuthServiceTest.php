@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Services\Integration\Auth;
+namespace Tests\Unit\Services\Integration;
 
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\AuthService;
@@ -14,7 +14,7 @@ use Tests\TestCase;
  * Test for App\Services\Integration\AuthService
  *
  * Class AuthServiceTest
- * @package Tests\Unit\Services\Auth
+ * @package Tests\Unit\Services\Integration
  *
  * @coversDefaultClass \App\Services\Integration\AuthService
  */
