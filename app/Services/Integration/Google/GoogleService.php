@@ -2,7 +2,6 @@
 
 namespace App\Services\Integration\Google;
 
-use App\Services\Integration\Google\GoogleService;
 use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGapiClientIdException;
