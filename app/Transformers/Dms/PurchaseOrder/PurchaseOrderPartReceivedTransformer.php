@@ -10,11 +10,11 @@ class PurchaseOrderPartReceivedTransformer extends TransformerAbstract
 {
 
     public function transform(PurchaseOrderPartReceived $partReceived)
-    {   
+    {
         return [
             'id' => $partReceived->id,
             'qty' => $partReceived->qty,
-            'item' => (new PurchaseOrderPartTransformer())->transform($partReceived->purchaseOrderItem)
+            'item' => empty($partReceived->purchaseOrderItem) ? null : (new PurchaseOrderPartTransformer())->transform($partReceived->purchaseOrderItem)
         ];
     }
 
