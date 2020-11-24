@@ -21,7 +21,7 @@ class PurchaseOrderInventoryTransformer extends TransformerAbstract
 
     public function includeQbItem(PurchaseOrderInventory $poInventory)
     {
-        return $this->item($poInventory->qbItem, new ItemTransformer());
+        return empty($poInventory->qbItem) ? null : $this->item($poInventory->qbItem, new ItemTransformer());
     }
 
 } 

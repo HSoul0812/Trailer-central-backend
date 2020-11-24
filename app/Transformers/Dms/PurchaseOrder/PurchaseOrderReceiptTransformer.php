@@ -10,7 +10,7 @@ use App\Transformers\Dms\PurchaseOrder\PurchaseOrderInventoryTransformer;
 
 class PurchaseOrderReceiptTransformer extends TransformerAbstract
 {
-    protected $defualtIncludes = ['partsReceived', 'inventoriesReceived'];
+    protected $defaultIncludes = ['partsReceived', 'inventoriesReceived'];
 
     public function transform(PurchaseOrderReceipt $poReceipt)
     {
