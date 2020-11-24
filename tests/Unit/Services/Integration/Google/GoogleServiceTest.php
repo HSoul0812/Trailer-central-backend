@@ -23,8 +23,9 @@ class GoogleServiceTest extends TestCase
     {
         parent::setUp();
 
-        $googleClientMock = Mockery::mock(Google_Client::class);
-        
+        $this->googleClientMock = Mockery::mock(Google_Client::class);
+        $googleClientMock = $this->googleClientMock;
+
         $this->app->when(GoogleService::class)
             ->needs(Google_Client::class)
             ->give(function () use($googleClientMock) {
