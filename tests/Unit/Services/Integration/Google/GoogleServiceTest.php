@@ -5,6 +5,7 @@ namespace Tests\Unit\Services\Integration\Google;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Google\GoogleService;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Google_Client as gc;
 use Mockery;
 use Tests\TestCase;
 
