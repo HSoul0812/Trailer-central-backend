@@ -4,7 +4,6 @@ namespace Tests\Unit\Services\Integration\Google;
 
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Google\GoogleService;
-use App\Services\Integration\Google\GoogleClientInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Mockery;
 use Tests\TestCase;
@@ -20,7 +19,7 @@ use Tests\TestCase;
 class GoogleServiceTest extends TestCase
 {
     /**
-     * @var LegacyMockInterface|GoogleClientInterface
+     * @var LegacyMockInterface|Google_Client
      */
     private $googleClientMock;
 
@@ -28,8 +27,8 @@ class GoogleServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->googleClientMock = Mockery::mock(GoogleClientInterface::class);
-        $this->app->instance(GoogleClientInterface::class, $this->googleClientMock);
+        $this->googleClientMock = Mockery::mock(\Google_Client::class);
+        $this->app->instance(\Google_Client::class, $this->googleClientMock);
     }
 
     /**
@@ -54,7 +53,7 @@ class GoogleServiceTest extends TestCase
         /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);
 
-        // Mock Set Application Name
+        // Mock Set Access Token
         $this->googleClientMock
             ->shouldReceive('setApplicationName')
             ->once()
