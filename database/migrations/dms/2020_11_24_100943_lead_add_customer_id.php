@@ -17,7 +17,7 @@ class LeadAddCustomerId extends Migration
         Schema::table('website_lead', function (Blueprint $table) {
             $table->integer('customer_id')->nullable();
 
-            $table->index(['customer_id', 'is_spam']);
+            $table->index(['customer_id', 'dealer_id', 'is_spam', 'first_name', 'last_name']);
         });
     }
 
