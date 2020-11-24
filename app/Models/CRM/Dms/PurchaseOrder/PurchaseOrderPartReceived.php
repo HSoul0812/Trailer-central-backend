@@ -28,7 +28,7 @@ class PurchaseOrderPartReceived extends Model
 
     public function purchaseOrderItem()
     {
-        return $this->hasOne(PurchaseOrderPart::class, 'id', 'po_part_id');
+        return $this->belongsTo(PurchaseOrderPart::class, 'po_part_id', 'id');
     }
 
 }

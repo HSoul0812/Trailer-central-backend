@@ -28,7 +28,7 @@ class PurchaseOrderInventory extends Model
 
     public function qbItem()
     {
-        return $this->hasOne(Item::class, 'item_primary_id', 'inventory_id')->where('type', '=', Item::ITEM_TYPES['TRAILER']);
+        return $this->belongsTo(Item::class, 'inventory_id', 'item_primary_id')->where('type', '=', Item::ITEM_TYPES['TRAILER']);
     }
 
 }
