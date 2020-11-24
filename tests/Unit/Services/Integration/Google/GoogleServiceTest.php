@@ -28,7 +28,7 @@ class GoogleServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->googleClientMock = Mockery::mock(Google_Client::class);
+        $this->googleClientMock = Mockery::mock('overload:Google_Client');
         $this->app->instance(Google_Client::class, $this->googleClientMock);
     }
 
@@ -42,7 +42,6 @@ class GoogleServiceTest extends TestCase
         // Get Test Token
         $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
         $accessToken = AccessToken::find($tokenId);
-        $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Index Request Params
         $setAccessTokenParams = [
@@ -52,7 +51,7 @@ class GoogleServiceTest extends TestCase
             'created' => strtotime($accessToken->issued_at)
         ];
 
-        /** @var AuthService $service */
+        /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);
 
         // Mock Set Access Token
