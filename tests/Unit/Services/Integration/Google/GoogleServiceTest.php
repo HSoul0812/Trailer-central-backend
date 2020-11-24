@@ -32,9 +32,8 @@ class GoogleServiceTest extends TestCase
     }
 
     /**
-     * @covers ::index
-     *
-     * @throws BindingResolutionException
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testValidate()
     {
