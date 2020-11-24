@@ -16,6 +16,10 @@ use Tests\TestCase;
  *
  * @coversDefaultClass \App\Services\Integration\Auth\GoogleService
  */
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 class GoogleServiceTest extends TestCase
 {
     /**
@@ -51,6 +55,15 @@ class GoogleServiceTest extends TestCase
 
         /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);
+
+        // Mock Set Access Token
+        $this->googleClientMock
+            ->shouldReceive('__construct')
+            ->once()
+            ->with([
+                'application_name' => $_ENV['GOOGLE_OAUTH_APP_NAME'],
+                'client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID']
+            ]);
 
         // Mock Set Access Token
         $this->googleClientMock
