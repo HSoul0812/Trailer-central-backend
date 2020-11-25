@@ -86,7 +86,19 @@ class SalesAuthService implements SalesAuthServiceInterface
         unset($params['id']);
 
         // Create Access Token
-        $accessToken = $this->tokens->create($params);
+        $token = $this->tokens->create($params);
+
+        // Get Refresh Token
+        $refresh = $this->google->refresh($token);
+        var_dump($refresh);
+
+        // Set Refresh Token
+        $accessToken = $token;
+        if(!empty($refresh)) {
+            $accessToken = $this->tokens->update([
+                'refresh_token' => $refresh
+            ]);
+        }
 
         // Return Response
         return $this->response($accessToken, $params);
@@ -105,7 +117,18 @@ class SalesAuthService implements SalesAuthServiceInterface
         unset($params['id']);
 
         // Create Access Token
-        $accessToken = $this->tokens->update($params);
+        $token = $this->tokens->update($params);
+
+        // Get Refresh Token
+        $refresh = $this->google->refresh($token);
+
+        // Set Refresh Token
+        $accessToken = $token;
+        if(!empty($refresh)) {
+            $accessToken = $this->tokens->update([
+                'refresh_token' => $refresh
+            ]);
+        }
 
         // Return Response
         return $this->response($accessToken, $params);
