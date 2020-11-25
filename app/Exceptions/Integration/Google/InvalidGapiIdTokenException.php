@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exceptions\Integration\Auth;
+namespace App\Exceptions\Integration\Google;
 
 /**
  * Class InvalidGapiIdTokenException

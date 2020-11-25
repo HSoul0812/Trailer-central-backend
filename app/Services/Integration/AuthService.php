@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration;
 
+use App\Exceptions\Integration\Auth\MissingAuthLoginTokenTypeScopesException;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -124,6 +125,31 @@ class AuthService implements AuthServiceInterface
         return $this->response($accessToken);
     }
 
+
+    /**
+     * Get Login URL
+     * 
+     * @param array $params
+     * @return refresh token
+     */
+    public function login($params) {
+        // Token Type and Scopes Required
+        if(empty($params['token_type']) || empty($params['scopes'])) {
+            throw new MissingAuthLoginTokenTypeScopesException;
+        }
+
+        // Initialize Login URL
+        $login = null;
+
+        // Get Login URL
+        if($params['token_type'] === 'google') {
+            $login = $this->google->login($params['scopes']);
+        }
+
+        // Return Refresh Token
+        return ['url' => $login];
+    }
+
     /**
      * Get Refresh Token
      * 
@@ -146,7 +172,6 @@ class AuthService implements AuthServiceInterface
         // Return Refresh Token
         return $refresh;
     }
-
 
     /**
      * Validate Access Token

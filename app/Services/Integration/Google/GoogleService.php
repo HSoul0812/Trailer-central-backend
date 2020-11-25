@@ -44,6 +44,17 @@ class GoogleService implements GoogleServiceInterface
 
 
     /**
+     * Get Login URL
+     * 
+     * @param array $scopes scopes requested by login
+     * @return login url with offline access support
+     */
+    public function login($scopes) {
+        // Return Auth URL for Login
+        return $this->client->createAuthUrl($scopes);
+    }
+
+    /**
      * Get Refresh Token
      * 
      * @param array $params
