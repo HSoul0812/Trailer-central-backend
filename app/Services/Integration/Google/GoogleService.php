@@ -42,6 +42,18 @@ class GoogleService implements GoogleServiceInterface
         $this->client->setAccessType('offline');
     }
 
+
+    /**
+     * Get Refresh Token
+     * 
+     * @param array $params
+     * @return array of validation info
+     */
+    public function refresh($params) {
+        // Return Refresh Token
+        return $this->client->getRefreshToken();
+    }
+
     /**
      * Validate Google API Access Token Exists and Refresh if Possible
      * 
