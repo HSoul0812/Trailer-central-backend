@@ -177,6 +177,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\PartsServiceProvider::class,
         App\Providers\DmsServiceProvider::class,
+        App\Providers\IntegrationServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
 
         /*
