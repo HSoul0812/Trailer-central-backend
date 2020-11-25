@@ -143,7 +143,7 @@ class AuthService implements AuthServiceInterface
 
         // Get Login URL
         if($params['token_type'] === 'google') {
-            $login = $this->google->login($params['scopes']);
+            $login = $this->google->login($params['redirect_uri'], $params['scopes']);
         }
 
         // Return Refresh Token

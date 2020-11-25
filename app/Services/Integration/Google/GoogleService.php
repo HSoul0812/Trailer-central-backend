@@ -46,10 +46,14 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Get Login URL
      * 
+     * @param string $redirectUrl url to redirect auth back to again
      * @param array $scopes scopes requested by login
      * @return login url with offline access support
      */
-    public function login($scopes) {
+    public function login($redirectUrl, $scopes) {
+        // Set Redirect URL
+        $this->client->setRedirectUri($redirectUrl);
+
         // Return Auth URL for Login
         return $this->client->createAuthUrl($scopes);
     }
