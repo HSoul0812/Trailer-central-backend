@@ -49,7 +49,16 @@ class GoogleService implements GoogleServiceInterface
      * @param array $params
      * @return array of validation info
      */
-    public function refresh($params) {
+    public function refresh($accessToken) {
+        // Configure Client
+        $this->client->setAccessToken([
+            'access_token' => $accessToken->access_token,
+            'id_token' => $accessToken->id_token,
+            'expires_in' => $accessToken->expires_in,
+            'created' => strtotime($accessToken->issued_at)
+        ]);
+        $this->client->setScopes($accessToken->scope);
+
         // Return Refresh Token
         return $this->client->getRefreshToken();
     }

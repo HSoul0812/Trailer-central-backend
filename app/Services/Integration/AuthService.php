@@ -82,7 +82,19 @@ class AuthService implements AuthServiceInterface
      */
     public function create($params) {
         // Create Access Token
-        $accessToken = $this->tokens->create($params);
+        $token = $this->tokens->create($params);
+
+        // Get Refresh Token
+        $refresh = $this->google->refresh($token);
+        var_dump($refresh);
+
+        // Set Refresh Token
+        $accessToken = $token;
+        if(!empty($refresh)) {
+            $accessToken = $this->tokens->update([
+                'refresh_token' => $refresh
+            ]);
+        }
 
         // Return Response
         return $this->response($accessToken);
@@ -95,8 +107,19 @@ class AuthService implements AuthServiceInterface
      * @return Fractal
      */
     public function update($params) {
-        // Create Access Token
-        $accessToken = $this->tokens->update($params);
+        // Update Access Token
+        $token = $this->tokens->update($params);
+
+        // Get Refresh Token
+        $refresh = $this->google->refresh($token);
+
+        // Set Refresh Token
+        $accessToken = $token;
+        if(!empty($refresh)) {
+            $accessToken = $this->tokens->update([
+                'refresh_token' => $refresh
+            ]);
+        }
 
         // Return Response
         return $this->response($accessToken);
