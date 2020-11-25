@@ -86,7 +86,6 @@ class AuthService implements AuthServiceInterface
 
         // Get Refresh Token
         $refresh = $this->google->refresh($token);
-        var_dump($refresh);
 
         // Set Refresh Token
         $accessToken = $token;
