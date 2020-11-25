@@ -90,7 +90,6 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Get Refresh Token
         $refresh = $this->auth->refresh($token);
-        var_dump($refresh);
 
         // Set Refresh Token
         $accessToken = $token;
@@ -118,6 +117,7 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Create Access Token
         $token = $this->tokens->update($params);
+        var_dump($refresh);
 
         // Get Refresh Token
         $refresh = $this->auth->refresh($token);
