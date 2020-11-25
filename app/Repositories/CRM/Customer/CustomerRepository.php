@@ -45,16 +45,37 @@ class CustomerRepository implements CustomerRepositoryInterface
          return $query->get();
     }
 
-    public function createFromLead(Lead $lead)
+    /**
+     * @param  Lead  $lead
+     * @param  bool  $useExisting Force use an existing customer record
+     * @return Customer
+     * @throws \Exception
+     */
+    public function createFromLead(Lead $lead, $useExisting = true)
     {
         if (empty($lead->first_name) || empty($lead->last_name)) {
             throw new \Exception('Lead first name or last name is empty');
         }
 
+        if ($useExisting) {
+            // match by dealer_id, and name
+            //   erroneous matches are accepted because the dealer will create the
+            //   required customer anyway if it does not exist
+            $customer = Customer::where([
+                'dealer_id' => $lead->dealer_id,
+                'first_name' => trim($lead->first_name),
+                'last_name' => trim($lead->last_name),
+            ])->get()->first();
+
+            if ($customer) {
+                return $customer;
+            }
+        }
+
         $customer = new Customer([
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'display_name' => $lead->first_name . ' ' . $lead->last_name,
+            'first_name' => trim($lead->first_name),
+            'last_name' => trim($lead->last_name),
+            'display_name' => trim($lead->first_name) . ' ' . trim($lead->last_name),
             'email' => $lead->email_address,
             'drivers_license' => '',
             'home_phone' => $lead->phone_number,

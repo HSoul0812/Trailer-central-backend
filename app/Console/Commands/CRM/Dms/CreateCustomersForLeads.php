@@ -4,10 +4,10 @@
 namespace App\Console\Commands\CRM\Dms;
 
 
-use App\Exceptions\Dms\CustomerAlreadyExistsException;
 use App\Jobs\Dms\CustomerCreateBatchJob;
-use App\Models\CRM\Leads\Lead;
+use App\Repositories\CRM\Customer\CustomerRepository;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadRepository;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use Illuminate\Console\Command;
 
@@ -20,11 +20,11 @@ class CreateCustomersForLeads extends Command
     protected $description = 'Create customer objects for leads without customers';
 
     /**
-     * @var CustomerRepositoryInterface
+     * @var CustomerRepository
      */
     private $customerRepository;
     /**
-     * @var LeadRepositoryInterface
+     * @var LeadRepository
      */
     private $leadRepository;
 
@@ -37,27 +37,15 @@ class CreateCustomersForLeads extends Command
 
     public function handle()
     {
-        $leadIds = $this->leadRepository->getLeadsWithoutCustomers();
-
-        $chunk = 0;
-        $batch = [];
-        foreach ($leadIds as $item) {
-            $leadId = $item['identifier'];
-            $batch[] = $leadId;
-            if (++$chunk >= self::BATCH_SIZE) {
-                $job = new CustomerCreateBatchJob($batch);
-                dispatch($job);
-
-                $batch = [];
-                $chunk = 0;
+        $this->leadRepository->getLeadsWithoutCustomers(function($leads) {
+            $batch = [];
+            foreach ($leads as $item) {
+                $leadId = $item->identifier;
+                $batch[] = $leadId;
             }
-        }
-
-        // see if any batch unsent
-        if (count($batch) > 0) {
             $job = new CustomerCreateBatchJob($batch);
             dispatch($job);
-        }
+        });
 
         return true;
     }
