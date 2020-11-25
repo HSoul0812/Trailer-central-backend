@@ -425,7 +425,7 @@ $api->version('v1', function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\Integration\AuthController@index');
                 $route->put('/', 'App\Http\Controllers\v1\Integration\AuthController@create');
                 $route->post('/', 'App\Http\Controllers\v1\Integration\AuthController@valid');
-                $route->get('login', 'App\Http\Controllers\v1\Integration\AuthController@login');
+                $route->put('login', 'App\Http\Controllers\v1\Integration\AuthController@login');
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\AuthController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\AuthController@update')->where('id', '[0-9]+');
             });

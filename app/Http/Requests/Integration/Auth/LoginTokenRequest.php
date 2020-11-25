@@ -12,6 +12,8 @@ use App\Http\Requests\Request;
 class LoginTokenRequest extends Request {
     
     protected $rules = [
-        'token_type' => 'required|valid_token_type'
+        'token_type' => 'required|valid_token_type',
+        'scopes' => 'required|array',
+        'scopes.*' => 'required|string|max:80'
     ];
 }
