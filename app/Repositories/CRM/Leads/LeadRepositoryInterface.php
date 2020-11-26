@@ -66,6 +66,6 @@ interface LeadRepositoryInterface extends Repository {
      */
     public function getLeadsSortFields();
 
-    public function getLeadsWithoutCustomers();
+    public function getLeadsWithoutCustomers(callable $callback = null, $chunkSize = 1000);
 
 }

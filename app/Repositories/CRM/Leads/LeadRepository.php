@@ -677,26 +677,52 @@ class LeadRepository implements LeadRepositoryInterface {
     /**
      * Find all leads without an associated customer record
      * note: this will skip all leads with matching dealer id, first name and last name
+     * @param  callable|null  $callback
+     * @param  int  $chunkSize
+     * @return bool|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection
      */
-    public function getLeadsWithoutCustomers()
+    public function getLeadsWithoutCustomers(callable $callback = null, $chunkSize = 500)
     {
+//        $query = Lead::query()
+//            ->select('website_lead.identifier')
+//            ->join('dealer', 'website_lead.dealer_id', '=', 'dealer.dealer_id')
+//            ->leftJoinSub(Customer::query()->select(['id', 'dealer_id', 'first_name', 'last_name', 'website_lead_id']), 'customers', function($join) {
+//                $join->on('customers.dealer_id', '=', 'website_lead.dealer_id')
+//                    ->on('customers.first_name', '=', 'website_lead.first_name')
+//                    ->on('customers.last_name', '=', 'website_lead.last_name')
+//                ;
+//            })
+//            ->where('dealer.is_dms_active', '=', 1)
+//            ->where('website_lead.is_spam', '=', 0)
+//            ->where('website_lead.first_name', '<>', '')
+//            ->whereNotNull('website_lead.first_name')
+//            ->where('website_lead.last_name', '<>', '')
+//            ->whereNotNull('website_lead.last_name')
+//            ->where('customers.id', null);
+
+        // get all website lead, where:
+        //   dealer has dms active
+        //   is_spam is 0
+        //   first name and last name is not empty
         $query = Lead::query()
-            ->select('website_lead.identifier')
+            ->select('website_lead.*')
             ->join('dealer', 'website_lead.dealer_id', '=', 'dealer.dealer_id')
-            ->leftJoinSub(Customer::query()->select(['id', 'dealer_id', 'first_name', 'last_name', 'website_lead_id']), 'customers', function($join) {
-                $join->on('customers.dealer_id', '=', 'website_lead.dealer_id')
-                    ->on('customers.first_name', '=', 'website_lead.first_name')
-                    ->on('customers.last_name', '=', 'website_lead.last_name')
-                ;
-            })
+
+            ->whereNull('website_lead.customer_id')
             ->where('dealer.is_dms_active', '=', 1)
             ->where('website_lead.is_spam', '=', 0)
+
             ->where('website_lead.first_name', '<>', '')
             ->whereNotNull('website_lead.first_name')
-            ->where('website_lead.last_name', '<>', '')
-            ->whereNotNull('website_lead.last_name')
-            ->where('customers.id', null);
 
-        return $query->get();
+            ->where('website_lead.last_name', '<>', '')
+            ->whereNotNull('website_lead.last_name');
+
+        if ($callback !== null) {
+            $query->chunkById($chunkSize, $callback);
+            return true;
+        } else {
+            return $query->get();
+        }
     }
 }

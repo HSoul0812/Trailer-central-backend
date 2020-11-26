@@ -9,5 +9,5 @@ interface CustomerRepositoryInterface extends Repository {
 
     public function getCustomersWihOpenBalance($dealerId, $perPage = 15);
 
-    public function createFromLead(Lead $lead);
+    public function createFromLead(Lead $lead, $useExisting = true);
 }
