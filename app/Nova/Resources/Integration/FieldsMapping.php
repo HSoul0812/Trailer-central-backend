@@ -1,33 +1,35 @@
 <?php
 
-namespace App\Nova\Resources\Mapping;
+namespace App\Nova\Resources\Integration;
 
-use Epartment\NovaDependencyContainer\HasDependencies;
-use Epartment\NovaDependencyContainer\NovaDependencyContainer;
+use App\Models\Integration\Collector\CollectorFields;
+use App\Nova\Filters\DealerIDMapping;
+use App\Nova\Resource;
+use App\Nova\Resources\Dealer\Dealer;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncomingMapping;
-use App\Nova\Resource;
-use App\Nova\Filters\DealerIDMapping;
+use Laravel\Nova\Http\Requests\NovaRequest;
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 
-class ApiEntityReference extends Resource
+class FieldsMapping extends Resource
 {
-    public static $group = 'Mapping';
-    
+    public static $group = 'Integration';
+
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Feed\Mapping\Incoming\ApiEntityReference';
+    public static $model = 'App\Models\Feed\Mapping\Incoming\DealerIncomingMapping';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'api_entity_reference_id';
+    public static $title = 'id';
 
     /**
      * The pagination per-page options configured for this resource.
@@ -42,10 +44,9 @@ class ApiEntityReference extends Resource
      * @var array
      */
     public static $search = [
-        'entity_id',
-        'reference_id',
-        'entity_type',
-        'api_key'
+        'map_from',
+        'map_to',
+        'dealer_id'
     ];
 
     /**
@@ -57,14 +58,33 @@ class ApiEntityReference extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Entity ID')->sortable(),
+            Text::make('Incoming Field', 'map_from')->rules('required')->sortable(),
 
-            Text::make('Reference ID')->sortable(),
-            
-            Text::make('Entity Type')->sortable(),
-            
-            Text::make('API Key')->sortable(),
+            Select::make('Our Field', 'map_to')
+                ->options(CollectorFields::select(['label', 'field'])->orderBy('label')->get()->pluck('label', 'field'))
+                ->rules('required')
+                ->sortable()
+                ->displayUsingLabels(),
+
+            BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
+
+            Text::make('', 'type')->withMeta([
+                'type' => 'hidden',
+                'value'=> $this->type ?? 'fields'
+            ])->onlyOnForms()
         ];
+    }
+
+    /**
+     * Build an "index" query for the given resource.
+     *
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        return $query->where('type', DealerIncomingMapping::FIELDS);
     }
 
     /**
@@ -86,7 +106,9 @@ class ApiEntityReference extends Resource
      */
     public function filters(Request $request)
     {
-        return [];
+        return [
+            new DealerIDMapping
+        ];
     }
 
     /**

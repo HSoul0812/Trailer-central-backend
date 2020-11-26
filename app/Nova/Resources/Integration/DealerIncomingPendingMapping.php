@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova\Resources\Mapping;
+namespace App\Nova\Resources\Integration;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Select;
@@ -12,9 +12,9 @@ use App\Nova\Filters\DealerIDPendingMapping;
 
 class DealerIncomingPendingMapping extends Resource
 {
-    
-    public static $group = 'Mapping';
-    
+
+    public static $group = 'Integration';
+
     /**
      * The model the resource corresponds to.
      *
@@ -55,12 +55,12 @@ class DealerIncomingPendingMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Dealer ID', 'dealer_id')->sortable(),          
-            
+            Text::make('Dealer ID', 'dealer_id')->sortable(),
+
             Select::make('Type', 'type')
                 ->options(FeedDealerIncomingPendingMapping::$types)
                 ->displayUsingLabels(),
-            
+
             Text::make('Data', 'data'),
 
         ];
@@ -113,7 +113,7 @@ class DealerIncomingPendingMapping extends Resource
             new MapData
         ];
     }
-    
+
     public function update()
     {
         return false;

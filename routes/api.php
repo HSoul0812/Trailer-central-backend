@@ -617,4 +617,14 @@ $api->version('v1', function ($route) {
 
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Integration
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
+    $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
 });
