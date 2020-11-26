@@ -158,7 +158,8 @@ class Part extends Model
         $array['bins'] = $this->bins;
         $array['bins_total_qty'] = ($this->bins instanceof Collection)?
             $this->bins->reduce(function ($total, $item) {
-                return $total + $item->qty;
+                // add only non zero quantities
+                return $total + ($item->qty > 0? $item->qty: 0);
             }, 0): 0;
 
         return $array;
