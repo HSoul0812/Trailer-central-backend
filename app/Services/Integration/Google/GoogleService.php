@@ -35,13 +35,15 @@ class GoogleService implements GoogleServiceInterface
         $this->client = new \Google_Client([
             'application_name' => $_ENV['GOOGLE_OAUTH_APP_NAME'],
             'client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID'],
-            'client_secret' => $_ENV['GOOGLE_OAUTH_CLIENT_SECRET'],
-            'redirect_uri' => $_ENV['GOOGLE_OAUTH_REDIRECT_URI']
+            'client_secret' => $_ENV['GOOGLE_OAUTH_CLIENT_SECRET']
         ]);
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
+        // Set Redirect URL
+        $this->client->setRedirectUri($_ENV['GOOGLE_OAUTH_REDIRECT_URI']);
         $this->client->setAccessType('offline');
+        $this->client->setIncludeGrantedScopes(true);
     }
 
 
