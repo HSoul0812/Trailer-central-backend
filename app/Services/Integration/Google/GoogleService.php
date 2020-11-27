@@ -34,7 +34,8 @@ class GoogleService implements GoogleServiceInterface
         // Initialize Client
         $this->client = new \Google_Client([
             'application_name' => $_ENV['GOOGLE_OAUTH_APP_NAME'],
-            'client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID']
+            'client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID'],
+            'client_secret' => $_ENV['GOOGLE_OAUTH_CLIENT_SECRET']
         ]);
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
