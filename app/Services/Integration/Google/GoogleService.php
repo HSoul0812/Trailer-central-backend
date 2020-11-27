@@ -40,6 +40,7 @@ class GoogleService implements GoogleServiceInterface
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
+
         // Set Redirect URL
         $this->client->setRedirectUri($_ENV['GOOGLE_OAUTH_REDIRECT_URI']);
         $this->client->setAccessType('offline');
