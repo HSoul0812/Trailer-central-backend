@@ -70,8 +70,6 @@ class GoogleService implements GoogleServiceInterface
      * @return all auth data
      */
     public function auth($authCode) {
-        echo $this->client->getRedirectUri();
-        die;
         return $this->client->fetchAccessTokenWithAuthCode($authCode);
     }
 
