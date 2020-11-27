@@ -41,8 +41,7 @@ class GoogleService implements GoogleServiceInterface
             throw new FailedConnectGapiClientException;
         }
 
-        // Set Redirect URL
-        $this->client->setRedirectUri($_ENV['GOOGLE_OAUTH_REDIRECT_URI']);
+        // Set Defaults
         $this->client->setAccessType('offline');
         $this->client->setIncludeGrantedScopes(true);
     }
@@ -66,10 +65,15 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Get Auth URL
      * 
+     * @param string $redirectUrl url to redirect auth back to again
      * @param string $authCode auth code to get full credentials with
      * @return all auth data
      */
-    public function auth($authCode) {
+    public function auth($redirectUrl, $authCode) {
+        // Set Redirect URL
+        $this->client->setRedirectUri($redirectUrl);
+
+        // Return Auth URL for Login
         return $this->client->fetchAccessTokenWithAuthCode($authCode);
     }
 

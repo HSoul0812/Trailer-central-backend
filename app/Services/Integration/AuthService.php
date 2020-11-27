@@ -145,7 +145,7 @@ class AuthService implements AuthServiceInterface
         if($params['token_type'] === 'google') {
             // Auth Code Exists?!
             if(!empty($params['auth_code'])) {
-                $auth = $this->google->auth($params['auth_code']);
+                $auth = $this->google->auth($params['redirect_uri'], $params['auth_code']);
             } else {
                 $login = $this->google->login($params['redirect_uri'], $params['scopes']);
                 $auth = ['url' => $login];
