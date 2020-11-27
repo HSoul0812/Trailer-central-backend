@@ -15,6 +15,7 @@ class LoginTokenRequest extends Request {
         'token_type' => 'required|valid_token_type',
         'redirect_uri' => 'required|string',
         'scopes' => 'required|array',
-        'scopes.*' => 'required|string|max:80'
+        'scopes.*' => 'required|string|max:80',
+        'auth_code' => 'nullable|string'
     ];
 }

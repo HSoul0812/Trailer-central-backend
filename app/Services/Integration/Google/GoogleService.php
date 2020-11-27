@@ -59,6 +59,16 @@ class GoogleService implements GoogleServiceInterface
     }
 
     /**
+     * Get Auth URL
+     * 
+     * @param string $authCode auth code to get full credentials with
+     * @return all auth data
+     */
+    public function auth($authCode) {
+        return $this->client->fetchAccessTokenWithAuthCode($authCode);
+    }
+
+    /**
      * Get Refresh Token
      * 
      * @param array $params
