@@ -30,7 +30,7 @@ class BusinessServiceTest extends TestCase
     public function testValidate()
     {
         // Get Access Token
-        $time = array();
+        $time = time();
         $accessToken = factory(AccessToken::class)->make([
             'token_type' => 'facebook',
             'relation_type' => 'fbapp_catalog',
@@ -39,7 +39,7 @@ class BusinessServiceTest extends TestCase
             'refresh_token' => $_ENV['TEST_FB_REFRESH_TOKEN'],
             'id_token' => $_ENV['TEST_FB_ID_TOKEN'],
             'expires_in' => $_ENV['TEST_FB_EXPIRES_IN'],
-            'expires_at' => date("Y-m-d H:i:s", $time + $_ENV['TEST_GOOGLE_EXPIRES_IN']),
+            'expires_at' => date("Y-m-d H:i:s", $time + $_ENV['TEST_FB_EXPIRES_IN']),
             'issued_at' => date("Y-m-d H:i:s", $time)
         ]);
 
