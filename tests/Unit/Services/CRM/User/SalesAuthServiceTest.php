@@ -61,7 +61,7 @@ class SalesAuthServiceTest extends TestCase
         // Get Test Sales Person
         $accessToken = factory(AccessToken::class)->make();
         $salesPerson = factory(SalesPerson::class)->make([
-            'id' => $accessToken->relation_id
+            'id' => (int) $accessToken->relation_id
         ]);
 
         // Get Test Token
@@ -104,7 +104,7 @@ class SalesAuthServiceTest extends TestCase
         // Validate Show Catalog Result
         $result = $service->show([
             'token_type' => 'google',
-            'id' => $accessToken->relation_id
+            'id' => (int) $accessToken->relation_id
         ]);
 
         // Assert Match
@@ -127,13 +127,13 @@ class SalesAuthServiceTest extends TestCase
         // Get Test Sales Person
         $accessToken = factory(AccessToken::class)->make();
         $salesPerson = factory(SalesPerson::class)->make([
-            'id' => $accessToken->relation_id
+            'id' => (int) $accessToken->relation_id
         ]);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Request Params
         $createRequestParams = [
-            'id' => $accessToken->relation_id,
+            'id' => (int) $accessToken->relation_id,
             'token_type' => 'google',
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
@@ -200,13 +200,13 @@ class SalesAuthServiceTest extends TestCase
         // Get Test Sales Person
         $accessToken = factory(AccessToken::class)->make();
         $salesPerson = factory(SalesPerson::class)->make([
-            'id' => $accessToken->relation_id
+            'id' => (int) $accessToken->relation_id
         ]);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Update Request Params
         $updateRequestParams = [
-            'id' => $accessToken->relation_id,
+            'id' => (int) $accessToken->relation_id,
             'token_type' => 'google',
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
