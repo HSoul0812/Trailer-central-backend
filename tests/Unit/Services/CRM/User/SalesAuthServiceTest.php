@@ -6,7 +6,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\User\SalesAuthService;
 use App\Services\Integration\AuthServiceInterface;
-use App\Models\CRM\User\SalesPerson;;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Mockery;
@@ -59,20 +59,19 @@ class SalesAuthServiceTest extends TestCase
     public function testShow()
     {
         // Get Test Sales Person
-        $salesId = (int) $_ENV['TEST_AUTH_SALES_ID'];
-        $salesPerson = SalesPerson::find($salesId);
+        $accessToken = factory(AccessToken::class)->make();
+        $salesPerson = factory(SalesPerson::class)->make([
+            'id' => (int) $accessToken->relation_id
+        ]);
 
         // Get Test Token
-        $accessToken = AccessToken::where('token_type', 'google')
-                                  ->where('relation_type', 'sales_person')
-                                  ->where('relation_id', $salesId)->first();
         $validate = ['is_valid' => true, 'is_expired' => false];
         
         // Show Request Params
         $getRelationParams = [
             'token_type' => 'google',
             'relation_type' => 'sales_person',
-            'relation_id' => $salesId
+            'relation_id' => $accessToken->relation_id
         ];
 
         /** @var SalesAuthService $service */
@@ -89,7 +88,7 @@ class SalesAuthServiceTest extends TestCase
         $this->salesPersonRepositoryMock
             ->shouldReceive('get')
             ->once()
-            ->with(['sales_person_id' => $salesId])
+            ->with(['sales_person_id' => $accessToken->relation_id])
             ->andReturn($salesPerson);
 
         // Mock Sales Person Repository
@@ -105,11 +104,11 @@ class SalesAuthServiceTest extends TestCase
         // Validate Show Catalog Result
         $result = $service->show([
             'token_type' => 'google',
-            'id' => $salesId
+            'id' => (int) $accessToken->relation_id
         ]);
 
         // Assert Match
-        $this->assertSame($result['sales_person']['id'], $salesId);
+        $this->assertSame($result['sales_person']['id'], (int) $accessToken->relation_id);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $accessToken->id);
@@ -126,18 +125,15 @@ class SalesAuthServiceTest extends TestCase
     public function testCreate()
     {
         // Get Test Sales Person
-        $salesId = (int) $_ENV['TEST_AUTH_SALES_ID'];
-        $salesPerson = SalesPerson::find($salesId);
-
-        // Get Test Token
-        $accessToken = AccessToken::where('token_type', 'google')
-                                  ->where('relation_type', 'sales_person')
-                                  ->where('relation_id', $salesId)->first();
+        $accessToken = factory(AccessToken::class)->make();
+        $salesPerson = factory(SalesPerson::class)->make([
+            'id' => (int) $accessToken->relation_id
+        ]);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Request Params
         $createRequestParams = [
-            'id' => $salesId,
+            'id' => (int) $accessToken->relation_id,
             'token_type' => 'google',
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
@@ -152,7 +148,7 @@ class SalesAuthServiceTest extends TestCase
         unset($createAuthParams['id']);
         $createAuthParams['token_type'] = 'google';
         $createAuthParams['relation_type'] = 'sales_person';
-        $createAuthParams['relation_id'] = $salesId;
+        $createAuthParams['relation_id'] = $accessToken->relation_id;
 
         /** @var SalesAuthService $service */
         $service = $this->app->make(SalesAuthService::class);
@@ -168,7 +164,7 @@ class SalesAuthServiceTest extends TestCase
         $this->salesPersonRepositoryMock
             ->shouldReceive('get')
             ->once()
-            ->with(['sales_person_id' => $salesId])
+            ->with(['sales_person_id' => $accessToken->relation_id])
             ->andReturn($salesPerson);
 
         // Mock Sales Person Repository
@@ -185,7 +181,7 @@ class SalesAuthServiceTest extends TestCase
         $result = $service->create($createRequestParams);
 
         // Assert Match
-        $this->assertSame($result['sales_person']['id'], $salesId);
+        $this->assertSame($result['sales_person']['id'], (int) $accessToken->relation_id);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $accessToken->id);
@@ -202,18 +198,15 @@ class SalesAuthServiceTest extends TestCase
     public function testUpdate()
     {
         // Get Test Sales Person
-        $salesId = (int) $_ENV['TEST_AUTH_SALES_ID'];
-        $salesPerson = SalesPerson::find($salesId);
-
-        // Get Test Token
-        $accessToken = AccessToken::where('token_type', 'google')
-                                  ->where('relation_type', 'sales_person')
-                                  ->where('relation_id', $salesId)->first();
+        $accessToken = factory(AccessToken::class)->make();
+        $salesPerson = factory(SalesPerson::class)->make([
+            'id' => (int) $accessToken->relation_id
+        ]);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Update Request Params
         $updateRequestParams = [
-            'id' => $salesId,
+            'id' => (int) $accessToken->relation_id,
             'token_type' => 'google',
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
@@ -228,14 +221,14 @@ class SalesAuthServiceTest extends TestCase
         unset($updateAuthParams['id']);
         $updateAuthParams['token_type'] = 'google';
         $updateAuthParams['relation_type'] = 'sales_person';
-        $updateAuthParams['relation_id'] = $salesId;
+        $updateAuthParams['relation_id'] = $accessToken->relation_id;
 
         /** @var SalesAuthService $service */
         $service = $this->app->make(SalesAuthService::class);
 
         // Mock Update Access Token
         $this->tokenRepositoryMock
-            ->shouldReceive('update')
+            ->shouldReceive('create')
             ->once()
             ->with($updateAuthParams)
             ->andReturn($accessToken);
@@ -244,7 +237,7 @@ class SalesAuthServiceTest extends TestCase
         $this->salesPersonRepositoryMock
             ->shouldReceive('get')
             ->once()
-            ->with(['sales_person_id' => $salesId])
+            ->with(['sales_person_id' => $accessToken->relation_id])
             ->andReturn($salesPerson);
 
         // Mock Sales Person Repository
@@ -261,7 +254,7 @@ class SalesAuthServiceTest extends TestCase
         $result = $service->update($updateRequestParams);
 
         // Assert Match
-        $this->assertSame($result['sales_person']['id'], $salesId);
+        $this->assertSame($result['sales_person']['id'], (int) $accessToken->relation_id);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $accessToken->id);

@@ -49,15 +49,14 @@ class AuthServiceTest extends TestCase
     public function testIndex()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Index Request Params
         $indexRequestParams = [
             'token_type' => $accessToken->token_type,
             'relation_type' => $accessToken->relation_type,
-            'relation_id' => $tokenId
+            'relation_id' => $accessToken->id
         ];
 
         /** @var AuthService $service */
@@ -81,7 +80,7 @@ class AuthServiceTest extends TestCase
         $result = $service->index($indexRequestParams);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['data']['id'], $accessToken->id);
     }
 
     /**
@@ -92,8 +91,7 @@ class AuthServiceTest extends TestCase
     public function testShow()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         /** @var AuthService $service */
@@ -103,7 +101,7 @@ class AuthServiceTest extends TestCase
         $this->tokenRepositoryMock
             ->shouldReceive('get')
             ->once()
-            ->with(['id' => $tokenId])
+            ->with(['id' => $accessToken->id])
             ->andReturn($accessToken);
 
         // Mock Validate Access Token
@@ -114,10 +112,10 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show($tokenId);
+        $result = $service->show($accessToken->id);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['data']['id'], $accessToken->id);
     }
 
     /**
@@ -127,9 +125,8 @@ class AuthServiceTest extends TestCase
      */
     public function testCreate()
     {
-        // Get Test Catalog
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        // Get Test Token
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Request Params
@@ -163,7 +160,7 @@ class AuthServiceTest extends TestCase
         $result = $service->create($createRequestParams);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['data']['id'], $accessToken->id);
 
         // Assert Match
         $this->assertSame($result['validate'], $validate);
@@ -176,9 +173,8 @@ class AuthServiceTest extends TestCase
      */
     public function testUpdate()
     {
-        // Get Test Catalog
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        // Get Test Token
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Update Request Params
@@ -213,7 +209,7 @@ class AuthServiceTest extends TestCase
         $result = $service->update($updateRequestParams);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['data']['id'], $accessToken->id);
 
         // Assert Match
         $this->assertSame($result['validate'], $validate);
@@ -227,8 +223,7 @@ class AuthServiceTest extends TestCase
     public function testValidate()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         /** @var AuthService $service */

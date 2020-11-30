@@ -13,6 +13,7 @@ $factory->define(SalesPerson::class, function (Faker $faker) {
 
     // Return Overrides
     return [
+        'id' => 1,
         'user_id' => $newDealerUser->crmUser->user_id,
         'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
         'perms' => 'user',
