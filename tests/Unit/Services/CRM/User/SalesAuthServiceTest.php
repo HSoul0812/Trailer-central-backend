@@ -6,7 +6,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\User\SalesAuthService;
 use App\Services\Integration\AuthServiceInterface;
-use App\Models\CRM\User\SalesPerson;;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Mockery;
