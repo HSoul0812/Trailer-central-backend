@@ -94,8 +94,8 @@ class GoogleService implements GoogleServiceInterface
         ]);
         $this->client->setScopes($accessToken->scope);
 
-        // Refresh Access Token
-        return $this->refreshAccessToken();
+        // Get New Token
+        return $this->client->fetchAccessTokenWithRefreshToken($accessToken->refresh_token);
     }
 
     /**

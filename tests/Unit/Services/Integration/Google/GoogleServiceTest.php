@@ -59,13 +59,9 @@ class GoogleServiceTest extends TestCase
 
         // Validate Show Catalog Result
         $result = $service->refresh($accessToken);
-        var_dump($result);
 
         // Assert New Token is Set
-        $this->assertTrue(!empty($result['new_token']));
-
-        // Assert False
-        $this->assertFalse($result['expired']);
+        $this->assertTrue(!empty($result));
     }
 
     /**
