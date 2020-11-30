@@ -145,14 +145,14 @@ class GoogleService implements GoogleServiceInterface
      * @param AccessToken $accessToken
      * @return boolean
      */
-    private function validateIdToken($accessToken) {
+    private function validateIdToken($idToken) {
         // Invalid
         $validate = false;
 
         // Validate ID Token
         try {
             // Verify ID Token is Valid
-            $payload = $this->client->verifyIdToken($accessToken->id_token);
+            $payload = $this->client->verifyIdToken($idToken);
             if ($payload) {
                 $validate = true;
             }
