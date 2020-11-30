@@ -108,7 +108,7 @@ class SalesAuthServiceTest extends TestCase
         ]);
 
         // Assert Match
-        $this->assertSame($result['sales_person']['id'], $accessToken->relation_id);
+        $this->assertSame($result['sales_person']['id'], (int) $accessToken->relation_id);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $accessToken->id);
@@ -181,7 +181,7 @@ class SalesAuthServiceTest extends TestCase
         $result = $service->create($createRequestParams);
 
         // Assert Match
-        $this->assertSame($result['sales_person']['id'], $accessToken->relation_id);
+        $this->assertSame($result['sales_person']['id'], (int) $accessToken->relation_id);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $accessToken->id);
@@ -254,7 +254,7 @@ class SalesAuthServiceTest extends TestCase
         $result = $service->update($updateRequestParams);
 
         // Assert Match
-        $this->assertSame($result['sales_person']['id'], $accessToken->relation_id);
+        $this->assertSame($result['sales_person']['id'], (int) $accessToken->relation_id);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $accessToken->id);
