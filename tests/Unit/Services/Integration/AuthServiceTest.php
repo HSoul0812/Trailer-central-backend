@@ -49,7 +49,7 @@ class AuthServiceTest extends TestCase
     public function testIndex()
     {
         // Get Test Token
-        $accessToken = factory(AccessToken::class)->create();
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Index Request Params
@@ -91,7 +91,7 @@ class AuthServiceTest extends TestCase
     public function testShow()
     {
         // Get Test Token
-        $accessToken = factory(AccessToken::class)->create();
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         /** @var AuthService $service */
@@ -126,7 +126,7 @@ class AuthServiceTest extends TestCase
     public function testCreate()
     {
         // Get Test Token
-        $accessToken = factory(AccessToken::class)->create();
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Request Params
@@ -157,7 +157,7 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Create Catalog Result
-        $result = $service->create($createRequestParams);
+        $result = $service->make($createRequestParams);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $tokenId);
@@ -174,7 +174,7 @@ class AuthServiceTest extends TestCase
     public function testUpdate()
     {
         // Get Test Token
-        $accessToken = factory(AccessToken::class)->create();
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Update Request Params
@@ -223,7 +223,7 @@ class AuthServiceTest extends TestCase
     public function testValidate()
     {
         // Get Test Token
-        $accessToken = factory(AccessToken::class)->create();
+        $accessToken = factory(AccessToken::class)->make();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         /** @var AuthService $service */

@@ -30,7 +30,7 @@ class GoogleServiceTest extends TestCase
     public function testLogin()
     {
         // Get Test Token
-        $accessToken = factory(AccessToken::class)->create();
+        $accessToken = factory(AccessToken::class)->make();
 
         /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);
@@ -50,7 +50,7 @@ class GoogleServiceTest extends TestCase
     public function testRefresh()
     {
         // Get Test Token
-        $accessToken = factory(AccessToken::class)->create();
+        $accessToken = factory(AccessToken::class)->make();
 
         /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);
@@ -70,7 +70,7 @@ class GoogleServiceTest extends TestCase
     public function testValidate()
     {
         // Get Test Token
-        $accessToken = factory(AccessToken::class)->create();
+        $accessToken = factory(AccessToken::class)->make();
 
         /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);
