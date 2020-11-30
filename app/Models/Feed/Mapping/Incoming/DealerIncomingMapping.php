@@ -24,6 +24,9 @@ class DealerIncomingMapping extends Model {
     const BRAND = 'brand';
     const MANUFACTURER_BRAND = 'manufacturer_brand';
     const LOCATION = 'dealer_location';
+    const TRANSMISSION = 'transmission';
+    const DRIVE_TRAIL = 'drive_trail';
+    const ENGINE_SIZE = 'engine_size';
     const FIELDS = 'fields';
     const DEFAULT_VALUES = 'default_values';
 
@@ -41,6 +44,9 @@ class DealerIncomingMapping extends Model {
         self::COLOR => 'Color',
         self::BRAND => 'Brand',
         self::LOCATION => 'Dealer Location',
+        self::TRANSMISSION => 'Transmission',
+        self::DRIVE_TRAIL => 'Drive Trail',
+        self::ENGINE_SIZE => 'Engine Size',
         self::FIELDS => 'Fields',
         self::DEFAULT_VALUES => 'Default Values'
     ];

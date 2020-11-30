@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\v1\Integration;
 
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\Integration\GetCollectorFieldsRequest;
 use App\Repositories\Integration\CollectorFieldsRepositoryInterface;
 use App\Transformers\Integration\CollectorFieldsTransformer;
 use Dingo\Api\Http\Request;
@@ -47,6 +48,12 @@ class CollectorFieldsController extends RestfulController
      */
     public function index(Request $request)
     {
-        return $this->response->collection($this->collectorFieldsRepository->withRequest($request)->getAll([]), new CollectorFieldsTransformer());
+        $request = new GetCollectorFieldsRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->collection($this->collectorFieldsRepository->withRequest($request)->getAll([]), new CollectorFieldsTransformer());
+        }
+
+        return $this->response->errorBadRequest();
     }
 }

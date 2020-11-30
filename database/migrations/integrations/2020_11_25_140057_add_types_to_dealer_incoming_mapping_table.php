@@ -16,7 +16,7 @@ class AddTypesToDealerIncomingMappingTable extends Migration
             "ALTER TABLE
                       `dealer_incoming_mappings`
                    MODIFY COLUMN
-                      `type` enum('manufacturer','category','entity_type','condition','status','color','pull_type','nose_type','construction','fuel_type','brand','manufacturer_brand','dealer_location','fields','default_values');"
+                      `type` enum('manufacturer','category','entity_type','condition','status','color','pull_type','nose_type','construction','fuel_type','brand','manufacturer_brand','dealer_location','transmission','drive_trail', 'engine_size','fields','default_values');"
         );
 
         exit();

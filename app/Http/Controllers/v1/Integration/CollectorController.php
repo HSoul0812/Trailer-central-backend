@@ -52,7 +52,8 @@ class CollectorController extends RestfulController
      *     ),
      * )
      */
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $request = new GetCollectorRequest($request->all());
 
         if ($request->validate()) {
@@ -60,6 +61,5 @@ class CollectorController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
-
     }
 }

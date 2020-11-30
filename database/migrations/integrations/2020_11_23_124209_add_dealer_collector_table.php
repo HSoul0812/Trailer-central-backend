@@ -13,8 +13,6 @@ class AddDealerCollectorTable extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('collector');
-
         Schema::create('collector', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('dealer_id')->unsigned();
@@ -27,24 +25,30 @@ class AddDealerCollectorTable extends Migration
             $table->string('ftp_password', 128);
 
             $table->string('file_format', 16);
+            $table->string('path_to_data', 254)->default('');
 
             $table->string('length_format', 64)->nullable();
             $table->string('width_format', 64)->nullable();
             $table->string('height_format', 64)->nullable();
 
             $table->boolean('show_on_rvtrader')->default(false);
-            $table->string('title_format', 128)->nullable();
+            $table->string('title_format', 128)->default('');
             $table->boolean('import_prices')->default(false);
             $table->boolean('import_description')->default(false);
             $table->string('images_delimiter', 16)->default(',');
+            $table->string('overridable_fields', 254)->default('');
+            $table->boolean('use_secondary_image')->default(false);
+            $table->boolean('append_floorplan_image')->default(true);
+            $table->boolean('update_images')->default(false);
+            $table->boolean('update_files')->default(false);
+            $table->boolean('import_with_showroom_category')->default(false);
+            $table->boolean('unarchive_sold_items')->default(false);
 
             $table->boolean('active')->default(true);
             $table->timestamps();
 
             $table->foreign('dealer_id')->references('dealer_id')->on('dealer');
         });
-
-        exit();
     }
 
     /**
@@ -54,6 +58,6 @@ class AddDealerCollectorTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::drop('collector');
     }
 }

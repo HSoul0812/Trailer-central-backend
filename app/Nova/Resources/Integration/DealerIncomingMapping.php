@@ -78,6 +78,8 @@ class DealerIncomingMapping extends Resource
             return strcmp($a, $b);
         });
 
+        $attributes = Attribute::select('values', 'code')->get();
+
         return [
             Select::make('Type', 'type')
                 ->options($sortedTypes)
@@ -107,33 +109,51 @@ class DealerIncomingMapping extends Resource
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(Attribute::select('values')->where(['code' => FeedDealerIncomingMapping::FUEL_TYPE])->first()->getValuesArray())
+                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::FUEL_TYPE)->getValuesArray())
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::FUEL_TYPE)->onlyOnForms(),
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(Attribute::select('values')->where(['code' => FeedDealerIncomingMapping::CONSTRUCTION])->first()->getValuesArray())
+                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::CONSTRUCTION)->getValuesArray())
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::CONSTRUCTION)->onlyOnForms(),
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(Attribute::select('values')->where(['code' => FeedDealerIncomingMapping::NOSE_TYPE])->first()->getValuesArray())
+                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::NOSE_TYPE)->getValuesArray())
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::NOSE_TYPE)->onlyOnForms(),
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(Attribute::select('values')->where(['code' => FeedDealerIncomingMapping::PULL_TYPE])->first()->getValuesArray())
+                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::PULL_TYPE)->getValuesArray())
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::PULL_TYPE)->onlyOnForms(),
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(Attribute::select('values')->where(['code' => FeedDealerIncomingMapping::COLOR])->first()->getValuesArray())
+                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::COLOR)->getValuesArray())
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::COLOR)->onlyOnForms(),
+
+            NovaDependencyContainer::make([
+                Select::make('Map To', 'map_to')
+                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::TRANSMISSION)->getValuesArray())
+                    ->rules('required')
+            ])->dependsOn('type', FeedDealerIncomingMapping::TRANSMISSION)->onlyOnForms(),
+
+            NovaDependencyContainer::make([
+                Select::make('Map To', 'map_to')
+                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::DRIVE_TRAIL)->getValuesArray())
+                    ->rules('required')
+            ])->dependsOn('type', FeedDealerIncomingMapping::DRIVE_TRAIL)->onlyOnForms(),
+
+            NovaDependencyContainer::make([
+                Select::make('Map To', 'map_to')
+                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::ENGINE_SIZE)->getValuesArray())
+                    ->rules('required')
+            ])->dependsOn('type', FeedDealerIncomingMapping::ENGINE_SIZE)->onlyOnForms(),
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')

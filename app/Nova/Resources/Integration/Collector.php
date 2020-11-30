@@ -72,15 +72,23 @@ class Collector extends Resource
                         ->options(array_combine(CollectorModel::FILE_FORMATS, CollectorModel::FILE_FORMATS))
                         ->displayUsingLabels()
                         ->rules('required'),
+                    Text::make('Path To Data', 'path_to_data')->hideFromIndex(),
                 ]
             ),
 
             new Panel('Config', [
-                Boolean::make('Import Prices', 'import_prices'),
-                Boolean::make('Import Description', 'import_description'),
-                Boolean::make('Show On RV Trader', 'show_on_rvtrader'),
+                Boolean::make('Import Prices', 'import_prices')->hideFromIndex(),
+                Boolean::make('Import Description', 'import_description')->hideFromIndex(),
+                Boolean::make('Show On RV Trader', 'show_on_rvtrader')->hideFromIndex(),
+                Boolean::make('Use Secondary Image', 'use_secondary_image')->hideFromIndex(),
+                Boolean::make('Append Floorplan Image', 'append_floorplan_image')->withMeta(['value' => $this->active ?? true])->hideFromIndex(),
+                Boolean::make('Update Images', 'update_images')->hideFromIndex(),
+                Boolean::make('Update Files', 'update_files')->hideFromIndex(),
+                Boolean::make('Import With Showroom Category', 'import_with_showroom_category')->hideFromIndex(),
+                Boolean::make('Unarchive Sold Items', 'unarchive_sold_items')->hideFromIndex(),
                 Text::make('Title Format', 'title_format')->rules('max:128')->hideFromIndex(),
                 Text::make('Images Delimiter', 'images_delimiter')->rules('max:128')->hideFromIndex(),
+                Text::make('Overridable Fields', 'overridable_fields')->rules('max:254')->hideFromIndex(),
             ]),
 
             new Panel('Measures', [

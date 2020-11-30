@@ -280,7 +280,10 @@ class AddCollectorFieldsTable extends Migration
         'pull_type',
         'fuel_type',
         'nose_type',
-        'color'
+        'color',
+        'transmission',
+        'drive_trail',
+        'engine_size',
     ];
 
     /**
@@ -290,8 +293,6 @@ class AddCollectorFieldsTable extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('collector_fields');
-
         Schema::create('collector_fields', function (Blueprint $table) {
             $table->increments('id');
 
@@ -324,8 +325,6 @@ class AddCollectorFieldsTable extends Migration
         }
 
         DB::table('collector_fields')->insert(array_merge(self::COLLECTOR_FIELDS, $attributes));
-
-        exit();
     }
 
     /**
@@ -335,6 +334,6 @@ class AddCollectorFieldsTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::drop('collector_fields');
     }
 }

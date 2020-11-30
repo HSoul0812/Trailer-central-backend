@@ -4,6 +4,7 @@ namespace App\Models\Integration\Collector;
 
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
+use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $ftp_password
  * @property boolean $active
  * @property string $file_format
+ * @property string $path_to_data
  * @property string $length_format
  * @property string $width_format
  * @property string $height_format
@@ -28,8 +30,15 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $import_prices
  * @property bool $import_description
  * @property string $images_delimiter
+ * @property string $overridable_fields
+ * @property bool $use_secondary_image
+ * @property bool $append_floorplan_image
+ * @property bool $update_images
+ * @property bool $update_files
+ * @property bool $import_with_showroom_category
+ * @property bool $unarchive_sold_items
  */
-class Collector extends Model
+class Collector extends Model  implements Filterable
 {
     public const FILE_FORMATS = [
         'xml',
@@ -65,6 +74,7 @@ class Collector extends Model
         'ftp_login',
         'ftp_password',
         'file_format',
+        'path_to_data',
         'length_format',
         'width_format',
         'height_format',
@@ -74,6 +84,13 @@ class Collector extends Model
         'import_prices',
         'import_description',
         'images_delimiter',
+        'overridable_fields',
+        'use_secondary_image',
+        'append_floorplan_image',
+        'update_images',
+        'update_files',
+        'import_with_showroom_category',
+        'unarchive_sold_items',
     ];
 
     public function dealers()
@@ -84,5 +101,10 @@ class Collector extends Model
     public function dealerLocation()
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    public function jsonApiFilterableColumns(): ?array
+    {
+        return ['*'];
     }
 }
