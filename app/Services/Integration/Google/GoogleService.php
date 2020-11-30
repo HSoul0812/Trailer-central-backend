@@ -87,14 +87,15 @@ class GoogleService implements GoogleServiceInterface
         // Configure Client
         $this->client->setAccessToken([
             'access_token' => $accessToken->access_token,
+            'refresh_token' => $accessToken->refresh_token,
             'id_token' => $accessToken->id_token,
             'expires_in' => $accessToken->expires_in,
             'created' => strtotime($accessToken->issued_at)
         ]);
         $this->client->setScopes($accessToken->scope);
 
-        // Return Refresh Token
-        return $this->client->getRefreshToken();
+        // Refresh Access Token
+        return $this->refreshAccessToken();
     }
 
     /**

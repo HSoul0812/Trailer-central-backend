@@ -23,7 +23,52 @@ class GoogleServiceTest extends TestCase
     }
 
     /**
-     * @covers ::index
+     * @covers ::login
+     *
+     * @throws BindingResolutionException
+     */
+    public function testLogin()
+    {
+        // Get Test Token
+        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
+        $accessToken = AccessToken::find($tokenId);
+
+        /** @var GoogleService $service */
+        $service = $this->app->make(GoogleService::class);
+
+        // Validate Show Catalog Result
+        $result = $service->login($_ENV['TEST_AUTH_REDIRECT_URI'], $accessToken->scopes);
+
+        // Assert Login URL Exists
+        $this->assertTrue(!empty($result));
+    }
+
+    /**
+     * @covers ::refresh
+     *
+     * @throws BindingResolutionException
+     */
+    public function testRefresh()
+    {
+        // Get Test Token
+        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
+        $accessToken = AccessToken::find($tokenId);
+
+        /** @var GoogleService $service */
+        $service = $this->app->make(GoogleService::class);
+
+        // Validate Show Catalog Result
+        $result = $service->refresh($accessToken);
+
+        // Assert New Token is Set
+        $this->assertTrue(!empty($result['new_token']));
+
+        // Assert False
+        $this->assertFalse($result['expired']);
+    }
+
+    /**
+     * @covers ::validate
      *
      * @throws BindingResolutionException
      */
