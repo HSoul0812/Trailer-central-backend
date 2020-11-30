@@ -111,29 +111,6 @@ class AuthService implements AuthServiceInterface
         return $this->response($accessToken);
     }
 
-    /**
-     * Get Refresh Token
-     * 
-     * @param array $params
-     * @return refresh token
-     */
-    public function refresh($params) {
-        // Initialize Refresh Token
-        $refresh = null;
-
-        // Find Refresh Token
-        if(!empty($params['token_type'])) {
-            if($params['token_type'] === 'google') {
-                $refresh = $this->google->refresh($params);
-            } elseif($params['token_type'] === 'facebook') {
-                $refresh = $this->facebook->refresh($params);
-            }
-        }
-
-        // Return Refresh Token
-        return $refresh;
-    }
-
 
     /**
      * Get Login URL

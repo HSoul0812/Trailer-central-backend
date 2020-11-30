@@ -44,6 +44,7 @@ class BusinessServiceTest extends TestCase
         ]);
 
         /** @var BusinessService $service */
+        var_dump($accessToken);
         $service = $this->app->make(BusinessService::class);
 
         // Validate Test Service
