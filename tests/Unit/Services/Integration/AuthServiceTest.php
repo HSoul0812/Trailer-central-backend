@@ -157,7 +157,7 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Create Catalog Result
-        $result = $service->make($createRequestParams);
+        $result = $service->create($createRequestParams);
 
         // Assert Match
         $this->assertSame($result['data']['id'], $accessToken->id);
