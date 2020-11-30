@@ -8,6 +8,46 @@ use App\Models\CRM\Dms\UnitSale;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
 
+/**
+ * Class Customer
+ * @package App\Models\CRM\User
+ *
+ * @property $id
+ * @property $dealer_id
+ * @property $first_name
+ * @property $last_name
+ * @property $display_name
+ * @property $email
+ * @property $drivers_license
+ * @property $home_phone
+ * @property $work_phone
+ * @property $cell_phone
+ * @property $address
+ * @property $city
+ * @property $region
+ * @property $postal_code
+ * @property $country
+ * @property $website_lead_id
+ * @property $tax_exempt
+ * @property $is_financing_company
+ * @property $account_number
+ * @property $qb_id
+ * @property $gender
+ * @property $dob
+ * @property $deleted_at
+ * @property $is_wholesale
+ * @property $default_discount_percent
+ * @property $middle_name
+ * @property $company_name
+ * @property $use_same_address
+ * @property $shipping_address
+ * @property $shipping_city
+ * @property $shipping_region
+ * @property $shipping_postal_code
+ * @property $shipping_country
+ * @property $county
+ * @property $shipping_county
+ */
 class Customer extends Model
 {
     use Searchable, CustomSearch;

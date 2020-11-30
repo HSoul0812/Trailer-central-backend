@@ -2,7 +2,10 @@
 
 namespace App\Repositories\Dms\Quickbooks;
 
+use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
+use App\Models\CRM\User\Customer;
 use \App\Repositories\Repository;
+use Illuminate\Support\Collection;
 
 /**
  * @author Marcel
@@ -14,5 +17,14 @@ interface QuickbookApprovalRepositoryInterface extends Repository {
      * @return Collection
      */
     public function getPoInvoiceApprovals($dealerId);
-    
+
+    /**
+     * Create an approval object for a customer
+     *
+     * @param  Customer  $customer
+     * @return QuickbookApproval|mixed|void
+     * @throws \Exception
+     */
+    public function createForCustomer(Customer $customer);
+
 }
