@@ -61,7 +61,7 @@ class SalesAuthServiceTest extends TestCase
         // Get Test Sales Person
         $accessToken = factory(AccessToken::class)->make();
         $salesPerson = factory(SalesPerson::class)->make([
-            'relation_id' => $accessToken->relation_id
+            'id' => $accessToken->relation_id
         ]);
 
         // Get Test Token
@@ -127,7 +127,7 @@ class SalesAuthServiceTest extends TestCase
         // Get Test Sales Person
         $accessToken = factory(AccessToken::class)->make();
         $salesPerson = factory(SalesPerson::class)->make([
-            'relation_id' => $accessToken->relation_id
+            'id' => $accessToken->relation_id
         ]);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
@@ -200,7 +200,7 @@ class SalesAuthServiceTest extends TestCase
         // Get Test Sales Person
         $accessToken = factory(AccessToken::class)->make();
         $salesPerson = factory(SalesPerson::class)->make([
-            'relation_id' => $accessToken->relation_id
+            'id' => $accessToken->relation_id
         ]);
         $validate = ['is_valid' => true, 'is_expired' => false];
 
