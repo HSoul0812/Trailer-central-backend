@@ -30,8 +30,7 @@ class GoogleServiceTest extends TestCase
     public function testLogin()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->create();
 
         /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);
@@ -51,8 +50,7 @@ class GoogleServiceTest extends TestCase
     public function testRefresh()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->create();
 
         /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);
@@ -72,8 +70,7 @@ class GoogleServiceTest extends TestCase
     public function testValidate()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->create();
 
         /** @var GoogleService $service */
         $service = $this->app->make(GoogleService::class);

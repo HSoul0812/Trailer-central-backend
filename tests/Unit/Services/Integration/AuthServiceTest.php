@@ -49,8 +49,7 @@ class AuthServiceTest extends TestCase
     public function testIndex()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->create();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Index Request Params
@@ -92,8 +91,7 @@ class AuthServiceTest extends TestCase
     public function testShow()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->create();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         /** @var AuthService $service */
@@ -127,9 +125,8 @@ class AuthServiceTest extends TestCase
      */
     public function testCreate()
     {
-        // Get Test Catalog
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        // Get Test Token
+        $accessToken = factory(AccessToken::class)->create();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Request Params
@@ -176,9 +173,8 @@ class AuthServiceTest extends TestCase
      */
     public function testUpdate()
     {
-        // Get Test Catalog
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        // Get Test Token
+        $accessToken = factory(AccessToken::class)->create();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Update Request Params
@@ -227,8 +223,7 @@ class AuthServiceTest extends TestCase
     public function testValidate()
     {
         // Get Test Token
-        $tokenId = (int) $_ENV['TEST_AUTH_TOKEN_ID'];
-        $accessToken = AccessToken::find($tokenId);
+        $accessToken = factory(AccessToken::class)->create();
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         /** @var AuthService $service */
