@@ -105,7 +105,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         unset($params['id']);
 
         // Create Access Token
-        $accessToken = $this->tokens->update($params);
+        $accessToken = $this->tokens->create($params);
 
         // Return Response
         return $this->response($accessToken, $params);

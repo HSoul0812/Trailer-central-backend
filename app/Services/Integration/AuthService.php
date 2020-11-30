@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration;
 
+use App\Exceptions\Integration\Auth\MissingAuthLoginTokenTypeScopesException;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
@@ -103,7 +104,7 @@ class AuthService implements AuthServiceInterface
      * @return Fractal
      */
     public function update($params) {
-        // Create Access Token
+        // Update Access Token
         $accessToken = $this->tokens->update($params);
 
         // Return Response
@@ -133,6 +134,59 @@ class AuthService implements AuthServiceInterface
         return $refresh;
     }
 
+
+    /**
+     * Get Login URL
+     * 
+     * @param array $params
+     * @return refresh token
+     */
+    public function login($params) {
+        // Token Type and Scopes Required
+        if(empty($params['token_type']) || empty($params['scopes'])) {
+            throw new MissingAuthLoginTokenTypeScopesException;
+        }
+
+        // Initialize Login URL
+        $auth = ['url' => null];
+
+        // Get Login URL
+        if($params['token_type'] === 'google') {
+            // Auth Code Exists?!
+            if(!empty($params['auth_code'])) {
+                $auth = $this->google->auth($params['redirect_uri'], $params['auth_code']);
+            } else {
+                $login = $this->google->login($params['redirect_uri'], $params['scopes']);
+                $auth = ['url' => $login];
+            }
+        }
+
+        // Return Refresh Token
+        return $auth;
+    }
+
+    /**
+     * Get Refresh Token
+     * 
+     * @param array $params
+     * @return refresh token
+     */
+    public function refresh($params) {
+        // Initialize Refresh Token
+        $refresh = null;
+
+        // Find Refresh Token
+        if(!empty($params['token_type'])) {
+            if($params['token_type'] === 'google') {
+                $refresh = $this->google->refresh($params);
+            } elseif($params['token_type'] === 'facebook') {
+                $refresh = $this->facebook->refresh($params);
+            }
+        }
+
+        // Return Refresh Token
+        return $refresh;
+    }
 
     /**
      * Validate Access Token
@@ -169,6 +223,22 @@ class AuthService implements AuthServiceInterface
      * @return array
      */
     public function response($accessToken, $response = array()) {
+        // Set Validate
+        $validate = $this->validate($accessToken);
+
+        // Token Was Refreshed?!
+        if(!empty($validate['new_token'])) {
+            $time = time();
+            $accessToken = $this->tokens->update([
+                'id' => $accessToken->id,
+                'access_token' => $validate['new_token']['access_token'],
+                'id_token' => $validate['new_token']['id_token'],
+                'expires_in' => $validate['new_token']['expires_in'],
+                'expires_at' => date("Y-m-d H:i:s", $time + $validate['new_token']['expires_in']),
+                'issued_at' => date("Y-m-d H:i:s", $time)
+            ]);
+        }
+
         // Convert Token to Array
         if(!empty($accessToken)) {
             $data = new Item($accessToken, new TokenTransformer(), 'data');
@@ -179,7 +249,8 @@ class AuthService implements AuthServiceInterface
         }
 
         // Set Validate
-        $response['validate'] = $this->validate($accessToken);
+        unset($validate['new_token']);
+        $response['validate'] = $validate;
 
         // Return Response
         return $response;

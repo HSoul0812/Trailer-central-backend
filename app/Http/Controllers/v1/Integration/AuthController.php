@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\v1\Integration;
 
 use App\Http\Controllers\RestfulControllerV2;
-use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use Dingo\Api\Http\Request;
 use App\Models\Integration\Auth\AccessToken;
 use App\Http\Requests\Integration\Auth\GetTokenRequest;
@@ -11,56 +10,26 @@ use App\Http\Requests\Integration\Auth\CreateTokenRequest;
 use App\Http\Requests\Integration\Auth\ShowTokenRequest;
 use App\Http\Requests\Integration\Auth\UpdateTokenRequest;
 use App\Http\Requests\Integration\Auth\ValidateTokenRequest;
-use App\Transformers\Integration\Auth\TokenTransformer;
+use App\Http\Requests\Integration\Auth\LoginTokenRequest;
 use App\Services\Integration\AuthServiceInterface;
-use App\Services\Integration\Auth\GoogleServiceInterface;
-use App\Utilities\Fractal\NoDataArraySerializer;
-use League\Fractal\Manager;
-use League\Fractal\Resource\Item;
 
 class AuthController extends RestfulControllerV2
 {
-
-    /**
-     * @var TokenRepository
-     */
-    protected $tokens;
-
     /**
      * @var AuthServiceInterface
      */
     protected $auth;
 
-    /**
-     * @var GoogleServiceInterface
-     */
-    protected $google;
-
-    /**
-     * @var Manager
-     */
-    private $fractal;
-
-    public function __construct(
-        TokenRepositoryInterface $tokens,
-        AuthServiceInterface $authService,
-        GoogleServiceInterface $googleService,
-        Manager $fractal
-    ) {
+    public function __construct(AuthServiceInterface $authService) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'valid']);
 
-        $this->tokens = $tokens;
         $this->auth = $authService;
-        $this->google = $googleService;
-        $this->fractal = $fractal;
-
-        $this->fractal->setSerializer(new NoDataArraySerializer());
     }
 
 
     /**
      * @OA\Get(
-     *     path="/api/leads/{leadId}/texts",
+     *     path="/api/integration/auth",
      *     description="Retrieve a list of texts by lead id",
      *     tags={"Text"},
      *     @OA\Parameter(
@@ -101,7 +70,7 @@ class AuthController extends RestfulControllerV2
     
     /**
      * @OA\Put(
-     *     path="/api/leads/{leadId}/texts",
+     *     path="/api/integration/auth",
      *     description="Create a text",
      *     tags={"Text"},
      *     @OA\Parameter(
@@ -150,7 +119,7 @@ class AuthController extends RestfulControllerV2
 
     /**
      * @OA\Get(
-     *     path="/api/leads/{leadId}/texts/{id}",
+     *     path="/api/integration/auth/{id}",
      *     description="Retrieve a text",
      
      *     tags={"Post"},
@@ -185,7 +154,7 @@ class AuthController extends RestfulControllerV2
     
     /**
      * @OA\Text(
-     *     path="/api/leads/{leadId}/texts/{id}",
+     *     path="/api/integration/auth/{id}",
      *     description="Update a text",
      * 
      *     @OA\Parameter(
@@ -236,8 +205,8 @@ class AuthController extends RestfulControllerV2
 
     /**
      * @OA\Get(
-     *     path="/api/leads/{leadId}/texts/{id}",
-     *     description="Retrieve a text",
+     *     path="/api/integration/auth",
+     *     description="Validate an auth token without creating/saving",
      
      *     tags={"Post"},
      *     @OA\Parameter(
@@ -268,6 +237,41 @@ class AuthController extends RestfulControllerV2
 
             // Return Auth
             return $this->response->array($this->auth->validate($accessToken));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Login(
+     *     path="/api/integration/auth",
+     *     description="Initialize login process",
+     
+     *     tags={"Get"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="Post ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a post",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function login(Request $request) {
+        // Start Login Token Request
+        $request = new LoginTokenRequest($request->all());
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->array($this->auth->login($request->all()));
         }
         
         return $this->response->errorBadRequest();
