@@ -228,7 +228,7 @@ class SalesAuthServiceTest extends TestCase
 
         // Mock Update Access Token
         $this->tokenRepositoryMock
-            ->shouldReceive('update')
+            ->shouldReceive('create')
             ->once()
             ->with($updateAuthParams)
             ->andReturn($accessToken);
