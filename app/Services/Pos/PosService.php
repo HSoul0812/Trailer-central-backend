@@ -35,6 +35,8 @@ class PosService
         // if no query supplied but is allowed
         } else if (!$queryTerm && ($options['allowAll'] ?? false)) {
             $search->must('match_all', []);
+            $search->sort('bins_total_qty', 'DESC');
+            $search->sort('_score', 'DESC') ;
 
         } else { // no query and allowAll is false
             throw new \Exception('Query is required');
