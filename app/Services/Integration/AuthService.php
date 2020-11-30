@@ -189,6 +189,22 @@ class AuthService implements AuthServiceInterface
      * @return array
      */
     public function response($accessToken, $response = array()) {
+        // Set Validate
+        $validate = $this->validate($accessToken);
+
+        // Token Was Refreshed?!
+        if(!empty($validate['new_token'])) {
+            $time = time();
+            $accessToken = $this->tokens->update([
+                'id' => $accessToken->id,
+                'access_token' => $validate['new_token']['access_token'],
+                'id_token' => $validate['new_token']['id_token'],
+                'expires_in' => $validate['new_token']['expires_in'],
+                'expires_at' => date("Y-m-d H:i:s", $time + $validate['new_token']['expires_in']),
+                'issued_at' => date("Y-m-d H:i:s", $time)
+            ]);
+        }
+
         // Convert Token to Array
         if(!empty($accessToken)) {
             $data = new Item($accessToken, new TokenTransformer(), 'data');
@@ -199,7 +215,8 @@ class AuthService implements AuthServiceInterface
         }
 
         // Set Validate
-        $response['validate'] = $this->validate($accessToken);
+        unset($validate['new_token']);
+        $response['validate'] = $validate;
 
         // Return Response
         return $response;
