@@ -83,18 +83,7 @@ class AuthService implements AuthServiceInterface
      */
     public function create($params) {
         // Create Access Token
-        $token = $this->tokens->create($params);
-
-        // Get Refresh Token
-        $refresh = $this->google->refresh($token);
-
-        // Set Refresh Token
-        $accessToken = $token;
-        if(!empty($refresh)) {
-            $accessToken = $this->tokens->update([
-                'refresh_token' => $refresh
-            ]);
-        }
+        $accessToken = $this->tokens->create($params);
 
         // Return Response
         return $this->response($accessToken);
@@ -108,18 +97,7 @@ class AuthService implements AuthServiceInterface
      */
     public function update($params) {
         // Update Access Token
-        $token = $this->tokens->update($params);
-
-        // Get Refresh Token
-        $refresh = $this->google->refresh($token);
-
-        // Set Refresh Token
-        $accessToken = $token;
-        if(!empty($refresh)) {
-            $accessToken = $this->tokens->update([
-                'refresh_token' => $refresh
-            ]);
-        }
+        $accessToken = $this->tokens->update($params);
 
         // Return Response
         return $this->response($accessToken);

@@ -86,18 +86,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         unset($params['id']);
 
         // Create Access Token
-        $token = $this->tokens->create($params);
-
-        // Get Refresh Token
-        $refresh = $this->auth->refresh($token);
-
-        // Set Refresh Token
-        $accessToken = $token;
-        if(!empty($refresh)) {
-            $accessToken = $this->tokens->update([
-                'refresh_token' => $refresh
-            ]);
-        }
+        $accessToken = $this->tokens->create($params);
 
         // Return Response
         return $this->response($accessToken, $params);
@@ -116,18 +105,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         unset($params['id']);
 
         // Create Access Token
-        $token = $this->tokens->create($params);
-
-        // Get Refresh Token
-        $refresh = $this->auth->refresh($token);
-
-        // Set Refresh Token
-        $accessToken = $token;
-        if(!empty($refresh)) {
-            $accessToken = $this->tokens->update([
-                'refresh_token' => $refresh
-            ]);
-        }
+        $accessToken = $this->tokens->create($params);
 
         // Return Response
         return $this->response($accessToken, $params);
