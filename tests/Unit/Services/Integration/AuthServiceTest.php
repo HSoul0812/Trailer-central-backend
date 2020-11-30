@@ -56,7 +56,7 @@ class AuthServiceTest extends TestCase
         $indexRequestParams = [
             'token_type' => $accessToken->token_type,
             'relation_type' => $accessToken->relation_type,
-            'relation_id' => $tokenId
+            'relation_id' => $accessToken->id
         ];
 
         /** @var AuthService $service */
@@ -80,7 +80,7 @@ class AuthServiceTest extends TestCase
         $result = $service->index($indexRequestParams);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['data']['id'], $accessToken->id);
     }
 
     /**
@@ -101,7 +101,7 @@ class AuthServiceTest extends TestCase
         $this->tokenRepositoryMock
             ->shouldReceive('get')
             ->once()
-            ->with(['id' => $tokenId])
+            ->with(['id' => $accessToken->id])
             ->andReturn($accessToken);
 
         // Mock Validate Access Token
@@ -112,10 +112,10 @@ class AuthServiceTest extends TestCase
             ->andReturn($validate);
 
         // Validate Show Catalog Result
-        $result = $service->show($tokenId);
+        $result = $service->show($accessToken->id);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['data']['id'], $accessToken->id);
     }
 
     /**
@@ -160,7 +160,7 @@ class AuthServiceTest extends TestCase
         $result = $service->make($createRequestParams);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['data']['id'], $accessToken->id);
 
         // Assert Match
         $this->assertSame($result['validate'], $validate);
@@ -209,7 +209,7 @@ class AuthServiceTest extends TestCase
         $result = $service->update($updateRequestParams);
 
         // Assert Match
-        $this->assertSame($result['data']['id'], $tokenId);
+        $this->assertSame($result['data']['id'], $accessToken->id);
 
         // Assert Match
         $this->assertSame($result['validate'], $validate);
