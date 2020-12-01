@@ -87,4 +87,12 @@ class AccessToken extends Model
     {
         return $this->scopes()->pluck('scope')->toArray();
     }
+
+    /**
+     * @param array $value
+     */
+    public function setScopeAttribute($value)
+    {
+        $this->attributes['scope'] = is_array($value) ? $value : explode(" ", $value);
+    }
 }
