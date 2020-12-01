@@ -346,6 +346,7 @@ class BusinessService implements BusinessServiceInterface
 
             // Check Valid Scopes!
             var_dump($content['data']['scopes']);
+            var_dump($scopes);
             foreach($content['data']['scopes'] as $scope) {
                 if(!in_array($scope, $scopes)) {
                     $validate['is_valid'] = false;
