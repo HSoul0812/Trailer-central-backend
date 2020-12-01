@@ -73,7 +73,10 @@ class BusinessServiceTest extends TestCase
         // Get Child Scopes
         $relationScopes = array();
         foreach($scopes as $scope) {
-            $relationScopes[] = factory(Scope::class)->make(['scope' => $scope]);
+            $relationScopes[] = factory(Scope::class)->make([
+                'integration_token_id' => $accessToken->id,
+                'scope' => $scope
+            ]);
         }
         $collectScopes = new Collection($relationScopes);
         $accessToken->setRelation('scopes', $collectScopes);
