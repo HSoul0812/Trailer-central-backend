@@ -80,8 +80,7 @@ class BusinessServiceTest extends TestCase
         }
         $collectScopes = new Collection($relationScopes);
         $accessToken->setRelation('scopes', $collectScopes);
-        $accessToken->setScopeAttribute($scopes);
-        var_dump($accessToken->scope);
+        $accessToken->scope = $scopes;
 
         // Return Access Token
         return $accessToken;
