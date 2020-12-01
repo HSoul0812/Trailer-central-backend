@@ -304,7 +304,7 @@ class CatalogServiceTest extends TestCase
         $this->catalogRepositoryMock
             ->shouldReceive('get')
             ->once()
-            ->with(['id' => $catalogId])
+            ->with(['id' => $catalog->id])
             ->andReturn($catalog);
 
         // Mock Delete Feed
