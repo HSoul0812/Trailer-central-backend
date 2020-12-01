@@ -52,10 +52,10 @@ class BusinessServiceTest extends TestCase
     /**
      * Create Access Token With Factory
      */
-    private function createAccessToken() {
-        
+    private function createAccessToken()
+    {
         // Get Access Token
-        $time = time();
+        $time = strtotime($_ENV['TEST_FB_ISSUED_AT']);
         $scopes = explode(" ", $_ENV['TEST_FB_SCOPES']);
         $accessToken = factory(AccessToken::class)->make([
             'token_type' => 'facebook',
