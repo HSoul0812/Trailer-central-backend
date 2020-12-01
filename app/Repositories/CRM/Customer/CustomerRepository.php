@@ -21,7 +21,9 @@ class CustomerRepository implements CustomerRepositoryInterface
     ];
 
     public function create($params) {
-        return Customer::insert($params);
+        $customer = new Customer($params);
+        $customer->save();
+        return $customer;
     }
 
     public function delete($params) {
