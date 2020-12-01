@@ -31,6 +31,28 @@ class BusinessServiceTest extends TestCase
     public function testValidate()
     {
         // Get Access Token
+        $accessToken = $this->createAccessToken();
+
+        /** @var BusinessService $service */
+        $service = $this->app->make(BusinessService::class);
+
+        // Validate Test Service
+        $result = $service->validate($accessToken);
+
+        // Assert is Valid
+        $this->assertTrue($result['is_valid']);
+
+        // Assert Is Not Expired
+        $this->assertFalse($result['is_expired']);
+    }
+
+
+    /**
+     * Create Access Token With Factory
+     */
+    private function createAccessToken() {
+        
+        // Get Access Token
         $time = time();
         $scopes = explode(" ", $_ENV['TEST_FB_SCOPES']);
         $accessToken = factory(AccessToken::class)->make([
@@ -52,18 +74,7 @@ class BusinessServiceTest extends TestCase
         }
         $accessToken->scopes()->createMany($tokenScopes);
 
-        /** @var BusinessService $service */
-        var_dump($accessToken);
-        die;
-        $service = $this->app->make(BusinessService::class);
-
-        // Validate Test Service
-        $result = $service->validate($accessToken);
-
-        // Assert is Valid
-        $this->assertTrue($result['is_valid']);
-
-        // Assert Is Not Expired
-        $this->assertFalse($result['is_expired']);
+        // Return Access Token
+        return $accessToken;
     }
 }
