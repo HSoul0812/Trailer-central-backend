@@ -38,8 +38,6 @@ class BusinessServiceTest extends TestCase
 
         // Validate Test Service
         $result = $service->validate($accessToken);
-        var_dump($accessToken);
-        var_dump($result);
 
         // Assert is Valid
         $this->assertTrue($result['is_valid']);
@@ -69,13 +67,6 @@ class BusinessServiceTest extends TestCase
             'issued_at' => date("Y-m-d H:i:s", $time)
         ]);
         $accessToken->scope = $scopes;
-
-        // Create Scopes
-        /*$tokenScopes = array();
-        foreach($scopes as $scope) {
-            $tokenScopes[] = factory(Scope::class)->make(['scope' => $scope])->toArray();
-        }
-        $accessToken->scopes()->createMany($tokenScopes);*/
 
         // Return Access Token
         return $accessToken;
