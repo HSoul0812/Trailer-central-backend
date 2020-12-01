@@ -61,7 +61,8 @@ class AccessToken extends Model
         'id_token',
         'expires_in',
         'expires_at',
-        'issued_at'
+        'issued_at',
+        'scope'
     ];
 
     /**
