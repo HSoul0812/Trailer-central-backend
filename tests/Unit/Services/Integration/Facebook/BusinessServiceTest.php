@@ -69,6 +69,7 @@ class BusinessServiceTest extends TestCase
             'scope' => $scopes
         ]);
         dd($accessToken);
+        var_dump($accessToken->scope);
 
         // Get Child Scopes
         /*$relationScopes = array();
