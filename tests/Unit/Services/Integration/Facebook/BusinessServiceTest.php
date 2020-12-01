@@ -46,7 +46,7 @@ class BusinessServiceTest extends TestCase
         ])->each(function ($user) use($scopes) {
             // Loop Scopes
             foreach($scopes as $scope) {
-                $user->scope()->attach(factory(Scope::class)->make(['scope' => $scope]));
+                $user->scopes()->attach(factory(Scope::class)->make(['scope' => $scope]));
             }
         });
 
