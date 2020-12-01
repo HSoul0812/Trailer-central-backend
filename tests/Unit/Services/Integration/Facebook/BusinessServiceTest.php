@@ -74,8 +74,7 @@ class BusinessServiceTest extends TestCase
         foreach($scopes as $scope) {
             $relationScopes[] = factory(Scope::class)->make(['scope' => $scope]);
         }
-        $collectScopes = collect($relationScopes);
-        $accessToken->setRelation('scopes', $collectScopes);
+        $accessToken->setRelation('scopes', $relationScopes);
 
         // Return Access Token
         return $accessToken;
