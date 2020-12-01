@@ -59,7 +59,9 @@ class CustomerController extends RestfulController
         ]);
 
         try {
-            return $this->transformer->transform($this->customerRepository->create($customerData));
+            $customer = $this->customerRepository->create($customerData);
+
+            return $this->response->item($customer, $this->transformer);
 
         } catch (\Exception $e) {
             Log::error($e->getMessage());
@@ -83,8 +85,9 @@ class CustomerController extends RestfulController
         $customerData['id'] = $id;
 
         try {
-            return $this->transformer->transform($this->customerRepository->update($customerData));
+            $customer = $this->customerRepository->update($customerData);
 
+            return $this->response->item($customer, $this->transformer);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
