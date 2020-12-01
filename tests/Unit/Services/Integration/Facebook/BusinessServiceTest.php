@@ -68,8 +68,8 @@ class BusinessServiceTest extends TestCase
             'issued_at' => date("Y-m-d H:i:s", $time),
             'scope' => $scopes
         ]);
-        dd($accessToken);
         var_dump($accessToken->scope);
+        dd($accessToken);
 
         // Get Child Scopes
         /*$relationScopes = array();
