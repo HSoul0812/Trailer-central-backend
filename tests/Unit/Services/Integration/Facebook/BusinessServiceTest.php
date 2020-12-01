@@ -53,10 +53,6 @@ class BusinessServiceTest extends TestCase
      */
     private function createAccessToken()
     {
-        $accessToken = AccessToken::find(72);
-        var_dump($accessToken->scope);
-        var_dump($accessToken);
-        die;
         // Get Access Token
         $time = strtotime($_ENV['TEST_FB_ISSUED_AT']);
         $scopes = explode(" ", $_ENV['TEST_FB_SCOPES']);
@@ -69,11 +65,12 @@ class BusinessServiceTest extends TestCase
             'id_token' => $_ENV['TEST_FB_ID_TOKEN'],
             'expires_in' => $_ENV['TEST_FB_EXPIRES_IN'],
             'expires_at' => date("Y-m-d H:i:s", $time + $_ENV['TEST_FB_EXPIRES_IN']),
-            'issued_at' => date("Y-m-d H:i:s", $time)
+            'issued_at' => date("Y-m-d H:i:s", $time),
+            'scope' => $scopes
         ]);
 
         // Get Child Scopes
-        $relationScopes = array();
+        /*$relationScopes = array();
         foreach($scopes as $scope) {
             $relationScopes[] = factory(Scope::class)->make([
                 'integration_token_id' => $accessToken->id,
@@ -86,7 +83,7 @@ class BusinessServiceTest extends TestCase
         var_dump($accessToken);
         var_dump($accessToken->scopes);
         var_dump($accessToken->scope);
-        die;
+        die;*/
 
         // Return Access Token
         return $accessToken;
