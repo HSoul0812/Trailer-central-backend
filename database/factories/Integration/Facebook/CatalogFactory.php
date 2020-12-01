@@ -20,7 +20,8 @@ $factory->define(Catalog::class, function (Faker $faker) {
         'business_id' => $_ENV['TEST_FB_BUSINESS_ID'],
         'catalog_id' => $_ENV['TEST_FB_CATALOG_ID'],
         'account_id' => $_ENV['TEST_FB_ACCOUNT_ID'],
-        'account_name' => $_ENV['TEST_FB_ACCOUNT_NAME']
+        'account_name' => $_ENV['TEST_FB_ACCOUNT_NAME'],
+        'feed_id' => $_ENV['TEST_FB_FEED_ID']
     ];
 });
 
