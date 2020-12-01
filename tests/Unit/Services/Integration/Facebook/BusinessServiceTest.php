@@ -38,6 +38,8 @@ class BusinessServiceTest extends TestCase
 
         // Validate Test Service
         $result = $service->validate($accessToken);
+        var_dump($accessToken);
+        var_dump($result);
 
         // Assert is Valid
         $this->assertTrue($result['is_valid']);
