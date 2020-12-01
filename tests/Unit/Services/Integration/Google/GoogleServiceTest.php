@@ -77,6 +77,7 @@ class GoogleServiceTest extends TestCase
 
         // Validate Show Catalog Result
         $result = $service->validate($accessToken);
+        var_dump($result);
 
         // Assert True
         $this->assertTrue($result['is_valid']);
