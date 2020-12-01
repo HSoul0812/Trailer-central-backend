@@ -3,6 +3,7 @@
 namespace App\Services\Integration\Facebook;
 
 use App\Exceptions\Integration\Facebook\FailedGetProductFeedException;
+use App\Exceptions\Integration\Facebook\FailedDeleteProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedValidateAccessTokenException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
