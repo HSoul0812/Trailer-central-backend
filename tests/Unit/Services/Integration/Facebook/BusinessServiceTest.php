@@ -66,13 +66,14 @@ class BusinessServiceTest extends TestCase
             'expires_at' => date("Y-m-d H:i:s", $time + $_ENV['TEST_FB_EXPIRES_IN']),
             'issued_at' => date("Y-m-d H:i:s", $time)
         ]);
+        $accessToken->scope = $_ENV['TEST_FB_SCOPES'];
 
         // Create Scopes
-        $tokenScopes = array();
+        /*$tokenScopes = array();
         foreach($scopes as $scope) {
             $tokenScopes[] = factory(Scope::class)->make(['scope' => $scope])->toArray();
         }
-        $accessToken->scopes()->createMany($tokenScopes);
+        $accessToken->scopes()->createMany($tokenScopes);*/
 
         // Return Access Token
         return $accessToken;
