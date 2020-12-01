@@ -68,7 +68,7 @@ class BusinessServiceTest extends TestCase
             'expires_at' => date("Y-m-d H:i:s", $time + $_ENV['TEST_FB_EXPIRES_IN']),
             'issued_at' => date("Y-m-d H:i:s", $time)
         ]);
-        $accessToken->scope = $_ENV['TEST_FB_SCOPES'];
+        $accessToken->scope = $scopes;
 
         // Create Scopes
         /*$tokenScopes = array();
