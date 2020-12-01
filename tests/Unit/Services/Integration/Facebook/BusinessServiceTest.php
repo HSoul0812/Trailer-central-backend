@@ -54,6 +54,7 @@ class BusinessServiceTest extends TestCase
     private function createAccessToken()
     {
         $accessToken = AccessToken::find(72);
+        var_dump($accessToken->scope);
         var_dump($accessToken);
         die;
         // Get Access Token
