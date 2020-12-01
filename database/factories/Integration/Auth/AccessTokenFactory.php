@@ -11,7 +11,7 @@ use Faker\Generator as Faker;
  */
 $factory->define(AccessToken::class, function (Faker $faker) {
     // Return Overrides
-    $time = time();
+    $time = strtotime($_ENV['TEST_GOOGLE_ISSUED_AT']);
     return [
         'id' => 99999999999999,
         'dealer_id' => 1001,
