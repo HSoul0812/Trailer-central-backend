@@ -124,11 +124,11 @@ class GoogleService implements GoogleServiceInterface
         $result = [
             'new_token' => [],
             'is_valid' => $this->validateIdToken($accessToken->id_token),
-            'is_expired' => true
+            'is_expired' => $this->client->isAccessTokenExpired()
         ];
 
         // Try to Refesh Access Token!
-        if(!empty($accessToken->refresh_token)) {
+        if(!empty($accessToken->refresh_token) && $result['is_expired']) {
             $refresh = $this->refreshAccessToken();
             $result['is_expired'] = $refresh['expired'];
             if(!empty($refresh['access_token'])) {
@@ -185,25 +185,17 @@ class GoogleService implements GoogleServiceInterface
 
         // Validate If Expired
         try {
-            // If there is no previous token or it's expired.
-            $this->client->isAccessTokenExpired();
-            if ($this->client->isAccessTokenExpired()) {
-                // Refresh the token if possible, else fetch a new one.
-                if ($refreshToken = $this->client->getRefreshToken()) {
-                    if($newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken)) {
-                        $result = $newToken;
-                        $result['expired'] = false;
-                    }
+            // Refresh the token if possible, else fetch a new one.
+            if ($refreshToken = $this->client->getRefreshToken()) {
+                if($newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken)) {
+                    $result = $newToken;
+                    $result['expired'] = false;
                 }
-            }
-            // Its Not Expired!
-            else {
-                $result['expired'] = false;
             }
         } catch (\Exception $e) {
             // We actually just want to verify this is true or false
             // If it throws an exception, that means its false, the token isn't valid
-            Log::error('Exception returned for Google Refresh Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            Log::error('Exception returned for Google Refresh Access Token: ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Result
