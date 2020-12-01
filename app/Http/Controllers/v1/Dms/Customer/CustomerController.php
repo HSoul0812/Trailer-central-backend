@@ -69,6 +69,30 @@ class CustomerController extends RestfulController
         }
     }
 
+    public function update($id, Request $request)
+    {
+        $customerData = $request->only([
+            'dealer_id', 'first_name', 'last_name', 'display_name', 'email', 'drivers_license', 'home_phone',
+            'work_phone', 'cell_phone', 'address', 'city', 'region', 'postal_code', 'country', 'website_lead_id',
+            'tax_exempt', 'is_financing_company', 'account_number', 'qb_id', 'gender', 'dob', 'deleted_at',
+            'is_wholesale', 'default_discount_percent', 'middle_name', 'company_name', 'use_same_address',
+            'shipping_address', 'shipping_city', 'shipping_region', 'shipping_postal_code', 'shipping_country',
+            'county', 'shipping_county',
+        ]);
+
+        $customerData['id'] = $id;
+
+        try {
+            return $this->transformer->transform($this->customerRepository->update($customerData));
+
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            throw new \Exception('Unable to create customer: ' . $e->getMessage());
+        }
+    }
+
     public function index(Request $request)
     {
         $request = new GetCustomersRequest($request->all());

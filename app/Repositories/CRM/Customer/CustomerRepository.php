@@ -7,6 +7,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
@@ -20,7 +21,8 @@ class CustomerRepository implements CustomerRepositoryInterface
         'email' => 'email.keyword',
     ];
 
-    public function create($params) {
+    public function create($params)
+    {
         $customer = new Customer($params);
         $customer->save();
         return $customer;
@@ -38,8 +40,12 @@ class CustomerRepository implements CustomerRepositoryInterface
         throw NotImplementedException;
     }
 
-    public function update($params) {
-        throw NotImplementedException;
+    public function update($params)
+    {
+        $customer = Customer::find($params['id']);
+        $customer->fill(Arr::except($params, 'id'));
+        $customer->save();
+        return $customer;
     }
 
     public function getCustomersWihOpenBalance($dealerId, $perPage = 15) {
