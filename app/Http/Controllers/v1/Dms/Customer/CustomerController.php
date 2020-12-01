@@ -39,7 +39,7 @@ class CustomerController extends RestfulController
      */
     public function __construct(CustomerRepositoryInterface $customerRepository, LeadRepositoryInterface $leadRepo, CustomerTransformer $transformer, Manager $fractal)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'search']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'search', 'create', 'update']);
         $this->leads = $leadRepo;
         $this->transformer = new CustomerTransformer;
         $this->fractal = $fractal;

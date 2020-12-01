@@ -24,6 +24,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     public function create($params)
     {
         $customer = new Customer($params);
+        $customer->dealer_id = $params['dealer_id'];
         $customer->save();
         return $customer;
     }
@@ -44,6 +45,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         $customer = Customer::find($params['id']);
         $customer->fill(Arr::except($params, 'id'));
+        $customer->dealer_id = $params['dealer_id'];
         $customer->save();
         return $customer;
     }
