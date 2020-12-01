@@ -3,6 +3,7 @@
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
 use App\Models\Integration\Auth\AccessToken;
+use App\Models\Integration\Auth\Scope;
 use Faker\Generator as Faker;
 
 /**
@@ -23,5 +24,15 @@ $factory->define(AccessToken::class, function (Faker $faker) {
         'expires_in' => $_ENV['TEST_GOOGLE_EXPIRES_IN'],
         'expires_at' => date("Y-m-d H:i:s", $time + $_ENV['TEST_GOOGLE_EXPIRES_IN']),
         'issued_at' => date("Y-m-d H:i:s", $time)
+    ];
+});
+
+/**
+ * Define Access Token Scope Factory
+ */
+$factory->define(Scope::class, function (Faker $faker) {
+    // Return Overrides
+    return [
+        'scope' => 'profile'
     ];
 });
