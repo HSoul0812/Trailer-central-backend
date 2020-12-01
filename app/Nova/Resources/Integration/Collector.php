@@ -72,23 +72,37 @@ class Collector extends Resource
                         ->options(array_combine(CollectorModel::FILE_FORMATS, CollectorModel::FILE_FORMATS))
                         ->displayUsingLabels()
                         ->rules('required'),
-                    Text::make('Path To Data', 'path_to_data')->hideFromIndex(),
+                    Text::make('Path To Data', 'path_to_data')->hideFromIndex()->help(
+                        'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
+                    ),
                 ]
             ),
 
             new Panel('Config', [
-                Boolean::make('Import Prices', 'import_prices')->hideFromIndex(),
+                Boolean::make('Import Prices', 'import_prices')->hideFromIndex()->help(
+                    'If an option is not selected, price fields (msrp, use_website_price, price, sale_price, website_price, total_of_cost, cost_of_unit) won\'t be imported'
+                ),
                 Boolean::make('Import Description', 'import_description')->hideFromIndex(),
                 Boolean::make('Show On RV Trader', 'show_on_rvtrader')->hideFromIndex(),
-                Boolean::make('Use Secondary Image', 'use_secondary_image')->hideFromIndex(),
+                Boolean::make('Use Secondary Image', 'use_secondary_image')->hideFromIndex()->help(
+                    'Images in the file are marked as secondary'
+                ),
                 Boolean::make('Append Floorplan Image', 'append_floorplan_image')->withMeta(['value' => $this->active ?? true])->hideFromIndex(),
                 Boolean::make('Update Images', 'update_images')->hideFromIndex(),
                 Boolean::make('Update Files', 'update_files')->hideFromIndex(),
                 Boolean::make('Import With Showroom Category', 'import_with_showroom_category')->hideFromIndex(),
-                Boolean::make('Unarchive Sold Items', 'unarchive_sold_items')->hideFromIndex(),
-                Text::make('Title Format', 'title_format')->rules('max:128')->hideFromIndex(),
-                Text::make('Images Delimiter', 'images_delimiter')->rules('max:128')->hideFromIndex(),
-                Text::make('Overridable Fields', 'overridable_fields')->rules('max:254')->hideFromIndex(),
+                Boolean::make('Unarchive Sold Items', 'unarchive_sold_items')->hideFromIndex()->help(
+                    'If item exists, but is archived, it will be unarchived upon selecting this option'
+                ),
+                Text::make('Title Format', 'title_format')->rules('max:128')->hideFromIndex()->help(
+                    'Title generation. A list of fields should be separated by commas (by default - "year,manufacturer,model,category")'
+                ),
+                Text::make('Images Delimiter', 'images_delimiter')->rules('max:128')->hideFromIndex()->help(
+                    'Separator between links to images in the file (by default - ",")'
+                ),
+                Text::make('Overridable Fields', 'overridable_fields')->rules('max:254')->hideFromIndex()->help(
+                    'If certain fields shouldn\'t be overwritten after changing these fields in dashboard, it\'s required to specify a list of these fields separated by commas'
+                ),
             ]),
 
             new Panel('Measures', [

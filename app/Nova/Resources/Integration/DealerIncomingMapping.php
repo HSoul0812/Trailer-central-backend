@@ -80,7 +80,7 @@ class DealerIncomingMapping extends Resource
 
         $attributes = Attribute::select('values', 'code')->get();
 
-        return [
+        $fields = [
             Select::make('Type', 'type')
                 ->options($sortedTypes)
                 ->rules('required')
@@ -106,54 +106,6 @@ class DealerIncomingMapping extends Resource
 
             NovaDependencyContainer::make([Text::make('Map To', 'map_to')->sortable()->rules('required')])
                 ->dependsOn('type', FeedDealerIncomingMapping::BRAND)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::FUEL_TYPE)->getValuesArray())
-                    ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::FUEL_TYPE)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::CONSTRUCTION)->getValuesArray())
-                    ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::CONSTRUCTION)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::NOSE_TYPE)->getValuesArray())
-                    ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::NOSE_TYPE)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::PULL_TYPE)->getValuesArray())
-                    ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::PULL_TYPE)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::COLOR)->getValuesArray())
-                    ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::COLOR)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::TRANSMISSION)->getValuesArray())
-                    ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::TRANSMISSION)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::DRIVE_TRAIL)->getValuesArray())
-                    ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::DRIVE_TRAIL)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options($attributes->firstWhere('code', FeedDealerIncomingMapping::ENGINE_SIZE)->getValuesArray())
-                    ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::ENGINE_SIZE)->onlyOnForms(),
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
@@ -184,6 +136,20 @@ class DealerIncomingMapping extends Resource
                 Text::make('Map To Brand', self::MAP_TO_BRAND)->sortable()->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND)->onlyOnForms(),
         ];
+
+        foreach ($attributes as $attribute) {
+            if (!in_array($attribute->code, array_keys(FeedDealerIncomingMapping::$types))) {
+                continue;
+            }
+
+            $fields[] = NovaDependencyContainer::make([
+                Select::make('Map To', 'map_to')
+                    ->options($attributes->firstWhere('code', $attribute->code)->getValuesArray())
+                    ->rules('required')
+            ])->dependsOn('type', $attribute->code)->onlyOnForms();
+        }
+
+        return $fields;
     }
 
     /**

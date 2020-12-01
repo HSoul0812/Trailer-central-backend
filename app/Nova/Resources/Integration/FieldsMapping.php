@@ -58,13 +58,18 @@ class FieldsMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Incoming Field', 'map_from')->rules('required')->sortable(),
+            Text::make('Incoming Field', 'map_from')->rules('required')->sortable()->help(
+                'For example, "Category". If it\'s needed, the path can be specified (for instance, Details/Category)'
+            ),
 
             Select::make('Our Field', 'map_to')
                 ->options(CollectorFields::select(['label', 'field'])->orderBy('label')->get()->pluck('label', 'field'))
                 ->rules('required')
                 ->sortable()
-                ->displayUsingLabels(),
+                ->displayUsingLabels()
+                ->help(
+                    '<span style="color: red">Important! The following fields must be specified: manufacturer, category, status. If some of the fields is absent in the file, the default value should be specified. (Default Value Mappings)</span>'
+                ),
 
             BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
 
