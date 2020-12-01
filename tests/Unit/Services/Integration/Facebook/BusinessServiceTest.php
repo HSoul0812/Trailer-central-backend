@@ -53,6 +53,9 @@ class BusinessServiceTest extends TestCase
      */
     private function createAccessToken()
     {
+        $accessToken = AccessToken::find(72);
+        var_dump($accessToken);
+        die;
         // Get Access Token
         $time = strtotime($_ENV['TEST_FB_ISSUED_AT']);
         $scopes = explode(" ", $_ENV['TEST_FB_SCOPES']);
