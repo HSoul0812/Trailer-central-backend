@@ -70,7 +70,7 @@ class BusinessServiceTest extends TestCase
         // Create Scopes
         $tokenScopes = array();
         foreach($scopes as $scope) {
-            $tokenScopes[] = factory(Scope::class)->make(['scope' => $scope]);
+            $tokenScopes[] = factory(Scope::class)->make(['scope' => $scope])->toArray();
         }
         $accessToken->scopes()->createMany($tokenScopes);
 
