@@ -38,7 +38,8 @@ class BusinessServiceTest extends TestCase
         $service = $this->app->make(BusinessService::class);
 
         // Validate Test Service
-        $result = $service->validate($accessToken);
+        $scopes = explode(" ", $_ENV['TEST_FB_SCOPES']);
+        $result = $service->validate($accessToken, $scopes);
 
         // Assert is Valid
         $this->assertTrue($result['is_valid']);
@@ -55,7 +56,6 @@ class BusinessServiceTest extends TestCase
     {
         // Get Access Token
         $time = strtotime($_ENV['TEST_FB_ISSUED_AT']);
-        $scopes = explode(" ", $_ENV['TEST_FB_SCOPES']);
         $accessToken = factory(AccessToken::class)->make([
             'token_type' => 'facebook',
             'relation_type' => 'fbapp_catalog',
@@ -65,27 +65,8 @@ class BusinessServiceTest extends TestCase
             'id_token' => $_ENV['TEST_FB_ID_TOKEN'],
             'expires_in' => $_ENV['TEST_FB_EXPIRES_IN'],
             'expires_at' => date("Y-m-d H:i:s", $time + $_ENV['TEST_FB_EXPIRES_IN']),
-            'issued_at' => date("Y-m-d H:i:s", $time),
-            'scope' => $scopes
+            'issued_at' => date("Y-m-d H:i:s", $time)
         ]);
-        var_dump($accessToken->scope);
-        dd($accessToken);
-
-        // Get Child Scopes
-        /*$relationScopes = array();
-        foreach($scopes as $scope) {
-            $relationScopes[] = factory(Scope::class)->make([
-                'integration_token_id' => $accessToken->id,
-                'scope' => $scope
-            ]);
-        }
-        $collectScopes = new Collection($relationScopes);
-        $accessToken->setRelation('scopes', $collectScopes);
-        $accessToken->scope = $scopes;
-        var_dump($accessToken);
-        var_dump($accessToken->scopes);
-        var_dump($accessToken->scope);
-        die;*/
 
         // Return Access Token
         return $accessToken;

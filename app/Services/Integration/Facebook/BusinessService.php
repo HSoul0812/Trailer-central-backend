@@ -96,14 +96,15 @@ class BusinessService implements BusinessServiceInterface
      * Validate Facebook SDK Access Token Exists and Refresh if Possible
      * 
      * @param string || AccessToken $accessToken
+     * @param array scopes to use to validate if no scopes exist on access token
      * @return array of validation info
      */
-    public function validate($accessToken) {
+    public function validate($accessToken, $scopes = array()) {
         // Configure Client
         $this->initApi($accessToken);
 
         // Initialize Vars
-        $result = $this->validateAccessToken($accessToken);
+        $result = $this->validateAccessToken($accessToken, $scopes);
         $result['refresh_token'] = null;
 
         // Access Token is Valid?
