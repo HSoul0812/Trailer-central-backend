@@ -6,8 +6,9 @@ namespace App\Providers;
 
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Dms\FinancingCompany;
-use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
+use App\Models\CRM\Dms\TaxCalculator;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\Pos\Sale;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
@@ -31,6 +32,8 @@ use App\Repositories\Dms\ServiceOrderRepository;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Repositories\Dms\SettingsRepository;
 use App\Repositories\Dms\SettingsRepositoryInterface;
+use App\Repositories\Dms\TaxCalculatorRepository;
+use App\Repositories\Dms\TaxCalculatorRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
@@ -65,6 +68,10 @@ class DmsServiceProvider extends ServiceProvider
 
         $this->app->bind(ServiceItemTechnicianRepositoryInterface::class, function () {
             return new ServiceItemTechnicianRepository(ServiceItemTechnician::query());
+        });
+
+        $this->app->bind(TaxCalculatorRepositoryInterface::class, function () {
+            return new TaxCalculatorRepository(TaxCalculator::query());
         });
     }
 }
