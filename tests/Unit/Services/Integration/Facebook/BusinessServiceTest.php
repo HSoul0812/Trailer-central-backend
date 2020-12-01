@@ -5,6 +5,7 @@ namespace Tests\Unit\Services\Integration\Facebook;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Auth\Scope;
 use App\Services\Integration\Facebook\BusinessService;
+use Illuminate\Support\Collection;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tests\TestCase;
 
@@ -74,7 +75,9 @@ class BusinessServiceTest extends TestCase
         foreach($scopes as $scope) {
             $relationScopes[] = factory(Scope::class)->make(['scope' => $scope]);
         }
-        $accessToken->setRelation('scopes', $relationScopes);
+        $collectScopes = new Collection($relationScopes);
+        $accessToken->setRelation('scopes', $collectScopes);
+        $accessToken->scope = $scopes;
 
         // Return Access Token
         return $accessToken;
