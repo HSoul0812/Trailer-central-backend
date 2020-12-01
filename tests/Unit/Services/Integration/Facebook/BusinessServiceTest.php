@@ -37,6 +37,8 @@ class BusinessServiceTest extends TestCase
         $service = $this->app->make(BusinessService::class);
 
         // Validate Test Service
+        var_dump($accessToken->scopes);
+        var_dump($accessToken->scope);
         $result = $service->validate($accessToken);
 
         // Assert is Valid
