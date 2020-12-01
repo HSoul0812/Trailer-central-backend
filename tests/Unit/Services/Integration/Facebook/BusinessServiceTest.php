@@ -38,8 +38,6 @@ class BusinessServiceTest extends TestCase
         $service = $this->app->make(BusinessService::class);
 
         // Validate Test Service
-        var_dump($accessToken->scopes);
-        var_dump($accessToken->scope);
         $result = $service->validate($accessToken);
 
         // Assert is Valid
@@ -81,6 +79,10 @@ class BusinessServiceTest extends TestCase
         $collectScopes = new Collection($relationScopes);
         $accessToken->setRelation('scopes', $collectScopes);
         $accessToken->scope = $scopes;
+        var_dump($accessToken);
+        var_dump($accessToken->scopes);
+        var_dump($accessToken->scope);
+        die;
 
         // Return Access Token
         return $accessToken;
