@@ -107,13 +107,17 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     SUM(sales_parts.cost_amount) part_cost_amount,
 
                     SUM(sales_labor.sale_amount) labor_sale_amount,
-                    SUM(sales_labor.cost_amount) labor_cost_amount
+                    SUM(sales_labor.cost_amount) labor_cost_amount,
+                    inventory.stock as inventory_stock,
+                    inventory.manufacturer as inventory_make,
+                    inventory.notes as inventory_notes
 
                 FROM dms_unit_sale us
                 LEFT JOIN dms_unit_sale_accessory usa ON usa.unit_sale_id=us.id
                 LEFT JOIN dms_customer c ON us.buyer_id=c.id
                 LEFT JOIN qb_invoices i ON i.unit_sale_id=us.id
-
+                LEFT JOIN inventory ON inventory.inventory_id = us.inventory_id
+                
                 /* use this to prevent getting DP invoices */
                 JOIN qb_invoice_items ii ON i.id=ii.invoice_id
 
@@ -165,7 +169,10 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     SUM(sales_part.sale_amount) as part_sale_amount,
                     SUM(sales_part.cost_amount) as part_cost_amount,
                     SUM(sales_labor.sale_amount) as labor_sale_amount,
-                    SUM(sales_labor.cost_amount) as labor_cost_amount
+                    SUM(sales_labor.cost_amount) as labor_cost_amount, 
+                    NULL as inventory_stock,
+                    NULL as inventory_make,
+                    NULL as inventory_notes
 
                 FROM crm_pos_sales ps
                     LEFT JOIN dms_customer c ON ps.customer_id=c.id

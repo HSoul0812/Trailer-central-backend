@@ -29,6 +29,9 @@ class SalesReportTransformer extends TransformerAbstract
                     'part_cost_amount' => (float)$row['part_cost_amount'],
                     'labor_sale_amount' => (float)$row['labor_sale_amount'],
                     'labor_cost_amount' => (float)$row['labor_cost_amount'],
+                    'inventory_stock' => $row['inventory_stock'],
+                    'inventory_make' => $row['inventory_make'],
+                    'inventory_notes' => $row['inventory_notes']
                 ];
             }
         }
