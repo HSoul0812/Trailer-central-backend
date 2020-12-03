@@ -386,6 +386,8 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
+        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
+        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
         $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
         $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
 
@@ -623,6 +625,16 @@ $api->version('v1', function ($route) {
         $route->post('financing-companies', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@create');
         $route->put('financing-companies/{id}', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@update');
         $route->delete('financing-companies/{id}', 'App\Http\Controllers\v1\Dms\FinancingCompanyController@destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tax Calculator
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('tax-calculators', 'App\Http\Controllers\v1\Dms\TaxCalculatorController@index');
 
         /*
         |--------------------------------------------------------------------------
