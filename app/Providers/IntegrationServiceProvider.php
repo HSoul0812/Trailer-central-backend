@@ -9,6 +9,8 @@ use App\Repositories\Integration\Facebook\CatalogRepository;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepository;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
+use App\Services\CRM\Email\ScrapeRepliesService;
+use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
 use App\Services\CRM\User\SalesAuthService;
 use App\Services\CRM\User\SalesAuthServiceInterface;
 use App\Services\Integration\AuthService;
@@ -32,6 +34,7 @@ class IntegrationServiceProvider extends ServiceProvider
     public function register()
     {
         // Integration Services
+        $this->app->bind(ScrapeRepliesServiceInterface::class, ScrapeRepliesService::class);
         $this->app->bind(SalesAuthServiceInterface::class, SalesAuthService::class);
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->bind(GoogleServiceInterface::class, GoogleService::class);

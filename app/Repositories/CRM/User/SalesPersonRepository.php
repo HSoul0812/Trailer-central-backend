@@ -66,7 +66,11 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $dealerId = $params['dealer_id'] ?? $this->requestQueryableRequest->input('dealer_id');
         if ($dealerId) {
             $newDealerUser = NewDealerUser::findOrFail($dealerId);
-            $query = $query->WHERE('user_id', $newDealerUser->user_id);
+            $query = $query->where('user_id', $newDealerUser->user_id);
+        }
+
+        if (isset($params['user_id'])) {
+            $query = $query->where('user_id', $params['user_id']);
         }
 
         return $query->get();
@@ -79,11 +83,32 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @return type
      */
     public function getAll($params) {
-        $query = SalesPerson::SELECT('*');
+        $query = SalesPerson::select('*');
 
         if (isset($params['dealer_id'])) {
             $newDealerUser = NewDealerUser::findOrFail($params['dealer_id']);
-            $query = $query->WHERE('user_id', $newDealerUser->user_id);
+            $query = $query->where('user_id', $newDealerUser->user_id);
+        }
+
+        if (isset($params['user_id'])) {
+            $query = $query->where('user_id', $params['user_id']);
+        }
+
+        // Get Sales People With IMAP and/or Gmail Credentials
+        if (!empty($params['has_imap'])) {
+            // Require Sales Person ID NULL or 0
+            $query = $query->where(function($query) {
+                $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
+                      ->orWhere(LeadStatus::getTableName().'.sales_person_id', 0);
+            })->where(Lead::getTableName().'.is_archived', 0)
+              ->where(Lead::getTableName().'.is_spam', 0)
+              ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY');
+            $select->where("imap_password IS NOT NULL AND imap_password <> ''");
+            $select->where("imap_server IS NOT NULL AND imap_server <> ''");
+            $select->where("imap_port IS NOT NULL AND imap_port <> ''");
+            $select->where("(imap_failed IS NULL or imap_failed = 0)");
+            $select->where("deleted_at IS NULL");
+            $query = $query->where('user_id', $params['user_id']);
         }
 
         if (!isset($params['per_page'])) {
@@ -91,6 +116,31 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         }
 
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * Get All Salespeople w/Imap Credentials
+     *
+     * @param int $userId
+     * @return Collection of SalesPerson
+     */
+    public function getAllImap($userId) {
+        return SalesPerson::select(SalesPerson::getTableName().'.*')
+                          ->leftJoin(AccessToken::getTableName(), function($join) {
+            $join->on(AccessToken::getTableName().'.relation_id', '=', SalesPerson::getTableName().'.id')
+                 ->whereTokenType('google')
+                 ->whereRelationType('sales_person');
+        })->where('user_id', $userId)->where(function($query) {
+            $query->whereNotNull(AccessToken::getTableName().'.id')
+                  ->where(function($query) {
+                    $query->whereNotNull('imap_password')
+                          ->where('imap_password', '<>', '')
+                          ->whereNotNull('imap_server')
+                          ->where('imap_server', '<>', '')
+                          ->whereNotNull('imap_port')
+                          ->where('imap_port', '<>', '');
+            });
+        });
     }
 
     /**
