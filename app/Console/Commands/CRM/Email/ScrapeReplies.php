@@ -3,6 +3,7 @@
 namespace App\Console\Commands\CRM\Email;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Redis;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
@@ -34,6 +35,27 @@ class ScrapeReplies extends Command
     protected $service;
 
     /**
+     * @var Illuminate\Support\Facades\Redis
+     */
+    protected $redis;
+
+    /**
+     * @var string
+     */
+    protected $lkey = 'cron:email-history:sales-people';
+    protected $skey = 'db:sales-people';
+
+    /**
+     * @var string
+     */
+    protected $command = 'email:scrape-replies';
+
+    /**
+     * @var int
+     */
+    protected $salesPersonId = 0;
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -45,6 +67,19 @@ class ScrapeReplies extends Command
 
         $this->service = $service;
         $this->salespeople = $salesRepo;
+        $this->redis = Redis::connection('default');
+
+        // Get Sales Person From Predis
+        try {
+            $this->salesPersonId = $this->redis->lpop($this->lkey);
+        } catch(\Predis\Connection\ConnectionException $e) {
+            // Send Slack Error
+            $this->sendSlackError($e->getMessage());
+            $this->error("{$this->command} exception returned connecting to redis on scrape email replies command: " . $e->getMessage());
+
+            // Kill Set (Invalid) Vars
+            $this->salesPersonId = 0;
+        }
     }
 
     /**
@@ -66,44 +101,99 @@ class ScrapeReplies extends Command
         try {
             // Log Start
             $now = $this->datetime->format("l, F jS, Y");
-            $command = "email:scrape-replies" . (!empty($dealerId) ? ' ' . $dealerId : '');
-            $this->info("{$command} started {$now}");
+            $this->command .= (!empty($dealerId) ? ' ' . $dealerId : '');
+            $this->info("{$this->command} started {$now}");
 
             // Handle Dealer Differently
             if(!empty($dealerId)) {
-                $dealers = NewDealerUser::where('id', $dealerId)->with('user')->get();
+                $dealers = NewDealerUser::where('id', $dealerId)->has('leadEmails')->with('user')->get();
             } else {
-                $dealers = NewDealerUser::has('activeCrmUser')->with('user')->get();
+                // Get Dealers With Active CRM
+                $dealers = NewDealerUser::has('activeCrmUser')->has('leadEmails')->with('user')->get();
             }
-            $this->info("{$command} found " . count($dealers) . " dealers to process");
+            $this->info("{$this->command} found " . count($dealers) . " dealers to process");
 
             // Get Dealers With Active CRM
             foreach($dealers as $dealer) {
-                // Get Salespeople With Email Credentials
-                $salespeople = $this->salespeople->getAllImap($dealer->user_id);
-                if(count($salespeople) < 1) {
-                    continue;
-                }
-
-                // Loop Campaigns for Current Dealer
-                $this->info("{$command} dealer #{$dealer->id} found " . count($salespeople) . " active salespeople with imap credentials to process");
-                foreach($salespeople as $salesperson) {
-                    // Try Catching Error for Sales Person
-                    try {
-                        // Import Emails
-                        $this->service->import($dealer, $salesperson);
-                    } catch(\Exception $e) {
-                        $this->error("{$command} exception returned on sales person #{$salesperson->id} {$e->getMessage()}: {$e->getTraceAsString()}");
-                    }
+                // Parse Single Dealer
+                $imported = $this->processDealer($dealer);
+                if($imported !== false) {
+                    $this->info("{$this->command} imported {$imported} emails on dealer #{$dealer->id}");
+                } else {
+                    $this->info("{$this->command} skipped importing emails on dealer #{$dealer->id}");
                 }
             }
         } catch(\Exception $e) {
-            $this->error("{$command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
+            $this->error("{$this->command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
         }
 
         // Log End
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
-        $this->info("{$command} finished on " . $datetime->format("l, F jS, Y"));
+        $this->info("{$this->command} finished on " . $datetime->format("l, F jS, Y"));
+    }
+
+    /**
+     * Process Dealer
+     * 
+     * @param User $dealer
+     */
+    private function processDealer($dealer) {
+        // Doesn't Belong to Sales Person?!
+        $salesPerson = SalesPerson::find($this->salesPersonId);
+        if(!empty($this->salesPersonId) && !empty($salesPerson->user_id)) {
+            if($salesPerson->user_id !== $dealer->user_id) {
+                return false;
+            }
+        }
+
+        // Get Salespeople With Email Credentials
+        $salespeople = $this->salespeople->getAllImap($dealer->user_id);
+        if(count($salespeople) < 1) {
+            return false;
+        }
+
+        // Loop Campaigns for Current Dealer
+        $imported = 0;
+        $this->info("{$this->command} dealer #{$dealer->id} found " . count($salespeople) . " active salespeople with imap credentials to process");
+        foreach($salespeople as $salesperson) {
+            // Not Correct Sales Person?!
+            if($salesperson->id !== $this->salesPersonId) {
+                continue;
+            }
+
+            // Try Catching Error for Sales Person
+            try {
+                // Set Current Sales Person to Redis
+                $this->redis->hmset($this->skey, $salesPerson->id, json_encode($salesPerson));
+                $this->salesPersonId = 0;
+
+                // Import Emails
+                $this->info("{$this->command} importing emails on sales person #{$salesperson->id} for dealer #{$dealer->id}");
+                $imports = $this->service->import($dealer, $salesperson);
+
+                // Adjust Total Import Counts
+                $this->info("{$this->command} imported {$imports} emails on sales person #{$salesperson->id}");
+                $imported += $imports;
+            } catch(\Exception $e) {
+                $this->error("{$this->command} exception returned on sales person #{$salesperson->id} {$e->getMessage()}: {$e->getTraceAsString()}");
+            }
+        }
+
+        // Return Imported Email Count for Dealer
+        return $imported;
+    }
+
+    /**
+     * Send Slack Error
+     */
+    private function sendSlackError($error) {
+        // Get Title/Message
+        $title = "CRM EMAIL IMPORTER ERROR";
+        $msg = "Exception returned trying to connect to redis client! Client returned exception: " . $error;
+
+        // Send to Slack
+        $this->slack->sendSlackNotify($msg, $title);
+        return $msg;
     }
 }

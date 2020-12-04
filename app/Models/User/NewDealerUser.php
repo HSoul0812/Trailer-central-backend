@@ -6,6 +6,7 @@ use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Models\CRM\Email\Processed;
 use App\Models\CRM\User\SalesPerson;
 use Illuminate\Database\Eloquent\Model;
 
@@ -114,6 +115,36 @@ class NewDealerUser extends Model
      */
     public function salespeopleEmails() {
         return $this->salespeople()->whereNotNull('email')->where('email', '<>', '')->orderBy('id', 'asc');
+    }
+
+    /**
+     * Get leads
+     * 
+     * @return HasMany
+     */
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'dealer_id', 'id')->where('is_spam', 0);
+    }
+
+    /**
+     * Get leads with valid email addresses
+     * 
+     * @return HasMany
+     */
+    public function leadEmails()
+    {
+        return $this->leads()->where('email_address', '<>', '')
+                             ->whereNotNull('email_address');
+    }
+
+    /**
+     * Get Processed Emails
+     * 
+     * @return HasMany
+     */
+    public function processedEmails() {
+        return $this->hasMany(Processed::class, 'user_id', 'user_id');
     }
     
     public static function getTableName() {

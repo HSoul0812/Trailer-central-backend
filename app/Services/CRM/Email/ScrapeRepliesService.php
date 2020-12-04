@@ -7,12 +7,9 @@ use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\CampaignSent;
-use App\Services\CRM\Text\TextServiceInterface;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\CRM\Text\CampaignRepositoryInterface;
-use App\Repositories\CRM\Text\TemplateRepositoryInterface;
-use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Services\CRM\Email\ImapServiceInterface;
+use App\Services\Integration\Google\GmailServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -25,54 +22,28 @@ use Carbon\Carbon;
 class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 {
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var App\Services\Integration\Google\GmailServiceInterface
      */
-    protected $textService;
+    protected $gmail;
 
     /**
-     * @var App\Repositories\CRM\Leads\LeadRepository
+     * @var App\Services\CRM\Email\ImapServiceInterface
      */
-    protected $leads;
+    protected $imap;
 
     /**
-     * @var App\Repositories\CRM\Text\TextRepository
+     * ScrapeRepliesService constructor.
      */
-    protected $texts;
-
-    /**
-     * @var App\Repositories\CRM\Text\CampaignRepository
-     */
-    protected $campaigns;
-
-    /**
-     * @var App\Repositories\CRM\Text\TemplateRepository
-     */
-    protected $templates;
-
-    /**
-     * @var App\Repositories\User\DealerLocationRepository
-     */
-    protected $dealerLocation;
-
-    /**
-     * CampaignService constructor.
-     */
-    public function __construct(TextServiceInterface $text,
-                                LeadRepositoryInterface $leadRepo,
-                                TextRepositoryInterface $textRepo,
-                                CampaignRepositoryInterface $campaignRepo,
-                                TemplateRepositoryInterface $templateRepo,
-                                DealerLocationRepositoryInterface $dealerLocationRepo)
+    public function __construct(GmailServiceInterface $gmail,
+                                ImapServiceInterface $imap,
+                                EmailHistoryRepositoryInterface $emails)
     {
-        // Initialize Text Service
-        $this->textService = $text;
+        // Initialize Services
+        $this->gmail = $gmail;
+        $this->imap = $imap;
 
         // Initialize Repositories
-        $this->leads = $leadRepo;
-        $this->texts = $textRepo;
-        $this->campaigns = $campaignRepo;
-        $this->templates = $templateRepo;
-        $this->dealerLocation = $dealerLocationRepo;
+        $this->emails = $emails;
     }
 
     /**
@@ -83,117 +54,83 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return false || array of EmailHistory
      */
     public function import($dealer, $salesperson) {
-        // Get From Number
-        $from_number = $campaign->from_sms_number;
-        if(empty($from_number)) {
-            $from_number = $this->dealerLocation->findDealerSmsNumber($dealer->id);
-            if(empty($from_number)) {
-                throw new NoCampaignSmsFromNumberException();
+        // Messages Return?
+        $imported = 0;
+        if(count($this->messages) > 0 || count($this->leads) > 0) {
+            // Process Messages
+            echo date("r") . ": " . count($this->messages) . " Sent Emails Found, " .
+                count($this->leads) . " Lead Email Addresses Found, " .
+                "Processing Getting Emails for User #" . $salesPerson->user_id . PHP_EOL;
+            foreach($salesperson->folders as $folder) {
+                // Import Folder
+                $imported = $this->importFolder($dealer, $salesperson, $folder);
             }
-        }
-
-        // Get Unsent Campaign Leads
-        if(count($campaign->leads) < 1) {
-            throw new NoLeadsProcessCampaignException();
-        }
-
-        // Loop Leads for Current Dealer
-        $sent = collect([]);
-        foreach($campaign->leads as $lead) {
-            // Not a Valid To Number?!
-            if(empty($lead->text_phone)) {
-                continue;
-            }
-
-            // Send Lead
-            $leadSent = $this->sendToLead($from_number, $dealer, $campaign, $lead);
-            $sent->push($leadSent);
         }
 
         // Return Campaign Sent Entries
-        return $sent;
+        return $imported;
     }
 
     /**
-     * Send Text to Lead
+     * Import Single Folder
      * 
-     * @param string $from_number sms from number
-     * @param NewDealerUser $dealer
-     * @param Campaign $campaign
-     * @param Lead $lead
-     * @return CampaignSent
+     * @param SalesPerson $salesperson
+     * @param Folder $folder
+     * @return false || array of EmailHistory
      */
-    private function sendToLead($from_number, $dealer, $campaign, $lead) {
-        // Get Text Message
-        $textMessage = $this->templates->fillTemplate($campaign->template->template, [
-            'lead_name' => $lead->full_name,
-            'title_of_unit_of_interest' => $lead->inventory_title,
-            'dealer_name' => $dealer->user->name
-        ]);
-
-        try {
-            // Send Text
-            $this->textService->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
-            $status = CampaignSent::STATUS_SENT;
-        } catch (CustomerLandlineNumberException $ex) {
-            $status = CampaignSent::STATUS_LANDLINE;
-        } catch (Exception $ex) {
-            $status = CampaignSent::STATUS_INVALID;
+    private function importFolder($salesperson, $folder) {
+        // Missing Folder Name?
+        if(empty($folder->name)) {
+            $this->updateFolder($folder, false, false);
+            return false;
         }
 
-        // Return Sent Result
-        return $this->markLeadSent($from_number, $campaign, $lead, $textMessage, $status);
+        // Get From Google?
+        if(!empty($salesperson->googleToken)) {
+            $replies = $this->importGoogle($salesperson->googleToken, $folder);
+        }
+        // Get From IMAP Instead
+        else {
+            $replies = $this->importImap($salesperson, $folder);
+        }
+
+        // Insert Replies Into DB
+
+        // Return Inserted Replies
+        return $replies;
     }
 
     /**
-     * Mark Lead as Sent
+     * Import Google
      * 
-     * @param string $from_number sms from number
-     * @param Campaign $campaign
-     * @param Lead $lead
-     * @param string $textMessage filled text message
-     * @param string $status
-     * @return CampaignSent
+     * @param AccessToken $accessToken
+     * @param EmailFolder $folder
+     * @return false || array of EmailHistory
      */
-    private function markLeadSent($from_number, $campaign, $lead, $textMessage, $status) {
-        // Handle Transaction
-        $textLog = null;
-        DB::transaction(function() use ($from_number, $campaign, $lead, $textMessage, &$status, &$textLog) {
-            // Save Lead Status
-            $this->leads->update([
-                'id' => $lead->identifier,
-                'lead_status' => Lead::STATUS_MEDIUM,
-                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-            ]);
-            $status = CampaignSent::STATUS_LEAD;
+    private function importGoogle($accessToken, $folder) {
+        // Get Emails From Google
+        $messages = $this->gmail->messages($accessToken, $folder);
 
-            // Log SMS
-            $textLog = $this->texts->create([
-                'lead_id'     => $lead->identifier,
-                'from_number' => $from_number,
-                'to_number'   => $lead->text_phone,
-                'log_message' => $textMessage
-            ]);
-        });
+        // Loop Messages
+        foreach($messages as $message) {
+            // Get Headers
+            $payload = $message->getPayload();
 
-        // Set Logged Status
-        if(!empty($textLog->id)) {
-            $status = CampaignSent::STATUS_LOGGED;
+            // Get Headers
+            $headers = $payload->getHeaders();
+            var_dump($headers);
+        }
+    }
+
+    /**
+     * Import Via Imap
+     */
+    private function importImap($salesperson, $folder) {
+        // NTLM?
+        if($salesperson->smtp_auth === 'NTLM') {
+            $charset = 'US-ASCII';
         }
 
-        // Handle Transaction
-        $sent = null;
-        DB::transaction(function() use ($campaign, $lead, &$status, &$textLog, &$sent) {
-            // Mark Blast as Sent to Lead
-            $sent = $this->campaigns->sent([
-                'text_campaign_id' => $campaign->id,
-                'lead_id' => $lead->identifier,
-                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-                'status' => $status
-            ]);
-        });
-
-        // Return Sent
-        return $sent;
+        
     }
 }

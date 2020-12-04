@@ -3,9 +3,11 @@
 namespace App\Models\CRM\User;
 
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
+use App\Models\Integration\Auth\AccessToken;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -128,6 +130,29 @@ class SalesPerson extends Model implements Filterable
     public function folders()
     {
         return $this->hasMany(EmailFolder::class, 'sales_person_id')->where('deleted', 0);
+    }
+
+    /**
+     * Google Access Token
+     * 
+     * @return HasOne
+     */
+    public function googleToken()
+    {
+        return $this->hasOne(AccessToken::class, 'relation_id', 'id')
+                    ->whereTokenType('google')
+                    ->whereRelationType('sales_person');
+    }
+
+    /**
+     * Get From Email History
+     * 
+     * @return HasMany
+     */
+    public function fromEmails() {
+        return $this->hasMany(EmailHistory::class, 'from_email', 'email')
+                    ->orWhere(SalesPerson::getTableName() . '.smtp_email', '=', EmailHistory::getTableName() . '.from_email');
+        
     }
 
     /**

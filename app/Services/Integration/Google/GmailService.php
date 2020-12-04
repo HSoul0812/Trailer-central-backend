@@ -74,10 +74,8 @@ class GmailService implements GmailServiceInterface
      * @return array of validation info
      */
     public function send($accessToken, $params) {
-        // ID Token Exists?
-        if(empty($accessToken->id_token)) {
-            throw new MissingGapiIdTokenException;
-        }
+        // Set Access Token
+        $this->setAccessToken($accessToken);
 
         // Create Message ID
         if(empty($params['message_id'])) {
@@ -86,15 +84,6 @@ class GmailService implements GmailServiceInterface
             $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
         }
         $params['message_id'] = $messageId;
-
-        // Configure Client
-        $this->client->setAccessToken([
-            'access_token' => $accessToken->access_token,
-            'id_token' => $accessToken->id_token,
-            'expires_in' => $accessToken->expires_in,
-            'created' => strtotime($accessToken->issued_at)
-        ]);
-        $this->client->setScopes($accessToken->scope);
 
 
         // Insert Gmail
@@ -132,19 +121,92 @@ class GmailService implements GmailServiceInterface
     }
 
     /**
-     * Get All Messages in Specific Folder
+     * Get All Messages With Label
      * 
-     * @param array $params
+     * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
+     * @param array $params
      * @return whether the email was sent successfully or not
      */
-    public function getFolder($accessToken, $params, $inbox = 'INBOX') {
+    public function messages($accessToken, $folder = 'INBOX', $params = []) {
+        // Configure Client
+        $this->setAccessToken($accessToken);
+
+
+        // Get Labels
+        $label = $this->labels($accessToken, $folder);
+
+        // Get Messages
+        $results = $this->gmail->users_messages->listUsersMessages('me', ['labelIds' => [$label->id]]);
+        if (count($results->getMessages()) == 0) {
+            return array();
+        }
+
+        // Get Messages
+        $messages = array();
+        foreach ($results->getMessages() as $message) {
+            $messages[] = $message;
+        }
+
+        // Get Messages?!
+        return $messages;
+    }
+
+    /**
+     * Get All Labels for User
+     * 
+     * @param AccessToken $accessToken
+     * @param string || null $search
+     * @return array of labels || single label
+     */
+    public function labels($accessToken, $search = null) {
+        // Configure Client
+        $this->setAccessToken($accessToken);
+
+        // Get Labels
+        $results = $service->users_labels->listUsersLabels('me');
+        if(count($results->getLabels()) == 0) {
+            throw new MissingGmailLabelsException;
+        }
+
+        // Get Labels
+        $labels = array();
+        foreach($results->getLabels() as $label) {
+            // Search for Label Exists?
+            if(!empty($search)) {
+                // Skip If Label Doesn't Match!
+                if($search !== $label->getName()) {
+                    continue;
+                }
+            }
+
+            // Add Label to Array
+            $labels[] = $label;
+        }
+
+        // Return Labels
+        if(count($labels) > 1) {
+            return $labels;
+        }
+
+        // Only One?
+        return reset($labels);
+    }
+
+
+    /**
+     * Set Access Token on Client
+     * 
+     * @param type $accessToken
+     * @return void
+     */
+    private function setAccessToken($accessToken) {
         // ID Token Exists?
         if(empty($accessToken->id_token)) {
             throw new MissingGapiIdTokenException;
         }
 
-        // Configure Client
+        // Set Access Token on Client
         $this->client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
@@ -152,9 +214,7 @@ class GmailService implements GmailServiceInterface
             'created' => strtotime($accessToken->issued_at) * 1000
         ]);
         $this->client->setScopes($accessToken->scope);
-        return null;
     }
-
 
     /**
      * Prepare Message to Send to Gmail
