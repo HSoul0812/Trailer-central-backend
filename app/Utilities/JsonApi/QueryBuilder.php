@@ -171,8 +171,7 @@ class QueryBuilder implements QueryBuilderInterface
     private function buildPagination()
     {
         // if limit and offset are specified, skip this
-        if ($this->request->input('limit', null) &&
-            $this->request->input('offset', null))
+        if ($this->request->input('limit', null) !== null && $this->request->input('offset', null) !== null)
         {
             return $this;
         }
