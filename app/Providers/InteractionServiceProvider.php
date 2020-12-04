@@ -19,6 +19,8 @@ use App\Repositories\CRM\Text\NumberRepository;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Email\ScrapeRepliesService;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
+use App\Services\CRM\Email\ImapService;
+use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\CRM\Text\TwilioService;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Services\CRM\Text\BlastService;
@@ -42,6 +44,7 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(BlastServiceInterface::class, BlastService::class);
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
         $this->app->bind(ScrapeRepliesServiceInterface::class, ScrapeRepliesService::class);
+        $this->app->bind(ImapServiceInterface::class, ImapService::class);
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
 
         // Interaction Repositories
