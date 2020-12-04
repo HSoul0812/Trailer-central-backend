@@ -40,15 +40,9 @@ class GmailService implements GmailServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct(
-        InteractionEmailServiceInterface $interactionEmail,
-        GoogleClientInterface $client,
-        GoogleGmailInterface $gmail
-    ) {
+    public function __construct(InteractionEmailServiceInterface $interactionEmail) {
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
-        $this->client = $client;
-        $this->gmail = $gmail;
 
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
@@ -56,6 +50,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Initialize Client
+        $this->client = new \Google_Client();
         $this->client->setApplicationName($_ENV['GOOGLE_OAUTH_APP_NAME']);
         $this->client->setClientId($_ENV['GOOGLE_OAUTH_CLIENT_ID']);
         if(empty($this->client)) {
