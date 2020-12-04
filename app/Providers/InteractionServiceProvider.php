@@ -28,7 +28,7 @@ use App\Services\CRM\Text\CampaignServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailService;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 
-class IntegrationServiceProvider extends ServiceProvider
+class InteractionServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
