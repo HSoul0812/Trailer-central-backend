@@ -104,8 +104,6 @@ use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Services\CRM\Leads\AutoAssignService;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
-use App\Jobs\Mailer\UserMailerJob;
-use App\Rules\CRM\Leads\ValidLeadSource;
 use Laravel\Nova\Nova;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
@@ -143,6 +141,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
         \Validator::extend('valid_form_map_field', 'App\Rules\Website\Forms\ValidMapField@passes');
         \Validator::extend('valid_form_map_table', 'App\Rules\Website\Forms\ValidMapTable@passes');
+        \Validator::extend('valid_token_type', 'App\Rules\Integration\Auth\ValidTokenType@passes');
+        \Validator::extend('valid_relation_type', 'App\Rules\Integration\Auth\ValidRelationType@passes');
         \Validator::extend('valid_part_order_status', 'App\Rules\Parts\ValidOrderStatus@passes');
         \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
 
@@ -242,6 +242,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
+        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
+        $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
+        $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
+        $this->app->bind(PurchaseOrderReceiptRepositoryInterface::class, PurchaseOrderReceiptRepository::class);
+        $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
+        $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
+        $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
         

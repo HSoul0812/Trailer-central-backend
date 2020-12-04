@@ -78,7 +78,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * 
      * @param type $files
      */
-    private function getAttachments($files) {
+    public function getAttachments($files) {
         // Check Size of Attachments
         $this->checkAttachmentsSize($files);
 
@@ -102,26 +102,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
     }
 
     /**
-     * @param $files - mail attachment(-s)
-     * @return bool | string
-     */
-    private function checkAttachmentsSize($files) {
-        // Calculate Total Size
-        $totalSize = 0;
-        foreach ($files as $file) {
-            if ($file->getSize() > Attachment::MAX_FILE_SIZE) {
-                throw new ExceededSingleAttachmentSizeException();
-            } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
-                throw new ExceededTotalAttachmentSizeException();
-            }
-            $totalSize += $file->getSize();
-        }
-
-        // Return Total Size
-        return $totalSize;
-    }
-
-    /**
      * Store Uploaded Attachments
      * 
      * @param array $files
@@ -129,7 +109,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * @param string $messageId
      * @return array of saved attachments
      */
-    private function storeAttachments($files, $dealerId, $messageId) {
+    public function storeAttachments($files, $dealerId, $messageId) {
         // Calculate Directory
         $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
 
@@ -159,5 +139,25 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Return Attachment Objects
         return $attachments;
+    }
+
+    /**
+     * @param $files - mail attachment(-s)
+     * @return bool | string
+     */
+    private function checkAttachmentsSize($files) {
+        // Calculate Total Size
+        $totalSize = 0;
+        foreach ($files as $file) {
+            if ($file->getSize() > Attachment::MAX_FILE_SIZE) {
+                throw new ExceededSingleAttachmentSizeException();
+            } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
+                throw new ExceededTotalAttachmentSizeException();
+            }
+            $totalSize += $file->getSize();
+        }
+
+        // Return Total Size
+        return $totalSize;
     }
 }

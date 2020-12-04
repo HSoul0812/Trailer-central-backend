@@ -16,6 +16,9 @@ use App\Http\Middleware\CRM\Text\TextValidate;
 use App\Http\Middleware\CRM\Text\TemplateValidate;
 use App\Http\Middleware\CRM\Text\BlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate;
+use App\Http\Middleware\CRM\User\SalesPersonValidate;
+use App\Http\Middleware\Integration\AuthValidate;
+use App\Http\Middleware\Integration\Facebook\CatalogValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
 
 class Kernel extends HttpKernel
@@ -89,6 +92,9 @@ class Kernel extends HttpKernel
         'text.template.validate' => TemplateValidate::class,
         'text.campaign.validate' => CampaignValidate::class,
         'text.blast.validate' => BlastValidate::class,
+        'integration.auth.validate' => AuthValidate::class,
+        'facebook.catalog.validate' => CatalogValidate::class,
+        'sales-person.validate' => SalesPersonValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
     ];
 

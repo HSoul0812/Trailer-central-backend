@@ -16,13 +16,16 @@ use League\Fractal\Resource\Item;
 
 class SalesPersonController extends RestfulController {
 
+    /**
+     * @var SalesPersonRepository
+     */
     protected $salesPerson;
 
-    protected $transformer;
     /**
      * @var SalesPersonTransformer
      */
     private $salesPersonTransformer;
+
     /**
      * @var Manager
      */

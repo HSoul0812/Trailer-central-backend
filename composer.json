@@ -23,6 +23,7 @@
         "epartment/nova-dependency-container": "^1.2",
         "feed/edit-mapping": "*",
         "fideloper/proxy": "^4.0",
+        "google/apiclient": "^2.7",
         "guzzlehttp/guzzle": "^6.5",
         "illuminate/container": "^6.0",
         "illuminate/contracts": "^6.0",
@@ -39,14 +40,15 @@
         "league/csv": "^9.5",
         "league/flysystem-aws-s3-v3": "^1.0",
         "predis/predis": "^1.1",
-        "twilio/sdk": "^5.31",
         "psr/log": "^1.0",
         "spatie/laravel-sitemap": "^5.7",
         "swiftmailer/swiftmailer": "^6.0",
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
-        "grimzy/laravel-mysql-spatial": "^1.0"
+        "twilio/sdk": "^5.31",
+        "grimzy/laravel-mysql-spatial": "^1.0",
+        "facebook/php-business-sdk": "5.0.5"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -76,7 +78,8 @@
     "scripts": {
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ]
+        ],
+        "post-update-cmd": "Google_Task_Composer::cleanup"
     },
     "config": {
         "preferred-install": "dist",
@@ -96,6 +99,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "extra": {
+        "google/apiclient-services": [
+            "Gmail"
+        ],
         "laravel": {
             "dont-discover": [
                 "Grimzy\\LaravelMysqlSpatial\\SpatialServiceProvider"
