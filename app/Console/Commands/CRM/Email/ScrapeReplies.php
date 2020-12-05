@@ -67,8 +67,7 @@ class ScrapeReplies extends Command
 
         $this->service = $service;
         $this->salespeople = $salesRepo;
-        die;
-        $this->redis = Redis::connection('default');
+        /*$this->redis = Redis::connection('default');
 
         // Get Sales Person From Predis
         try {
@@ -82,7 +81,7 @@ class ScrapeReplies extends Command
 
             // Kill Set (Invalid) Vars
             $this->salesPersonId = 0;
-        }
+        }*/
     }
 
     /**
