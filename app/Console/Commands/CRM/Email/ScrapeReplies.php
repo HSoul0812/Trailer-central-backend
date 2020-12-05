@@ -105,6 +105,7 @@ class ScrapeReplies extends Command
             $this->info("{$this->command} started {$now}");
 
             // Handle Dealer Differently
+            die;
             if(!empty($dealerId)) {
                 $dealers = NewDealerUser::where('id', $dealerId)->with('user')->get();
             } else {
