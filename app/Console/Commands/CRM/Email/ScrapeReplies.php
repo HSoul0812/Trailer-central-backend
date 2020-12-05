@@ -112,6 +112,8 @@ class ScrapeReplies extends Command
                 $dealers = NewDealerUser::has('activeCrmUser')->has('leadEmails')->with('user')->get();
             }
             $this->info("{$this->command} found " . count($dealers) . " dealers to process");
+            var_dump($dealers);
+            die;
 
             // Get Dealers With Active CRM
             foreach($dealers as $dealer) {
