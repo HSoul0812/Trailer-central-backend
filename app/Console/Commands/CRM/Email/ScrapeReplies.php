@@ -63,23 +63,23 @@ class ScrapeReplies extends Command
     public function __construct(SalesPersonRepositoryInterface $salesRepo,
                                 ScrapeRepliesServiceInterface $service)
     {
-        parent::__construct();
+        //parent::__construct();
 
         $this->service = $service;
         $this->salespeople = $salesRepo;
-        $this->redis = Redis::connection('default');
+        /*$this->redis = Redis::connection('default');
 
         // Get Sales Person From Predis
         try {
             $this->salesPersonId = $this->redis->lpop($this->lkey);
         } catch(\Predis\Connection\ConnectionException $e) {
             // Send Slack Error
-            $this->sendSlackError($e->getMessage());
+            //$this->sendSlackError($e->getMessage());
             $this->error("{$this->command} exception returned connecting to redis on scrape email replies command: " . $e->getMessage());
 
             // Kill Set (Invalid) Vars
             $this->salesPersonId = 0;
-        }
+        }*/
     }
 
     /**
@@ -89,6 +89,7 @@ class ScrapeReplies extends Command
      */
     public function handle()
     {
+        die;
         // Get Dealer ID
         $dealerId = $this->argument('dealer');
 
