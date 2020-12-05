@@ -67,13 +67,11 @@ class ScrapeReplies extends Command
 
         $this->service = $service;
         $this->salespeople = $salesRepo;
-        /*$this->redis = Redis::connection('default');
+        $this->redis = Redis::connection('default');
 
         // Get Sales Person From Predis
         try {
             $this->salesPersonId = $this->redis->lpop($this->lkey);
-            var_dump($this->salesPersonId);
-            die;
         } catch(\Predis\Connection\ConnectionException $e) {
             // Send Slack Error
             $this->sendSlackError($e->getMessage());
@@ -81,7 +79,7 @@ class ScrapeReplies extends Command
 
             // Kill Set (Invalid) Vars
             $this->salesPersonId = 0;
-        }*/
+        }
     }
 
     /**
