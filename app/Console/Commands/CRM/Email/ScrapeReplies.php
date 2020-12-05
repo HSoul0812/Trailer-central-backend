@@ -106,10 +106,10 @@ class ScrapeReplies extends Command
 
             // Handle Dealer Differently
             if(!empty($dealerId)) {
-                $dealers = NewDealerUser::where('id', $dealerId)->has('leadEmails')->with('user')->get();
+                $dealers = NewDealerUser::where('id', $dealerId)->with('user')->get();
             } else {
                 // Get Dealers With Active CRM
-                $dealers = NewDealerUser::has('activeCrmUser')->has('leadEmails')->with('user')->get();
+                $dealers = NewDealerUser::has('activeCrmUser')->with('user')->get();
             }
             $this->info("{$this->command} found " . count($dealers) . " dealers to process");
             var_dump($dealers);
