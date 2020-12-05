@@ -158,6 +158,10 @@ $api->version('v1', function ($route) {
      * Inventory Statuses
      */
     $route->get('inventory/statuses', 'App\Http\Controllers\v1\Inventory\StatusController@index');
+    /**
+     * Inventory Attributes
+     */
+    $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
 
     /**
      * Inventory
@@ -695,4 +699,14 @@ $api->version('v1', function ($route) {
 
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Integration
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
+    $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
 });

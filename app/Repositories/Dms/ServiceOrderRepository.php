@@ -111,6 +111,20 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
+        if (isset($params['created_at_or_closed_at_lte'])) {
+            $query = $query->where(function($q) use($params) {
+                $q->where('created_at', '<=', $params['created_at_or_closed_at_lte'])
+                    ->orWhere('closed_at', '<=', $params['created_at_or_closed_at_lte']);
+            });
+        }
+
+        if (isset($params['created_at_or_closed_at_gte'])) {
+            $query = $query->where(function($q) use($params) {
+                $q->where('created_at', '>=', $params['created_at_or_closed_at_gte'])
+                    ->orWhere('closed_at', '>=', $params['created_at_or_closed_at_gte']);
+            });
+        }
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 

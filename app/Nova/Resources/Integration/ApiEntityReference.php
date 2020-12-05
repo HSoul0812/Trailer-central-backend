@@ -1,33 +1,33 @@
 <?php
 
-namespace App\Nova\Resources\Mapping;
+namespace App\Nova\Resources\Integration;
 
+use Epartment\NovaDependencyContainer\HasDependencies;
+use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping as FeedDealerIncomingPendingMapping;
-use App\Nova\Actions\Mapping\MapData;
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncomingMapping;
 use App\Nova\Resource;
-use App\Nova\Filters\DealerIDPendingMapping;
+use App\Nova\Filters\DealerIDMapping;
 
-class DealerIncomingPendingMapping extends Resource
+class ApiEntityReference extends Resource
 {
-    
-    public static $group = 'Mapping';
-    
+    public static $group = 'Integration';
+
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping';
+    public static $model = 'App\Models\Feed\Mapping\Incoming\ApiEntityReference';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'api_entity_reference_id';
 
     /**
      * The pagination per-page options configured for this resource.
@@ -42,8 +42,10 @@ class DealerIncomingPendingMapping extends Resource
      * @var array
      */
     public static $search = [
-        'dealer_id',
-        'data'
+        'entity_id',
+        'reference_id',
+        'entity_type',
+        'api_key'
     ];
 
     /**
@@ -55,14 +57,13 @@ class DealerIncomingPendingMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Dealer ID', 'dealer_id')->sortable(),          
-            
-            Select::make('Type', 'type')
-                ->options(FeedDealerIncomingPendingMapping::$types)
-                ->displayUsingLabels(),
-            
-            Text::make('Data', 'data'),
+            Text::make('Entity ID')->sortable(),
 
+            Text::make('Reference ID')->sortable(),
+
+            Text::make('Entity Type')->sortable(),
+
+            Text::make('API Key')->sortable(),
         ];
     }
 
@@ -85,9 +86,7 @@ class DealerIncomingPendingMapping extends Resource
      */
     public function filters(Request $request)
     {
-        return [
-            new DealerIDPendingMapping
-        ];
+        return [];
     }
 
     /**
@@ -109,13 +108,6 @@ class DealerIncomingPendingMapping extends Resource
      */
     public function actions(Request $request)
     {
-        return [
-            new MapData
-        ];
-    }
-    
-    public function update()
-    {
-        return false;
+        return [];
     }
 }

@@ -1,12 +1,17 @@
 <?php
 
-namespace App\Nova\Filters;
+namespace App\Nova\Filters\Integration;
 
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncomingMapping;
 use Illuminate\Http\Request;
-use Laravel\Nova\Filters\Filter;
 use Illuminate\Support\Facades\DB;
+use Laravel\Nova\Filters\Filter;
 
-class DealerIDMapping extends Filter
+/**
+ * Class IncomingMappingsTypeFilter
+ * @package App\Nova\Filters\Integration
+ */
+class IncomingMappingsTypeFilter extends Filter
 {
     /**
      * The filter's component.
@@ -15,7 +20,7 @@ class DealerIDMapping extends Filter
      */
     public $component = 'select-filter';
 
-    public $name = 'Dealer Id';
+    public $name = 'Type';
 
     /**
      * Apply the filter to the given query.
@@ -27,7 +32,7 @@ class DealerIDMapping extends Filter
      */
     public function apply(Request $request, $query, $value)
     {
-        return $query->where('dealer_id', $value);
+        return $query->where('type', $value);
     }
 
     /**
@@ -38,14 +43,12 @@ class DealerIDMapping extends Filter
      */
     public function options(Request $request)
     {
-        $dealerOut = [];
-        $dealers = DB::table('dealer_incoming_mappings')->select('dealer_id')->groupBy('dealer_id')->get();
-
-        foreach($dealers as $dealer) {
-            $dealerOut[$dealer->dealer_id] = $dealer->dealer_id;
-        }
-
-
-        return $dealerOut;
+        return DB::table('dealer_incoming_mappings')
+            ->select('type')
+            ->whereNotIn('type', [FeedDealerIncomingMapping::DEFAULT_VALUES, FeedDealerIncomingMapping::FIELDS])
+            ->groupBy('type')
+            ->get()
+            ->pluck('type', 'type')
+            ->toArray();
     }
 }
