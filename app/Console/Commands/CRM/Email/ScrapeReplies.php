@@ -71,7 +71,10 @@ class ScrapeReplies extends Command
 
         // Get Sales Person From Predis
         try {
+            die;
             $this->salesPersonId = $this->redis->lpop($this->lkey);
+            var_dump($this->salesPersonId);
+            die;
         } catch(\Predis\Connection\ConnectionException $e) {
             // Send Slack Error
             $this->sendSlackError($e->getMessage());
