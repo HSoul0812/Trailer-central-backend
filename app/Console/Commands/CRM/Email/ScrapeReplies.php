@@ -67,11 +67,11 @@ class ScrapeReplies extends Command
 
         $this->service = $service;
         $this->salespeople = $salesRepo;
+        die;
         $this->redis = Redis::connection('default');
 
         // Get Sales Person From Predis
         try {
-            die;
             $this->salesPersonId = $this->redis->lpop($this->lkey);
             var_dump($this->salesPersonId);
             die;
