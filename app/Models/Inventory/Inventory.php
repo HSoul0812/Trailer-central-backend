@@ -46,6 +46,16 @@ class Inventory extends Model
         self::STATUS_SPECIAL_ORDER  => self::STATUS_SPECIAL_ORDER_LABEL
     ];
 
+    const CONDITION_NEW = 'new';
+    const CONDITION_USED = 'used';
+    const CONDITION_RE_MFG = 'remfg';
+
+    const CONDITION_MAPPING = [
+        self::CONDITION_NEW => 'New',
+        self::CONDITION_USED => 'Used',
+        self::CONDITION_RE_MFG => 'Re-manufactured',
+    ];
+
     /**
      * The table associated with the model.
      *

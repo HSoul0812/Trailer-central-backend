@@ -1,25 +1,24 @@
 <?php
 
-namespace App\Nova\Resources\Mapping;
 
-use Epartment\NovaDependencyContainer\HasDependencies;
-use Epartment\NovaDependencyContainer\NovaDependencyContainer;
+namespace App\Nova\Resources\Integration;
+
+
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
+use App\Models\Integration\Collector\CollectorFields;
+use App\Nova\Filters\DealerIDMapping;
+use App\Nova\Resource;
+use App\Nova\Resources\Dealer\Dealer;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncomingMapping;
-use App\Nova\Resource;
-use App\Nova\Filters\DealerIDMapping;
+use Laravel\Nova\Http\Requests\NovaRequest;
 
-class DealerIncomingMapping extends Resource
+class DefaultValueMapping extends Resource
 {
-    use HasDependencies;
+    public static $group = 'Integration';
 
-    const MAP_TO_MANUFACTURER = 'map_to_manufacturer';
-    const MAP_TO_BRAND = 'map_to_brand';
-
-    public static $group = 'Mapping';
-    
     /**
      * The model the resource corresponds to.
      *
@@ -61,27 +60,33 @@ class DealerIncomingMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Map From', 'map_from')->sortable(),
+            BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
 
-            NovaDependencyContainer::make([
-                Text::make('Map To', 'map_to')->sortable()
-            ])->dependsOnNot('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
-
-            NovaDependencyContainer::make([
-                Text::make('Map To Manufacturer', self::MAP_TO_MANUFACTURER)->sortable()
-            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
-
-            NovaDependencyContainer::make([
-                Text::make('Map To Brand', self::MAP_TO_BRAND)->sortable()
-            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND),
-
-            Text::make('Dealer ID', 'dealer_id')->sortable(),
-
-            Select::make('Type', 'type')
-                ->options(FeedDealerIncomingMapping::$types)
+            Select::make('Field', 'map_from')
+                ->options(CollectorFields::select(['label', 'field'])->orderBy('label')->get()->pluck('label', 'field'))
+                ->rules('required')
+                ->sortable()
                 ->displayUsingLabels(),
 
+            Text::make('Default Value', 'map_to')->rules('required')->sortable(),
+
+            Text::make('', 'type')->withMeta([
+                'type' => 'hidden',
+                'value'=> $this->type ?? DealerIncomingMapping::DEFAULT_VALUES
+            ])->onlyOnForms()
         ];
+    }
+
+    /**
+     * Build an "index" query for the given resource.
+     *
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        return $query->where('type', DealerIncomingMapping::DEFAULT_VALUES);
     }
 
     /**
