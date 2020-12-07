@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
@@ -21,14 +23,18 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     use SortTrait;
 
     /**
+     * @var GmailServiceInterface
      * @var InteractionEmailServiceInterface
      */
+    private $gmail;
     private $interactionEmail;
 
     /**
      * @var EmailHistoryRepositoryInterface
+     * @var TokenRepositoryInterface
      */
     private $emailHistory;
+    private $tokens;
     
     private $sortOrders = [
         'created_at' => [
@@ -55,10 +61,16 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * 
      * @param EmailHistoryRepositoryInterface
      */
-    public function __construct(InteractionEmailServiceInterface $service, EmailHistoryRepositoryInterface $emailHistory)
-    {
+    public function __construct(
+        GmailServiceInterface $gmail,
+        InteractionEmailServiceInterface $service,
+        EmailHistoryRepositoryInterface $emailHistory,
+        TokenRepositoryInterface $tokens
+    ) {
+        $this->gmail = $gmail;
         $this->interactionEmail = $service;
         $this->emailHistory = $emailHistory;
+        $this->tokens = $tokens;
     }
     
     public function create($params) {
@@ -191,16 +203,29 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * 
      * @param int $leadId
      * @param array $params
+     * @param array $attachments
      * @return Interaction || error
      */
-    public function sendEmail($leadId, $params) {
+    public function sendEmail($leadId, $params, $attachments = array()) {
         // Find Lead/Sales Person
         $lead = Lead::findOrFail($leadId);
         $user = Auth::user();
+        $accessToken = null;
         if(!empty($user->sales_person)) {
-            $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
+            // Set From Name/Email
             $params['from_email'] = $user->sales_person->smtp_email;
             $params['from_name'] = $user->sales_person->full_name ?? '';
+
+            // Get Sales Person Auth
+            $accessToken = $this->tokens->getRelation([
+                'token_type' => 'google',
+                'relation_type' => 'sales_person',
+                'relation_id' => $user->sales_person->id
+            ]);
+            if(empty($accessToken->id)) {
+                // Set Sales Person Config
+                $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
+            }
         } else {
             $params['from_email'] = $user->email;
             $params['from_name'] = $user->name ?? '';
@@ -223,8 +248,18 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $params['to_email'] = $lead->email_address;
         $params['to_name']  = $lead->full_name;
 
+        // Append Attachments
+        if(!isset($params['attachments'])) {
+            $params['attachments'] = array();
+        }
+        $params['attachments'] = array_merge($params['attachments'], $attachments);
+
         // Send Email
-        $email = $this->interactionEmail->send($lead->dealer_id, $params);
+        if(!empty($accessToken->id)) {
+            $email = $this->gmail->send($accessToken, $params);
+        } else {
+            $email = $this->interactionEmail->send($lead->dealer_id, $params);
+        }
 
         // Save Email
         return $this->saveEmail($leadId, $user->newDealerUser->user_id, $email);

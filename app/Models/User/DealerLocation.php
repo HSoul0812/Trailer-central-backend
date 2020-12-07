@@ -38,7 +38,14 @@ class DealerLocation extends Model
         "contact",
         "website",
         "phone",
-        "location_id" 
+        "fax",
+        "email",
+        "address",
+        "city",
+        "county",
+        "region",
+        "postalcode",
+        "country"
         // TODO: Add fields
     ];
 

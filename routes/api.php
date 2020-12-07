@@ -379,16 +379,6 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/sales-people', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sales People
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
 
         /*
@@ -415,6 +405,57 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Integrations
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'integration'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Integration Auth
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'auth',
+                'middleware' => 'integration.auth.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Integration\AuthController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Integration\AuthController@create');
+                $route->post('/', 'App\Http\Controllers\v1\Integration\AuthController@valid');
+                $route->put('login', 'App\Http\Controllers\v1\Integration\AuthController@login');
+                $route->get('{id}', 'App\Http\Controllers\v1\Integration\AuthController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Integration\AuthController@update')->where('id', '[0-9]+');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Facebook
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'facebook',
+                'middleware' => 'facebook.catalog.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Integration\FacebookController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Integration\FacebookController@create');
+                $route->post('/', 'App\Http\Controllers\v1\Integration\FacebookController@payload');
+                $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
+            });
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -427,6 +468,30 @@ $api->version('v1', function ($route) {
         $route->group([
             'prefix' => 'user'
         ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Sales People
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'sales-people',
+                'middleware' => 'sales-person.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
+                $route->put('/', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@create');
+                $route->get('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
+
+                // Sales People w/Auth
+                $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
+                $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');
+                $route->post('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@update')->where('id', '[0-9]+');
+            });
+
             /*
             |--------------------------------------------------------------------------
             | Texts

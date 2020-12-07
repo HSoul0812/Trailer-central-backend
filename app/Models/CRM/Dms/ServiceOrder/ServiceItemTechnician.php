@@ -29,6 +29,6 @@ class ServiceItemTechnician extends Model implements Filterable
 
     public function jsonApiFilterableColumns(): ?array
     {
-        return ['start_date'];
+        return ['start_date', 'completed_date'];
     }
 }
