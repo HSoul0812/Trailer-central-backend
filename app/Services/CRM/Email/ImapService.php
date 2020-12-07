@@ -3,8 +3,6 @@
 namespace App\Services\CRM\Email;
 
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
-use App\Services\CRM\Email\ImapServiceInterface;
-use App\Services\Integration\Google\GmailServiceInterface;
 
 /**
  * Class ScrapeRepliesService
@@ -14,28 +12,16 @@ use App\Services\Integration\Google\GmailServiceInterface;
 class ImapService implements ImapServiceInterface
 {
     /**
-     * @var App\Services\Integration\Google\GmailServiceInterface
-     */
-    protected $gmail;
-
-    /**
-     * @var App\Services\CRM\Email\ImapServiceInterface
+     * @var php_imap
      */
     protected $imap;
 
     /**
      * ScrapeRepliesService constructor.
      */
-    public function __construct(GmailServiceInterface $gmail,
-                                ImapServiceInterface $imap,
-                                EmailHistoryRepositoryInterface $emails)
+    public function __construct()
     {
-        // Initialize Services
-        $this->gmail = $gmail;
-        $this->imap = $imap;
-
-        // Initialize Repositories
-        $this->emails = $emails;
+        $this->imap = null;
     }
 
     /**
