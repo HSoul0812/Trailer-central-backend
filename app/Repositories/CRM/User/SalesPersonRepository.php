@@ -148,17 +148,20 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 LEFT JOIN inventory ON inventory.inventory_id = us.inventory_id
                 
                 /* use this to prevent getting DP invoices */
-                JOIN qb_invoice_items ii ON i.id=ii.invoice_id
+                /* JOIN qb_invoice_items ii ON i.id=ii.invoice_id */
 
                 LEFT JOIN (
                     SELECT
                        ii.invoice_id,
-                       SUM(ii.unit_price * ii.qty) sale_amount,
+                       qb_invoices.total as sale_amount,
                        SUM(COALESCE(qi.cost, inv.true_cost, 0)) cost_amount
                     FROM qb_invoice_items ii
                     LEFT JOIN qb_items qi ON qi.id=ii.item_id
                     LEFT JOIN inventory inv ON qi.item_primary_id=inv.inventory_id
-                    WHERE qi.type = 'trailer'
+                    INNER JOIN
+                        qb_invoices 
+                        ON qb_invoices.id = ii.invoice_id
+                    WHERE qi.type = 'trailer' OR qi.type = 'deposit_down_payment'
                     GROUP BY ii.invoice_id
                 ) sales_units ON i.id = sales_units.invoice_id
 
