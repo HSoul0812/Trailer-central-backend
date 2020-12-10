@@ -122,21 +122,21 @@ class NewDealerUser extends Model
      * 
      * @return HasMany
      */
-    /*public function leads()
+    public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'id')->where('is_spam', 0);
-    }*/
+    }
 
     /**
      * Get leads with valid email addresses
      * 
      * @return HasMany
      */
-    /*public function leadEmails()
+    public function leadEmails()
     {
         return $this->leads()->where('email_address', '<>', '')
                              ->whereNotNull('email_address');
-    }*/
+    }
 
     /**
      * Get Processed Emails

@@ -149,11 +149,11 @@ class SalesPerson extends Model implements Filterable
      * 
      * @return HasMany
      */
-    /*public function fromEmails() {
+    public function fromEmails() {
         return $this->hasMany(EmailHistory::class, 'from_email', 'email')
                     ->orWhere(SalesPerson::getTableName() . '.smtp_email', '=', EmailHistory::getTableName() . '.from_email');
         
-    }*/
+    }
 
     /**
      * @return Collection<GenericSaleInterface>

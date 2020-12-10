@@ -256,6 +256,8 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
 
         // Send Email
         if(!empty($accessToken->id)) {
+            // Validate Google
+            $this->google->validate($accessToken);
             $email = $this->gmail->send($accessToken, $params);
         } else {
             $email = $this->interactionEmail->send($lead->dealer_id, $params);
