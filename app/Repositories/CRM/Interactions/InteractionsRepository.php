@@ -8,6 +8,7 @@ use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Models\CRM\Interactions\Interaction;
@@ -23,9 +24,11 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     use SortTrait;
 
     /**
+     * @var GoogleServiceInterface
      * @var GmailServiceInterface
      * @var InteractionEmailServiceInterface
      */
+    private $google;
     private $gmail;
     private $interactionEmail;
 
@@ -62,11 +65,13 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * @param EmailHistoryRepositoryInterface
      */
     public function __construct(
+        GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
         InteractionEmailServiceInterface $service,
         EmailHistoryRepositoryInterface $emailHistory,
         TokenRepositoryInterface $tokens
     ) {
+        $this->google = $google;
         $this->gmail = $gmail;
         $this->interactionEmail = $service;
         $this->emailHistory = $emailHistory;
@@ -256,6 +261,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
 
         // Send Email
         if(!empty($accessToken->id)) {
+            $this->google->validate($accessToken);
             $email = $this->gmail->send($accessToken, $params);
         } else {
             $email = $this->interactionEmail->send($lead->dealer_id, $params);

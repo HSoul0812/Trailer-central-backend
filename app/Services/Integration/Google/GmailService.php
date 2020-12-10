@@ -115,6 +115,7 @@ class GmailService implements GmailServiceInterface
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
+            $this->error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
             if(strpos($error, "invalid authentication") !== FALSE) {
                 throw new InvalidGmailAuthMessageException();
             } else {
