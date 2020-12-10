@@ -17,15 +17,17 @@ use Dingo\Api\Http\Request;
 class InteractionsController extends RestfulControllerV2
 {
     protected $interactions;
+    protected $service;
 
     /**
      * Create a new controller instance.
      *
      * @param Repository $interactions
      */
-    public function __construct(InteractionsRepositoryInterface $interactions)
+    public function __construct(InteractionsRepositoryInterface $interactions, InteractionsServiceInterface $service)
     {
         $this->interactions = $interactions;
+        $this->service = $service;
         $this->transformer = new InteractionTransformer();
     }
 
@@ -204,7 +206,7 @@ class InteractionsController extends RestfulControllerV2
         $request = new SendEmailRequest($params);
         if ( $request->validate()) {
             // Get Results
-            $result = $this->interactions->sendEmail($leadId, $params, $request->allFiles());
+            $result = $this->service->email($leadId, $params, $request->allFiles());
 
             // Send Email Response
             return $this->response->item($result, new InteractionTransformer());
