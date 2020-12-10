@@ -11,8 +11,6 @@ use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\Traits\SortTrait;
-use Carbon\Carbon;
-use Throwable;
 
 class InteractionsRepository implements InteractionsRepositoryInterface {
     

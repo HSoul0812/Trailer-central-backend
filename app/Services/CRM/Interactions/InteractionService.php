@@ -12,6 +12,7 @@ use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 /**
  * Class InteractionEmailService
