@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Interactions;
 
+use App\Models\CRM\Leads\Lead;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
@@ -9,6 +10,7 @@ use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class InteractionEmailService
