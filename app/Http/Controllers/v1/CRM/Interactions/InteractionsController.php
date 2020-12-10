@@ -11,6 +11,7 @@ use App\Http\Requests\CRM\Interactions\CreateInteractionRequest;
 use App\Http\Requests\CRM\Interactions\ShowInteractionRequest;
 use App\Http\Requests\CRM\Interactions\UpdateInteractionRequest;
 use App\Http\Requests\CRM\Interactions\SendEmailRequest;
+use App\Services\CRM\Interactions\InteractionServiceInterface;
 use Dingo\Api\Http\Request;
 
 
@@ -24,7 +25,7 @@ class InteractionsController extends RestfulControllerV2
      *
      * @param Repository $interactions
      */
-    public function __construct(InteractionsRepositoryInterface $interactions, InteractionsServiceInterface $service)
+    public function __construct(InteractionsRepositoryInterface $interactions, InteractionServiceInterface $service)
     {
         $this->interactions = $interactions;
         $this->service = $service;
