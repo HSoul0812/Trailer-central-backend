@@ -49,10 +49,16 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         }
         $params['message_id'] = sprintf('<%s>', $messageId);
 
-        // Get Attachments
+        // Add Existing Attachments
         $attachments = array();
+        if(isset($params['files'])) {
+            $attachments = $this->cleanAttachments($params['files']);
+        }
+
+        // Get Attachments
         if(isset($params['attachments'])) {
-            $attachments = $this->getAttachments($params['attachments']);
+            $attach = $this->getAttachments($params['attachments']);
+            $attachments = array_merge($attachments, $attach);
         }
 
         // Try/Send Email!
@@ -67,7 +73,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 'replyToName' => $params['from_name'],
                 'subject' => $params['subject'],
                 'body' => $params['body'],
-                'files' => $params['files'],
                 'attach' => $attachments,
                 'id' => $messageId
             ]));
