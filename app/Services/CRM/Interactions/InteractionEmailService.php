@@ -24,6 +24,16 @@ class InteractionEmailService implements InteractionEmailServiceInterface
     use CustomerHelper, MailHelper;
 
     /**
+     * @var array
+     */
+    private $imageTypes = [
+        'gif',
+        'png',
+        'jpeg',
+        'jpg'
+    ];
+
+    /**
      * Send Email With Params
      * 
      * @param int $dealerId
@@ -39,10 +49,16 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         }
         $params['message_id'] = sprintf('<%s>', $messageId);
 
-        // Get Attachments
+        // Add Existing Attachments
         $attachments = array();
+        if(isset($params['files'])) {
+            $attachments = $this->cleanAttachments($params['files']);
+        }
+
+        // Get Attachments
         if(isset($params['attachments'])) {
-            $attachments = $this->getAttachments($params['attachments']);
+            $attach = $this->getAttachments($params['attachments']);
+            $attachments = array_merge($attachments, $attach);
         }
 
         // Try/Send Email!
@@ -71,6 +87,58 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Returns Params With Attachments
         return $params;
+    }
+
+    /**
+     * Clean Existing Attachments
+     * 
+     * @param type $files
+     */
+    public function cleanAttachments($files) {
+        // Clean Existing Attachments
+        $attachments = array();
+        if (!empty($files) && is_array($files)) {
+            // Loop Attachment Files
+            foreach ($files as $file) {
+                // Get File Name
+                $parts = explode("/", $file);
+                $filename = end($parts);
+                $ext = explode(".", $filename);
+                $mime = 'image/jpeg';
+                $size = 0;
+                if(!empty($ext[1])) {
+                    if(in_array($ext[1], $this->imageTypes)) {
+                        $mime = 'image/' . $ext[1];
+                    } else {
+                        $mime = 'text/' . $ext[1];
+                    }
+                }
+
+                // Get Mime Type
+                $headers = get_headers($file);
+                if(!empty($headers)) {
+                    foreach($headers as $header) {
+                        if(strpos($header, 'Content-Type') !== false) {
+                            $mime = str_replace('Content-Type: ', '', $header);
+                        }
+                        elseif(strpos($header, 'Content-Length') !== false) {
+                            $size = str_replace('Content-Length: ', '', $header);
+                        }
+                    }
+                }
+
+                // Add to Array
+                $attachments[] = [
+                    'path' => $file,
+                    'as'   => $filename,
+                    'mime' => $mime,
+                    'size' => $size
+                ];
+            }
+        }
+
+        // Return Filled Attachments Array
+        return $attachments;
     }
 
     /**

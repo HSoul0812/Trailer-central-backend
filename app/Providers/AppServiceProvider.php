@@ -96,6 +96,8 @@ use App\Services\CRM\Text\BlastService;
 use App\Services\CRM\Text\BlastServiceInterface;
 use App\Services\CRM\Text\CampaignService;
 use App\Services\CRM\Text\CampaignServiceInterface;
+use App\Services\CRM\Interactions\InteractionService;
+use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailService;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\Parts\PartServiceInterface;
@@ -216,6 +218,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TextServiceInterface::class, TwilioService::class);
         $this->app->bind(BlastServiceInterface::class, BlastService::class);
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
+        $this->app->bind(InteractionServiceInterface::class, InteractionService::class);
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');

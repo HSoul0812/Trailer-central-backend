@@ -12,6 +12,7 @@ use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class GoogleService
@@ -41,14 +42,10 @@ class GmailService implements GmailServiceInterface
      * Construct Google Client
      */
     public function __construct(
-        InteractionEmailServiceInterface $interactionEmail,
-        GoogleClientInterface $client,
-        GoogleGmailInterface $gmail
+        InteractionEmailServiceInterface $interactionEmail
     ) {
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
-        $this->client = $client;
-        $this->gmail = $gmail;
 
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
@@ -56,6 +53,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Initialize Client
+        $this->client = new \Google_Client();
         $this->client->setApplicationName($_ENV['GOOGLE_OAUTH_APP_NAME']);
         $this->client->setClientId($_ENV['GOOGLE_OAUTH_CLIENT_ID']);
         if(empty($this->client)) {
@@ -115,6 +113,7 @@ class GmailService implements GmailServiceInterface
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
+            Log::error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
             if(strpos($error, "invalid authentication") !== FALSE) {
                 throw new InvalidGmailAuthMessageException();
             } else {
@@ -179,6 +178,15 @@ class GmailService implements GmailServiceInterface
 
         // Set Message ID
         $message->getHeaders()->get('Message-ID')->setId($params['message_id']);
+
+        // Add Existing Attachments
+        if(isset($params['files'])) {
+            $files = $this->interactionEmail->cleanAttachments($params['files']);
+            foreach($files as $attachment) {
+                // Optionally add any attachments
+                $message->attach((new \Swift_Attachment(file_get_contents($attachment['path']), $attachment['as'], $attachment['mime'])));
+            }
+        }
 
         // Add Attachments
         if(isset($params['attachments'])) {
