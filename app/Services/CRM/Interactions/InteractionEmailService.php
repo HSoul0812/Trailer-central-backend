@@ -24,6 +24,16 @@ class InteractionEmailService implements InteractionEmailServiceInterface
     use CustomerHelper, MailHelper;
 
     /**
+     * @var array
+     */
+    private $imageTypes = [
+        'gif',
+        'png',
+        'jpeg',
+        'jpg'
+    ];
+
+    /**
      * Send Email With Params
      * 
      * @param int $dealerId
