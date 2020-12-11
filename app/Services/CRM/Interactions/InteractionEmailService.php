@@ -57,6 +57,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 'replyToName' => $params['from_name'],
                 'subject' => $params['subject'],
                 'body' => $params['body'],
+                'files' => $params['files'],
                 'attach' => $attachments,
                 'id' => $messageId
             ]));
@@ -71,6 +72,54 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Returns Params With Attachments
         return $params;
+    }
+
+    /**
+     * Clean Existing Attachments
+     * 
+     * @param type $files
+     */
+    public function cleanAttachments($files) {
+        // Clean Existing Attachments
+        $attachments = array();
+        if (!empty($files) && is_array($files)) {
+            // Loop Attachment Files
+            foreach ($files as $file) {
+                // Get File Name
+                $parts = explode("/", $file);
+                $filename = end($parts);
+                $ext = explode(".", $filename);
+                $mime = 'image/jpeg';
+                if(!empty($ext[1])) {
+                    if(in_array($ext[1], $this->imageTypes)) {
+                        $mime = 'image/' . $ext[1];
+                    } else {
+                        $mime = 'text/' . $ext[1];
+                    }
+                }
+
+                // Get Mime Type
+                $headers = get_headers($file);
+                if(!empty($headers)) {
+                    foreach($headers as $header) {
+                        if(strpos($header, 'Content-Type') !== false) {
+                            $mime = str_replace('Content-Type: ', '', $header);
+                            break;
+                        }
+                    }
+                }
+                // Add to Array
+                $attachments[] = [
+                    'path' => $file->getPathname(),
+                    'as'   => $file->getClientOriginalName(),
+                    'mime' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                ];
+            }
+        }
+
+        // Return Filled Attachments Array
+        return $attachments;
     }
 
     /**

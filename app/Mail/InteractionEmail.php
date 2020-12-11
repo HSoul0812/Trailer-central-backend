@@ -16,6 +16,16 @@ class InteractionEmail extends Mailable
     private $data;
 
     /**
+     * @var array
+     */
+    private $imageTypes = [
+        'gif',
+        'png',
+        'jpeg',
+        'jpg'
+    ];
+
+    /**
      * Create a new message instance.
      *
      * @param array $data

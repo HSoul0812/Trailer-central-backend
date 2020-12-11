@@ -179,6 +179,15 @@ class GmailService implements GmailServiceInterface
         // Set Message ID
         $message->getHeaders()->get('Message-ID')->setId($params['message_id']);
 
+        // Add Existing Attachments
+        if(isset($params['files'])) {
+            $files = $this->interactionEmail->cleanAttachments($params['files']);
+            foreach($files as $attachment) {
+                // Optionally add any attachments
+                $message->attach(\Swift_Attachment::fromPath($attachment['path'])->setFilename($attachment['as']));
+            }
+        }
+
         // Add Attachments
         if(isset($params['attachments'])) {
             $attachments = $this->interactionEmail->getAttachments($params['attachments']);
