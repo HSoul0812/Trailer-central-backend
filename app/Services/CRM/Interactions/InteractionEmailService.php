@@ -100,6 +100,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 $filename = end($parts);
                 $ext = explode(".", $filename);
                 $mime = 'image/jpeg';
+                $size = 0;
                 if(!empty($ext[1])) {
                     if(in_array($ext[1], $this->imageTypes)) {
                         $mime = 'image/' . $ext[1];
@@ -114,16 +115,19 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                     foreach($headers as $header) {
                         if(strpos($header, 'Content-Type') !== false) {
                             $mime = str_replace('Content-Type: ', '', $header);
-                            break;
+                        }
+                        elseif(strpos($header, 'Content-Length') !== false) {
+                            $size = str_replace('Content-Length: ', '', $header);
                         }
                     }
                 }
+
                 // Add to Array
                 $attachments[] = [
-                    'path' => $file->getPathname(),
-                    'as'   => $file->getClientOriginalName(),
-                    'mime' => $file->getMimeType(),
-                    'size' => $file->getSize(),
+                    'path' => $file,
+                    'as'   => $filename,
+                    'mime' => $mime,
+                    'size' => $size
                 ];
             }
         }
