@@ -555,7 +555,7 @@ class PartRepository implements PartRepositoryInterface {
         }
 
         // load relations
-        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins']);
+        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins', 'purchases']);
 
         // if a paginator is requested
         if ($options['page'] ?? null) {

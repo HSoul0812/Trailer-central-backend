@@ -2,12 +2,13 @@
 
 namespace App\Transformers\Parts;
 
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
 
 class PartsTransformer extends TransformerAbstract
 {
-    public function transform(Part $part)
+    public function transform(Part $part): array
     {
 	 return [
              'id' => (int)$part->id,
@@ -41,7 +42,19 @@ class PartsTransformer extends TransformerAbstract
              'video_embed_code' => $part->video_embed_code,
              'stock_min' => $part->stock_min,
              'stock_max' => $part->stock_max,
-             'bins' => $part->bins
+             'bins' => $part->bins,
+             'purchases' => [
+                 'has_not_completed' => $part->purchases->filter(static function (PurchaseOrderPart $part): bool {
+                     return !$part->purchaseOrder->isCompleted();
+                 })->isNotEmpty(),
+                 'items' => $part->purchases->map(static function (PurchaseOrderPart $part): array {
+                     return $part->purchaseOrder->only([
+                         'status',
+                         'user_defined_id',
+                         'id'
+                     ]);
+                 })
+             ],
          ];
     }
 }
