@@ -537,7 +537,7 @@ class PartRepository implements PartRepositoryInterface {
                 $search->filter('range', ['bins_total_qty' => ['gt' => 0]]);
             } else if ($query['in_stock'] == 2) {
                 $search->filter('range', ['bins_total_qty' => ['lte' => 0]]);
-            }
+            } 
         }
 
         // filter by dealer

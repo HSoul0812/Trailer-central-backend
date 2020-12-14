@@ -64,7 +64,9 @@ class BulkDownload extends Model
     public function lineMapper(Part $part = null)
     {
         // an empty object is needed so it does not throw an error
-        if ($part === null) $part = new Part();
+        if ($part === null) {
+            $part = new Part();
+        }
         return [
             'Vendor' => $part->vendor ? $part->vendor->name: '',
             'Brand' => $part->brand ? $part->brand->name: '',
@@ -82,6 +84,7 @@ class BulkDownload extends Model
             'Show on website' => $part->show_on_website,
             'Image' => !empty($part->images)? implode("\n", $part->images->all()): '',
             'Video Embed Code' => $part->video_embed_code,
+            'Qty' => $part->total_qty
         ];
     }
 

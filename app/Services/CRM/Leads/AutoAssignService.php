@@ -182,9 +182,9 @@ class AutoAssignService implements AutoAssignServiceInterface {
                             'lead_status' => !empty($lead->leadStatus->status) ? $lead->leadStatus->status : 'Uncontacted',
                             'lead_comments' => $lead->comments,
                             'next_contact_date' => $nextContactText,
-                            'id' => sprintf('<%s@%s>', $this->generateId(), $this->serverHostname())
+//                            'id' => sprintf('<%s@%s>', $this->generateId(), $this->serverHostname())
                         ])
-                    );
+                    ); 
 
                     // Success, Marked Mailed
                     $status = 'mailed';
