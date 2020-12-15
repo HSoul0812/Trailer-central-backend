@@ -174,7 +174,7 @@ class ScrapeReplies extends Command
 
                 // Import Emails
                 $this->info("{$this->command} importing emails on sales person #{$salesperson->id} for dealer #{$dealer->id}");
-                $imports = $this->service->import($dealer, $salesperson);
+                $imports = $this->service->import($salesperson);
 
                 // Adjust Total Import Counts
                 $this->info("{$this->command} imported {$imports} emails on sales person #{$salesperson->id}");

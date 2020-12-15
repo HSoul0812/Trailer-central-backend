@@ -5,6 +5,7 @@ namespace App\Services\CRM\Email;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Google\GoogleServiceInterface;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -14,6 +15,11 @@ use Illuminate\Support\Facades\Log;
  */
 class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 {
+    /**
+     * @var App\Services\Integration\Google\GoogleServiceInterface
+     */
+    protected $google;
+
     /**
      * @var App\Services\Integration\Google\GmailServiceInterface
      */
@@ -25,13 +31,20 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     protected $imap;
 
     /**
+     * @var App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface
+     */
+    protected $emails;
+
+    /**
      * ScrapeRepliesService constructor.
      */
-    public function __construct(GmailServiceInterface $gmail,
+    public function __construct(GoogleServiceInterface $google,
+                                GmailServiceInterface $gmail,
                                 ImapServiceInterface $imap,
                                 EmailHistoryRepositoryInterface $emails)
     {
         // Initialize Services
+        $this->google = $google;
         $this->gmail = $gmail;
         $this->imap = $imap;
 
@@ -42,11 +55,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Import Email Replies
      * 
-     * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
      * @return false || array of EmailHistory
      */
-    public function import($dealer, $salesperson) {
+    public function import($salesperson) {
         // Process Messages
         Log::info("Processing Getting Emails for User #" . $salesperson->user_id);
         $imported = 0;
@@ -99,6 +111,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return false || array of EmailHistory
      */
     private function importGoogle($accessToken, $folder) {
+        // Refresh Token
+        $validate = $this->google->validate($accessToken);
+
         // Get Emails From Google
         $messages = $this->gmail->messages($accessToken, $folder);
 
