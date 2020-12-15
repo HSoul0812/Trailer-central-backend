@@ -133,7 +133,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                  ->whereRelationType('sales_person');
         })->where('user_id', $userId)->where(function($query) {
             $query->whereNotNull(AccessToken::getTableName().'.id')
-                  ->where(function($query) {
+                  ->orWhere(function($query) {
                     $query->whereNotNull('imap_password')
                           ->where('imap_password', '<>', '')
                           ->whereNotNull('imap_server')
