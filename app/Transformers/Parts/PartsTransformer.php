@@ -3,11 +3,16 @@
 namespace App\Transformers\Parts;
 
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
+use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
 
 class PartsTransformer extends TransformerAbstract
 {
+    protected $availableIncludes = [
+        'purchaseOrders',
+    ];
+
     public function transform(Part $part): array
     {
 	 return [
@@ -42,19 +47,27 @@ class PartsTransformer extends TransformerAbstract
              'video_embed_code' => $part->video_embed_code,
              'stock_min' => $part->stock_min,
              'stock_max' => $part->stock_max,
-             'bins' => $part->bins,
-             'purchases' => [
-                 'has_not_completed' => $part->purchases->filter(static function (PurchaseOrderPart $part): bool {
-                     return !$part->purchaseOrder->isCompleted();
-                 })->isNotEmpty(),
-                 'items' => $part->purchases->map(static function (PurchaseOrderPart $part): array {
-                     return $part->purchaseOrder->only([
-                         'status',
-                         'user_defined_id',
-                         'id'
-                     ]);
-                 })
-             ],
+             'bins' => $part->bins
          ];
+    }
+
+    /**
+     * Include purchases resource object
+     *
+     * @param Part $part
+     * @return Collection
+     */
+    public function includePurchaseOrders(Part $part): Collection
+    {
+        return $this->collection(
+            $part->purchaseOrders,
+            new PurchaseOrderPartTransformer(), 'data')
+            ->setMeta([
+                'has_not_completed' => $part->purchaseOrders->filter(static function (
+                    PurchaseOrderPart $poPart
+                ): bool {
+                    return !$poPart->purchaseOrder->isCompleted();
+                })->isNotEmpty()
+            ]);
     }
 }

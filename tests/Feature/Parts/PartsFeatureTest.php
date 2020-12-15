@@ -33,7 +33,7 @@ class PartsFeatureTest extends TestCase
         self::assertTrue(isset($json['data']));
     }
 
-    public function testPartHasPurchasesPropertyAndItIsArrayType(): void
+    public function testPartHasNotPurchaseOrdesPropertyWhenIncludeParamIsNotPresent(): void
     {
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
@@ -41,11 +41,30 @@ class PartsFeatureTest extends TestCase
 
         $json = json_decode($response->getContent(), true);
 
-        self::assertTrue(isset($json['data'][0]['purchases']));
-        self::assertIsArray($json['data'][0]['purchases']);
+        self::assertNotTrue(isset($json['data'][0]['purchases']));
     }
 
-    public function testPartHasPurchasesOrderNotCompleted(): void
+    public function testPartHasPurchaseOrdersPropertyAndItsStructureIsWellFormed(): void
+    {
+        $params = [
+            'include' => 'purchaseOrders'
+        ];
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->get('/api/parts?' . http_build_query($params));
+
+        $json = json_decode($response->getContent(), true);
+
+        self::assertTrue(isset($json['data'][0]['purchaseOrders']));
+        self::assertIsArray($json['data'][0]['purchaseOrders']);
+        self::assertArrayHasKey('data', $json['data'][0]['purchaseOrders']);
+        self::assertIsArray($json['data'][0]['purchaseOrders']['data']);
+        self::assertArrayHasKey('meta', $json['data'][0]['purchaseOrders']);
+        self::assertArrayHasKey('has_not_completed', $json['data'][0]['purchaseOrders']['meta']);
+    }
+
+    public function testPartHasPurchaseOrdersNotCompleted(): void
     {
         // Given I'm a dealer
         $dealer_id = 1001;
@@ -58,7 +77,8 @@ class PartsFeatureTest extends TestCase
             'page' => 1,
             'query' => $term,
             'search_term' => $term,
-            'naive_search' => 1
+            'naive_search' => 1,
+            'include' => 'purchaseOrders'
         ];
 
         // When I search using the stock number
@@ -70,8 +90,6 @@ class PartsFeatureTest extends TestCase
 
         // Then I should see a part with the property purchases and within it a
         // property named has_not_completed equal true
-        self::assertTrue($json['data'][0]['purchases']['has_not_completed']);
+        self::assertTrue($json['data'][0]['purchaseOrders']['meta']['has_not_completed']);
     }
-
-
 }

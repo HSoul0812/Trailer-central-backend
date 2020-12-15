@@ -17,7 +17,7 @@ use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
  * @package App\Models\Parts
  * @property Collection $images
  * @property Collection<BinQuantity> $bins
- * @property Collection<PurchaseOrderPart> $purchases
+ * @property Collection<PurchaseOrderPart> $purchaseOrders
  * @property Vendor $vendor
  * @property Brand $brand
  * @property Category $category
@@ -221,7 +221,7 @@ class Part extends Model
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
     }
 
-    public function purchases(): HasMany
+    public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrderPart::class, 'part_id')
             ->has('purchaseOrder')

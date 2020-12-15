@@ -555,7 +555,7 @@ class PartRepository implements PartRepositoryInterface {
         }
 
         // load relations
-        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins', 'purchases']);
+        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins', 'purchaseOrders']);
 
         // if a paginator is requested
         if ($options['page'] ?? null) {
@@ -587,5 +587,4 @@ class PartRepository implements PartRepositoryInterface {
 
         return $search->execute()->models();
     }
-
 }
