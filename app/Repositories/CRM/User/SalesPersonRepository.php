@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\NewDealerUser;
 use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
