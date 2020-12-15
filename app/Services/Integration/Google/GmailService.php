@@ -12,6 +12,7 @@ use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class GoogleService
@@ -99,6 +100,7 @@ class GmailService implements GmailServiceInterface
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
+            Log::error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
             if(strpos($error, "invalid authentication") !== FALSE) {
                 throw new InvalidGmailAuthMessageException();
             } else {
@@ -234,6 +236,15 @@ class GmailService implements GmailServiceInterface
 
         // Set Message ID
         $message->getHeaders()->get('Message-ID')->setId($params['message_id']);
+
+        // Add Existing Attachments
+        if(isset($params['files'])) {
+            $files = $this->interactionEmail->cleanAttachments($params['files']);
+            foreach($files as $attachment) {
+                // Optionally add any attachments
+                $message->attach((new \Swift_Attachment(file_get_contents($attachment['path']), $attachment['as'], $attachment['mime'])));
+            }
+        }
 
         // Add Attachments
         if(isset($params['attachments'])) {

@@ -218,6 +218,15 @@ class Part extends Model
     {
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
     }
+    
+    public function getTotalQtyAttribute()
+    {
+        return ($this->bins instanceof Collection)?
+            $this->bins->reduce(function ($total, $item) {
+                // add only non zero quantities
+                return $total + ($item->qty > 0? $item->qty: 0);
+            }, 0): 0;
+    }
 
     /**
      * Inspects the price CostModifier model and determines what the part

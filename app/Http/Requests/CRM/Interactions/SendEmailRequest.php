@@ -15,6 +15,8 @@ class SendEmailRequest extends Request {
         'lead_id' => 'required|integer',
         'subject' => 'required|string',
         'body' => 'required|string',
+        'files' => 'array',
+        'files.*' => 'string',
         'attachments' => 'array',
         'attachments.*' => 'file',
     ];

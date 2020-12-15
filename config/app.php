@@ -180,7 +180,6 @@ return [
         App\Providers\IntegrationServiceProvider::class,
         App\Providers\InteractionServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
-        App\Providers\IntegrationsServiceProvider::class,
 
         /*
          * 3rd party stuff

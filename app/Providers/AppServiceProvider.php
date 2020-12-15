@@ -2,24 +2,18 @@
 
 namespace App\Providers;
 
-use App\Repositories\Inventory\FileRepository;
-use App\Repositories\Inventory\FileRepositoryInterface;
-use App\Repositories\Inventory\ImageRepository;
-use App\Repositories\Inventory\ImageRepositoryInterface;
-use App\Repositories\Inventory\StatusRepository;
-use App\Repositories\Inventory\StatusRepositoryInterface;
-use App\Repositories\Website\DealerProxyRedisRepository;
-use App\Repositories\Website\DealerProxyRepositoryInterface;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\ServiceProvider;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Nova\Observer\DealerIncomingMappingObserver;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
+use App\Repositories\Inventory\FileRepository;
+use App\Repositories\Inventory\FileRepositoryInterface;
+use App\Repositories\Inventory\ImageRepository;
+use App\Repositories\Inventory\ImageRepositoryInterface;
+use App\Repositories\Inventory\StatusRepository;
+use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 use App\Repositories\Dms\ServiceOrderRepository;
@@ -34,6 +28,8 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
+use App\Repositories\Website\DealerProxyRedisRepository;
+use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
 use App\Repositories\Website\TowingCapacity\MakesRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\VehiclesRepository;
@@ -66,13 +62,17 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
+use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Services\CRM\Leads\AutoAssignService;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
-use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
-use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {

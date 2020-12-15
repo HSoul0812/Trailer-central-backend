@@ -3,38 +3,23 @@
 namespace App\Repositories\CRM\Interactions;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
-use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Services\Integration\Google\GmailServiceInterface;
-use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\Traits\SortTrait;
-use Carbon\Carbon;
-use Throwable;
 
 class InteractionsRepository implements InteractionsRepositoryInterface {
     
     use SortTrait;
 
     /**
-     * @var GmailServiceInterface
-     * @var InteractionEmailServiceInterface
-     */
-    private $gmail;
-    private $interactionEmail;
-
-    /**
      * @var EmailHistoryRepositoryInterface
-     * @var TokenRepositoryInterface
      */
     private $emailHistory;
-    private $tokens;
     
     private $sortOrders = [
         'created_at' => [
@@ -61,16 +46,8 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * 
      * @param EmailHistoryRepositoryInterface
      */
-    public function __construct(
-        GmailServiceInterface $gmail,
-        InteractionEmailServiceInterface $service,
-        EmailHistoryRepositoryInterface $emailHistory,
-        TokenRepositoryInterface $tokens
-    ) {
-        $this->gmail = $gmail;
-        $this->interactionEmail = $service;
+    public function __construct(EmailHistoryRepositoryInterface $emailHistory) {
         $this->emailHistory = $emailHistory;
-        $this->tokens = $tokens;
     }
     
     public function create($params) {
