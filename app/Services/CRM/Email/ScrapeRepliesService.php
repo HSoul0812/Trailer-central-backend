@@ -5,6 +5,7 @@ namespace App\Services\CRM\Email;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ScrapeRepliesService
