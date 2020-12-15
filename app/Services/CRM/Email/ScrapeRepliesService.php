@@ -48,13 +48,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     public function import($dealer, $salesperson) {
         // Process Messages
-        Log::info(count($this->messages) . " Sent Emails Found, " .
-            count($this->leads) . " Lead Email Addresses Found, " .
-            "Processing Getting Emails for User #" . $salesperson->user_id);
+        Log::info("Processing Getting Emails for User #" . $salesperson->user_id);
         $imported = 0;
         foreach($salesperson->folders as $folder) {
             // Import Folder
-            $imported += $this->importFolder($dealer, $salesperson, $folder);
+            $imports = $this->importFolder($dealer, $salesperson, $folder);
+            Log::info("Imported " . $imports . " Email Replies for Sales Person #" . $salesperson->id);
+            $imported += $imports;
         }
 
         // Return Campaign Sent Entries
