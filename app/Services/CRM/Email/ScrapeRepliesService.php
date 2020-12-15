@@ -52,7 +52,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $imported = 0;
         foreach($salesperson->folders as $folder) {
             // Import Folder
-            $imports = $this->importFolder($dealer, $salesperson, $folder);
+            $imports = $this->importFolder($salesperson, $folder);
             Log::info("Imported " . $imports . " Email Replies for Sales Person #" . $salesperson->id);
             $imported += $imports;
         }
@@ -70,7 +70,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importFolder($salesperson, $folder) {
         // Missing Folder Name?
-        var_dump($folder);
         if(empty($folder->name)) {
             $this->updateFolder($folder, false, false);
             return 0;
