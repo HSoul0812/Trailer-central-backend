@@ -113,7 +113,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importGoogle($accessToken, $folder) {
         // Refresh Token
         $validate = $this->google->validate($accessToken);
-        var_dump($validate);
 
         // Get Emails From Google
         $messages = $this->gmail->messages($accessToken, $folder);
