@@ -126,8 +126,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @return Collection of SalesPerson
      */
     public function getAllImap($userId) {
-        return SalesPerson::select(SalesPerson::getTableName().'.*')
-                          ->leftJoin(AccessToken::getTableName(), function($join) {
+        $imapSales = SalesPerson::select(SalesPerson::getTableName().'.*')
+                                ->leftJoin(AccessToken::getTableName(), function($join) {
             $join->on(AccessToken::getTableName().'.relation_id', '=', SalesPerson::getTableName().'.id')
                  ->whereTokenType('google')
                  ->whereRelationType('sales_person');
@@ -142,6 +142,12 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                           ->where('imap_port', '<>', '');
             });
         })->get();
+
+        // Get Query
+        echo $imapSales->__toString();
+
+        // Return Sales People With IMAP
+        return $imapSales;
     }
 
     /**

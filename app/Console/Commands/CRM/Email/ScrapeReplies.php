@@ -150,7 +150,6 @@ class ScrapeReplies extends Command
 
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
-        var_dump($salespeople);
         if(count($salespeople) < 1) {
             return false;
         }
