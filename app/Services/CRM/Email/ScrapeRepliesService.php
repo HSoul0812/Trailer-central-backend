@@ -70,6 +70,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importFolder($salesperson, $folder) {
         // Missing Folder Name?
+        var_dump($folder);
         if(empty($folder->name)) {
             $this->updateFolder($folder, false, false);
             return 0;
