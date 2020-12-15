@@ -144,7 +144,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         })->get();
 
         // Get Query
-        echo $imapSales->__toString();
+        echo $imapSales->getSql();
 
         // Return Sales People With IMAP
         return $imapSales;
