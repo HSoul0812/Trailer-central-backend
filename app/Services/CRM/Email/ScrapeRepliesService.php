@@ -2,17 +2,9 @@
 
 namespace App\Services\CRM\Email;
 
-use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
-use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
-use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
-use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Text\CampaignSent;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 /**
  * Class ScrapeRepliesService
@@ -54,17 +46,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return false || array of EmailHistory
      */
     public function import($dealer, $salesperson) {
-        // Messages Return?
+        // Process Messages
+        Log::info(count($this->messages) . " Sent Emails Found, " .
+            count($this->leads) . " Lead Email Addresses Found, " .
+            "Processing Getting Emails for User #" . $salesperson->user_id);
         $imported = 0;
-        if(count($this->messages) > 0 || count($this->leads) > 0) {
-            // Process Messages
-            echo date("r") . ": " . count($this->messages) . " Sent Emails Found, " .
-                count($this->leads) . " Lead Email Addresses Found, " .
-                "Processing Getting Emails for User #" . $salesPerson->user_id . PHP_EOL;
-            foreach($salesperson->folders as $folder) {
-                // Import Folder
-                $imported = $this->importFolder($dealer, $salesperson, $folder);
-            }
+        foreach($salesperson->folders as $folder) {
+            // Import Folder
+            $imported += $this->importFolder($dealer, $salesperson, $folder);
         }
 
         // Return Campaign Sent Entries
@@ -82,7 +71,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Missing Folder Name?
         if(empty($folder->name)) {
             $this->updateFolder($folder, false, false);
-            return false;
+            return 0;
         }
 
         // Get From Google?
@@ -95,6 +84,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Insert Replies Into DB
+        var_dump($replies);
 
         // Return Inserted Replies
         return $replies;
