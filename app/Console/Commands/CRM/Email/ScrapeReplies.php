@@ -54,6 +54,7 @@ class ScrapeReplies extends Command
     /**
      * @var int
      */
+    protected $dealerId = 0;
     protected $salesPersonId = 0;
 
     /**
@@ -91,7 +92,7 @@ class ScrapeReplies extends Command
     public function handle()
     {
         // Get Dealer ID
-        $dealerId = $this->argument('dealer');
+        $this->dealerId = $this->argument('dealer');
 
         // Initialize Time
         date_default_timezone_set(env('DB_TIMEZONE'));
@@ -102,12 +103,12 @@ class ScrapeReplies extends Command
         try {
             // Log Start
             $now = $this->datetime->format("l, F jS, Y");
-            $this->command .= (!empty($dealerId) ? ' ' . $dealerId : '');
+            $this->command .= (!empty($this->dealerId) ? ' ' . $this->dealerId : '');
             $this->info("{$this->command} started {$now}");
 
             // Handle Dealer Differently
-            if(!empty($dealerId)) {
-                $dealers = NewDealerUser::where('id', $dealerId)->with('user')->get();
+            if(!empty($this->dealerId)) {
+                $dealers = NewDealerUser::where('id', $this->dealerId)->with('user')->get();
             } else {
                 // Get Dealers With Active CRM
                 $dealers = NewDealerUser::has('activeCrmUser')->with('user')->get();
@@ -166,8 +167,10 @@ class ScrapeReplies extends Command
             // Try Catching Error for Sales Person
             try {
                 // Set Current Sales Person to Redis
-                $this->redis->hmset($this->skey, $salesPerson->id, json_encode($salesPerson));
-                $this->salesPersonId = 0;
+                if(empty($this->dealerId)) {
+                    $this->redis->hmset($this->skey, $salesperson->id, json_encode($salesperson));
+                    $this->salesPersonId = 0;
+                }
 
                 // Import Emails
                 $this->info("{$this->command} importing emails on sales person #{$salesperson->id} for dealer #{$dealer->id}");
