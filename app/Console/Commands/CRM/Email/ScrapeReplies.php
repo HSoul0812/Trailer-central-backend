@@ -4,6 +4,7 @@ namespace App\Console\Commands\CRM\Email;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
