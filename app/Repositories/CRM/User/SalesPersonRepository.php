@@ -141,13 +141,13 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                           ->whereNotNull('imap_port')
                           ->where('imap_port', '<>', '');
             });
-        })->get();
+        });
 
         // Get Query
         echo $imapSales->toSql();
 
         // Return Sales People With IMAP
-        return $imapSales;
+        return $imapSales->get();
     }
 
     /**
