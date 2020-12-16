@@ -131,7 +131,7 @@ class GmailService implements GmailServiceInterface
 
 
         // Get Labels
-        $label = $this->labels($accessToken, $folder);
+        $label = $this->labels($accessToken, $folder, true);
 
         // Get Messages
         $results = $this->gmail->users_messages->listUsersMessages('me', ['labelIds' => [$label['id']]]);
@@ -154,15 +154,15 @@ class GmailService implements GmailServiceInterface
      * 
      * @param AccessToken $accessToken
      * @param string || null $search
+     * @param bool $single
      * @return array of labels || single label
      */
-    public function labels($accessToken, $search = null) {
+    public function labels($accessToken, $search = null, $single = false) {
         // Configure Client
         $this->setAccessToken($accessToken);
 
         // Get Labels
         $results = $this->gmail->users_labels->listUsersLabels('me');
-        var_dump($results);
         if(count($results->getLabels()) == 0) {
             throw new MissingGmailLabelsException;
         }
@@ -183,7 +183,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Return Labels
-        if(count($labels) > 1) {
+        if(!$single) {
             return $labels;
         }
 
