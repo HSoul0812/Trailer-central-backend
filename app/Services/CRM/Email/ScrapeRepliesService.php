@@ -115,6 +115,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importGoogle($accessToken, $folder) {
         // Refresh Token
         $validate = $this->google->validate($accessToken);
+        var_dump($validate);
         if(!empty($validate['new_token'])) {
             $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
         }

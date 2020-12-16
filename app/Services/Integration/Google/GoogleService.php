@@ -129,6 +129,7 @@ class GoogleService implements GoogleServiceInterface
         // Try to Refesh Access Token!
         if(!empty($accessToken->refresh_token) && (!$result['is_valid'] || $result['is_expired'])) {
             $refresh = $this->refreshAccessToken();
+            var_dump($refresh);
             $result['is_expired'] = $refresh['expired'];
             if(!empty($refresh['access_token'])) {
                 unset($refresh['expired']);
