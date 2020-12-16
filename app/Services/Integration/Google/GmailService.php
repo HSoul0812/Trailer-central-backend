@@ -134,10 +134,7 @@ class GmailService implements GmailServiceInterface
         $label = $this->labels($accessToken, $folder);
 
         // Get Messages
-        $results = $this->gmail->users_messages->listUsersMessages('me', ['labelIds' => [$label->id]]);
-        var_dump($results);
-        var_dump($label);
-        var_dump($folder);
+        $results = $this->gmail->users_messages->listUsersMessages('me', ['labelIds' => [$label['id']]]);
         if (count($results->getMessages()) == 0) {
             return array();
         }
