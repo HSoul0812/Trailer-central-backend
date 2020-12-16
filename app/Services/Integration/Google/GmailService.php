@@ -175,6 +175,7 @@ class GmailService implements GmailServiceInterface
             // Search for Label Exists?
             if(!empty($search)) {
                 // Skip If Label Doesn't Match!
+                echo $label->getName() . PHP_EOL;
                 if($search !== $label->getName()) {
                     continue;
                 }
