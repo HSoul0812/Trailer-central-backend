@@ -171,6 +171,7 @@ class GmailService implements GmailServiceInterface
 
         // Get Labels
         $labels = array();
+        echo $search . PHP_EOL;
         foreach($results->getLabels() as $label) {
             // Search for Label Exists?
             if(!empty($search)) {
