@@ -120,7 +120,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Get Emails From Google
-        $messages = $this->gmail->messages($accessToken, $folder->name);
+        $messages = $this->gmail->messages($accessToken, $folder->name, ['format' => 'full']);
 
         // Loop Messages
         foreach($messages as $message) {
