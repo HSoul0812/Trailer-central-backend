@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Email;
 
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
@@ -41,7 +42,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     public function __construct(GoogleServiceInterface $google,
                                 GmailServiceInterface $gmail,
                                 ImapServiceInterface $imap,
-                                EmailHistoryRepositoryInterface $emails)
+                                EmailHistoryRepositoryInterface $emails,
+                                TokenRepositoryInterface $tokens)
     {
         // Initialize Services
         $this->google = $google;
@@ -50,6 +52,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Initialize Repositories
         $this->emails = $emails;
+        $this->tokens = $tokens;
     }
 
     /**
@@ -97,7 +100,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Insert Replies Into DB
-        var_dump($replies);
 
         // Return Inserted Replies
         return $replies;
@@ -113,7 +115,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importGoogle($accessToken, $folder) {
         // Refresh Token
         $validate = $this->google->validate($accessToken);
-        var_dump($validate);
+        if(!empty($validate['new_token'])) {
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
+        }
 
         // Get Emails From Google
         $messages = $this->gmail->messages($accessToken, $folder);

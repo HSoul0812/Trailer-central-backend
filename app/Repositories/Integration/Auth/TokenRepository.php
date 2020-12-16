@@ -7,7 +7,6 @@ use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Auth\Scope;
 use Illuminate\Database\Eloquent\Collection;
-use Carbon\Carbon;
 
 class TokenRepository implements TokenRepositoryInterface {
     /**
@@ -180,6 +179,27 @@ class TokenRepository implements TokenRepositoryInterface {
         // Return Empty
         return null;
     }
+
+    /**
+     * Refresh Access Token
+     * 
+     * @param int $tokenId
+     * @param array $newToken
+     * @return AccessToken
+     */
+    public function refresh($tokenId, $newToken) {
+        // Refresh Access Token
+        $time = time();
+        return $this->update([
+            'id' => $tokenId,
+            'access_token' => $newToken['access_token'],
+            'id_token' => $newToken['id_token'],
+            'expires_in' => $newToken['expires_in'],
+            'expires_at' => date("Y-m-d H:i:s", $time + $newToken['expires_in']),
+            'issued_at' => date("Y-m-d H:i:s", $time)
+        ]);
+    }
+
 
     /**
      * Delete Access Token Scopes
