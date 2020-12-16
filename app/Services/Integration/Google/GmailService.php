@@ -181,6 +181,7 @@ class GmailService implements GmailServiceInterface
             }
 
             // Add Label to Array
+            var_dump($label);
             $labels[] = $label;
         }
 
