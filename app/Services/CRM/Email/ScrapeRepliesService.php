@@ -128,6 +128,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $payload = $message->getPayload();
 
             // Get Headers
+            var_dump($message);
+            var_dump($payload);
             $headers = $payload->getHeaders();
             var_dump($headers);
         }
