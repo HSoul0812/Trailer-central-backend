@@ -5,6 +5,9 @@ namespace App\Models\Inventory;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $label
+ */
 class Category extends Model {
 
     use TableAware;
