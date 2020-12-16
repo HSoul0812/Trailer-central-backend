@@ -134,8 +134,6 @@ class GmailService implements GmailServiceInterface
         $label = $this->labels($accessToken, $folder, true);
 
         // Get Messages
-        var_dump($label);
-        die;
         $results = $this->gmail->users_messages->listUsersMessages('me', ['labelIds' => [$label['id']]]);
         if (count($results->getMessages()) == 0) {
             return array();
@@ -171,20 +169,22 @@ class GmailService implements GmailServiceInterface
 
         // Get Labels
         $labels = array();
-        echo $search . PHP_EOL;
         foreach($results->getLabels() as $label) {
             // Search for Label Exists?
             if(!empty($search)) {
                 // Skip If Label Doesn't Match!
-                echo $label->getName() . PHP_EOL;
                 if($search !== $label->getName()) {
                     continue;
                 }
             }
 
             // Add Label to Array
-            var_dump($label);
             $labels[] = $label;
+        }
+
+        // None Exist?!
+        if(count($labels) < 1 && $search !== 'INBOX') {
+            return $this->labels($accessToken, 'INBOX', $single);
         }
 
         // Return Labels
