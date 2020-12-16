@@ -29,4 +29,20 @@ interface EmailHistoryRepositoryInterface extends Repository {
      * @return Attachment
      */
     public function createAttachments($attachments);
+
+    /**
+     * Get Message ID's for Dealer
+     * 
+     * @param int $userId
+     * @return array of Message ID's
+     */
+    public function getMessageIds($userId);
+
+    /**
+     * Get Processed Message ID's for Dealer
+     * 
+     * @param int $userId
+     * @return array of Message ID's
+     */
+    public function getProcessed($userId);
 }

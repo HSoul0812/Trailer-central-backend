@@ -143,7 +143,24 @@ class GmailService implements GmailServiceInterface
         $messages = array();
         foreach ($results->getMessages() as $item) {
             // Get Message
-            $messages[] = $this->gmail->users_messages->get('me', $item->id, ['format' => 'full']);
+            $message = $this->gmail->users_messages->get('me', $item->id, ['format' => 'full']);
+
+            // Get Headers
+            $payload = $message->getPayload();
+            if(empty($payload)) {
+                unset($message);
+                unset($messages[$k]);
+                continue;
+            }
+
+            // Get Headers
+            $headers = $this->parseMessageHeaders($payload->getHeaders());
+
+            // Add to Array
+            $messages[] = [
+                'message' => $message,
+                'headers' => $headers
+            ];
         }
 
         // Get Messages?!
@@ -273,5 +290,40 @@ class GmailService implements GmailServiceInterface
 
         // Return Message
         return $this->message;
+    }
+
+
+    /**
+     * Parse Message Headers Into More Reasonable Format
+     * 
+     * @param array $headers
+     * @return array
+     */
+    private function parseMessageHeaders($headers) {
+        // Initialize New Headers Array
+        $clean = array();
+        foreach($headers as $header) {
+            // Get Value
+            $value = $header->value;
+
+            // Clean Email Values
+            if($header->name === 'Reply-To' || $header->name === 'From') {
+                $name = '';
+
+                // Separate Name From Email
+                if(strpos($value, '<') !== FALSE) {
+                    $parts = explode("<", $value);
+                    $value = str_replace('>', '', end($parts));
+                    $name = trim(reset($parts));
+                }
+                $clean[$header->name . '-Name'] = $name;
+            }
+
+            // Add to Array
+            $clean[$header->name] = trim($value);
+        }
+
+        // Return Cleaned Headers
+        return $clean;
     }
 }

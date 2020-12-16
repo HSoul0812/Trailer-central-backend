@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Email\Attachment;
+use App\Models\CRM\Email\Processed;
 use Carbon\Carbon;
 
 class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
@@ -169,6 +170,55 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
             ->whereFromEmail($fromEmail)
             ->whereNull('date_sent')
             ->first();
+    }
+
+    /**
+     * Get Message ID's for Dealer
+     * 
+     * @param int $userId
+     * @return array of Message ID's
+     */
+    public function getMessageIds($userId) {
+        // Get All Message ID's for User
+        return EmailHistory::leftJoin(Interaction::getTableName(),
+                                      Interaction::getTableName() . '.interaction_id', '=',
+                                      EmailHistory::getTableName() . '.interaction_id')
+                           ->where(EmailHistory::getTableName() . '.user_id', $userId)
+                           ->pluck('message_id')->toArray();
+    }
+
+    /**
+     * Get Processed Message ID's for Dealer
+     * 
+     * @param int $userId
+     * @return array of Message ID's
+     */
+    public function getProcessed($userId) {
+        // Get All Message ID's for User
+        return Processed::where('user_id', $userId)->pluck('message_id')->toArray();
+    }
+
+    /**
+     * Created Processed Emails
+     * 
+     * @param int $userId
+     * @param array $processed
+     * @return Collection of Processed
+     */
+    public function createProcessed($userId, $messageIds) {
+        // Initialized Processed
+        $processed = array();
+
+        // Loop Processed
+        foreach($messageIds as $messageId) {
+            $processed[] = Processed::create([
+                'user_id' => $userId,
+                'message_id' => $messageID
+            ]);
+        }
+
+        // Return Collection
+        return collect($processed);
     }
 
 

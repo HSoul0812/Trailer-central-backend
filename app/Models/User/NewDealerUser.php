@@ -130,21 +130,14 @@ class NewDealerUser extends Model
     /**
      * Get leads with valid email addresses
      * 
-     * @return HasMany
+     * @return array of lead emails
      */
-    public function leadEmails()
+    public function getLeadEmailsAttribute()
     {
         return $this->leads()->where('email_address', '<>', '')
-                             ->whereNotNull('email_address');
-    }
-
-    /**
-     * Get Processed Emails
-     * 
-     * @return HasMany
-     */
-    public function processedEmails() {
-        return $this->hasMany(Processed::class, 'user_id', 'user_id');
+                             ->whereNotNull('email_address')
+                             ->pluck('email_address')
+                             ->toArray();
     }
     
     public static function getTableName() {
