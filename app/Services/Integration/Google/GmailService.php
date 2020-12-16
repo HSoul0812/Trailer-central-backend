@@ -141,8 +141,9 @@ class GmailService implements GmailServiceInterface
 
         // Get Messages
         $messages = array();
-        foreach ($results->getMessages() as $message) {
-            $messages[] = $message;
+        foreach ($results->getMessages() as $item) {
+            // Get Message
+            $messages[] = $this->gmail->users_messages->get('me', $item->id, ['format' => 'full']);
         }
 
         // Get Messages?!
