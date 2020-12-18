@@ -94,7 +94,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Get User Details to Know What to Import
         $this->messageIds = $this->emails->getMessageIds($dealer->user_id);
         $this->processed = $this->emails->getProcessed($dealer->user_id);
-        $this->leadEmails = $this->leads->getLeadEmails($dealer->user_id);
+        $this->leadEmails = $this->leads->getLeadEmails($dealer->id);
 
         // Process Messages
         Log::info("Processing Getting Emails for User #" . $salesperson->user_id);
@@ -143,25 +143,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $emails = array();
         if(!empty($replies) && count($replies) > 0) {
             foreach($replies as $reply) {
-                // Interaction Exists?
-                if(empty($interactionId)) {
-                    // Insert Interaction
-                    $interaction = $this->interactions->create([
-                        'tc_lead_id' => $reply['lead_id'],
-                        'user_id' => $salesperson->user_id,
-                        'interaction_type' => 'EMAIL',
-                        'interaction_notes' => 'E-Mail ' . $reply['direction'] . ': ' . $reply['subject'],
-                        'interaction_time' => $reply['date_sent']
-                    ]);
-                } else {
-                    // Update Interaction
-                    $interaction = $this->interactions->update([
-                        'id' => $interactionId,
-                        'interaction_type' => 'EMAIL',
-                        'interaction_notes' => 'E-Mail ' . $reply['direction'] . ': ' . $reply['subject'],
-                        'interaction_time' => $reply['date_sent']
-                    ]);
-                }
+                // Insert Interaction
+                $interaction = $this->interactions->create([
+                    'tc_lead_id' => $reply['lead_id'],
+                    'user_id' => $salesperson->user_id,
+                    'interaction_type' => 'EMAIL',
+                    'interaction_notes' => 'E-Mail ' . $reply['direction'] . ': ' . $reply['subject'],
+                    'interaction_time' => $reply['date_sent']
+                ]);
 
                 // Insert Email History Entry
                 unset($reply['direction']);
