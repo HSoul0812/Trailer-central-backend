@@ -160,7 +160,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Return Inserted Replies
-        return collect($emails);
+        return count($emails);
     }
 
     /**
