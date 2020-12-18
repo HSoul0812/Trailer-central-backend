@@ -86,6 +86,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Import Email Replies
      * 
+     * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
      * @return false || array of EmailHistory
      */
@@ -117,6 +118,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Import Single Folder
      * 
+     * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
      * @param Folder $folder
      * @return false || array of EmailHistory
