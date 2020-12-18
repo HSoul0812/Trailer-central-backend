@@ -187,6 +187,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
                            ->pluck('message_id')->toArray();
     }
 
+
     /**
      * Get Processed Message ID's for Dealer
      * 
@@ -202,7 +203,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
      * Created Processed Emails
      * 
      * @param int $userId
-     * @param array $processed
+     * @param array $messageIds
      * @return Collection of Processed
      */
     public function createProcessed($userId, $messageIds) {
@@ -213,7 +214,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         foreach($messageIds as $messageId) {
             $processed[] = Processed::create([
                 'user_id' => $userId,
-                'message_id' => $messageID
+                'message_id' => $messageId
             ]);
         }
 

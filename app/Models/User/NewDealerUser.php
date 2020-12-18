@@ -126,19 +126,6 @@ class NewDealerUser extends Model
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'id')->where('is_spam', 0);
     }
-
-    /**
-     * Get leads with valid email addresses
-     * 
-     * @return array of lead emails
-     */
-    public function getLeadEmailsAttribute()
-    {
-        return $this->leads()->where('email_address', '<>', '')
-                             ->whereNotNull('email_address')
-                             ->pluck('email_address')
-                             ->toArray();
-    }
     
     public static function getTableName() {
         return self::TABLE_NAME;

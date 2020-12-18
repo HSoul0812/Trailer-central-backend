@@ -79,7 +79,7 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Get Refresh Token
      * 
-     * @param array $params
+     * @param array $accessToken
      * @return array of validation info
      */
     public function refresh($accessToken) {
@@ -145,7 +145,7 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Validate ID Token
      * 
-     * @param AccessToken $accessToken
+     * @param string $idToken
      * @return boolean
      */
     private function validateIdToken($idToken) {
