@@ -184,7 +184,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         return EmailHistory::leftJoin(Interaction::getTableName(),
                                       Interaction::getTableName() . '.interaction_id', '=',
                                       EmailHistory::getTableName() . '.interaction_id')
-                           ->where(EmailHistory::getTableName() . '.user_id', $userId)
+                           ->where(Interaction::getTableName() . '.user_id', $userId)
                            ->pluck('message_id')->toArray();
     }
 
