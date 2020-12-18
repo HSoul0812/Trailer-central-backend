@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class EmailHistory extends Model
 {
 
-    const TABLE_NAME = 'crm_interaction';
+    const TABLE_NAME = 'crm_email_history';
 
     /**
      * The table associated with the model.
