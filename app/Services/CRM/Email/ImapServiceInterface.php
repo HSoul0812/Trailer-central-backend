@@ -6,9 +6,9 @@ interface ImapServiceInterface {
     /**
      * Import Email Replies
      * 
-     * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
+     * @param EmailFolder $folder
      * @return false || array of EmailHistory
      */
-    public function import($dealer, $salesperson);
+    public function messages($salesperson, $folder);
 }

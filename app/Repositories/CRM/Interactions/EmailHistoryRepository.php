@@ -35,7 +35,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
         // Insert Attachments?
         if(!empty($fields['attachments'])) {
-            $this->createAttachments($fields['attachments']);
+            $this->updateAttachments($fields['message_id'], $fields['attachments']);
         }
 
         // Create Email History Entry
@@ -102,12 +102,12 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         // Fill Report Fields
         $fields = $this->fillReportFields($params);
 
-        // Insert Attachments?
-        if(!empty($fields['attachments'])) {
-            $this->createAttachments($fields['attachments']);
-        }
-
         DB::transaction(function() use (&$emailHistory, $fields) {
+            // Insert Attachments?
+            if(!empty($fields['attachments'])) {
+                $this->updateAttachments($fields['message_id'], $fields['attachments']);
+            }
+
             // Fill EmailHistory Details
             $emailHistory->fill($fields)->save();
         });
@@ -138,18 +138,21 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
     }
 
     /**
-     * Create Email Attachments
+     * Update Email Attachments
      * 
+     * @param string $messageId
      * @param array $attachments
      * @return Attachment
      */
-    public function createAttachments($attachments) {
-        // Initialize Attachments Array
-        $emailAttachments = array();
+    public function updateAttachments($messageId, $attachments) {
+        // Deleted Existing Attachments for Message ID!
+        Attachment::where('message_id', $messageId)->delete();
 
         // Loop Attachments
+        $emailAttachments = array();
         if(count($attachments) > 0) {
             foreach($attachments as $attachment) {
+                $attachment['message_id'] = $messageId;
                 $emailAttachments[] = Attachment::create($attachment);
             }
         }

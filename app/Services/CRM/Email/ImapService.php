@@ -3,6 +3,8 @@
 namespace App\Services\CRM\Email;
 
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use PhpImap\Mailbox;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ScrapeRepliesService
@@ -12,9 +14,14 @@ use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 class ImapService implements ImapServiceInterface
 {
     /**
-     * @var php_imap
+     * @var PhpImap\Mailbox
      */
     protected $imap;
+
+    /**
+     * @var string
+     */
+    protected $attachmentDir;
 
     /**
      * ScrapeRepliesService constructor.
@@ -22,93 +29,223 @@ class ImapService implements ImapServiceInterface
     public function __construct()
     {
         $this->imap = null;
+        $this->attachmentDir = $_ENV['IMAP_ATTACHMENT_DIR'];
+        if(!file_exists($this->attachmentDir)) {
+            mkdir($this->attachmentDir);
+        }
     }
 
     /**
      * Import Email Replies
      * 
-     * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
-     * @return false || array of EmailHistory
-     */
-    public function import($dealer, $salesperson) {
-        // Messages Return?
-        $imported = 0;
-        if(count($this->messages) > 0 || count($this->leads) > 0) {
-            // Process Messages
-            echo date("r") . ": " . count($this->messages) . " Sent Emails Found, " .
-                count($this->leads) . " Lead Email Addresses Found, " .
-                "Processing Getting Emails for User #" . $salesPerson->user_id . PHP_EOL;
-            foreach($salesperson->folders as $folder) {
-                // Import Folder
-                $imported = $this->importFolder($dealer, $salesperson, $folder);
-            }
-        }
-
-        // Return Campaign Sent Entries
-        return $imported;
-    }
-
-    /**
-     * Import Single Folder
-     * 
-     * @param SalesPerson $salesperson
-     * @param Folder $folder
-     * @return false || array of EmailHistory
-     */
-    private function importFolder($salesperson, $folder) {
-        // Missing Folder Name?
-        if(empty($folder->name)) {
-            $this->updateFolder($folder, false, false);
-            return false;
-        }
-
-        // Get From Google?
-        if(!empty($salesperson->googleToken)) {
-            $replies = $this->importGoogle($salesperson->googleToken, $folder);
-        }
-        // Get From IMAP Instead
-        else {
-            $replies = $this->importImap($salesperson, $folder);
-        }
-
-        // Insert Replies Into DB
-
-        // Return Inserted Replies
-        return $replies;
-    }
-
-    /**
-     * Import Google
-     * 
-     * @param AccessToken $accessToken
      * @param EmailFolder $folder
      * @return false || array of EmailHistory
      */
-    private function importGoogle($accessToken, $folder) {
-        // Get Emails From Google
-        $messages = $this->gmail->messages($accessToken, $folder);
-
-        // Loop Messages
-        foreach($messages as $message) {
-            // Get Headers
-            $payload = $message->getPayload();
-
-            // Get Headers
-            $headers = $payload->getHeaders();
-            var_dump($headers);
-        }
-    }
-
-    /**
-     * Import Via Imap
-     */
-    private function importImap($salesperson, $folder) {
+    public function messages($salesperson, $folder) {
         // NTLM?
+        $charset = 'UTF-8';
         if($salesperson->smtp_auth === 'NTLM') {
             $charset = 'US-ASCII';
         }
 
-        
+        // Get IMAP
+        $email = !empty($salesperson->imap_email) ? $salesperson->imap_email : $salesperson->email;
+        $oneMonthAgo = (time() - (60 * 60 * 24 * 30));
+        $dateImported = (!empty($folder->date_imported) ? strtotime($folder->date_imported) : $oneMonthAgo);
+        $this->connectIMAP($folder->name, [
+            'email'    => $email,
+            'password' => $salesperson->imap_password,
+            'host'     => $salesperson->imap_server,
+            'port'     => $salesperson->imap_port,
+            'security' => (!empty($salesperson->imap_security) ? $salesperson->imap_security : 'ssl'),
+            'charset'  => $charset
+        ], $dateImported);
+
+        // Get Messages
+        $emails = array();
+        $replies = $this->getMessages($dateImported);
+        if($replies !== false && count($replies) > 0) {
+            // Parse Replies
+            foreach($replies as $reply) {
+                // Parse Reply
+                $parsed = $this->parseReply($reply);
+                if($parsed !== false) {
+                    // Append Emails
+                    $emails[] = $parsed;
+                }
+            }
+        }
+
+        // Return Array of Parsed Emails
+        return $emails;
+    }
+
+
+    /**
+     * Connect to IMAP
+     * 
+     * @param string $folder
+     * @param array $config
+     * @return type
+     */
+    private function connectIMAP($folder, $config) {
+        // Get SMTP Config
+        $ssl = '/imap/' . $config['security'];
+        $hostname = '{' . $config['host'] . ':' . $config['port'] . $ssl . '}' . $folder;
+        $username = $config['email'];
+        $password = $config['password'];
+        $charset  = $config['charset'];
+
+        // Return Mailbox
+        try {
+            // Imap Inbox ALREADY Exists?
+            Log::info("Connecting to IMAP host: " . $hostname . " with email: " . $username);
+            if(!empty($this->imap)) {
+                $this->imap->switchMailbox($hostname);
+            } else {
+                $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
+            }
+            Log::info('Connected to IMAP for email address: ' . $username);
+        } catch (\Exception $e) {
+            // Logged Exceptions
+            $this->imap = null;
+            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
+            Log::error('Cannot connect to ' . $username . ' via IMAP, exception returned: ' . $error);
+
+            // Authentication Error?!
+            if(strpos($error, 'Can not authenticate to IMAP server') !== FALSE) {
+                // Mark Connection as Failed!
+                $this->updateFolder($folder, false, false);
+            }
+
+            // Check for Chartype Error
+            if(strpos($error, "BADCHARSET") !== FALSE) {
+                preg_match('/\[BADCHARSET \((.*?)\)\]/', $error, $matches);
+                if(isset($matches[1]) && !empty($matches[1])) {
+                    Log::error('Detected bad CHARSET! Trying to load again with ' . $charset);
+                }
+            }
+        }
+
+        // Return IMAP Details
+        return $this->imap;
+    }
+
+    /**
+     * Get Messages After Set Date
+     * 
+     * @param string $time
+     * @param int $days
+     * @return array of emails
+     */
+    private function getMessages($time = 'days', $days = 7) {
+        // Base Timestamp on Number of Days
+        if($time === 'days') {
+            $m = date("m");
+            $d = date("d") - $days;
+            $y = date("Y");
+            $time = mktime(0, 0, 0, $m, $d, $y);
+        }
+
+        // Don't Implement Since if Time is 0
+        if(empty($time) || !is_numeric($time)) {
+            // Get All
+            $search = "ALL";
+        } else {
+            // Create Date Search Expression
+            $date = date('j M Y', $time);
+            $search = 'SINCE "' . $date . '"';
+        }
+
+        // Return Messages
+        $mailIds = $this->imapInbox->searchMailbox($search);
+        if(count($mailIds) > 0) {
+            return $this->imapInbox->getMailsInfo($mailIds);
+        }
+
+        // No Mail ID's Found? Return Empty Array!
+        return array();
+    }
+
+    /**
+     * Parse Reply Details to Clean Up Result
+     * 
+     * @param type $overview
+     * @return array of parsed data
+     */
+    private function parseReply($overview) {
+        // Get Mail
+        if(empty($overview->uid)) {
+            return false;
+        }
+
+        // Get Mail Data
+        $mail = $this->imap->getMail($overview->uid, false);
+        if(empty($mail->subject)) {
+            return false;
+        }
+
+        // Parse Message ID's
+        $parsed = [
+            'references' => !empty($overview->references) ? $overview->references : array(),
+            'message_id' => $overview->in_reply_to,
+            'root_id' => $overview->in_reply_to
+        ];
+        if(!empty($parsed['references'])) {
+            $parsed['references'] = explode(" ", $parsed['references']);
+            $parsed['root_id'] = reset($parsed['references']);
+            if(empty($parsed['message_id'])) {
+                $parsed['message_id'] = end($parsed['references']);
+            }
+        }
+
+        // Parse To Email/Name
+        $toFull = !empty($overview->to) ? $overview->to : '';
+        $to = explode("<", $toFull);
+        $parsed['to_name'] = trim($to[0]);
+        $parsed['to'] = '';
+        if(!empty($to[1])) {
+            $parsed['to'] = trim(str_replace(">", "", $to[1]));
+        }
+        if(empty($parsed['to'])) {
+            $parsed['to'] = $parsed['to_name'];
+            $parsed['to_name'] = '';
+        }
+
+        // Parse From Email/Name
+        $fromFull = !empty($overview->from) ? $overview->from : '';
+        $from = explode("<", $fromFull);
+        $parsed['from_name'] = trim($from[0]);
+        $parsed['from'] = '';
+        if(!empty($from[1])) {
+            $parsed['from'] = trim(str_replace(">", "", $from[1]));
+        }
+        if(empty($parsed['from'])) {
+            $parsed['from'] = $parsed['from_name'];
+            $parsed['from_name'] = '';
+        }
+
+        // Handle Subject
+        $parsed['subject'] = !empty($mail->subject) ? $mail->subject : '';
+        if(empty($parsed['subject'])) {
+            $parsed['subject'] = !empty($overview->subject) ? $overview->subject : "";
+        }
+
+        // Handle Body
+        $parsed['body'] = $mail->textHtml;
+        $parsed['use_html'] = 1;
+        if(empty($parsed['body'])) {
+            $parsed['use_html'] = 0;
+            $parsed['body'] = !empty($mail->textPlain) ? $mail->textPlain : "";
+        }
+
+        // Handle Attachments
+        $parsed['attachments'] = $mail->getAttachments();
+
+        // Return Parsed Array
+        unset($overview);
+        unset($mail);
+        return $parsed;
     }
 }

@@ -136,26 +136,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
         // Get From IMAP Instead
         else {
-            $replies = $this->importImap($dealer, $salesperson, $folder);
+            $replies = $this->importImap($salesperson, $folder);
         }
 
         // Insert Replies Into DB
         $emails = array();
         if(!empty($replies) && count($replies) > 0) {
             foreach($replies as $reply) {
-                // Insert Interaction
-                $interaction = $this->interactions->create([
-                    'tc_lead_id' => $reply['lead_id'],
-                    'user_id' => $salesperson->user_id,
-                    'interaction_type' => 'EMAIL',
-                    'interaction_notes' => 'E-Mail ' . $reply['direction'] . ': ' . $reply['subject'],
-                    'interaction_time' => $reply['date_sent']
-                ]);
-
-                // Insert Email History Entry
-                unset($reply['direction']);
-                $reply['interaction_id'] = $interaction->interaction_id;
-                $emails[] = $this->emails->create($reply);
+                // Insert Interaction / Email History
+                $reply['user_id'] = $salesperson->user_id;
+                $emails[] = $this->insertReply($reply);
             }
         }
 
@@ -235,7 +225,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Process Skipped Message ID's
-        $this->emails->createProcessed($salesperson->user_id, $skipped);
+        if(count($skipped) > 0) {
+            $this->emails->createProcessed($salesperson->user_id, $skipped);
+            Log::info("Processed " . count($skipped) . " emails that were skipped and not imported.");
+            unset($skipped);
+        }
 
         // Return Result Messages That Match
         return $results;
@@ -256,33 +250,140 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Loop Messages
         $results = array();
         $skipped = array();
-        foreach($messages as $k => $message) {
+        foreach($messages as $k => $parsed) {
             // Compare Message ID!
-            $messageId = $message['headers']['Message-ID'];
-            if(in_array($messageId, $this->processed) || in_array($messageId, $this->messageIds)) {
+            if(in_array($parsed['message_id'], $this->processed) ||
+               in_array($parsed['message_id'], $this->messageIds)) {
                 unset($message);
                 unset($messages[$k]);
                 continue;
             }
 
             // Verify if Email Exists!
-            $to = $message['headers']['Delivered-To'];
-            $from = $message['headers']['From'];
-            $reply = $message['headers']['Reply-To'];
-            if(($salesperson->smtp_email !== $to && in_array($to, $dealer->leadEmails)) ||
-                ($salesperson->smtp_email !== $from && in_array($from, $dealer->leadEmails)) ||
-                ($salesperson->smtp_email !== $reply && in_array($reply, $dealer->leadEmails))) {
-                // Add to Array
-                $results[] = $message;
+            $leadId = 0;
+            $direction = 'Received';
+            $to = $parsed['to'];
+            $from = $parsed['from'];
+            $reply = $parsed['reply'];
+
+            // Get Lead Email Exists?
+            if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
+                $leadId = $this->leadEmails[$to];
+                $direction = 'Sent';
+            } elseif($salesperson->smtp_email !== $from && isset($this->leadEmails[$from])) {
+                $leadId = $this->leadEmails[$from];
+            } elseif($salesperson->smtp_email !== $reply && isset($this->leadEmails[$reply])) {
+                $leadId = $this->leadEmails[$reply];
+            }
+
+            // Mark as Skipped
+            if(!empty($leadId)) {
+                // Add to Results
+                $results[] = [
+                    'lead_id' => $leadId,
+                    'message_id' => $parsed['message_id'],
+                    'root_message_id' => $parsed['root_id'],
+                    'to_email' => $parsed['to'],
+                    'to_name' => $parsed['to_name'],
+                    'from_email' => $parsed['from'],
+                    'from_name' => $parsed['from_name'],
+                    'subject' => $parsed['subject'],
+                    'body' => $parsed['body'],
+                    'use_html' => $parsed['use_html'],
+                    'attachments' => $parsed['attachments'],
+                    'direction' => $direction
+                ];
             } else {
-                $skipped[] = $messageId;
+                $skipped[] = $parsed['message_id'];
             }
         }
 
         // Process Skipped Message ID's
-        $this->emails->createProcessed($salesperson->user_id, $skipped);
+        if(count($skipped) > 0) {
+            $this->emails->createProcessed($salesperson->user_id, $skipped);
+            Log::info("Processed " . count($skipped) . " emails that were skipped and not imported.");
+            unset($skipped);
+        }
 
         // Return Result Messages That Match
         return $results;
+    }
+
+    /**
+     * Insert Reply Into DB
+     * 
+     * @param array $reply
+     * @return array
+     */
+    private function insertReply($reply) {
+        // Start Transaction
+        $email = array();
+        DB::transaction(function() use (&$email, $reply) {
+            // Insert Interaction
+            $interaction = $this->interactions->create([
+                'tc_lead_id' => $reply['lead_id'],
+                'user_id' => $reply['user_id'],
+                'interaction_type' => 'EMAIL',
+                'interaction_notes' => 'E-Mail ' . $reply['direction'] . ': ' . $reply['subject'],
+                'interaction_time' => $reply['date_sent']
+            ]);
+
+            // Insert Attachments
+            $this->insertAttachments($reply['message_id'], $reply['attachments']);
+
+            // Insert Email History Entry
+            unset($reply['direction']);
+            $reply['interaction_id'] = $interaction->interaction_id;
+            $email = $this->emails->create($reply);
+        });
+
+        // Return Final Email
+        return $email;
+    }
+
+    /**
+     * Insert Attachments
+     * 
+     * @param string $messageId
+     * @param array $files
+     * @return Collection of Attachment
+     */
+    private function insertAttachments($messageId, $files) {
+        // No Attachments?
+        if(empty($files)) {
+            return collect([]);
+        }
+
+        // Loop Attachments
+        $attachments = array();
+        foreach($files as $file) {
+            // Skip Entry
+            if(empty($file->filePath)) {
+                continue;
+            }
+
+            // Upload File to S3
+            $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
+            $path_parts = pathinfo( $file->filePath );
+            $filename = $path_parts['filename'];
+            $ext = $path_parts['extension'];
+
+            // Upload Image
+            $key = 'crm/' . $this->dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
+            $s3Image = Storage::disk('s3')->put($key, fopen($file->filePath, 'r+'), 'public');
+
+            // Add Email Attachment
+            $attachments[] = [
+                'message_id' => $messageId,
+                'filename' => $s3Image,
+                'original_filename' => $file->name
+            ];
+
+            // Delete Temporary File
+            unlink($file->filePath);
+        }
+
+        // Return Collection of Attachment
+        return $attachments;
     }
 }

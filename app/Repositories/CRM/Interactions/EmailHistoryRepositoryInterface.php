@@ -25,10 +25,11 @@ interface EmailHistoryRepositoryInterface extends Repository {
     /**
      * Create Email Attachments
      * 
+     * @param string $messageId
      * @param array $attachments
      * @return Attachment
      */
-    public function createAttachments($attachments);
+    public function updateAttachments($messageId, $attachments);
 
     /**
      * Get Message ID's for Dealer
