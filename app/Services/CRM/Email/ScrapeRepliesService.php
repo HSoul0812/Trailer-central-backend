@@ -174,6 +174,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Loop Messages
         $results = array();
         $skipped = array();
+        var_dump($this->processed);
         foreach($messages as $k => $message) {
             // Compare Message ID!
             $messageId = $message['headers']['Message-ID'];
@@ -199,7 +200,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             } elseif($salesperson->smtp_email !== $reply && isset($this->leadEmails[$reply])) {
                 $leadId = $this->leadEmails[$reply];
             }
-            var_dump($leadId);
 
             // Mark as Skipped
             if(!empty($leadId)) {
@@ -220,7 +220,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'body' => base64_decode($message['body']),
                     'direction' => $direction
                 ];
-            } else {
+            } elseif(!in_array($messageId, $skipped)) {
                 $skipped[] = $messageId;
             }
         }
