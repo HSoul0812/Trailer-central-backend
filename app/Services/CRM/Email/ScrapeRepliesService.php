@@ -95,7 +95,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->messageIds = $this->emails->getMessageIds($dealer->user_id);
         $this->processed = $this->emails->getProcessed($dealer->user_id);
         $this->leadEmails = $this->leads->getLeadEmails($dealer->id);
-        var_dump($this->processed);
 
         // Process Messages
         Log::info("Processing Getting Emails for User #" . $salesperson->user_id);
@@ -224,7 +223,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $skipped[] = $messageId;
             }
         }
-        var_dump($skipped);
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
