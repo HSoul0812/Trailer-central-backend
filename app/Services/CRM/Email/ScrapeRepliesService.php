@@ -174,7 +174,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Loop Messages
         $results = array();
         $skipped = array();
-        var_dump($this->processed);
+        var_dump($this->messageIds);
         die;
         foreach($messages as $k => $message) {
             // Compare Message ID!
