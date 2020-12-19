@@ -205,6 +205,8 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         // Fix Results
         $results = array();
         foreach($processed as $mail) {
+            var_dump($mail);
+            die;
             $results[] = $mail->message_id;
         }
 
