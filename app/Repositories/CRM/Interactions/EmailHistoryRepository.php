@@ -200,7 +200,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
      */
     public function getProcessed($userId) {
         // Get All Message ID's for User
-        $processed = Processed::where('user_id', $userId);
+        $processed = Processed::where('user_id', $userId)->get();
 
         // Fix Results
         $results = array();
