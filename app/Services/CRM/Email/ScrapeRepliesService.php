@@ -177,7 +177,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $k => $message) {
             // Compare Message ID!
             $messageId = $message['headers']['Message-ID'];
-            var_dump($messageId);
             if(in_array($messageId, $this->processed) || in_array($messageId, $this->messageIds)) {
                 unset($message);
                 unset($messages[$k]);
@@ -187,9 +186,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Verify if Email Exists!
             $leadId = 0;
             $direction = 'Received';
-            $to = $message['headers']['Delivered-To'];
-            $from = $message['headers']['From'];
-            $reply = $message['headers']['Reply-To'];
+            $to = !empty($message['headers']['Delivered-To']) ? $message['headers']['Delivered-To'] : '';
+            $from = !empty($message['headers']['From']) ? $message['headers']['From'] : '';
+            $reply = !empty($message['headers']['Reply-To']) ? $message['headers']['Reply-To'] : '';
 
             // Get Lead Email Exists?
             if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
