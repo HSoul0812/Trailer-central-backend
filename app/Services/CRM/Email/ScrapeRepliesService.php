@@ -221,6 +221,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 ];
             } elseif(!in_array($messageId, $skipped)) {
                 $skipped[] = $messageId;
+                $this->processed[] = $messageId;
             }
         }
 
