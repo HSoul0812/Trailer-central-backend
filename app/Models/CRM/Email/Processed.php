@@ -19,6 +19,8 @@ class Processed extends Model
      * @var string
      */
     protected $primaryKey = 'message_id';
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
