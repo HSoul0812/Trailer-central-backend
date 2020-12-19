@@ -254,7 +254,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Compare Message ID!
             if(in_array($parsed['message_id'], $this->processed) ||
                in_array($parsed['message_id'], $this->messageIds)) {
-                unset($message);
+                unset($parsed);
                 unset($messages[$k]);
                 continue;
             }
@@ -297,6 +297,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $skipped[] = $parsed['message_id'];
             }
         }
+        var_dump($skipped);
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
