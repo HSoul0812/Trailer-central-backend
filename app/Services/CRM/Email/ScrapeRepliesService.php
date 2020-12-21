@@ -190,7 +190,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $to = !empty($message['headers']['To']) ? $message['headers']['To'] : '';
             $from = !empty($message['headers']['From']) ? $message['headers']['From'] : '';
             $reply = !empty($message['headers']['Reply-To']) ? $message['headers']['Reply-To'] : '';
-            var_dump($message['headers']);
 
             // Get Lead Email Exists?
             if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
@@ -328,7 +327,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         DB::transaction(function() use (&$email, $reply) {
             // Insert Interaction
             $interaction = $this->interactions->create([
-                'tc_lead_id' => $reply['lead_id'],
+                'lead_id' => $reply['lead_id'],
                 'user_id' => $reply['user_id'],
                 'interaction_type' => 'EMAIL',
                 'interaction_notes' => 'E-Mail ' . $reply['direction'] . ': ' . $reply['subject'],
