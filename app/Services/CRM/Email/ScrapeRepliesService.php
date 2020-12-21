@@ -337,7 +337,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             ]);
 
             // Insert Attachments
-            $this->insertAttachments($reply['dealer_id'], $reply['message_id'], $reply['attachments']);
+            $reply['attachments'] = $this->insertAttachments($reply['dealer_id'], $reply['message_id'], $reply['attachments']);
 
             // Insert Email History Entry
             unset($reply['direction']);
