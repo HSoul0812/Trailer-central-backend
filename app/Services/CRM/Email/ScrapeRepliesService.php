@@ -224,6 +224,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->processed[] = $messageId;
             }
         }
+        var_dump($results);
         return [];
 
         // Process Skipped Message ID's
