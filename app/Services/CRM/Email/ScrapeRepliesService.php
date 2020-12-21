@@ -378,15 +378,15 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $ext = $path_parts['extension'];
 
             // Get File Data
+            $filepath = $file->filePath;
             if(!empty($file->data)) {
-                $contents = base64_decode($file->data);
-            } else {
-                $contents = fopen($file->filePath, 'r+');
+                // Send Base64 File
+                $filepath = 'data:' . $file->mime . ';base64,' . $file->data;
             }
 
             // Upload Image
             $key = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
-            $s3Image = Storage::disk('s3')->put($key, $contents, 'public');
+            $s3Image = Storage::disk('s3')->putFile($key, $filepath, 'public');
 
             // Add Email Attachment
             $attachments[] = [
