@@ -176,11 +176,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $skipped = array();
         foreach($messages as $k => $message) {
             // Compare Message ID!
-            if(isset($message['headers']['Message-ID'])) {
-                $messageId = $message['headers']['Message-ID'];
-            } else {
-                $messageId = $message['headers']['Message-Id'];
-            }
+            $messageId = $message['headers']['Message-ID'];
             if(in_array($messageId, $this->processed) || in_array($messageId, $this->messageIds)) {
                 unset($message);
                 unset($messages[$k]);
@@ -190,7 +186,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Verify if Email Exists!
             $leadId = 0;
             $direction = 'Received';
-            $to = !empty($message['headers']['Delivered-To']) ? $message['headers']['Delivered-To'] : '';
+            $to = !empty($message['headers']['To']) ? $message['headers']['To'] : '';
             $from = !empty($message['headers']['From']) ? $message['headers']['From'] : '';
             $reply = !empty($message['headers']['Reply-To']) ? $message['headers']['Reply-To'] : '';
 
@@ -207,12 +203,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Mark as Skipped
             if(!empty($leadId)) {
                 // Get To Name
-                if(empty($message['headers']['Delivered-To-Name'])) {
-                    var_dump($message['headers']);
-                    die;
-                }
                 $subject = $message['headers']['Subject'];
-                $toName = $message['headers']['Delivered-To-Name'];
+                $toName = $message['headers']['To-Name'];
                 $fromName = $message['headers']['From-Name'];
 
                 // Add to Results
