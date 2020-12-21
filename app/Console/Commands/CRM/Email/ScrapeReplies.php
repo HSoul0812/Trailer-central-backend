@@ -142,6 +142,7 @@ class ScrapeReplies extends Command
      */
     private function processDealer($dealer) {
         // Doesn't Belong to Sales Person?!
+        var_dump($this->salesPersonId);
         $salesPerson = SalesPerson::find($this->salesPersonId);
         if(!empty($this->salesPersonId) && !empty($salesPerson->user_id)) {
             if($salesPerson->user_id !== $dealer->user_id) {
@@ -168,7 +169,7 @@ class ScrapeReplies extends Command
             try {
                 // Set Current Sales Person to Redis
                 if(empty($this->dealerId)) {
-                    $this->redis->hmset($this->skey, $salesperson->id, json_encode($salesperson));
+                    //$this->redis->hmset($this->skey, $salesperson->id, json_encode($salesperson));
                     $this->salesPersonId = 0;
                 }
 
