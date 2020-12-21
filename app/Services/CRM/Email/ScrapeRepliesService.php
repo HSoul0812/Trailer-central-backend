@@ -208,8 +208,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $fromName = $message['headers']['From-Name'];
 
                 // Add to Results
-                var_dump($message['body']);
-                die;
                 $results[] = [
                     'lead_id' => $leadId,
                     'message_id' => $messageId,
@@ -218,7 +216,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'from_email' => $from,
                     'from_name' => !empty($fromName) ? $fromName : '',
                     'subject' => !empty($subject) ? $subject : '',
-                    'body' => base64_decode($message['body']),
+                    'body' => !empty($message['body']) ? base64_decode($message['body']) : '',
                     'direction' => $direction
                 ];
             } elseif(!in_array($messageId, $skipped)) {
