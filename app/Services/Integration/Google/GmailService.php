@@ -157,11 +157,13 @@ class GmailService implements GmailServiceInterface
             $headers = $this->parseMessageHeaders($payload->getHeaders());
 
             // Add to Array
-            var_dump($payload);
-            die;
             $body = $payload->getBody();
+            if(!empty($body->attachments)) {
+                var_dump($body->attachments);
+            }
             $messages[] = [
                 'body' => $body->data,
+                'body' => $body->attachments,
                 'message' => $message,
                 'headers' => $headers
             ];
