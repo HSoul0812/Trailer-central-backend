@@ -308,7 +308,9 @@ class GmailService implements GmailServiceInterface
             $value = $header->value;
 
             // Clean Email Values
-            if($header->name === 'Reply-To' || $header->name === 'From') {
+            if($header->name === 'Delivered-To' ||
+               $header->name === 'Reply-To' ||
+               $header->name === 'From') {
                 $name = '';
 
                 // Separate Name From Email
