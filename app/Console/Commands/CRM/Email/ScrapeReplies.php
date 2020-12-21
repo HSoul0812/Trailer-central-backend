@@ -5,8 +5,8 @@ namespace App\Console\Commands\CRM\Email;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
 use App\Models\CRM\User\SalesPerson;
-use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
 
 class ScrapeReplies extends Command
@@ -36,6 +36,11 @@ class ScrapeReplies extends Command
     protected $service;
 
     /**
+     * @var App\Repositories\User\UserRepositoryInterface
+     */
+    protected $users;
+
+    /**
      * @var Illuminate\Support\Facades\Redis
      */
     protected $redis;
@@ -63,12 +68,14 @@ class ScrapeReplies extends Command
      * @return void
      */
     public function __construct(SalesPersonRepositoryInterface $salesRepo,
+                                UserRepositoryInterface $users,
                                 ScrapeRepliesServiceInterface $service)
     {
         parent::__construct();
 
         $this->service = $service;
         $this->salespeople = $salesRepo;
+        $this->users = $users;
         $this->redis = Redis::connection('default');
 
         // Get Sales Person From Predis
@@ -106,16 +113,9 @@ class ScrapeReplies extends Command
             $this->command .= (!empty($this->dealerId) ? ' ' . $this->dealerId : '');
             $this->info("{$this->command} started {$now}");
 
-            // Handle Dealer Differently
-            if(!empty($this->dealerId)) {
-                $dealers = NewDealerUser::where('id', $this->dealerId)->with('user')->get();
-            } else {
-                // Get Dealers With Active CRM
-                $dealers = NewDealerUser::has('activeCrmUser')->with('user')->get();
-            }
-            $this->info("{$this->command} found " . count($dealers) . " dealers to process");
-
             // Get Dealers With Active CRM
+            $dealers = $this->users->getCrmActiveUsers($this->dealerId);
+            $this->info("{$this->command} found " . count($dealers) . " dealers to process");
             foreach($dealers as $dealer) {
                 // Parse Single Dealer
                 $imported = $this->processDealer($dealer);

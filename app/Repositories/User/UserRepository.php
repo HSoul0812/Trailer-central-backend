@@ -50,6 +50,25 @@ class UserRepository implements UserRepositoryInterface {
         return User::where('is_dms_active', 1)->get();
     }
 
+    /**
+     * Get CRM Active Users
+     * 
+     * @param int $dealerId
+     * @return Collection of NewDealerUser
+     */
+    public function getCrmActiveUsers($dealerId = 0) {
+        // Initialize Query for NewDealerUser
+        $dealers = NewDealerUser::has('activeCrmUser')->with('user');
+
+        // Add Where Dealer ID
+        if(!empty($dealerId)) {
+            $dealers = $dealers->where('id', $dealerId);
+        }
+
+        // Return Results
+        return $dealers->get();
+    }
+
     public function setAdminPasswd($dealerId, $passwd)
     {
         return User::where('dealer_id', $dealerId)->update([
