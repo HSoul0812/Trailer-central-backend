@@ -5,6 +5,7 @@ namespace App\Repositories\User;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\User\User;
+use App\Models\User\NewDealerUser;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
 
