@@ -80,7 +80,9 @@ class ScrapeReplies extends Command
 
         // Get Sales Person From Predis
         try {
-            $this->salesPersonId = $this->redis->lpop($this->lkey);
+            $this->salesPersonId = $this->redis->lpop($this->lkey) ?: 0;
+            var_dump($this->lkey);
+            var_dump($this->salesPersonId);
         } catch(\Predis\Connection\ConnectionException $e) {
             // Send Slack Error
             $this->sendSlackError($e->getMessage());
@@ -142,7 +144,6 @@ class ScrapeReplies extends Command
      */
     private function processDealer($dealer) {
         // Doesn't Belong to Sales Person?!
-        var_dump($this->salesPersonId);
         $salesPerson = SalesPerson::find($this->salesPersonId);
         if(!empty($this->salesPersonId) && !empty($salesPerson->user_id)) {
             if($salesPerson->user_id !== $dealer->user_id) {
