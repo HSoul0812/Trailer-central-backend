@@ -2,7 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
-use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use PhpImap\Mailbox;
 use Illuminate\Support\Facades\Log;
 
@@ -53,7 +53,7 @@ class ImapService implements ImapServiceInterface
         $email = !empty($salesperson->imap_email) ? $salesperson->imap_email : $salesperson->email;
         $oneMonthAgo = (time() - (60 * 60 * 24 * 30));
         $dateImported = (!empty($folder->date_imported) ? strtotime($folder->date_imported) : $oneMonthAgo);
-        $this->connectIMAP($folder->name, [
+        $imap = $this->connectIMAP($folder->name, [
             'email'    => $email,
             'password' => $salesperson->imap_password,
             'host'     => $salesperson->imap_server,
@@ -61,6 +61,11 @@ class ImapService implements ImapServiceInterface
             'security' => (!empty($salesperson->imap_security) ? $salesperson->imap_security : 'ssl'),
             'charset'  => $charset
         ], $dateImported);
+
+        // Error Occurred
+        if($imap === null) {
+            throw new ImapConnectionFailedException();
+        }
 
         // Get Messages
         $emails = array();
