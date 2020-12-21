@@ -145,6 +145,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         if(!empty($replies) && count($replies) > 0) {
             foreach($replies as $reply) {
                 // Insert Interaction / Email History
+                $reply['dealer_id'] = $dealer->id;
                 $reply['user_id'] = $salesperson->user_id;
                 $emails[] = $this->insertReply($reply);
             }
@@ -335,7 +336,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             ]);
 
             // Insert Attachments
-            $this->insertAttachments($reply['message_id'], $reply['attachments']);
+            $this->insertAttachments($reply['dealer_id'], $reply['message_id'], $reply['attachments']);
 
             // Insert Email History Entry
             unset($reply['direction']);
@@ -354,7 +355,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param array $files
      * @return Collection of Attachment
      */
-    private function insertAttachments($messageId, $files) {
+    private function insertAttachments($dealerId, $messageId, $files) {
         // No Attachments?
         if(empty($files)) {
             return collect([]);
@@ -382,7 +383,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             }
 
             // Upload Image
-            $key = 'crm/' . $this->dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
+            $key = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
             $s3Image = Storage::disk('s3')->put($key, $contents, 'public');
 
             // Add Email Attachment
