@@ -208,6 +208,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $fromName = $message['headers']['From-Name'];
 
                 // Add to Results
+                var_dump($message['body']);
+                die;
                 $results[] = [
                     'lead_id' => $leadId,
                     'message_id' => $messageId,
