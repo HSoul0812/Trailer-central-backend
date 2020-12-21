@@ -356,12 +356,12 @@ class GmailService implements GmailServiceInterface
         // Get Body From Parts
         $body = '';
         if(is_array($payload)) {
-            foreach ($parts as $part) {
-                if (!empty($part->body->data)) {
-                    $body = $part->body->data;
+            foreach ($payload as $part) {
+                if (!empty($payload->body->data)) {
+                    $body = $payload->body->data;
                     break;
-                } else if (!empty($part->parts)) {
-                    $body = $this->parseMessageBody($message_id, $part->parts);
+                } else if (!empty($payload->parts)) {
+                    $body = $this->parseMessageBody($message_id, $payload->parts);
                 }
             }
             return $body;
