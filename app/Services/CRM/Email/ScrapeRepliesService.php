@@ -103,9 +103,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $imported = 0;
         foreach($salesperson->folders as $folder) {
             // Import Folder
-            if(!empty($salesperson->googleToken)) {
-                continue;
-            }
             $imports = $this->importFolder($dealer, $salesperson, $folder);
             Log::info('Imported ' . $imports . ' Email Replies for Sales Person #' .
                         $salesperson->id . ' Folder ' . $folder->name);
