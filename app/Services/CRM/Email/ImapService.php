@@ -159,9 +159,9 @@ class ImapService implements ImapServiceInterface
         }
 
         // Return Messages
-        $mailIds = $this->imapInbox->searchMailbox($search);
+        $mailIds = $this->imap->searchMailbox($search);
         if(count($mailIds) > 0) {
-            return $this->imapInbox->getMailsInfo($mailIds);
+            return $this->imap->getMailsInfo($mailIds);
         }
 
         // No Mail ID's Found? Return Empty Array!
