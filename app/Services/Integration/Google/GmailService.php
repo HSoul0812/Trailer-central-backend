@@ -158,9 +158,7 @@ class GmailService implements GmailServiceInterface
 
             // Add to Array
             $body = $payload->getBody();
-            if(!empty($body->attachments)) {
-                var_dump($body);
-            }
+            var_dump($body);
             $messages[] = [
                 'body' => $body->data,
                 'body' => $body->attachments,
