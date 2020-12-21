@@ -176,11 +176,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $skipped = array();
         foreach($messages as $k => $message) {
             // Compare Message ID!
-            if(empty($message['headers']['Message-ID'])) {
-                var_dump($message);
-            }
-            continue;
-            $messageId = $message['headers']['Message-ID'];
+            $messageId = $message['headers']['Message-Id'];
             if(in_array($messageId, $this->processed) || in_array($messageId, $this->messageIds)) {
                 unset($message);
                 unset($messages[$k]);
