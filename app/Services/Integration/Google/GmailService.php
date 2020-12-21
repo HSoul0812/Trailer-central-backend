@@ -157,6 +157,10 @@ class GmailService implements GmailServiceInterface
             $headers = $this->parseMessageHeaders($payload->getHeaders());
             $body = $this->parseMessageBody($headers['Message-ID'], $payload);
             $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload);
+            if($headers['subject'] === 'Test Email History Scraping Replies') {
+                var_dump($body);
+                die;
+            }
 
             // Add to Array
             $messages[] = [
