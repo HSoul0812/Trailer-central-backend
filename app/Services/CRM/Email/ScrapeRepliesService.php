@@ -207,6 +207,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Mark as Skipped
             if(!empty($leadId)) {
                 // Get To Name
+                if(empty($message['headers']['Delivered-To-Name'])) {
+                    var_dump($message['headers']);
+                    die;
+                }
                 $subject = $message['headers']['Subject'];
                 $toName = $message['headers']['Delivered-To-Name'];
                 $fromName = $message['headers']['From-Name'];
