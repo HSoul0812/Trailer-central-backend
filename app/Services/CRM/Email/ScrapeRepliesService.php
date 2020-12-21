@@ -102,11 +102,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         Log::info("Processing Getting Emails for User #" . $salesperson->user_id);
         $imported = 0;
         foreach($salesperson->folders as $folder) {
-            // Import Folder
-            $imports = $this->importFolder($dealer, $salesperson, $folder);
-            Log::info('Imported ' . $imports . ' Email Replies for Sales Person #' .
-                        $salesperson->id . ' Folder ' . $folder->name);
-            $imported += $imports;
+            // Try Catching Error for Sales Person Folder
+            try {
+                // Import Folder
+                $imports = $this->importFolder($dealer, $salesperson, $folder);
+                Log::info('Imported ' . $imports . ' Email Replies for Sales Person #' .
+                            $salesperson->id . ' Folder ' . $folder->name);
+                $imported += $imports;
+            } catch(\Exception $e) {
+                Log::error('Error Importing Sales Person #' .
+                            $salesperson->id . ' Folder ' . $folder->name .
+                            $e->getMessage() . ':' . $e->getTraceAsString());
+            }
         }
 
         // Clean Memory
@@ -128,7 +135,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importFolder($dealer, $salesperson, $folder) {
         // Missing Folder Name?
-        var_dump($folder);
         if(empty($folder->name)) {
             //$this->updateFolder($folder, false, false);
             return 0;
