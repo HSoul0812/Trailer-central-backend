@@ -203,6 +203,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             } elseif($salesperson->smtp_email !== $reply && isset($this->leadEmails[$reply])) {
                 $leadId = $this->leadEmails[$reply];
             }
+            var_dump($leadId);
+            var_dump($to);
+            var_dump($from);
+            var_dump($reply);
 
             // Mark as Skipped
             if(!empty($leadId)) {
@@ -228,6 +232,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->processed[] = $messageId;
             }
         }
+        return [];
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
