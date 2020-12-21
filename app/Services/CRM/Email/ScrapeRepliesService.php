@@ -387,7 +387,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Upload Image
             $key = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
             Storage::disk('s3email')->put($key, $contents, 'public');
-            $s3Image = Storage::disk('s3email')->url($key);
+            $s3Image = Storage::disk('s3email')->url($_ENV['MAIL_BUCKET'] . '/' . $key);
 
             // Add Email Attachment
             $attachments[] = [
