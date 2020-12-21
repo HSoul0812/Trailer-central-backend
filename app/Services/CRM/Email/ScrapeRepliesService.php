@@ -225,6 +225,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'date_sent' => date("Y-m-d H:i:s", $date),
                     'direction' => $direction
                 ];
+                $this->messageIds[] = $messageId;
             } elseif(!in_array($messageId, $skipped)) {
                 $skipped[] = $messageId;
                 $this->processed[] = $messageId;
