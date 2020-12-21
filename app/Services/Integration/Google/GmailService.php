@@ -376,7 +376,7 @@ class GmailService implements GmailServiceInterface
         $attachments = [];
         foreach ($parts as $part) {
             if (!empty($part->body->attachmentId)) {
-                $attachment = $this->service->users_messages_attachments->get('me', $message_id, $part->body->attachmentId);
+                $attachment = $this->gmail->users_messages_attachments->get('me', $message_id, $part->body->attachmentId);
                 $attachments[] = [
                     'filename' => $part->filename,
                     'mime'     => $part->mimeType,
