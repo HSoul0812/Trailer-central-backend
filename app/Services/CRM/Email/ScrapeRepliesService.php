@@ -174,6 +174,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Loop Messages
         $results = array();
         $skipped = array();
+        var_dump($this->leadEmails);
         foreach($messages as $k => $message) {
             // Compare Message ID!
             if(isset($message['headers']['Message-ID'])) {
