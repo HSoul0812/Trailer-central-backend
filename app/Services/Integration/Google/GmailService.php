@@ -396,11 +396,16 @@ class GmailService implements GmailServiceInterface
         foreach ($parts as $part) {
             if (!empty($part->body->attachmentId)) {
                 $attachment = $this->gmail->users_messages_attachments->get('me', $message_id, $part->body->attachmentId);
-                $attachments[] = [
-                    'filename' => $part->filename,
-                    'mime'     => $part->mimeType,
-                    'data'     => strtr($attachment->data, '-_', '+/')
-                ];
+
+                // Generate Attachment Object
+                $obj = new stdclass;
+                $obj->filePath = $part->filename;
+                $obj->name = $part->filename;
+                $obj->mime = $part->mimeType;
+                $obj->data = strtr($attachment->data, '-_', '+/');
+
+                // Add Attachment to Array
+                $attachments[] = $obj;
             } else if (!empty($part->parts)) {
                 $attachments = array_merge($attachments, $this->parseMessageAttachments($message_id, $part->parts));
             }

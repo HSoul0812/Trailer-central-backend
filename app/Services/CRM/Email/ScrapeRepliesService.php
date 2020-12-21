@@ -370,9 +370,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $filename = $path_parts['filename'];
             $ext = $path_parts['extension'];
 
+            // Get File Data
+            if(!empty($file->data)) {
+                $contents = base64_decode($file->data);
+            } else {
+                $contents = fopen($file->filePath, 'r+');
+            }
+
             // Upload Image
             $key = 'crm/' . $this->dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
-            $s3Image = Storage::disk('s3')->put($key, fopen($file->filePath, 'r+'), 'public');
+            $s3Image = Storage::disk('s3')->put($key, $contents, 'public');
 
             // Add Email Attachment
             $attachments[] = [
@@ -382,7 +389,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             ];
 
             // Delete Temporary File
-            unlink($file->filePath);
+            if(empty($file->data)) {
+                unlink($file->filePath);
+            }
         }
 
         // Return Collection of Attachment
