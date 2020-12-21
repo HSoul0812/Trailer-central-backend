@@ -190,6 +190,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $to = !empty($message['headers']['To']) ? $message['headers']['To'] : '';
             $from = !empty($message['headers']['From']) ? $message['headers']['From'] : '';
             $reply = !empty($message['headers']['Reply-To']) ? $message['headers']['Reply-To'] : '';
+            var_dump($message['headers']);
 
             // Get Lead Email Exists?
             if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
@@ -226,6 +227,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->processed[] = $messageId;
             }
         }
+        die;
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
