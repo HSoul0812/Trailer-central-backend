@@ -155,10 +155,9 @@ class GmailService implements GmailServiceInterface
 
             // Get Headers/Body/Attachments
             $headers = $this->parseMessageHeaders($payload->getHeaders());
-            $body = $payload->body->data;
+            $body = $this->parseMessageBody($headers['Message-ID'], $payload);
             $attachments = array();
             if(!empty($payload->parts)) {
-                $body = $this->parseMessageBody($headers['Message-ID'], $payload->parts);
                 $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
             }
 
@@ -349,22 +348,38 @@ class GmailService implements GmailServiceInterface
      * Parse Message Into Body
      * 
      * @param string $message_id
-     * @param array $parts
+     * @param array $payload
      * @source https://stackoverflow.com/a/32660892
      * @return string of body
      */
-    private function parseMessageBody($message_id, $parts) {
+    private function parseMessageBody($message_id, $payload) {
         // Get Body From Parts
         $body = '';
-        foreach ($parts as $part) {
-            if (!empty($part->body->data)) {
-                $body = $part->body->data;
-                break;
-            } else if (!empty($part->parts)) {
-                $body = $this->parseMessageBody($message_id, $part->parts);
+        if(is_array($payload)) {
+            foreach ($parts as $part) {
+                if (!empty($part->body->data)) {
+                    $body = $part->body->data;
+                    break;
+                } else if (!empty($part->parts)) {
+                    $body = $this->parseMessageBody($message_id, $part->parts);
+                }
             }
+            return $body;
         }
-        return $body;
+
+        // Handle Normal Payload Data
+        if (!empty($payload->body->data)) {
+            $body = $payload->body->data;
+        } else if (!empty($payload->parts)) {
+            $body = $this->parseMessageBody($message_id, $payload->parts);
+        }
+
+        // Clean Result Body
+        $decoded = base64_decode($body);
+        $cleaned = str_replace(['-', '_'], ['+', '/'], $decoded);
+
+        // Return Result
+        return $cleaned;
     }
 
     /**

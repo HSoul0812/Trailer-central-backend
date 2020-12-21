@@ -216,7 +216,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'from_email' => $from,
                     'from_name' => !empty($fromName) ? $fromName : '',
                     'subject' => !empty($subject) ? $subject : '',
-                    'body' => !empty($message['body']) ? urldecode(base64_decode($message['body'])) : '',
+                    'body' => !empty($message['body']) ? $message['body'] : '',
                     'attachments' => $message['attachments'],
                     'direction' => $direction
                 ];
