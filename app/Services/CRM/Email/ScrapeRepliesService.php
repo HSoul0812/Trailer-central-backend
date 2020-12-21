@@ -103,7 +103,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $imported = 0;
         foreach($salesperson->folders as $folder) {
             // Import Folder
-            var_dump($salesperson->googleToken);
             if(!empty($salesperson->googleToken)) {
                 continue;
             }
@@ -132,6 +131,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importFolder($dealer, $salesperson, $folder) {
         // Missing Folder Name?
+        var_dump($folder);
         if(empty($folder->name)) {
             //$this->updateFolder($folder, false, false);
             return 0;
