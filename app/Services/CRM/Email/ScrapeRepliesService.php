@@ -205,6 +205,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Mark as Skipped
             if(!empty($leadId)) {
                 // Get To Name
+                $date = strtotime($message['headers']['Date']);
                 $subject = $message['headers']['Subject'];
                 $toName = $message['headers']['To-Name'];
                 $fromName = $message['headers']['From-Name'];
@@ -220,6 +221,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'subject' => !empty($subject) ? $subject : '',
                     'body' => !empty($message['body']) ? $message['body'] : '',
                     'attachments' => $message['attachments'],
+                    'date_sent' => date("Y-m-d H:i:s", $date),
                     'direction' => $direction
                 ];
             } elseif(!in_array($messageId, $skipped)) {
@@ -227,6 +229,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->processed[] = $messageId;
             }
         }
+        var_dump($results);
         die;
 
         // Process Skipped Message ID's
@@ -296,6 +299,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'body' => $parsed['body'],
                     'use_html' => $parsed['use_html'],
                     'attachments' => $parsed['attachments'],
+                    'date_sent' => $parsed['date'],
                     'direction' => $direction
                 ];
             } else {
