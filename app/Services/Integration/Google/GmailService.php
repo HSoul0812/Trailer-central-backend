@@ -357,11 +357,11 @@ class GmailService implements GmailServiceInterface
         $body = '';
         if(is_array($payload)) {
             foreach ($payload as $part) {
-                if (!empty($payload->body->data)) {
-                    $body = $payload->body->data;
+                if (!empty($part->body->data)) {
+                    $body = $part->body->data;
                     break;
-                } else if (!empty($payload->parts)) {
-                    $body = $this->parseMessageBody($message_id, $payload->parts);
+                } else if (!empty($part->parts)) {
+                    $body = $this->parseMessageBody($message_id, $part->parts);
                 }
             }
             return $body;
@@ -375,8 +375,8 @@ class GmailService implements GmailServiceInterface
         }
 
         // Clean Result Body
-        $decoded = base64_decode($body);
-        $cleaned = str_replace(['-', '_'], ['+', '/'], $decoded);
+        $decoded = str_replace(['-', '_'], ['+', '/'], $body);
+        $cleaned = base64_decode($decoded);
 
         // Return Result
         return $cleaned;
