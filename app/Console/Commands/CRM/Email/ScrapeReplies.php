@@ -81,8 +81,6 @@ class ScrapeReplies extends Command
         // Get Sales Person From Predis
         try {
             $this->salesPersonId = $this->redis->lpop($this->lkey) ?: 0;
-            var_dump($this->lkey);
-            var_dump($this->salesPersonId);
         } catch(\Predis\Connection\ConnectionException $e) {
             // Send Slack Error
             $this->sendSlackError($e->getMessage());
@@ -170,7 +168,7 @@ class ScrapeReplies extends Command
             try {
                 // Set Current Sales Person to Redis
                 if(empty($this->dealerId)) {
-                    //$this->redis->hmset($this->skey, $salesperson->id, json_encode($salesperson));
+                    $this->redis->hmset($this->skey, $salesperson->id, json_encode($salesperson));
                     $this->salesPersonId = 0;
                 }
 
