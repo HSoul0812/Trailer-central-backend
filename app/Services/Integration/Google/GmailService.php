@@ -153,15 +153,15 @@ class GmailService implements GmailServiceInterface
                 continue;
             }
 
-            // Get Headers
+            // Get Headers/Body/Attachments
             $headers = $this->parseMessageHeaders($payload->getHeaders());
+            $body = $this->parseMessageBody($headers['Message-ID'], $payload->getParts());
+            $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->getParts());
 
             // Add to Array
-            $body = $payload->getBody();
-            var_dump($body);
             $messages[] = [
-                'body' => $body->data,
-                'body' => $body->attachments,
+                'body' => $body,
+                'attachments' => $attachments,
                 'message' => $message,
                 'headers' => $headers
             ];
@@ -339,5 +339,53 @@ class GmailService implements GmailServiceInterface
 
         // Return Cleaned Headers
         return $clean;
+    }
+
+    /**
+     * Parse Message Into Body
+     * 
+     * @param string $message_id
+     * @param array $parts
+     * @source https://stackoverflow.com/a/32660892
+     * @return string of body
+     */
+    private function parseMessageBody($message_id, $parts) {
+        // Get Body From Parts
+        $body = '';
+        foreach ($parts as $part) {
+            if (!empty($part->body->data)) {
+                $body = $part->body->data;
+                break;
+            } else if (!empty($part->parts)) {
+                $body = $this->parseMessageBody($message_id, $part->parts);
+            }
+        }
+        return $body;
+    }
+
+    /**
+     * Parse Message Into Attachments
+     * 
+     * @param string $message_id
+     * @param array $parts
+     * @source https://stackoverflow.com/a/59400043
+     * @return array of attachments
+     */
+    private function parseMessageAttachments($message_id, $parts) {
+        // Get Attachments From Parts
+        $attachments = [];
+        foreach ($parts as $part) {
+            if (!empty($part->body->attachmentId)) {
+                $attachment = $this->service->users_messages_attachments->get('me', $message_id, $part->body->attachmentId);
+                $attachments[] = [
+                    'filename' => $part->filename,
+                    'mime'     => $part->mimeType,
+                    'data'     => strtr($attachment->data, '-_', '+/')
+                ];
+            } else if (!empty($part->parts)) {
+                $attachments = array_merge($attachments, $this->parseMessageAttachments($message_id, $part->parts));
+            }
+        }
+        return $attachments;
     }
 }
