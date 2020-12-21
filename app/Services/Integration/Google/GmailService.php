@@ -398,7 +398,7 @@ class GmailService implements GmailServiceInterface
                 $attachment = $this->gmail->users_messages_attachments->get('me', $message_id, $part->body->attachmentId);
 
                 // Generate Attachment Object
-                $obj = new stdclass;
+                $obj = new \stdclass;
                 $obj->filePath = $part->filename;
                 $obj->name = $part->filename;
                 $obj->mime = $part->mimeType;
