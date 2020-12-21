@@ -116,7 +116,7 @@ class ImapService implements ImapServiceInterface
             // Authentication Error?!
             if(strpos($error, 'Can not authenticate to IMAP server') !== FALSE) {
                 // Mark Connection as Failed!
-                $this->updateFolder($folder, false, false);
+                //$this->updateFolder($folder, false, false);
             }
 
             // Check for Chartype Error

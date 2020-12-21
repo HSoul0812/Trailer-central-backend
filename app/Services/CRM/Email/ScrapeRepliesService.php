@@ -103,6 +103,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $imported = 0;
         foreach($salesperson->folders as $folder) {
             // Import Folder
+            if(!empty($salesperson->googleToken)) {
+                continue;
+            }
             $imports = $this->importFolder($dealer, $salesperson, $folder);
             Log::info("Imported " . $imports . " Email Replies for Sales Person #" . $salesperson->id);
             $imported += $imports;
@@ -254,6 +257,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importImap($salesperson, $folder) {
         // Get Emails From IMAP
         $messages = $this->imap->messages($salesperson, $folder);
+        var_dump($this->leadEmails);
 
         // Loop Messages
         $results = array();
@@ -275,6 +279,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $reply = $parsed['reply'];
 
             // Get Lead Email Exists?
+            var_dump([
+                'to' => $to,
+                'from' => $from,
+                'reply' => $reply
+            ]);
             if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
                 $leadId = $this->leadEmails[$to];
                 $direction = 'Sent';
@@ -306,6 +315,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $skipped[] = $parsed['message_id'];
             }
         }
+        die;
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
