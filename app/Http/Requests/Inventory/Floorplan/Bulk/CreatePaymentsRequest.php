@@ -8,6 +8,7 @@ use App\Http\Requests\Request;
 class CreatePaymentsRequest extends Request {
 
     protected $rules = [
+        'paymentUUID' => 'string|required',
         'payments' => 'required',
         'payments.*.inventory_id' => 'integer|required',
         'payments.*.type' => 'string|required',

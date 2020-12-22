@@ -21,6 +21,8 @@ class PaymentController extends RestfulController
     public function __construct(PaymentRepositoryInterface $payment)
     {
         $this->payment = $payment;
+
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
     }
 
     /**
@@ -85,7 +87,7 @@ class PaymentController extends RestfulController
         $request = new CreatePaymentsRequest($request->all());
         
         if ( $request->validate() ) {
-            return $this->response->collection($this->payment->createBulk($request->all()['payments']), new PaymentTransformer());
+            return $this->response->collection($this->payment->createBulk($request->all()), new PaymentTransformer());
         }  
         
         return $this->response->errorBadRequest();
