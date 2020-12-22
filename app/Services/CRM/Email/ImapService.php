@@ -79,10 +79,6 @@ class ImapService implements ImapServiceInterface
                     $parsed = $this->parseReply($reply);
                     if($parsed !== false) {
                         // Append Emails
-                        if(!empty($parsed['attachments'])) {
-                            var_dump($parsed['attachments']);
-                            die;
-                        }
                         $emails[] = $parsed;
                     }
                 }
