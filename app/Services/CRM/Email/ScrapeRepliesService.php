@@ -296,7 +296,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Mark as Skipped
             if(!empty($leadId)) {
-                var_dump($parsed);
+                var_dump($leadId);
                 var_dump([
                     'to' => $to,
                     'from' => $from,
