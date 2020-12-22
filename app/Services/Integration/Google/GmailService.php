@@ -129,7 +129,6 @@ class GmailService implements GmailServiceInterface
         // Configure Client
         $this->setAccessToken($accessToken);
 
-
         // Get Labels
         $label = $this->labels($accessToken, $folder, true);
 
@@ -139,39 +138,42 @@ class GmailService implements GmailServiceInterface
             return array();
         }
 
-        // Get Messages
-        $messages = array();
-        foreach ($results->getMessages() as $item) {
-            // Get Message
-            $message = $this->gmail->users_messages->get('me', $item->id, ['format' => 'full']);
+        // Get Messages?!
+        return $results->getMessage();
+    }
 
-            // Get Headers
-            $payload = $message->getPayload();
-            if(empty($payload)) {
-                unset($message);
-                unset($messages[$k]);
-                continue;
-            }
+    /**
+     * Get and Parse Individual Message
+     * 
+     * @param obj $item
+     * @return parsed message details
+     */
+    public function message($item) {
+        // Get Message
+        $message = $this->gmail->users_messages->get('me', $item->id, ['format' => 'full']);
 
-            // Get Headers/Body/Attachments
-            $headers = $this->parseMessageHeaders($payload->getHeaders());
-            $body = $this->parseMessageBody($headers['Message-ID'], $payload);
-            $attachments = array();
-            if(!empty($payload->parts)) {
-                $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
-            }
-
-            // Add to Array
-            $messages[] = [
-                'body' => $body,
-                'attachments' => $attachments,
-                'message' => $message,
-                'headers' => $headers
-            ];
+        // Get Headers
+        $payload = $message->getPayload();
+        if(empty($payload)) {
+            unset($message);
+            return array();
         }
 
-        // Get Messages?!
-        return $messages;
+        // Get Headers/Body/Attachments
+        $headers = $this->parseMessageHeaders($payload->getHeaders());
+        $body = $this->parseMessageBody($headers['Message-ID'], $payload);
+        $attachments = array();
+        if(!empty($payload->parts)) {
+            $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
+        }
+
+        // Add to Array
+        return [
+            'body' => $body,
+            'attachments' => $attachments,
+            'message' => $message,
+            'headers' => $headers
+        ];
     }
 
     /**

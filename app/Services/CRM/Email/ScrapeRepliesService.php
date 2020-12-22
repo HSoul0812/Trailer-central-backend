@@ -142,22 +142,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Get From Google?
         if(!empty($salesperson->googleToken)) {
-            $replies = $this->importGoogle($salesperson, $folder);
+            $emails = $this->importGoogle($dealer->id, $salesperson, $folder);
         }
         // Get From IMAP Instead
         else {
-            $replies = $this->importImap($salesperson, $folder);
-        }
-
-        // Insert Replies Into DB
-        $emails = array();
-        if(!empty($replies) && count($replies) > 0) {
-            foreach($replies as $reply) {
-                // Insert Interaction / Email History
-                $reply['dealer_id'] = $dealer->id;
-                $reply['user_id'] = $salesperson->user_id;
-                $emails[] = $this->insertReply($reply);
-            }
+            $emails = $this->importImap($dealer->id, $salesperson, $folder);
         }
 
         // Return Inserted Replies
@@ -167,11 +156,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Import Google
      * 
+     * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param EmailFolder $folder
      * @return false || array of email results
      */
-    private function importGoogle($salesperson, $folder) {
+    private function importGoogle($dealerId, $salesperson, $folder) {
         // Refresh Token
         $accessToken = $salesperson->googleToken;
         $validate = $this->google->validate($accessToken);
@@ -185,14 +175,24 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Loop Messages
         $results = array();
         $skipped = array();
-        foreach($messages as $k => $message) {
+        foreach($messages as $overview) {
+            // Get Parsed Message
+            $parsed = $this->gmail->message($overview);
+
             // Compare Message ID!
-            $messageId = $message['headers']['Message-ID'];
-            if(count($this->processed) > 0 || count($this->messageIds) > 0) {
-                if(in_array($messageId, $this->processed) ||
-                   in_array($messageId, $this->messageIds)) {
-                    unset($message);
-                    unset($messages[$k]);
+            $messageId = $parsed['headers']['Message-ID'];
+            if(empty($parsed['headers']['Subject']) || empty($messageId)) {
+                // Delete All Attachments
+                $this->deleteAttachments($parsed['attachments']);
+                unset($parsed);
+                continue;
+            }
+            elseif(count($this->processed) > 0 || count($this->messageIds) > 0) {
+                if(in_array($parsed['message_id'], $this->processed) ||
+                   in_array($parsed['message_id'], $this->messageIds)) {
+                    // Delete All Attachments
+                    $this->deleteAttachments($parsed['attachments']);
+                    unset($parsed);
                     continue;
                 }
             }
@@ -200,9 +200,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Verify if Email Exists!
             $leadId = 0;
             $direction = 'Received';
-            $to = !empty($message['headers']['To']) ? $message['headers']['To'] : '';
-            $from = !empty($message['headers']['From']) ? $message['headers']['From'] : '';
-            $reply = !empty($message['headers']['Reply-To']) ? $message['headers']['Reply-To'] : '';
+            $to = !empty($parsed['headers']['To']) ? $parsed['headers']['To'] : '';
+            $from = !empty($parsed['headers']['From']) ? $parsed['headers']['From'] : '';
+            $reply = !empty($parsed['headers']['Reply-To']) ? $parsed['headers']['Reply-To'] : '';
 
             // Get Lead Email Exists?
             if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
@@ -217,13 +217,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Mark as Skipped
             if(!empty($leadId)) {
                 // Get To Name
-                $date = strtotime($message['headers']['Date']);
-                $subject = $message['headers']['Subject'];
-                $toName = $message['headers']['To-Name'];
-                $fromName = $message['headers']['From-Name'];
+                $date = strtotime($parsed['headers']['Date']);
+                $subject = $parsed['headers']['Subject'];
+                $toName = $parsed['headers']['To-Name'];
+                $fromName = $parsed['headers']['From-Name'];
 
-                // Add to Results
-                $results[] = [
+                // Insert Interaction / Email History
+                $params = [
                     'lead_id' => $leadId,
                     'message_id' => $messageId,
                     'to_email' => $to,
@@ -231,12 +231,20 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'from_email' => $from,
                     'from_name' => !empty($fromName) ? $fromName : '',
                     'subject' => !empty($subject) ? $subject : '',
-                    'body' => !empty($message['body']) ? $message['body'] : '',
-                    'attachments' => $message['attachments'],
+                    'body' => !empty($parsed['body']) ? $parsed['body'] : '',
+                    'attachments' => $parsed['attachments'],
                     'date_sent' => date("Y-m-d H:i:s", $date),
                     'direction' => $direction
                 ];
-                $this->messageIds[] = $messageId;
+                $reply = $this->insertReply($params);
+
+                // Valid?
+                if(!empty($reply->message_id)) {
+                    $results[] = $reply->email_id;
+                    $this->messageIds[] = $reply->message_id;
+                }
+                unset($reply);
+                unset($params);
             } elseif(!in_array($messageId, $skipped)) {
                 $skipped[] = $messageId;
                 $this->processed[] = $messageId;
@@ -257,29 +265,35 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Import Via Imap
      * 
-     * @param NewDealerUser $dealer
+     * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param EmailFolder $folder
      * @return false || array of email results
      */
-    private function importImap($salesperson, $folder) {
+    private function importImap($dealerId, $salesperson, $folder) {
         // Get Emails From IMAP
         $messages = $this->imap->messages($salesperson, $folder);
 
         // Loop Messages
         $results = array();
         $skipped = array();
-        foreach($messages as $k => $parsed) {
+        foreach($messages as $overview) {
+            // Get Parsed Message
+            $parsed = $this->imap->message($overview);
+
             // Compare Message ID!
-            if(empty($parsed['subject']) || empty($parsed['message_id']) ||
-               count($this->processed) > 0 || count($this->messageIds) > 0) {
-                if(empty($parsed['subject']) || empty($parsed['message_id']) ||
-                   in_array($parsed['message_id'], $this->processed) ||
+            if(empty($parsed['subject']) || empty($parsed['message_id'])) {
+                // Delete All Attachments
+                $this->deleteAttachments($parsed['attachments']);
+                unset($parsed);
+                continue;
+            }
+            elseif(count($this->processed) > 0 || count($this->messageIds) > 0) {
+                if(in_array($parsed['message_id'], $this->processed) ||
                    in_array($parsed['message_id'], $this->messageIds)) {
                     // Delete All Attachments
                     $this->deleteAttachments($parsed['attachments']);
                     unset($parsed);
-                    unset($messages[$k]);
                     continue;
                 }
             }
@@ -300,8 +314,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Mark as Skipped
             if(!empty($leadId)) {
-                // Add to Results
-                $results[] = [
+                // Insert Interaction / Email History
+                $params = [
+                    'dealer_id' => $dealerId,
+                    'user_id' => $salesperson->user_id,
                     'lead_id' => $leadId,
                     'message_id' => $parsed['message_id'],
                     'root_message_id' => $parsed['root_id'],
@@ -316,13 +332,20 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'date_sent' => $parsed['date'],
                     'direction' => $direction
                 ];
-                $this->messageIds[] = $parsed['message_id'];
+                $reply = $this->insertReply($params);
+
+                // Valid?
+                if(!empty($reply->message_id)) {
+                    $results[] = $reply->email_id;
+                    $this->messageIds[] = $reply->message_id;
+                }
+                unset($reply);
+                unset($params);
             } else {
                 $skipped[] = $parsed['message_id'];
                 $this->processed[] = $parsed['message_id'];
             }
             unset($parsed);
-            unset($messages[$k]);
         }
         unset($messages);
 

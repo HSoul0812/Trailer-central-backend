@@ -70,19 +70,7 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Get Messages
-            $emails = array();
-            $replies = $this->getMessages($dateImported);
-            if($replies !== false && count($replies) > 0) {
-                // Parse Replies
-                foreach($replies as $reply) {
-                    // Parse Reply
-                    $parsed = $this->parseReply($reply);
-                    if($parsed !== false) {
-                        // Append Emails
-                        $emails[] = $parsed;
-                    }
-                }
-            }
+            $emails = $this->getMessages($dateImported);
         } catch (ConnectionException $e) {
             // Logged Exceptions
             $error = $e->getMessage() . ': ' . $e->getTraceAsString();
@@ -95,92 +83,7 @@ class ImapService implements ImapServiceInterface
         $this->imap = null;
 
         // Return Array of Parsed Emails
-        return $emails;
-    }
-
-
-    /**
-     * Connect to IMAP
-     * 
-     * @param string $folder
-     * @param array $config
-     * @return type
-     */
-    private function connectIMAP($folder, $config) {
-        // Get SMTP Config
-        $ssl = '/imap/' . $config['security'];
-        $hostname = '{' . $config['host'] . ':' . $config['port'] . $ssl . '}' . $folder;
-        $username = $config['email'];
-        $password = $config['password'];
-        $charset  = $config['charset'];
-
-        // Return Mailbox
-        try {
-            // Imap Inbox ALREADY Exists?
-            Log::info("Connecting to IMAP host: " . $hostname . " with email: " . $username);
-            $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
-            Log::info('Connected to IMAP for email address: ' . $username);
-        } catch (\Exception $e) {
-            // Logged Exceptions
-            $this->imap = null;
-            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
-            Log::error('Cannot connect to ' . $username . ' via IMAP, exception returned: ' . $error);
-
-            // Authentication Error?!
-            if(strpos($error, 'Can not authenticate to IMAP server') !== FALSE) {
-                // Mark Connection as Failed!
-                //$this->updateFolder($folder, false, false);
-            }
-
-            // Check for Chartype Error
-            if(strpos($error, "BADCHARSET") !== FALSE) {
-                preg_match('/\[BADCHARSET \((.*?)\)\]/', $error, $matches);
-                if(isset($matches[1]) && !empty($matches[1])) {
-                    Log::error('Detected bad CHARSET! Trying to load again with ' . $charset);
-                }
-            }
-        }
-
-        // Return IMAP Details
-        return $this->imap;
-    }
-
-    /**
-     * Get Messages After Set Date
-     * 
-     * @param string $time
-     * @param int $days
-     * @return array of emails
-     */
-    private function getMessages($time = 'days', $days = 7) {
-        // Base Timestamp on Number of Days
-        if($time === 'days') {
-            $m = date("m");
-            $d = date("d") - $days;
-            $y = date("Y");
-            $time = mktime(0, 0, 0, $m, $d, $y);
-        }
-
-        // Don't Implement Since if Time is 0
-        if(empty($time) || !is_numeric($time)) {
-            // Get All
-            $search = "ALL";
-        } else {
-            // Create Date Search Expression
-            $date = date('j M Y', $time);
-            $search = 'SINCE "' . $date . '"';
-        }
-
-        // Imap Inbox ALREADY Exists?
-        Log::info('Getting Messages From IMAP With Filter: "' . $search . '"');
-        $mailIds = $this->imap->searchMailbox($search);
-        if(count($mailIds) > 0) {
-            Log::info('Getting Mail Info From IMAP With ID\'s: "' . implode(", ", $mailIds) . '"');
-            return $this->imap->getMailsInfo($mailIds);
-        }
-
-        // No Mail ID's Found? Return Empty Array!
-        return array();
+        return $emails ?: array();
     }
 
     /**
@@ -189,7 +92,7 @@ class ImapService implements ImapServiceInterface
      * @param type $overview
      * @return array of parsed data
      */
-    private function parseReply($overview) {
+    public function message($overview) {
         // Get Mail
         if(empty($overview->uid)) {
             return false;
@@ -283,5 +186,90 @@ class ImapService implements ImapServiceInterface
         unset($overview);
         unset($mail);
         return $parsed;
+    }
+
+
+    /**
+     * Connect to IMAP
+     * 
+     * @param string $folder
+     * @param array $config
+     * @return type
+     */
+    private function connectIMAP($folder, $config) {
+        // Get SMTP Config
+        $ssl = '/imap/' . $config['security'];
+        $hostname = '{' . $config['host'] . ':' . $config['port'] . $ssl . '}' . $folder;
+        $username = $config['email'];
+        $password = $config['password'];
+        $charset  = $config['charset'];
+
+        // Return Mailbox
+        try {
+            // Imap Inbox ALREADY Exists?
+            Log::info("Connecting to IMAP host: " . $hostname . " with email: " . $username);
+            $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
+            Log::info('Connected to IMAP for email address: ' . $username);
+        } catch (\Exception $e) {
+            // Logged Exceptions
+            $this->imap = null;
+            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
+            Log::error('Cannot connect to ' . $username . ' via IMAP, exception returned: ' . $error);
+
+            // Authentication Error?!
+            if(strpos($error, 'Can not authenticate to IMAP server') !== FALSE) {
+                // Mark Connection as Failed!
+                //$this->updateFolder($folder, false, false);
+            }
+
+            // Check for Chartype Error
+            if(strpos($error, "BADCHARSET") !== FALSE) {
+                preg_match('/\[BADCHARSET \((.*?)\)\]/', $error, $matches);
+                if(isset($matches[1]) && !empty($matches[1])) {
+                    Log::error('Detected bad CHARSET! Trying to load again with ' . $charset);
+                }
+            }
+        }
+
+        // Return IMAP Details
+        return $this->imap;
+    }
+
+    /**
+     * Get Messages After Set Date
+     * 
+     * @param string $time
+     * @param int $days
+     * @return array of emails
+     */
+    private function getMessages($time = 'days', $days = 7) {
+        // Base Timestamp on Number of Days
+        if($time === 'days') {
+            $m = date("m");
+            $d = date("d") - $days;
+            $y = date("Y");
+            $time = mktime(0, 0, 0, $m, $d, $y);
+        }
+
+        // Don't Implement Since if Time is 0
+        if(empty($time) || !is_numeric($time)) {
+            // Get All
+            $search = "ALL";
+        } else {
+            // Create Date Search Expression
+            $date = date('j M Y', $time);
+            $search = 'SINCE "' . $date . '"';
+        }
+
+        // Imap Inbox ALREADY Exists?
+        Log::info('Getting Messages From IMAP With Filter: "' . $search . '"');
+        $mailIds = $this->imap->searchMailbox($search);
+        if(count($mailIds) > 0) {
+            Log::info('Getting Mail Info From IMAP With ID\'s: "' . implode(", ", $mailIds) . '"');
+            return $this->imap->getMailsInfo($mailIds);
+        }
+
+        // No Mail ID's Found? Return Empty Array!
+        return array();
     }
 }
