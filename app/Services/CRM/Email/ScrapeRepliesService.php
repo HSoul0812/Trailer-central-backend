@@ -101,7 +101,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Process Messages
         Log::info("Processing Getting Emails for Sales Person #" . $salesperson->id);
         $imported = 0;
-        foreach($salesperson->folders as $folder) {
+        foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
             try {
                 // Import Folder
@@ -262,6 +262,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importImap($salesperson, $folder) {
         // Get Emails From IMAP
         $messages = $this->imap->messages($salesperson, $folder);
+        var_dump($messages);
+        die;
 
         // Loop Messages
         $results = array();

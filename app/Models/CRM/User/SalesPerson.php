@@ -4,6 +4,7 @@ namespace App\Models\CRM\User;
 
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\User\EmailFolder;
 use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
@@ -167,7 +168,101 @@ class SalesPerson extends Model implements Filterable
         return ['*'];
     }
 
+
+    /**
+     * Get Email Folders Including Defaults
+     * 
+     * @return Collection of EmailFolder
+     */
+    public function getEmailFoldersAttribute() {
+        // Get Email Folders Based on Existing Data
+        if(!empty($this->folders)) {
+            return $this->folders;
+        }
+
+        // Google Token Exists?
+        if(!empty($this->googleToken)) {
+            // Return Only Google Defaults
+            return $this->getDefaultGmailFolders();
+        }
+
+        // Return Default Folders
+        return $this->getDefaultFolders();
+    }
+
     public static function getTableName() {
         return self::TABLE_NAME;
+    }
+
+
+    /**
+     * Get Default Email Folders
+     * 
+     * @return Collection of EmailFolder
+     */
+    private function getDefaultFolders() {
+        // Add Folders to Array
+        $defaults = array(
+            array(
+                'name' => 'INBOX',
+                'folder_id' => -4
+            ),
+            array(
+                'name' => 'INBOX.Sent Mail',
+                'folder_id' => -3
+            ),
+            array(
+                'name' => '[Gmail]/Sent Mail',
+                'folder_id' => -2
+            ),
+            array(
+                'name' => 'Sent Items',
+                'folder_id' => -1
+            )
+        );
+
+        // Set Folders Array
+        $folders = array();
+        foreach($defaults as $default) {
+            // Get Access Token
+            $folder = new EmailFolder();
+            $folder->fill($default);
+            $folders[] = $folder;
+        }
+
+        // Return Folders
+        return collect($folders);
+    }
+
+
+    /**
+     * Get Default Email Folders
+     * 
+     * @return Collection of EmailFolder
+     */
+    private function getDefaultGmailFolders() {
+        // Add Folders to Array
+        $defaults = array(
+            array(
+                'name' => 'INBOX',
+                'folder_id' => -4
+            ),
+            array(
+                'name' => 'SENT',
+                'folder_id' => -3
+            )
+        );
+
+        // Set Folders Array
+        $folders = array();
+        foreach($defaults as $default) {
+            // Get Access Token
+            $folder = new EmailFolder();
+            $folder->fill($default);
+            $folders[] = $folder;
+        }
+
+        // Return Folders
+        return collect($folders);
     }
 }
