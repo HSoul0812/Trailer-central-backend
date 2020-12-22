@@ -69,6 +69,7 @@ class ImapService implements ImapServiceInterface
         // Get Messages
         $emails = array();
         $replies = $this->getMessages($dateImported);
+        var_dump($replies);
         if($replies !== false && count($replies) > 0) {
             // Parse Replies
             foreach($replies as $reply) {
