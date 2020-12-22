@@ -176,7 +176,7 @@ class SalesPerson extends Model implements Filterable
      */
     public function getEmailFoldersAttribute() {
         // Get Email Folders Based on Existing Data
-        if(!empty($this->folders)) {
+        if(!empty($this->folders) && count($this->folders) > 0) {
             return $this->folders;
         }
 
