@@ -268,7 +268,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $skipped = array();
         foreach($messages as $k => $parsed) {
             // Compare Message ID!
-            var_dump($parsed);
             if(in_array($parsed['message_id'], $this->processed) ||
                in_array($parsed['message_id'], $this->messageIds)) {
                 unset($parsed);
@@ -284,11 +283,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $reply = $parsed['reply'];
 
             // Get Lead Email Exists?
-            var_dump([
-                'to' => $to,
-                'from' => $from,
-                'reply' => $reply
-            ]);
             if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
                 $leadId = $this->leadEmails[$to];
                 $direction = 'Sent';
@@ -300,6 +294,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Mark as Skipped
             if(!empty($leadId)) {
+                var_dump($parsed);
+                var_dump([
+                    'to' => $to,
+                    'from' => $from,
+                    'reply' => $reply
+                ]);
                 // Add to Results
                 $results[] = [
                     'lead_id' => $leadId,
