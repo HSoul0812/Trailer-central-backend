@@ -89,6 +89,7 @@ class ScrapeReplies extends Command
             // Kill Set (Invalid) Vars
             $this->salesPersonId = 0;
         }
+        $this->salesPersonId = 608;
     }
 
     /**
@@ -116,7 +117,7 @@ class ScrapeReplies extends Command
             // Get Dealers With Active CRM
             $dealers = $this->users->getCrmActiveUsers($this->dealerId);
             $this->info("{$this->command} found " . count($dealers) . " dealers to process");
-            foreach($dealers as $dealer) {
+            foreach($dealers as $k => $dealer) {
                 // Parse Single Dealer
                 $imported = $this->processDealer($dealer);
                 if($imported !== false) {
@@ -124,10 +125,13 @@ class ScrapeReplies extends Command
                 } else {
                     $this->info("{$this->command} skipped importing emails on dealer #{$dealer->id}");
                 }
+                unset($dealers[$k]);
+                unset($dealer);
             }
         } catch(\Exception $e) {
             $this->error("{$this->command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
         }
+        unset($dealers);
 
         // Log End
         $datetime = new \DateTime();
@@ -145,6 +149,7 @@ class ScrapeReplies extends Command
         $salesPerson = SalesPerson::find($this->salesPersonId);
         if(!empty($this->salesPersonId) && !empty($salesPerson->user_id)) {
             if($salesPerson->user_id !== $dealer->user_id) {
+                unset($salesPerson);
                 return false;
             }
         }
@@ -158,12 +163,13 @@ class ScrapeReplies extends Command
         // Loop Campaigns for Current Dealer
         $imported = 0;
         $this->info("{$this->command} dealer #{$dealer->id} found " . count($salespeople) . " active salespeople with imap credentials to process");
-        foreach($salespeople as $salesperson) {
+        foreach($salespeople as $k => $salesperson) {
             // Not Correct Sales Person?!
-            if(!empty($salesperson->googleToken)) {
-                continue;
-            }
-            if(!empty($this->salesPersonId) && $salesperson->id !== $this->salesPersonId) {
+            if(!empty($salesperson->googleToken) ||
+              (!empty($this->salesPersonId) && $salesperson->id !== $this->salesPersonId)) {
+                // Clear Memory
+                unset($salespeople[$k]);
+                unset($salesperson);
                 continue;
             }
 
@@ -182,9 +188,14 @@ class ScrapeReplies extends Command
                 // Adjust Total Import Counts
                 $this->info("{$this->command} imported {$imports} emails on sales person #{$salesperson->id}");
                 $imported += $imports;
+                unset($imports);
             } catch(\Exception $e) {
                 $this->error("{$this->command} exception returned on sales person #{$salesperson->id} {$e->getMessage()}: {$e->getTraceAsString()}");
             }
+
+            // Clear Memory
+            unset($salespeople[$k]);
+            unset($salesperson);
         }
 
         // Return Imported Email Count for Dealer
