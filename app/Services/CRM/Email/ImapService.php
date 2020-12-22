@@ -96,102 +96,107 @@ class ImapService implements ImapServiceInterface
         // Get Mail
         $overviews = $this->imap->getMailsInfo([$mailId]);
         $overview = reset($overviews);
-        if(empty($overview->uid)) {
-            return false;
-        }
+        if(!empty($overview->uid)) {
+            // Get Mail Data
+            $mail = $this->imap->getMail($overview->uid, false);
 
-        // Get Mail Data
-        $mail = $this->imap->getMail($overview->uid, false);
-
-        // Parse Message ID's
-        $messageId = '';
-        if(!empty($overview->in_reply_to)) {
-            $messageId = $overview->in_reply_to;
-        }
-        if(!empty($overview->message_id)) {
-            $messageId = $overview->message_id;
-        }
-        if(empty($messageId) && !empty($mail->messageId)) {
-            $messageId = $mail->messageId;
-        }
-
-        // Handle Initializing Parsed Data
-        $parsed = [
-            'references' => !empty($overview->references) ? $overview->references : array(),
-            'message_id' => $messageId,
-            'root_id' => $messageId
-        ];
-        if(!empty($parsed['references'])) {
-            $parsed['references'] = explode(" ", $parsed['references']);
-            $parsed['root_id'] = reset($parsed['references']);
-            if(empty($parsed['message_id'])) {
-                $parsed['message_id'] = end($parsed['references']);
+            // Parse Message ID's
+            $messageId = '';
+            if(!empty($overview->in_reply_to)) {
+                $messageId = $overview->in_reply_to;
             }
+            if(!empty($overview->message_id)) {
+                $messageId = $overview->message_id;
+            }
+            if(empty($messageId) && !empty($mail->messageId)) {
+                $messageId = $mail->messageId;
+            }
+
+            // Handle Initializing Parsed Data
+            $parsed = [
+                'references' => !empty($overview->references) ? $overview->references : array(),
+                'message_id' => $messageId,
+                'root_id' => $messageId
+            ];
+            if(!empty($parsed['references'])) {
+                $parsed['references'] = explode(" ", $parsed['references']);
+                $parsed['root_id'] = reset($parsed['references']);
+                if(empty($parsed['message_id'])) {
+                    $parsed['message_id'] = end($parsed['references']);
+                }
+            }
+            $parsed['message_id'] = trim($parsed['message_id']);
+
+            // Parse To Email/Name
+            $toFull = !empty($overview->to) ? $overview->to : '';
+            $to = explode("<", $toFull);
+            $parsed['to_name'] = trim($to[0]);
+            $parsed['to'] = '';
+            if(!empty($to[1])) {
+                $parsed['to'] = trim(str_replace(">", "", $to[1]));
+            }
+            if(empty($parsed['to'])) {
+                $parsed['to'] = $parsed['to_name'];
+                $parsed['to_name'] = '';
+            }
+
+            // Parse From Email/Name
+            $fromFull = !empty($overview->from) ? $overview->from : '';
+            $from = explode("<", $fromFull);
+            $parsed['from_name'] = trim($from[0]);
+            $parsed['from'] = '';
+            if(!empty($from[1])) {
+                $parsed['from'] = trim(str_replace(">", "", $from[1]));
+            }
+            if(empty($parsed['from'])) {
+                $parsed['from'] = $parsed['from_name'];
+                $parsed['from_name'] = '';
+            }
+
+            // Handle Subject
+            $parsed['subject'] = !empty($mail->subject) ? $mail->subject : '';
+            if(empty($parsed['subject'])) {
+                $parsed['subject'] = !empty($overview->subject) ? $overview->subject : "";
+            }
+
+            // Handle Body
+            $parsed['body'] = $mail->textHtml;
+            $parsed['use_html'] = 1;
+            if(empty($parsed['body'])) {
+                $parsed['use_html'] = 0;
+                $parsed['body'] = !empty($mail->textPlain) ? $mail->textPlain : "";
+            }
+
+            // Handle Attachments
+            $attachments = $mail->getAttachments();
+            $files = array();
+            foreach($attachments as $attachment) {
+                $file = new \stdclass;
+                $file->tmpName = $attachment->__get('filePath');
+                $file->filePath = $attachment->name;
+                $file->name = $attachment->name;
+                $files[] = $file;
+            }
+            $parsed['attachments'] = $files;
+            if(count($files) > 0) {
+                Log::info('Found ' . count($files) . ' total attachments on Message ' . $parsed['message_id']);
+            }
+
+            // Set Date
+            $parsed['date'] = date("Y-m-d H:i:s", strtotime($overview->date));
+
+            // Clear Memory
+            unset($attachments);
+            unset($files);
+            unset($mail);
         }
 
-        // Parse To Email/Name
-        $toFull = !empty($overview->to) ? $overview->to : '';
-        $to = explode("<", $toFull);
-        $parsed['to_name'] = trim($to[0]);
-        $parsed['to'] = '';
-        if(!empty($to[1])) {
-            $parsed['to'] = trim(str_replace(">", "", $to[1]));
-        }
-        if(empty($parsed['to'])) {
-            $parsed['to'] = $parsed['to_name'];
-            $parsed['to_name'] = '';
-        }
-
-        // Parse From Email/Name
-        $fromFull = !empty($overview->from) ? $overview->from : '';
-        $from = explode("<", $fromFull);
-        $parsed['from_name'] = trim($from[0]);
-        $parsed['from'] = '';
-        if(!empty($from[1])) {
-            $parsed['from'] = trim(str_replace(">", "", $from[1]));
-        }
-        if(empty($parsed['from'])) {
-            $parsed['from'] = $parsed['from_name'];
-            $parsed['from_name'] = '';
-        }
-
-        // Handle Subject
-        $parsed['subject'] = !empty($mail->subject) ? $mail->subject : '';
-        if(empty($parsed['subject'])) {
-            $parsed['subject'] = !empty($overview->subject) ? $overview->subject : "";
-        }
-
-        // Handle Body
-        $parsed['body'] = $mail->textHtml;
-        $parsed['use_html'] = 1;
-        if(empty($parsed['body'])) {
-            $parsed['use_html'] = 0;
-            $parsed['body'] = !empty($mail->textPlain) ? $mail->textPlain : "";
-        }
-
-        // Handle Attachments
-        $attachments = $mail->getAttachments();
-        $files = array();
-        foreach($attachments as $attachment) {
-            $file = new \stdclass;
-            $file->tmpName = $attachment->__get('filePath');
-            $file->filePath = $attachment->name;
-            $file->name = $attachment->name;
-            $files[] = $file;
-        }
-        $parsed['attachments'] = $files;
-        if(count($files) > 0) {
-            Log::info('Found ' . count($files) . ' total attachments on Message ' . $parsed['message_id']);
-        }
-
-        // Set Date
-        $parsed['date'] = date("Y-m-d H:i:s", strtotime($overview->date));
+        // Clear Memory
+        unset($overviews);
+        unset($overview);
+        unset($mailId);
 
         // Return Parsed Array
-        unset($attachments);
-        unset($overview);
-        unset($files);
-        unset($mail);
         return $parsed;
     }
 

@@ -287,9 +287,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                in_array($parsed['message_id'], $this->processed) ||
                in_array($parsed['message_id'], $this->messageIds)) {
                 // Delete All Attachments
+                Log::info("Already Processed Email Message " . $parsed['message_id']);
                 $this->deleteAttachments($parsed['attachments']);
+                unset($mailId);
                 unset($parsed);
-                unset($overview);
                 unset($messages[$k]);
                 continue;
             }
@@ -334,6 +335,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 if(!empty($message->message_id)) {
                     $results[] = $message->email_id;
                     $this->messageIds[] = $message->message_id;
+                    Log::info("Inserted Email Message " . $message->message_id);
                 }
                 unset($message);
                 unset($params);
@@ -341,12 +343,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->emails->createProcessed($salesperson->user_id, $parsed['message_id']);
                 $skipped[] = $parsed['message_id'];
                 $this->processed[] = $parsed['message_id'];
+                Log::info("Skipped Email Message " . $parsed['message_id']);
             }
 
             // Clear Memory/Space
             $this->deleteAttachments($parsed['attachments']);
+            unset($mailId);
             unset($parsed);
-            unset($overview);
             unset($messages[$k]);
         }
         unset($messages);
