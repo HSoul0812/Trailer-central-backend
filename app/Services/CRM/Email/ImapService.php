@@ -177,6 +177,7 @@ class ImapService implements ImapServiceInterface
             $files[] = $file;
         }
         $parsed['attachments'] = $files;
+        Log::info('Found ' . count($files) . ' total attachments on Message ' . $parsed['message_id']);
 
         // Set Date
         $parsed['date'] = date("Y-m-d H:i:s", strtotime($overview->date));

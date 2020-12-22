@@ -213,6 +213,9 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
     public function createProcessed($userId, $messageIds) {
         // Initialized Processed
         $processed = array();
+        if(!is_array($messageIds)) {
+            $messageIds = array($messageIds);
+        }
 
         // Loop Processed
         foreach($messageIds as $messageId) {

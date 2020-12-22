@@ -241,9 +241,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 unset($message);
                 unset($params);
             } elseif(!in_array($messageId, $skipped)) {
+                $this->emails->createProcessed($salesperson->user_id, $parsed['message_id']);
                 $skipped[] = $messageId;
                 $this->processed[] = $messageId;
             }
+
+            // Clear Memory/Space
+            $this->deleteAttachments($parsed['attachments']);
             unset($parsed);
             unset($overview);
             unset($messages[$k]);
@@ -251,7 +255,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
-            $this->emails->createProcessed($salesperson->user_id, $skipped);
             Log::info("Processed " . count($skipped) . " emails that were skipped and not imported.");
             unset($skipped);
         }
@@ -278,8 +281,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $k => $overview) {
             // Get Parsed Message
             $parsed = $this->imap->message($overview);
-            var_dump($overview);
-            var_dump($parsed);
 
             // Compare Message ID!
             if(empty($parsed['subject']) || empty($parsed['message_id']) ||
@@ -337,9 +338,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 unset($message);
                 unset($params);
             } else {
+                $this->emails->createProcessed($salesperson->user_id, $parsed['message_id']);
                 $skipped[] = $parsed['message_id'];
                 $this->processed[] = $parsed['message_id'];
             }
+
+            // Clear Memory/Space
+            $this->deleteAttachments($parsed['attachments']);
             unset($parsed);
             unset($overview);
             unset($messages[$k]);
@@ -348,7 +353,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
-            $this->emails->createProcessed($salesperson->user_id, $skipped);
             Log::info("Processed " . count($skipped) . " emails that were skipped and not imported.");
             unset($skipped);
         }
@@ -383,6 +387,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             unset($reply['direction']);
             $reply['interaction_id'] = $interaction->interaction_id;
             $email = $this->emails->create($reply);
+            unset($reply);
         });
 
         // Return Final Email
@@ -438,9 +443,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             ];
         }
 
-        // Delete Attachments
-        $this->deleteAttachments($files);
-
         // Return Collection of Attachment
         return $attachments;
     }
@@ -461,8 +463,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             }
         }
 
+        // Deleted Some Replies?
+        if($deleted > 0) {
+            Log::info('Deleted ' . $deleted . ' total temporary attachment files');
+        }
+
         // Return Total
-        Log::info('Deleted ' . $deleted . ' total temporary attachment files');
         return $deleted;
     }
 }
