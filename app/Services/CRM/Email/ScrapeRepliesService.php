@@ -120,6 +120,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         unset($this->messageIds);
         unset($this->processed);
         unset($this->leadEmails);
+        die;
 
         // Return Campaign Sent Entries
         return $imported;
@@ -271,6 +272,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $skipped = array();
         foreach($messages as $k => $parsed) {
             // Compare Message ID!
+            var_dump($parsed);
             if(count($this->processed) > 0 || count($this->messageIds) > 0) {
                 if(in_array($parsed['message_id'], $this->processed) ||
                    in_array($parsed['message_id'], $this->messageIds)) {
@@ -279,6 +281,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     continue;
                 }
             }
+            var_dump($parsed);
 
             // Verify if Email Exists!
             $leadId = 0;
