@@ -101,7 +101,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Process Messages
         Log::info("Processing Getting Emails for Sales Person #" . $salesperson->id);
         $imported = 0;
-        var_dump($salesperson->email_folders);
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
             try {
