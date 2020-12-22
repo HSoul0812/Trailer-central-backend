@@ -167,7 +167,6 @@ class ScrapeReplies extends Command
             if(!empty($salesperson->googleToken) ||
               (!empty($this->salesPersonId) && $salesperson->id !== $this->salesPersonId)) {
                 // Clear Memory
-                unset($salespeople[$k]);
                 unset($salesperson);
                 continue;
             }
@@ -182,7 +181,8 @@ class ScrapeReplies extends Command
 
                 // Import Emails
                 $this->info("{$this->command} importing emails on sales person #{$salesperson->id} for dealer #{$dealer->id}");
-                $imports = $this->service->import($dealer, $salesperson);
+                //$imports = $this->service->import($dealer, $salesperson);
+                $imports = 0;
 
                 // Adjust Total Import Counts
                 $this->info("{$this->command} imported {$imports} emails on sales person #{$salesperson->id}");
