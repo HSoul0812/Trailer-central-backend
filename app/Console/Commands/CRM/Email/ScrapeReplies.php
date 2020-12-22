@@ -125,7 +125,6 @@ class ScrapeReplies extends Command
                 } else {
                     $this->info("{$this->command} skipped importing emails on dealer #{$dealer->id}");
                 }
-                unset($dealers[$k]);
                 unset($dealer);
             }
         } catch(\Exception $e) {
@@ -194,7 +193,6 @@ class ScrapeReplies extends Command
             }
 
             // Clear Memory
-            unset($salespeople[$k]);
             unset($salesperson);
         }
 

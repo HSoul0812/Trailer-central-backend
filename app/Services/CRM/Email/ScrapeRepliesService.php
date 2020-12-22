@@ -187,8 +187,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 // Delete All Attachments
                 $this->deleteAttachments($parsed['attachments']);
                 unset($parsed);
-                unset($overview);
-                unset($messages[$k]);
                 continue;
             }
 
@@ -248,9 +246,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Clear Memory/Space
             $this->deleteAttachments($parsed['attachments']);
-            unset($parsed);
             unset($overview);
-            unset($messages[$k]);
         }
 
         // Process Skipped Message ID's
@@ -289,9 +285,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 // Delete All Attachments
                 Log::info("Already Processed Email Message " . $parsed['message_id']);
                 $this->deleteAttachments($parsed['attachments']);
-                unset($mailId);
                 unset($parsed);
-                unset($messages[$k]);
                 continue;
             }
 
@@ -348,9 +342,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Clear Memory/Space
             $this->deleteAttachments($parsed['attachments']);
-            unset($mailId);
             unset($parsed);
-            unset($messages[$k]);
         }
         unset($messages);
 
