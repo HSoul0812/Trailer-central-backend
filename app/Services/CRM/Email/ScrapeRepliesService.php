@@ -271,6 +271,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importImap($dealerId, $salesperson, $folder) {
         // Get Emails From IMAP
         $messages = $this->imap->messages($salesperson, $folder);
+        var_dump($messages);
 
         // Loop Messages
         $results = array();
@@ -278,6 +279,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $k => $overview) {
             // Get Parsed Message
             $parsed = $this->imap->message($overview);
+            var_dump($overview);
+            var_dump($parsed);
 
             // Compare Message ID!
             if(empty($parsed['subject']) || empty($parsed['message_id']) ||
@@ -343,6 +346,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             unset($messages[$k]);
         }
         unset($messages);
+        die;
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {

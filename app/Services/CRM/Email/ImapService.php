@@ -182,6 +182,7 @@ class ImapService implements ImapServiceInterface
         $parsed['date'] = date("Y-m-d H:i:s", strtotime($overview->date));
 
         // Return Parsed Array
+        unset($attachments);
         unset($overview);
         unset($mail);
         return $parsed;
