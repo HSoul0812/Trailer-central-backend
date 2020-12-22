@@ -23,6 +23,7 @@ class ImapService implements ImapServiceInterface
      * @var string
      */
     protected $attachmentDir;
+    protected $skipMessageId = '<8ED2EF24-D7D1-4368-B8DB-8446BE7206A9@yahoo.com>';
 
     /**
      * ScrapeRepliesService constructor.
@@ -96,21 +97,30 @@ class ImapService implements ImapServiceInterface
         // Get Mail
         $overviews = $this->imap->getMailsInfo([$mailId]);
         $overview = reset($overviews);
+        $parsed = [];
         if(!empty($overview->uid)) {
             // Parse Message ID's
             $messageId = '';
             if(!empty($overview->in_reply_to)) {
-                $messageId = $overview->in_reply_to;
+                $messageId = trim($overview->in_reply_to);
             }
             if(!empty($overview->message_id)) {
-                $messageId = $overview->message_id;
+                $messageId = trim($overview->message_id);
+            }
+            if(!empty($this->skipMessageId)) {
+                if($this->skipMessageId === $messageId) {
+                    $this->skipMessageId = '';
+                }
+                unset($overview);
+                return false;
             }
             Log::info('Processing Email Message ' . $messageId);
+            var_dump($overview);
 
             // Get Mail Data
             $mail = $this->imap->getMail($overview->uid, false);
             if(empty($messageId) && !empty($mail->messageId)) {
-                $messageId = $mail->messageId;
+                $messageId = trim($mail->messageId);
             }
 
             // Handle Initializing Parsed Data
@@ -121,12 +131,11 @@ class ImapService implements ImapServiceInterface
             ];
             if(!empty($parsed['references'])) {
                 $parsed['references'] = explode(" ", $parsed['references']);
-                $parsed['root_id'] = reset($parsed['references']);
+                $parsed['root_id'] = trim(reset($parsed['references']));
                 if(empty($parsed['message_id'])) {
-                    $parsed['message_id'] = end($parsed['references']);
+                    $parsed['message_id'] = trim(end($parsed['references']));
                 }
             }
-            $parsed['message_id'] = trim($parsed['message_id']);
 
             // Parse To Email/Name
             $toFull = !empty($overview->to) ? $overview->to : '';
