@@ -4,11 +4,12 @@ namespace App\Services\CRM\Email;
 
 interface ScrapeRepliesServiceInterface {
     /**
-     * Import Email Replies
+     * Import Single Folder
      * 
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
-     * @return false || array of EmailHistory
+     * @param Folder $folder
+     * @return total number of imported emails
      */
-    public function import($dealer, $salesperson);
+    public function import($dealer, $salesperson, $folder);
 }
