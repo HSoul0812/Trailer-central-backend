@@ -99,7 +99,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->leadEmails = $this->leads->getLeadEmails($dealer->id);
 
         // Process Messages
-        Log::info("Processing Getting Emails for User #" . $salesperson->user_id);
+        Log::info("Processing Getting Emails for Sales Person #" . $salesperson->id);
         $imported = 0;
         foreach($salesperson->folders as $folder) {
             // Try Catching Error for Sales Person Folder
@@ -111,7 +111,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $imported += $imports;
             } catch(\Exception $e) {
                 Log::error('Error Importing Sales Person #' .
-                            $salesperson->id . ' Folder ' . $folder->name .
+                            $salesperson->id . ' Folder ' . $folder->name . '; ' .
                             $e->getMessage() . ':' . $e->getTraceAsString());
             }
         }
@@ -261,8 +261,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importImap($salesperson, $folder) {
         // Get Emails From IMAP
+        var_dump($salesperson);
+        var_dump($folder);
+        die;
         $messages = $this->imap->messages($salesperson, $folder);
-        var_dump($messages);
 
         // Loop Messages
         $results = array();
