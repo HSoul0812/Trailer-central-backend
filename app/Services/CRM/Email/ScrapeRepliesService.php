@@ -279,14 +279,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     continue;
                 }
             }
-            var_dump($parsed);
 
             // Verify if Email Exists!
             $leadId = 0;
             $direction = 'Received';
             $to = $parsed['to'];
             $from = $parsed['from'];
-            $reply = $parsed['reply'];
 
             // Get Lead Email Exists?
             if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
@@ -294,8 +292,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $direction = 'Sent';
             } elseif($salesperson->smtp_email !== $from && isset($this->leadEmails[$from])) {
                 $leadId = $this->leadEmails[$from];
-            } elseif($salesperson->smtp_email !== $reply && isset($this->leadEmails[$reply])) {
-                $leadId = $this->leadEmails[$reply];
             }
 
             // Mark as Skipped
@@ -330,8 +326,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Process Skipped Message ID's
-        var_dump($salesperson->user_id);
-        var_dump($skipped);
         if(count($skipped) > 0) {
             $this->emails->createProcessed($salesperson->user_id, $skipped);
             Log::info("Processed " . count($skipped) . " emails that were skipped and not imported.");
