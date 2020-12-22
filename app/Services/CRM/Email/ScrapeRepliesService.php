@@ -320,7 +320,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $skipped[] = $parsed['message_id'];
             }
         }
-        die;
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
