@@ -210,7 +210,8 @@ class ImapService implements ImapServiceInterface
             $messageId = $overview->message_id;
         }
         if(empty($messageId)) {
-            var_dump($overview);
+            var_dump($mail);
+            die;
         }
         $parsed = [
             'references' => !empty($overview->references) ? $overview->references : array(),
