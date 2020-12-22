@@ -191,8 +191,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             if(count($this->processed) > 0 || count($this->messageIds) > 0) {
                 if(in_array($messageId, $this->processed) ||
                    in_array($messageId, $this->messageIds)) {
-                    // Delete All Attachments
-                    $this->deleteAttachments($message['attachments']);
                     unset($message);
                     unset($messages[$k]);
                     continue;
@@ -276,6 +274,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             if(count($this->processed) > 0 || count($this->messageIds) > 0) {
                 if(in_array($parsed['message_id'], $this->processed) ||
                    in_array($parsed['message_id'], $this->messageIds)) {
+                    // Delete All Attachments
+                    $this->deleteAttachments($message['attachments']);
                     unset($parsed);
                     unset($messages[$k]);
                     continue;
