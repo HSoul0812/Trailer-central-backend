@@ -120,7 +120,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         unset($this->messageIds);
         unset($this->processed);
         unset($this->leadEmails);
-        die;
 
         // Return Campaign Sent Entries
         return $imported;
