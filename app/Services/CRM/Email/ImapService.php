@@ -209,10 +209,11 @@ class ImapService implements ImapServiceInterface
         if(!empty($overview->message_id)) {
             $messageId = $overview->message_id;
         }
-        if(empty($messageId)) {
-            var_dump($mail);
-            die;
+        if(empty($messageId) && !empty($mail->messageId)) {
+            $messageId = $mail->messageId;
         }
+
+        // Handle Initializing Parsed Data
         $parsed = [
             'references' => !empty($overview->references) ? $overview->references : array(),
             'message_id' => $messageId,
@@ -224,6 +225,11 @@ class ImapService implements ImapServiceInterface
             if(empty($parsed['message_id'])) {
                 $parsed['message_id'] = end($parsed['references']);
             }
+        }
+
+        // No Message ID?
+        if(empty($parsed['message_id'])) {
+            return false;
         }
 
         // Parse To Email/Name
