@@ -268,8 +268,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $skipped = array();
         foreach($messages as $k => $parsed) {
             // Compare Message ID!
-            var_dump($parsed);
-            var_dump($parsed['message_id']);
+            if(!empty($parsed['message_id'])) {
+                var_dump($parsed);
+                var_dump($parsed['message_id']);
+                var_dump($this->processed);
+                var_dump($this->messagesIds);
+                die;
+            }
             if(in_array($parsed['message_id'], $this->processed) ||
                in_array($parsed['message_id'], $this->messageIds)) {
                 unset($parsed);
@@ -318,8 +323,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'date_sent' => $parsed['date'],
                     'direction' => $direction
                 ];
+                $this->messageIds[] = $parsed['message_id'];
             } else {
                 $skipped[] = $parsed['message_id'];
+                $this->processed[] = $parsed['message_id'];
             }
         }
 
