@@ -272,7 +272,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 var_dump($parsed);
                 var_dump($parsed['message_id']);
                 var_dump($this->processed);
-                var_dump($this->messagesIds);
+                var_dump($this->messageIds);
                 die;
             }
             if(in_array($parsed['message_id'], $this->processed) ||
