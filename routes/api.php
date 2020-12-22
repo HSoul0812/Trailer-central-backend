@@ -571,6 +571,8 @@ $api->version('v1', function ($route) {
         $route->get('service-item-technicians/by-location/{locationId}', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byLocation');
         $route->get('service-item-technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@index');
 
+        $route->get('technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\TechnicianController@index');
+
         /*
         |--------------------------------------------------------------------------
         | POS
@@ -669,7 +671,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
-
+        $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
 
         /*
         |--------------------------------------------------------------------------

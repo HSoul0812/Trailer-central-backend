@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
@@ -36,7 +37,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        AccessToken::class        
+        AccessToken::class
     ];
 
     /**
@@ -85,6 +86,7 @@ class Kernel extends HttpKernel
         'website.validate' => WebsiteValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
+        'setDealerIdFilterOnRequest' => SetDealerIdFilterOnRequest::class,
         'setWebsiteIdOnRequest' => SetWebsiteIdOnRequest::class,
         'setUserIdOnRequest' => SetUserIdOnRequest::class,
         'interaction.validate' => InteractionValidate::class,
