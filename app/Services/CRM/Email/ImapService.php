@@ -92,6 +92,7 @@ class ImapService implements ImapServiceInterface
             $error = $e->getMessage() . ': ' . $e->getTraceAsString();
             Log::error('An unknown IMAP error occurred, exception returned: ' . $error);
         }
+        $this->imap = null;
 
         // Return Array of Parsed Emails
         return $emails;
