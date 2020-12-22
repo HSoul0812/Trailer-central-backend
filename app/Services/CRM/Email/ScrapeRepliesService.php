@@ -188,10 +188,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $k => $message) {
             // Compare Message ID!
             $messageId = $message['headers']['Message-ID'];
-            if(in_array($messageId, $this->processed) || in_array($messageId, $this->messageIds)) {
-                unset($message);
-                unset($messages[$k]);
-                continue;
+            if(count($this->processed) > 0 || count($this->messageIds) > 0) {
+                if(in_array($messageId, $this->processed) ||
+                   in_array($messageId, $this->messageIds)) {
+                    unset($message);
+                    unset($messages[$k]);
+                    continue;
+                }
             }
 
             // Verify if Email Exists!
@@ -268,18 +271,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $skipped = array();
         foreach($messages as $k => $parsed) {
             // Compare Message ID!
-            if(!empty($parsed['message_id'])) {
-                var_dump($parsed);
-                var_dump($parsed['message_id']);
-                var_dump($this->processed);
-                var_dump($this->messageIds);
-                die;
-            }
-            if(in_array($parsed['message_id'], $this->processed) ||
-               in_array($parsed['message_id'], $this->messageIds)) {
-                unset($parsed);
-                unset($messages[$k]);
-                continue;
+            if(count($this->processed) > 0 || count($this->messageIds) > 0) {
+                if(in_array($parsed['message_id'], $this->processed) ||
+                   in_array($parsed['message_id'], $this->messageIds)) {
+                    unset($parsed);
+                    unset($messages[$k]);
+                    continue;
+                }
             }
 
             // Verify if Email Exists!
