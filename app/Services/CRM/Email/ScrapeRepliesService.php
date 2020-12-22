@@ -148,7 +148,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         else {
             $replies = $this->importImap($salesperson, $folder);
         }
-        die;
 
         // Insert Replies Into DB
         $emails = array();
