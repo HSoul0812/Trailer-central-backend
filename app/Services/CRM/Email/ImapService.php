@@ -272,7 +272,6 @@ class ImapService implements ImapServiceInterface
             $file->tmpName = $attachment->__get('filePath');
             $file->filePath = $attachment->name;
             $file->name = $attachment->name;
-            $file->data = $attachment->getContents();
             $files[] = $file;
         }
         $parsed['attachments'] = $files;

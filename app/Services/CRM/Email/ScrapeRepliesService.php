@@ -392,13 +392,15 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Upload File to S3
             $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
-            $path_parts = pathinfo( $file->filePath );
+            $path_parts = pathinfo( $file->name );
             $filename = $path_parts['filename'];
             $ext = $path_parts['extension'];
 
             // Get File Data
             if(!empty($file->data)) {
                 $contents = base64_decode($file->data);
+            } elseif(!empty($file->tmpName)) {
+                $contents = fopen($file->tmpName, 'r+');
             } else {
                 $contents = fopen($file->filePath, 'r+');
             }
