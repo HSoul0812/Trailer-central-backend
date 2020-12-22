@@ -432,11 +432,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function deleteAttachments($files) {
         // Loop All Attachments
         $deleted = 0;
-        foreach($files as $file) {
-            // Delete Attachments If Exists
-            if(!empty($file->tmpName) && file_exists($file->tmpName)) {
-                unlink($file->tmpName);
-                $deleted++;
+        if(!empty($files) && count($files) > 0) {
+            foreach($files as $file) {
+                // Delete Attachments If Exists
+                if(!empty($file->tmpName) && file_exists($file->tmpName)) {
+                    unlink($file->tmpName);
+                    $deleted++;
+                }
             }
         }
 
