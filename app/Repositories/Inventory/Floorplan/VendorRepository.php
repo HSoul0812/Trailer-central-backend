@@ -22,13 +22,15 @@ class VendorRepository implements VendorRepositoryInterface
     }
 
     public function getAll($params) {
-         $query = Vendor::where('show_on_floorplan', 1);
+        $query = Vendor::where('show_on_floorplan', 1);
          
-         if (isset($params['dealer_id'])) {
-             $query->where('dealer_id', $params['dealer_id']);
-         }
-         
-         if (!isset($params['per_page'])) {
+        if (isset($params['dealer_id'])) {
+            $query->where('dealer_id', $params['dealer_id']);
+        }
+        if (isset($params['search_term'])) {
+            $query->where('name', 'like', '%'.$params['search_term'].'%');
+        }
+        if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
         
