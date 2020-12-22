@@ -82,7 +82,7 @@ class ImapService implements ImapServiceInterface
         }
 
         // Return Array of Parsed Emails
-        return $emails ?: array();
+        return !empty($emails) ? $emails : array();
     }
 
     /**
