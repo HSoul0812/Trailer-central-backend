@@ -191,6 +191,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             if(count($this->processed) > 0 || count($this->messageIds) > 0) {
                 if(in_array($messageId, $this->processed) ||
                    in_array($messageId, $this->messageIds)) {
+                    // Delete All Attachments
+                    $this->deleteAttachments($message['attachments']);
                     unset($message);
                     unset($messages[$k]);
                     continue;
@@ -414,14 +416,33 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 'filename' => $s3Image,
                 'original_filename' => $file->name
             ];
-
-            // Delete Temporary File
-            if(empty($file->data)) {
-                unlink($file->filePath);
-            }
         }
+
+        // Delete Attachments
+        $this->deleteAttachments($files);
 
         // Return Collection of Attachment
         return $attachments;
+    }
+
+    /**
+     * Delete Temporary Attachment Files
+     * 
+     * @param array $files
+     */
+    private function deleteAttachments($files) {
+        // Loop All Attachments
+        $deleted = 0;
+        foreach($files as $file) {
+            // Delete Attachments If Exists
+            if(!empty($file->filePath) && file_exists($file->filePath)) {
+                unlink($file->filePath);
+                $deleted++;
+            }
+        }
+
+        // Return Total
+        Log::info('Deleted ' . $deleted . ' total temporary attachment files');
+        return $deleted;
     }
 }
