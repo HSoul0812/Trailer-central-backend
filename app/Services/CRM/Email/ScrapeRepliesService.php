@@ -271,9 +271,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $skipped = array();
         foreach($messages as $k => $parsed) {
             // Compare Message ID!
-            var_dump($parsed['attachments']);
-            if(count($this->processed) > 0 || count($this->messageIds) > 0) {
-                if(in_array($parsed['message_id'], $this->processed) ||
+            if(empty($parsed['message_id']) ||
+               count($this->processed) > 0 ||
+               count($this->messageIds) > 0) {
+                if(empty($parsed['message_id']) ||
+                   in_array($parsed['message_id'], $this->processed) ||
                    in_array($parsed['message_id'], $this->messageIds)) {
                     // Delete All Attachments
                     $this->deleteAttachments($parsed['attachments']);

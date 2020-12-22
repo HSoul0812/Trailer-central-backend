@@ -227,11 +227,6 @@ class ImapService implements ImapServiceInterface
             }
         }
 
-        // No Message ID?
-        if(empty($parsed['message_id'])) {
-            return false;
-        }
-
         // Parse To Email/Name
         $toFull = !empty($overview->to) ? $overview->to : '';
         $to = explode("<", $toFull);
