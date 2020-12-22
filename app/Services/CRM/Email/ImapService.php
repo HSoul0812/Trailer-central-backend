@@ -67,19 +67,30 @@ class ImapService implements ImapServiceInterface
             throw new ImapConnectionFailedException();
         }
 
-        // Get Messages
-        $emails = array();
-        $replies = $this->getMessages($dateImported);
-        if($replies !== false && count($replies) > 0) {
-            // Parse Replies
-            foreach($replies as $reply) {
-                // Parse Reply
-                $parsed = $this->parseReply($reply);
-                if($parsed !== false) {
-                    // Append Emails
-                    $emails[] = $parsed;
+        // Return Mailbox
+        try {
+            // Get Messages
+            $emails = array();
+            $replies = $this->getMessages($dateImported);
+            if($replies !== false && count($replies) > 0) {
+                // Parse Replies
+                foreach($replies as $reply) {
+                    // Parse Reply
+                    $parsed = $this->parseReply($reply);
+                    if($parsed !== false) {
+                        // Append Emails
+                        $emails[] = $parsed;
+                    }
                 }
             }
+        } catch (ConnectionException $e) {
+            // Logged Exceptions
+            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
+            Log::error('Cannot connect to IMAP, exception returned: ' . $error);
+        } catch (\Exception $e) {
+            // Logged Exceptions
+            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
+            Log::error('An unknown IMAP error occurred, exception returned: ' . $error);
         }
 
         // Return Array of Parsed Emails
@@ -159,25 +170,12 @@ class ImapService implements ImapServiceInterface
             $search = 'SINCE "' . $date . '"';
         }
 
-        // Return Mailbox
-        try {
-            // Imap Inbox ALREADY Exists?
-            Log::info('Getting Messages From IMAP With Filter: "' . $search . '"');
-            $mailIds = $this->imap->searchMailbox($search);
-            if(count($mailIds) > 0) {
-                Log::info('Getting Mail Info From IMAP With ID\'s: "' . implode(", ", $mailIds) . '"');
-                return $this->imap->getMailsInfo($mailIds);
-            }
-        } catch (ConnectionException $e) {
-            // Logged Exceptions
-            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
-            Log::error('Cannot connect to IMAP, exception returned: ' . $error);
-            return false;
-        } catch (\Exception $e) {
-            // Logged Exceptions
-            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
-            Log::error('An unknown IMAP error occurred, exception returned: ' . $error);
-            return false;
+        // Imap Inbox ALREADY Exists?
+        Log::info('Getting Messages From IMAP With Filter: "' . $search . '"');
+        $mailIds = $this->imap->searchMailbox($search);
+        if(count($mailIds) > 0) {
+            Log::info('Getting Mail Info From IMAP With ID\'s: "' . implode(", ", $mailIds) . '"');
+            return $this->imap->getMailsInfo($mailIds);
         }
 
         // No Mail ID's Found? Return Empty Array!
