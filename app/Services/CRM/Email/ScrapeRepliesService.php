@@ -297,6 +297,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Mark as Skipped
             if(!empty($leadId)) {
                 // Add to Results
+                if(!empty($parsed['attachments'])) {
+                    var_dump($parsed['attachments']);
+                    die;
+                }
                 $results[] = [
                     'lead_id' => $leadId,
                     'message_id' => $parsed['message_id'],
@@ -321,6 +325,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             unset($messages[$k]);
         }
         unset($messages);
+        return [];
 
         // Process Skipped Message ID's
         if(count($skipped) > 0) {
