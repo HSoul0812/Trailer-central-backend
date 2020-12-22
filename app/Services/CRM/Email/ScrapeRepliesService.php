@@ -435,15 +435,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $deleted = 0;
         foreach($files as $file) {
             // Delete Attachments If Exists
-            var_dump($file->filePath);
-            echo !empty($file->filePath);
-            echo file_exists($file->filePath);
             if(!empty($file->filePath) && file_exists($file->filePath)) {
                 unlink($file->filePath);
                 $deleted++;
             }
         }
-        die;
 
         // Return Total
         Log::info('Deleted ' . $deleted . ' total temporary attachment files');
