@@ -202,10 +202,14 @@ class ImapService implements ImapServiceInterface
         }
 
         // Parse Message ID's
+        if(empty($overview->in_reply_to)) {
+            var_dump($overview);
+        }
+        die;
         $parsed = [
             'references' => !empty($overview->references) ? $overview->references : array(),
-            'message_id' => $overview->in_reply_to,
-            'root_id' => $overview->in_reply_to
+            'message_id' => !empty($overview->in_reply_to) ? $overview->in_reply_to : '',
+            'root_id' => !empty($overview->in_reply_to) ? $overview->in_reply_to : ''
         ];
         if(!empty($parsed['references'])) {
             $parsed['references'] = explode(" ", $parsed['references']);
