@@ -97,9 +97,6 @@ class ImapService implements ImapServiceInterface
         $overviews = $this->imap->getMailsInfo([$mailId]);
         $overview = reset($overviews);
         if(!empty($overview->uid)) {
-            // Get Mail Data
-            $mail = $this->imap->getMail($overview->uid, false);
-
             // Parse Message ID's
             $messageId = '';
             if(!empty($overview->in_reply_to)) {
@@ -108,6 +105,10 @@ class ImapService implements ImapServiceInterface
             if(!empty($overview->message_id)) {
                 $messageId = $overview->message_id;
             }
+            Log::info('Processing Email Message ' . $messageId);
+
+            // Get Mail Data
+            $mail = $this->imap->getMail($overview->uid, false);
             if(empty($messageId) && !empty($mail->messageId)) {
                 $messageId = $mail->messageId;
             }
