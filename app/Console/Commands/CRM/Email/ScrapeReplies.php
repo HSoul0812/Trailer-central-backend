@@ -181,8 +181,7 @@ class ScrapeReplies extends Command
 
                 // Import Emails
                 $this->info("{$this->command} importing emails on sales person #{$salesperson->id} for dealer #{$dealer->id}");
-                //$imports = $this->service->import($dealer, $salesperson);
-                $imports = 0;
+                $imports = $this->processSalesperson($dealer, $salesperson);
 
                 // Adjust Total Import Counts
                 $this->info("{$this->command} imported {$imports} emails on sales person #{$salesperson->id}");
@@ -199,6 +198,43 @@ class ScrapeReplies extends Command
         // Return Imported Email Count for Dealer
         return $imported;
     }
+
+    /**
+     * Process Sales Person
+     * 
+     * @param NewDealerUser $dealer
+     * @param SalesPerson $salesperson
+     * @return false || array of EmailHistory
+     */
+    private function processSalesperson($dealer, $salesperson) {
+        // Get User Details to Know What to Import
+        $this->service->init($dealer);
+
+        // Process Messages
+        $this->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
+        $imported = 0;
+        foreach($salesperson->email_folders as $folder) {
+            // Try Catching Error for Sales Person Folder
+            try {
+                // Import Folder
+                $imports = $this->service->import($dealer, $salesperson, $folder);
+                $this->info('Imported ' . $imports . ' Email Replies for Sales Person #' .
+                            $salesperson->id . ' Folder ' . $folder->name);
+                $imported += $imports;
+            } catch(\Exception $e) {
+                $this->error('Error Importing Sales Person #' .
+                            $salesperson->id . ' Folder ' . $folder->name . '; ' .
+                            $e->getMessage() . ':' . $e->getTraceAsString());
+            }
+        }
+
+        // Clean Memory
+        $this->service->clear();
+
+        // Return Campaign Sent Entries
+        return $imported;
+    }
+
 
     /**
      * Send Slack Error

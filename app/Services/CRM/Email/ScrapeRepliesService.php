@@ -86,44 +86,26 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     }
 
     /**
-     * Import Email Replies
+     * Initialized Dealer
      * 
      * @param NewDealerUser $dealer
-     * @param SalesPerson $salesperson
-     * @return false || array of EmailHistory
      */
-    public function import($dealer, $salesperson) {
-        // Get User Details to Know What to Import
+    public function init($dealer) {
+        // Get Message ID's / Processed Message ID's / Lead Emails
         $this->messageIds = $this->emails->getMessageIds($dealer->user_id);
         $this->processed = $this->emails->getProcessed($dealer->user_id);
         $this->leadEmails = $this->leads->getLeadEmails($dealer->id);
+    }
 
-        // Process Messages
-        Log::info("Processing Getting Emails for Sales Person #" . $salesperson->id);
-        $imported = 0;
-        foreach($salesperson->email_folders as $folder) {
-            // Try Catching Error for Sales Person Folder
-            try {
-                // Import Folder
-                $imports = $this->importFolder($dealer, $salesperson, $folder);
-                Log::info('Imported ' . $imports . ' Email Replies for Sales Person #' .
-                            $salesperson->id . ' Folder ' . $folder->name);
-                $imported += $imports;
-            } catch(\Exception $e) {
-                Log::error('Error Importing Sales Person #' .
-                            $salesperson->id . ' Folder ' . $folder->name . '; ' .
-                            $e->getMessage() . ':' . $e->getTraceAsString());
-            }
-        }
-
-        // Clean Memory
+    /**
+     * Clear Memory
+     */
+    public function clear() {
         unset($this->messageIds);
         unset($this->processed);
         unset($this->leadEmails);
-
-        // Return Campaign Sent Entries
-        return $imported;
     }
+
 
     /**
      * Import Single Folder
@@ -131,9 +113,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
      * @param Folder $folder
-     * @return false || array of EmailHistory
+     * @return total number of imported emails
      */
-    private function importFolder($dealer, $salesperson, $folder) {
+    public function import($dealer, $salesperson, $folder) {
         // Missing Folder Name?
         if(empty($folder->name)) {
             //$this->updateFolder($folder, false, false);
@@ -142,15 +124,15 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Get From Google?
         if(!empty($salesperson->googleToken)) {
-            $emails = $this->importGoogle($dealer->id, $salesperson, $folder);
+            $total = $this->importGoogle($dealer->id, $salesperson, $folder);
         }
         // Get From IMAP Instead
         else {
-            $emails = $this->importImap($dealer->id, $salesperson, $folder);
+            $total = $this->importImap($dealer->id, $salesperson, $folder);
         }
 
         // Return Inserted Replies
-        return count($emails);
+        return $total;
     }
 
     /**
@@ -173,9 +155,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $messages = $this->gmail->messages($accessToken, $folder->name);
 
         // Loop Messages
-        $results = array();
-        $skipped = array();
-        foreach($messages as $k => $overview) {
+        $total = 0;
+        $skipped = 0;
+        foreach($messages as $overview) {
             // Get Parsed Message
             $parsed = $this->gmail->message($overview);
 
@@ -233,14 +215,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
                 // Valid?
                 if(!empty($message->message_id)) {
-                    $results[] = $message->email_id;
                     $this->messageIds[] = $message->message_id;
+                    $total++;
                 }
                 unset($message);
                 unset($params);
             } elseif(!in_array($messageId, $skipped)) {
                 $this->emails->createProcessed($salesperson->user_id, $parsed['message_id']);
-                $skipped[] = $messageId;
+                $skipped++;
                 $this->processed[] = $messageId;
             }
 
@@ -250,13 +232,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Process Skipped Message ID's
-        if(count($skipped) > 0) {
-            Log::info("Processed " . count($skipped) . " emails that were skipped and not imported.");
-            unset($skipped);
+        if($skipped > 0) {
+            Log::info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
         // Return Result Messages That Match
-        return $results;
+        return $total;
     }
 
     /**
@@ -272,9 +253,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $messages = $this->imap->messages($salesperson, $folder);
 
         // Loop Messages
-        $results = array();
-        $skipped = array();
-        foreach($messages as $k => $mailId) {
+        $total = 0;
+        $skipped = 0;
+        foreach($messages as $mailId) {
             // Get Parsed Message
             $parsed = $this->imap->message($mailId);
 
@@ -303,7 +284,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $leadId = $this->leadEmails[$from];
             }
 
-            // Mark as Skipped
+            // Valid Lead
             if(!empty($leadId)) {
                 // Insert Interaction / Email History
                 $params = [
@@ -327,16 +308,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
                 // Valid?
                 if(!empty($message->message_id)) {
-                    $results[] = $message->email_id;
+                    $total++;
                     $this->messageIds[] = $message->message_id;
                     Log::info("Inserted Email Message " . $message->message_id);
                 }
                 unset($message);
                 unset($params);
-            } else {
+            }
+            // Mark as Skipped
+            else {
                 $this->emails->createProcessed($salesperson->user_id, $parsed['message_id']);
-                $skipped[] = $parsed['message_id'];
                 $this->processed[] = $parsed['message_id'];
+                $skipped++;
                 Log::info("Skipped Email Message " . $parsed['message_id']);
             }
 
@@ -347,13 +330,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         unset($messages);
 
         // Process Skipped Message ID's
-        if(count($skipped) > 0) {
-            Log::info("Processed " . count($skipped) . " emails that were skipped and not imported.");
-            unset($skipped);
+        if($skipped > 0) {
+            Log::info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
         // Return Result Messages That Match
-        return $results;
+        return $total;
     }
 
     /**
