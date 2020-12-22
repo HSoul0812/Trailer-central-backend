@@ -23,7 +23,7 @@ class ImapService implements ImapServiceInterface
      * @var string
      */
     protected $attachmentDir;
-    protected $skipMessageId = '<8ED2EF24-D7D1-4368-B8DB-8446BE7206A9@yahoo.com>';
+    protected $skipMessageId = '';//'<8ED2EF24-D7D1-4368-B8DB-8446BE7206A9@yahoo.com>';
 
     /**
      * ScrapeRepliesService constructor.
@@ -115,7 +115,6 @@ class ImapService implements ImapServiceInterface
                 return false;
             }
             Log::info('Processing Email Message ' . $messageId);
-            var_dump($overview);
 
             // Get Mail Data
             $mail = $this->imap->getMail($overview->uid, false);
@@ -186,6 +185,7 @@ class ImapService implements ImapServiceInterface
                 $file->filePath = $attachment->name;
                 $file->name = $attachment->name;
                 $files[] = $file;
+                unset($attachment);
             }
             $parsed['attachments'] = $files;
             if(count($files) > 0) {
