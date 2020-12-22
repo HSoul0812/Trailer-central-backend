@@ -69,7 +69,6 @@ class ImapService implements ImapServiceInterface
         // Get Messages
         $emails = array();
         $replies = $this->getMessages($dateImported);
-        var_dump($replies);
         if($replies !== false && count($replies) > 0) {
             // Parse Replies
             foreach($replies as $reply) {
@@ -159,8 +158,6 @@ class ImapService implements ImapServiceInterface
             $search = 'SINCE "' . $date . '"';
         }
 
-        // Return Messages
-
         // Return Mailbox
         try {
             // Imap Inbox ALREADY Exists?
@@ -170,15 +167,15 @@ class ImapService implements ImapServiceInterface
                 Log::info('Getting Mail Info From IMAP With ID\'s: "' . implode(", ", $mailIds) . '"');
                 return $this->imap->getMailsInfo($mailIds);
             }
+
+            // No Mail ID's Found? Return Empty Array!
+            return array();
         } catch (\Exception $e) {
             // Logged Exceptions
-            $this->imap = null;
             $error = $e->getMessage() . ': ' . $e->getTraceAsString();
             Log::error('Cannot connect to IMAP, exception returned: ' . $error);
+            return false;
         }
-
-        // No Mail ID's Found? Return Empty Array!
-        return array();
     }
 
     /**
