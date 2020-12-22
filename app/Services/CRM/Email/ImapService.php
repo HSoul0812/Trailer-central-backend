@@ -28,7 +28,6 @@ class ImapService implements ImapServiceInterface
      */
     public function __construct()
     {
-        $this->imap = null;
         $this->attachmentDir = $_ENV['MAIL_ATTACHMENT_DIR'];
         if(!file_exists($this->attachmentDir)) {
             mkdir($this->attachmentDir);
@@ -101,16 +100,13 @@ class ImapService implements ImapServiceInterface
         $username = $config['email'];
         $password = $config['password'];
         $charset  = $config['charset'];
+        var_dump($config);
 
         // Return Mailbox
         try {
             // Imap Inbox ALREADY Exists?
             Log::info("Connecting to IMAP host: " . $hostname . " with email: " . $username);
-            if(!empty($this->imap)) {
-                $this->imap->switchMailbox($hostname);
-            } else {
-                $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
-            }
+            $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
             Log::info('Connected to IMAP for email address: ' . $username);
         } catch (\Exception $e) {
             // Logged Exceptions

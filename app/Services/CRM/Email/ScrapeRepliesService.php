@@ -148,6 +148,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         else {
             $replies = $this->importImap($salesperson, $folder);
         }
+        die;
 
         // Insert Replies Into DB
         $emails = array();
@@ -261,9 +262,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importImap($salesperson, $folder) {
         // Get Emails From IMAP
-        var_dump($salesperson);
-        var_dump($folder);
-        die;
         $messages = $this->imap->messages($salesperson, $folder);
 
         // Loop Messages
