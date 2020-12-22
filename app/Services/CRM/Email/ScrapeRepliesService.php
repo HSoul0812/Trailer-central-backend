@@ -278,9 +278,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Loop Messages
         $results = array();
         $skipped = array();
-        foreach($messages as $k => $overview) {
+        foreach($messages as $k => $mailId) {
             // Get Parsed Message
-            $parsed = $this->imap->message($overview);
+            $parsed = $this->imap->message($mailId);
 
             // Compare Message ID!
             if(empty($parsed['subject']) || empty($parsed['message_id']) ||

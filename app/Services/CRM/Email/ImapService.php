@@ -74,7 +74,8 @@ class ImapService implements ImapServiceInterface
         } catch (ConnectionException $e) {
             // Logged Exceptions
             $error = $e->getMessage() . ': ' . $e->getTraceAsString();
-            Log::error('Cannot connect to IMAP, exception returned: ' . $error);
+            Log::error('Cannot connect to IMAP ' . $salesperson->imap_email .
+                        ' folder ' . $folder->name . ', exception returned: ' . $error);
         } catch (\Exception $e) {
             // Logged Exceptions
             $error = $e->getMessage() . ': ' . $e->getTraceAsString();
@@ -88,11 +89,13 @@ class ImapService implements ImapServiceInterface
     /**
      * Parse Reply Details to Clean Up Result
      * 
-     * @param type $overview
+     * @param int $mailId
      * @return array of parsed data
      */
-    public function message($overview) {
+    public function message($mailId) {
         // Get Mail
+        $overviews = $this->imap->getMailsInfo([$mailId]);
+        $overview = reset($overviews);
         if(empty($overview->uid)) {
             return false;
         }
@@ -177,7 +180,9 @@ class ImapService implements ImapServiceInterface
             $files[] = $file;
         }
         $parsed['attachments'] = $files;
-        Log::info('Found ' . count($files) . ' total attachments on Message ' . $parsed['message_id']);
+        if(count($files) > 0) {
+            Log::info('Found ' . count($files) . ' total attachments on Message ' . $parsed['message_id']);
+        }
 
         // Set Date
         $parsed['date'] = date("Y-m-d H:i:s", strtotime($overview->date));
@@ -185,6 +190,7 @@ class ImapService implements ImapServiceInterface
         // Return Parsed Array
         unset($attachments);
         unset($overview);
+        unset($files);
         unset($mail);
         return $parsed;
     }
@@ -266,8 +272,8 @@ class ImapService implements ImapServiceInterface
         Log::info('Getting Messages From IMAP With Filter: "' . $search . '"');
         $mailIds = $this->imap->searchMailbox($search);
         if(count($mailIds) > 0) {
-            Log::info('Getting Mail Info From IMAP With ID\'s: "' . implode(", ", $mailIds) . '"');
-            return $this->imap->getMailsInfo($mailIds);
+            Log::info('Found ' . count($mailIds) . ' Message ID\'s to Process');
+            return $mailIds;
         }
 
         // No Mail ID's Found? Return Empty Array!

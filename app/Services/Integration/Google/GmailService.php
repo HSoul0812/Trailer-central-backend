@@ -166,7 +166,9 @@ class GmailService implements GmailServiceInterface
         if(!empty($payload->parts)) {
             $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
         }
-        Log::info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
+        if(count($attachments) > 0) {
+            Log::info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
+        }
 
         // Add to Array
         return [
