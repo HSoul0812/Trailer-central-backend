@@ -275,9 +275,7 @@ class ImapService implements ImapServiceInterface
         // Handle Attachments
         $parsed['attachments'] = $mail->getAttachments();
         foreach($parsed['attachments'] as $attachment) {
-            var_dump($attachment->mime);
-            var_dump($attachment->__get());
-            var_dump($attachment->fileType);
+            var_dump($attachment);
             die;
         }
 
