@@ -275,7 +275,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 if(in_array($parsed['message_id'], $this->processed) ||
                    in_array($parsed['message_id'], $this->messageIds)) {
                     // Delete All Attachments
-                    $this->deleteAttachments($message['attachments']);
+                    $this->deleteAttachments($parsed['attachments']);
                     unset($parsed);
                     unset($messages[$k]);
                     continue;
@@ -435,11 +435,15 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $deleted = 0;
         foreach($files as $file) {
             // Delete Attachments If Exists
+            var_dump($file->filePath);
+            echo !empty($file->filePath);
+            echo file_exists($file->filePath);
             if(!empty($file->filePath) && file_exists($file->filePath)) {
                 unlink($file->filePath);
                 $deleted++;
             }
         }
+        die;
 
         // Return Total
         Log::info('Deleted ' . $deleted . ' total temporary attachment files');
