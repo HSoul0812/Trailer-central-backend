@@ -167,19 +167,24 @@ class ScrapeReplies extends Command
                 continue;
             }
 
-            // Set Current Sales Person to Redis
-            if(empty($this->dealerId)) {
-                $this->redis->hmset($this->skey, $salesperson->id, json_encode($salesperson));
-                $this->salesPersonId = 0;
+            // Try Catching Error for Sales Person
+            try {
+                // Set Current Sales Person to Redis
+                if(empty($this->dealerId)) {
+                    $this->redis->hmset($this->skey, $salesperson->id, json_encode($salesperson));
+                    $this->salesPersonId = 0;
+                }
+
+                // Import Emails
+                $this->info("{$this->command} importing emails on sales person #{$salesperson->id} for dealer #{$dealer->id}");
+                $imports = $this->service->import($dealer, $salesperson);
+
+                // Adjust Total Import Counts
+                $this->info("{$this->command} imported {$imports} emails on sales person #{$salesperson->id}");
+                $imported += $imports;
+            } catch(\Exception $e) {
+                $this->error("{$this->command} exception returned on sales person #{$salesperson->id} {$e->getMessage()}: {$e->getTraceAsString()}");
             }
-
-            // Import Emails
-            $this->info("{$this->command} importing emails on sales person #{$salesperson->id} for dealer #{$dealer->id}");
-            $imports = $this->service->import($dealer, $salesperson);
-
-            // Adjust Total Import Counts
-            $this->info("{$this->command} imported {$imports} emails on sales person #{$salesperson->id}");
-            $imported += $imports;
         }
 
         // Return Imported Email Count for Dealer
