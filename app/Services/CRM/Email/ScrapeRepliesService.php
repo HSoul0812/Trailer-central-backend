@@ -384,9 +384,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $attachments = array();
         foreach($files as $file) {
             // Skip Entry
-            foreach($file as $key => $var) {
-                echo $key . ', ';
-            }
             if(empty($file->filePath)) {
                 continue;
             }
@@ -434,8 +431,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $deleted = 0;
         foreach($files as $file) {
             // Delete Attachments If Exists
-            if(!empty($file->filePath) && file_exists($file->filePath)) {
-                unlink($file->filePath);
+            if(!empty($file->tmpName) && file_exists($file->tmpName)) {
+                unlink($file->tmpName);
                 $deleted++;
             }
         }

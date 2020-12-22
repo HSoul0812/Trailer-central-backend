@@ -273,7 +273,16 @@ class ImapService implements ImapServiceInterface
         }
 
         // Handle Attachments
-        $parsed['attachments'] = $mail->getAttachments();
+        $attachments = $mail->getAttachments();
+        $files = array();
+        foreach($attachments as $attachment) {
+            $files[] = [
+                'tmpName' => $attachment->__get(),
+                'filePath' => $attachment->name,
+                'name' => $attachment->name,
+                'data' => $attachment->getContents()
+            ];
+        }
 
         // Set Date
         $parsed['date'] = date("Y-m-d H:i:s", strtotime($overview->date));
