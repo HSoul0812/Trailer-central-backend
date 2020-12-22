@@ -276,12 +276,12 @@ class ImapService implements ImapServiceInterface
         $attachments = $mail->getAttachments();
         $files = array();
         foreach($attachments as $attachment) {
-            $files[] = [
-                'tmpName' => $attachment->__get('filePath'),
-                'filePath' => $attachment->name,
-                'name' => $attachment->name,
-                'data' => $attachment->getContents()
-            ];
+            $file = new \stdclass;
+            $file->tmpName = $attachment->__get('filePath');
+            $file->filePath = $attachment->name;
+            $file->name = $attachment->name;
+            $file->data = $attachment->getContents();
+            $files[] = $file;
         }
 
         // Set Date
