@@ -86,20 +86,38 @@ class Kernel extends ConsoleKernel
         $schedule->command('text:deliver-blast')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
-        $schedule->command('email:scrape-replies 0 2999')
+
+
+        /**
+         * Scrape Replies
+         */
+        // 0 - 1098
+        $schedule->command('email:scrape-replies 0 1098')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
+        // 1099 (super long, so run it separately)
+        $schedule->command('email:scrape-replies 0 0 1099')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+        // 1100 - 2999
+        $schedule->command('email:scrape-replies 1100 2999')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+        // 3000 - 5999
         $schedule->command('email:scrape-replies 3000 5999')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
+        // 6000 - 8999
         $schedule->command('email:scrape-replies 6000 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
-        $schedule->command('email:scrape-replies 8999')
+
+        // 9000+
+        $schedule->command('email:scrape-replies 9000')
                 ->withoutOverlapping()
                 ->runInBackground();
 
