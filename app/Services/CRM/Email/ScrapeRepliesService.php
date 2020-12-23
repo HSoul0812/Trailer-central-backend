@@ -21,13 +21,6 @@ use Illuminate\Support\Facades\Storage;
 class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 {
     /**
-     * @var array
-     */
-    protected $messageIds = [];
-    protected $processed = [];
-    protected $leadEmails = [];
-
-    /**
      * @var App\Services\Integration\Google\GoogleServiceInterface
      */
     protected $google;
@@ -85,31 +78,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->leads = $leads;
     }
 
-    /**
-     * Initialized Dealer
-     * 
-     * @param NewDealerUser $dealer
-     */
-    public function init($dealer) {
-        // Get Message ID's / Processed Message ID's / Lead Emails
-        $this->messageIds = $this->emails->getMessageIds($dealer->user_id);
-        $this->processed = $this->emails->getProcessed($dealer->user_id);
-        $this->leadEmails = $this->leads->getLeadEmails($dealer->id);
-        Log::info('Initiated Message ID\'s/Lead Emails for Dealer ' . $dealer->id .
-                    ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
-    }
-
-    /**
-     * Clear Memory
-     */
-    public function clear() {
-        unset($this->messageIds);
-        unset($this->processed);
-        unset($this->leadEmails);
-        Log::info('Cleared Message ID\'s/Lead Emails, Memory Usage: ' .
-                    round(memory_get_usage() / 1048576, 2).''.' MB');
-    }
-
 
     /**
      * Import Single Folder
@@ -165,36 +133,38 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Get Parsed Message
             $parsed = $this->gmail->message($overview);
 
-            // Compare Message ID!
-            $messageId = $parsed['headers']['Message-ID'];
-            if(empty($parsed['headers']['Subject']) || empty($messageId) ||
-               in_array($messageId, $this->processed) ||
-               in_array($messageId, $this->messageIds)) {
+            // Check if Exists
+            if(empty($parsed['headers']['Subject']) || empty($parsed['headers']['Message-ID']) ||
+               $this->emails->findMessageId($salesperson->user_id, $parsed['headers']['Message-ID'])) {
                 // Delete All Attachments
+                Log::info('Already Processed Email Message ' . $parsed['headers']['Message-ID']);
                 $this->deleteAttachments($parsed['attachments']);
-                unset($parsed);
+                unset($overview);
                 continue;
             }
 
             // Verify if Email Exists!
-            $leadId = 0;
             $direction = 'Received';
             $to = !empty($parsed['headers']['To']) ? $parsed['headers']['To'] : '';
             $from = !empty($parsed['headers']['From']) ? $parsed['headers']['From'] : '';
             $reply = !empty($parsed['headers']['Reply-To']) ? $parsed['headers']['Reply-To'] : '';
 
             // Get Lead Email Exists?
-            if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
-                $leadId = $this->leadEmails[$to];
+            $emails = [];
+            if($salesperson->smtp_email !== $to) {
+                $emails[] = $to;
                 $direction = 'Sent';
-            } elseif($salesperson->smtp_email !== $from && isset($this->leadEmails[$from])) {
-                $leadId = $this->leadEmails[$from];
-            } elseif($salesperson->smtp_email !== $reply && isset($this->leadEmails[$reply])) {
-                $leadId = $this->leadEmails[$reply];
             }
+            if($salesperson->smtp_email !== $from) {
+                $emails[] = $from;
+            }
+            if($salesperson->smtp_email !== $reply) {
+                $email[] = $reply;
+            }
+            $lead = $this->leads->getByEmails($dealerId, $emails);
 
-            // Mark as Skipped
-            if(!empty($leadId)) {
+            // Valid Lead
+            if(!empty($lead->identifier)) {
                 // Get To Name
                 $date = strtotime($parsed['headers']['Date']);
                 $subject = $parsed['headers']['Subject'];
@@ -203,8 +173,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
                 // Insert Interaction / Email History
                 $params = [
-                    'lead_id' => $leadId,
-                    'message_id' => $messageId,
+                    'lead_id' => $lead->identifier,
+                    'message_id' => $parsed['headers']['Message-ID'],
                     'to_email' => $to,
                     'to_name' => !empty($toName) ? $toName : '',
                     'from_email' => $from,
@@ -224,10 +194,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 }
                 unset($message);
                 unset($params);
-            } elseif(!in_array($messageId, $skipped)) {
-                $this->emails->createProcessed($salesperson->user_id, $parsed['message_id']);
+            }
+            // Mark as Skipped
+            else {
+                $this->emails->createProcessed($salesperson->user_id, $parsed['headers']['Message-ID']);
                 $skipped++;
-                $this->processed[] = $messageId;
+                $this->processed[] = $parsed['headers']['Message-ID'];
+                Log::info("Skipped Email Message " . $parsed['message_id']);
             }
 
             // Clear Memory/Space
@@ -260,41 +233,44 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $total = 0;
         $skipped = 0;
         foreach($messages as $mailId) {
-            // Get Parsed Message
-            $parsed = $this->imap->message($mailId);
+            // Get Message Overview
+            $overview = $this->imap->overview($mailId);
 
-            // Compare Message ID!
-            if(empty($parsed['subject']) || empty($parsed['message_id']) ||
-               in_array($parsed['message_id'], $this->processed) ||
-               in_array($parsed['message_id'], $this->messageIds)) {
+            // Check if Exists
+            if(empty($overview['subject']) || empty($overview['message_id']) ||
+               $this->emails->findMessageId($salesperson->user_id, $overview['message_id'])) {
                 // Delete All Attachments
-                Log::info("Already Processed Email Message " . $parsed['message_id']);
-                $this->deleteAttachments($parsed['attachments']);
-                unset($parsed);
+                Log::info('Already Processed Email Message ' . $overview['message_id']);
+                unset($overview);
                 continue;
             }
 
             // Verify if Email Exists!
-            $leadId = 0;
             $direction = 'Received';
-            $to = $parsed['to'];
-            $from = $parsed['from'];
+            $to = $overview['to'];
+            $from = $overview['from'];
 
             // Get Lead Email Exists?
-            if($salesperson->smtp_email !== $to && isset($this->leadEmails[$to])) {
-                $leadId = $this->leadEmails[$to];
+            $emails = [];
+            if($salesperson->smtp_email !== $to) {
+                $emails[] = $to;
                 $direction = 'Sent';
-            } elseif($salesperson->smtp_email !== $from && isset($this->leadEmails[$from])) {
-                $leadId = $this->leadEmails[$from];
             }
+            if($salesperson->smtp_email !== $from) {
+                $emails[] = $from;
+            }
+            $lead = $this->leads->getByEmails($dealerId, $emails);
 
             // Valid Lead
-            if(!empty($leadId)) {
+            if(!empty($lead->identifier)) {
+                // Get Message Parsed
+                $parsed = $this->imap->parsed($overview);
+
                 // Insert Interaction / Email History
                 $params = [
                     'dealer_id' => $dealerId,
                     'user_id' => $salesperson->user_id,
-                    'lead_id' => $leadId,
+                    'lead_id' => $lead->identifier,
                     'message_id' => $parsed['message_id'],
                     'root_message_id' => $parsed['root_id'],
                     'to_email' => $parsed['to'],
@@ -318,6 +294,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 }
                 unset($message);
                 unset($params);
+
+                // Clear Memory/Space
+                $this->deleteAttachments($parsed['attachments']);
+                $messageId = $parsed['message_id'];
+                unset($parsed);
+                Log::info('Cleared Email Message ' . $messageId .
+                        ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
             }
             // Mark as Skipped
             else {
@@ -326,13 +309,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $skipped++;
                 Log::info("Skipped Email Message " . $parsed['message_id']);
             }
-
-            // Clear Memory/Space
-            $this->deleteAttachments($parsed['attachments']);
-            $messageId = $parsed['message_id'];
-            unset($parsed);
-            Log::info('Cleared Email Message ' . $messageId .
-                    ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
         }
         unset($messages);
 

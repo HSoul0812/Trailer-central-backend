@@ -14,6 +14,15 @@ interface LeadRepositoryInterface extends Repository {
     public function getAllUnassigned($params);
 
     /**
+     * Get Leads By Emails
+     *
+     * @param int $dealerId
+     * @param array $emails
+     * @return Collection of Lead
+     */
+    public function getByEmails($dealerId, $emails);
+
+    /**
      * Create Assign Log for Lead
      *
      * @param type $params

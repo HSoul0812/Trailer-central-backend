@@ -191,6 +191,34 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
                            ->pluck('message_id')->toArray();
     }
 
+    /**
+     * Find Message ID Anywhere
+     * 
+     * @param int $userId
+     * @param string $messageId
+     * @return bool
+     */
+    public function findMessageId($userId, $messageId) {
+        // Message ID Exists in Processed?
+        $processed = Processed::where('user_id', $userId)->where('message_id', $messageId)->get();
+        if(count($processed) > 0) {
+            return true;
+        }
+
+        // Message ID Exists in Email History?
+        $emails = EmailHistory::leftJoin(Interaction::getTableName(),
+                                         Interaction::getTableName() . '.interaction_id', '=',
+                                         EmailHistory::getTableName() . '.interaction_id')
+                              ->where(Interaction::getTableName() . '.user_id', $userId)
+                              ->where(EmailHistory::getTableName() . '.message_id', $messageId)->get();
+        if(count($emails) > 0) {
+            return true;
+        }
+
+        // None Returned!
+        return false;
+    }
+
 
     /**
      * Get Processed Message ID's for Dealer

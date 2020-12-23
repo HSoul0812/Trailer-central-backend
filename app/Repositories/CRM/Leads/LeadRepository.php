@@ -220,6 +220,30 @@ class LeadRepository implements LeadRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * Get Leads By Emails
+     *
+     * @param int $dealerId
+     * @param array $emails
+     * @return Collection of Lead
+     */
+    public function getByEmails($dealerId, $emails) {
+        // Fix Making Emails an Array
+        if(!is_array($emails)) {
+            $emails = [$emails];
+        }
+
+        // Return Lead Emails for User ID
+        return Lead::select(['identifier', 'email_address'])
+                     ->where('dealer_id', $dealerId)
+                     ->where(function($query) use($emails) {
+                         // Append Query
+                         foreach($emails as $email) {
+                             $query = $query->orWhere('email_address', '=', $email);
+                         }
+                     })->first();
+    }
+
     public function update($params) {
         $lead = Lead::findOrFail($params['id']);
 

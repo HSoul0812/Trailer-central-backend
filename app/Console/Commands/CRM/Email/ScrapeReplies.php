@@ -207,9 +207,6 @@ class ScrapeReplies extends Command
      * @return false || array of EmailHistory
      */
     private function processSalesperson($dealer, $salesperson) {
-        // Get User Details to Know What to Import
-        $this->service->init($dealer);
-
         // Process Messages
         $this->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
         $imported = 0;
@@ -228,9 +225,6 @@ class ScrapeReplies extends Command
                             $e->getMessage() . ':' . $e->getTraceAsString());
             }
         }
-
-        // Clean Memory
-        $this->service->clear();
 
         // Return Campaign Sent Entries
         return $imported;
