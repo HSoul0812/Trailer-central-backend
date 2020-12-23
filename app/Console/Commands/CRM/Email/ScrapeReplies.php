@@ -85,6 +85,8 @@ class ScrapeReplies extends Command
         $this->boundUpper = $this->argument('boundUpper');        
         
         $now = $this->datetime->format("l, F jS, Y");
+        $this->command = str_replace('{boundLower?}', $this->boundLower, $this->signature);
+        $this->command = str_replace('{boundUpper?}', $this->boundUpper, $this->signature);
         $this->command = str_replace('{dealer?}', $this->dealerId, $this->signature);
 
         // Try Catching Error for Whole Script
