@@ -86,6 +86,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('text:deliver-blast')
                 ->withoutOverlapping()
                 ->runInBackground();
+        
+        $schedule->command('email:scrape-replies')
+                ->withoutOverlapping()
+                ->runInBackground();
+
         // $schedule->command('inspire')
         //          ->hourly();
     }
