@@ -303,9 +303,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             }
             // Mark as Skipped
             else {
-                $this->emails->createProcessed($salesperson->user_id, $parsed['message_id']);
+                $this->emails->createProcessed($salesperson->user_id, $overview['message_id']);
                 $skipped++;
-                Log::info("Skipped Email Message " . $parsed['message_id']);
+                Log::info("Skipped Email Message " . $overview['message_id']);
             }
         }
         unset($messages);
