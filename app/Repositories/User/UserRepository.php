@@ -59,7 +59,14 @@ class UserRepository implements UserRepositoryInterface {
      */
     public function getCrmActiveUsers($params) {
         // Initialize Query for NewDealerUser
-        $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->with('user');
+        $dealers = NewDealerUser::has('activeCrmUser')->with('user');
+
+        // Has Sales People?
+        if(!empty($params['has'])) {
+            foreach($params['has'] as $has) {
+                $dealers = $dealers->has($has);
+            }
+        }
 
         // Add Where Dealer ID
         if(!empty($params['dealer_id'])) {

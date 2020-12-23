@@ -23,10 +23,10 @@ interface UserRepositoryInterface extends Repository {
     /**
      * Get CRM Active Users
      * 
-     * @param int $dealerId
+     * @param array $params
      * @return Collection of NewDealerUser
      */
-    public function getCrmActiveUsers($dealerId = 0);
+    public function getCrmActiveUsers($params);
     
     public function setAdminPasswd($dealerId, $passwd);
 }
