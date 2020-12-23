@@ -380,10 +380,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $filename = $path_parts['filename'];
             $ext = !empty($path_parts['extension']) ? $path_parts['extension'] : '';
             if(empty($ext)) {
-                var_dump($file);
-                $mime = mime_content_type($file->tmpName);
-                var_dump($mime);
-                die;
+                $type = mime_content_type($file->tmpName);
+                if(!empty($type)) {
+                    $mimes = explode('/', $type);
+                    $ext = end($mimes);
+                }
             }
 
             // Get File Data
