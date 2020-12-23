@@ -139,7 +139,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Get Messages?!
-        return $results->getMessage();
+        return $results->getMessages();
     }
 
     /**
