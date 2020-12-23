@@ -122,6 +122,8 @@ class ImapService implements ImapServiceInterface
             if(empty($messageId) && !empty($mail->messageId)) {
                 $messageId = trim($mail->messageId);
             }
+            Log::info('Got Full Mail Details for Email Message ' . $messageId .
+                    ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
 
             // Handle Initializing Parsed Data
             $parsed = [
