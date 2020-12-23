@@ -102,14 +102,9 @@ class Dealer extends Resource
      */
     public function actions(Request $request)
     {
-        $actions = [];
-
-        if ($this->isCrmActive) {
-            $actions[] = app()->make(DeactivateCrm::class);
-        } else {
-            $actions[] = app()->make(ActivateCrm::class);
-        }
-
-        return $actions;
+        return [
+            app()->make(ActivateCrm::class),
+            app()->make(DeactivateCrm::class),
+        ];
     }
 }

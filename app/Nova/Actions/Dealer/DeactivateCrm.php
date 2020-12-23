@@ -45,7 +45,11 @@ class DeactivateCrm extends Action
     {
         /** @var User $model */
         foreach ($models as $model) {
-            $this->dealerOptionsService->deactivateCrm($model->dealer_id);
+            $result = $this->dealerOptionsService->deactivateCrm($model->dealer_id);
+
+            if (!$result) {
+                throw new \InvalidArgumentException('CRM deactivation error', 500);
+            }
         }
     }
 

@@ -2,12 +2,11 @@
 
 namespace App\Services\User;
 
-use App\Models\CRM\User\UserRole;
-use App\Models\User\CrmUser;
 use App\Models\User\User;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
+use http\Exception\InvalidArgumentException;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -61,7 +60,7 @@ class DealerOptionsService
             $crmUser = $user->crmUser;
             $newDealerUser = $user->newDealerUser;
 
-            if ($crmUser instanceof CrmUser) {
+            if ($crmUser) {
                 $crmUserParams = [
                     'user_id' => $crmUser->user_id,
                     'active' => 1
@@ -84,7 +83,7 @@ class DealerOptionsService
 
             $crmUserRole = $this->crmUserRoleRepository->get(['user_id' => $newDealerUser->user_id]);
 
-            if (!$crmUserRole instanceof UserRole) {
+            if (!$crmUserRole) {
                 $crmUserRoleParams = [
                     'user_id' => $newDealerUser->user_id,
                     'role_id' => 'user'
@@ -99,7 +98,7 @@ class DealerOptionsService
 
             return true;
         } catch (\Exception $e) {
-            Log::error('CRM activation error.', $e->getTrace());
+            Log::error('CRM activation error', $e->getTrace());
             $this->userRepository->rollbackTransaction();
 
             return false;
@@ -127,7 +126,7 @@ class DealerOptionsService
 
             return true;
         } catch (\Exception $e) {
-            Log::error('CRM deactivation error.', $e->getTrace());
+            Log::error('CRM deactivation error', $e->getTrace());
 
             return false;
         }

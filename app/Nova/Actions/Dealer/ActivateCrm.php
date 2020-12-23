@@ -41,7 +41,11 @@ class ActivateCrm extends Action
     {
         /** @var User $model */
         foreach ($models as $model) {
-            $this->dealerOptionsService->activateCrm($model->dealer_id);
+            $result = $this->dealerOptionsService->activateCrm($model->dealer_id);
+
+            if (!$result) {
+                throw new \InvalidArgumentException('CRM activation error', 500);
+            }
         }
     }
 
