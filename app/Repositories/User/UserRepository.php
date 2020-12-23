@@ -69,6 +69,7 @@ class UserRepository implements UserRepositoryInterface {
         }
 
         // Add Where Dealer ID
+        var_dump($params);
         if(!empty($params['dealer_id'])) {
             $dealers = $dealers->where('id', $params['dealer_id']);
         }
