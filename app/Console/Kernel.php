@@ -91,53 +91,23 @@ class Kernel extends ConsoleKernel
         /**
          * Scrape Replies
          */
-        // 0 - 1098
-        $schedule->command('email:scrape-replies 0 1098')
+        // 0 - 2999
+        $schedule->command('email:scrape-replies 0 2999')
                 ->withoutOverlapping()
                 ->runInBackground();
 
-        // 1099 (super long, so run it separately)
-        $schedule->command('email:scrape-replies 0 0 1099')
+        // 3000 - 5999
+        $schedule->command('email:scrape-replies 3000 5999')
                 ->withoutOverlapping()
                 ->runInBackground();
 
-        // 1100 - 2999
-        $schedule->command('email:scrape-replies 1100 2999')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        // 3000 - 5499
-        $schedule->command('email:scrape-replies 3000 5499')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        // 5500 - 6499
-        $schedule->command('email:scrape-replies 5500 5999')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        // 5500 - 6499
+        // 6000 - 6499
         $schedule->command('email:scrape-replies 6000 6499')
                 ->withoutOverlapping()
                 ->runInBackground();
 
         // 6500 - 8999
-        $schedule->command('email:scrape-replies 6500 6999')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        // 7000 - 7999
-        $schedule->command('email:scrape-replies 7000 7999')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        // 8000 - 8499
-        $schedule->command('email:scrape-replies 8000 8499')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        // 8500 - 8999
-        $schedule->command('email:scrape-replies 8500 8999')
+        $schedule->command('email:scrape-replies 6500 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
 
