@@ -209,9 +209,6 @@ class ImapService implements ImapServiceInterface
             Log::info('Found ' . count($files) . ' total attachments on Message ' . $overview['message_id']);
         }
 
-        // Set Date
-        $parsed['date'] = date("Y-m-d H:i:s", strtotime($overview->date));
-
         // Clear Memory
         unset($attachments);
         unset($overview);
