@@ -378,7 +378,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
             $path_parts = pathinfo( $file->name );
             $filename = $path_parts['filename'];
-            $ext = $path_parts['extension'];
+            $ext = !empty($path_parts['extension']) ? $path_parts['extension'] : '';
+            if(empty($ext)) {
+                var_dump($file);
+                die;
+            }
 
             // Get File Data
             if(!empty($file->data)) {
