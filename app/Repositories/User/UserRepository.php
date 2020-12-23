@@ -73,12 +73,12 @@ class UserRepository implements UserRepositoryInterface {
             $dealers = $dealers->where('id', $params['dealer_id']);
         }
         // Bounds Exist?!
-        else if ($this->boundLower && $this->boundUpper) {
+        else if(!empty($params['bound_lower']) && !empty($params['bound_upper'])) {
             $dealers = $dealers->where('id', '>=', $params['bound_lower'])
                                ->where('id', '<=', $params['bound_upper']);
         }
         // Only Lower Bound Exists!
-        else if ($this->boundLower) {
+        else if(!empty($params['bound_lower'])) {
             $dealers = $dealers->where('id', '>=', $params['bound_lower']);
         }
 
