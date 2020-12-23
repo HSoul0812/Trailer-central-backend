@@ -89,7 +89,6 @@ class ScrapeReplies extends Command
             // Kill Set (Invalid) Vars
             $this->salesPersonId = 0;
         }
-        $this->salesPersonId = 608;
     }
 
     /**
