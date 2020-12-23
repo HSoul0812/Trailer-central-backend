@@ -84,7 +84,7 @@ class ScrapeReplies extends Command
         $this->boundLower = $this->argument('boundLower');
         $this->boundUpper = $this->argument('boundUpper');        
         
-        $now = $this->datetime->format("l, F jS, Y");
+        $now = $this->datetime->format("l, F jS, Y H:i:s");
         $this->command = str_replace('{boundLower?}', $this->boundLower, $this->signature);
         $this->command = str_replace('{boundUpper?}', $this->boundUpper, $this->command);
         $this->command = str_replace('{dealer?}', $this->dealerId, $this->command);
@@ -120,7 +120,7 @@ class ScrapeReplies extends Command
         // Log End
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
-        $this->info("{$this->command} finished on " . $datetime->format("l, F jS, Y"));
+        $this->info("{$this->command} finished on " . $datetime->format("l, F jS, Y H:i:s"));
     }
 
     /**
@@ -187,7 +187,7 @@ class ScrapeReplies extends Command
      */
     private function processSalesperson($dealer, $salesperson) {
         // Process Messages
-        $this->info($this->command . ' processing getting emails for sales serson #' . $salesperson->id);
+        $this->info($this->command . ' processing getting emails for sales person #' . $salesperson->id);
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder

@@ -87,7 +87,19 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
         
-        $schedule->command('email:scrape-replies')
+        $schedule->command('email:scrape-replies 0 2999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('email:scrape-replies 3000 5999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('email:scrape-replies 6000 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('email:scrape-replies 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
 
