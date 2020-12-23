@@ -166,8 +166,7 @@ class ScrapeReplies extends Command
         $this->info("{$this->command} dealer #{$dealer->id} found " . count($salespeople) . " active salespeople with imap credentials to process");
         foreach($salespeople as $salesperson) {
             // Not Correct Sales Person?!
-            if(!empty($salesperson->googleToken) ||
-              (!empty($this->salesPersonId) && $salesperson->id !== $this->salesPersonId)) {
+            if(!empty($this->salesPersonId) && $salesperson->id !== $this->salesPersonId) {
                 // Clear Memory
                 unset($salesperson);
                 continue;
