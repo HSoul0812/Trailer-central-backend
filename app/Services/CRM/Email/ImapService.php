@@ -296,8 +296,7 @@ class ImapService implements ImapServiceInterface
         Log::info('Getting Messages From IMAP With Filter: "' . $search . '"');
         $mailIds = $this->imap->searchMailbox($search);
         if(count($mailIds) > 0) {
-            Log::info('Found ' . count($mailIds) . ' Message ID\'s to Process' .
-                    ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
+            Log::info('Found ' . count($mailIds) . ' Message ID\'s to Process');
             return $mailIds;
         }
 

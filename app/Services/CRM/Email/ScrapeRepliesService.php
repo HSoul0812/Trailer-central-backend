@@ -234,13 +234,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $mailId) {
             // Get Message Overview
             $overview = $this->imap->overview($mailId);
+            $parsed = $this->imap->parsed($overview);
 
             // Check if Exists
             if(empty($overview['subject']) || empty($overview['message_id']) ||
                $this->emails->findMessageId($salesperson->user_id, $overview['message_id'])) {
                 // Delete All Attachments
                 Log::info('Already Processed Email Message ' . $overview['message_id']);
+                $this->deleteAttachments($parsed['attachments']);
                 unset($overview);
+                unset($parsed);
                 continue;
             }
 
@@ -262,9 +265,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Valid Lead
             if(!empty($lead->identifier)) {
-                // Get Message Parsed
-                $parsed = $this->imap->parsed($overview);
-
                 // Insert Interaction / Email History
                 $params = [
                     'dealer_id' => $dealerId,
@@ -298,8 +298,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->deleteAttachments($parsed['attachments']);
                 $messageId = $parsed['message_id'];
                 unset($parsed);
-                Log::info('Cleared Email Message ' . $messageId .
-                        ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
+                Log::info('Cleared Email Message ' . $messageId);
             }
             // Mark as Skipped
             else {

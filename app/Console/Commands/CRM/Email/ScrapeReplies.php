@@ -80,7 +80,7 @@ class ScrapeReplies extends Command
 
         // Get Sales Person From Predis
         try {
-            $this->salesPersonId = $this->redis->lpop($this->lkey) ?: 0;
+            $this->salesPersonId = $this->redis->get($this->lkey) ?: 0;
         } catch(\Predis\Connection\ConnectionException $e) {
             // Send Slack Error
             $this->sendSlackError($e->getMessage());
@@ -131,6 +131,9 @@ class ScrapeReplies extends Command
         }
         unset($dealers);
 
+        // Finished Processing All Dealers
+        $this->redis->del($this->lkey);
+
         // Log End
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
@@ -161,7 +164,7 @@ class ScrapeReplies extends Command
         // Loop Campaigns for Current Dealer
         $imported = 0;
         $this->info("{$this->command} dealer #{$dealer->id} found " . count($salespeople) . " active salespeople with imap credentials to process");
-        foreach($salespeople as $k => $salesperson) {
+        foreach($salespeople as $salesperson) {
             // Not Correct Sales Person?!
             if(!empty($salesperson->googleToken) ||
               (!empty($this->salesPersonId) && $salesperson->id !== $this->salesPersonId)) {
@@ -169,13 +172,13 @@ class ScrapeReplies extends Command
                 unset($salesperson);
                 continue;
             }
+            $this->salesPersonId = 0;
 
             // Try Catching Error for Sales Person
             try {
                 // Set Current Sales Person to Redis
                 if(empty($this->dealerId)) {
-                    $this->redis->hmset($this->skey, $salesperson->id, json_encode($salesperson));
-                    $this->salesPersonId = 0;
+                    $this->redis->set($this->lkey, $salesperson->id);
                 }
 
                 // Import Emails
@@ -207,20 +210,19 @@ class ScrapeReplies extends Command
      */
     private function processSalesperson($dealer, $salesperson) {
         // Process Messages
-        $this->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
+        $this->info($this->command . ' processing getting emails for sales serson #' . $salesperson->id);
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
             try {
                 // Import Folder
                 $imports = $this->service->import($dealer, $salesperson, $folder);
-                $this->info('Imported ' . $imports . ' Email Replies for Sales Person #' .
-                            $salesperson->id . ' Folder ' . $folder->name .
-                            ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
+                $this->info($this->command . ' imported ' . $imports . ' email replies for sales person #' .
+                            $salesperson->id . ' folder ' . $folder->name);
                 $imported += $imports;
             } catch(\Exception $e) {
-                $this->error('Error Importing Sales Person #' .
-                            $salesperson->id . ' Folder ' . $folder->name . '; ' .
+                $this->error($this->command . ' error importing sales person #' .
+                            $salesperson->id . ' folder ' . $folder->name . '; ' .
                             $e->getMessage() . ':' . $e->getTraceAsString());
             }
         }
