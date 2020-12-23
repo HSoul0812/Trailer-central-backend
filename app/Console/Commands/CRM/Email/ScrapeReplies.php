@@ -219,7 +219,8 @@ class ScrapeReplies extends Command
                 // Import Folder
                 $imports = $this->service->import($dealer, $salesperson, $folder);
                 $this->info('Imported ' . $imports . ' Email Replies for Sales Person #' .
-                            $salesperson->id . ' Folder ' . $folder->name);
+                            $salesperson->id . ' Folder ' . $folder->name .
+                            ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB'););
                 $imported += $imports;
             } catch(\Exception $e) {
                 $this->error('Error Importing Sales Person #' .

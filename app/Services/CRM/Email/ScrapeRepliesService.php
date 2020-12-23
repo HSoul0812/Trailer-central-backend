@@ -95,6 +95,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->messageIds = $this->emails->getMessageIds($dealer->user_id);
         $this->processed = $this->emails->getProcessed($dealer->user_id);
         $this->leadEmails = $this->leads->getLeadEmails($dealer->id);
+        Log::info('Initiated Message ID\'s/Lead Emails for Dealer ' . $dealer-id .
+                    ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
     }
 
     /**
@@ -104,6 +106,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         unset($this->messageIds);
         unset($this->processed);
         unset($this->leadEmails);
+        Log::info('Cleared Message ID\'s/Lead Emails, Memory Usage: ' .
+                    round(memory_get_usage() / 1048576, 2).''.' MB');
     }
 
 
@@ -325,7 +329,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Clear Memory/Space
             $this->deleteAttachments($parsed['attachments']);
+            $messageId = $parsed['message_id'];
             unset($parsed);
+            Log::info('Cleared Email Message ' . $messageId .
+                    ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
         }
         unset($messages);
 
