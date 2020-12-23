@@ -381,6 +381,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $ext = !empty($path_parts['extension']) ? $path_parts['extension'] : '';
             if(empty($ext)) {
                 var_dump($file);
+                $mime = mime_content_type($file->tmpName);
+                var_dump($mime);
                 die;
             }
 
