@@ -82,6 +82,7 @@ class UserRepository implements UserRepositoryInterface {
         else if(!empty($params['bound_lower'])) {
             $dealers = $dealers->where('id', '>=', $params['bound_lower']);
         }
+        echo $dealers->getSql();
 
         // Return Results
         return $dealers->get();
