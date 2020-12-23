@@ -2,17 +2,17 @@
 
 namespace App\Nova\Resources\Dealer;
 
+use App\Nova\Actions\Dealer\ActivateCrm;
+use App\Nova\Actions\Dealer\DeactivateCrm;
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Gravatar;
-use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use App\Nova\Resource;
 
-class Dealer extends Resource 
+class Dealer extends Resource
 {
     public static $group = 'Dealer';
-    
+
     /**
      * The model the resource corresponds to.
      *
@@ -33,8 +33,10 @@ class Dealer extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'dealer_id', 'name', 'email',
     ];
+
+    public static $with = ['crmUser'];
 
     /**
      * Get the fields displayed by the resource.
@@ -53,8 +55,9 @@ class Dealer extends Resource
 
             Text::make('Email')
                 ->sortable()
-                ->rules('required', 'email', 'max:254')
+                ->rules('required', 'email', 'max:254'),
 
+            Boolean::make('CRM', 'isCrmActive')->hideWhenCreating()->hideWhenUpdating(),
         ];
     }
 
@@ -99,6 +102,14 @@ class Dealer extends Resource
      */
     public function actions(Request $request)
     {
-        return [];
+        $actions = [];
+
+        if ($this->isCrmActive) {
+            $actions[] = app()->make(DeactivateCrm::class);
+        } else {
+            $actions[] = app()->make(ActivateCrm::class);
+        }
+
+        return $actions;
     }
 }
