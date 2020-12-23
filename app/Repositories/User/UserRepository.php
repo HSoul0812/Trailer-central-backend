@@ -54,16 +54,25 @@ class UserRepository implements UserRepositoryInterface {
     /**
      * Get CRM Active Users
      * 
-     * @param int $dealerId
+     * @param array $params
      * @return Collection of NewDealerUser
      */
-    public function getCrmActiveUsers($dealerId = 0) {
+    public function getCrmActiveUsers($params) {
         // Initialize Query for NewDealerUser
-        $dealers = NewDealerUser::has('activeCrmUser')->with('user');
+        $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->with('user');
 
         // Add Where Dealer ID
-        if(!empty($dealerId)) {
-            $dealers = $dealers->where('id', $dealerId);
+        if(!empty($params['dealer_id'])) {
+            $dealers = $dealers->where('id', $params['dealer_id']);
+        }
+        // Bounds Exist?!
+        else if ($this->boundLower && $this->boundUpper) {
+            $dealers = $dealers->where('id', '>=', $params['bound_lower'])
+                               ->where('id', '<=', $params['bound_upper']);
+        }
+        // Only Lower Bound Exists!
+        else if ($this->boundLower) {
+            $dealers = $dealers->where('id', '>=', $params['bound_lower']);
         }
 
         // Return Results

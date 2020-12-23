@@ -3,7 +3,6 @@
 namespace App\Console\Commands\CRM\Email;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Redis;
 use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
@@ -16,7 +15,7 @@ class ScrapeReplies extends Command
      *
      * @var string
      */
-    protected $signature = 'email:scrape-replies {dealer?}';
+    protected $signature = 'email:scrape-replies {boundLower?} {boundUpper?} {dealer?}';
 
     /**
      * The console command description.
@@ -41,20 +40,9 @@ class ScrapeReplies extends Command
     protected $users;
 
     /**
-     * @var Illuminate\Support\Facades\Redis
-     */
-    protected $redis;
-
-    /**
      * @var string
      */
-    protected $lkey = 'cron:email-history:sales-people';
-    protected $skey = 'db:sales-people';
-
-    /**
-     * @var string
-     */
-    protected $command = 'email:scrape-replies';
+    protected $command = '';
 
     /**
      * @var int
@@ -76,19 +64,11 @@ class ScrapeReplies extends Command
         $this->service = $service;
         $this->salespeople = $salesRepo;
         $this->users = $users;
-        $this->redis = Redis::connection('default');
-
-        // Get Sales Person From Predis
-        try {
-            $this->salesPersonId = $this->redis->get($this->lkey) ?: 0;
-        } catch(\Predis\Connection\ConnectionException $e) {
-            // Send Slack Error
-            $this->sendSlackError($e->getMessage());
-            $this->error("{$this->command} exception returned connecting to redis on scrape email replies command: " . $e->getMessage());
-
-            // Kill Set (Invalid) Vars
-            $this->salesPersonId = 0;
-        }
+        
+        date_default_timezone_set(env('DB_TIMEZONE'));
+        
+        $this->datetime = new \DateTime();
+        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
     }
 
     /**
@@ -100,23 +80,27 @@ class ScrapeReplies extends Command
     {
         // Get Dealer ID
         $this->dealerId = $this->argument('dealer');
-
-        // Initialize Time
-        date_default_timezone_set(env('DB_TIMEZONE'));
-        $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        
+        $this->boundLower = $this->argument('boundLower');
+        $this->boundUpper = $this->argument('boundUpper');        
+        
+        $now = $this->datetime->format("l, F jS, Y");
+        $this->command = str_replace('{dealer?}', $this->dealerId, $this->signature);
 
         // Try Catching Error for Whole Script
         try {
-            // Log Start
-            $now = $this->datetime->format("l, F jS, Y");
-            $this->command .= (!empty($this->dealerId) ? ' ' . $this->dealerId : '');
             $this->info("{$this->command} started {$now}");
 
-            // Get Dealers With Active CRM
-            $dealers = $this->users->getCrmActiveUsers($this->dealerId);
+            $dealers = $this->users->getCrmActiveUsers([
+                'bound_lower' => $this->boundLower,
+                'bound_upper' => $this->boundUpper,
+                'dealer_id' => $this->dealerId
+            ]);
+
             $this->info("{$this->command} found " . count($dealers) . " dealers to process");
-            foreach($dealers as $k => $dealer) {
+
+            // Get Dealers With Valid Salespeople
+            foreach($dealers as $dealer) {
                 // Parse Single Dealer
                 $imported = $this->processDealer($dealer);
                 if($imported !== false) {
@@ -130,9 +114,6 @@ class ScrapeReplies extends Command
             $this->error("{$this->command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
         }
         unset($dealers);
-
-        // Finished Processing All Dealers
-        $this->redis->del($this->lkey);
 
         // Log End
         $datetime = new \DateTime();
@@ -175,11 +156,6 @@ class ScrapeReplies extends Command
 
             // Try Catching Error for Sales Person
             try {
-                // Set Current Sales Person to Redis
-                if(empty($this->dealerId)) {
-                    $this->redis->set($this->lkey, $salesperson->id);
-                }
-
                 // Import Emails
                 $this->info("{$this->command} importing emails on sales person #{$salesperson->id} for dealer #{$dealer->id}");
                 $imports = $this->processSalesperson($dealer, $salesperson);
@@ -228,19 +204,5 @@ class ScrapeReplies extends Command
 
         // Return Campaign Sent Entries
         return $imported;
-    }
-
-
-    /**
-     * Send Slack Error
-     */
-    private function sendSlackError($error) {
-        // Get Title/Message
-        $title = "CRM EMAIL IMPORTER ERROR";
-        $msg = "Exception returned trying to connect to redis client! Client returned exception: " . $error;
-
-        // Send to Slack
-        $this->slack->sendSlackNotify($msg, $title);
-        return $msg;
     }
 }
