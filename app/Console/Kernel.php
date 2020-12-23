@@ -112,7 +112,12 @@ class Kernel extends ConsoleKernel
                 ->runInBackground();
 
         // 5500 - 6499
-        $schedule->command('email:scrape-replies 5500 6499')
+        $schedule->command('email:scrape-replies 5500 5999')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+        // 5500 - 6499
+        $schedule->command('email:scrape-replies 6000 6499')
                 ->withoutOverlapping()
                 ->runInBackground();
 
@@ -126,18 +131,13 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
 
-        // 8000 - 8466
-        $schedule->command('email:scrape-replies 8000 8466')
+        // 8000 - 8499
+        $schedule->command('email:scrape-replies 8000 8499')
                 ->withoutOverlapping()
                 ->runInBackground();
 
-        // 8467 (super long, so run it separately)
-        $schedule->command('email:scrape-replies 0 0 8467')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        // 8468 - 8999
-        $schedule->command('email:scrape-replies 8468 8999')
+        // 8500 - 8999
+        $schedule->command('email:scrape-replies 8500 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
 
