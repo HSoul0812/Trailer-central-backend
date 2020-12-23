@@ -93,9 +93,6 @@ class ScrapeReplies extends Command
         try {
             $this->info("{$this->command} started {$now}");
 
-            var_dump($this->dealerId);
-            var_dump($this->boundLower);
-            var_dump($this->boundUpper);
             $dealers = $this->users->getCrmActiveUsers([
                 'bound_lower' => $this->boundLower,
                 'bound_upper' => $this->boundUpper,
