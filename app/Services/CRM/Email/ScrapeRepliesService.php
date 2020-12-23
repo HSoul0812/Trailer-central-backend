@@ -199,7 +199,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             else {
                 $this->emails->createProcessed($salesperson->user_id, $parsed['headers']['Message-ID']);
                 $skipped++;
-                Log::info("Skipped Email Message " . $parsed['message_id']);
+                Log::info("Skipped Email Message " . $parsed['headers']['Message-ID']);
             }
 
             // Clear Memory/Space
