@@ -95,7 +95,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->messageIds = $this->emails->getMessageIds($dealer->user_id);
         $this->processed = $this->emails->getProcessed($dealer->user_id);
         $this->leadEmails = $this->leads->getLeadEmails($dealer->id);
-        Log::info('Initiated Message ID\'s/Lead Emails for Dealer ' . $dealer-id .
+        Log::info('Initiated Message ID\'s/Lead Emails for Dealer ' . $dealer->id .
                     ', Memory Usage: ' . round(memory_get_usage() / 1048576, 2) . ' MB');
     }
 
