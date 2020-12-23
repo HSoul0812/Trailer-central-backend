@@ -173,6 +173,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
                 // Insert Interaction / Email History
                 $params = [
+                    'dealer_id' => $dealerId,
+                    'user_id' => $salesperson->user_id,
                     'lead_id' => $lead->identifier,
                     'message_id' => $parsed['headers']['Message-ID'],
                     'to_email' => $to,
