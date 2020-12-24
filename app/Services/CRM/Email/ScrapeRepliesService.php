@@ -113,13 +113,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             else {
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
             }
-
-            // Updated Successful
-            $this->folders->update([
-                'id' => $folder->id,
-                'date_imported' => Carbon::now()
-            ]);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $this->folders->updateFailed($folder->id);
             Log::error('Failed to Connect to Sales Person #' . $salesperson->id .
                         ' Folder ' . $folder->name . '; exception returned: ' .
@@ -155,9 +149,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Loop Messages
         $total = 0;
         $skipped = 0;
+        $imported = '';
         foreach($messages as $overview) {
             // Get Parsed Message
             $params = $this->gmail->message($overview);
+            if(empty($imported) || (!empty($imported) && strtotime($imported) < strtotime($params['date_sent']))) {
+                $imported = $params['date_sent'];
+            }
 
             // Check if Exists
             if(empty($params['subject']) || empty($params['message_id']) ||
@@ -216,6 +214,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             Log::info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
+        // Updated Successful
+        $this->folders->update([
+            'id' => $folder->id,
+            'date_imported' => !empty($imported) ? $imported : Carbon::now()
+        ]);
+
         // Return Result Messages That Match
         return $total;
     }
@@ -238,9 +242,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Loop Messages
         $total = 0;
         $skipped = 0;
+        $imported = '';
         foreach($messages as $mailId) {
             // Get Message Overview
             $overview = $this->imap->overview($mailId);
+            if(empty($imported) || (!empty($imported) && strtotime($imported) < strtotime($overview['date_sent']))) {
+                $imported = $overview['date_sent'];
+            }
 
             // Check if Exists
             if(empty($overview['subject']) || empty($overview['message_id']) ||
@@ -299,6 +307,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         if($skipped > 0) {
             Log::info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
+
+        // Updated Successful
+        $this->folders->update([
+            'id' => $folder->id,
+            'date_imported' => !empty($imported) ? $imported : Carbon::now()
+        ]);
 
         // Return Result Messages That Match
         return $total;
