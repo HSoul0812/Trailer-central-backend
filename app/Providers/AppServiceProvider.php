@@ -109,6 +109,8 @@ use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use Laravel\Nova\Nova;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
+use App\Repositories\Dms\Customer\InventoryRepositoryInterface as CustomerInventoryRepositoryInterface;
+use App\Repositories\Dms\Customer\InventoryRepository as CustomerInventoryRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -182,13 +184,13 @@ class AppServiceProvider extends ServiceProvider
 
             // parts crm
             __DIR__ . '/../../database/migrations/crm',
-            
+
             // dealer migrations
             __DIR__ . '/../../database/migrations/dealer',
 
             // utilities
             __DIR__ . '/../../database/migrations/utilities',
-            
+
             // configuration tables
             __DIR__ . '/../../database/migrations/config',
         ]);
@@ -254,8 +256,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
-        
+
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
+        $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);

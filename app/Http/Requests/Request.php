@@ -1,35 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
+use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request as BaseRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use App\Exceptions\NotImplementedException;
-use Illuminate\Database\Eloquent\Model;
+
 /**
- *  
+ *
  * @author Eczek
  */
 class Request extends BaseRequest {
-    
+
     /**
      * Rules to validate
-     * 
+     *
      * @var array
      */
     protected $rules = [];
-        
-    public function validate() {
-        $validator = Validator::make($this->all(), $this->rules);
+
+    /**
+     * @return bool it is true when the object belong to the current logged in dealer
+     *
+     * @throws ResourceException when there were some validation error
+     */
+    public function validate(): bool
+    {
+        $validator = Validator::make($this->all(), $this->getRules());
 
         if ($validator->fails()) {
-            throw new \Dingo\Api\Exception\ResourceException("Validation Failed", $validator->errors());
+            throw new ResourceException("Validation Failed", $validator->errors());
         }
-        
+
         if ($this->validateObjectBelongsToUser()) {
             $user = Auth::user();
-        
+
             if ($user) {
                 if ($this->getObjectIdValue()) {
                     $obj = $this->getObject()->findOrFail($this->getObjectIdValue());
@@ -37,19 +45,25 @@ class Request extends BaseRequest {
                         return false;
                     }
                 }
-                
+
             }
         }
-        
-        
+
         return true;
     }
-    
-    protected function getObjectIdValue() { 
+
+    protected function getObjectIdValue(): bool
+    {
         return false;
     }
-        
-    protected function validateObjectBelongsToUser() {
+
+    protected function validateObjectBelongsToUser(): bool
+    {
         return false;
+    }
+
+    protected function getRules(): array
+    {
+        return $this->rules;
     }
 }
