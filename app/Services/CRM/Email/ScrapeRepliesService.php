@@ -142,7 +142,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Get Emails From Gmail
-        $messages = $this->gmail->messages($accessToken, $folder->name);
+        $messages = $this->gmail->messages($accessToken, $folder->name, ['after' => $folder->date_imported]);
 
         // Update Folder
         $folder = $this->updateFolder($salesperson, $folder);

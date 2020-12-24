@@ -41,6 +41,13 @@ class GmailService implements GmailServiceInterface
     protected $message;
 
     /**
+     * @var array
+     */
+    protected $validQuery = [
+        'after', 'before', 'older', 'newer'
+    ];
+
+    /**
      * Construct Google Client
      */
     public function __construct(InteractionEmailServiceInterface $interactionEmail) {
@@ -134,14 +141,31 @@ class GmailService implements GmailServiceInterface
         // Get Labels
         $label = $this->labels($accessToken, $folder, true);
 
-        // Get Messages
-        $results = $this->gmail->users_messages->listUsersMessages('me', ['labelIds' => [$label['id']]]);
-        if (count($results->getMessages()) == 0) {
-            return array();
+        // Imap Inbox ALREADY Exists?
+        $filters = '';
+        Log::info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $filters . '"');
+
+        // Create Query
+        $q = '';
+        foreach($params as $k => $v) {
+            if(in_array($k, $this->validQuery)) {
+                $q .= $k . ': ' . $v;
+            }
         }
 
-        // Get Messages?!
-        return $results->getMessages();
+        // Get Messages
+        $results = $this->gmail->users_messages->listUsersMessages('me', [
+            'labelIds' => [$label['id']],
+            'q' => $q
+        ]);
+        $messages = $results->getMessages();
+
+        // Return Results
+        Log::info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
+        if (count($messages) == 0) {
+            return array();
+        }
+        return $messages;
     }
 
     /**
