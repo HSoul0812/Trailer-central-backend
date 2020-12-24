@@ -67,9 +67,6 @@ class GmailService implements GmailServiceInterface
             throw new FailedConnectGapiClientException;
         }
         $this->client->setAccessType('offline');
-
-        // Setup Gmail
-        $this->gmail = new \Google_Service_Gmail($this->client);
     }
 
     /**
@@ -279,6 +276,9 @@ class GmailService implements GmailServiceInterface
             'created' => strtotime($accessToken->issued_at) * 1000
         ]);
         $this->client->setScopes($accessToken->scope);
+
+        // Setup Gmail
+        $this->gmail = new \Google_Service_Gmail($this->client);
     }
 
     /**
