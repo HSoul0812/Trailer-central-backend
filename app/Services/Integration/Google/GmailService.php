@@ -7,6 +7,8 @@ use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGapiClientIdException;
 use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
+use App\Exceptions\Integration\Google\MissingGmailLabelsException;
+use App\Exceptions\Integration\Google\MissingGmailLabelException;
 use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
@@ -219,8 +221,8 @@ class GmailService implements GmailServiceInterface
         }
 
         // None Exist?!
-        if(count($labels) < 1 && $search !== 'INBOX') {
-            return $this->labels($accessToken, 'INBOX', $single);
+        if(count($labels) < 1) {
+            throw new MissingGmailLabelException;
         }
 
         // Return Labels
