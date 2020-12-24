@@ -170,12 +170,18 @@ class GmailService implements GmailServiceInterface
             Log::info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
         }
 
-        // Add to Array
+        // Parse Data
         return [
+            'message_id' => !empty($parsed['headers']['Message-ID']) ? $parsed['headers']['Message-ID'] : '',
+            'to_email' => !empty($parsed['headers']['To']) ? $parsed['headers']['To'] : '',
+            'to_name' => !empty($parsed['headers']['To-Name']) ? $parsed['headers']['To-Name'] : '',
+            'from_email' => !empty($parsed['headers']['From']) ? $parsed['headers']['From'] : '',
+            'from_name' => !empty($parsed['headers']['From-Name']) ? $parsed['headers']['From-Name'] : '',
+            'subject' => !empty($parsed['headers']['Subject']) ? $parsed['headers']['Subject'] : '',
             'body' => $body,
+            'is_html' => (strip_tags($body) != $body) ? true : false,
             'attachments' => $attachments,
-            'message' => $message,
-            'headers' => $headers
+            'date_sent' => date("Y-m-d H:i:s", strtotime($parsed['headers']['Date']))
         ];
     }
 

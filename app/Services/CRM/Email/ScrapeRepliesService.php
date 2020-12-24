@@ -5,6 +5,7 @@ namespace App\Services\CRM\Email;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
@@ -12,6 +13,7 @@ use App\Services\Integration\Google\GoogleServiceInterface;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 /**
  * Class ScrapeRepliesService
@@ -46,6 +48,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     protected $emails;
 
     /**
+     * @var App\Repositories\CRM\User\EmailFolderRepositoryInterface
+     */
+    protected $folders;
+
+    /**
      * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
      */
     protected $tokens;
@@ -63,6 +70,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                                 ImapServiceInterface $imap,
                                 InteractionsRepositoryInterface $interactions,
                                 EmailHistoryRepositoryInterface $emails,
+                                EmailFolderRepositoryInterface $folders,
                                 TokenRepositoryInterface $tokens,
                                 LeadRepositoryInterface $leads)
     {
@@ -74,6 +82,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Initialize Repositories
         $this->interactions = $interactions;
         $this->emails = $emails;
+        $this->folders = $folders;
         $this->tokens = $tokens;
         $this->leads = $leads;
     }
@@ -90,17 +99,31 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     public function import($dealer, $salesperson, $folder) {
         // Missing Folder Name?
         if(empty($folder->name)) {
-            //$this->updateFolder($folder, false, false);
+            $this->folders->delete($folder->id);
             return 0;
         }
 
-        // Get From Google?
-        if(!empty($salesperson->googleToken)) {
-            $total = $this->importGoogle($dealer->id, $salesperson, $folder);
-        }
-        // Get From IMAP Instead
-        else {
-            $total = $this->importImap($dealer->id, $salesperson, $folder);
+        // Try Importing
+        try {
+            // Get From Google?
+            if(!empty($salesperson->googleToken)) {
+                $total = $this->importGmail($dealer->id, $salesperson, $folder);
+            }
+            // Get From IMAP Instead
+            else {
+                $total = $this->importImap($dealer->id, $salesperson, $folder);
+            }
+
+            // Updated Successful
+            $this->folders->update([
+                'id' => $folder->id,
+                'date_imported' => Carbon::now()
+            ]);
+        } catch (Exception $ex) {
+            $this->folders->updateFailed($folder->id);
+            Log::error('Failed to Connect to Sales Person #' . $salesperson->id .
+                        ' Folder ' . $folder->name . '; exception returned: ' .
+                        $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Inserted Replies
@@ -108,14 +131,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     }
 
     /**
-     * Import Google
+     * Import G-Mail
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param EmailFolder $folder
      * @return false || array of email results
      */
-    private function importGoogle($dealerId, $salesperson, $folder) {
+    private function importGmail($dealerId, $salesperson, $folder) {
         // Refresh Token
         $accessToken = $salesperson->googleToken;
         $validate = $this->google->validate($accessToken);
@@ -123,89 +146,68 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
         }
 
-        // Get Emails From Google
+        // Get Emails From Gmail
         $messages = $this->gmail->messages($accessToken, $folder->name);
+
+        // Update Folder
+        $folder = $this->updateFolder($salesperson, $folder);
 
         // Loop Messages
         $total = 0;
         $skipped = 0;
         foreach($messages as $overview) {
             // Get Parsed Message
-            $parsed = $this->gmail->message($overview);
+            $params = $this->gmail->message($overview);
 
             // Check if Exists
-            if(empty($parsed['headers']['Subject']) || empty($parsed['headers']['Message-ID']) ||
-               $this->emails->findMessageId($salesperson->user_id, $parsed['headers']['Message-ID'])) {
+            if(empty($params['subject']) || empty($params['message_id']) ||
+               $this->emails->findMessageId($salesperson->user_id, $params['message_id'])) {
                 // Delete All Attachments
-                Log::info('Already Processed Email Message ' . $parsed['headers']['Message-ID']);
-                $this->deleteAttachments($parsed['attachments']);
+                Log::info('Already Processed Email Message ' . $params['message_id']);
+                $this->deleteAttachments($params['attachments']);
                 unset($overview);
+                unset($params);
                 continue;
             }
 
-            // Verify if Email Exists!
-            $direction = 'Received';
-            $to = !empty($parsed['headers']['To']) ? $parsed['headers']['To'] : '';
-            $from = !empty($parsed['headers']['From']) ? $parsed['headers']['From'] : '';
-            $reply = !empty($parsed['headers']['Reply-To']) ? $parsed['headers']['Reply-To'] : '';
-
             // Get Lead Email Exists?
             $emails = [];
-            if($salesperson->smtp_email !== $to) {
-                $emails[] = $to;
+            $direction = 'Received';
+            if($salesperson->smtp_email !== $params['to_email']) {
+                $emails[] = $params['to_email'];
                 $direction = 'Sent';
             }
-            if($salesperson->smtp_email !== $from) {
-                $emails[] = $from;
-            }
-            if($salesperson->smtp_email !== $reply) {
-                $email[] = $reply;
+            if($salesperson->smtp_email !== $params['from_email']) {
+                $emails[] = $params['from_email'];
             }
             $lead = $this->leads->getByEmails($dealerId, $emails);
 
             // Valid Lead
             if(!empty($lead->identifier)) {
                 // Get To Name
-                $date = strtotime($parsed['headers']['Date']);
-                $subject = $parsed['headers']['Subject'];
-                $toName = $parsed['headers']['To-Name'];
-                $fromName = $parsed['headers']['From-Name'];
-
-                // Insert Interaction / Email History
-                $params = [
-                    'dealer_id' => $dealerId,
-                    'user_id' => $salesperson->user_id,
-                    'lead_id' => $lead->identifier,
-                    'message_id' => $parsed['headers']['Message-ID'],
-                    'to_email' => $to,
-                    'to_name' => !empty($toName) ? $toName : '',
-                    'from_email' => $from,
-                    'from_name' => !empty($fromName) ? $fromName : '',
-                    'subject' => !empty($subject) ? $subject : '',
-                    'body' => !empty($parsed['body']) ? $parsed['body'] : '',
-                    'attachments' => $parsed['attachments'],
-                    'date_sent' => date("Y-m-d H:i:s", $date),
-                    'direction' => $direction
-                ];
+                $params['dealer_id'] = $dealerId;
+                $params['user_id'] = $salesperson->user_id;
+                $params['lead_id'] = $lead->identifier;
+                $params['direction'] = $direction;
                 $message = $this->insertReply($params);
 
                 // Valid?
                 if(!empty($message->message_id)) {
-                    $this->messageIds[] = $message->message_id;
                     $total++;
+                    Log::info("Inserted Email Message " . $message->message_id);
                 }
                 unset($message);
-                unset($params);
             }
             // Mark as Skipped
             else {
-                $this->emails->createProcessed($salesperson->user_id, $parsed['headers']['Message-ID']);
+                $this->emails->createProcessed($salesperson->user_id, $params['message_id']);
                 $skipped++;
-                Log::info("Skipped Email Message " . $parsed['headers']['Message-ID']);
+                Log::info("Skipped Email Message " . $params['message_id']);
             }
 
             // Clear Memory/Space
-            $this->deleteAttachments($parsed['attachments']);
+            $this->deleteAttachments($params['attachments']);
+            unset($params);
             unset($overview);
         }
 
@@ -230,6 +232,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Get Emails From IMAP
         $messages = $this->imap->messages($salesperson, $folder);
 
+        // Update Folder
+        $folder = $this->updateFolder($salesperson, $folder);
+
         // Loop Messages
         $total = 0;
         $skipped = 0;
@@ -246,60 +251,39 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 continue;
             }
 
-            // Verify if Email Exists!
-            $direction = 'Received';
-            $to = $overview['to'];
-            $from = $overview['from'];
-
             // Get Lead Email Exists?
             $emails = [];
-            if($salesperson->smtp_email !== $to) {
-                $emails[] = $to;
+            $direction = 'Received';
+            if($salesperson->smtp_email !== $overview['to_email']) {
+                $emails[] = $overview['to_email'];
                 $direction = 'Sent';
             }
-            if($salesperson->smtp_email !== $from) {
-                $emails[] = $from;
+            if($salesperson->smtp_email !== $overview['from_email']) {
+                $emails[] = $overview['from_email'];
             }
             $lead = $this->leads->getByEmails($dealerId, $emails);
 
             // Valid Lead
             if(!empty($lead->identifier)) {
                 // Get Full IMAP Data
-                $parsed = $this->imap->parsed($overview);
-
-                // Insert Interaction / Email History
-                $params = [
-                    'dealer_id' => $dealerId,
-                    'user_id' => $salesperson->user_id,
-                    'lead_id' => $lead->identifier,
-                    'message_id' => $parsed['message_id'],
-                    'root_message_id' => $parsed['root_id'],
-                    'to_email' => $parsed['to'],
-                    'to_name' => $parsed['to_name'],
-                    'from_email' => $parsed['from'],
-                    'from_name' => $parsed['from_name'],
-                    'subject' => $parsed['subject'],
-                    'body' => $parsed['body'],
-                    'use_html' => $parsed['use_html'],
-                    'attachments' => $parsed['attachments'],
-                    'date_sent' => $parsed['date'],
-                    'direction' => $direction
-                ];
+                $params = $this->imap->parsed($overview);
+                $params['dealer_id'] = $dealerId;
+                $params['user_id'] = $salesperson->user_id;
+                $params['lead_id'] = $lead->identifier;
+                $params['direction'] = $direction;
                 $message = $this->insertReply($params);
 
                 // Valid?
                 if(!empty($message->message_id)) {
                     $total++;
-                    $this->messageIds[] = $message->message_id;
                     Log::info("Inserted Email Message " . $message->message_id);
                 }
-                unset($message);
-                unset($params);
 
                 // Clear Memory/Space
-                $this->deleteAttachments($parsed['attachments']);
-                $messageId = $parsed['message_id'];
-                unset($parsed);
+                $this->deleteAttachments($params['attachments']);
+                $messageId = $params['message_id'];
+                unset($message);
+                unset($params);
                 Log::info('Cleared Email Message ' . $messageId);
             }
             // Mark as Skipped
@@ -352,6 +336,27 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Return Final Email
         return $email;
     }
+
+    /**
+     * Update Folder With Sales Person and Folder Details
+     * 
+     * @param SalesPerson $salesperson
+     * @param EmailFolder $folder
+     * @return EmailFolder
+     */
+    private function updateFolder($salesperson, $folder) {
+        // Create or Update Folder
+        return $this->folders->createOrUpdate([
+            'id' => $folder->id,
+            'sales_person_id' => $salesperson->id,
+            'user_id' => $salesperson->user_id,
+            'name' => $folder->name,
+            'failures_since' => 0,
+            'deleted' => 0,
+            'error' => 0
+        ]);
+    }
+
 
     /**
      * Insert Attachments

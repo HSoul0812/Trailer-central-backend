@@ -44,11 +44,18 @@ class EmailFolder extends Model
     ];
 
     /**
-     * Disable timestamps
+     * The name of the "created at" column.
      *
-     * @var bool
+     * @var string
      */
-    public $timestamps = false;
+    const CREATED_AT = 'date_added';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
 
     public function salesPerson()
     {
@@ -57,5 +64,77 @@ class EmailFolder extends Model
 
     public static function getTableName() {
         return self::TABLE_NAME;
+    }
+
+
+    /**
+     * Get Default Email Folders
+     * 
+     * @return Collection of EmailFolder
+     */
+    public static function getDefaultFolders() {
+        // Add Folders to Array
+        $defaults = array(
+            array(
+                'name' => 'INBOX',
+                'folder_id' => -4
+            ),
+            array(
+                'name' => 'INBOX.Sent Mail',
+                'folder_id' => -3
+            ),
+            array(
+                'name' => '[Gmail]/Sent Mail',
+                'folder_id' => -2
+            ),
+            array(
+                'name' => 'Sent Items',
+                'folder_id' => -1
+            )
+        );
+
+        // Set Folders Array
+        $folders = array();
+        foreach($defaults as $default) {
+            // Get Access Token
+            $folder = new EmailFolder();
+            $folder->fill($default);
+            $folders[] = $folder;
+        }
+
+        // Return Folders
+        return collect($folders);
+    }
+
+
+    /**
+     * Get Default Email Folders
+     * 
+     * @return Collection of EmailFolder
+     */
+    public static function getDefaultGmailFolders() {
+        // Add Folders to Array
+        $defaults = array(
+            array(
+                'name' => 'INBOX',
+                'folder_id' => -4
+            ),
+            array(
+                'name' => 'SENT',
+                'folder_id' => -3
+            )
+        );
+
+        // Set Folders Array
+        $folders = array();
+        foreach($defaults as $default) {
+            // Get Access Token
+            $folder = new EmailFolder();
+            $folder->fill($default);
+            $folders[] = $folder;
+        }
+
+        // Return Folders
+        return collect($folders);
     }
 }

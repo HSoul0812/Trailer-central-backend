@@ -17,6 +17,8 @@ use App\Repositories\CRM\Text\TextRepository;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\NumberRepository;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
+use App\Repositories\CRM\User\EmailFolderRepository;
+use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Services\CRM\Email\ScrapeRepliesService;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
 use App\Services\CRM\Email\ImapService;
@@ -56,6 +58,7 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(CampaignRepositoryInterface::class, CampaignRepository::class);
         $this->app->bind(BlastRepositoryInterface::class, BlastRepository::class);
         $this->app->bind(NumberRepositoryInterface::class, NumberRepository::class);
+        $this->app->bind(EmailFolderRepositoryInterface::class, EmailFolderRepository::class);
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
     }

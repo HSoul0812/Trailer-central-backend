@@ -114,12 +114,12 @@ class ImapService implements ImapServiceInterface
         $parsed = [
             'references' => !empty($overview->references) ? $overview->references : array(),
             'message_id' => $messageId,
-            'root_id' => $messageId,
+            'root_message_id' => $messageId,
             'uid' => $overview->uid
         ];
         if(!empty($parsed['references'])) {
             $parsed['references'] = explode(" ", $parsed['references']);
-            $parsed['root_id'] = trim(reset($parsed['references']));
+            $parsed['root_message_id'] = trim(reset($parsed['references']));
             if(empty($parsed['message_id'])) {
                 $parsed['message_id'] = trim(end($parsed['references']));
             }
@@ -129,12 +129,12 @@ class ImapService implements ImapServiceInterface
         $toFull = !empty($overview->to) ? $overview->to : '';
         $to = explode("<", $toFull);
         $parsed['to_name'] = trim($to[0]);
-        $parsed['to'] = '';
+        $parsed['to_email'] = '';
         if(!empty($to[1])) {
-            $parsed['to'] = trim(str_replace(">", "", $to[1]));
+            $parsed['to_email'] = trim(str_replace(">", "", $to[1]));
         }
-        if(empty($parsed['to'])) {
-            $parsed['to'] = $parsed['to_name'];
+        if(empty($parsed['to_email'])) {
+            $parsed['to_email'] = $parsed['to_name'];
             $parsed['to_name'] = '';
         }
 
@@ -142,12 +142,12 @@ class ImapService implements ImapServiceInterface
         $fromFull = !empty($overview->from) ? $overview->from : '';
         $from = explode("<", $fromFull);
         $parsed['from_name'] = trim($from[0]);
-        $parsed['from'] = '';
+        $parsed['from_email'] = '';
         if(!empty($from[1])) {
-            $parsed['from'] = trim(str_replace(">", "", $from[1]));
+            $parsed['from_email'] = trim(str_replace(">", "", $from[1]));
         }
-        if(empty($parsed['from'])) {
-            $parsed['from'] = $parsed['from_name'];
+        if(empty($parsed['from_email'])) {
+            $parsed['from_email'] = $parsed['from_name'];
             $parsed['from_name'] = '';
         }
 
@@ -155,7 +155,7 @@ class ImapService implements ImapServiceInterface
         $parsed['subject'] = !empty($overview->subject) ? $overview->subject : "";
 
         // Set Date
-        $parsed['date'] = date("Y-m-d H:i:s", strtotime($overview->date));
+        $parsed['date_sent'] = date("Y-m-d H:i:s", strtotime($overview->date));
 
         // Clear Memory
         unset($overviews);
