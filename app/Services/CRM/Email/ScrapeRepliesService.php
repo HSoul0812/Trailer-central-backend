@@ -114,7 +114,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
             }
         } catch (\Exception $ex) {
-            $this->folders->updateFailed($folder->id);
+            $this->folders->markFailed($folder->id);
             Log::error('Failed to Connect to Sales Person #' . $salesperson->id .
                         ' Folder ' . $folder->name . '; exception returned: ' .
                         $e->getMessage() . ': ' . $e->getTraceAsString());
