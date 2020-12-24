@@ -118,6 +118,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             Log::error('Failed to Connect to Sales Person #' . $salesperson->id .
                         ' Folder ' . $folder->name . '; exception returned: ' .
                         $e->getMessage() . ': ' . $e->getTraceAsString());
+            return 0;
         }
 
         // Return Inserted Replies
