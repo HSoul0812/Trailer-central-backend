@@ -3,6 +3,8 @@
 namespace App\Services\CRM\Email;
 
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
+use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
+use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
 use PhpImap\Mailbox;
 use Illuminate\Support\Facades\Log;
 use PhpImap\Exceptions\ConnectionException;
@@ -64,7 +66,7 @@ class ImapService implements ImapServiceInterface
 
         // Error Occurred
         if($imap === null) {
-            throw new ImapConnectionFailedException();
+            throw new ImapConnectionFailedException;
         }
 
         // Return Mailbox
@@ -72,14 +74,9 @@ class ImapService implements ImapServiceInterface
             // Get Messages
             $emails = $this->getMessages($dateImported);
         } catch (ConnectionException $e) {
-            // Logged Exceptions
-            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
-            Log::error('Cannot connect to IMAP ' . $salesperson->imap_email .
-                        ' folder ' . $folder->name . ', exception returned: ' . $error);
+            throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
-            // Logged Exceptions
-            $error = $e->getMessage() . ': ' . $e->getTraceAsString();
-            Log::error('An unknown IMAP error occurred, exception returned: ' . $error);
+            throw new ImapFolderUnknownErrorException;
         }
 
         // Return Array of Parsed Emails

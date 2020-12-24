@@ -12,6 +12,6 @@ namespace App\Exceptions\CRM\Email;
 class ImapConnectionFailedException extends \Exception
 {
 
-    protected $message = 'An exception occurred trying to connect to IMAP folder.';
+    protected $message = 'An exception occurred trying to connect to IMAP.';
 
 }
