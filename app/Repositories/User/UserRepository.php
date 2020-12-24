@@ -20,7 +20,11 @@ class UserRepository implements UserRepositoryInterface {
         throw new NotImplementedException;
     }
 
-    public function get($params)
+    /**
+     * @param array $params
+     * @return User
+     */
+    public function get($params): User
     {
         return User::findOrFail($params['dealer_id']);
     }

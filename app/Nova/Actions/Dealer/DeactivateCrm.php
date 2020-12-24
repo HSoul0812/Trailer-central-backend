@@ -39,9 +39,8 @@ class DeactivateCrm extends Action
      *
      * @param \Laravel\Nova\Fields\ActionFields $fields
      * @param \Illuminate\Support\Collection $models
-     * @return mixed
      */
-    public function handle(ActionFields $fields, Collection $models)
+    public function handle(ActionFields $fields, Collection $models): void
     {
         /** @var User $model */
         foreach ($models as $model) {
@@ -58,7 +57,7 @@ class DeactivateCrm extends Action
      *
      * @return array
      */
-    public function fields()
+    public function fields(): array
     {
         return [];
     }

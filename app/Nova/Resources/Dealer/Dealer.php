@@ -44,7 +44,7 @@ class Dealer extends Resource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function fields(Request $request)
+    public function fields(Request $request): array
     {
         return [
             Text::make('Dealer ID')->sortable(),
@@ -67,7 +67,7 @@ class Dealer extends Resource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function cards(Request $request)
+    public function cards(Request $request): array
     {
         return [];
     }
@@ -78,7 +78,7 @@ class Dealer extends Resource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function filters(Request $request)
+    public function filters(Request $request): array
     {
         return [];
     }
@@ -89,7 +89,7 @@ class Dealer extends Resource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function lenses(Request $request)
+    public function lenses(Request $request): array
     {
         return [];
     }
@@ -97,10 +97,11 @@ class Dealer extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function actions(Request $request)
+    public function actions(Request $request): array
     {
         return [
             app()->make(ActivateCrm::class),
