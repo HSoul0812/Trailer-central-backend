@@ -99,7 +99,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     public function import($dealer, $salesperson, $folder) {
         // Missing Folder Name?
         if(empty($folder->name)) {
-            $this->folders->delete($folder->id);
+            $this->folders->delete($folder->folder_id);
             return 0;
         }
 
@@ -113,8 +113,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             else {
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
             }
-        } catch (\Exception $ex) {
-            $this->folders->markFailed($folder->id);
+        } catch (\Exception $e) {
+            $this->folders->markFailed($folder->folder_id);
             Log::error('Failed to Connect to Sales Person #' . $salesperson->id .
                         ' Folder ' . $folder->name . '; exception returned: ' .
                         $e->getMessage() . ': ' . $e->getTraceAsString());
@@ -216,7 +216,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Updated Successful
         $this->folders->update([
-            'id' => $folder->id,
+            'id' => $folder->folder_id,
             'date_imported' => !empty($imported) ? $imported : Carbon::now()
         ]);
 
@@ -310,7 +310,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Updated Successful
         $this->folders->update([
-            'id' => $folder->id,
+            'id' => $folder->folder_id,
             'date_imported' => !empty($imported) ? $imported : Carbon::now()
         ]);
 
@@ -361,7 +361,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function updateFolder($salesperson, $folder) {
         // Create or Update Folder
         return $this->folders->createOrUpdate([
-            'id' => $folder->id,
+            'id' => $folder->folder_id,
             'sales_person_id' => $salesperson->id,
             'user_id' => $salesperson->user_id,
             'name' => $folder->name,

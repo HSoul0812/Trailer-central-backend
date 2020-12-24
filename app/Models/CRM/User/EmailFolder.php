@@ -117,11 +117,11 @@ class EmailFolder extends Model
         $defaults = array(
             array(
                 'name' => 'INBOX',
-                'folder_id' => -4
+                'folder_id' => -2
             ),
             array(
                 'name' => 'SENT',
-                'folder_id' => -3
+                'folder_id' => -1
             )
         );
 
