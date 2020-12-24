@@ -172,16 +172,16 @@ class GmailService implements GmailServiceInterface
 
         // Parse Data
         return [
-            'message_id' => !empty($parsed['headers']['Message-ID']) ? $parsed['headers']['Message-ID'] : '',
-            'to_email' => !empty($parsed['headers']['To']) ? $parsed['headers']['To'] : '',
-            'to_name' => !empty($parsed['headers']['To-Name']) ? $parsed['headers']['To-Name'] : '',
-            'from_email' => !empty($parsed['headers']['From']) ? $parsed['headers']['From'] : '',
-            'from_name' => !empty($parsed['headers']['From-Name']) ? $parsed['headers']['From-Name'] : '',
-            'subject' => !empty($parsed['headers']['Subject']) ? $parsed['headers']['Subject'] : '',
+            'message_id' => !empty($headers['Message-ID']) ? $headers['Message-ID'] : '',
+            'to_email' => !empty($headers['To']) ? $headers['To'] : '',
+            'to_name' => !empty($headers['To-Name']) ? $headers['To-Name'] : '',
+            'from_email' => !empty($headers['From']) ? $headers['From'] : '',
+            'from_name' => !empty($headers['From-Name']) ? $headers['From-Name'] : '',
+            'subject' => !empty($headers['Subject']) ? $headers['Subject'] : '',
             'body' => $body,
             'is_html' => (strip_tags($body) != $body) ? true : false,
             'attachments' => $attachments,
-            'date_sent' => date("Y-m-d H:i:s", strtotime($parsed['headers']['Date']))
+            'date_sent' => date("Y-m-d H:i:s", strtotime($headers['Date']))
         ];
     }
 
