@@ -78,30 +78,34 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $query = Inventory::select("$inventoryTableName.*");
 
-        $query->where("$inventoryTableName.dealer_id", $params['dealer_id']);
+        if (isset($params['dealer_id'])) {
+            $query->where("$inventoryTableName.dealer_id", $params['dealer_id']);
+        }
 
-        if (isset($params['customer_condition']) && $params['customer_condition'] === self::TENANCY_CONDITION['does_not_have']) {
-            $query->where(static function (EloquentBuilder $query) use (
-                $params,
-                $customerInventoryTableName
-            ): void {
-                $query->whereDoesntHave(
-                    'customerInventories',
-                    static function (EloquentBuilder $query) use ($params, $customerInventoryTableName): void {
-                        $query->where("$customerInventoryTableName.customer_id", $params['customer_id']);
-                    });
-            });
-        } else {
-            $query->join(
-                $customerInventoryTableName,
-                static function (JoinClause $join) use (
-                    $inventoryTableName,
-                    $customerInventoryTableName,
-                    $params
+        if (isset($params['customer_id'])) {
+            if (isset($params['customer_condition']) && $params['customer_condition'] === self::TENANCY_CONDITION['does_not_have']) {
+                $query->where(static function (EloquentBuilder $query) use (
+                    $params,
+                    $customerInventoryTableName
                 ): void {
-                    $join->on("$customerInventoryTableName.inventory_id", '=', "$inventoryTableName.inventory_id")
-                        ->where("$customerInventoryTableName.customer_id", $params['customer_id']);
-                })->addSelect("$customerInventoryTableName.id as customer_inventory_id");
+                    $query->whereDoesntHave(
+                        'customerInventories',
+                        static function (EloquentBuilder $query) use ($params, $customerInventoryTableName): void {
+                            $query->where("$customerInventoryTableName.customer_id", $params['customer_id']);
+                        });
+                });
+            } else {
+                $query->join(
+                    $customerInventoryTableName,
+                    static function (JoinClause $join) use (
+                        $inventoryTableName,
+                        $customerInventoryTableName,
+                        $params
+                    ): void {
+                        $join->on("$customerInventoryTableName.inventory_id", '=', "$inventoryTableName.inventory_id")
+                            ->where("$customerInventoryTableName.customer_id", $params['customer_id']);
+                    })->addSelect("$customerInventoryTableName.id as customer_inventory_id");
+            }
         }
 
         if (!isset($params['per_page'])) {
