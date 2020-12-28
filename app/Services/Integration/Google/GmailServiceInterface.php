@@ -10,7 +10,7 @@ interface GmailServiceInterface {
      * @param array $params
      * @return message ID of successfully sent email
      */
-    public function send($accessToken, $params);
+    public function send(AccessToken $accessToken, array $params);
 
     /**
      * Get All Messages With Label
@@ -20,14 +20,24 @@ interface GmailServiceInterface {
      * @param array $params
      * @return whether the email was sent successfully or not
      */
-    public function messages($accessToken, $folder = 'INBOX', $params = []);
+    public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []);
+
+    /**
+     * Get and Parse Individual Message
+     * 
+     * @param obj $item
+     * @return parsed message details
+     */
+    public function message($item);
 
     /**
      * Get All Labels for User
      * 
      * @param AccessToken $accessToken
-     * @param string || null $search
-     * @return array of labels || single label
+     * @param string $search
+     * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
+     * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
+     * @return array of labels
      */
-    public function labels($accessToken, $search = null);
+    public function labels(AccessToken $accessToken, string $search = '');
 }

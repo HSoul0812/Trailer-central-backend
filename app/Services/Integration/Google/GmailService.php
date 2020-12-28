@@ -73,9 +73,12 @@ class GmailService implements GmailServiceInterface
      * Send Email Email
      * 
      * @param AccessToken $accessToken
+     * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
+     * @throws App\Exceptions\Integration\Google\FailedInitializeGmailMessageException
+     * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
      * @return array of validation info
      */
-    public function send(AccessToken $accessToken, $params) {
+    public function send(AccessToken $accessToken, array $params) {
         // Set Access Token
         $this->setAccessToken($accessToken);
 
@@ -131,12 +134,12 @@ class GmailService implements GmailServiceInterface
      * @param array $params
      * @return whether the email was sent successfully or not
      */
-    public function messages(AccessToken $accessToken, $folder = 'INBOX', $params = []) {
+    public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []) {
         // Configure Client
         $this->setAccessToken($accessToken);
 
         // Get Labels
-        $label = $this->labels($accessToken, $folder, true);
+        $labels = $this->labels($accessToken, $folder);
 
         // Imap Inbox ALREADY Exists?
         $filters = '';
@@ -152,7 +155,7 @@ class GmailService implements GmailServiceInterface
 
         // Get Messages
         $results = $this->gmail->users_messages->listUsersMessages('me', [
-            'labelIds' => [$label['id']],
+            'labelIds' => $this->getLabelIds($labels),
             'q' => $q
         ]);
         $messages = $results->getMessages();
@@ -211,11 +214,13 @@ class GmailService implements GmailServiceInterface
      * Get All Labels for User
      * 
      * @param AccessToken $accessToken
-     * @param string || null $search
+     * @param string $search
      * @param bool $single
-     * @return array of labels || single label
+     * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
+     * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
+     * @return array of labels
      */
-    public function labels(AccessToken $accessToken, $search = null, $single = false) {
+    public function labels(AccessToken $accessToken, string $search = '') {
         // Configure Client
         $this->setAccessToken($accessToken);
 
@@ -246,12 +251,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Return Labels
-        if(!$single) {
-            return $labels;
-        }
-
-        // Only One?
-        return reset($labels);
+        return $labels;
     }
 
 
@@ -335,6 +335,23 @@ class GmailService implements GmailServiceInterface
         return $this->message;
     }
 
+
+    /**
+     * Get All Label ID's for User
+     * 
+     * @param array labels
+     * @return array of label ID's
+     */
+    private function getLabelIds($labels) {
+        // Initialize Label ID's
+        $labelIds = [];
+        foreach($labels as $label) {
+            $labelIds[] = $label['id'];
+        }
+
+        // Return Array
+        return $labelIds;
+    }
 
     /**
      * Parse Message Headers Into More Reasonable Format

@@ -42,9 +42,12 @@ class ImapService implements ImapServiceInterface
      * 
      * @param SalesPerson $salesperson
      * @param EmailFolder $folder
-     * @return false || array of EmailHistory
+     * @throws App\Exceptions\CRM\Email\ImapConnectionFailedException
+     * @throws App\Exceptions\CRM\Email\ImapFolderConnectionFailedException
+     * @throws App\Exceptions\CRM\Email\ImapFolderUnknownErrorException
+     * @return array of emails
      */
-    public function messages($salesperson, $folder) {
+    public function messages(SalesPerson $salesperson, EmailFolder $folder) {
         // NTLM?
         $charset = 'UTF-8';
         if($salesperson->smtp_auth === 'NTLM') {
@@ -89,7 +92,7 @@ class ImapService implements ImapServiceInterface
      * @param int $mailId
      * @return array of parsed data
      */
-    public function overview($mailId) {
+    public function overview(int $mailId) {
         // Get Mail
         $overviews = $this->imap->getMailsInfo([$mailId]);
         $overview = reset($overviews);
@@ -164,7 +167,7 @@ class ImapService implements ImapServiceInterface
      * @param array $overview
      * @return array of parsed data
      */
-    public function parsed($overview) {
+    public function parsed(array $overview) {
         // Get Mail Data
         $mail = $this->imap->getMail($overview['uid'], false);
         $parsed = $overview;
