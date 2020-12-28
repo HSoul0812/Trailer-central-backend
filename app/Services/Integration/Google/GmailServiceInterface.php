@@ -2,6 +2,8 @@
 
 namespace App\Services\Integration\Google;
 
+use App\Models\Integration\Auth\AccessToken;
+
 interface GmailServiceInterface {
     /**
      * Validate Google API Access Token Exists

@@ -2,6 +2,10 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Models\User\NewDealerUser;
+use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\User\EmailFolder;
+
 interface ScrapeRepliesServiceInterface {
     /**
      * Process Dealer

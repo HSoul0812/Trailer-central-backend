@@ -5,9 +5,11 @@ namespace App\Services\CRM\Email;
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
+use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\User\EmailFolder;
 use PhpImap\Mailbox;
-use Illuminate\Support\Facades\Log;
 use PhpImap\Exceptions\ConnectionException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ScrapeRepliesService
