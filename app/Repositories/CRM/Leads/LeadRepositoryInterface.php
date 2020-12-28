@@ -20,7 +20,7 @@ interface LeadRepositoryInterface extends Repository {
      * @param array $emails
      * @return Collection of Lead
      */
-    public function getByEmails($dealerId, $emails);
+    public function getByEmails(int $dealerId, array $emails);
 
     /**
      * Create Assign Log for Lead
@@ -67,6 +67,14 @@ interface LeadRepositoryInterface extends Repository {
      * @return array
      */
     public function getStatuses();
+
+    /**
+     * Get Lead Emails
+     *
+     * @param int $dealerId
+     * @return array of email address > lead id
+     */
+    public function getLeadEmails(int $dealerId);
 
     /**
      * Returns list of available sort fields
