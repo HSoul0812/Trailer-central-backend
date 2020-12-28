@@ -14,6 +14,8 @@ use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
+use App\Services\User\DealerOptionsService;
+use App\Services\User\DealerOptionsServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
@@ -271,6 +273,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
 
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
+
+        $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
     }
 
 }

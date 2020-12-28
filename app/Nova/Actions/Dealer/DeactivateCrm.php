@@ -3,7 +3,7 @@
 namespace App\Nova\Actions\Dealer;
 
 use App\Models\User\User;
-use App\Services\User\DealerOptionsService;
+use App\Services\User\DealerOptionsServiceInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
@@ -25,11 +25,11 @@ class DeactivateCrm extends Action
     public $confirmText = 'Are you sure you want to deactivate CRM?';
 
     /**
-     * @var DealerOptionsService
+     * @var DealerOptionsServiceInterface
      */
     private $dealerOptionsService;
 
-    public function __construct(DealerOptionsService $dealerOptionsService)
+    public function __construct(DealerOptionsServiceInterface $dealerOptionsService)
     {
         $this->dealerOptionsService = $dealerOptionsService;
     }

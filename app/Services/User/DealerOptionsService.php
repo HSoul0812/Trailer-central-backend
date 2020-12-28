@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
  * Class DealerOptionsService
  * @package App\Services\User
  */
-class DealerOptionsService
+class DealerOptionsService implements DealerOptionsServiceInterface
 {
     /**
      * @var UserRepositoryInterface
