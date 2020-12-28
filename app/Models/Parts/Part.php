@@ -5,10 +5,11 @@ namespace App\Models\Parts;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
-use App\Models\Parts\CacheStoreTime;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use Carbon\Carbon;
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
 
 /**
  * Class Part
@@ -16,6 +17,7 @@ use Carbon\Carbon;
  * @package App\Models\Parts
  * @property Collection $images
  * @property Collection<BinQuantity> $bins
+ * @property Collection<PurchaseOrderPart> $purchaseOrders
  * @property Vendor $vendor
  * @property Brand $brand
  * @property Category $category
@@ -136,7 +138,7 @@ class Part extends Model
         return env('INDEX_PARTS', 'parts');
     }
 
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         $array = $this->toArray();
 
@@ -226,6 +228,13 @@ class Part extends Model
                 // add only non zero quantities
                 return $total + ($item->qty > 0? $item->qty: 0);
             }, 0): 0;
+    }
+
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderPart::class, 'part_id')
+            ->has('purchaseOrder')
+            ->groupBy('purchase_order_id');
     }
 
     /**

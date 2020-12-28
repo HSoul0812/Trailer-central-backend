@@ -743,6 +743,9 @@ class PartsController extends RestfulController
                 $data->setPaginator(new IlluminatePaginatorAdapter($paginator));
             }
 
+            // parses the include params
+            $this->fractal->parseIncludes($request->get('include', []));
+
             // build the api response
             $result = (array) $this->fractal->createData($data)->toArray();
             return $this->response->array($result);

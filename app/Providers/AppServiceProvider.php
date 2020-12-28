@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Nova\Observer\DealerIncomingMappingObserver;
+use App\Repositories\CRM\User\CrmUserRepository;
+use App\Repositories\CRM\User\CrmUserRepositoryInterface;
+use App\Repositories\CRM\User\CrmUserRoleRepository;
+use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -64,6 +68,8 @@ use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
+use App\Services\User\DealerOptionsService;
+use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Services\CRM\Leads\AutoAssignService;
@@ -146,13 +152,13 @@ class AppServiceProvider extends ServiceProvider
 
             // parts crm
             __DIR__ . '/../../database/migrations/crm',
-            
+
             // dealer migrations
             __DIR__ . '/../../database/migrations/dealer',
 
             // utilities
             __DIR__ . '/../../database/migrations/utilities',
-            
+
             // configuration tables
             __DIR__ . '/../../database/migrations/config',
         ]);
@@ -196,6 +202,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
+        $this->app->bind(CrmUserRoleRepositoryInterface::class, CrmUserRoleRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
@@ -206,7 +214,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
-        
+
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
@@ -217,6 +225,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
 
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
+
+        $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
     }
 
 }

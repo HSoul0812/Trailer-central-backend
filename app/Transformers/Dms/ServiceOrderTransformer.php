@@ -28,6 +28,7 @@ class ServiceOrderTransformer extends TransformerAbstract
             'date_in' => $serviceOrder->date_in,
             'date_out' => $serviceOrder->date_out,
             'closed_at' => $serviceOrder->closed_at,
+            'type'      => $serviceOrder->type,
             'total_price' => $serviceOrder->total_price,
             'invoice' => $serviceOrder->invoice,
             'receipts' => $this->getReceipts($serviceOrder),

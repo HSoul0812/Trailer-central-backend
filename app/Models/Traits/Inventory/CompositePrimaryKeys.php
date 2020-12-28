@@ -22,4 +22,12 @@ trait CompositePrimaryKeys
 
         return $query;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getIncrementing(): bool
+    {
+        return false;
+    }
 }
