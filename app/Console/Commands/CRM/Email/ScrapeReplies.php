@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Console\Commands\CRM\Email;
-
 declare(strict_types=1);
+
+namespace App\Console\Commands\CRM\Email;
 
 use Illuminate\Console\Command;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
