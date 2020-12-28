@@ -227,12 +227,7 @@ class LeadRepository implements LeadRepositoryInterface {
      * @param array $emails
      * @return Collection of Lead
      */
-    public function getByEmails($dealerId, $emails) {
-        // Fix Making Emails an Array
-        if(!is_array($emails)) {
-            $emails = [$emails];
-        }
-
+    public function getByEmails(int $dealerId, array $emails) {
         // Return Lead Emails for User ID
         return Lead::select(['identifier', 'email_address'])
                      ->where('dealer_id', $dealerId)
@@ -548,7 +543,7 @@ class LeadRepository implements LeadRepositoryInterface {
                      ->whereNotNull('email_address')->get();
 
         // Map Array
-        $emails = array();
+        $emails = [];
         foreach($leads as $lead) {
             $emails[$lead->email_address] = $lead->identifier;
         }

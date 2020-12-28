@@ -75,7 +75,7 @@ class GmailService implements GmailServiceInterface
      * @param AccessToken $accessToken
      * @return array of validation info
      */
-    public function send($accessToken, $params) {
+    public function send(AccessToken $accessToken, $params) {
         // Set Access Token
         $this->setAccessToken($accessToken);
 
@@ -131,7 +131,7 @@ class GmailService implements GmailServiceInterface
      * @param array $params
      * @return whether the email was sent successfully or not
      */
-    public function messages($accessToken, $folder = 'INBOX', $params = []) {
+    public function messages(AccessToken $accessToken, $folder = 'INBOX', $params = []) {
         // Configure Client
         $this->setAccessToken($accessToken);
 
@@ -178,7 +178,6 @@ class GmailService implements GmailServiceInterface
         // Get Headers
         $payload = $message->getPayload();
         if(empty($payload)) {
-            unset($message);
             return array();
         }
 
@@ -216,7 +215,7 @@ class GmailService implements GmailServiceInterface
      * @param bool $single
      * @return array of labels || single label
      */
-    public function labels($accessToken, $search = null, $single = false) {
+    public function labels(AccessToken $accessToken, $search = null, $single = false) {
         // Configure Client
         $this->setAccessToken($accessToken);
 
@@ -262,7 +261,7 @@ class GmailService implements GmailServiceInterface
      * @param type $accessToken
      * @return void
      */
-    private function setAccessToken($accessToken) {
+    private function setAccessToken(AccessToken $accessToken) {
         // ID Token Exists?
         if(empty($accessToken->id_token)) {
             throw new MissingGapiIdTokenException;

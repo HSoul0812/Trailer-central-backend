@@ -154,11 +154,6 @@ class ImapService implements ImapServiceInterface
         // Set Date
         $parsed['date_sent'] = date("Y-m-d H:i:s", strtotime($overview->date));
 
-        // Clear Memory
-        unset($overviews);
-        unset($overview);
-        unset($mailId);
-
         // Return Parsed Array
         return $parsed;
     }
@@ -199,18 +194,11 @@ class ImapService implements ImapServiceInterface
             $file->filePath = $attachment->name;
             $file->name = $attachment->name;
             $files[] = $file;
-            unset($attachment);
         }
         $parsed['attachments'] = $files;
         if(count($files) > 0) {
             Log::info('Found ' . count($files) . ' total attachments on Message ' . $overview['message_id']);
         }
-
-        // Clear Memory
-        unset($attachments);
-        unset($overview);
-        unset($files);
-        unset($mail);
 
         // Return Parsed Array
         return $parsed;
