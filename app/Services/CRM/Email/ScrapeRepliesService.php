@@ -8,6 +8,7 @@ use App\Models\CRM\User\EmailFolder;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
@@ -51,6 +52,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     protected $emails;
 
     /**
+     * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
+     */
+    protected $salespeople;
+
+    /**
      * @var App\Repositories\CRM\User\EmailFolderRepositoryInterface
      */
     protected $folders;
@@ -73,6 +79,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                                 ImapServiceInterface $imap,
                                 InteractionsRepositoryInterface $interactions,
                                 EmailHistoryRepositoryInterface $emails,
+                                SalesPersonRepositoryInterface $salesRepo,
                                 EmailFolderRepositoryInterface $folders,
                                 TokenRepositoryInterface $tokens,
                                 LeadRepositoryInterface $leads)
@@ -85,6 +92,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Initialize Repositories
         $this->interactions = $interactions;
         $this->emails = $emails;
+        $this->salespeople = $salesRepo;
         $this->folders = $folders;
         $this->tokens = $tokens;
         $this->leads = $leads;
