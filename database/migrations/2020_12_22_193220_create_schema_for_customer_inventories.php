@@ -23,6 +23,7 @@ class CreateSchemaForCustomerInventories extends Migration
         // these mechanism must be dropped.
         $this->createProcedure();
         $this->createTriggers();
+        $this->migrateData();
     }
 
     private function createProcedure(): void
@@ -155,6 +156,43 @@ SQL;
             $table->foreign('inventory_id')->references('inventory_id')->on('inventory');
             $table->unique(['customer_id', 'inventory_id']);
         });
+    }
+
+    private function migrateData(): void
+    {
+        $sqlForMigrateAllData = <<<SQL
+INSERT INTO dms_customer_inventory(customer_id, inventory_id)
+SELECT * FROM (
+     SELECT RO.customer_id, RO.inventory_id
+     FROM dms_repair_order RO
+     JOIN inventory I ON RO.inventory_id = I.inventory_id
+     JOIN dms_customer C ON RO.customer_id = C.id -- inventories from repair orders
+
+     UNION
+
+     SELECT US.buyer_id AS customer_id, US.inventory_id FROM dms_unit_sale US
+     JOIN inventory I ON US.inventory_id = I.inventory_id
+     JOIN dms_customer C ON US.buyer_id = C.id -- inventories from unit sales by buyer
+
+     UNION
+
+     SELECT US.cobuyer_id AS customer_id, US.inventory_id FROM dms_unit_sale US
+     JOIN inventory I ON US.inventory_id = I.inventory_id
+     JOIN dms_customer C ON US.cobuyer_id = C.id -- inventories from unit sales by co-buyer
+
+     UNION
+
+     SELECT IV.customer_id, I.item_primary_id as inventory_id FROM qb_invoice_items II
+     JOIN qb_items I ON II.item_id = I.id
+     JOIN inventory IT ON IT.inventory_id = I.item_primary_id
+     JOIN qb_invoices IV ON II.invoice_id = IV.id
+     JOIN dms_customer C ON IV.customer_id = C.id
+     WHERE I.type = 'trailer' -- inventories from invoice items
+
+) cte_inventory GROUP BY customer_id, inventory_id;
+SQL;
+
+        DB::unprepared($sqlForMigrateAllData);
     }
 
     /**
