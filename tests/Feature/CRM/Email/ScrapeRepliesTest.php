@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\CRM\Email;
 
 use App\Models\CRM\Interactions\EmailHistory;
@@ -86,9 +88,10 @@ class ScrapeRepliesTest extends TestCase
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('validate')
                      ->with(Mockery::on(function($accessToken) use($salesPerson) {
-                         var_dump($accessToken);
-                         var_dump($salesPerson);
-                        $this->assertEquals($salesPerson->id, $accessToken->relation_id);
+                        if($salesPerson->id == $accessToken->relation_id) {
+                            return true;
+                        }
+                        return false;
                      }))
                      ->once()
                      ->andReturn([
