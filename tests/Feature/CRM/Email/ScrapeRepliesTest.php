@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\CRM\Email;
 
+use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
