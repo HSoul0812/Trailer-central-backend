@@ -258,7 +258,7 @@ class ScrapeRepliesTest extends TestCase
                         'from_email' => $reply->from_email,
                         'from_name' => $reply->from_name,
                         'subject' => $reply->subject,
-                        'date_sent' => $reply->date_sent
+                        'date_sent' => $reply->date_sent->format('Y-m-d H:i:s')
                 ]);
 
                 // Should NOT Receive Full Details; This One Is Invalid and Skipped
