@@ -14,7 +14,7 @@ $factory->define(SalesPerson::class, function (Faker $faker) {
     // Initialize Email
     $email = $faker->unique()->safeEmail;
     $password = $faker->password;
-    $server = $faker->domain;
+    $server = $faker->freeEmailDomain;
 
     // Return Overrides
     return [
