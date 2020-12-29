@@ -38,7 +38,7 @@ class ScrapeRepliesTest extends TestCase
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
 
         // Mark All Sales People as Deleted
-        $salespeople = $this->disableSalesPeople($dealer->user_id);
+        $salesIds = $this->disableSalesPeople($dealer->user_id);
 
         // Create Gmail Sales Person
         $salesPerson = factory(SalesPerson::class, 1)->create()->each(function ($salesperson) {
@@ -154,7 +154,7 @@ class ScrapeRepliesTest extends TestCase
 
 
         // Restore Existing Sales People
-        $this->restoreSalesPeople($salespeople);
+        $this->restoreSalesPeople($salesIds);
 
         // Delete Sales Person
         $salesPerson->delete();
@@ -171,7 +171,7 @@ class ScrapeRepliesTest extends TestCase
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
 
         // Mark All Sales People as Deleted
-        $salespeople = $this->disableSalesPeople($dealer->user_id);
+        $salesIds = $this->disableSalesPeople($dealer->user_id);
 
         // Create Gmail Sales Person
         $salesPerson = factory(SalesPerson::class, 1)->create()->first();
@@ -298,7 +298,7 @@ class ScrapeRepliesTest extends TestCase
 
         
         // Restore Existing Sales People
-        $this->restoreSalesPeople($salespeople);
+        $this->restoreSalesPeople($salesIds);
 
         // Delete Sales Person
         $salesPerson->delete();
@@ -314,11 +314,17 @@ class ScrapeRepliesTest extends TestCase
         // Get Sales People
         $salespeople = SalesPerson::where('user_id', $userId);
 
+        // Get Sales People ID's
+        $salesIds = [];
+        foreach($salespeople as $person) {
+            $salesIds[] = $person->id;
+        }
+
         // Delete All
         $salespeople->delete();
 
-        // Return
-        return $salespeople;
+        // Return People ID's
+        return $salesIds;
     }
 
     /**
@@ -326,13 +332,14 @@ class ScrapeRepliesTest extends TestCase
      * 
      * @return Collection<SalesPerson>
      */
-    private function restoreSalesPeople($salespeople) {
+    private function restoreSalesPeople($salesIds) {
         // Loop Sales People
-        foreach($salespeople as $salesperson) {
-            $salesperson->restore();
+        $salespeople = [];
+        foreach($salesIds as $salesId) {
+            $salespeople[] = SalesPerson::find($salesId)->withTrashed()->restore;
         }
 
         // Return
-        return $salespeople;
+        return collect($salespeople);
     }
 }
