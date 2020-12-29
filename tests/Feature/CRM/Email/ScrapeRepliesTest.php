@@ -319,8 +319,6 @@ class ScrapeRepliesTest extends TestCase
         foreach($salespeople->get() as $person) {
             $salesIds[] = $person->id;
         }
-        var_dump($salesIds);
-        die;
 
         // Delete All
         $salespeople->delete();
