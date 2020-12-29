@@ -316,7 +316,7 @@ class ScrapeRepliesTest extends TestCase
 
         // Get Sales People ID's
         $salesIds = [];
-        foreach($salespeople as $person) {
+        foreach($salespeople->get() as $person) {
             $salesIds[] = $person->id;
         }
         var_dump($salesIds);
