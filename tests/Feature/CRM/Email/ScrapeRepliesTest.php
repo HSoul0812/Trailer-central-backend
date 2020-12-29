@@ -69,13 +69,13 @@ class ScrapeRepliesTest extends TestCase
         $messages = [];
         foreach($replies as $reply) {
             $msg = new \stdclass;
-            $msg->id = $reply->message_id;
+            $msg->id = count($messages);
             $msg->reply = $reply;
             $messages[] = $msg;
         }
         foreach($unused as $reply) {
             $msg = new \stdclass;
-            $msg->id = $reply->message_id;
+            $msg->id = count($messages);
             $msg->reply = $reply;
             $messages[] = $msg;
         }
