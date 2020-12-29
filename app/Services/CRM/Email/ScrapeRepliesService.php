@@ -216,7 +216,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importGmail($dealerId, $salesperson, $folder) {
         // Get Emails From Gmail
-        $messages = $this->gmail->messages($accessToken, $folder->name, ['after' => $folder->date_imported]);
+        $messages = $this->gmail->messages($salesperson->googleToken, $folder->name, ['after' => $folder->date_imported]);
 
         // Update Folder
         $folder = $this->updateFolder($salesperson, $folder);
