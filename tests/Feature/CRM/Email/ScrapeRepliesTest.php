@@ -45,7 +45,7 @@ class ScrapeRepliesTest extends TestCase
         });
 
         // Create Lead
-        $lead = factory(Lead::class, 1)->create();
+        $lead = factory(Lead::class, 1)->create()->first();
 
         // Get Folders
         $folders = EmailFolder::getDefaultGmailFolders();
@@ -164,7 +164,7 @@ class ScrapeRepliesTest extends TestCase
         });
 
         // Create Lead
-        $lead = factory(Lead::class, 1)->create();
+        $lead = factory(Lead::class, 1)->create()->first();
 
         // Get Folders
         $folders = EmailFolder::getDefaultGmailFolders();
