@@ -105,47 +105,22 @@ class ScrapeRepliesTest extends TestCase
                  ->andReturn($messages);
 
             // Mock Messages
-            foreach($replies as $message) {
+            foreach($messages as $message) {
                 // Should Receive Full Message Details Once Per Folder Per Message!
                 $mock->shouldReceive('message')
-                     ->with(Mockery::on(function($obj) use($message) {
-                        return ($obj->id === $message->message_id);
-                     }))
+                     ->withArgs([$message->id])
                      ->times(count($folders))
                      ->andReturn([
-                        'message_id' => $message->message_id,
-                        'to_email' => $message->to_email,
-                        'to_name' => $message->to_name,
-                        'from_email' => $message->from_email,
-                        'from_name' => $message->from_name,
-                        'subject' => $message->subject,
-                        'body' => $message->body,
-                        'is_html' => !empty($message->is_html),
+                        'message_id' => $message->reply->message_id,
+                        'to_email' => $message->reply->to_email,
+                        'to_name' => $message->reply->to_name,
+                        'from_email' => $message->reply->from_email,
+                        'from_name' => $message->reply->from_name,
+                        'subject' => $message->reply->subject,
+                        'body' => $message->reply->body,
+                        'is_html' => !empty($message->reply->is_html),
                         'attachments' => array(),
-                        'date_sent' => $message->date_sent
-                     ]);
-            }
-
-            // Mock Unused Messages
-            foreach($unused as $message) {
-                // Should Receive Full Message Details Once Per Folder Per Message!
-                $mock->shouldReceive('message')
-                     ->with(Mockery::on(function($obj) use($message) {
-                        return ($obj->id === $message->message_id);
-                     }))
-                     ->withArgs([$message->message_id])
-                     ->times(count($folders))
-                     ->andReturn([
-                        'message_id' => $message->message_id,
-                        'to_email' => $message->to_email,
-                        'to_name' => $message->to_name,
-                        'from_email' => $message->from_email,
-                        'from_name' => $message->from_name,
-                        'subject' => $message->subject,
-                        'body' => $message->body,
-                        'is_html' => !empty($message->is_html),
-                        'attachments' => array(),
-                        'date_sent' => $message->date_sent
+                        'date_sent' => $message->reply->date_sent
                      ]);
             }
         });

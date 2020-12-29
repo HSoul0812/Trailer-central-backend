@@ -27,10 +27,10 @@ interface GmailServiceInterface {
     /**
      * Get and Parse Individual Message
      * 
-     * @param obj $item
+     * @param int $item
      * @return parsed message details
      */
-    public function message($item);
+    public function message(int $item);
 
     /**
      * Get All Labels for User

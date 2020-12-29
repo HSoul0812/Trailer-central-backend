@@ -227,7 +227,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $imported = '';
         foreach($messages as $overview) {
             // Get Parsed Message
-            $params = $this->gmail->message($overview);
+            $params = $this->gmail->message($overview->id);
             if(empty($imported) || (!empty($imported) && strtotime($imported) < strtotime($params['date_sent']))) {
                 $imported = $params['date_sent'];
             }

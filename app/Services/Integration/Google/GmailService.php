@@ -172,12 +172,12 @@ class GmailService implements GmailServiceInterface
     /**
      * Get and Parse Individual Message
      * 
-     * @param obj $item
+     * @param int $mailId
      * @return parsed message details
      */
-    public function message($item) {
+    public function message(int $mailId) {
         // Get Message
-        $message = $this->gmail->users_messages->get('me', $item->id, ['format' => 'full']);
+        $message = $this->gmail->users_messages->get('me', $mailId, ['format' => 'full']);
 
         // Get Headers
         $payload = $message->getPayload();
