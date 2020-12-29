@@ -35,7 +35,7 @@ class ScrapeRepliesTest extends TestCase
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
 
         // Mark All Sales People as Deleted
-        $salespeople = $this->disableSalesPeople();
+        $salespeople = $this->disableSalesPeople($dealer->user_id);
 
         // Create Gmail Sales Person
         $salesPerson = factory(SalesPerson::class, 1)->create()->each(function ($salesperson) {
@@ -170,7 +170,7 @@ class ScrapeRepliesTest extends TestCase
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
 
         // Mark All Sales People as Deleted
-        $salespeople = $this->disableSalesPeople();
+        $salespeople = $this->disableSalesPeople($dealer->user_id);
 
         // Create Gmail Sales Person
         $salesPerson = factory(SalesPerson::class, 1)->create()->each(function ($salesperson) {
@@ -315,9 +315,9 @@ class ScrapeRepliesTest extends TestCase
      * 
      * @return Collection<SalesPerson>
      */
-    private function disableSalesPeople() {
+    private function disableSalesPeople($userId) {
         // Get Sales People
-        $salespeople = SalesPerson::where('user_id', self::getTestDealerId());
+        $salespeople = SalesPerson::where('user_id', $userId);
 
         // Delete All
         $salespeople->delete();
