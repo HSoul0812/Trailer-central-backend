@@ -205,28 +205,28 @@ class ScrapeRepliesTest extends TestCase
                     // Should Receive Overview Details Once Per Folder Per Reply!
                     $overview = [
                         'references' => array(),
-                        'message_id' => $message->reply->message_id,
-                        'root_message_id' => $message->reply->message_id,
-                        'uid' => $message->reply->message_id,
-                        'to_email' => $message->reply->to_email,
-                        'to_name' => $message->reply->to_name,
-                        'from_email' => $message->reply->from_email,
-                        'from_name' => $message->reply->from_name,
-                        'subject' => $message->reply->subject,
-                        'date_sent' => $message->reply->date_sent
+                        'message_id' => $reply->reply->message_id,
+                        'root_message_id' => $reply->reply->message_id,
+                        'uid' => $reply->reply->message_id,
+                        'to_email' => $reply->reply->to_email,
+                        'to_name' => $reply->reply->to_name,
+                        'from_email' => $reply->reply->from_email,
+                        'from_name' => $reply->reply->from_name,
+                        'subject' => $reply->reply->subject,
+                        'date_sent' => $reply->reply->date_sent
                     ];
                     $mock->shouldReceive('overview')
-                         ->withArgs([$message->message_id])
+                         ->withArgs([$reply->message_id])
                          ->once()
                          ->andReturn($overview);
 
                     // Should Receive Full Details Once Per Folder Per Reply!
                     $parsed = $overview;
-                    $parsed['body'] = $message->reply->body;
-                    $parsed['is_html'] = $message->reply->is_html;
+                    $parsed['body'] = $reply->reply->body;
+                    $parsed['is_html'] = $reply->reply->is_html;
                     $parsed['attachments'] = array();
                     $mock->shouldReceive('parsed')
-                         ->withArgs([$message->message_id])
+                         ->withArgs([$reply->message_id])
                          ->once()
                          ->andReturn($parsed);
                 }
@@ -235,24 +235,24 @@ class ScrapeRepliesTest extends TestCase
                 foreach($unused as $reply) {
                     // Should Receive Overview Details Once Per Folder Per Reply!
                     $mock->shouldReceive('overview')
-                         ->withArgs([$message->message_id])
+                         ->withArgs([$reply->message_id])
                          ->once()
                          ->andReturn([
                             'references' => array(),
-                            'message_id' => $message->reply->message_id,
-                            'root_message_id' => $message->reply->message_id,
-                            'uid' => $message->reply->message_id,
-                            'to_email' => $message->reply->to_email,
-                            'to_name' => $message->reply->to_name,
-                            'from_email' => $message->reply->from_email,
-                            'from_name' => $message->reply->from_name,
-                            'subject' => $message->reply->subject,
-                            'date_sent' => $message->reply->date_sent
+                            'message_id' => $reply->reply->message_id,
+                            'root_message_id' => $reply->reply->message_id,
+                            'uid' => $reply->reply->message_id,
+                            'to_email' => $reply->reply->to_email,
+                            'to_name' => $reply->reply->to_name,
+                            'from_email' => $reply->reply->from_email,
+                            'from_name' => $reply->reply->from_name,
+                            'subject' => $reply->reply->subject,
+                            'date_sent' => $reply->reply->date_sent
                     ]);
 
                     // Should NOT Receive Full Details; This One Is Invalid and Skipped
                     $mock->shouldReceive('parsed')
-                         ->withArgs([$message->message_id])
+                         ->withArgs([$reply->message_id])
                          ->never();
                 }
             }

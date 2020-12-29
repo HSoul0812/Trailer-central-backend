@@ -143,19 +143,19 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson) {
         // Process Messages
-        Log::info($this->command . ' processing getting emails for sales person #' . $salesperson->id);
+        Log::info('Processing Getting Emails for Sales Person #' . $salesperson->id);
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
             try {
                 // Import Folder
                 $imports = $this->folder($dealer, $salesperson, $folder);
-                Log::info($this->command . ' imported ' . $imports . ' email replies for sales person #' .
-                            $salesperson->id . ' folder ' . $folder->name);
+                Log::info('Imported ' . $imports . ' Email Replies for Sales Person #' .
+                            $salesperson->id . ' Folder ' . $folder->name);
                 $imported += $imports;
             } catch(\Exception $e) {
-                Log::error($this->command . ' error importing sales person #' .
-                            $salesperson->id . ' folder ' . $folder->name . '; ' .
+                Log::error('Error Importing Sales Person #' .
+                            $salesperson->id . ' Folder ' . $folder->name . '; ' .
                             $e->getMessage() . ':' . $e->getTraceAsString());
             }
         }
