@@ -9,6 +9,7 @@ use App\Models\CRM\User\EmailFolder;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Email\ImapServiceInterface;
+use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Tests\TestCase;
 
@@ -76,6 +77,22 @@ class ScrapeRepliesTest extends TestCase
             $messages[] = $msg;
         }
 
+
+        // Mock Gmail Service
+        $this->mock(GoogleServiceInterface::class, function ($mock) use($folders, $salesPerson) {
+            // Loop Folders
+            foreach($folders as $folder) {
+                // Should Receive Messages With Args Once Per Folder!
+                $mock->shouldReceive('validate')
+                     ->withArgs([$salesPerson->googleToken])
+                     ->once()
+                     ->andReturn([
+                        'is_valid' => true,
+                        'is_expired' => false,
+                        'new_token' => array()
+                     ]);
+            }
+        });
 
         // Mock Gmail Service
         $this->mock(GmailServiceInterface::class, function ($mock) use($salesPerson, $folders, $messages) {
