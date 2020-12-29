@@ -205,15 +205,15 @@ class ScrapeRepliesTest extends TestCase
                     // Should Receive Overview Details Once Per Folder Per Reply!
                     $overview = [
                         'references' => array(),
-                        'message_id' => $reply->reply->message_id,
-                        'root_message_id' => $reply->reply->message_id,
-                        'uid' => $reply->reply->message_id,
-                        'to_email' => $reply->reply->to_email,
-                        'to_name' => $reply->reply->to_name,
-                        'from_email' => $reply->reply->from_email,
-                        'from_name' => $reply->reply->from_name,
-                        'subject' => $reply->reply->subject,
-                        'date_sent' => $reply->reply->date_sent
+                        'message_id' => $reply->message_id,
+                        'root_message_id' => $reply->message_id,
+                        'uid' => $reply->message_id,
+                        'to_email' => $reply->to_email,
+                        'to_name' => $reply->to_name,
+                        'from_email' => $reply->from_email,
+                        'from_name' => $reply->from_name,
+                        'subject' => $reply->subject,
+                        'date_sent' => $reply->date_sent
                     ];
                     $mock->shouldReceive('overview')
                          ->withArgs([$reply->message_id])
@@ -222,8 +222,8 @@ class ScrapeRepliesTest extends TestCase
 
                     // Should Receive Full Details Once Per Folder Per Reply!
                     $parsed = $overview;
-                    $parsed['body'] = $reply->reply->body;
-                    $parsed['is_html'] = $reply->reply->is_html;
+                    $parsed['body'] = $reply->body;
+                    $parsed['is_html'] = $reply->is_html;
                     $parsed['attachments'] = array();
                     $mock->shouldReceive('parsed')
                          ->withArgs([$reply->message_id])
@@ -239,15 +239,15 @@ class ScrapeRepliesTest extends TestCase
                          ->once()
                          ->andReturn([
                             'references' => array(),
-                            'message_id' => $reply->reply->message_id,
-                            'root_message_id' => $reply->reply->message_id,
-                            'uid' => $reply->reply->message_id,
-                            'to_email' => $reply->reply->to_email,
-                            'to_name' => $reply->reply->to_name,
-                            'from_email' => $reply->reply->from_email,
-                            'from_name' => $reply->reply->from_name,
-                            'subject' => $reply->reply->subject,
-                            'date_sent' => $reply->reply->date_sent
+                            'message_id' => $reply->message_id,
+                            'root_message_id' => $reply->message_id,
+                            'uid' => $reply->message_id,
+                            'to_email' => $reply->to_email,
+                            'to_name' => $reply->to_name,
+                            'from_email' => $reply->from_email,
+                            'from_name' => $reply->from_name,
+                            'subject' => $reply->subject,
+                            'date_sent' => $reply->date_sent
                     ]);
 
                     // Should NOT Receive Full Details; This One Is Invalid and Skipped
