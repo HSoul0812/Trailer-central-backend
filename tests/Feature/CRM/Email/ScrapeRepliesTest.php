@@ -107,10 +107,10 @@ class ScrapeRepliesTest extends TestCase
             // Mock Messages
             foreach($replies as $message) {
                 // Should Receive Full Message Details Once Per Folder Per Message!
-                $item = new \stdclass;
-                $item->id = $message->messageId;
                 $mock->shouldReceive('message')
-                     ->withArgs([$item])
+                     ->with(Mockery::on(function($obj) use($message) {
+                        return ($obj->id === $message->message_id);
+                     }))
                      ->times(count($folders))
                      ->andReturn([
                         'message_id' => $message->message_id,
@@ -129,10 +129,11 @@ class ScrapeRepliesTest extends TestCase
             // Mock Unused Messages
             foreach($unused as $message) {
                 // Should Receive Full Message Details Once Per Folder Per Message!
-                $item = new \stdclass;
-                $item->id = $message->messageId;
                 $mock->shouldReceive('message')
-                     ->withArgs([$item])
+                     ->with(Mockery::on(function($obj) use($message) {
+                        return ($obj->id === $message->message_id);
+                     }))
+                     ->withArgs([$message->message_id])
                      ->times(count($folders))
                      ->andReturn([
                         'message_id' => $message->message_id,
