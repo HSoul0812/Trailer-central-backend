@@ -336,7 +336,7 @@ class ScrapeRepliesTest extends TestCase
         // Loop Sales People
         $salespeople = [];
         foreach($salesIds as $salesId) {
-            $salespeople[] = SalesPerson::withTrashed()->find($salesId)->restore;
+            $salespeople[] = SalesPerson::withTrashed()->find($salesId)->restore();
         }
 
         // Return
