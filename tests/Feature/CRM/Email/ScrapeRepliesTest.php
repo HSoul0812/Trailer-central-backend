@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\CRM\Email;
 
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\NewDealerUser;
