@@ -224,6 +224,7 @@ class ScrapeRepliesTest extends TestCase
                         'date_sent' => $reply->date_sent
                     ];
                     $mock->shouldReceive('overview')
+                         ->withArgs([$reply->message_id])
                          ->once()
                          ->andReturn($overview);
 
@@ -242,6 +243,7 @@ class ScrapeRepliesTest extends TestCase
                 foreach($unused as $reply) {
                     // Should Receive Overview Details Once Per Folder Per Reply!
                     $mock->shouldReceive('overview')
+                         ->withArgs([$reply->message_id])
                          ->once()
                          ->andReturn([
                             'references' => array(),
