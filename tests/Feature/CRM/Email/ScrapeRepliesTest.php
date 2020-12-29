@@ -70,11 +70,13 @@ class ScrapeRepliesTest extends TestCase
         foreach($replies as $reply) {
             $msg = new \stdclass;
             $msg->id = $reply->message_id;
+            $msg->reply = $reply;
             $messages[] = $msg;
         }
         foreach($unused as $reply) {
             $msg = new \stdclass;
             $msg->id = $reply->message_id;
+            $msg->reply = $reply;
             $messages[] = $msg;
         }
 
@@ -98,7 +100,7 @@ class ScrapeRepliesTest extends TestCase
         });
 
         // Mock Gmail Service
-        $this->mock(GmailServiceInterface::class, function ($mock) use($folders, $messages, $replies, $unused) {
+        $this->mock(GmailServiceInterface::class, function ($mock) use($folders, $messages) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->times(count($folders))
