@@ -238,7 +238,7 @@ class ScrapeRepliesTest extends TestCase
                      ->with(Mockery::on(function($overview) use($reply) {
                         return ($overview['message_id'] == $reply->message_id);
                      }))
-                     ->times(count($folders))
+                     ->once()
                      ->andReturn($parsed);
             }
 
