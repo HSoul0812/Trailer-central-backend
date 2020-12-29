@@ -36,12 +36,14 @@ class ScrapeRepliesTest extends TestCase
         $salespeople = $this->disableSalesPeople();
 
         // Create Gmail Sales Person
-        $salesPerson = factory(SalesPerson::class)->create()->each(function ($salesperson) {
-            $salesperson->googleToken()->save(factory(AccessToken::class)->make());
+        $salesPerson = factory(SalesPerson::class, 1)->create()->each(function ($salesperson) {
+            $salesperson->googleToken()->save(factory(AccessToken::class, 1)->make([
+                'sales_person_id' => $salesperson->id
+            ]));
         });
 
         // Create Lead
-        $lead = factory(Lead::class)->create();
+        $lead = factory(Lead::class, 1)->create();
 
         // Get Folders
         $folders = EmailFolder::getDefaultGmailFolders();
@@ -151,12 +153,14 @@ class ScrapeRepliesTest extends TestCase
         $salespeople = $this->disableSalesPeople();
 
         // Create Gmail Sales Person
-        $salesPerson = factory(SalesPerson::class)->create()->each(function ($salesperson) {
-            $salesperson->googleToken()->save(factory(AccessToken::class)->make());
+        $salesPerson = factory(SalesPerson::class, 1)->create()->each(function ($salesperson) {
+            $salesperson->googleToken()->save(factory(AccessToken::class, 1)->make([
+                'sales_person_id' => $salesperson->id
+            ]));
         });
 
         // Create Lead
-        $lead = factory(Lead::class)->create();
+        $lead = factory(Lead::class, 1)->create();
 
         // Get Folders
         $folders = EmailFolder::getDefaultGmailFolders();
