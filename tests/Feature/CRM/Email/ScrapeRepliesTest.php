@@ -108,8 +108,11 @@ class ScrapeRepliesTest extends TestCase
             foreach($folders as $folder) {
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('messages')
-                     ->with(Mockery::on(function($data){
-                        dd($data);
+                     ->with(Mockery::on(function($accessToken, $emailFolder) use($salesPerson, $folder) {
+                        if($salesPerson->id == $accessToken->relation_id && $emailFolder->name === $folder->name) {
+                            return true;
+                        }
+                        return false;
                      }))
                      ->once()
                      ->andReturn($messages);
@@ -118,8 +121,8 @@ class ScrapeRepliesTest extends TestCase
                 foreach($messages as $message) {
                     // Should Receive Full Message Details Once Per Folder Per Message!
                     $mock->shouldReceive('message')
-                         ->with(Mockery::on(function($data){
-                           dd($data);
+                         ->with(Mockery::on(function($item) use($message) {
+                            return ($item->id == $message->id);
                          }))
                          ->once()
                          ->andReturn([
@@ -219,8 +222,11 @@ class ScrapeRepliesTest extends TestCase
             foreach($folders as $folder) {
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('messages')
-                     ->with(Mockery::on(function($data){
-                        dd($data);
+                     ->with(Mockery::on(function($sales, $emailFolder) use($salesPerson, $folder) {
+                        if($sales->id == $salesPerson->id && $emailFolder->name == $folder->name) {
+                            return true;
+                        }
+                        return false;
                      }))
                      ->once()
                      ->andReturn($messages);
@@ -241,7 +247,9 @@ class ScrapeRepliesTest extends TestCase
                         'date_sent' => $reply->date_sent
                     ];
                     $mock->shouldReceive('overview')
-                         ->withArgs([$reply->message_id])
+                         ->with(Mockery::on(function($messageId) use($reply) {
+                           return ($messageId == $reply->message_id);
+                         }))
                          ->once()
                          ->andReturn($overview);
 
@@ -251,7 +259,9 @@ class ScrapeRepliesTest extends TestCase
                     $parsed['is_html'] = $reply->is_html;
                     $parsed['attachments'] = array();
                     $mock->shouldReceive('parsed')
-                         ->withArgs([$reply->message_id])
+                         ->with(Mockery::on(function($messageId) use($reply) {
+                           return ($messageId == $reply->message_id);
+                         }))
                          ->once()
                          ->andReturn($parsed);
                 }
@@ -260,7 +270,9 @@ class ScrapeRepliesTest extends TestCase
                 foreach($unused as $reply) {
                     // Should Receive Overview Details Once Per Folder Per Reply!
                     $mock->shouldReceive('overview')
-                         ->withArgs([$reply->message_id])
+                         ->with(Mockery::on(function($messageId) use($reply) {
+                           return ($messageId == $reply->message_id);
+                         }))
                          ->once()
                          ->andReturn([
                             'references' => array(),
@@ -277,7 +289,9 @@ class ScrapeRepliesTest extends TestCase
 
                     // Should NOT Receive Full Details; This One Is Invalid and Skipped
                     $mock->shouldReceive('parsed')
-                         ->withArgs([$reply->message_id])
+                         ->with(Mockery::on(function($messageId) use($reply) {
+                           return ($messageId == $reply->message_id);
+                         }))
                          ->never();
                 }
             }
