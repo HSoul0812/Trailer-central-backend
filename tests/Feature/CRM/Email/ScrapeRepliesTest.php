@@ -110,7 +110,7 @@ class ScrapeRepliesTest extends TestCase
             foreach($messages as $message) {
                 // Should Receive Full Message Details Once Per Folder Per Message!
                 $mock->shouldReceive('message')
-                     ->withArgs([$message->message_id])
+                     ->withArgs([$message->reply->message_id])
                      ->times(count($folders))
                      ->andReturn([
                         'message_id' => $message->reply->message_id,
