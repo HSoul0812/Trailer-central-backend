@@ -86,6 +86,8 @@ class ScrapeRepliesTest extends TestCase
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('validate')
                      ->with(Mockery::on(function($accessToken) use($salesPerson) {
+                         dd($accessToken);
+                         dd($salesPerson);
                         $this->assertEquals($salesPerson->id, $accessToken->relation_id);
                      }))
                      ->once()
