@@ -122,7 +122,7 @@ class ScrapeRepliesTest extends TestCase
                         'body' => $message->reply->body,
                         'is_html' => !empty($message->reply->is_html),
                         'attachments' => array(),
-                        'date_sent' => $message->reply->date_sent
+                        'date_sent' => $message->reply->date_sent->format('Y-m-d H:i:s')
                      ]);
             }
         });
