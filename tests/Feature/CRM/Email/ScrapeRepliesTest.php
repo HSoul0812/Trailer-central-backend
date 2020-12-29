@@ -104,7 +104,8 @@ class ScrapeRepliesTest extends TestCase
             // Loop Folders
             foreach($folders as $folder) {
                 // Should Receive Messages With Args Once Per Folder!
-                $mock->shouldReceive('messages')
+                var_dump($folder);
+                /*$mock->shouldReceive('messages')
                      ->with(Mockery::on(function($accessToken, $label) use($salesPerson, $folder) {
                         if($salesPerson->id == $accessToken->relation_id && $label == $folder->name) {
                             return true;
@@ -139,7 +140,7 @@ class ScrapeRepliesTest extends TestCase
                             'attachments' => array(),
                             'date_sent' => $message->reply->date_sent
                          ]);
-                }
+                }*/
             }
         });
 
