@@ -37,9 +37,11 @@ class ScrapeRepliesTest extends TestCase
 
         // Create Gmail Sales Person
         $salesPerson = factory(SalesPerson::class, 1)->create()->each(function ($salesperson) {
-            $salesperson->googleToken()->save(factory(AccessToken::class, 1)->make([
-                'sales_person_id' => $salesperson->id
-            ]));
+            // Make Token
+            $tokens = factory(AccessToken::class, 1)->make([
+                'relation_id' => $salesperson->id
+            ]);
+            $salesperson->googleToken()->save($tokens->first());
         });
 
         // Create Lead
@@ -154,9 +156,11 @@ class ScrapeRepliesTest extends TestCase
 
         // Create Gmail Sales Person
         $salesPerson = factory(SalesPerson::class, 1)->create()->each(function ($salesperson) {
-            $salesperson->googleToken()->save(factory(AccessToken::class, 1)->make([
-                'sales_person_id' => $salesperson->id
-            ]));
+            // Make Token
+            $tokens = factory(AccessToken::class, 1)->make([
+                'relation_id' => $salesperson->id
+            ]);
+            $salesperson->googleToken()->save($tokens->first());
         });
 
         // Create Lead
