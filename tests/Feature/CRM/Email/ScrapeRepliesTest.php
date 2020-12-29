@@ -83,23 +83,20 @@ class ScrapeRepliesTest extends TestCase
 
         // Mock Gmail Service
         $this->mock(GoogleServiceInterface::class, function ($mock) use($folders, $salesPerson) {
-            // Loop Folders
-            foreach($folders as $folder) {
-                // Should Receive Messages With Args Once Per Folder!
-                $mock->shouldReceive('validate')
-                     ->with(Mockery::on(function($accessToken) use($salesPerson) {
-                        if($salesPerson->id == $accessToken->relation_id) {
-                            return true;
-                        }
-                        return false;
-                     }))
-                     ->once()
-                     ->andReturn([
-                        'is_valid' => true,
-                        'is_expired' => false,
-                        'new_token' => array()
-                     ]);
-            }
+            // Should Receive Messages With Args Once Per Folder!
+            $mock->shouldReceive('validate')
+                 ->with(Mockery::on(function($accessToken) use($salesPerson) {
+                    if($salesPerson->id == $accessToken->relation_id) {
+                        return true;
+                    }
+                    return false;
+                 }))
+                 ->once()
+                 ->andReturn([
+                    'is_valid' => true,
+                    'is_expired' => false,
+                    'new_token' => array()
+                 ]);
         });
 
         // Mock Gmail Service
@@ -109,7 +106,8 @@ class ScrapeRepliesTest extends TestCase
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('messages')
                      ->with(Mockery::on(function($accessToken, $label) use($salesPerson, $folder) {
-                         dd($accessToken);
+                        var_dump($accessToken);
+                        var_dump($label);
                         /*if($salesPerson->id == $accessToken->relation_id && $label == $folder->name) {
                             return true;
                         }
@@ -195,7 +193,7 @@ class ScrapeRepliesTest extends TestCase
         $lead = factory(Lead::class, 1)->create()->first();
 
         // Get Folders
-        $folders = EmailFolder::getDefaultGmailFolders();
+        $folders = EmailFolder::getDefaultFolders();
 
         // Create Dummy Emails
         $replies = factory(EmailHistory::class, 5)->make([

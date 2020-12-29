@@ -142,6 +142,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return int total number of imported emails
      */
     public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson) {
+        // Token Exists?
+        if(!empty($salesPerson->googleToken)) {
+            // Refresh Token
+            $validate = $this->google->validate($salesPerson->googleToken);
+            if(!empty($validate['new_token'])) {
+                $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
+                $salesPerson->setRelation('googleToken', $accessToken);
+            }
+        }
+
         // Process Messages
         Log::info('Processing Getting Emails for Sales Person #' . $salesperson->id);
         $imported = 0;
@@ -205,13 +215,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return false || array of email results
      */
     private function importGmail($dealerId, $salesperson, $folder) {
-        // Refresh Token
-        $accessToken = $salesperson->googleToken;
-        $validate = $this->google->validate($accessToken);
-        if(!empty($validate['new_token'])) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
-        }
-
         // Get Emails From Gmail
         $messages = $this->gmail->messages($accessToken, $folder->name, ['after' => $folder->date_imported]);
 
