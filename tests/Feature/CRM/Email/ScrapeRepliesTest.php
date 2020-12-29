@@ -42,7 +42,7 @@ class ScrapeRepliesTest extends TestCase
                 'relation_id' => $salesperson->id
             ]);
             $salesperson->googleToken()->save($tokens->first());
-        });
+        })->first();
 
         // Create Lead
         $lead = factory(Lead::class, 1)->create()->first();
@@ -161,7 +161,7 @@ class ScrapeRepliesTest extends TestCase
                 'relation_id' => $salesperson->id
             ]);
             $salesperson->googleToken()->save($tokens->first());
-        });
+        })->first();
 
         // Create Lead
         $lead = factory(Lead::class, 1)->create()->first();
