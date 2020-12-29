@@ -85,7 +85,12 @@ class ScrapeRepliesTest extends TestCase
         $this->mock(GoogleServiceInterface::class, function ($mock) use($folders, $salesPerson) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('validate')
-                 ->withArgs([$salesPerson->googleToken])
+                 ->with(Mockery::on(function($accessToken) use($salesPerson) {
+                    if($salesPerson->id == $accessToken->relation_id) {
+                        return true;
+                    }
+                    return false;
+                 }))
                  ->once()
                  ->andReturn([
                     'is_valid' => true,
@@ -100,7 +105,12 @@ class ScrapeRepliesTest extends TestCase
             foreach($folders as $folder) {
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('messages')
-                     ->withArgs([$salesPerson->googleToken, $folder->name, ['after' => $folder->date_imported]])
+                     ->withArgs(Mockery::on(function($accessToken, $label) use($salesPerson, $folder) {
+                        if($salesPerson->id == $accessToken->relation_id && $label == $folder->name) {
+                            return true;
+                        }
+                        return false;
+                     }))
                      ->once()
                      ->andReturn($messages);
 
