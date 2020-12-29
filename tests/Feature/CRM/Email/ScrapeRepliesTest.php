@@ -1,0 +1,315 @@
+<?php
+
+namespace Tests\Feature\CRM\Email;
+
+use App\Models\CRM\User\EmailFolder;
+use App\Models\Integration\Auth\AccessToken;
+use App\Models\User\NewDealerUser;
+use App\Services\CRM\Email\ImapServiceInterface;
+use App\Services\Integration\Google\GmailServiceInterface;
+use Tests\TestCase;
+
+class ScrapeRepliesTest extends TestCase
+{
+
+    /**
+     * Set Up Test
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+    }
+
+    /**
+     * Test Scraping Gmail Emails
+     *
+     * @return void
+     */
+    public function testScrapeRepliesGmail()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Mark All Sales People as Deleted
+        $salespeople = $this->disableSalesPeople();
+
+        // Create Gmail Sales Person
+        $salesPerson = factory(SalesPerson::class)->create()->each(function ($salesperson) {
+            $salesperson->googleToken()->save(factory(AccessToken::class)->make());
+        });
+
+        // Create Lead
+        $lead = factory(Lead::class)->create();
+
+        // Get Folders
+        $folders = EmailFolder::getDefaultGmailFolders();
+
+        // Create Dummy Emails
+        $replies = factory(EmailHistory::class, 5)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name
+        ]);
+        $unused = factory(EmailHistory::class, 5)->make();
+
+        // Get Messages
+        $messages = [];
+        foreach($replies as $reply) {
+            $msg = new \stdclass;
+            $msg->id = $reply->message_id;
+            $msg->reply = $reply;
+            $messages[] = $msg;
+        }
+        foreach($unused as $reply) {
+            $msg = new \stdclass;
+            $msg->id = $reply->message_id;
+            $msg->reply = $reply;
+            $messages[] = $msg;
+        }
+
+
+        // Mock Gmail Service
+        $this->mock(GmailServiceInterface::class, function ($mock) use($salesPerson, $folders, $messages) {
+            // Loop Folders
+            foreach($folders as $folder) {
+                // Should Receive Messages With Args Once Per Folder!
+                $mock->shouldReceive('messages')
+                     ->withArgs([$salesPerson->googleToken, $folder->name, ['after' => $folder->date_imported]])
+                     ->once()
+                     ->andReturn($messages);
+
+                // Mock Messages
+                foreach($messages as $message) {
+                    // Should Receive Full Message Details Once Per Folder Per Message!
+                    $mock->shouldReceive('message')
+                         ->withArgs([$message])
+                         ->once()
+                         ->andReturn([
+                            'message_id' => $message->reply->message_id,
+                            'to_email' => $message->reply->to_email,
+                            'to_name' => $message->reply->to_name,
+                            'from_email' => $message->reply->from_email,
+                            'from_name' => $message->reply->from_name,
+                            'subject' => $message->reply->subject,
+                            'body' => $message->reply->body,
+                            'is_html' => !empty($message->reply->is_html),
+                            'attachments' => array(),
+                            'date_sent' => $message->reply->date_sent
+                         ]);
+                }
+            }
+        });
+
+        // Call Leads Assign Command
+        $this->artisan('email:scrape-replies 0 0 ' . self::getTestDealerId())->assertExitCode(0);
+
+        // Mock Saved Replies
+        foreach($replies as $reply) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('crm_email_history', [
+                'message_id' => $reply->message_id
+            ]);
+        }
+
+        // Mock Skipped Replies
+        foreach($unused as $email) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('crm_email_processed', [
+                'user_id' => $salesPerson->user_id,
+                'message_id' => $email->message_id
+            ]);
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseMissing('crm_email_history', [
+                'message_id' => $email->message_id
+            ]);
+        }
+
+
+        // Restore Existing Sales People
+        $this->restoreSalesPeople($salespeople);
+
+        // Delete Sales Person
+        $salesPerson->delete();
+    }
+
+    /**
+     * Test Scraping IMAP Emails
+     *
+     * @return void
+     */
+    public function testScrapeRepliesImap()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Mark All Sales People as Deleted
+        $salespeople = $this->disableSalesPeople();
+
+        // Create Gmail Sales Person
+        $salesPerson = factory(SalesPerson::class)->create()->each(function ($salesperson) {
+            $salesperson->googleToken()->save(factory(AccessToken::class)->make());
+        });
+
+        // Create Lead
+        $lead = factory(Lead::class)->create();
+
+        // Get Folders
+        $folders = EmailFolder::getDefaultGmailFolders();
+
+        // Create Dummy Emails
+        $replies = factory(EmailHistory::class, 5)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name
+        ]);
+        $unused = factory(EmailHistory::class, 5)->make();
+
+        // Get Messages
+        $messages = [];
+        foreach($replies as $reply) {
+            $messages[] = $reply->message_id;
+        }
+        foreach($unused as $reply) {
+            $messages[] = $reply->message_id;
+        }
+
+
+        // Mock Imap Service
+        $this->mock(ImapServiceInterface::class, function ($mock) use($salesPerson, $folders, $messages, $replies, $unused) {
+            // Loop Folders
+            foreach($folders as $folder) {
+                // Should Receive Messages With Args Once Per Folder!
+                $mock->shouldReceive('messages')
+                     ->withArgs([$salesPerson, $folder])
+                     ->once()
+                     ->andReturn($messages);
+
+                // Mock Replies
+                foreach($replies as $reply) {
+                    // Should Receive Overview Details Once Per Folder Per Reply!
+                    $overview = [
+                        'references' => array(),
+                        'message_id' => $message->reply->message_id,
+                        'root_message_id' => $message->reply->message_id,
+                        'uid' => $message->reply->message_id,
+                        'to_email' => $message->reply->to_email,
+                        'to_name' => $message->reply->to_name,
+                        'from_email' => $message->reply->from_email,
+                        'from_name' => $message->reply->from_name,
+                        'subject' => $message->reply->subject,
+                        'date_sent' => $message->reply->date_sent
+                    ];
+                    $mock->shouldReceive('overview')
+                         ->withArgs([$message->message_id])
+                         ->once()
+                         ->andReturn($overview);
+
+                    // Should Receive Full Details Once Per Folder Per Reply!
+                    $parsed = $overview;
+                    $parsed['body'] = $message->reply->body;
+                    $parsed['is_html'] = $message->reply->is_html;
+                    $parsed['attachments'] = array();
+                    $mock->shouldReceive('parsed')
+                         ->withArgs([$message->message_id])
+                         ->once()
+                         ->andReturn($parsed);
+                }
+
+                // Mock Unused Emails
+                foreach($unused as $reply) {
+                    // Should Receive Overview Details Once Per Folder Per Reply!
+                    $mock->shouldReceive('overview')
+                         ->withArgs([$message->message_id])
+                         ->once()
+                         ->andReturn([
+                            'references' => array(),
+                            'message_id' => $message->reply->message_id,
+                            'root_message_id' => $message->reply->message_id,
+                            'uid' => $message->reply->message_id,
+                            'to_email' => $message->reply->to_email,
+                            'to_name' => $message->reply->to_name,
+                            'from_email' => $message->reply->from_email,
+                            'from_name' => $message->reply->from_name,
+                            'subject' => $message->reply->subject,
+                            'date_sent' => $message->reply->date_sent
+                    ]);
+
+                    // Should NOT Receive Full Details; This One Is Invalid and Skipped
+                    $mock->shouldReceive('parsed')
+                         ->withArgs([$message->message_id])
+                         ->never();
+                }
+            }
+        });
+
+
+        // Call Leads Assign Command
+        $this->artisan('email:scrape-replies 0 0 ' . self::getTestDealerId())->assertExitCode(0);
+
+        // Mock Saved Replies
+        foreach($replies as $reply) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('crm_email_history', [
+                'message_id' => $reply->message_id
+            ]);
+        }
+
+        // Mock Skipped Replies
+        foreach($unused as $email) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('crm_email_processed', [
+                'user_id' => $salesPerson->user_id,
+                'message_id' => $email->message_id
+            ]);
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseMissing('crm_email_history', [
+                'message_id' => $email->message_id
+            ]);
+        }
+
+        
+        // Restore Existing Sales People
+        $this->restoreSalesPeople($salespeople);
+
+        // Delete Sales Person
+        $salesPerson->delete();
+    }
+
+
+    /**
+     * Delete Sales People
+     * 
+     * @return Collection<SalesPerson>
+     */
+    private function disableSalesPeople() {
+        // Get Sales People
+        $salespeople = SalesPerson::where('user_id', self::getTestDealerId());
+
+        // Delete All
+        $salespeople->delete();
+
+        // Return
+        return $salespeople;
+    }
+
+    /**
+     * Restore Sales People
+     * 
+     * @return Collection<SalesPerson>
+     */
+    private function restoreSalesPeople($salespeople) {
+        // Loop Sales People
+        foreach($salespeople as $salesperson) {
+            $salesperson->restore();
+        }
+
+        // Return
+        return $salespeople;
+    }
+}

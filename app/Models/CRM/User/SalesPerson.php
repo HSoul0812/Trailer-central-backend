@@ -26,6 +26,16 @@ class SalesPerson extends Model implements Filterable
     const TABLE_NAME = 'crm_sales_person';
 
     /**
+     * @array auth type map from key => name
+     */
+    const AUTH_TYPES = [
+        'auto' => 'Auto Detect',
+        'PLAIN' => 'PLAIN',
+        'LOGIN' => 'LOGIN',
+        'NTLM'  => 'NTLM',
+    ];
+
+    /**
      * The table associated with the model.
      *
      * @var string

@@ -173,9 +173,6 @@ class ImapService implements ImapServiceInterface
         // Get Mail Data
         $mail = $this->imap->getMail($overview['uid'], false);
         $parsed = $overview;
-        if(empty($overview['messageId']) && !empty($mail->messageId)) {
-            $parsed['messageId'] = trim($mail->messageId);
-        }
 
         // Handle Subject
         if(!empty($mail->subject)) {
