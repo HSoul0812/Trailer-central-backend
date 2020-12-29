@@ -100,47 +100,30 @@ class ScrapeRepliesTest extends TestCase
         });
 
         // Mock Gmail Service
-        $this->mock(GmailServiceInterface::class, function ($mock) use($salesPerson, $folders, $messages) {
-            // Loop Folders
-            foreach($folders as $folder) {
-                // Should Receive Messages With Args Once Per Folder!
-                var_dump($folder);
-                /*$mock->shouldReceive('messages')
-                     ->with(Mockery::on(function($accessToken, $label) use($salesPerson, $folder) {
-                        if($salesPerson->id == $accessToken->relation_id && $label == $folder->name) {
-                            return true;
-                        }
-                        var_dump($salesPerson->id);
-                        var_dump($accessToken->relation_id);
-                        var_dump($label);
-                        var_dump($folder->name);
-                        die;
-                        return false;
-                     }))
-                     ->once()
-                     ->andReturn($messages);
+        $this->mock(GmailServiceInterface::class, function ($mock) use($folders, $messages) {
+            // Should Receive Messages With Args Once Per Folder!
+            $mock->shouldReceive('messages')
+                 ->times(count($folders))
+                 ->andReturn($messages);
 
-                // Mock Messages
-                foreach($messages as $message) {
-                    // Should Receive Full Message Details Once Per Folder Per Message!
-                    $mock->shouldReceive('message')
-                         ->with(Mockery::on(function($item) use($message) {
-                            return ($item->id == $message->id);
-                         }))
-                         ->once()
-                         ->andReturn([
-                            'message_id' => $message->reply->message_id,
-                            'to_email' => $message->reply->to_email,
-                            'to_name' => $message->reply->to_name,
-                            'from_email' => $message->reply->from_email,
-                            'from_name' => $message->reply->from_name,
-                            'subject' => $message->reply->subject,
-                            'body' => $message->reply->body,
-                            'is_html' => !empty($message->reply->is_html),
-                            'attachments' => array(),
-                            'date_sent' => $message->reply->date_sent
-                         ]);
-                }*/
+            // Mock Messages
+            foreach($messages as $message) {
+                // Should Receive Full Message Details Once Per Folder Per Message!
+                $mock->shouldReceive('message')
+                     ->withArgs([$message->message_id])
+                     ->times(count($folders))
+                     ->andReturn([
+                        'message_id' => $message->reply->message_id,
+                        'to_email' => $message->reply->to_email,
+                        'to_name' => $message->reply->to_name,
+                        'from_email' => $message->reply->from_email,
+                        'from_name' => $message->reply->from_name,
+                        'subject' => $message->reply->subject,
+                        'body' => $message->reply->body,
+                        'is_html' => !empty($message->reply->is_html),
+                        'attachments' => array(),
+                        'date_sent' => $message->reply->date_sent
+                     ]);
             }
         });
 
