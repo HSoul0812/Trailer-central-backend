@@ -275,7 +275,7 @@ class ScrapeRepliesTest extends TestCase
         $this->artisan('email:scrape-replies 0 0 ' . self::getTestDealerId())->assertExitCode(0);
 
         // Mock Saved Replies
-        /*foreach($replies as $reply) {
+        foreach($replies as $reply) {
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_email_history', [
                 'message_id' => $reply->message_id
@@ -294,7 +294,7 @@ class ScrapeRepliesTest extends TestCase
             $this->assertDatabaseMissing('crm_email_history', [
                 'message_id' => $email->message_id
             ]);
-        }*/
+        }
 
         
         // Restore Existing Sales People
