@@ -203,7 +203,6 @@ class ScrapeRepliesTest extends TestCase
 
 
         // Mock Imap Service
-        var_dump($messages);
         $this->mock(ImapServiceInterface::class, function ($mock) use($salesPerson, $folders, $messages, $replies, $unused) {            
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
@@ -223,7 +222,7 @@ class ScrapeRepliesTest extends TestCase
                     'from_email' => $reply->from_email,
                     'from_name' => $reply->from_name,
                     'subject' => $reply->subject,
-                    'date_sent' => $reply->date_sent
+                    'date_sent' => $reply->date_sent->format('Y-m-d H:i:s')
                 ];
                 $mock->shouldReceive('overview')
                      ->withArgs([$messages[$reply->message_id]])
