@@ -109,6 +109,11 @@ class ScrapeRepliesTest extends TestCase
                         if($salesPerson->id == $accessToken->relation_id && $label == $folder->name) {
                             return true;
                         }
+                        var_dump($salesPerson->id);
+                        var_dump($accessToken->relation_id);
+                        var_dump($label);
+                        var_dump($folder->name);
+                        die;
                         return false;
                      }))
                      ->once()
