@@ -79,6 +79,7 @@ class ScrapeRepliesTest extends TestCase
 
 
         // Mock Gmail Service
+        var_dump($salesPerson->googleToken);
         $this->mock(GoogleServiceInterface::class, function ($mock) use($folders, $salesPerson) {
             // Loop Folders
             foreach($folders as $folder) {
