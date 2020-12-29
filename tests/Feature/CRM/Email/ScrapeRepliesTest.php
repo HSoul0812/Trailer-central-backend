@@ -12,6 +12,7 @@ use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Tests\TestCase;
+use Mockery;
 
 class ScrapeRepliesTest extends TestCase
 {
@@ -79,13 +80,14 @@ class ScrapeRepliesTest extends TestCase
 
 
         // Mock Gmail Service
-        var_dump($salesPerson->googleToken);
         $this->mock(GoogleServiceInterface::class, function ($mock) use($folders, $salesPerson) {
             // Loop Folders
             foreach($folders as $folder) {
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('validate')
-                     ->withArgs([$salesPerson->googleToken])
+                     ->with(Mockery::on(function($arg) use ($salesPerson) {
+                        $this->assertEquals($salesPerson->googleToken, $arg);
+                     }))
                      ->once()
                      ->andReturn([
                         'is_valid' => true,
@@ -101,6 +103,11 @@ class ScrapeRepliesTest extends TestCase
             foreach($folders as $folder) {
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('messages')
+                     ->with(Mockery::on(function($arg1, $arg2, $arg3) use ($salesPerson, $folder) {
+                        $this->assertEquals($salesPerson->googleToken, $arg1);
+                        $this->assertEquals($folder->name, $arg2);
+                        $this->assertEquals(['after' => $folder->date_imported], $arg3);
+                     }))
                      ->withArgs([$salesPerson->googleToken, $folder->name, ['after' => $folder->date_imported]])
                      ->once()
                      ->andReturn($messages);
@@ -109,7 +116,9 @@ class ScrapeRepliesTest extends TestCase
                 foreach($messages as $message) {
                     // Should Receive Full Message Details Once Per Folder Per Message!
                     $mock->shouldReceive('message')
-                         ->withArgs([$message])
+                        ->with(Mockery::on(function($arg) use ($message) {
+                           $this->assertEquals($message, $arg);
+                        }))
                          ->once()
                          ->andReturn([
                             'message_id' => $message->reply->message_id,
@@ -208,7 +217,10 @@ class ScrapeRepliesTest extends TestCase
             foreach($folders as $folder) {
                 // Should Receive Messages With Args Once Per Folder!
                 $mock->shouldReceive('messages')
-                     ->withArgs([$salesPerson, $folder])
+                     ->with(Mockery::on(function($arg1, $arg2) use ($salesPerson, $folder) {
+                        $this->assertEquals($salesPerson->googleToken, $arg1);
+                        $this->assertEquals($folder->name, $arg2);
+                     }))
                      ->once()
                      ->andReturn($messages);
 
