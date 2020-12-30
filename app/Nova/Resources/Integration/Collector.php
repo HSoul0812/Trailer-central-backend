@@ -19,7 +19,7 @@ use App\Models\Integration\Collector\Collector as CollectorModel;
  * @package App\Nova\Resources\Integration
  */
 class Collector extends Resource
-{
+{    
     public static $group = 'Integration';
 
     /**
@@ -68,10 +68,16 @@ class Collector extends Resource
                     Text::make('Path To File', 'ftp_path')->rules('required', 'max:128')->hideFromIndex(),
                     Text::make('Login', 'ftp_login')->rules('required', 'max:128')->hideFromIndex(),
                     Text::make('Password', 'ftp_password')->rules('required', 'max:128')->hideFromIndex(),
+                    Text::make('CDK Username', 'cdk_username')->rules('max:128')->hideFromIndex()->help(
+                        "Only needed if file format is CDK"
+                    ),
+                    Text::make('CDK Password', 'cdk_password')->rules('max:128')->hideFromIndex()->help(
+                        "Only needed if file format is CDK"
+                    ),
                     Select::make('File Format', 'file_format')
                         ->options(array_combine(CollectorModel::FILE_FORMATS, CollectorModel::FILE_FORMATS))
                         ->displayUsingLabels()
-                        ->rules('required'),
+                        ->rules('required'),                    
                     Text::make('Path To Data', 'path_to_data')->hideFromIndex()->help(
                         'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
                     ),
