@@ -5,7 +5,7 @@ namespace App\Transformers\User;
 use League\Fractal\TransformerAbstract;
 use App\Models\User\DealerLocation;
 
-class DealerLocationTransformer extends TransformerAbstract 
+class DealerLocationTransformer extends TransformerAbstract
 {
     public function transform(DealerLocation $dealerLocation)
     {
@@ -26,7 +26,6 @@ class DealerLocationTransformer extends TransformerAbstract
             'federal_id' => $dealerLocation->federal_id,
             'sales_tax' => $dealerLocation->salesTax,
             'dealer_location_no' => $dealerLocation->dealer_license_no,
-            'federal_id' => $dealerLocation->federal_id
         ];
     }
 }
