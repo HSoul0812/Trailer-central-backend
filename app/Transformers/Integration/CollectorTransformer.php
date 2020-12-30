@@ -44,6 +44,8 @@ class CollectorTransformer extends TransformerAbstract
             'import_with_showroom_category' => $collector->import_with_showroom_category,
             'unarchive_sold_items' => $collector->unarchive_sold_items,
             'active' => $collector->active,
+            'cdk_password' => $collector->cdk_password,
+            'cdk_username' => $collector->cdk_username 
         ];
     }
 }
