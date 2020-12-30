@@ -10,6 +10,16 @@ class EmailHistory extends Model
     const TABLE_NAME = 'crm_email_history';
 
     /**
+     * @const default charset
+     */
+    const CHARSET_DEFAULT = 'UTF-8';
+
+    /**
+     * @const NTLM charset
+     */
+    const CHARSET_NTLM = 'US-ASCIII';
+
+    /**
      * The table associated with the model.
      *
      * @var string

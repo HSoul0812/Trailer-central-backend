@@ -149,7 +149,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         Attachment::where('message_id', $messageId)->delete();
 
         // Loop Attachments
-        $emailAttachments = array();
+        $emailAttachments = [];
         if(count($attachments) > 0) {
             foreach($attachments as $attachment) {
                 $attachment['message_id'] = $messageId;
@@ -240,9 +240,9 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
      */
     public function createProcessed($userId, $messageIds) {
         // Initialized Processed
-        $processed = array();
+        $processed = [];
         if(!is_array($messageIds)) {
-            $messageIds = array($messageIds);
+            $messageIds = [$messageIds];
         }
 
         // Loop Processed

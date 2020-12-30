@@ -164,7 +164,7 @@ class GmailService implements GmailServiceInterface
         // Return Results
         Log::info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
         if (count($messages) == 0) {
-            return array();
+            return [];
         }
         return $messages;
     }
@@ -182,13 +182,13 @@ class GmailService implements GmailServiceInterface
         // Get Headers
         $payload = $message->getPayload();
         if(empty($payload)) {
-            return array();
+            return [];
         }
 
         // Get Headers/Body/Attachments
         $headers = $this->parseMessageHeaders($payload->getHeaders());
         $body = $this->parseMessageBody($headers['Message-ID'], $payload);
-        $attachments = array();
+        $attachments = [];
         if(!empty($payload->parts)) {
             $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
         }
@@ -207,7 +207,8 @@ class GmailService implements GmailServiceInterface
             'body' => $body,
             'is_html' => (strip_tags($body) != $body) ? true : false,
             'attachments' => $attachments,
-            'date_sent' => date("Y-m-d H:i:s", strtotime($headers['Date']))
+            'date_sent' => Carbon::parse($headers['Date'])->isoFormat('YYYY-M-D h:mm:ss'),
+            'direction' => 'Received'
         ];
     }
 
@@ -232,7 +233,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Get Labels
-        $labels = array();
+        $labels = [];
         foreach($results->getLabels() as $label) {
             // Search for Label Exists?
             if(!empty($search)) {
@@ -362,7 +363,7 @@ class GmailService implements GmailServiceInterface
      */
     private function parseMessageHeaders($headers) {
         // Initialize New Headers Array
-        $clean = array();
+        $clean = [];
         foreach($headers as $header) {
             // Get Value
             $value = $header->value;

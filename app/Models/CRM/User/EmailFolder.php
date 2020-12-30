@@ -74,27 +74,27 @@ class EmailFolder extends Model
      */
     public static function getDefaultFolders() {
         // Add Folders to Array
-        $defaults = array(
-            array(
+        $defaults = [
+            [
                 'name' => 'INBOX',
                 'folder_id' => -4
-            ),
-            array(
+            ],
+            [
                 'name' => 'INBOX.Sent Mail',
                 'folder_id' => -3
-            ),
-            array(
+            ],
+            [
                 'name' => '[Gmail]/Sent Mail',
                 'folder_id' => -2
-            ),
-            array(
+            ],
+            [
                 'name' => 'Sent Items',
                 'folder_id' => -1
-            )
-        );
+            ]
+        ];
 
         // Set Folders Array
-        $folders = array();
+        $folders = [];
         foreach($defaults as $default) {
             // Get Access Token
             $folder = new EmailFolder();
@@ -114,19 +114,19 @@ class EmailFolder extends Model
      */
     public static function getDefaultGmailFolders() {
         // Add Folders to Array
-        $defaults = array(
-            array(
+        $defaults = [
+            [
                 'name' => 'INBOX',
                 'folder_id' => -2
-            ),
-            array(
+            ],
+            [
                 'name' => 'SENT',
                 'folder_id' => -1
-            )
-        );
+            ]
+        ];
 
         // Set Folders Array
-        $folders = array();
+        $folders = [];
         foreach($defaults as $default) {
             // Get Access Token
             $folder = new EmailFolder();

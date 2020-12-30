@@ -95,7 +95,7 @@ class ScrapeRepliesTest extends TestCase
                  ->andReturn([
                     'is_valid' => true,
                     'is_expired' => false,
-                    'new_token' => array()
+                    'new_token' => []
                  ]);
         });
 
@@ -121,7 +121,7 @@ class ScrapeRepliesTest extends TestCase
                         'subject' => $message->reply->subject,
                         'body' => $message->reply->body,
                         'is_html' => !empty($message->reply->is_html),
-                        'attachments' => array(),
+                        'attachments' => [],
                         'date_sent' => $message->reply->date_sent->format('Y-m-d H:i:s')
                      ]);
             }
@@ -213,7 +213,7 @@ class ScrapeRepliesTest extends TestCase
             foreach($replies as $reply) {
                 // Should Receive Overview Details Once Per Folder Per Reply!
                 $overview = [
-                    'references' => array(),
+                    'references' => [],
                     'message_id' => $reply->message_id,
                     'root_message_id' => $reply->message_id,
                     'uid' => $reply->message_id,
@@ -233,7 +233,7 @@ class ScrapeRepliesTest extends TestCase
                 $parsed = $overview;
                 $parsed['body'] = $reply->body;
                 $parsed['is_html'] = $reply->is_html;
-                $parsed['attachments'] = array();
+                $parsed['attachments'] = [];
                 $mock->shouldReceive('parsed')
                      ->with(Mockery::on(function($overview) use($reply) {
                         return ($overview['message_id'] == $reply->message_id);
@@ -249,7 +249,7 @@ class ScrapeRepliesTest extends TestCase
                      ->withArgs([$messages[$reply->message_id]])
                      ->times(count($folders))
                      ->andReturn([
-                        'references' => array(),
+                        'references' => [],
                         'message_id' => $reply->message_id,
                         'root_message_id' => $reply->message_id,
                         'uid' => $reply->message_id,

@@ -199,7 +199,7 @@ class AuthService implements AuthServiceInterface
      * @param array $response
      * @return array
      */
-    public function response($accessToken, $response = array()) {
+    public function response($accessToken, $response = []) {
         // Set Validate
         $validate = $this->validate($accessToken);
         if(!empty($validate['new_token'])) {

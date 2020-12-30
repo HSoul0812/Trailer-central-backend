@@ -50,24 +50,16 @@ class ImapService implements ImapServiceInterface
      * @return array of emails
      */
     public function messages(SalesPerson $salesperson, EmailFolder $folder) {
-        // NTLM?
-        $charset = 'UTF-8';
-        if($salesperson->smtp_auth === 'NTLM') {
-            $charset = 'US-ASCII';
-        }
-
         // Get IMAP
-        $email = !empty($salesperson->imap_email) ? $salesperson->imap_email : $salesperson->email;
-        $oneMonthAgo = (time() - (60 * 60 * 24 * 30));
-        $dateImported = (!empty($folder->date_imported) ? strtotime($folder->date_imported) : $oneMonthAgo);
+        $imported = (!empty($folder->date_imported) ? strtotime($folder->date_imported) : Carbon::now()->sub(1, 'month'));
         $imap = $this->connectIMAP($folder->name, [
-            'email'    => $email,
+            'email'    => !empty($salesperson->imap_email) ? $salesperson->imap_email : $salesperson->email,
             'password' => $salesperson->imap_password,
             'host'     => $salesperson->imap_server,
             'port'     => $salesperson->imap_port,
             'security' => (!empty($salesperson->imap_security) ? $salesperson->imap_security : 'ssl'),
-            'charset'  => $charset
-        ], $dateImported);
+            'charset'  => ($salesperson->smtp_auth === 'NTLM') ? EmailHistory::CHARSET_NTLM : EmailHistory::CHARSET_DEFAULT
+        ], $imported);
 
         // Error Occurred
         if($imap === null) {
@@ -77,15 +69,12 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Get Messages
-            $emails = $this->getMessages($dateImported);
+            return $this->getMessages($imported);
         } catch (ConnectionException $e) {
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
             throw new ImapFolderUnknownErrorException;
         }
-
-        // Return Array of Parsed Emails
-        return !empty($emails) ? $emails : array();
     }
 
     /**
@@ -96,61 +85,25 @@ class ImapService implements ImapServiceInterface
      */
     public function overview(int $mailId) {
         // Get Mail
-        $overviews = $this->imap->getMailsInfo([$mailId]);
-        $overview = reset($overviews);
+        $overview = reset($this->imap->getMailsInfo([$mailId]));
         if(empty($overview->uid)) {
             return false;
         }
 
-        // Parse Message ID's
-        $messageId = '';
-        if(!empty($overview->in_reply_to)) {
-            $messageId = trim($overview->in_reply_to);
-        }
-        if(!empty($overview->message_id)) {
-            $messageId = trim($overview->message_id);
-        }
-        Log::info('Processing Email Message ' . $messageId);
+        // Get To/From
+        $parsed = $this->parseToFrom($overview);
 
         // Handle Initializing Parsed Data
-        $parsed = [
-            'references' => !empty($overview->references) ? $overview->references : array(),
-            'message_id' => $messageId,
-            'root_message_id' => $messageId,
-            'uid' => $overview->uid
-        ];
+        $parsed['references'] = !empty($overview->references) ? $overview->references : [];
+        $parsed['message_id'] = !empty($overview->in_reply_to) ? trim($overview->in_reply_to) : trim($overview->message_id);
+        $parsed['uid'] = $overview->uid;
+        $parsed['root_message_id'] = $parsed['message_id'];
         if(!empty($parsed['references'])) {
             $parsed['references'] = explode(" ", $parsed['references']);
             $parsed['root_message_id'] = trim(reset($parsed['references']));
             if(empty($parsed['message_id'])) {
                 $parsed['message_id'] = trim(end($parsed['references']));
             }
-        }
-
-        // Parse To Email/Name
-        $toFull = !empty($overview->to) ? $overview->to : '';
-        $to = explode("<", $toFull);
-        $parsed['to_name'] = trim($to[0]);
-        $parsed['to_email'] = '';
-        if(!empty($to[1])) {
-            $parsed['to_email'] = trim(str_replace(">", "", $to[1]));
-        }
-        if(empty($parsed['to_email'])) {
-            $parsed['to_email'] = $parsed['to_name'];
-            $parsed['to_name'] = '';
-        }
-
-        // Parse From Email/Name
-        $fromFull = !empty($overview->from) ? $overview->from : '';
-        $from = explode("<", $fromFull);
-        $parsed['from_name'] = trim($from[0]);
-        $parsed['from_email'] = '';
-        if(!empty($from[1])) {
-            $parsed['from_email'] = trim(str_replace(">", "", $from[1]));
-        }
-        if(empty($parsed['from_email'])) {
-            $parsed['from_email'] = $parsed['from_name'];
-            $parsed['from_name'] = '';
         }
 
         // Handle Subject
@@ -160,19 +113,19 @@ class ImapService implements ImapServiceInterface
         $parsed['date_sent'] = date("Y-m-d H:i:s", strtotime($overview->date));
 
         // Return Parsed Array
+        $parsed['direction'] = 'Received';
         return $parsed;
     }
 
     /**
      * Parse Reply Details to Clean Up Result
      * 
-     * @param array $overview
+     * @param array $parsed
      * @return array of parsed data
      */
-    public function parsed(array $overview) {
+    public function parsed(array $parsed) {
         // Get Mail Data
-        $mail = $this->imap->getMail($overview['uid'], false);
-        $parsed = $overview;
+        $mail = $this->imap->getMail($parsed['uid'], false);
 
         // Handle Subject
         if(!empty($mail->subject)) {
@@ -188,18 +141,9 @@ class ImapService implements ImapServiceInterface
         }
 
         // Handle Attachments
-        $attachments = $mail->getAttachments();
-        $files = array();
-        foreach($attachments as $attachment) {
-            $file = new \stdclass;
-            $file->tmpName = $attachment->__get('filePath');
-            $file->filePath = $attachment->name;
-            $file->name = $attachment->name;
-            $files[] = $file;
-        }
-        $parsed['attachments'] = $files;
-        if(count($files) > 0) {
-            Log::info('Found ' . count($files) . ' total attachments on Message ' . $overview['message_id']);
+        $parsed['attachments'] = $this->parseAttachments($mail);
+        if(count($parsed['attachments']) > 0) {
+            Log::info('Found ' . count($parsed['attachments']) . ' total attachments on Message ' . $parsed['message_id']);
         }
 
         // Return Parsed Array
@@ -234,18 +178,9 @@ class ImapService implements ImapServiceInterface
             $error = $e->getMessage() . ': ' . $e->getTraceAsString();
             Log::error('Cannot connect to ' . $username . ' via IMAP, exception returned: ' . $error);
 
-            // Authentication Error?!
-            if(strpos($error, 'Can not authenticate to IMAP server') !== FALSE) {
-                // Mark Connection as Failed!
-                //$this->updateFolder($folder, false, false);
-            }
-
             // Check for Chartype Error
             if(strpos($error, "BADCHARSET") !== FALSE) {
-                preg_match('/\[BADCHARSET \((.*?)\)\]/', $error, $matches);
-                if(isset($matches[1]) && !empty($matches[1])) {
-                    Log::error('Detected bad CHARSET! Trying to load again with ' . $charset);
-                }
+                Log::error('Detected bad CHARSET, cannot import emails on ' . $username);
             }
         }
 
@@ -288,6 +223,65 @@ class ImapService implements ImapServiceInterface
         }
 
         // No Mail ID's Found? Return Empty Array!
-        return array();
+        return [];
+    }
+
+    /**
+     * Parse To/From Email and Name
+     * 
+     * @param \stdclass $overview
+     * @return array
+     */
+    private function parseToFrom($overview) {
+        // Parse To Email/Name
+        $to = explode("<", (!empty($overview->to) ? $overview->to : ''));
+        $parsed = [];
+        $parsed['to_name'] = trim($to[0]);
+        if(!empty($to[1])) {
+            $parsed['to_email'] = trim(str_replace(">", "", $to[1]));
+        }
+        if(empty($parsed['to_email'])) {
+            $parsed['to_email'] = $parsed['to_name'];
+            $parsed['to_name'] = '';
+        }
+
+        // Parse From Email/Name
+        $from = explode("<", (!empty($overview->from) ? $overview->from : ''));
+        $parsed['from_name'] = trim($from[0]);
+        if(!empty($from[1])) {
+            $parsed['from_email'] = trim(str_replace(">", "", $from[1]));
+        }
+        if(empty($parsed['from_email'])) {
+            $parsed['from_email'] = $parsed['from_name'];
+            $parsed['from_name'] = '';
+        }
+
+        // Return Items
+        return $parsed;
+    }
+
+    /**
+     * Parse Attachments From
+     * 
+     * @param Mail $mail
+     * @return array of files
+     */
+    private function parseAttachments($mail) {
+        // Get Attachments
+        $files = [];
+        $attachments = $mail->getAttachments();
+        foreach($attachments as $attachment) {
+            // Initialize File Class
+            $file = new \stdclass;
+            $file->tmpName = $attachment->__get('filePath');
+            $file->filePath = $attachment->name;
+            $file->name = $attachment->name;
+
+            // Add Files to Array
+            $files[] = $file;
+        }
+
+        // Return Attachments
+        return $files;
     }
 }

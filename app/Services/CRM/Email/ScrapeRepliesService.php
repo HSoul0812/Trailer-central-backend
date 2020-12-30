@@ -185,6 +185,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder) {
         // Try Importing
         try {
+            // Mark Date Before Import Starts
+            $now = Carbon::now();
+
             // Get From Google?
             if(!empty($salesperson->googleToken)) {
                 $total = $this->importGmail($dealer->id, $salesperson, $folder);
@@ -193,6 +196,15 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             else {
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
             }
+
+            // Updated Successful
+            $this->folders->update([
+                'id' => $folder->folder_id,
+                'date_imported' => $now
+            ]);
+
+            // Return Total
+            return $total;
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
             Log::error('Failed to Connect to Sales Person #' . $salesperson->id .
@@ -200,9 +212,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                         $e->getMessage() . ': ' . $e->getTraceAsString());
             return 0;
         }
-
-        // Return Inserted Replies
-        return $total;
     }
 
 
@@ -211,84 +220,35 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
+     * @param EmailFolder $emailFolder
      * @return false || array of email results
      */
-    private function importGmail($dealerId, $salesperson, $folder) {
+    private function importGmail($dealerId, $salesperson, $emailFolder) {
         // Get Emails From Gmail
-        $messages = $this->gmail->messages($salesperson->googleToken, $folder->name, ['after' => $folder->date_imported]);
-
-        // Update Folder
-        $folder = $this->updateFolder($salesperson, $folder);
+        $messages = $this->gmail->messages($salesperson->googleToken, $emailFolder->name, ['after' => $emailFolder->date_imported]);
+        $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
         $total = 0;
         $skipped = 0;
-        $imported = '';
         foreach($messages as $overview) {
             // Get Parsed Message
             $params = $this->gmail->message($overview->id);
-            if(empty($imported) || (!empty($imported) && strtotime($imported) < strtotime($params['date_sent']))) {
-                $imported = $params['date_sent'];
-            }
+            $params['dealer_id'] = $dealerId;
 
-            // Check if Exists
-            if(empty($params['subject']) || empty($params['message_id']) ||
-               $this->emails->findMessageId($salesperson->user_id, $params['message_id'])) {
-                // Delete All Attachments
-                Log::info('Already Processed Email Message ' . $params['message_id']);
-                $this->deleteAttachments($params['attachments']);
-                continue;
-            }
-
-            // Get Lead Email Exists?
-            $emails = [];
-            $direction = 'Received';
-            if($salesperson->smtp_email !== $params['to_email']) {
-                $emails[] = $params['to_email'];
-                $direction = 'Sent';
-            }
-            if($salesperson->smtp_email !== $params['from_email']) {
-                $emails[] = $params['from_email'];
-            }
-            $lead = $this->leads->getByEmails($dealerId, $emails);
-
-            // Valid Lead
-            if(!empty($lead->identifier)) {
-                // Get To Name
-                $params['dealer_id'] = $dealerId;
-                $params['user_id'] = $salesperson->user_id;
-                $params['lead_id'] = $lead->identifier;
-                $params['direction'] = $direction;
-                $message = $this->insertReply($params);
-
-                // Valid?
-                if(!empty($message->message_id)) {
-                    $total++;
-                    Log::info("Inserted Email Message " . $message->message_id);
-                }
-            }
-            // Mark as Skipped
-            else {
-                $this->emails->createProcessed($salesperson->user_id, $params['message_id']);
+            // Import Message
+            $result = $this->importMessage($salesperson, $overview);
+            if($result === 1) {
+                $total++;
+            } elseif($result === 0) {
                 $skipped++;
-                Log::info("Skipped Email Message " . $params['message_id']);
             }
-
-            // Clear Memory/Space
-            $this->deleteAttachments($params['attachments']);
         }
 
         // Process Skipped Message ID's
         if($skipped > 0) {
             Log::info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
-
-        // Updated Successful
-        $this->folders->update([
-            'id' => $folder->folder_id,
-            'date_imported' => !empty($imported) ? $imported : Carbon::now()
-        ]);
 
         // Return Result Messages That Match
         return $total;
@@ -299,89 +259,104 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
+     * @param EmailFolder $emailFolder
      * @return false || array of email results
      */
-    private function importImap($dealerId, $salesperson, $folder) {
+    private function importImap($dealerId, $salesperson, $emailFolder) {
         // Get Emails From IMAP
-        $messages = $this->imap->messages($salesperson, $folder);
-
-        // Update Folder
-        $folder = $this->updateFolder($salesperson, $folder);
+        $messages = $this->imap->messages($salesperson, $emailFolder);
+        $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
         $total = 0;
         $skipped = 0;
-        $imported = '';
         foreach($messages as $mailId) {
             // Get Message Overview
             $overview = $this->imap->overview($mailId);
-            if(empty($imported) || (!empty($imported) && strtotime($imported) < strtotime($overview['date_sent']))) {
-                $imported = $overview['date_sent'];
-            }
+            $overview['dealer_id'] = $dealerId;
 
-            // Check if Exists
-            if(empty($overview['subject']) || empty($overview['message_id']) ||
-               $this->emails->findMessageId($salesperson->user_id, $overview['message_id'])) {
-                // Delete All Attachments
-                Log::info('Already Processed Email Message ' . $overview['message_id']);
-                continue;
-            }
-
-            // Get Lead Email Exists?
-            $emails = [];
-            $direction = 'Received';
-            if($salesperson->smtp_email !== $overview['to_email']) {
-                $emails[] = $overview['to_email'];
-                $direction = 'Sent';
-            }
-            if($salesperson->smtp_email !== $overview['from_email']) {
-                $emails[] = $overview['from_email'];
-            }
-            $lead = $this->leads->getByEmails($dealerId, $emails);
-
-            // Valid Lead
-            if(!empty($lead->identifier)) {
-                // Get Full IMAP Data
-                $params = $this->imap->parsed($overview);
-                $params['dealer_id'] = $dealerId;
-                $params['user_id'] = $salesperson->user_id;
-                $params['lead_id'] = $lead->identifier;
-                $params['direction'] = $direction;
-                $message = $this->insertReply($params);
-
-                // Valid?
-                if(!empty($message->message_id)) {
-                    $total++;
-                    Log::info("Inserted Email Message " . $message->message_id);
-                }
-
-                // Clear Memory/Space
-                $this->deleteAttachments($params['attachments']);
-                $messageId = $params['message_id'];
-                Log::info('Cleared Email Message ' . $messageId);
-            }
-            // Mark as Skipped
-            else {
-                $this->emails->createProcessed($salesperson->user_id, $overview['message_id']);
+            // Import Message
+            $result = $this->importMessage($salesperson, $overview);
+            if($result === 1) {
+                $total++;
+            } elseif($result === 0) {
                 $skipped++;
-                Log::info("Skipped Email Message " . $overview['message_id']);
             }
         }
 
         // Process Skipped Message ID's
         if($skipped > 0) {
-            Log::info("Processed " . $skipped . " emails that were skipped and not imported.");
+            Log::info("Processed " . $skipped . " Emails That were Skipped and not Imported");
         }
-
-        // Updated Successful
-        $this->folders->update([
-            'id' => $folder->folder_id,
-            'date_imported' => !empty($imported) ? $imported : Carbon::now()
-        ]);
 
         // Return Result Messages That Match
         return $total;
+    }
+
+    /**
+     * Import Message From IMAP
+     * 
+     * @param SalesPerson $salesperson
+     * @param array $overview
+     * @return int | -1=skipped | 0=processed | 1=imported
+     */
+    private function importMessage($salesperson, $overview) {
+        // Check if Exists
+        if(empty($overview['subject']) || empty($overview['message_id']) ||
+           $this->emails->findMessageId($salesperson->user_id, $overview['message_id'])) {
+            $this->deleteAttachments($overview['attachments']);
+            return -1;
+        }
+
+        // Find Lead
+        $result = $this->findLead($salesperson, $overview['dealer_id']);
+
+        // Lead ID Exists?
+        if(!empty($result['lead_id'])) {
+            // Get Full IMAP Data
+            $params = $this->imap->parsed($result);
+            $params['user_id'] = $salesperson->user_id;
+            $params['lead_id'] = $result['lead_id'];
+            $this->insertReply($params);
+
+            // Delete Attachments
+            $this->deleteAttachments($params['attachments']);
+            return 1;
+        }
+
+        // Marked as Processed
+        $this->emails->createProcessed($salesperson->user_id, $overview['message_id']);
+        return 0;
+    }
+
+    /**
+     * Find Lead That Matches Email
+     * 
+     * @param SalesPerson $salesperson
+     * @param array $overview
+     * @return Lead
+     */
+    private function findLead(SalesPerson $salesperson, array $overview) {
+        // Get Emails
+        $emails = [];
+        if($salesperson->smtp_email !== $overview['to_email'] &&
+           $salesperson->imap_email !== $overview['to_email']) {
+            $emails[] = $overview['to_email'];
+            $overview['direction'] = 'Sent';
+        }
+        if($salesperson->smtp_email !== $overview['from_email'] &&
+           $salesperson->imap_email !== $overview['from_email']) {
+            $emails[] = $overview['from_email'];
+        }
+
+        // Get Lead By Emails
+        $lead = $this->leads->getByEmails($overview['dealer_id'], $emails);
+
+        // Return Updated Overview
+        $overview['lead_id'] = $lead->identifier;
+
+        // Return
+        return $overview;
     }
 
     /**
@@ -392,7 +367,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function insertReply($reply) {
         // Start Transaction
-        $email = array();
+        $email = [];
         DB::transaction(function() use (&$email, $reply) {
             // Insert Interaction
             $interaction = $this->interactions->create([
@@ -451,39 +426,15 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Loop Attachments
-        $attachments = array();
+        $attachments = [];
         foreach($files as $file) {
             // Skip Entry
             if(empty($file->filePath)) {
                 continue;
             }
 
-            // Upload File to S3
-            $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
-            $path_parts = pathinfo( $file->name );
-            $filename = $path_parts['filename'];
-            $ext = !empty($path_parts['extension']) ? $path_parts['extension'] : '';
-            if(empty($ext)) {
-                $type = mime_content_type($file->tmpName);
-                if(!empty($type)) {
-                    $mimes = explode('/', $type);
-                    $ext = end($mimes);
-                }
-            }
-
-            // Get File Data
-            if(!empty($file->data)) {
-                $contents = base64_decode($file->data);
-            } elseif(!empty($file->tmpName)) {
-                $contents = fopen($file->tmpName, 'r+');
-            } else {
-                $contents = fopen($file->filePath, 'r+');
-            }
-
-            // Upload Image
-            $key = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
-            Storage::disk('s3email')->put($key, $contents, 'public');
-            $s3Image = Storage::disk('s3email')->url($_ENV['MAIL_BUCKET'] . '/' . $key);
+            // Upload File
+            $s3Image = $this->uploadAttachment($dealerId, $messageId, $file);
 
             // Add Email Attachment
             $attachments[] = [
@@ -495,6 +446,43 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Return Collection of Attachment
         return $attachments;
+    }
+
+    /**
+     * Upload Attachment
+     * 
+     * @param int $dealerId
+     * @param string $messageId
+     * @param File $file
+     * @return string
+     */
+    private function uploadAttachment($dealerId, $messageId, $file) {
+        // Upload File to S3
+        $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
+        $path_parts = pathinfo( $file->name );
+        $filename = $path_parts['filename'];
+        $ext = !empty($path_parts['extension']) ? $path_parts['extension'] : '';
+        if(empty($ext)) {
+            $type = mime_content_type($file->tmpName);
+            if(!empty($type)) {
+                $mimes = explode('/', $type);
+                $ext = end($mimes);
+            }
+        }
+
+        // Get File Data
+        if(!empty($file->data)) {
+            $contents = base64_decode($file->data);
+        } elseif(!empty($file->tmpName)) {
+            $contents = fopen($file->tmpName, 'r+');
+        } else {
+            $contents = fopen($file->filePath, 'r+');
+        }
+
+        // Upload Image
+        $key = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
+        Storage::disk('s3email')->put($key, $contents, 'public');
+        return Storage::disk('s3email')->url($_ENV['MAIL_BUCKET'] . '/' . $key);
     }
 
     /**
