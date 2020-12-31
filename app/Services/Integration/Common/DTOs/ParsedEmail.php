@@ -187,7 +187,7 @@ class ParsedEmail
      * 
      * @return string $this->to || $this->toName ($this->to)
      */
-    public function getTo($to): string
+    public function getTo(): string
     {
         // Name Exists?
         if(!empty($this->toName)) {
@@ -211,12 +211,12 @@ class ParsedEmail
         $name = '';
         if(strpos($toFull, '<') !== FALSE) {
             $parts = explode("<", $toFull);
-            $to = str_replace('>', '', end($parts));
+            $email = str_replace('>', '', end($parts));
             $name = trim(reset($parts));
         }
 
         // Set To
-        $this->setToEmail($to);
+        $this->setToEmail($email);
         $this->setToName($name);
     }
 
@@ -268,7 +268,7 @@ class ParsedEmail
      * 
      * @return string $this->from || $this->fromName ($this->from)
      */
-    public function getFrom($from): string
+    public function getFrom(): string
     {
         // Name Exists?
         if(!empty($this->fromName)) {
@@ -292,12 +292,12 @@ class ParsedEmail
         $name = '';
         if(strpos($fromFull, '<') !== FALSE) {
             $parts = explode("<", $fromFull);
-            $from = str_replace('>', '', end($parts));
+            $email = str_replace('>', '', end($parts));
             $name = trim(reset($parts));
         }
 
         // Set From
-        $this->setFromEmail($from);
+        $this->setFromEmail($email);
         $this->setFromName($name);
     }
 
