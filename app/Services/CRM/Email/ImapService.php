@@ -66,14 +66,14 @@ class ImapService implements ImapServiceInterface
         }
 
         // Return Mailbox
-        //try {
+        try {
             // Get Messages
             return $this->getMessages($imapConfig->getStartDate());
-        /*} catch (ConnectionException $e) {
+        } catch (ConnectionException $e) {
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
             throw new ImapFolderUnknownErrorException($e->getMessage());
-        }*/
+        }
     }
 
     /**
@@ -209,7 +209,7 @@ class ImapService implements ImapServiceInterface
             $search = "ALL";
         } else {
             // Create Date Search Expression
-            $search = 'SINCE "' . $time->isoFormat('M D YYYY') . '"';
+            $search = 'SINCE "' . $time->isoFormat('D MMMM YYYY') . '"';
         }
 
         // Imap Inbox ALREADY Exists?
