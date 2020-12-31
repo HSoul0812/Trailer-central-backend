@@ -535,7 +535,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $imapConfig->setHost($salesperson->imap_server);
         $imapConfig->setPort($salesperson->imap_port);
         $imapConfig->setSecurity($salesperson->imap_security);
-        $imapConfig->setAuth($salesperson->smtp_auth);
+        $imapConfig->setAuthType($salesperson->smtp_auth);
         $imapConfig->calcCharset();
 
         // Set Folder Config
