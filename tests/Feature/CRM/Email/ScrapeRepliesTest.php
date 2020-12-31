@@ -547,7 +547,7 @@ class ScrapeRepliesTest extends TestCase
         $lead = factory(Lead::class, 1)->create()->first();
 
         // Get Folders
-        $folders = EmailFolder::getDefaultGmailFolders();
+        $folders = EmailFolder::getDefaultFolders();
 
         // Create Dummy Emails
         $replies = factory(EmailHistory::class, 5)->make([
