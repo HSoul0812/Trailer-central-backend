@@ -149,7 +149,7 @@ class ImapConfig
      */
     public function getPort(): int
     {
-        return $this->fd;
+        return $this->port;
     }
 
     /**
