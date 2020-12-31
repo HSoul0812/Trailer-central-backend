@@ -4,6 +4,7 @@ namespace App\Services\CRM\Email;
 
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 
 interface ImapServiceInterface {
     /**
