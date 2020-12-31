@@ -129,34 +129,28 @@ class ImapService implements ImapServiceInterface
     /**
      * Full Reply Details to Clean Up Result
      * 
-     * @param array $parsed
-     * @return array of parsed data
+     * @param ParsedEmail $email
+     * @return ParsedEmail updated with additional details
      */
-    public function full(array $parsed) {
+    public function full(ParsedEmail $email) {
         // Get Mail Data
-        $mail = $this->imap->getMail($parsed['uid'], false);
-
-        // Handle Subject
-        if(!empty($mail->subject)) {
-            $parsed['subject'] = $mail->subject;
-        }
+        $mail = $this->imap->getMail($email->id, false);
 
         // Handle Body
-        $parsed['body'] = $mail->textHtml;
-        $parsed['use_html'] = 1;
-        if(empty($parsed['body'])) {
-            $parsed['use_html'] = 0;
-            $parsed['body'] = !empty($mail->textPlain) ? $mail->textPlain : "";
+        $email->setBody($mail->textHtml);
+        if(empty($email->getBody())) {
+            $email->setIsHtml(false);
+            $email->setBody($mail->textPlain);
         }
 
         // Handle Attachments
-        $parsed['attachments'] = $this->parseAttachments($mail);
-        if(count($parsed['attachments']) > 0) {
-            Log::info('Found ' . count($parsed['attachments']) . ' total attachments on Message ' . $parsed['message_id']);
+        $email->setAttachments($this->parseAttachments($mail));
+        if(count($email->getAttachments()) > 0) {
+            Log::info('Found ' . count($email->getAttachments()) . ' total attachments on Message ' . $email->getMessageId());
         }
 
-        // Return Parsed Array
-        return $parsed;
+        // Return Updated ParsedEmail
+        return $email;
     }
 
 
@@ -233,40 +227,6 @@ class ImapService implements ImapServiceInterface
 
         // No Mail ID's Found? Return Empty Array!
         return [];
-    }
-
-    /**
-     * Parse To/From Email and Name
-     * 
-     * @param \stdclass $overview
-     * @return array
-     */
-    private function parseToFrom($overview) {
-        // Parse To Email/Name
-        $to = explode("<", (!empty($overview->to) ? $overview->to : ''));
-        $parsed = [];
-        $parsed['to_name'] = trim($to[0]);
-        if(!empty($to[1])) {
-            $parsed['to_email'] = trim(str_replace(">", "", $to[1]));
-        }
-        if(empty($parsed['to_email'])) {
-            $parsed['to_email'] = $parsed['to_name'];
-            $parsed['to_name'] = '';
-        }
-
-        // Parse From Email/Name
-        $from = explode("<", (!empty($overview->from) ? $overview->from : ''));
-        $parsed['from_name'] = trim($from[0]);
-        if(!empty($from[1])) {
-            $parsed['from_email'] = trim(str_replace(">", "", $from[1]));
-        }
-        if(empty($parsed['from_email'])) {
-            $parsed['from_email'] = $parsed['from_name'];
-            $parsed['from_name'] = '';
-        }
-
-        // Return Items
-        return $parsed;
     }
 
     /**
