@@ -13,6 +13,8 @@ use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
+use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
 use Google_Service_Gmail_MessagePart;
