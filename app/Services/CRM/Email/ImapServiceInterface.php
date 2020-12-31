@@ -27,10 +27,10 @@ interface ImapServiceInterface {
     public function overview(int $mailId);
 
     /**
-     * Parse Reply Details to Clean Up Result
+     * Full Reply Details to Clean Up Result
      * 
-     * @param array $overview
-     * @return array of parsed data
+     * @param ParsedEmail $email
+     * @return ParsedEmail updated with additional details
      */
-    public function parsed(array $overview);
+    public function full(ParsedEmail $email);
 }
