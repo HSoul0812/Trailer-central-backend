@@ -619,7 +619,7 @@ class ScrapeRepliesTest extends TestCase
                             return ($overview->getMessageId() == $message->getMessageId());
                          }))
                          ->once()
-                         ->andReturn($email);
+                         ->andReturn($message);
                 } else {
                     // Should NOT Receive Full Details; This One Is Invalid and Skipped
                     $mock->shouldReceive('full')
