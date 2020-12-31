@@ -94,17 +94,17 @@ class ScrapeRepliesTest extends TestCase
         }
         foreach($nosub as $reply) {
             $messages[] = $id;
-            $parsed[] = $this->getParsedEmail($reply);
+            $parsed[] = $this->getParsedEmail($id, $reply);
             $id++;
         }
         foreach($noid as $reply) {
             $messages[] = $id;
-            $parsed[] = $this->getParsedEmail($reply);
+            $parsed[] = $this->getParsedEmail($id, $reply);
             $id++;
         }
         foreach($unused as $reply) {
             $messages[] = $id;
-            $parsed[] = $this->getParsedEmail($reply);
+            $parsed[] = $this->getParsedEmail($id, $reply);
             $id++;
         }
 
@@ -252,17 +252,17 @@ class ScrapeRepliesTest extends TestCase
         }
         foreach($nosub as $reply) {
             $messages[] = $id;
-            $parsed[] = $this->getParsedEmail($reply);
+            $parsed[] = $this->getParsedEmail($id, $reply);
             $id++;
         }
         foreach($noid as $reply) {
             $messages[] = $id;
-            $parsed[] = $this->getParsedEmail($reply);
+            $parsed[] = $this->getParsedEmail($id, $reply);
             $id++;
         }
         foreach($unused as $reply) {
             $messages[] = $id;
-            $parsed[] = $this->getParsedEmail($reply);
+            $parsed[] = $this->getParsedEmail($id, $reply);
             $id++;
         }
 
