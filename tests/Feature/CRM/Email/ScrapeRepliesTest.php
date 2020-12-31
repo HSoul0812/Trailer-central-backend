@@ -286,8 +286,8 @@ class ScrapeRepliesTest extends TestCase
                 if(isset($replies[$id])) {
                     // Should Receive Full Details Once Per Folder Per Reply!
                     $mock->shouldReceive('full')
-                         ->with(Mockery::on(function($overview) use($reply) {
-                            return ($overview->getMessageId() == $reply->message_id);
+                         ->with(Mockery::on(function($overview) use($email) {
+                            return ($overview->getMessageId() == $email->getMessageId());
                          }))
                          ->once()
                          ->andReturn($email);
@@ -295,7 +295,7 @@ class ScrapeRepliesTest extends TestCase
                     // Should NOT Receive Full Details; This One Is Invalid and Skipped
                     $mock->shouldReceive('full')
                          ->with(Mockery::on(function($overview) use($reply) {
-                            return ($overview->getMessageId() == $reply->message_id);
+                            return ($overview->getMessageId() == $email->getMessageId());
                          }))
                          ->never();
                 }
