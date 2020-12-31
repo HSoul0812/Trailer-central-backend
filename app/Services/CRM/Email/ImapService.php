@@ -66,14 +66,14 @@ class ImapService implements ImapServiceInterface
         }
 
         // Return Mailbox
-        try {
+        //try {
             // Get Messages
             return $this->getMessages($imapConfig->getStartDate());
-        } catch (ConnectionException $e) {
+        /*} catch (ConnectionException $e) {
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
-            throw new ImapFolderUnknownErrorException;
-        }
+            throw new ImapFolderUnknownErrorException($e->getMessage());
+        }*/
     }
 
     /**
