@@ -512,8 +512,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         if(!empty($files) && count($files) > 0) {
             foreach($files as $file) {
                 // Delete Attachments If Exists
-                if(!empty($file->tmpName) && file_exists($file->tmpName)) {
-                    unlink($file->tmpName);
+                if(!empty($file->getTmpName()) && file_exists($file->getTmpName())) {
+                    unlink($file->getTmpName());
                     $deleted++;
                 }
             }
