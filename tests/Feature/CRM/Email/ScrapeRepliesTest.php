@@ -265,96 +265,40 @@ class ScrapeRepliesTest extends TestCase
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
-        var_dump($messages);
-        var_dump($parsed);
-        die;
 
 
         // Mock Imap Service
-        $this->mock(ImapServiceInterface::class, function ($mock)
-            use($folders, $messages, $parsed, $replies, $nosub, $noid, $unused) {
+        $this->mock(ImapServiceInterface::class, function ($mock) use($folders, $messages, $parsed, $replies) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->times(count($folders))
                  ->andReturn($messages);
 
             // Mock Replies
-            foreach($replies as $reply) {
-                // Get Parsed Email
-                $id = $messages[$reply->message_id];
-                $email = $parsed[$id];
-
+            foreach($parsed as $id => $email) {
                 // Should Receive Overview Details Once Per Folder Per Reply!
                 $mock->shouldReceive('overview')
                      ->withArgs([$id])
                      ->times(count($folders))
                      ->andReturn($email);
 
-                // Should Receive Full Details Once Per Folder Per Reply!
-                $mock->shouldReceive('full')
-                     ->with(Mockery::on(function($overview) use($reply) {
-                        return ($overview->getMessageId() == $reply->message_id);
-                     }))
-                     ->once()
-                     ->andReturn($email);
-            }
-
-            // Mock Ignored Entirely
-            foreach($nosub as $reply) {
-                // Get Parsed Email
-                $id = $messages[$reply->message_id];
-                $email = $parsed[$id];
-
-                // Should Receive Overview Details Once Per Folder Per Reply!
-                $mock->shouldReceive('overview')
-                     ->withArgs([$id])
-                     ->times(count($folders))
-                     ->andReturn($email);
-
-                // Should NOT Receive Full Details; This One Is Invalid and Skipped
-                $mock->shouldReceive('full')
-                     ->with(Mockery::on(function($overview) use($reply) {
-                        return ($overview->getMessageId() == $reply->message_id);
-                     }))
-                     ->never();
-            }
-            foreach($noid as $reply) {
-                // Get Parsed Email
-                $id = $messages[$reply->message_id];
-                $email = $parsed[$id];
-
-                // Should Receive Overview Details Once Per Folder Per Reply!
-                $mock->shouldReceive('overview')
-                     ->withArgs([$id])
-                     ->times(count($folders))
-                     ->andReturn($email);
-
-                // Should NOT Receive Full Details; This One Is Invalid and Skipped
-                $mock->shouldReceive('full')
-                     ->with(Mockery::on(function($overview) use($reply) {
-                        return ($overview->getMessageId() == $reply->message_id);
-                     }))
-                     ->never();
-            }
-
-            // Mock Unused Emails
-            foreach($unused as $reply) {
-                // Get Parsed Email
-                $id = $messages[$reply->message_id];
-                $email = $parsed[$id];
-
-                // Should Receive Overview Details Once Per Folder Per Reply!
-                $mock->shouldReceive('overview')
-                     ->withArgs([$id])
-                     ->times(count($folders))
-                     ->andReturn($email);
-
-                // Should NOT Receive Full Details; This One Is Invalid and Skipped
-                $mock->shouldReceive('full')
-                     ->with(Mockery::on(function($overview) use($reply) {
-                        return ($overview->getMessageId() == $reply->message_id);
-                     }))
-                     ->never();
+                // Exists in Replies?
+                if(isset($replies[$id])) {
+                    // Should Receive Full Details Once Per Folder Per Reply!
+                    $mock->shouldReceive('full')
+                         ->with(Mockery::on(function($overview) use($reply) {
+                            return ($overview->getMessageId() == $reply->message_id);
+                         }))
+                         ->once()
+                         ->andReturn($email);
+                } else {
+                    // Should NOT Receive Full Details; This One Is Invalid and Skipped
+                    $mock->shouldReceive('full')
+                         ->with(Mockery::on(function($overview) use($reply) {
+                            return ($overview->getMessageId() == $reply->message_id);
+                         }))
+                         ->never();
+                }
             }
         });
 
