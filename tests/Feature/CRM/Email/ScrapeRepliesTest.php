@@ -294,7 +294,7 @@ class ScrapeRepliesTest extends TestCase
                 } else {
                     // Should NOT Receive Full Details; This One Is Invalid and Skipped
                     $mock->shouldReceive('full')
-                         ->with(Mockery::on(function($overview) use($reply) {
+                         ->with(Mockery::on(function($overview) use($email) {
                             return ($overview->getMessageId() == $email->getMessageId());
                          }))
                          ->never();
