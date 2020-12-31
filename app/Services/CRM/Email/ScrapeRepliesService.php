@@ -14,6 +14,7 @@ use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\CRM\Email\DTOs\ImapConfig;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use Illuminate\Support\Facades\Log;
