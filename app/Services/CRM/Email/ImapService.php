@@ -68,7 +68,7 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Get Messages
-            return $this->getMessages($imapConfig->getLastImported());
+            return $this->getMessages($imapConfig->getStartDate());
         } catch (ConnectionException $e) {
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
@@ -117,10 +117,9 @@ class ImapService implements ImapServiceInterface
         $parsed->setSubject($overview->subject);
 
         // Set Date
-        $parsed['date_sent'] = date("Y-m-d H:i:s", strtotime($overview->date));
+        $parsed->setDate($overview->date);
 
         // Return Parsed Array
-        $parsed['direction'] = 'Received';
         return $parsed;
     }
 

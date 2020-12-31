@@ -70,6 +70,11 @@ class ImapConfig
      */
     private $folderName;
 
+    /**
+     * @var string Date to Start Importing From
+     */
+    private $startDate;
+
 
     /**
      * Return Username
@@ -240,7 +245,7 @@ class ImapConfig
 
 
     /**
-     * Return FolderName
+     * Return Folder Name
      * 
      * @return string $this->folderName
      */
@@ -258,5 +263,27 @@ class ImapConfig
     public function setFolderName(string $folderName): void
     {
         $this->folderName = $folderName;
+    }
+
+
+    /**
+     * Return Start Date
+     * 
+     * @return string $this->startDate
+     */
+    public function getStartDate(): string
+    {
+        return $this->startDate;
+    }
+
+    /**
+     * Set Start Date
+     * 
+     * @param string $startDate
+     * @return void
+     */
+    public function setStartDate(string $startDate): void
+    {
+        $this->startDate = $startDate;
     }
 }

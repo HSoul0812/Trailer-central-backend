@@ -539,11 +539,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $imapConfig->calcCharset();
 
         // Set Folder Config
-        $imapConfig->setFolder($folder->name);
+        $imapConfig->setFolderName($folder->name);
         if(!empty($folder->date_imported)) {
-            $imapConfig->setImapConfig($folder->date_imported);
+            $imapConfig->setStartDate($folder->date_imported);
         } else {
-            $imapConfig->setImapConfig(Carbon::now()->sub(1, 'month'));
+            $imapConfig->setStartDate(Carbon::now()->sub(1, 'month'));
         }
 
         // Return IMAP Config
