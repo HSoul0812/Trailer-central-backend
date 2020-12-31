@@ -189,9 +189,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder) {
         // Try Importing
         try {
-            // Mark Date Before Import Starts
-            $now = Carbon::now();
-
             // Get From Google?
             if(!empty($salesperson->googleToken)) {
                 $total = $this->importGmail($dealer->id, $salesperson, $folder);
@@ -200,12 +197,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             else {
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
             }
-
-            // Updated Successful
-            $this->folders->update([
-                'id' => $folder->folder_id,
-                'date_imported' => $now
-            ]);
 
             // Return Total
             return $total;
@@ -227,12 +218,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param EmailFolder $folder
      * @return false || array of email results
      */
-    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $folder) {
+    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
         // Get Emails From Gmail
-        $messages = $this->gmail->messages($salesperson->googleToken, $folder->name, [
-            'after' => Carbon::parse($folder->date_imported)->isoFormat('YYYY/M/D')
+        $messages = $this->gmail->messages($salesperson->googleToken, $emailFolder->name, [
+            'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
         ]);
-        $this->updateFolder($salesperson, $folder);
+        $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
         $total = 0;
@@ -255,6 +246,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             Log::info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
+        // Updated Successful
+        $this->folders->update([
+            'id' => $folder->folder_id,
+            'date_imported' => Carbon::now()
+        ]);
+
         // Return Result Messages That Match
         return $total;
     }
@@ -267,11 +264,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param EmailFolder $folder
      * @return false || array of email results
      */
-    private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $folder) {
+    private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
         // Get Emails From IMAP
-        $imapConfig = $this->getImapConfig($salesperson, $folder);
+        $imapConfig = $this->getImapConfig($salesperson, $emailFolder);
         $messages = $this->imap->messages($imapConfig);
-        $this->updateFolder($salesperson, $folder);
+        $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
         $total = 0;
@@ -293,6 +290,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         if($skipped > 0) {
             Log::info("Processed " . $skipped . " Emails That were Skipped and not Imported");
         }
+
+        // Updated Successful
+        $this->folders->update([
+            'id' => $folder->folder_id,
+            'date_imported' => Carbon::now()
+        ]);
 
         // Return Result Messages That Match
         return $total;
