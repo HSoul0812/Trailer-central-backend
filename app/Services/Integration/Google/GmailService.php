@@ -419,7 +419,7 @@ class GmailService implements GmailServiceInterface
      */
     private function parseMessageAttachments(string $message_id, array $parts) {
         // Get Attachments From Parts
-        $attachments = [];
+        $attachments = new Collection();
         foreach ($parts as $part) {
             if (!empty($part->body->attachmentId)) {
                 $attachment = $this->gmail->users_messages_attachments->get('me', $message_id, $part->body->attachmentId);
@@ -432,11 +432,13 @@ class GmailService implements GmailServiceInterface
                 $file->setContents(strtr($attachment->data, '-_', '+/'));
 
                 // Add Attachment to Array
-                $attachments[] = $file;
+                $attachments->push($file);
             } else if (!empty($part->parts)) {
-                $attachments = array_merge($attachments, $this->parseMessageAttachments($message_id, $part->parts));
+                $attachments = $attachments->concat($this->parseMessageAttachments($message_id, $part->parts));
             }
         }
+
+        // Collect Attachments
         return $attachments;
     }
 
