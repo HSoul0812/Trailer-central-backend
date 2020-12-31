@@ -423,7 +423,13 @@ class ParsedEmail
      */
     public function getAttachments(): Collection
     {
-        return $this->attachments;
+        // Attachments Exist?
+        if(!empty($this->attachments)) {
+            return $this->attachments;
+        }
+
+        // Return Empty Collection
+        return new Collection();
     }
 
     /**

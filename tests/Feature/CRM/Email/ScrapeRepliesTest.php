@@ -11,6 +11,8 @@ use App\Models\CRM\User\EmailFolder;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Email\ImapServiceInterface;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
+use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Tests\TestCase;
@@ -63,26 +65,47 @@ class ScrapeRepliesTest extends TestCase
             'from_email' => $salesPerson->email,
             'from_name' => $salesPerson->full_name
         ]);
+        $nosub = factory(EmailHistory::class, 2)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name,
+            'subject' => ''
+        ]);
+        $noid = factory(EmailHistory::class, 2)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name,
+            'message_id' => ''
+        ]);
         $unused = factory(EmailHistory::class, 5)->make();
 
         // Get Messages
+        $parsed = [];
         $messages = [];
         foreach($replies as $reply) {
-            $msg = new \stdclass;
-            $msg->id = count($messages);
-            $msg->reply = $reply;
-            $messages[] = $msg;
+            $messages[] = count($messages);
+            $parsed[] = $this->getParsedEmail($reply);
+        }
+        foreach($nosub as $reply) {
+            $messages[] = count($messages);
+            $parsed[] = $this->getParsedEmail($reply);
+        }
+        foreach($noid as $reply) {
+            $messages[] = count($messages);
+            $parsed[] = $this->getParsedEmail($reply);
         }
         foreach($unused as $reply) {
-            $msg = new \stdclass;
-            $msg->id = count($messages);
-            $msg->reply = $reply;
-            $messages[] = $msg;
+            $messages[] = count($messages);
+            $parsed[] = $this->getParsedEmail($reply);
         }
 
 
         // Mock Gmail Service
-        $this->mock(GoogleServiceInterface::class, function ($mock) use($folders, $salesPerson) {
+        $this->mock(GoogleServiceInterface::class, function ($mock) use($salesPerson) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('validate')
                  ->with(Mockery::on(function($accessToken) use($salesPerson) {
@@ -100,30 +123,19 @@ class ScrapeRepliesTest extends TestCase
         });
 
         // Mock Gmail Service
-        $this->mock(GmailServiceInterface::class, function ($mock) use($folders, $messages) {
+        $this->mock(GmailServiceInterface::class, function ($mock) use($folders, $messages, $parsed) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->times(count($folders))
                  ->andReturn($messages);
 
             // Mock Messages
-            foreach($messages as $message) {
+            foreach($parsed as $k => $message) {
                 // Should Receive Full Message Details Once Per Folder Per Message!
                 $mock->shouldReceive('message')
-                     ->withArgs([$message->id])
+                     ->withArgs([$k])
                      ->times(count($folders))
-                     ->andReturn([
-                        'message_id' => $message->reply->message_id,
-                        'to_email' => $message->reply->to_email,
-                        'to_name' => $message->reply->to_name,
-                        'from_email' => $message->reply->from_email,
-                        'from_name' => $message->reply->from_name,
-                        'subject' => $message->reply->subject,
-                        'body' => $message->reply->body,
-                        'is_html' => !empty($message->reply->is_html),
-                        'attachments' => [],
-                        'date_sent' => $message->reply->date_sent->format('Y-m-d H:i:s')
-                     ]);
+                     ->andReturn($message);
             }
         });
 
@@ -148,6 +160,22 @@ class ScrapeRepliesTest extends TestCase
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseMissing('crm_email_history', [
+                'message_id' => $email->message_id
+            ]);
+        }
+
+        // Mock Skipping Entirely
+        foreach($nosub as $email) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseMissing('crm_email_processed', [
+                'user_id' => $salesPerson->user_id,
+                'message_id' => $email->message_id
+            ]);
+        }
+        foreach($noid as $email) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseMissing('crm_email_processed', [
+                'user_id' => $salesPerson->user_id,
                 'message_id' => $email->message_id
             ]);
         }
@@ -190,15 +218,42 @@ class ScrapeRepliesTest extends TestCase
             'from_email' => $salesPerson->email,
             'from_name' => $salesPerson->full_name
         ]);
+        $nosub = factory(EmailHistory::class, 2)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name,
+            'subject' => ''
+        ]);
+        $noid = factory(EmailHistory::class, 2)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name,
+            'message_id' => ''
+        ]);
         $unused = factory(EmailHistory::class, 5)->make();
 
         // Get Messages
+        $parsed = [];
         $messages = [];
         foreach($replies as $reply) {
-            $messages[$reply->message_id] = count($messages);
+            $messages[] = count($messages);
+            $parsed[] = $this->getParsedEmail($reply);
+        }
+        foreach($nosub as $reply) {
+            $messages[] = count($messages);
+            $parsed[] = $this->getParsedEmail($reply);
+        }
+        foreach($noid as $reply) {
+            $messages[] = count($messages);
+            $parsed[] = $this->getParsedEmail($reply);
         }
         foreach($unused as $reply) {
-            $messages[$reply->message_id] = count($messages);
+            $messages[] = count($messages);
+            $parsed[] = $this->getParsedEmail($reply);
         }
 
 
@@ -296,6 +351,22 @@ class ScrapeRepliesTest extends TestCase
             ]);
         }
 
+        // Mock Skipping Entirely
+        foreach($nosub as $email) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseMissing('crm_email_processed', [
+                'user_id' => $salesPerson->user_id,
+                'message_id' => $email->message_id
+            ]);
+        }
+        foreach($noid as $email) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseMissing('crm_email_processed', [
+                'user_id' => $salesPerson->user_id,
+                'message_id' => $email->message_id
+            ]);
+        }
+
         
         // Restore Existing Sales People
         $this->restoreSalesPeople($salesIds);
@@ -341,5 +412,45 @@ class ScrapeRepliesTest extends TestCase
 
         // Return
         return collect($salespeople);
+    }
+
+    /**
+     * Get Parsed Email
+     * 
+     * @param string $id
+     * @param EmailHistory $email
+     * @return ParsedEmail
+     */
+    private function getParsedEmail($id, $email, $attachments = null) {
+        // Create Parsed Email
+        $parsed = new ParsedEmail();
+        $parsed->setId((string) $id);
+
+        // Set Lead ID
+        $parsed->setLeadId($email->lead_id);
+
+        // Set Message ID
+        $parsed->setMessageId($email->message_id);
+
+        // Set To/From
+        $parsed->setToName($email->to_name);
+        $parsed->setToEmail($email->to_email);
+        $parsed->setFromName($email->from_name);
+        $parsed->setFromEmail($email->from_email);
+
+        // Set Subject/Body
+        $parsed->setSubject($email->subject);
+        $parsed->setBody($email->body);
+
+        // Add Attachments
+        if(!empty($attachments)) {
+            $parsed->setAttachments($attachments);
+        }
+
+        // Set Date
+        $parsed->setDate($email->date_sent);
+
+        // Return ParsedEmail
+        return $parsed;
     }
 }
