@@ -109,7 +109,7 @@ class AttachmentFile
     /**
      * Return File Size
      * 
-     * @return string $this->fileSize
+     * @return int $this->fileSize
      */
     public function getFileSize(): int
     {

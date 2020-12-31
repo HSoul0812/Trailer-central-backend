@@ -5,12 +5,12 @@ namespace App\Services\CRM\Email;
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
-use App\Models\CRM\User\SalesPerson;
-use App\Models\CRM\User\EmailFolder;
+use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Support\Facades\Log;
 use PhpImap\Mailbox;
 use PhpImap\Exceptions\ConnectionException;
+use Carbon\Carbon;
 
 /**
  * Class ScrapeRepliesService
@@ -43,24 +43,22 @@ class ImapService implements ImapServiceInterface
     /**
      * Import Email Replies
      * 
-     * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
+     * @param ImapConfig $imapConfig
      * @throws App\Exceptions\CRM\Email\ImapConnectionFailedException
      * @throws App\Exceptions\CRM\Email\ImapFolderConnectionFailedException
      * @throws App\Exceptions\CRM\Email\ImapFolderUnknownErrorException
      * @return array of emails
      */
-    public function messages(SalesPerson $salesperson, EmailFolder $folder) {
+    public function messages(ImapConfig $imapConfig) {
         // Get IMAP
-        $imported = (!empty($folder->date_imported) ? strtotime($folder->date_imported) : Carbon::now()->sub(1, 'month'));
-        $imap = $this->connectIMAP($folder->name, [
-            'email'    => !empty($salesperson->imap_email) ? $salesperson->imap_email : $salesperson->email,
-            'password' => $salesperson->imap_password,
-            'host'     => $salesperson->imap_server,
-            'port'     => $salesperson->imap_port,
-            'security' => (!empty($salesperson->imap_security) ? $salesperson->imap_security : 'ssl'),
-            'charset'  => ($salesperson->smtp_auth === 'NTLM') ? EmailHistory::CHARSET_NTLM : EmailHistory::CHARSET_DEFAULT
-        ], $imported);
+        $imap = $this->connectIMAP($imapConfig->getFolderName(), [
+            'email'    => $imapConfig->getUsername(),
+            'password' => $imapConfig->getPassword(),
+            'host'     => $imapConfig->getHost(),
+            'port'     => $imapConfig->getPort(),
+            'security' => $imapConfig->getSecurity(),
+            'charset'  => $imapConfig->getCharset()
+        ]);
 
         // Error Occurred
         if($imap === null) {
@@ -70,7 +68,7 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Get Messages
-            return $this->getMessages($imported);
+            return $this->getMessages($imapConfig->getLastImported());
         } catch (ConnectionException $e) {
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
@@ -194,27 +192,25 @@ class ImapService implements ImapServiceInterface
     /**
      * Get Messages After Set Date
      * 
-     * @param string $time
+     * @param string $time days || all || DATETIME
      * @param int $days
      * @return array of emails
      */
     private function getMessages($time = 'days', $days = 7) {
         // Base Timestamp on Number of Days
         if($time === 'days') {
-            $m = date("m");
-            $d = date("d") - $days;
-            $y = date("Y");
-            $time = mktime(0, 0, 0, $m, $d, $y);
+            $time = Carbon::now()->startOfDay()->subDays($days);
+        } elseif(!empty($time) && $time !== 'all') {
+            $time = Carbon::parse($time);
         }
 
         // Don't Implement Since if Time is 0
-        if(empty($time) || !is_numeric($time)) {
+        if(empty($time) || $time === 'all') {
             // Get All
             $search = "ALL";
         } else {
             // Create Date Search Expression
-            $date = date('j M Y', $time);
-            $search = 'SINCE "' . $date . '"';
+            $search = 'SINCE "' . $time->isoFormat('M D YYYY') . '"';
         }
 
         // Imap Inbox ALREADY Exists?

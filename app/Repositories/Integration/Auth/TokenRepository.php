@@ -196,8 +196,8 @@ class TokenRepository implements TokenRepositoryInterface {
             'access_token' => $newToken['access_token'],
             'id_token' => $newToken['id_token'],
             'expires_in' => $newToken['expires_in'],
-            'expires_at' => $time->addSeconds($newToken['expires_in'])->isoFormat('YYYY-M-D h:mm:ss'),
-            'issued_at' => $time->isoFormat('YYYY-M-D h:mm:ss')
+            'expires_at' => $time->addSeconds($newToken['expires_in'])->toDateTimeString(),
+            'issued_at' => $time->toDateTimeString()
         ]);
     }
 

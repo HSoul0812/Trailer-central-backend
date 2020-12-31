@@ -13,6 +13,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
+use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use Illuminate\Support\Facades\Log;
@@ -264,7 +265,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $folder) {
         // Get Emails From IMAP
-        $messages = $this->imap->messages($salesperson, $folder);
+        $imapConfig = $this->getImapConfig($salesperson, $folder);
+        $messages = $this->imap->messages($imapConfig);
         $this->updateFolder($salesperson, $folder);
 
         // Loop Messages
@@ -513,5 +515,38 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Return Total
         return $deleted;
+    }
+
+    /**
+     * Get IMAP Config From Sales Person and Folder
+     * 
+     * @param SalesPerson $salesperson
+     * @param EmailFolder $folder
+     */
+    private function getImapConfig(SalesPerson $salesperson, EmailFolder $folder) {
+        // Initialize
+        $imapConfig = new ImapConfig();
+
+        // Set Username/Password
+        $imapConfig->setUsername($salesperson->imap_email);
+        $imapConfig->setPassword($salesperson->imap_password);
+
+        // Set Host/Post
+        $imapConfig->setHost($salesperson->imap_server);
+        $imapConfig->setPort($salesperson->imap_port);
+        $imapConfig->setSecurity($salesperson->imap_security);
+        $imapConfig->setAuth($salesperson->smtp_auth);
+        $imapConfig->calcCharset();
+
+        // Set Folder Config
+        $imapConfig->setFolder($folder->name);
+        if(!empty($folder->date_imported)) {
+            $imapConfig->setImapConfig($folder->date_imported);
+        } else {
+            $imapConfig->setImapConfig(Carbon::now()->sub(1, 'month'));
+        }
+
+        // Return IMAP Config
+        return $imapConfig;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\Integration\Common\DTOs;
 
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 /**
  * Class ParsedEmail
@@ -471,7 +472,7 @@ class ParsedEmail
      */
     public function setDate(string $date): void
     {
-        $this->date = Carbon::parse($date)->isoFormat('YYYY-M-D h:mm:ss');
+        $this->date = Carbon::parse($date)->toDateTimeString();
     }
 
 
