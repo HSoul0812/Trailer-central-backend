@@ -22,7 +22,7 @@ use Mockery;
 class ScrapeRepliesTest extends TestCase
 {
     // Get a Random Image
-    const RANDOM_IMAGE = 'https://source.unsplash.com/random;'
+    const RANDOM_IMAGE = 'https://source.unsplash.com/random;';
 
     /**
      * Set Up Test
