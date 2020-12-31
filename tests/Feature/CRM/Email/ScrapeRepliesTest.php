@@ -458,7 +458,7 @@ class ScrapeRepliesTest extends TestCase
         }
 
         // Set Date
-        $parsed->setDate($email->date_sent);
+        $parsed->setDate($email->date_sent->format('Y-m-d H:i:s'));
 
         // Return ParsedEmail
         return $parsed;
