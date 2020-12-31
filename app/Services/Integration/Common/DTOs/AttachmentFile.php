@@ -172,7 +172,11 @@ class AttachmentFile
      */
     public function getContents(): string
     {
-        return $this->contents;
+        // Contents Exists?
+        if(!empty($this->contents)) {
+            return $this->contents;
+        }
+        return '';
     }
 
     /**
