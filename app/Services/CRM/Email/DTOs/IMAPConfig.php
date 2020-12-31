@@ -237,4 +237,26 @@ class ImapConfig
             $this->setCharset(self::CHARSET_DEFAULT);
         }
     }
+
+
+    /**
+     * Return FolderName
+     * 
+     * @return string $this->folderName
+     */
+    public function getFolderName(): string
+    {
+        return $this->folderName;
+    }
+
+    /**
+     * Set Folder Name
+     * 
+     * @param string $folderName
+     * @return void
+     */
+    public function setFolderName(string $folderName): void
+    {
+        $this->folderName = $folderName;
+    }
 }
