@@ -84,8 +84,8 @@ class ScrapeRepliesTest extends TestCase
         $unused = factory(EmailHistory::class, 5)->make();
 
         // Get Messages
-        $parsed = [];
         $messages = [];
+        $parsed = [];
         $id = 0;
         foreach($replies as $reply) {
             $messages[] = $id;
@@ -246,22 +246,22 @@ class ScrapeRepliesTest extends TestCase
         $messages = [];
         $id = 0;
         foreach($replies as $reply) {
-            $messages[$reply->message_id] = $id;
+            $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
         foreach($nosub as $reply) {
-            $messages[$reply->message_id] = $id;
+            $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
         foreach($noid as $reply) {
-            $messages[$reply->message_id] = $id;
+            $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
         foreach($unused as $reply) {
-            $messages[$reply->message_id] = $id;
+            $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
