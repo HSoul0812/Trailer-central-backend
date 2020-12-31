@@ -21,6 +21,8 @@ use Mockery;
 
 class ScrapeRepliesTest extends TestCase
 {
+    // Get a Random Image
+    const RANDOM_IMAGE = 'https://source.unsplash.com/random;'
 
     /**
      * Set Up Test
@@ -398,9 +400,9 @@ class ScrapeRepliesTest extends TestCase
             $id = count($messages);
             $attachments = null;
             if($id == 1) {
-                $attachments = $this->getAttachmentFiles(0, 2);
+                $attachments = $this->getAttachmentFiles(2, 2);
             } elseif($id == 3) {
-                $attachments = $this->getAttachmentFiles(0, 1);
+                $attachments = $this->getAttachmentFiles(1, 1);
             }
 
             // Parse Email Message
@@ -443,6 +445,9 @@ class ScrapeRepliesTest extends TestCase
                      ->andReturn($message);
             }
         });
+
+        // Fake Storage
+        Storage::fake('s3email');
 
         // Call Leads Assign Command
         $this->artisan('email:scrape-replies 0 0 ' . self::getTestDealerId())->assertExitCode(0);
@@ -579,18 +584,20 @@ class ScrapeRepliesTest extends TestCase
         $faker = Faker::create();
 
         // Loop Total
-        for($i = 0; $i <= $total; $i++) {
+        for($i = 0; $i < $total; $i++) {
             // Create Image
-            $img = $faker->image($_ENV['MAIL_ATTACHMENT_DIR']);
-            var_dump($img);
-            $parts = pathinfo($img);
-            $filename = $parts['filename'] . '.' . $parts['extension'];
+            $contents = file_get_contents(self::RANDOM_IMAGE);
+
+            // Write File Locally
+            $filename = $faker->md5 . '.jpg';
+            $filepath = $_ENV['MAIL_ATTACHMENT_DIR'] . $filename;
+            file_put_contents($filepath, $contents);
 
             // Create Parsed Email
             $attachment = new AttachmentFile();
 
             // Set Temp Filename
-            $attachment->setTmpName($img);
+            $attachment->setTmpName($filepath);
 
             // Set File Path
             $attachment->setFilePath($faker->imageUrl);
