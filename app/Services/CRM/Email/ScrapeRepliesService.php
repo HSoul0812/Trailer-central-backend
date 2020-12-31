@@ -318,8 +318,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Lead ID Exists?
         if(!empty($email->getLeadId())) {
+            // Only on IMAP
+            if(empty($salesperson->googleToken)) {
+                $this->imap->full($email);
+            }
+
             // Get Full IMAP Data
-            $this->imap->full($email);
             $this->insertReply($dealerId, $salesperson->user_id, $email);
 
             // Delete Attachments
