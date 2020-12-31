@@ -26,7 +26,7 @@ interface EmailHistoryRepositoryInterface extends Repository {
      * Create Email Attachments
      * 
      * @param string $messageId
-     * @param array $attachments
+     * @param Collection<AttachmentFile> $attachments
      * @return Attachment
      */
     public function updateAttachments($messageId, $attachments);

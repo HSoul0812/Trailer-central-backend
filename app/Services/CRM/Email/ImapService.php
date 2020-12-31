@@ -7,9 +7,10 @@ use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Illuminate\Support\Facades\Log;
 use PhpImap\Mailbox;
 use PhpImap\Exceptions\ConnectionException;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class ScrapeRepliesService
@@ -90,24 +91,32 @@ class ImapService implements ImapServiceInterface
             return false;
         }
 
-        // Get To/From
-        $parsed = $this->parseToFrom($overview);
+        // Initialize Parsed Email
+        $parsed = new ParsedEmail();
+        $parsed->setId($overview->uid);
 
-        // Handle Initializing Parsed Data
-        $parsed['references'] = !empty($overview->references) ? $overview->references : [];
-        $parsed['message_id'] = !empty($overview->in_reply_to) ? trim($overview->in_reply_to) : trim($overview->message_id);
-        $parsed['uid'] = $overview->uid;
-        $parsed['root_message_id'] = $parsed['message_id'];
-        if(!empty($parsed['references'])) {
-            $parsed['references'] = explode(" ", $parsed['references']);
-            $parsed['root_message_id'] = trim(reset($parsed['references']));
-            if(empty($parsed['message_id'])) {
-                $parsed['message_id'] = trim(end($parsed['references']));
+        // Set Message ID's
+        $parsed->setMessageId(!empty($overview->in_reply_to) ? trim($overview->in_reply_to) : trim($overview->message_id));
+        $parsed->setRootMessageId($parsed->getMessageId());
+        $parsed->setReferences($overview->references);
+
+        // Handle Overriding Message ID From References
+        $references = $parsed->getReferences();
+        if(!empty($references)) {
+            $parsed->setRootMessageId(reset($parsed['references']));
+
+            // Message ID Doesn't Exist?
+            if(empty($parsed->getMessageId())) {
+                $parsed->setMessageId(end($parsed['references']));
             }
         }
 
+        // Set To/From
+        $parsed->setTo($overview->to);
+        $parsed->setFrom($overview->from);
+
         // Handle Subject
-        $parsed['subject'] = !empty($overview->subject) ? $overview->subject : "";
+        $parsed->setSubject($overview->subject);
 
         // Set Date
         $parsed['date_sent'] = date("Y-m-d H:i:s", strtotime($overview->date));
@@ -118,12 +127,12 @@ class ImapService implements ImapServiceInterface
     }
 
     /**
-     * Parse Reply Details to Clean Up Result
+     * Full Reply Details to Clean Up Result
      * 
      * @param array $parsed
      * @return array of parsed data
      */
-    public function parsed(array $parsed) {
+    public function full(array $parsed) {
         // Get Mail Data
         $mail = $this->imap->getMail($parsed['uid'], false);
 
@@ -272,16 +281,20 @@ class ImapService implements ImapServiceInterface
         $attachments = $mail->getAttachments();
         foreach($attachments as $attachment) {
             // Initialize File Class
-            $file = new \stdclass;
-            $file->tmpName = $attachment->__get('filePath');
-            $file->filePath = $attachment->name;
-            $file->name = $attachment->name;
+            $file = new AttachmentFile();
+            $file->setTmpName($attachment->__get('filePath'));
+            $file->setFilePath($attachment->name);
+            $file->setFileName($attachment->name);
+
+            // Get Mime Type
+            $mime = mime_content_type($file->getTmpName());
+            $file->setMimeType($mime);
 
             // Add Files to Array
             $files[] = $file;
         }
 
         // Return Attachments
-        return $files;
+        return collect($files);
     }
 }

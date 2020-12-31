@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Email;
 
 use App\Models\User\NewDealerUser;
+use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
@@ -220,24 +221,23 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $emailFolder
+     * @param EmailFolder $folder
      * @return false || array of email results
      */
-    private function importGmail($dealerId, $salesperson, $emailFolder) {
+    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $folder) {
         // Get Emails From Gmail
-        $messages = $this->gmail->messages($salesperson->googleToken, $emailFolder->name, ['after' => $emailFolder->date_imported]);
-        $this->updateFolder($salesperson, $emailFolder);
+        $messages = $this->gmail->messages($salesperson->googleToken, $folder->name, ['after' => $folder->date_imported]);
+        $this->updateFolder($salesperson, $folder);
 
         // Loop Messages
         $total = 0;
         $skipped = 0;
-        foreach($messages as $overview) {
+        foreach($messages as $mailId) {
             // Get Parsed Message
-            $params = $this->gmail->message($overview->id);
-            $params['dealer_id'] = $dealerId;
+            $email = $this->gmail->message($mailId);
 
             // Import Message
-            $result = $this->importMessage($salesperson, $overview);
+            $result = $this->importMessage($dealerId, $salesperson, $email);
             if($result === 1) {
                 $total++;
             } elseif($result === 0) {
@@ -259,24 +259,23 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $emailFolder
+     * @param EmailFolder $folder
      * @return false || array of email results
      */
-    private function importImap($dealerId, $salesperson, $emailFolder) {
+    private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $folder) {
         // Get Emails From IMAP
-        $messages = $this->imap->messages($salesperson, $emailFolder);
-        $this->updateFolder($salesperson, $emailFolder);
+        $messages = $this->imap->messages($salesperson, $folder);
+        $this->updateFolder($salesperson, $folder);
 
         // Loop Messages
         $total = 0;
         $skipped = 0;
         foreach($messages as $mailId) {
             // Get Message Overview
-            $overview = $this->imap->overview($mailId);
-            $overview['dealer_id'] = $dealerId;
+            $email = $this->imap->overview($mailId);
 
             // Import Message
-            $result = $this->importMessage($salesperson, $overview);
+            $result = $this->importMessage($dealerId, $salesperson, $email);
             if($result === 1) {
                 $total++;
             } elseif($result === 0) {
@@ -296,99 +295,111 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Import Message From IMAP
      * 
+     * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param array $overview
+     * @param ParsedEmail $email
      * @return int | -1=skipped | 0=processed | 1=imported
      */
-    private function importMessage($salesperson, $overview) {
+    private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
         // Check if Exists
-        if(empty($overview['subject']) || empty($overview['message_id']) ||
-           $this->emails->findMessageId($salesperson->user_id, $overview['message_id'])) {
-            $this->deleteAttachments($overview['attachments']);
+        if(empty($email->getSubject()) || empty($email->getMessageId()) ||
+           $this->emails->findMessageId($salesperson->user_id, $email->getMessageId())) {
+            $this->deleteAttachments($email->getAttachments());
             return -1;
         }
 
         // Find Lead
-        $result = $this->findLead($salesperson, $overview['dealer_id']);
+        $this->findLead($dealerId, $salesperson, $email);
 
         // Lead ID Exists?
-        if(!empty($result['lead_id'])) {
+        if(!empty($email->getLeadId())) {
             // Get Full IMAP Data
-            $params = $this->imap->parsed($result);
-            $params['user_id'] = $salesperson->user_id;
-            $params['lead_id'] = $result['lead_id'];
-            $this->insertReply($params);
+            $this->imap->full($email);
+            $this->insertReply($dealerId, $salesperson->user_id, $email);
 
             // Delete Attachments
-            $this->deleteAttachments($params['attachments']);
+            $this->deleteAttachments($email->getAttachments());
             return 1;
         }
 
         // Marked as Processed
-        $this->emails->createProcessed($salesperson->user_id, $overview['message_id']);
+        $this->emails->createProcessed($salesperson->user_id, $email->getMessageId());
         return 0;
     }
 
     /**
      * Find Lead That Matches Email
      * 
+     * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param array $overview
+     * @param ParsedEmail $email
      * @return Lead
      */
-    private function findLead(SalesPerson $salesperson, array $overview) {
+    private function findLead(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
         // Get Emails
         $emails = [];
-        if($salesperson->smtp_email !== $overview['to_email'] &&
-           $salesperson->imap_email !== $overview['to_email']) {
-            $emails[] = $overview['to_email'];
-            $overview['direction'] = 'Sent';
+        if($salesperson->smtp_email !== $email->getToEmail() &&
+           $salesperson->imap_email !== $email->getToEmail()) {
+            $emails[] = $email->getToEmail();
+            $email->setDirection('Sent');
         }
-        if($salesperson->smtp_email !== $overview['from_email'] &&
-           $salesperson->imap_email !== $overview['from_email']) {
-            $emails[] = $overview['from_email'];
+        if($salesperson->smtp_email !== $email->getFromEmail() &&
+           $salesperson->imap_email !== $email->getFromEmail()) {
+            $emails[] = $email->getFromEmail();
         }
 
         // Get Lead By Emails
-        $lead = $this->leads->getByEmails($overview['dealer_id'], $emails);
+        $lead = $this->leads->getByEmails($dealerId, $emails);
 
         // Return Updated Overview
-        $overview['lead_id'] = $lead->identifier;
+        $email->setLeadId($lead->identifier);
 
         // Return
-        return $overview;
+        return $email;
     }
 
     /**
      * Insert Reply Into DB
      * 
-     * @param array $reply
+     * @param int $dealerId
+     * @param int $userId
+     * @param ParsedEmail $email
      * @return array
      */
-    private function insertReply($reply) {
+    private function insertReply($dealerId, $userId, $email) {
         // Start Transaction
-        $email = [];
-        DB::transaction(function() use (&$email, $reply) {
+        $emailHistory = [];
+        DB::transaction(function() use (&$emailHistory, $dealerId, $userId, $email) {
             // Insert Interaction
             $interaction = $this->interactions->create([
-                'lead_id' => $reply['lead_id'],
-                'user_id' => $reply['user_id'],
+                'lead_id' => $email->getLeadId(),
+                'user_id' => $userId,
                 'interaction_type' => 'EMAIL',
-                'interaction_notes' => 'E-Mail ' . $reply['direction'] . ': ' . $reply['subject'],
-                'interaction_time' => $reply['date_sent']
+                'interaction_notes' => 'E-Mail ' . $email->getDirection() . ': ' . $email->getSubject(),
+                'interaction_time' => $email->getDate()
             ]);
 
             // Insert Attachments
-            $reply['attachments'] = $this->insertAttachments($reply['dealer_id'], $reply['message_id'], $reply['attachments']);
+            $this->insertAttachments($dealerId, $email->getMessageId(), $email->getAttachments());
 
             // Insert Email History Entry
-            unset($reply['direction']);
-            $reply['interaction_id'] = $interaction->interaction_id;
-            $email = $this->emails->create($reply);
+            $emailHistory = $this->emails->create([
+                'lead_id' => $email->getLeadId(),
+                'interaction_id' => $interaction->interaction_id,
+                'message_id' => $email->getMessageId(),
+                'root_message_id' => $email->getRootMessageId(),
+                'to_email' => $email->getToEmail(),
+                'to_name' => $email->getToName(),
+                'from_email' => $email->getFromName(),
+                'subject' => $email->getSubject(),
+                'body' => $email->getBody(),
+                'use_html' => $email->getIsHtml(),
+                'date_sent' => $email->getDate()
+            ]);
         });
 
         // Return Final Email
-        return $email;
+        return $emailHistory;
     }
 
     /**
@@ -398,7 +409,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param EmailFolder $folder
      * @return EmailFolder
      */
-    private function updateFolder($salesperson, $folder) {
+    private function updateFolder(SalesPerson $salesperson, EmailFolder $folder) {
         // Create or Update Folder
         return $this->folders->createOrUpdate([
             'id' => $folder->folder_id,
@@ -415,37 +426,33 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Insert Attachments
      * 
+     * @param int $dealerId
      * @param string $messageId
-     * @param array $files
-     * @return Collection of Attachment
+     * @param Collection<AttachmentFile>
+     * @return Collection<Attachment>
      */
-    private function insertAttachments($dealerId, $messageId, $files) {
-        // No Attachments?
-        if(empty($files)) {
-            return collect([]);
-        }
-
+    private function insertAttachments(int $dealerId, string $messageId, Collection $files) {
         // Loop Attachments
         $attachments = [];
         foreach($files as $file) {
             // Skip Entry
-            if(empty($file->filePath)) {
+            if(empty($file->getFilePath())) {
                 continue;
             }
 
             // Upload File
             $s3Image = $this->uploadAttachment($dealerId, $messageId, $file);
 
-            // Add Email Attachment
-            $attachments[] = [
+            // Add Attachments to Array
+            $attachments[] = Attachment::create([
                 'message_id' => $messageId,
                 'filename' => $s3Image,
-                'original_filename' => $file->name
-            ];
+                'original_filename' => $file->getFileName()
+            ]);
         }
 
         // Return Collection of Attachment
-        return $attachments;
+        return collect($attachments);
     }
 
     /**
@@ -453,30 +460,26 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param string $messageId
-     * @param File $file
+     * @param AttachmentFile $file
      * @return string
      */
     private function uploadAttachment($dealerId, $messageId, $file) {
         // Upload File to S3
         $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
-        $path_parts = pathinfo( $file->name );
+        $path_parts = pathinfo( $file->getFileName() );
         $filename = $path_parts['filename'];
         $ext = !empty($path_parts['extension']) ? $path_parts['extension'] : '';
         if(empty($ext)) {
-            $type = mime_content_type($file->tmpName);
-            if(!empty($type)) {
-                $mimes = explode('/', $type);
-                $ext = end($mimes);
-            }
+            $ext = $file->getMimeExt();
         }
 
         // Get File Data
-        if(!empty($file->data)) {
-            $contents = base64_decode($file->data);
-        } elseif(!empty($file->tmpName)) {
-            $contents = fopen($file->tmpName, 'r+');
+        if(!empty($file->getContents())) {
+            $contents = base64_decode($file->getContents());
+        } elseif(!empty($file->getTmpName())) {
+            $contents = fopen($file->getTmpName(), 'r+');
         } else {
-            $contents = fopen($file->filePath, 'r+');
+            $contents = fopen($file->getFilePath(), 'r+');
         }
 
         // Upload Image
@@ -505,7 +508,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Deleted Some Replies?
         if($deleted > 0) {
-            Log::info('Deleted ' . $deleted . ' total temporary attachment files');
+            Log::info('Deleted ' . $deleted . ' Total Temporary Attachment Files');
         }
 
         // Return Total

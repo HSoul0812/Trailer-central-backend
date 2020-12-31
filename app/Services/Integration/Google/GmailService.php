@@ -15,6 +15,7 @@ use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
+use Google_Service_Gmail_MessagePart;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -143,16 +144,13 @@ class GmailService implements GmailServiceInterface
         $labels = $this->labels($accessToken, $folder);
 
         // Imap Inbox ALREADY Exists?
-        $filters = '';
-        Log::info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $filters . '"');
-
-        // Create Query
         $q = '';
         foreach($params as $k => $v) {
             if(in_array($k, $this->validQuery)) {
                 $q .= $k . ': ' . $v;
             }
         }
+        Log::info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
 
         // Get Messages
         $results = $this->gmail->users_messages->listUsersMessages('me', [
@@ -166,7 +164,11 @@ class GmailService implements GmailServiceInterface
         if (count($messages) == 0) {
             return [];
         }
-        return $messages;
+
+        // Return Mapped Array
+        return array_map(function($item) {
+            return $item->id;
+        }, $messages);
     }
 
     /**
@@ -197,19 +199,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Parse Data
-        return [
-            'message_id' => !empty($headers['Message-ID']) ? $headers['Message-ID'] : '',
-            'to_email' => !empty($headers['To']) ? $headers['To'] : '',
-            'to_name' => !empty($headers['To-Name']) ? $headers['To-Name'] : '',
-            'from_email' => !empty($headers['From']) ? $headers['From'] : '',
-            'from_name' => !empty($headers['From-Name']) ? $headers['From-Name'] : '',
-            'subject' => !empty($headers['Subject']) ? $headers['Subject'] : '',
-            'body' => $body,
-            'is_html' => (strip_tags($body) != $body) ? true : false,
-            'attachments' => $attachments,
-            'date_sent' => Carbon::parse($headers['Date'])->isoFormat('YYYY-M-D h:mm:ss'),
-            'direction' => 'Received'
-        ];
+        return $this->getParsedMessage($mailId, $headers, $body, $attachments);
     }
 
     /**
@@ -344,7 +334,7 @@ class GmailService implements GmailServiceInterface
      * @param array labels
      * @return array of label ID's
      */
-    private function getLabelIds($labels) {
+    private function getLabelIds(array $labels) {
         // Initialize Label ID's
         $labelIds = [];
         foreach($labels as $label) {
@@ -361,41 +351,20 @@ class GmailService implements GmailServiceInterface
      * @param array $headers
      * @return array
      */
-    private function parseMessageHeaders($headers) {
+    private function parseMessageHeaders(array $headers) {
         // Initialize New Headers Array
         $clean = [];
         foreach($headers as $header) {
-            // Get Value
-            $value = $header->value;
-
             // Clean Name
             if($header->name === 'Message-Id') {
                 $header->name = 'Message-ID';
-            }
-            elseif($header->name === 'Delivered-To') {
+            } elseif($header->name === 'Delivered-To') {
                 $header->name = 'To';
             }
 
-            // Clean Email Values
-            if($header->name === 'To' ||
-               $header->name === 'Reply-To' ||
-               $header->name === 'From') {
-                $name = '';
-
-                // Separate Name From Email
-                if(strpos($value, '<') !== FALSE) {
-                    $parts = explode("<", $value);
-                    $value = str_replace('>', '', end($parts));
-                    $name = trim(reset($parts));
-                }
-                $clean[$header->name . '-Name'] = $name;
-            }
-
             // Add to Array
-            $clean[$header->name] = trim($value);
+            $clean[$header->name] = trim($header->value);
         }
-
-        // Return Cleaned Headers
         return $clean;
     }
 
@@ -407,7 +376,7 @@ class GmailService implements GmailServiceInterface
      * @source https://stackoverflow.com/a/32660892
      * @return string of body
      */
-    private function parseMessageBody($message_id, $payload) {
+    private function parseMessageBody(string $message_id, Google_Service_Gmail_MessagePart $payload) {
         // Get Body From Parts
         $body = '';
         if(is_array($payload)) {
@@ -415,7 +384,7 @@ class GmailService implements GmailServiceInterface
                 if (!empty($part->body->data)) {
                     $body = $part->body->data;
                     break;
-                } else if (!empty($part->parts)) {
+                } elseif (!empty($part->parts)) {
                     $body = $this->parseMessageBody($message_id, $part->parts);
                 }
             }
@@ -445,26 +414,58 @@ class GmailService implements GmailServiceInterface
      * @source https://stackoverflow.com/a/59400043
      * @return array of attachments
      */
-    private function parseMessageAttachments($message_id, $parts) {
+    private function parseMessageAttachments(string $message_id, array $parts) {
         // Get Attachments From Parts
         $attachments = [];
         foreach ($parts as $part) {
             if (!empty($part->body->attachmentId)) {
                 $attachment = $this->gmail->users_messages_attachments->get('me', $message_id, $part->body->attachmentId);
 
-                // Generate Attachment Object
-                $obj = new \stdclass;
-                $obj->filePath = $part->filename;
-                $obj->name = $part->filename;
-                $obj->mime = $part->mimeType;
-                $obj->data = strtr($attachment->data, '-_', '+/');
+                // Initialize File Class
+                $file = new AttachmentFile();
+                $file->setFilePath($part->filename);
+                $file->setFileName($part->filename);
+                $file->setMimeType($part->mimeType);
+                $file->setContents(strtr($attachment->data, '-_', '+/'));
 
                 // Add Attachment to Array
-                $attachments[] = $obj;
+                $attachments[] = $file;
             } else if (!empty($part->parts)) {
                 $attachments = array_merge($attachments, $this->parseMessageAttachments($message_id, $part->parts));
             }
         }
         return $attachments;
+    }
+
+    /**
+     * Get Parsed Message
+     * 
+     * @param array $headers
+     * @param string $body
+     * @param Collection<AttachmentFile> $attachments
+     * @return ParsedEmail
+     */
+    private function getParsedMessage($mailId, $headers, $body, $attachments) {
+        // Create Parsed Email
+        $parsed = new ParsedEmail();
+        $parsed->setId($mailId);
+
+        // Set Message ID
+        $parsed->setMessageId($headers['Message-ID']);
+
+        // Set To/From
+        $parsed->setTo($headers['To']);
+        $parsed->setFrom($headers['From']);
+
+        // Set Subject/Body
+        $parsed->setSubject($headers['Subject']);
+        $parsed->setBody($body);
+        $parsed->setAttachments($attachments);
+
+        // Set Date
+        $parsed->setDate($headers['Date']);
+
+        // Return ParsedEmail
+        return $parsed;
     }
 }
