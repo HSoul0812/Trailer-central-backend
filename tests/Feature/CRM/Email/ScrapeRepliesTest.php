@@ -394,6 +394,16 @@ class ScrapeRepliesTest extends TestCase
             'from_name' => $salesPerson->full_name
         ]);
 
+        // Always Skipped
+        $nosub = factory(EmailHistory::class, 2)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name,
+            'subject' => ''
+        ]);
+
         // Get Messages
         $messages = [];
         $parsed = [];
@@ -406,6 +416,15 @@ class ScrapeRepliesTest extends TestCase
             } elseif($id == 3) {
                 $attachments = $this->getAttachmentFiles(1, 1);
             }
+
+            // Parse Email Message
+            $messages[] = $id;
+            $parsed[] = $this->getParsedEmail($id, $reply, $attachments);
+        }
+        foreach($nosub as $reply) {
+            // Generate Attachments?!
+            $id = count($messages);
+            $attachments = $this->getAttachmentFiles(1, 1);
 
             // Parse Email Message
             $messages[] = $id;
@@ -456,28 +475,47 @@ class ScrapeRepliesTest extends TestCase
 
         // Mock Saved Replies
         foreach($parsed as $reply) {
-            // Assert a lead status entry was saved...
-            $this->assertDatabaseHas('crm_email_history', [
-                'message_id' => $reply->getMessageId()
-            ]);
+            // Skipped
+            if(empty($reply->getSubject())) {
+                // Assert a lead status entry was NOT saved...
+                $this->assertDatabaseMissing('crm_email_history', [
+                    'message_id' => $reply->getMessageId()
+                ]);
 
-            // Check Attachments
-            if(!empty($reply->getAttachments())) {
+                // Attachment Exists in DB
+                $this->assertDatabaseMissing('crm_email_attachments', [
+                    'message_id' => $reply->getMessageId()
+                ]);
+
+                // Attachments ALWAYS Set
                 foreach($reply->getAttachments() as $attachment) {
-                    // Attachment Exists in DB
-                    $this->assertDatabaseHas('crm_email_attachments', [
-                        'message_id' => $reply->getMessageId(),
-                        'original_filename' => $attachment->getFileName()
-                    ]);
-
                     // Attachment Was Deleted From Tmp Directory
                     $this->assertFileDoesNotExist($attachment->getTmpName());
                 }
             } else {
-                // No Attachments
-                $this->assertDatabaseMissing('crm_email_attachments', [
+                // Assert a lead status entry was saved...
+                $this->assertDatabaseHas('crm_email_history', [
                     'message_id' => $reply->getMessageId()
                 ]);
+
+                // Check Attachments
+                if(!empty($reply->getAttachments())) {
+                    foreach($reply->getAttachments() as $attachment) {
+                        // Attachment Exists in DB
+                        $this->assertDatabaseHas('crm_email_attachments', [
+                            'message_id' => $reply->getMessageId(),
+                            'original_filename' => $attachment->getFileName()
+                        ]);
+
+                        // Attachment Was Deleted From Tmp Directory
+                        $this->assertFileDoesNotExist($attachment->getTmpName());
+                    }
+                } else {
+                    // No Attachments
+                    $this->assertDatabaseMissing('crm_email_attachments', [
+                        'message_id' => $reply->getMessageId()
+                    ]);
+                }
             }
         }
 
