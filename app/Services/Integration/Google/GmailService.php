@@ -18,6 +18,7 @@ use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
 use Google_Service_Gmail_MessagePart;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -192,7 +193,7 @@ class GmailService implements GmailServiceInterface
         // Get Headers/Body/Attachments
         $headers = $this->parseMessageHeaders($payload->getHeaders());
         $body = $this->parseMessageBody($headers['Message-ID'], $payload);
-        $attachments = [];
+        $attachments = new Collection();
         if(!empty($payload->parts)) {
             $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
         }
@@ -442,12 +443,13 @@ class GmailService implements GmailServiceInterface
     /**
      * Get Parsed Message
      * 
+     * @param string $mailId
      * @param array $headers
      * @param string $body
      * @param Collection<AttachmentFile> $attachments
      * @return ParsedEmail
      */
-    private function getParsedMessage($mailId, $headers, $body, $attachments) {
+    private function getParsedMessage(string $mailId, array $headers, string $body, Collection $attachments) {
         // Create Parsed Email
         $parsed = new ParsedEmail();
         $parsed->setId($mailId);
