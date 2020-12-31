@@ -355,9 +355,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Get Lead By Emails
         $lead = $this->leads->getByEmails($dealerId, $emails);
-
-        // Return Updated Overview
-        $email->setLeadId($lead->identifier);
+        if(!empty($lead->identifier)) {
+            $email->setLeadId($lead->identifier);
+        }
 
         // Return
         return $email;
