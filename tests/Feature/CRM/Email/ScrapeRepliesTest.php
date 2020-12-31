@@ -527,6 +527,170 @@ class ScrapeRepliesTest extends TestCase
         $salesPerson->delete();
     }
 
+    /**
+     * Test Scraping Attachment Emails From IMAP
+     *
+     * @return void
+     */
+    public function testScrapeAttachmentsImap()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Mark All Sales People as Deleted
+        $salesIds = $this->disableSalesPeople($dealer->user_id);
+
+        // Create Gmail Sales Person
+        $salesPerson = factory(SalesPerson::class, 1)->create()->first();
+
+        // Create Lead
+        $lead = factory(Lead::class, 1)->create()->first();
+
+        // Get Folders
+        $folders = EmailFolder::getDefaultGmailFolders();
+
+        // Create Dummy Emails
+        $replies = factory(EmailHistory::class, 5)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name
+        ]);
+
+        // Always Skipped
+        $nosub = factory(EmailHistory::class, 2)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name,
+            'subject' => ''
+        ]);
+
+        // Get Messages
+        $messages = [];
+        $parsed = [];
+        foreach($replies as $reply) {
+            // Generate Attachments?!
+            $id = count($messages);
+            $attachments = null;
+            if($id == 1) {
+                $attachments = $this->getAttachmentFiles(2, 2);
+            } elseif($id == 3) {
+                $attachments = $this->getAttachmentFiles(1, 1);
+            }
+
+            // Parse Email Message
+            $messages[] = $id;
+            $parsed[] = $this->getParsedEmail($id, $reply, $attachments);
+        }
+        foreach($nosub as $reply) {
+            // Generate Attachments?!
+            $id = count($messages);
+            $attachments = $this->getAttachmentFiles(1, 1);
+
+            // Parse Email Message
+            $messages[] = $id;
+            $parsed[] = $this->getParsedEmail($id, $reply, $attachments);
+        }
+
+
+        // Mock Imap Service
+        $this->mock(ImapServiceInterface::class, function ($mock) use($folders, $messages, $parsed) {
+            // Should Receive Messages With Args Once Per Folder!
+            $mock->shouldReceive('messages')
+                 ->times(count($folders))
+                 ->andReturn($messages);
+
+            // Mock Messages
+            foreach($parsed as $k => $message) {
+                // Should Receive Full Message Details Once Per Folder Per Message!
+                $mock->shouldReceive('message')
+                     ->withArgs([$k])
+                     ->times(count($folders))
+                     ->andReturn($message);
+
+                // Exists in Replies?
+                if(!empty($message->getSubject())) {
+                    // Should Receive Full Details Once Per Folder Per Reply!
+                    $mock->shouldReceive('full')
+                         ->with(Mockery::on(function($overview) use($message) {
+                            return ($overview->getMessageId() == $message->getMessageId());
+                         }))
+                         ->once()
+                         ->andReturn($email);
+                } else {
+                    // Should NOT Receive Full Details; This One Is Invalid and Skipped
+                    $mock->shouldReceive('full')
+                         ->with(Mockery::on(function($overview) use($message) {
+                            return ($overview->getMessageId() == $message->getMessageId());
+                         }))
+                         ->never();
+                }
+            }
+        });
+
+        // Fake Storage
+        Storage::fake('s3email');
+
+        // Call Leads Assign Command
+        $this->artisan('email:scrape-replies 0 0 ' . self::getTestDealerId())->assertExitCode(0);
+
+        // Mock Saved Replies
+        foreach($parsed as $reply) {
+            // Skipped
+            if(empty($reply->getSubject())) {
+                // Assert a lead status entry was NOT saved...
+                $this->assertDatabaseMissing('crm_email_history', [
+                    'message_id' => $reply->getMessageId()
+                ]);
+
+                // Attachment Exists in DB
+                $this->assertDatabaseMissing('crm_email_attachments', [
+                    'message_id' => $reply->getMessageId()
+                ]);
+
+                // Attachments ALWAYS Set
+                foreach($reply->getAttachments() as $attachment) {
+                    // Attachment Was Deleted From Tmp Directory
+                    $this->assertFileDoesNotExist($attachment->getTmpName());
+                }
+            } else {
+                // Assert a lead status entry was saved...
+                $this->assertDatabaseHas('crm_email_history', [
+                    'message_id' => $reply->getMessageId()
+                ]);
+
+                // Check Attachments
+                if(!empty($reply->getAttachments())) {
+                    foreach($reply->getAttachments() as $attachment) {
+                        // Attachment Exists in DB
+                        $this->assertDatabaseHas('crm_email_attachments', [
+                            'message_id' => $reply->getMessageId(),
+                            'original_filename' => $attachment->getFileName()
+                        ]);
+
+                        // Attachment Was Deleted From Tmp Directory
+                        $this->assertFileDoesNotExist($attachment->getTmpName());
+                    }
+                } else {
+                    // No Attachments
+                    $this->assertDatabaseMissing('crm_email_attachments', [
+                        'message_id' => $reply->getMessageId()
+                    ]);
+                }
+            }
+        }
+
+
+        // Restore Existing Sales People
+        $this->restoreSalesPeople($salesIds);
+
+        // Delete Sales Person
+        $salesPerson->delete();
+    }
+
 
     /**
      * Delete Sales People
@@ -618,7 +782,6 @@ class ScrapeRepliesTest extends TestCase
         // Calculate Total Number
         $attachments = [];
         $total = rand($min, $max);
-        var_dump($total);
 
         // Initialize Faker
         $faker = Faker::create();
