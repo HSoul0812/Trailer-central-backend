@@ -18,6 +18,7 @@ use App\Services\Integration\Google\GmailServiceInterface;
 use Tests\TestCase;
 use Faker\Factory as Faker;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Mockery;
 
 class ScrapeRepliesTest extends TestCase
