@@ -382,7 +382,7 @@ class ScrapeRepliesTest extends TestCase
         $folders = EmailFolder::getDefaultGmailFolders();
 
         // Create Dummy Emails
-        $replies = factory(EmailHistory::class, 10)->make([
+        $replies = factory(EmailHistory::class, 5)->make([
             'lead_id' => $lead->identifier,
             'to_email' => $lead->email_address,
             'to_name' => $lead->full_name,
@@ -397,8 +397,10 @@ class ScrapeRepliesTest extends TestCase
             // Generate Attachments?!
             $id = count($messages);
             $attachments = null;
-            if($id < 5 || $id > 8) {
-                $attachments = $this->getAttachmentFiles();
+            if($id == 1) {
+                $attachments = $this->getAttachmentFiles(0, 2);
+            } elseif($id == 3) {
+                $attachments = $this->getAttachmentFiles(0, 1);
             }
 
             // Parse Email Message
@@ -571,6 +573,7 @@ class ScrapeRepliesTest extends TestCase
         // Calculate Total Number
         $attachments = [];
         $total = rand($min, $max);
+        var_dump($total);
 
         // Initialize Faker
         $faker = Faker::create();
