@@ -265,6 +265,9 @@ class ScrapeRepliesTest extends TestCase
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
+        var_dump($messages);
+        var_dump($parsed);
+        die;
 
 
         // Mock Imap Service
