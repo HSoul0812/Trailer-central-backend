@@ -20,6 +20,36 @@ class User extends Model implements Authenticatable
 {
     const TABLE_NAME = 'dealer';
 
+    public const TYPE_DEALER = 'dealer';
+
+    public const TYPE_MANUFACTURER = 'manufacturer';
+
+    public const TYPE_WEBSITE = 'website';
+
+    public const STATUS_SUSPENDED = 'suspended';
+
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_TRIAL = 'trial';
+
+    public const STATUS_EXTERNAL = 'external';
+
+    public const STATUS_SIGNUP = 'signup';
+
+    public const TYPES = [
+        self::TYPE_DEALER,
+        self::TYPE_MANUFACTURER,
+        self::TYPE_WEBSITE
+    ];
+
+    public const STATUSES = [
+        self::STATUS_SUSPENDED,
+        self::STATUS_ACTIVE,
+        self::STATUS_TRIAL,
+        self::STATUS_EXTERNAL,
+        self::STATUS_SIGNUP
+    ];
+
     /**
      * The table associated with the model.
      *

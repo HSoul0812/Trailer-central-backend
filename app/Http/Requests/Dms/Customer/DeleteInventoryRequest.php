@@ -9,9 +9,9 @@ use App\Http\Requests\Request;
 class DeleteInventoryRequest extends Request
 {
     protected $rules = [
-        'dealer_id' => 'integer|min:1|required',
-        'customer_id' => 'integer|min:1|required',
+        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
+        'customer_id' => 'integer|min:1|required|exists:dms_customer,id',
         'customer_inventory_ids' => 'array|required',
-        'customer_inventory_ids.*' => 'integer|min:1'
+        'customer_inventory_ids.*' => 'integer|min:1|exists:inventory,inventory_id'
     ];
 }

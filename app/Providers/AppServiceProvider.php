@@ -10,6 +10,8 @@ use App\Repositories\Inventory\StatusRepository;
 use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
+use App\Services\Common\EncrypterServiceInterface;
+use App\Services\Common\SPLEncrypterService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
@@ -264,6 +266,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
         $this->app->bind(LogServiceInterface::class, LogService::class);
+        $this->app->bind(EncrypterServiceInterface::class, SPLEncrypterService::class);
 
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
 

@@ -7,6 +7,7 @@ use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Exceptions\Tests\MissingTestDealerLocationIdException;
 use App\Exceptions\Tests\MissingTestWebsiteIdException;
 use Mockery;
+use Generator;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -114,5 +115,28 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('relationLoaded')->passthru();
 
         return $mock;
+    }
+
+    /**
+     * Helper to extract values from an array with callables
+     *
+     * @param  array  $values mixed values, included callables
+     * @return array mixed values without callables
+     */
+    public function extractValues(array $values): array
+    {
+        $iterator = function (array $values): Generator {
+            foreach ($values as $key => $value) {
+                if (is_callable($value)) {
+                    yield $key => $value($this);
+                } elseif (is_array($value)) {
+                    yield $key => $this->extractValues($value);
+                } else {
+                    yield $key => $value;
+                }
+            }
+        };
+
+        return iterator_to_array($iterator($values), true);
     }
 }

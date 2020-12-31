@@ -9,8 +9,8 @@ use App\Http\Requests\Request;
 class CreateInventoryRequest extends Request
 {
     protected $rules = [
-        'dealer_id' => 'integer|min:1|required',
-        'customer_id' => 'integer|min:1|required',
-        'inventory_id' => 'integer|min:1|required'
+        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
+        'customer_id' => 'integer|min:1|required|exists:dms_customer,id',
+        'inventory_id' => 'integer|min:1|required|exists:inventory,inventory_id'
     ];
 }
