@@ -35,7 +35,7 @@ class ScrapeRepliesTest extends TestCase
      *
      * @return void
      */
-    public function testScrapeRepliesGmail()
+    /*public function testScrapeRepliesGmail()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -192,14 +192,14 @@ class ScrapeRepliesTest extends TestCase
 
         // Delete Sales Person
         $salesPerson->delete();
-    }
+    }*/
 
     /**
      * Test Scraping IMAP Emails
      *
      * @return void
      */
-    public function testScrapeRepliesImap()
+    /*public function testScrapeRepliesImap()
     {
         // Get Dealer
         $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
@@ -351,7 +351,7 @@ class ScrapeRepliesTest extends TestCase
 
         // Delete Sales Person
         $salesPerson->delete();
-    }
+    }*/
 
     /**
      * Test Scraping Attachment Emails From Gmail
@@ -579,6 +579,7 @@ class ScrapeRepliesTest extends TestCase
         for($i = 0; $i <= $total; $i++) {
             // Create Image
             $img = $faker->image($_ENV['MAIL_ATTACHMENT_DIR']);
+            var_dump($img);
             $parts = pathinfo($img);
             $filename = $parts['filename'] . '.' . $parts['extension'];
 
