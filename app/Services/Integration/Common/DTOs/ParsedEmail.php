@@ -15,59 +15,59 @@ class ParsedEmail
     /**
      * @var string ID of Email from Source
      */
-    private $id;
+    private $id = '';
 
     /**
      * @var string Message ID
      */
-    private $messageId;
+    private $messageId = '';
 
     /**
      * @var string First Message ID in Chain
      */
-    private $rootMessageId;
+    private $rootMessageId = '';
 
     /**
      * @var string References to Past Replies, Separated by Spaces
      */
-    private $references;
+    private $references = '';
 
 
     /**
      * @var string Email Address Sent To
      */
-    private $to;
+    private $to = '';
 
     /**
      * @var string Name of Person Email Sent To
      */
-    private $toName;
+    private $toName = '';
 
     /**
      * @var string Email Address Sent From
      */
-    private $from;
+    private $from = '';
 
     /**
      * @var string Name of Person Email Sent From
      */
-    private $fromName;
+    private $fromName = '';
 
 
     /**
      * @var string Subject of Email
      */
-    private $subject;
+    private $subject = '';
 
     /**
      * @var string Body of Email
      */
-    private $body;
+    private $body = '';
 
     /**
      * @var bool Is Email HTML?
      */
-    private $isHtml;
+    private $isHtml = false;
 
     /**
      * @var Collection<AttachmentFile> Attachments Sent With Email
@@ -77,13 +77,13 @@ class ParsedEmail
     /**
      * @var string Date of email sent
      */
-    private $date;
+    private $date = '';
 
 
     /**
      * @var int Lead ID Associated With Email
      */
-    private $leadId;
+    private $leadId = 0;
 
     /**
      * @var string Received || Sent (By || From Sales Person)
