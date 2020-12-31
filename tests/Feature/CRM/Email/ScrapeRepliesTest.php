@@ -16,6 +16,7 @@ use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Tests\TestCase;
+use Faker\Factory as Faker;
 use Mockery;
 
 class ScrapeRepliesTest extends TestCase
@@ -352,6 +353,133 @@ class ScrapeRepliesTest extends TestCase
         $salesPerson->delete();
     }
 
+    /**
+     * Test Scraping Attachment Emails From Gmail
+     *
+     * @return void
+     */
+    public function testScrapeAttachmentsGmail()
+    {
+        // Get Dealer
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+
+        // Mark All Sales People as Deleted
+        $salesIds = $this->disableSalesPeople($dealer->user_id);
+
+        // Create Gmail Sales Person
+        $salesPerson = factory(SalesPerson::class, 1)->create()->each(function ($salesperson) {
+            // Make Token
+            $tokens = factory(AccessToken::class, 1)->make([
+                'relation_id' => $salesperson->id
+            ]);
+            $salesperson->googleToken()->save($tokens->first());
+        })->first();
+
+        // Create Lead
+        $lead = factory(Lead::class, 1)->create()->first();
+
+        // Get Folders
+        $folders = EmailFolder::getDefaultGmailFolders();
+
+        // Create Dummy Emails
+        $replies = factory(EmailHistory::class, 10)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => $lead->email_address,
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name
+        ]);
+
+        // Get Messages
+        $messages = [];
+        $parsed = [];
+        foreach($replies as $reply) {
+            // Generate Attachments?!
+            $id = count($messages);
+            $attachments = null;
+            if($id < 5 || $id > 8) {
+                $attachments = $this->getAttachmentFiles();
+            }
+
+            // Parse Email Message
+            $messages[] = $id;
+            $parsed[] = $this->getParsedEmail($id, $reply, $attachments);
+        }
+
+
+        // Mock Gmail Service
+        $this->mock(GoogleServiceInterface::class, function ($mock) use($salesPerson) {
+            // Should Receive Messages With Args Once Per Folder!
+            $mock->shouldReceive('validate')
+                 ->with(Mockery::on(function($accessToken) use($salesPerson) {
+                    if($salesPerson->id == $accessToken->relation_id) {
+                        return true;
+                    }
+                    return false;
+                 }))
+                 ->once()
+                 ->andReturn([
+                    'is_valid' => true,
+                    'is_expired' => false,
+                    'new_token' => []
+                 ]);
+        });
+
+        // Mock Gmail Service
+        $this->mock(GmailServiceInterface::class, function ($mock) use($folders, $messages, $parsed) {
+            // Should Receive Messages With Args Once Per Folder!
+            $mock->shouldReceive('messages')
+                 ->times(count($folders))
+                 ->andReturn($messages);
+
+            // Mock Messages
+            foreach($parsed as $k => $message) {
+                // Should Receive Full Message Details Once Per Folder Per Message!
+                $mock->shouldReceive('message')
+                     ->withArgs([$k])
+                     ->times(count($folders))
+                     ->andReturn($message);
+            }
+        });
+
+        // Call Leads Assign Command
+        $this->artisan('email:scrape-replies 0 0 ' . self::getTestDealerId())->assertExitCode(0);
+
+        // Mock Saved Replies
+        foreach($parsed as $reply) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('crm_email_history', [
+                'message_id' => $reply->getMessageId()
+            ]);
+
+            // Check Attachments
+            if(!empty($reply->getAttachments())) {
+                foreach($reply->getAttachments() as $attachment) {
+                    // Attachment Exists in DB
+                    $this->assertDatabaseHas('crm_email_attachments', [
+                        'message_id' => $reply->getMessageId(),
+                        'original_filename' => $attachment->getFileName()
+                    ]);
+
+                    // Attachment Was Deleted From Tmp Directory
+                    $this->assertFileDoesNotExist($attachment->getTmpName());
+                }
+            } else {
+                // No Attachments
+                $this->assertDatabaseMissing('crm_email_attachments', [
+                    'message_id' => $reply->getMessageId()
+                ]);
+            }
+        }
+
+
+        // Restore Existing Sales People
+        $this->restoreSalesPeople($salesIds);
+
+        // Delete Sales Person
+        $salesPerson->delete();
+    }
+
 
     /**
      * Delete Sales People
@@ -391,6 +519,7 @@ class ScrapeRepliesTest extends TestCase
         return collect($salespeople);
     }
 
+
     /**
      * Get Parsed Email
      * 
@@ -429,5 +558,47 @@ class ScrapeRepliesTest extends TestCase
 
         // Return ParsedEmail
         return $parsed;
+    }
+
+    /**
+     * Generate Fake Attachment Files
+     * 
+     * @param int $min
+     * @param int $max
+     * @return Collection<AttachmentFile>
+     */
+    private function getAttachmentFiles($min = 5, $max = 10) {
+        // Calculate Total Number
+        $attachments = [];
+        $total = rand($min, $max);
+
+        // Initialize Faker
+        $faker = Faker::create();
+
+        // Loop Total
+        for($i = 0; $i <= $total; $i++) {
+            // Create Image
+            $img = $faker->image($_ENV['MAIL_ATTACHMENT_DIR']);
+            $parts = pathinfo($img);
+            $filename = $parts['filename'] . '.' . $parts['extension'];
+
+            // Create Parsed Email
+            $attachment = new AttachmentFile();
+
+            // Set Temp Filename
+            $attachment->setTmpName($img);
+
+            // Set File Path
+            $attachment->setFilePath($faker->imageUrl);
+
+            // Set Filename
+            $attachment->setFileName($filename);
+
+            // Add Attachment to Array
+            $attachments[] = $attachment;
+        }
+
+        // Return Collection<AttachmentFile>
+        return new Collection($attachments);
     }
 }
