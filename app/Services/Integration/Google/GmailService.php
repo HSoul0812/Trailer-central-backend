@@ -372,11 +372,11 @@ class GmailService implements GmailServiceInterface
      * Parse Message Into Body
      * 
      * @param string $message_id
-     * @param array $payload
+     * @param Google_Service_Gmail_MessagePart|array $payload
      * @source https://stackoverflow.com/a/32660892
      * @return string of body
      */
-    private function parseMessageBody(string $message_id, Google_Service_Gmail_MessagePart $payload) {
+    private function parseMessageBody(string $message_id, $payload) {
         // Get Body From Parts
         $body = '';
         if(is_array($payload)) {
