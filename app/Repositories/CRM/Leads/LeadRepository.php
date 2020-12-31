@@ -529,29 +529,6 @@ class LeadRepository implements LeadRepositoryInterface {
         ];
     }
 
-    /**
-     * Get Lead Emails
-     *
-     * @param int $dealerId
-     * @return array of email address > lead id
-     */
-    public function getLeadEmails(int $dealerId) {
-        // Return Lead Emails for User ID
-        $leads = Lead::select(['identifier', 'email_address'])
-                     ->where('dealer_id', $dealerId)
-                     ->where('email_address', '<>', '')
-                     ->whereNotNull('email_address')->get();
-
-        // Map Array
-        $emails = [];
-        foreach($leads as $lead) {
-            $emails[$lead->email_address] = $lead->identifier;
-        }
-
-        // Return Emails Mapping
-        return $emails;
-    }
-
     public function getLeadsSortFields() {
         return $this->getSortFields();
     }

@@ -69,14 +69,6 @@ interface LeadRepositoryInterface extends Repository {
     public function getStatuses();
 
     /**
-     * Get Lead Emails
-     *
-     * @param int $dealerId
-     * @return array of email address > lead id
-     */
-    public function getLeadEmails(int $dealerId);
-
-    /**
      * Returns list of available sort fields
      *
      * @return array
