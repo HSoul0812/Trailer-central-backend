@@ -592,7 +592,7 @@ class ScrapeRepliesTest extends TestCase
 
             // Write File Locally
             $filename = $faker->md5 . '.jpg';
-            $filepath = $_ENV['MAIL_ATTACHMENT_DIR'] . $filename;
+            $filepath = $_ENV['MAIL_ATTACHMENT_DIR'] . '/' . $filename;
             file_put_contents($filepath, $contents);
 
             // Create Parsed Email
