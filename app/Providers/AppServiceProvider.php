@@ -2,16 +2,22 @@
 
 namespace App\Providers;
 
+use App\Repositories\CRM\User\CrmUserRoleRepository;
+use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\Inventory\FileRepository;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepository;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\StatusRepository;
 use App\Repositories\Inventory\StatusRepositoryInterface;
+use App\Repositories\CRM\User\CrmUserRepository;
+use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Services\Common\EncrypterServiceInterface;
 use App\Services\Common\SPLEncrypterService;
+use App\Services\User\DealerOptionsService;
+use App\Services\User\DealerOptionsServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
@@ -246,6 +252,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
+        $this->app->bind(CrmUserRoleRepositoryInterface::class, CrmUserRoleRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
@@ -271,6 +279,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
 
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
+
+        $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
     }
 
 }

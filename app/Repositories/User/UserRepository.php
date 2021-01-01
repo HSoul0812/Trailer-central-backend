@@ -2,13 +2,16 @@
 
 namespace App\Repositories\User;
 
+use App\Repositories\User\UserRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\User\User;
 use App\Services\Common\EncrypterServiceInterface;
+use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
 
 class UserRepository implements UserRepositoryInterface {
+    use Transaction;
 
     /**
      * @var EncrypterServiceInterface
@@ -31,8 +34,13 @@ class UserRepository implements UserRepositoryInterface {
         throw new NotImplementedException;
     }
 
-    public function get($params) {
-        throw new NotImplementedException;
+    /**
+     * @param array $params
+     * @return User
+     */
+    public function get($params): User
+    {
+        return User::findOrFail($params['dealer_id']);
     }
 
     public function getAll($params) {

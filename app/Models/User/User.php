@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\User\DealerUser;
 use App\Models\User\AuthToken;
 use App\Models\Website\Website;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * Class User
@@ -15,6 +16,8 @@ use App\Models\Website\Website;
  * This User class is for API users
  *
  * @package App\Models\User
+ *
+ * @property bool $isCrmActive
  */
 class User extends Model implements Authenticatable
 {
@@ -153,6 +156,17 @@ class User extends Model implements Authenticatable
     public function newDealerUser()
     {
         return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
+    }
+
+    public function crmUser(): HasOneThrough
+    {
+        return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
+    }
+
+    public function getIsCrmActiveAttribute(): bool
+    {
+        $crmUser = $this->crmUser()->first();
+        return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
     }
 
     /**
