@@ -2,7 +2,6 @@
 
 namespace App\Repositories\User;
 
-use App\Repositories\User\UserRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\User\User;
 use App\Services\Common\EncrypterServiceInterface;
