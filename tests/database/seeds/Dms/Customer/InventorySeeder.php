@@ -10,13 +10,13 @@ use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use App\Traits\WithGetter;
 use Illuminate\Support\Str;
-use Tests\database\seeds\SeederInterface;
+use Tests\database\seeds\Seeder;
 
 /**
  * @property-read Customer $customer
  * @property-read User $dealer
  */
-class InventorySeeder implements SeederInterface
+class InventorySeeder extends Seeder
 {
     use WithGetter;
 

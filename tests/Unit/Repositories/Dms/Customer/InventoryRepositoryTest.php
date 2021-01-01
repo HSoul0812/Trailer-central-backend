@@ -54,7 +54,7 @@ class InventoryRepositoryTest extends TestCase
 
         /** @var Collection $categories */
         // When I call getAll without pagination with valid parameters
-        $categories = $this->getConcreteRepository()->getAll($this->extractValues($params));
+        $categories = $this->getConcreteRepository()->getAll($this->seeder->extractValues($params));
 
         // Then I should get a class which is an instance of Collection
         self::assertInstanceOf(Collection::class, $categories);
@@ -83,7 +83,7 @@ class InventoryRepositoryTest extends TestCase
 
         /** @var LengthAwarePaginator $inventories */
         // When I call getAll with pagination with valid parameters
-        $inventories = $this->getConcreteRepository()->getAll($this->extractValues($params), true);
+        $inventories = $this->getConcreteRepository()->getAll($this->seeder->extractValues($params), true);
 
         /** @var Inventory $firstRecord */
         $firstRecord = $inventories->first();
@@ -104,12 +104,12 @@ class InventoryRepositoryTest extends TestCase
      */
     public function queryWellRequestedParametersAndSummariesProvider(): array
     {
-        $dealerIdLambda = static function (self $that) {
-            return $that->seeder->dealer->getKey();
+        $dealerIdLambda = static function (InventorySeeder $seeder) {
+            return $seeder->dealer->getKey();
         };
 
-        $customerIdLambda = static function (self $that) {
-            return $that->seeder->customer->getKey();
+        $customerIdLambda = static function (InventorySeeder $seeder) {
+            return $seeder->customer->getKey();
         };
 
         return [                                                                                                            // array $parameters, int $expectedTotal, int $expectedLastPage, string $expectedName
