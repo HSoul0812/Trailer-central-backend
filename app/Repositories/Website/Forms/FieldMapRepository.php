@@ -144,6 +144,12 @@ class FieldMapRepository implements FieldMapRepositoryInterface
         // Get All Sorted by Types
         $types = [];
         foreach(FieldMap::MAP_TYPES as $type => $name) {
+            // Type Exists?
+            if(isset($params['type']) && $params['type'] !== $type) {
+                continue;
+            }
+
+            // Get Fields By Type
             $fields = $this->getAll(['type' => $type]);
             $types[$type] = $fields->mapWithKeys(function($fieldMap) {
                 return [$fieldMap->form_field => $this->transformer->transform($fieldMap)];
