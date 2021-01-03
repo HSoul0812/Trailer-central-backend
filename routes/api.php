@@ -241,7 +241,6 @@ $api->version('v1', function ($route) {
         $route->get('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@index');
         $route->put('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@create');
         $route->get('website/forms/field-map/types', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@types');
-        $route->get('website/forms/field-map/{type}', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@get');
     });
 
 

@@ -7,7 +7,6 @@ use Dingo\Api\Http\Request;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
 use App\Http\Requests\Website\Forms\GetFieldMapRequest;
 use App\Http\Requests\Website\Forms\CreateFieldMapRequest;
-use App\Http\Requests\Website\Forms\TypeFieldMapRequest;
 use App\Http\Requests\Website\Forms\TypesFieldMapRequest;
 use App\Transformers\Website\Forms\FieldMapTransformer;
 
@@ -110,53 +109,6 @@ class FieldMapController extends RestfulController
         
         if ( $request->validate() ) {
             $fields = $this->fields->getMap($request->all());
-            return $this->response->array([
-                'data' => $fields
-            ]);
-        }
-        
-        return $this->response->errorBadRequest();
-    }
-
-    /**
-     * @OA\Get(
-     *     path="/api/website/forms/field-map/{type}",
-     *     description="Retrieve a list of field maps for type",
-     
-     *     tags={"Post"},
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="Page Limit",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="sort",
-     *         in="query",
-     *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns a list of posts",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
-     */
-    public function get(string $type, Request $request) {
-        $params = $request->all();
-        $params['type'] = $type;
-
-        // Type Field Map Request
-        $request = new TypeFieldMapRequest($params);
-        if ( $request->validate() ) {
-            $fields = $this->fields->getAll($request->all());
             return $this->response->array([
                 'data' => $fields
             ]);
