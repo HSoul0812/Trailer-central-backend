@@ -7,7 +7,7 @@ use Dingo\Api\Http\Request;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
 use App\Http\Requests\Website\Forms\GetFieldMapRequest;
 use App\Http\Requests\Website\Forms\CreateFieldMapRequest;
-use App\Http\Requests\Website\Forms\ShowFieldMapRequest;
+use App\Http\Requests\Website\Forms\TypeFieldMapRequest;
 use App\Http\Requests\Website\Forms\TypesFieldMapRequest;
 use App\Transformers\Website\Forms\FieldMapTransformer;
 
@@ -153,8 +153,8 @@ class FieldMapController extends RestfulController
         $params = $request->all();
         $params['type'] = $type;
 
-        // Show Field Map Request
-        $request = new ShowFieldMapRequest($params);
+        // Type Field Map Request
+        $request = new TypeFieldMapRequest($params);
         if ( $request->validate() ) {
             $fields = $this->fields->getAll($request->getAll());
             return $this->response->array([
