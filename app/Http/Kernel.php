@@ -83,6 +83,7 @@ class Kernel extends HttpKernel
         'cors' => CorsMiddleware::class,
         'user.validate' => UserValidate::class,
         'website.validate' => WebsiteValidate::class,
+        'forms.field-map.validate' => FieldMapValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
         'setWebsiteIdOnRequest' => SetWebsiteIdOnRequest::class,

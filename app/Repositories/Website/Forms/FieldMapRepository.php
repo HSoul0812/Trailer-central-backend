@@ -142,7 +142,7 @@ class FieldMapRepository implements FieldMapRepositoryInterface
     public function getMap($params)
     {
         // Get All Sorted by Types
-        $types = array();
+        $types = [];
         foreach(FieldMap::MAP_TYPES as $type => $name) {
             $fields = $this->getAll(['type' => $type]);
             $types[$type] = $fields->mapWithKeys(function($fieldMap) {
@@ -152,5 +152,16 @@ class FieldMapRepository implements FieldMapRepositoryInterface
 
         // Return Sorted Types Array
         return $types;
+    }
+
+    /**
+     * Get Field Map Types
+     * 
+     * @return Collection
+     */
+    public function getTypes()
+    {
+        // Get All Field Map Types
+        return collect(array_keys(FieldMap::MAP_TYPES));
     }
 }
