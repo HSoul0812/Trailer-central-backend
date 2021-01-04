@@ -15,7 +15,6 @@ class TypesFieldMapRequest extends Request {
     
     public function all($keys = null) {
         // Return Result
-        $all = parent::all($keys);
-        return $all;
+        return parent::all($keys);
     }
 }
