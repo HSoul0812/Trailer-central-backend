@@ -63,7 +63,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     public function bulkDestroy(array $ids): bool
     {
-        return (bool)CustomerInventory::where('id', $ids)->delete();
+        return (bool)CustomerInventory::whereIn('id', $ids)->delete();
     }
 
     /**

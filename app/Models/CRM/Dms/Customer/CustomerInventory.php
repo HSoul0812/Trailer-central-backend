@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  * @method static Collection|CustomerInventory create(array $attributes = [])
  */
 class CustomerInventory extends Model

@@ -15,6 +15,9 @@ use Tests\database\seeds\Seeder;
 /**
  * @property-read Customer $customer
  * @property-read User $dealer
+ * @property-read array<Inventory> $customerRelatedInventories
+ * @property-read array<Inventory> $unrelatedInventories
+ * @property-read int[] $customerInventoryIds
  */
 class InventorySeeder extends Seeder
 {
@@ -31,6 +34,21 @@ class InventorySeeder extends Seeder
     private $customer;
 
     /**
+     * @var Inventory[]
+     */
+    private $customerRelatedInventories = [];
+
+    /**
+     * @var Inventory[]
+     */
+    private $unrelatedInventories = [];
+
+    /**
+     * @var int[]
+     */
+    private $customerInventoryIds = [];
+
+    /**
      * InventorySeeder constructor.
      */
     public function __construct()
@@ -39,7 +57,7 @@ class InventorySeeder extends Seeder
         $this->dealer = $this->customer->dealer;
     }
 
-    public function seed():void
+    public function seed(): void
     {
         $customerId = $this->customer->getKey();
 
@@ -54,18 +72,24 @@ class InventorySeeder extends Seeder
             ['title' => 'Wayland Dump Truck', 'customer_id' => $customerId]
         ];
 
-        collect($seeds)->map(function (array $seed) use ($customerId): Inventory {
+        collect($seeds)->each(function (array $seed) use ($customerId): void {
             $inventory = factory(Inventory::class)->create([
                 'dealer_id' => $this->dealer->getKey(),
                 'title' => $seed['title'],
                 'vin' => $seed['vin'] ?? Str::random(18)
             ]);
 
+            $inventoryId = $inventory->getKey();
+
             if (isset($seed['customer_id'])) {
-                CustomerInventory::create(['customer_id' => $customerId, 'inventory_id' => $inventory->getKey()]);
+                $customerInventory = CustomerInventory::create(['customer_id' => $customerId, 'inventory_id' => $inventoryId]);
+                $this->customerRelatedInventories[] = $inventory;
+                $this->customerInventoryIds[] = $customerInventory->getKey();
+
+                return;
             }
 
-            return $inventory;
+            $this->unrelatedInventories[] = $inventory;
         });
     }
 

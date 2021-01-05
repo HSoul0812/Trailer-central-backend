@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories\Dms\Customer;
 
+use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Dms\Customer\InventoryRepository;
 use App\Repositories\Dms\Customer\InventoryRepositoryInterface;
@@ -11,12 +12,16 @@ use App\Traits\WithGetter;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use PDOException;
 use Tests\database\seeds\Dms\Customer\InventorySeeder;
 use Tests\TestCase;
+use Tests\Unit\WithMySqlDataBaseConstraintViolationsParser;
+
 
 class InventoryRepositoryTest extends TestCase
 {
     use WithGetter;
+    use WithMySqlDataBaseConstraintViolationsParser;
 
     /**
      * @var InventorySeeder
@@ -98,6 +103,86 @@ class InventoryRepositoryTest extends TestCase
     }
 
     /**
+     * @covers InventoryRepository::create
+     * @note IntegrationTestCase
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
+     */
+    public function testCreateIsWorkingAsExpectedWhenTheUniqueIndexIsBeingSatisfied(): void {
+        $this->seeder->seed();
+        // Given I have a collection of inventories not related yet to the customer
+        $inventories = $this->seeder->unrelatedInventories;
+
+        $customerId = $this->seeder->customer->getKey();
+
+        /** @var CustomerInventory $inventoryRelatedToCustomer */
+        // When I call create with valid parameters
+        $inventoryRelatedToCustomer = $this->getConcreteRepository()->create([
+            'customer_id' => $customerId,
+            'inventory_id' => $inventories[array_rand($inventories, 1)]->getKey(),
+        ]);
+
+        // Then I should get a class which is an instance of CustomerInventory
+        self::assertInstanceOf(CustomerInventory::class, $inventoryRelatedToCustomer);
+        // And I should see that total of inventories related to the customer has incremented in one record
+        self::assertSame(4, CustomerInventory::where(['customer_id' => $customerId])->count());
+    }
+
+    /**
+     * @dataProvider creationInvalidPropertiesProvider
+     *
+     * @param  array  $properties
+     * @param  string|callable  $expectedPDOExceptionMessage
+     * @covers       InventoryRepository::create
+     * @note IntegrationTestCase
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
+     */
+    public function testCreateIsThrowingAPDOExceptionWhenTheConstrainsIsNotBeingSatisfied(
+        array $properties,
+        $expectedPDOExceptionMessage
+    ): void {
+        // Given I have a collection of inventories
+        $this->seeder->seed();
+
+        $properties = $this->seeder->extractValues($properties);
+        $expectedPDOExceptionMessage = is_callable($expectedPDOExceptionMessage) ?
+            $expectedPDOExceptionMessage($properties['customer_id'], $properties['inventory_id']) :
+            $expectedPDOExceptionMessage;
+
+        // When I call create with invalid parameters
+        // Then I expect see that one exception have been thrown with a specific message
+        $this->expectException(PDOException::class);
+        $this->expectExceptionMessage($expectedPDOExceptionMessage);
+
+
+        /** @var null $inventoryRelatedToCustomer */
+        $inventoryRelatedToCustomer = $this->getConcreteRepository()->create([
+            'customer_id' => $properties['customer_id'],
+            'inventory_id' => $properties['inventory_id'],
+        ]);
+
+        // And I should get a null value
+        self::assertNull($inventoryRelatedToCustomer);
+    }
+
+    /**
+     * @covers InventoryRepository::bulkDestroy
+     * @note IntegrationTestCase
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
+     */
+    public function testBulkDestroyIsWorkingAsExpected(): void {
+        // Given I have a collection of inventories
+        $this->seeder->seed();
+
+        // When I call create with valid parameters
+        $deletion = $this->getConcreteRepository()->bulkDestroy(array_slice($this->seeder->customerInventoryIds, 1));
+
+        // Then I should get boolean true
+        self::assertTrue($deletion);
+        // And I should see that total of inventories related to the customer is zero
+        self::assertSame(1, CustomerInventory::where(['customer_id' => $this->seeder->customer->getKey()])->count());
+    }
+
+    /**
      * Examples of parameters with expected total, last page numbers, and first inventory title name.
      *
      * @return array[]
@@ -119,6 +204,29 @@ class InventoryRepositoryTest extends TestCase
             'Dummy customer is paged'                                                                                       => [['dealer_id' => $dealerIdLambda, 'customer_id' => $customerIdLambda, 'per_page' => 2], 3, 2, '102 Ironworks Dump Truck'],
             'Dummy customer which does not have condition also is sorted by title asc and is filtered with extra condition' => [['dealer_id' => $dealerIdLambda, 'customer_id' => $customerIdLambda, 'customer_condition' => '-has', 'sort' => '-title', 'andWhere' => [['vin', '<>', '12345678901234567']]], 4, 1, '2017 Adventure Sports Products Adventure Testing Horse Trailer'],
             'Dummy customer which does not have condition also is sorted by title desc'                                     => [['dealer_id' => $dealerIdLambda, 'customer_id' => $customerIdLambda, 'customer_condition' => '-has', 'sort' => 'title'], 5, 1, 'Windsurf board Magic Wave PRO']
+        ];
+    }
+
+    /**
+     * Examples of invalid properties with expected exception message.
+     *
+     * @return array[]
+     */
+    public function creationInvalidPropertiesProvider(): array
+    {
+        $customerIdLambda = static function (InventorySeeder $seeder) {
+            return $seeder->customer->getKey();
+        };
+
+        $customerRelatedInventoryIdLambda = static function (InventorySeeder $seeder): int {
+            $inventories = $seeder->customerRelatedInventories;
+            return $inventories[array_rand($inventories, 1)]->getKey();
+        };
+
+        return [                     // array $properties, string $expectedPDOExceptionMessage
+            'Non-existent customer'  => [['customer_id' => 666999, 'inventory_id' => $customerRelatedInventoryIdLambda], function(int $customerId, int $inventoryId){ return $this->getMessageForCannotInsertOrUpdateConstraint(CustomerInventory::getTableName(), 'dms_customer_inventory_customer_id_foreign');}],
+            'Non-existent inventory' => [['customer_id' => $customerIdLambda, 'inventory_id' => 666999], function(int $customerId, int $inventoryId){ return $this->getMessageForCannotInsertOrUpdateConstraint(CustomerInventory::getTableName(), 'dms_customer_inventory_inventory_id_foreign');}],
+            'Duplicate entry'        => [['customer_id' => $customerIdLambda, 'inventory_id' => $customerRelatedInventoryIdLambda], function(int $customerId, int $inventoryId){ return $this->getMessageForDuplicateEntryConstraint("$customerId-$inventoryId", 'dms_customer_inventory_customer_id_inventory_id_unique');}],
         ];
     }
 
