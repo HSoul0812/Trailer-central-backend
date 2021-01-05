@@ -109,7 +109,7 @@ class Catalog extends Model
      */
     public function getFeedUrlAttribute()
     {
-        return $_ENV['AWS_URL'] . '/' . $_ENV['AWS_BUCKET'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page->page_id . '.csv';
+        return $_ENV['AWS_URL'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page->page_id . '.csv';
     }
 
     /**
