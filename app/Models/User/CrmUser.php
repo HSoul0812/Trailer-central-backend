@@ -60,7 +60,7 @@ class CrmUser extends Model
      * @var bool
      */
     public $timestamps = false;
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }

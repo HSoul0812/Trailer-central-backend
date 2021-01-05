@@ -39,11 +39,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $unarchive_sold_items
  */
 class Collector extends Model  implements Filterable
-{
+{ 
     public const FILE_FORMATS = [
-        'xml',
-        'csv',
+        self::FILE_FORMAT_XML,
+        self::FILE_FORMAT_CSV,
+        self::FILE_FORMAT_CDK
     ];
+    
+    public const FILE_FORMAT_CDK = 'cdk';
+    public const FILE_FORMAT_XML = 'xml';
+    public const FILE_FORMAT_CSV = 'csv';
 
     public const MEASURE_FORMATS = [
         'Feet' => 'feet',
@@ -91,6 +96,8 @@ class Collector extends Model  implements Filterable
         'update_files',
         'import_with_showroom_category',
         'unarchive_sold_items',
+        'cdk_password',
+        'cdk_username'
     ];
 
     public function dealers()
