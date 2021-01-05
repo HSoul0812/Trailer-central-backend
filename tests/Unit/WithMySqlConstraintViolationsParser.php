@@ -11,10 +11,10 @@ use Tests\Exceptions\ExpectationException;
 /**
  * @see https://dev.mysql.com/doc/mysql-errors/5.6/en/server-error-reference.html
  */
-trait WithMySqlDataBaseConstraintViolationsParser
+trait WithMySqlConstraintViolationsParser
 {
     /**
-     * Build and return the exception message for the integrity constrain violation 1452 of MySQL.
+     * Gets exception message for the integrity constrain violation 1452.
      *
      * @param string $tableName      the table name that has defined the constraint name
      * @param string $constraintName the constraint name defined in table schema
@@ -23,7 +23,7 @@ trait WithMySqlDataBaseConstraintViolationsParser
      *
      * @return string the exception message well-formed for the passed constraint name
      */
-    protected function getMessageForCannotInsertOrUpdateConstraint(string $tableName, string $constraintName): string
+    protected function getCannotInsertOrUpdateMessage(string $tableName, string $constraintName): string
     {
         $failedExpectationMessage = "There is not constraint for $constraintName on table $tableName";
         $schemaName = DB::connection()->getDatabaseName();
@@ -48,7 +48,7 @@ trait WithMySqlDataBaseConstraintViolationsParser
     }
 
     /**
-     * Build and return the exception message for the integrity constrain violation 1062 of MySQL.
+     * Gets exception message for the integrity constrain violation 1062.
      *
      * @param  string  $entry a string delimited by dash
      *                        i.e 1452-54878
@@ -57,7 +57,7 @@ trait WithMySqlDataBaseConstraintViolationsParser
      *
      * @return string the exception message well-formed for the passed constraint name
      */
-    protected function getMessageForDuplicateEntryConstraint(string $entry, string $constraintName): string
+    protected function getDuplicateEntryMessage(string $entry, string $constraintName): string
     {
         return sprintf(
             "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '%s' for key '%s",
