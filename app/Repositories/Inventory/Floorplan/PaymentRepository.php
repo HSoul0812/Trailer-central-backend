@@ -3,7 +3,6 @@
 namespace App\Repositories\Inventory\Floorplan;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\Inventory\Inventory;
@@ -14,11 +13,6 @@ use App\Models\Inventory\Floorplan\Payment;
  * @author Marcel
  */
 class PaymentRepository implements PaymentRepositoryInterface {
-
-    /**
-     * @var Connection
-     */
-    private $redis;
 
     private $sortOrders = [
         'type' => [ 
@@ -55,11 +49,6 @@ class PaymentRepository implements PaymentRepositoryInterface {
         ]
     ];
 
-    public function __construct()
-    {
-        $this->redis = Redis::connection('cache');
-    }
-
     public function create($params) {
         DB::beginTransaction();
 
@@ -76,17 +65,13 @@ class PaymentRepository implements PaymentRepositoryInterface {
         return $floorplanPayment;
     }
     
-    public function createBulk($params) {
-        $bulkFloorplanPaymentKey = 'bulk_floorplan_payment_' . $params['dealer_id'];
-        if ($this->redis->get($bulkFloorplanPaymentKey) === $params['paymentUUID']) {
-            throw new \Exception('This floorplan payment is duplicated.');
-        }
+    public function createBulk($payments) {
         // Should probably queue this
         $floorplanPayments = [];
         DB::beginTransaction();
         
         try {
-            foreach($params['payments'] as $paymentData) {
+            foreach($payments as $paymentData) {
                 $floorplanPayment = Payment::create($paymentData);
                 $this->adjustBalance($floorplanPayment, $paymentData);
                 $floorplanPayments[] = $floorplanPayment;
@@ -97,7 +82,6 @@ class PaymentRepository implements PaymentRepositoryInterface {
             throw new \Exception($ex->getMessage());
         }
         
-        $this->redis->set($bulkFloorplanPaymentKey, $params['paymentUUID']);
         return collect($floorplanPayments);
     }
 

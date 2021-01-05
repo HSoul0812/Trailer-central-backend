@@ -14,8 +14,8 @@ interface PaymentRepositoryInterface extends Repository {
     /**
      * Creates multiple floorplan payments
      * 
-     * @param array $params
+     * @param array $payments
      */
-    public function createBulk($params);
+    public function createBulk($payments);
     
 }
