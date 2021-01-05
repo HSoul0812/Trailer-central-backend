@@ -216,15 +216,6 @@ class CatalogService implements CatalogServiceInterface
         // Get Catalog
         $catalog = $this->catalogs->get(['id' => $id]);
 
-        // Feed ID Exists?!
-        if(!empty($catalog->feed_id)) {
-            try {
-                $this->sdk->deleteFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_id);
-            } catch (\Exception $ex) {
-                // Allow to continue even if exception occurs; if exception occurs feed doesn't exist!
-            }
-        }
-
         // Delete Access Token
         $this->tokens->delete([
             'token_type' => 'facebook',
