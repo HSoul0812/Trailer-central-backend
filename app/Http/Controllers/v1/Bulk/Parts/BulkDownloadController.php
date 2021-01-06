@@ -57,7 +57,7 @@ class BulkDownloadController extends Controller
         );
 
         // dispatch job to queue
-        $this->dispatch($job->onQueue('parts'));
+        $this->dispatch($job->onQueue('parts-export-new'));
 
         // if requested, wait for file assembly then download it now. no need for separate api call
         if ($request->input('wait')) {

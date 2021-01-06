@@ -537,7 +537,7 @@ class PartRepository implements PartRepositoryInterface {
                 $search->filter('range', ['bins_total_qty' => ['gt' => 0]]);
             } else if ($query['in_stock'] == 2) {
                 $search->filter('range', ['bins_total_qty' => ['lte' => 0]]);
-            }
+            } 
         }
 
         // filter by dealer
@@ -555,7 +555,7 @@ class PartRepository implements PartRepositoryInterface {
         }
 
         // load relations
-        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins']);
+        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins', 'purchaseOrders']);
 
         // if a paginator is requested
         if ($options['page'] ?? null) {
@@ -587,5 +587,4 @@ class PartRepository implements PartRepositoryInterface {
 
         return $search->execute()->models();
     }
-
 }

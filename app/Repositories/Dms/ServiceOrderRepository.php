@@ -82,6 +82,7 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
                 $q->where('user_defined_id', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('total_price', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('type', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhereHas('customer', function($q) use($params) {
                         $q->where('display_name', 'LIKE', '%' . $params['search_term'] . '%');
                     });
