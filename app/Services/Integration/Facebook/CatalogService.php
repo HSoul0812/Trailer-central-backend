@@ -252,31 +252,16 @@ class CatalogService implements CatalogServiceInterface
                 continue;
             }
 
-            // Feed ID Exists?
-            $feed = [];
-            if(!empty($catalog->feed->feed_id)) {
-                try {
-                    $feed = $this->sdk->validateFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed->feed_id);
-                } catch(\Exception $ex) {
-                    Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
-                }
-            }
-
-            // Feed Doesn't Exist?
-            if(empty($feed['id'])) {
-                try {
-                    $catalog->feed->feed_id = 0;
-                    $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_url, $catalog->feed_name);
-                } catch(\Exception $ex) {
-                    Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
-                    continue;
-                }
+            // Get Feed ID From SDK
+            $feedId = $this->scheduleFeed($catalog);
+            if(empty($feedId)) {
+                continue;
             }
 
             // Feed Exists?
-            $catalog = $this->updateFeed($catalog, $feed['id']);
+            $catalog = $this->updateFeed($catalog, $feedId);
             if(!empty($catalog->feed)) {
-                $feeds[] = $feed['id'];
+                $feeds[] = $feedId;
             }
 
             // Create Job
@@ -315,6 +300,41 @@ class CatalogService implements CatalogServiceInterface
         return $response;
     }
 
+
+    /**
+     * Schedule Feed With Catalog Data
+     * 
+     * @param Catalog $catalog
+     * @return int feed ID
+     */
+    private function scheduleFeed(Catalog $catalog) {
+        // Initialize Feed
+        $feedId = 0;
+
+        // Feed ID Exists?
+        if(!empty($catalog->feed->feed_id)) {
+            try {
+                $feed = $this->sdk->validateFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed->feed_id);
+                $feedId = $feed['id'];
+            } catch(\Exception $ex) {
+                Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            }
+        }
+
+        // Feed Doesn't Exist?
+        if(empty($feedId)) {
+            try {
+                $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_url, $catalog->feed_name);
+                $feedId = $feed['id'];
+            } catch(\Exception $ex) {
+                Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                $feedId = 0;
+            }
+        }
+
+        // Return Feed ID
+        return $feedId;
+    }
 
     /**
      * Update Catalog Feed
