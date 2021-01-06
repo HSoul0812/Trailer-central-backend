@@ -2,10 +2,10 @@
 
 namespace App\Models\Integration\Facebook;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Integration\Auth\AccessToken;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Catalog
@@ -44,7 +44,6 @@ class Catalog extends Model
         'catalog_id',
         'account_name',
         'account_id',
-        'feed_id',
         'filters',
         'is_active'
     ];
@@ -80,6 +79,16 @@ class Catalog extends Model
     }
 
     /**
+     * Get Feed
+     * 
+     * @return BelongsTo
+     */
+    public function feed()
+    {
+        return $this->belongsTo(Feed::class, 'catalog_id', 'catalog_id');
+    }
+
+    /**
      * Access Token
      * 
      * @return HasOne
@@ -99,7 +108,7 @@ class Catalog extends Model
      */
     public function getFeedPathAttribute()
     {
-        return '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->catalog_id . '.csv';
+        return '/' . self::CATALOG_URL_PREFIX . '/' . $this->business_id . '/' . $this->catalog_id . '.csv';
     }
 
     /**
@@ -109,7 +118,7 @@ class Catalog extends Model
      */
     public function getFeedUrlAttribute()
     {
-        return $_ENV['AWS_URL'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->catalog_id . '.csv';
+        return $_ENV['AWS_URL'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->business_id . '/' . $this->catalog_id . '.csv';
     }
 
     /**

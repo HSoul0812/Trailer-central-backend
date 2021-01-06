@@ -5,6 +5,7 @@ namespace App\Repositories\Integration\Facebook;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Facebook\Catalog;
+use App\Models\Integration\Facebook\Feed;
 use App\Repositories\Traits\SortTrait;
 
 class CatalogRepository implements CatalogRepositoryInterface {
@@ -140,6 +141,53 @@ class CatalogRepository implements CatalogRepositoryInterface {
         });
 
         return $catalog;
+    }
+
+
+    /**
+     * Create Facebook Catalog Feed
+     * 
+     * @param array $params
+     * @return Feed
+     */
+    public function createFeed($params) {
+        // Catalog Feed Already Exists?
+        return Feed::create($params);
+    }
+
+    /**
+     * Update Facebook Catalog Feed
+     * 
+     * @param array $params
+     * @return Feed
+     */
+    public function updateFeed($params) {
+        $feed = Feed::findOrFail($params['id']);
+
+        DB::transaction(function() use (&$feed, $params) {
+            // Fill Feed Details
+            $feed->fill($params)->save();
+        });
+
+        return $feed;
+    }
+
+    /**
+     * Update Facebook Catalog Feed
+     * 
+     * @param array $params
+     * @return Feed
+     */
+    public function createOrUpdateFeed($params) {
+        // Catalog Feed Already Exists?
+        $feed = Feed::where('catalog_id', $params['catalog_id'])->first();
+        if(!empty($feed->id)) {
+            $params['id'] = $feed->id;
+            return $this->createFeed($params);
+        }
+
+        // Update Feed
+        return $this->updateFeed($params);
     }
 
     protected function getSortOrders() {
