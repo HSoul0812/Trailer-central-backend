@@ -17,17 +17,17 @@ class CreateFbappFeedsTable extends Migration
             $table->increments('id');
             $table->bigInteger('business_id')->index();
             $table->bigInteger('catalog_id')->unique();
-            $table->bigInteger('feed_id')->index();
+            $table->bigInteger('feed_id')->unique();
             $table->string('feed_title');
             $table->string('feed_url');
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
-            $table->timestamp('date_imported')->nullable();
+            $table->timestamp('imported_at')->nullable();
             $table->softDeletes();
         });
 
         Schema::table('fbapp_catalog', function (Blueprint $table) {
-            $table->dropTable('feed_id');
+            $table->dropColumn('feed_id');
         });
     }
 
