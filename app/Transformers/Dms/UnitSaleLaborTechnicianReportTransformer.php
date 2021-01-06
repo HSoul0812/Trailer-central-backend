@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Transformers\Dms\ServiceOrder;
+namespace App\Transformers\Dms;
 
 use League\Fractal\TransformerAbstract;
 
 /**
- * Class ServiceItemTechnicianReportTransformer
- * @package App\Transformers\Dms\ServiceOrder
+ * Class UnitSaleLaborTechnicianReportTransformer
+ * @package App\Transformers\Dms
  */
-class ServiceItemTechnicianReportTransformer extends TransformerAbstract
+class UnitSaleLaborTechnicianReportTransformer extends TransformerAbstract
 {
     public function transform($params)
     {
@@ -17,12 +17,11 @@ class ServiceItemTechnicianReportTransformer extends TransformerAbstract
         foreach ($params as $salesPersonId => $salesPersonData) {
             foreach ($salesPersonData as $row) {
                 $result[$salesPersonId][] = [
-                    'first_name' => $row['first_name'],
-                    'last_name' => $row['last_name'],
-                    'type' => $row['repair_order_type'],
-                    'act_hrs' => $row['act_hrs'],
-                    'paid_hrs' => $row['paid_hrs'],
-                    'billed_hrs' => $row['billed_hrs'],
+                    'technician' => $row['technician'],
+                    'type' => 'Misc Labor',
+                    'act_hrs' => $row['actual_hours'],
+                    'paid_hrs' => $row['paid_hours'],
+                    'billed_hrs' => $row['billed_hours'],
                     'sale_id' => $row['sale_id'],
                     'invoice_id' => $row['invoice_id'],
                     'invoice_total' => (float)$row['invoice_total'],
@@ -39,7 +38,6 @@ class ServiceItemTechnicianReportTransformer extends TransformerAbstract
                     'inventory_stock' => $row['inventory_stock'],
                     'inventory_make' => $row['inventory_make'],
                     'inventory_notes' => $row['inventory_notes'],
-                    'paid_retail' => $row['paid_retail']
                 ];
             }
         }

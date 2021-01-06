@@ -40,6 +40,8 @@ use App\Repositories\Dms\SettingsRepository;
 use App\Repositories\Dms\SettingsRepositoryInterface;
 use App\Repositories\Dms\TaxCalculatorRepository;
 use App\Repositories\Dms\TaxCalculatorRepositoryInterface;
+use App\Repositories\Dms\UnitSaleLaborRepository;
+use App\Repositories\Dms\UnitSaleLaborRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
@@ -55,6 +57,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+        $this->app->bind(UnitSaleLaborRepositoryInterface::class, UnitSaleLaborRepository::class);
 
         $this->app->bind(SaleRepositoryInterface::class, function () {
             return new SaleRepository(Sale::query());

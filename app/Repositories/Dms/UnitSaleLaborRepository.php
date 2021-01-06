@@ -1,22 +1,46 @@
 <?php
 
-namespace App\Repositories\Dms\ServiceOrder;
+namespace App\Repositories\Dms;
 
+use App\Models\CRM\Dms\UnitSale;
+use App\Models\CRM\Dms\UnitSaleLabor;
 use App\Repositories\RepositoryAbstract;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Class UnitSaleLaborRepository
- * @package App\Repositories\Dms\ServiceOrder
+ * @package App\Repositories\Dms
  */
 class UnitSaleLaborRepository extends RepositoryAbstract implements UnitSaleLaborRepositoryInterface
 {
-    public function serviceReport($params): Collection
+    /**
+     * @param $params
+     * @return array
+     */
+    public function getTechnicians($params): array
+    {
+        $unitSaleTable = UnitSale::getTableName();
+        $unitSaleLaborTable = UnitSaleLabor::getTableName();
+
+        return DB::table($unitSaleLaborTable)
+            ->join($unitSaleTable, "{$unitSaleTable}.id", '=', "{$unitSaleLaborTable}.unit_sale_id")
+            ->select("{$unitSaleLaborTable}.technician")
+            ->groupBy("{$unitSaleLaborTable}.technician")
+            ->where("{$unitSaleTable}.dealer_id", '=', $params['dealer_id'])
+            ->get()
+            ->pluck('technician')
+            ->toArray();
+    }
+
+    /**
+     * @param $params
+     * @return array
+     */
+    public function serviceReport($params): array
     {
         $dbParams = ['dealerId' => $params['dealer_id']];
         $usWhere = "";
-        $technicianWhere = '';
+        $where = 'WHERE 1=1 ';
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
             $usWhere .= " AND DATE(us.created_at) BETWEEN :fromDate AND :toDate ";
@@ -24,20 +48,17 @@ class UnitSaleLaborRepository extends RepositoryAbstract implements UnitSaleLabo
             $dbParams['toDate'] = $params['to_date'];
         }
 
-        if (!empty($params['technician_id'])) {
-            $technicianWhere .= " WHERE technician.id = :technicianId ";
-            $dbParams['technicianId'] = $params['technician_id'];
+        if (!empty($params['technician']) && is_array($params['technician'])) {
+            foreach ($params['technician'] as $key => $technician) {
+                $where .= " AND labor.technician = :technician{$key} ";
+                $dbParams["technician{$key}"] = $technician;
+            }
         }
 
         $sql =
-            "SELECT technician.id technician_id, technician.first_name, technician.last_name,
-                    s_technician.act_hrs, s_technician.paid_hrs, s_technician.billed_hrs,
-                    r_order.type repair_order_type,
+            "SELECT labor.actual_hours, labor.paid_hours, labor.billed_hours, labor.technician,
                     sales.*
-            FROM dms_settings_technician technician
-            JOIN dms_service_technician AS s_technician ON technician.id = s_technician.dms_settings_technician_id
-            JOIN dms_service_item AS s_item ON s_technician.service_item_id = s_item.id
-            JOIN dms_repair_order AS r_order ON s_item.repair_order_id = r_order.id
+            FROM dms_unit_sale_labor labor
             JOIN (
                 /* unit sales */
                 SELECT
@@ -105,14 +126,14 @@ class UnitSaleLaborRepository extends RepositoryAbstract implements UnitSaleLabo
 
                 WHERE us.dealer_id=:dealerId
                 {$usWhere}
-                GROUP BY us.id) sales ON r_order.unit_sale_id=sales.sale_id
-            {$technicianWhere}";
+                GROUP BY us.id) sales ON labor.unit_sale_id=sales.sale_id
+            {$where}";
 
         $result = DB::select($sql, $dbParams);
 
         $all = [];
         foreach ($result as $row) {
-            $all[$row->technician_id][] = (array)$row;
+            $all[str_replace(" ","_",$row->technician)][] = (array)$row;
         }
 
         return $all;

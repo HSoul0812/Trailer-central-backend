@@ -700,6 +700,8 @@ $api->version('v1', function ($route) {
         $route->get('settings', 'App\Http\Controllers\v1\Dms\SettingsController@show');
         $route->put('settings', 'App\Http\Controllers\v1\Dms\SettingsController@update');
 
+        $route->get('unit-sale-labor/technicians', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getTechnicians');
+        $route->get('unit-sale-labor/service-report', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getServiceReport');
     });
 
     /*

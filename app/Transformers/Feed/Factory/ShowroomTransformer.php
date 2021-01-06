@@ -21,7 +21,7 @@ class ShowroomTransformer extends TransformerAbstract
             'msrp' => $showroom->msrp,
             'description' => $showroom->description,
             'description_txt' => $showroom->description_txt,
-            'dry_weight' => $showroom->dry_weight            
+            'dry_weight' => $showroom->dry_weight
         ];
     }
 }
