@@ -328,7 +328,7 @@ class CatalogService implements CatalogServiceInterface
             // Feed Doesn't Exist?
             if(empty($catalog->feed->feed_id)) {
                 // Update Feed in Catalog
-                $feed = $this->feeds->createOrUpdate([
+                $feed = $this->feeds->createOrUpdateFeed([
                     'business_id' => $catalog->business_id,
                     'catalog_id' => $catalog->catalog_id,
                     'feed_id' => $feedId,
