@@ -38,7 +38,8 @@ class ServiceItemTechnicianReportTransformer extends TransformerAbstract
                     'labor_cost_amount' => (float)$row['labor_cost_amount'],
                     'inventory_stock' => $row['inventory_stock'],
                     'inventory_make' => $row['inventory_make'],
-                    'inventory_notes' => $row['inventory_notes']
+                    'inventory_notes' => $row['inventory_notes'],
+                    'paid_retail' => $row['paid_retail']
                 ];
             }
         }

@@ -571,7 +571,8 @@ $api->version('v1', function ($route) {
         $route->get('service-item-technicians/by-location/{locationId}', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byLocation');
         $route->get('service-item-technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@index');
 
-        $route->get('technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\TechnicianController@index');
+        $route->get('service-order/technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\TechnicianController@index');
+        $route->get('service-order/types', 'App\Http\Controllers\v1\Dms\ServiceOrder\TypesController@index');
 
         /*
         |--------------------------------------------------------------------------

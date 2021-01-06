@@ -23,5 +23,5 @@ interface ServiceItemTechnicianRepositoryInterface extends Repository, RequestQu
      * @param $params
      * @return Collection
      */
-    public function serviceReport($params);
+    public function serviceReport($params): array;
 }

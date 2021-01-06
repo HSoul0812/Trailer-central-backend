@@ -1,60 +1,22 @@
 <?php
 
-
 namespace App\Repositories\Dms\ServiceOrder;
 
-
-use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Repositories\RepositoryAbstract;
-use App\Utilities\JsonApi\WithRequestQueryable;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
-class ServiceItemTechnicianRepository extends RepositoryAbstract implements ServiceItemTechnicianRepositoryInterface
+/**
+ * Class UnitSaleLaborRepository
+ * @package App\Repositories\Dms\ServiceOrder
+ */
+class UnitSaleLaborRepository extends RepositoryAbstract implements UnitSaleLaborRepositoryInterface
 {
-    use WithRequestQueryable;
-
-    public function __construct(Builder $baseQuery)
-    {
-        $this->withQuery($baseQuery);
-    }
-
-    public function get($params)
-    {
-        return $this->query()->get();
-    }
-
-    public function findByLocation($locationId)
-    {
-        return $this->query()
-            ->with(['serviceItem', 'serviceItem.serviceOrder'])
-            ->whereHas('serviceItem.serviceOrder', function($query) use ($locationId) {
-                $query->where('location', '=', $locationId);
-            })
-            ->get();
-    }
-
-    public function findByDealer($dealerId)
-    {
-        return $this->query()
-            ->with(['serviceItem', 'serviceItem.serviceOrder'])
-            ->whereHas('serviceItem.serviceOrder', function($query) use ($dealerId) {
-                $query->where('dealer_id', '=', $dealerId);
-            })
-            ->get();
-    }
-
-    /**
-     * Get Sales Report
-     *
-     * @param array $params
-     * @return array
-     */
-    public function serviceReport($params) :array
+    public function serviceReport($params): Collection
     {
         $dbParams = ['dealerId' => $params['dealer_id']];
         $usWhere = "";
-        $where = 'WHERE 1=1 ';
+        $technicianWhere = '';
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
             $usWhere .= " AND DATE(us.created_at) BETWEEN :fromDate AND :toDate ";
@@ -62,25 +24,15 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
             $dbParams['toDate'] = $params['to_date'];
         }
 
-        if (!empty($params['technician_id']) && is_array($params['technician_id'])) {
-            foreach ($params['technician_id'] as $key => $technicianId) {
-                $where .= " AND technician.id = :technicianId{$key} ";
-                $dbParams["technicianId{$key}"] = $technicianId;
-            }
-        }
-
-        if (!empty($params['repair_order_type']) && is_array($params['repair_order_type'])) {
-            foreach ($params['repair_order_type'] as $key => $type) {
-                $where .= " AND r_order.type = :rOrderType{$key} ";
-                $dbParams["rOrderType{$key}"] = $type;
-            }
+        if (!empty($params['technician_id'])) {
+            $technicianWhere .= " WHERE technician.id = :technicianId ";
+            $dbParams['technicianId'] = $params['technician_id'];
         }
 
         $sql =
             "SELECT technician.id technician_id, technician.first_name, technician.last_name,
                     s_technician.act_hrs, s_technician.paid_hrs, s_technician.billed_hrs,
                     r_order.type repair_order_type,
-                    s_item.amount paid_retail,
                     sales.*
             FROM dms_settings_technician technician
             JOIN dms_service_technician AS s_technician ON technician.id = s_technician.dms_settings_technician_id
@@ -154,7 +106,7 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
                 WHERE us.dealer_id=:dealerId
                 {$usWhere}
                 GROUP BY us.id) sales ON r_order.unit_sale_id=sales.sale_id
-            {$where}";
+            {$technicianWhere}";
 
         $result = DB::select($sql, $dbParams);
 

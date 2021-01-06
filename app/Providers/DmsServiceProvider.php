@@ -8,6 +8,7 @@ use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Dms\FinancingCompany;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
+use App\Models\CRM\Dms\ServiceOrder\Type;
 use App\Models\CRM\Dms\TaxCalculator;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Pos\Sale;
@@ -31,6 +32,8 @@ use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepository;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\TechnicianRepository;
 use App\Repositories\Dms\ServiceOrder\TechnicianRepositoryInterface;
+use App\Repositories\Dms\ServiceOrder\TypeRepository;
+use App\Repositories\Dms\ServiceOrder\TypeRepositoryInterface;
 use App\Repositories\Dms\ServiceOrderRepository;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Repositories\Dms\SettingsRepository;
@@ -79,6 +82,10 @@ class DmsServiceProvider extends ServiceProvider
 
         $this->app->bind(TechnicianRepositoryInterface::class, function () {
             return new TechnicianRepository(Technician::query());
+        });
+
+        $this->app->bind(TypeRepositoryInterface::class, function () {
+            return new TypeRepository(Type::query());
         });
     }
 }

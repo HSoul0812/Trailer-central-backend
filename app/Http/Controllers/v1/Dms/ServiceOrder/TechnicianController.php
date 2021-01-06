@@ -46,7 +46,7 @@ class TechnicianController extends RestfulControllerV2
 
     public function index(Request $request)
     {
-        $technicians = $this->technicianRepository->withRequest($request)->get([]);
+        $technicians = $this->technicianRepository->withRequest($request)->getAll([]);
 
         $data = new Collection($technicians, $this->transformer);
         $data->setPaginator(new IlluminatePaginatorAdapter($this->technicianRepository->getPaginator()));

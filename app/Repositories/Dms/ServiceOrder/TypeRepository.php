@@ -2,15 +2,16 @@
 
 namespace App\Repositories\Dms\ServiceOrder;
 
+use App\Models\CRM\Dms\ServiceOrder\Type;
 use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Class TechnicianRepository
+ * Class TypeRepository
  * @package App\Repositories\Dms\ServiceOrder
  */
-class TechnicianRepository extends RepositoryAbstract implements TechnicianRepositoryInterface
+class TypeRepository extends RepositoryAbstract implements TypeRepositoryInterface
 {
     use WithRequestQueryable;
 
