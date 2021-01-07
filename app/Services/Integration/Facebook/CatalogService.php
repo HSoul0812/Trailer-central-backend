@@ -355,7 +355,7 @@ class CatalogService implements CatalogServiceInterface
                     'feed_title' => $catalog->feed_name,
                     'feed_url' => $catalog->feed_url,
                     'is_active' => 1,
-                    'date_imported' => Carbon::now()->toDateTimeString()
+                    'imported_at' => Carbon::now()->toDateTimeString()
                 ]);
 
                 // Set Feed to Catalog
