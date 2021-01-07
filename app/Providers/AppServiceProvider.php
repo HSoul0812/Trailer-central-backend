@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Exceptions\OperationNotAllowedException;
+use App\Models\Inventory\InventoryHistory;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\Inventory\FileRepository;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepository;
 use App\Repositories\Inventory\ImageRepositoryInterface;
+use App\Repositories\Inventory\InventoryHistoryRepository;
+use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\StatusRepository;
 use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRepository;
@@ -209,6 +213,11 @@ class AppServiceProvider extends ServiceProvider
                 );
             });
         }
+
+        // Turn on read-only mode for InventoryHistory
+        InventoryHistory::saving(static function (InventoryHistory $user) {
+            throw new OperationNotAllowedException();
+        });
     }
 
     /**
@@ -239,6 +248,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(InventoryHistoryRepositoryInterface::class, InventoryHistoryRepository::class);
         $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
