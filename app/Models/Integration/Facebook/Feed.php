@@ -39,7 +39,7 @@ class Feed extends Model
         'feed_title',
         'feed_url',
         'is_active',
-        'date_imported'
+        'imported_at'
     ];
 
     /**
