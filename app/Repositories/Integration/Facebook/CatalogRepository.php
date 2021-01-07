@@ -183,11 +183,11 @@ class CatalogRepository implements CatalogRepositoryInterface {
         $feed = Feed::where('catalog_id', $params['catalog_id'])->first();
         if(!empty($feed->id)) {
             $params['id'] = $feed->id;
-            return $this->createFeed($params);
+            return $this->updateFeed($params);
         }
 
         // Update Feed
-        return $this->updateFeed($params);
+        return $this->createFeed($params);
     }
 
     protected function getSortOrders() {
