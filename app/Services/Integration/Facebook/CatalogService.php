@@ -239,7 +239,7 @@ class CatalogService implements CatalogServiceInterface
         // Parse Payload Data
         $payload = json_decode($params['payload']);
         $success = false;
-        $feeds = array();
+        $feeds = [];
         foreach($payload as $integration) {
             // Validate Payload
             if(empty($integration->page_id)) {
@@ -348,7 +348,7 @@ class CatalogService implements CatalogServiceInterface
             // Feed Doesn't Exist?
             if(empty($catalog->feed->feed_id)) {
                 // Update Feed in Catalog
-                $feed = $this->feeds->createOrUpdateFeed([
+                $feed = $this->catalogs->createOrUpdateFeed([
                     'business_id' => $catalog->business_id,
                     'catalog_id' => $catalog->catalog_id,
                     'feed_id' => $feedId,
