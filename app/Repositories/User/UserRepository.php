@@ -5,6 +5,7 @@ namespace App\Repositories\User;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\User\User;
+use App\Models\User\NewDealerUser;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
@@ -55,6 +56,41 @@ class UserRepository implements UserRepositoryInterface {
 
     public function getDmsActiveUsers() {
         return User::where('is_dms_active', 1)->get();
+    }
+
+    /**
+     * Get CRM Active Users
+     * 
+     * @param array $params
+     * @return Collection of NewDealerUser
+     */
+    public function getCrmActiveUsers($params) {
+        // Initialize Query for NewDealerUser
+        $dealers = NewDealerUser::has('activeCrmUser')->with('user');
+
+        // Has Sales People?
+        if(!empty($params['has'])) {
+            foreach($params['has'] as $has) {
+                $dealers = $dealers->has($has);
+            }
+        }
+
+        // Add Where Dealer ID
+        if(!empty($params['dealer_id'])) {
+            $dealers = $dealers->where('id', $params['dealer_id']);
+        }
+        // Bounds Exist?!
+        else if($params['bound_lower'] !== NULL && !empty($params['bound_upper'])) {
+            $dealers = $dealers->where('id', '>=', $params['bound_lower'])
+                               ->where('id', '<=', $params['bound_upper']);
+        }
+        // Only Lower Bound Exists!
+        else if($params['bound_lower'] !== NULL) {
+            $dealers = $dealers->where('id', '>=', $params['bound_lower']);
+        }
+
+        // Return Results
+        return $dealers->get();
     }
 
     public function setAdminPasswd($dealerId, $passwd)

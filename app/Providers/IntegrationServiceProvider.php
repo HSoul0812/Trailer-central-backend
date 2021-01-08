@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Integration\Collector\Collector;
+use App\Models\Integration\Collector\CollectorFields;
 use App\Repositories\Integration\Auth\TokenRepository;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Repositories\Integration\CollectorFieldsRepository;
+use App\Repositories\Integration\CollectorFieldsRepositoryInterface;
+use App\Repositories\Integration\CollectorRepository;
+use App\Repositories\Integration\CollectorRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepository;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepository;
@@ -21,6 +26,7 @@ use App\Services\Integration\Facebook\CatalogService;
 use App\Services\Integration\Facebook\CatalogServiceInterface;
 use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
+use Illuminate\Support\ServiceProvider;
 
 class IntegrationServiceProvider extends ServiceProvider
 {
@@ -43,6 +49,14 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(TokenRepositoryInterface::class, TokenRepository::class);
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
         $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
+
+        // Collector Repositories
+        $this->app->bind(CollectorRepositoryInterface::class, function() {
+            return new CollectorRepository(Collector::query());
+        });
+        $this->app->bind(CollectorFieldsRepositoryInterface::class, function () {
+            return new CollectorFieldsRepository(CollectorFields::query());
+        });
     }
 
 }

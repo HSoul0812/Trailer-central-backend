@@ -20,6 +20,16 @@ interface UserRepositoryInterface extends Repository {
      */
     public function getDmsActiveUsers();
 
+    /**
+     * Get CRM Active Users
+     * 
+     * @param array $params
+     * @return Collection of NewDealerUser
+     */
+    public function getCrmActiveUsers($params);
+    
+    public function setAdminPasswd($dealerId, $passwd);
+
     public function beginTransaction(): void;
 
     public function commitTransaction(): void;
