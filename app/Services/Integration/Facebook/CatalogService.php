@@ -6,6 +6,7 @@ use App\Models\Integration\Facebook\Catalog;
 use App\Jobs\Integration\Facebook\CatalogJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
+use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
@@ -29,6 +30,11 @@ class CatalogService implements CatalogServiceInterface
      * @var CatalogRepositoryInterface
      */
     protected $catalogs;
+
+    /**
+     * @var FeedRepositoryInterface
+     */
+    protected $feeds;
 
     /**
      * @var PageRepositoryInterface
@@ -60,6 +66,7 @@ class CatalogService implements CatalogServiceInterface
      */
     public function __construct(
         CatalogRepositoryInterface $catalogs,
+        FeedRepositoryInterface $feeds,
         PageRepositoryInterface $pages,
         TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
@@ -67,6 +74,7 @@ class CatalogService implements CatalogServiceInterface
         Manager $fractal
     ) {
         $this->catalogs = $catalogs;
+        $this->feeds = $feeds;
         $this->pages = $pages;
         $this->tokens = $tokens;
         $this->auth = $auth;
@@ -288,7 +296,7 @@ class CatalogService implements CatalogServiceInterface
      * @param array $response
      * @return array
      */
-    public function response($catalog, $accessToken) {
+    public function response(Catalog $catalog, AccessToken $accessToken) {
         // Convert Catalog to Array
         $data = new Item($catalog, new CatalogTransformer(), 'data');
         $response = $this->fractal->createData($data)->toArray();
@@ -344,23 +352,20 @@ class CatalogService implements CatalogServiceInterface
      */
     private function updateFeed(Catalog $catalog, int $feedId) {
         // Feed Exists?
-        if(!empty($feedId)) {
-            // Feed Doesn't Exist?
-            if(empty($catalog->feed->feed_id)) {
-                // Update Feed in Catalog
-                $feed = $this->catalogs->createOrUpdateFeed([
-                    'business_id' => $catalog->business_id,
-                    'catalog_id' => $catalog->catalog_id,
-                    'feed_id' => $feedId,
-                    'feed_title' => $catalog->feed_name,
-                    'feed_url' => $catalog->feed_url,
-                    'is_active' => 1,
-                    'imported_at' => Carbon::now()->toDateTimeString()
-                ]);
+        if(!empty($feedId) && empty($catalog->feed->feed_id)) {
+            // Update Feed in Catalog
+            $feed = $this->feeds->createOrUpdate([
+                'business_id' => $catalog->business_id,
+                'catalog_id' => $catalog->catalog_id,
+                'feed_id' => $feedId,
+                'feed_title' => $catalog->feed_name,
+                'feed_url' => $catalog->feed_url,
+                'is_active' => 1,
+                'imported_at' => Carbon::now()->toDateTimeString()
+            ]);
 
-                // Set Feed to Catalog
-                $catalog->setRelation('feed', $feed);
-            }
+            // Set Feed to Catalog
+            $catalog->setRelation('feed', $feed);
         }
 
         // Return Catalog With Feed

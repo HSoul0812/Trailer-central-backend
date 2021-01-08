@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Integration\Facebook;
 
 use App\Models\Integration\Facebook\Catalog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Catalog
@@ -47,7 +50,7 @@ class Feed extends Model
      * 
      * @return HasMany
      */
-    public function catalogs()
+    public function catalogs(): HasMany
     {
         return $this->hasMany(Catalog::class, 'catalog_id', 'catalog_id');
     }

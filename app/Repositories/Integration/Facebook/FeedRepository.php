@@ -4,10 +4,10 @@ namespace App\Repositories\Integration\Facebook;
 
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
-use App\Models\Integration\Facebook\Catalog;
+use App\Models\Integration\Facebook\Feed;
 use App\Repositories\Traits\SortTrait;
 
-class CatalogRepository implements CatalogRepositoryInterface {
+class FeedRepository implements FeedRepositoryInterface {
     use SortTrait;
 
     /**
@@ -16,22 +16,6 @@ class CatalogRepository implements CatalogRepositoryInterface {
      * @var array
      */
     private $sortOrders = [
-        'location' => [
-            'field' => 'dealer_location_id',
-            'direction' => 'DESC'
-        ],
-        '-location' => [
-            'field' => 'dealer_location_id',
-            'direction' => 'ASC'
-        ],
-        'account_name' => [
-            'field' => 'account_name',
-            'direction' => 'DESC'
-        ],
-        '-account_name' => [
-            'field' => 'account_name',
-            'direction' => 'ASC'
-        ],
         'created_at' => [
             'field' => 'created_at',
             'direction' => 'DESC'
@@ -51,10 +35,10 @@ class CatalogRepository implements CatalogRepositoryInterface {
     ];
 
     /**
-     * Create Facebook Catalog
+     * Create Facebook Feed
      * 
      * @param array $params
-     * @return Catalog
+     * @return Feed
      */
     public function create($params) {
         // Active Not Set?
@@ -67,55 +51,55 @@ class CatalogRepository implements CatalogRepositoryInterface {
             $params['filters'] = '';
         }
 
-        // Create Catalog
-        return Catalog::create($params);
+        // Feed Feed Already Exists?
+        return Feed::create($params);
     }
 
     /**
-     * Delete Catalog
+     * Delete Feed
      * 
      * @param int $id
      * @throws NotImplementedException
      */
     public function delete($id) {
-        // Delete Catalog
-        return Catalog::findOrFail($id)->delete();
+        // Delete Feed
+        return Feed::findOrFail($id)->delete();
     }
 
     /**
-     * Get Catalog
+     * Get Feed
      * 
      * @param array $params
-     * @return Catalog
+     * @return Feed
      */
     public function get($params) {
-        // Find Catalog By ID
-        return Catalog::findOrFail($params['id']);
+        // Find Feed By ID
+        return Feed::findOrFail($params['id']);
     }
 
     /**
-     * Get All Catalogs That Match Params
+     * Get All Feeds That Match Params
      * 
      * @param array $params
-     * @return Collection of Catalogs
+     * @return Collection of Feeds
      */
     public function getAll($params) {
-        $query = Catalog::where('dealer_id', '=', $params['dealer_id']);
+        $query = Feed::select();
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
 
-        if (isset($params['dealer_location_id'])) {
-            $query = $query->where('dealer_location_id', $params['dealer_location_id']);
+        if (isset($params['business_id'])) {
+            $query = $query->where('business_id', $params['business_id']);
         }
 
-        if (isset($params['account_id'])) {
-            $query = $query->where('account_id', $params['account_id']);
+        if (isset($params['catalog_id'])) {
+            $query = $query->where('catalog_id', $params['catalog_id']);
         }
 
-        if (isset($params['id'])) {
-            $query = $query->whereIn('id', $params['id']);
+        if (isset($params['feed_id'])) {
+            $query = $query->where('feed_id', $params['feed_id']);
         }
 
         if (isset($params['sort'])) {
@@ -126,21 +110,41 @@ class CatalogRepository implements CatalogRepositoryInterface {
     }
 
     /**
-     * Update Catalog
+     * Update Feed
      * 
      * @param array $params
-     * @return Catalog
+     * @return Feed
      */
     public function update($params) {
-        $catalog = Catalog::findOrFail($params['id']);
+        $feed = Feed::findOrFail($params['id']);
 
-        DB::transaction(function() use (&$catalog, $params) {
-            // Fill Catalog Details
-            $catalog->fill($params)->save();
+        DB::transaction(function() use (&$feed, $params) {
+            // Fill Feed Details
+            $feed->fill($params)->save();
         });
 
-        return $catalog;
+        return $feed;
     }
+
+    /**
+     * Create or Update Feed
+     * 
+     * @param array $params
+     * @return Feed
+     */
+    public function createOrUpdate($params) {
+        // Feed Already Exists?
+        $feed = Feed::where('catalog_id', $params['catalog_id'])->first();
+        if(!empty($feed->id)) {
+            // Update Feed
+            $params['id'] = $feed->id;
+            return $this->update($params);
+        }
+
+        // Create Feed
+        return $this->create($params);
+    }
+
 
     protected function getSortOrders() {
         return $this->sortOrders;
