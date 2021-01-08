@@ -158,18 +158,8 @@ class InteractionService implements InteractionServiceInterface
     private function refreshToken($accessToken) {
         // Validate Token
         $validate = $this->google->validate($accessToken);
-
-        // Token Was Refreshed?!
         if(!empty($validate['new_token'])) {
-            $time = time();
-            $accessToken = $this->tokens->update([
-                'id' => $accessToken->id,
-                'access_token' => $validate['new_token']['access_token'],
-                'id_token' => $validate['new_token']['id_token'],
-                'expires_in' => $validate['new_token']['expires_in'],
-                'expires_at' => date("Y-m-d H:i:s", $time + $validate['new_token']['expires_in']),
-                'issued_at' => date("Y-m-d H:i:s", $time)
-            ]);
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
         }
 
         // Return Access Token

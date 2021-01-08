@@ -2,12 +2,12 @@
 
 namespace App\Repositories\Integration\Auth;
 
-use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Auth\Scope;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 
 class TokenRepository implements TokenRepositoryInterface {
     /**
@@ -180,6 +180,27 @@ class TokenRepository implements TokenRepositoryInterface {
         // Return Empty
         return null;
     }
+
+    /**
+     * Refresh Access Token
+     * 
+     * @param int $tokenId
+     * @param array $newToken
+     * @return AccessToken
+     */
+    public function refresh($tokenId, $newToken) {
+        // Refresh Access Token
+        $time = CarbonImmutable::now();
+        return $this->update([
+            'id' => $tokenId,
+            'access_token' => $newToken['access_token'],
+            'id_token' => $newToken['id_token'],
+            'expires_in' => $newToken['expires_in'],
+            'expires_at' => $time->addSeconds($newToken['expires_in'])->toDateTimeString(),
+            'issued_at' => $time->toDateTimeString()
+        ]);
+    }
+
 
     /**
      * Delete Access Token Scopes

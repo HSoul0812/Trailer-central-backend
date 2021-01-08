@@ -96,4 +96,8 @@ class AccessToken extends Model
     {
         $this->attributes['scope'] = is_array($value) ? $value : explode(" ", $value);
     }
+
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }
