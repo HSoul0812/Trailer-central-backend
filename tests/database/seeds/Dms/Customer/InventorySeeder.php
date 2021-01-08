@@ -98,7 +98,6 @@ class InventorySeeder extends Seeder
         $dealerId = $this->dealer->getKey();
 
         // Database clean up
-        CustomerInventory::where('customer_id', $this->customer->getKey())->delete();
         Inventory::where('dealer_id', $dealerId)->delete();
         Customer::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);

@@ -152,8 +152,8 @@ SQL;
             $table->integer('inventory_id')->unsigned();
             $table->timestamp('created_at')->useCurrent();
 
-            $table->foreign('customer_id')->references('id')->on('dms_customer');
-            $table->foreign('inventory_id')->references('inventory_id')->on('inventory');
+            $table->foreign('customer_id')->references('id')->on('dms_customer')->onDelete('CASCADE')->onUpdate('CASCADE');
+            $table->foreign('inventory_id')->references('inventory_id')->on('inventory')->onDelete('CASCADE')->onUpdate('CASCADE');
             $table->unique(['customer_id', 'inventory_id']);
         });
     }
