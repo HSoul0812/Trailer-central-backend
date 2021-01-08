@@ -238,9 +238,8 @@ class BusinessService implements BusinessServiceInterface
                 array(
                     'name' => $feedName,
                     'schedule' => array(
-                        'interval' => 'DAILY',
-                        'url' => $feedUrl,
-                        'hour' => '22'
+                        'interval' => 'HOURLY',
+                        'url' => $feedUrl
                     )
                 )
             )->exportAllData();
