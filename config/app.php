@@ -178,8 +178,8 @@ return [
         App\Providers\PartsServiceProvider::class,
         App\Providers\DmsServiceProvider::class,
         App\Providers\IntegrationServiceProvider::class,
+        App\Providers\InteractionServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
-        App\Providers\IntegrationsServiceProvider::class,
 
         /*
          * 3rd party stuff
