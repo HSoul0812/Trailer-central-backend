@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmailHistory extends Model
 {
+
+    const TABLE_NAME = 'crm_email_history';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'crm_email_history';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
@@ -92,5 +95,9 @@ class EmailHistory extends Model
     public function interaction()
     {
         return $this->belongsTo(Lead::class, "interaction_id", "interaction_id");
+    }
+    
+    public static function getTableName() {
+        return self::TABLE_NAME;
     }
 }

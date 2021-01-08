@@ -199,21 +199,11 @@ class AuthService implements AuthServiceInterface
      * @param array $response
      * @return array
      */
-    public function response($accessToken, $response = array()) {
+    public function response($accessToken, $response = []) {
         // Set Validate
         $validate = $this->validate($accessToken);
-
-        // Token Was Refreshed?!
         if(!empty($validate['new_token'])) {
-            $time = time();
-            $accessToken = $this->tokens->update([
-                'id' => $accessToken->id,
-                'access_token' => $validate['new_token']['access_token'],
-                'id_token' => $validate['new_token']['id_token'],
-                'expires_in' => $validate['new_token']['expires_in'],
-                'expires_at' => date("Y-m-d H:i:s", $time + $validate['new_token']['expires_in']),
-                'issued_at' => date("Y-m-d H:i:s", $time)
-            ]);
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
         }
 
         // Convert Token to Array
