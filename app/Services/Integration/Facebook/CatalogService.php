@@ -272,7 +272,7 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Create Job
-            $this->dispatch(new CatalogJob($catalog, $integration));
+            $this->dispatch(new CatalogJob($integration, $feed->feed_url));
         }
 
         // Validate Feeds Exist?
@@ -355,7 +355,7 @@ class CatalogService implements CatalogServiceInterface
         $feed = null;
         if(!empty($feedId)) {
             // Get Feed URL and Name
-            $feedUrl = $this->feeds->getFeedUrl($businessId, $catalogId);
+            $feedUrl = $this->feeds->getFeedUrl($businessId, $catalogId, false);
             $feedName = $this->feeds->getFeedName($catalogId);
 
             // Update Feed in Catalog
