@@ -266,7 +266,7 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Feed Exists?
-            $feed = $this->updateFeed($catalog, $feedId);
+            $feed = $this->updateFeed($integration->business_id, $integration->catalog_id, $feedId);
             if(!empty($feed->feed_id)) {
                 $feeds[] = $feed->feed_id;
             }
