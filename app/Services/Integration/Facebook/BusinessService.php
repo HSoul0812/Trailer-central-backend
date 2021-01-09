@@ -99,7 +99,7 @@ class BusinessService implements BusinessServiceInterface
      * @param array scopes to use to validate if no scopes exist on access token
      * @return array of validation info
      */
-    public function validate($accessToken, $scopes = [])) {
+    public function validate($accessToken, $scopes = []) {
         // Configure Client
         $this->initApi($accessToken);
 
