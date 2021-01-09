@@ -303,7 +303,7 @@ class BusinessService implements BusinessServiceInterface
      * @param string || AccessToken $accessToken
      * @return boolean
      */
-    private function validateAccessToken($accessToken, $scopes = [])) {
+    private function validateAccessToken($accessToken, $scopes = []) {
         // Get Final Token
         $inputToken = $accessToken; // Assuming this is a Page Token
         if(!empty($accessToken->refresh_token)) {
