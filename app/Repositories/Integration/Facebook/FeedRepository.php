@@ -149,4 +149,33 @@ class FeedRepository implements FeedRepositoryInterface {
     protected function getSortOrders() {
         return $this->sortOrders;
     }
+
+
+    /**
+     * Get Feed Path
+     * 
+     * @param int $businessId
+     * @param int $catalogId
+     * @param bool $remote
+     * @return string of calculated feed path
+     */
+    public function getFeedUrl($businessId, $catalogId, $remote = true)
+    {
+        // Set URL
+        $url = $remote ? $_ENV['AWS_URL'] : '';
+
+        // Return URL
+        return $url . '/' . Feed::CATALOG_URL_PREFIX . '/' . $businessId . '/' . $catalogId . '.csv';
+    }
+
+    /**
+     * Get Feed Name
+     * 
+     * @param int $catalogId
+     * @return string of calculated feed name
+     */
+    public function getFeedName($catalogId)
+    {
+        return "Feed for Catalog #" . $catalogId;
+    }
 }

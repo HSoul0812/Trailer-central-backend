@@ -250,26 +250,24 @@ class CatalogService implements CatalogServiceInterface
         $feeds = [];
         foreach($payload as $integration) {
             // Validate Payload
-            if(empty($integration->page_id)) {
+            if(empty($integration->business_id) && empty($integration->catalog_id)) {
                 continue;
             }
 
-            // Get Catalog
-            $catalog = $this->catalogs->get(['id' => $integration->fb_catalog_id]);
-            if(empty($catalog->id)) {
-                continue;
-            }
+            // Get Access Token and Feed ID
+            $catalog = $this->catalogs->findOne(['catalog_id' => $integration->catalog_id]);
+            $feedId = !empty($catalog->feed) ? $catalog->feed->feed_id : 0;
 
             // Get Feed ID From SDK
-            $feedId = $this->scheduleFeed($catalog);
+            $feedId = $this->scheduleFeed($catalog->accessToken, $integration->business_id, $integration->catalog_id, $feedId);
             if(empty($feedId)) {
                 continue;
             }
 
             // Feed Exists?
-            $catalog = $this->updateFeed($catalog, $feedId);
-            if(!empty($catalog->feed)) {
-                $feeds[] = $feedId;
+            $feed = $this->updateFeed($catalog, $feedId);
+            if(!empty($feed->feed_id)) {
+                $feeds[] = $feed->feed_id;
             }
 
             // Create Job
@@ -312,17 +310,16 @@ class CatalogService implements CatalogServiceInterface
     /**
      * Schedule Feed With Catalog Data
      * 
-     * @param Catalog $catalog
+     * @param int $businessId
+     * @param int $catalogId
+     * @param int $feedId
      * @return int feed ID
      */
-    private function scheduleFeed(Catalog $catalog) {
-        // Initialize Feed
-        $feedId = 0;
-
+    private function scheduleFeed(AccessToken $accessToken, int $businessId, int $catalogId, int $feedId = 0) {
         // Feed ID Exists?
-        if(!empty($catalog->feed->feed_id)) {
+        if(!empty($feedId)) {
             try {
-                $feed = $this->sdk->validateFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed->feed_id);
+                $feed = $this->sdk->validateFeed($accessToken, $catalogId, $feedId);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
                 Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
@@ -332,7 +329,9 @@ class CatalogService implements CatalogServiceInterface
         // Feed Doesn't Exist?
         if(empty($feedId)) {
             try {
-                $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_url, $catalog->feed_name);
+                $feedUrl = $this->feeds->getFeedUrl($businessId, $catalogId);
+                $feedName = $this->feeds->getFeedName($catalogId);
+                $feed = $this->sdk->scheduleFeed($accessToken, $catalogId, $feedUrl, $feedName);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
                 Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
@@ -350,25 +349,27 @@ class CatalogService implements CatalogServiceInterface
      * Catalog $catalog
      * int $feedId
      */
-    private function updateFeed(Catalog $catalog, int $feedId) {
+    private function updateFeed(int $businessId, int $catalogId, int $feedId) {
         // Feed Exists?
-        if(!empty($feedId) && empty($catalog->feed->feed_id)) {
+        $feed = null;
+        if(!empty($feedId)) {
+            // Get Feed URL and Name
+            $feedUrl = $this->feeds->getFeedUrl($businessId, $catalogId);
+            $feedName = $this->feeds->getFeedName($catalogId);
+
             // Update Feed in Catalog
             $feed = $this->feeds->createOrUpdate([
-                'business_id' => $catalog->business_id,
-                'catalog_id' => $catalog->catalog_id,
+                'business_id' => $businessId,
+                'catalog_id' => $catalogId,
                 'feed_id' => $feedId,
-                'feed_title' => $catalog->feed_name,
-                'feed_url' => $catalog->feed_url,
+                'feed_title' => $feedName,
+                'feed_url' => $feedUrl,
                 'is_active' => 1,
                 'imported_at' => Carbon::now()->toDateTimeString()
             ]);
-
-            // Set Feed to Catalog
-            $catalog->setRelation('feed', $feed);
         }
 
-        // Return Catalog With Feed
-        return $catalog;
+        // Return Feed
+        return $feed;
     }
 }

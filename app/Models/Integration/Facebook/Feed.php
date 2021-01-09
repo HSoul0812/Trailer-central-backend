@@ -21,6 +21,11 @@ class Feed extends Model
     const TABLE_NAME = 'fbapp_feeds';
 
     /**
+     * Define Catalog URL Prefix
+     */
+    const CATALOG_URL_PREFIX = 'facebook/catalog';
+
+    /**
      * @var string
      */
     protected $table = self::TABLE_NAME;

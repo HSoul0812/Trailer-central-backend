@@ -142,6 +142,40 @@ class CatalogRepository implements CatalogRepositoryInterface {
         return $catalog;
     }
 
+    /**
+     * Find Catalogs
+     * 
+     * @param array $params
+     * @return Collection of Catalogs
+     */
+    public function find($params) {
+        $query = Catalog::where('id', '>', 0);
+
+        if (isset($params['business_id'])) {
+            $query = $query->where('business_id', $params['business_id']);
+        }
+
+        if (isset($params['account_id'])) {
+            $query = $query->where('account_id', $params['account_id']);
+        }
+
+        if (isset($params['catalog_id'])) {
+            $query = $query->where('catalog_id', $params['catalog_id']);
+        }
+        
+        return $query->get();
+    }
+
+    /**
+     * Find One Catalog
+     * 
+     * @param array $params
+     * @return Catalog
+     */
+    public function findOne($params) {
+        return $this->find($params)->first();
+    }
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }

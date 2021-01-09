@@ -17,11 +17,6 @@ class Catalog extends Model
     const TABLE_NAME = 'fbapp_catalog';
 
     /**
-     * Define Catalog URL Prefix
-     */
-    const CATALOG_URL_PREFIX = 'facebook/catalog';
-
-    /**
      * @var string
      */
     protected $table = self::TABLE_NAME;
@@ -98,36 +93,5 @@ class Catalog extends Model
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('facebook')
                     ->whereRelationType('fbapp_catalog');
-    }
-
-
-    /**
-     * Get Feed Path
-     * 
-     * @return string of calculated feed path
-     */
-    public function getFeedPathAttribute()
-    {
-        return '/' . self::CATALOG_URL_PREFIX . '/' . $this->business_id . '/' . $this->catalog_id . '.csv';
-    }
-
-    /**
-     * Get Feed Url
-     * 
-     * @return string of calculated feed url
-     */
-    public function getFeedUrlAttribute()
-    {
-        return $_ENV['AWS_URL'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->business_id . '/' . $this->catalog_id . '.csv';
-    }
-
-    /**
-     * Get Feed Name
-     * 
-     * @return string of calculated feed name
-     */
-    public function getFeedNameAttribute()
-    {
-        return $this->account_name . "'s Feed for Catalog #" . $this->catalog_id;
     }
 }
