@@ -99,7 +99,7 @@ class BusinessService implements BusinessServiceInterface
      * @param array scopes to use to validate if no scopes exist on access token
      * @return array of validation info
      */
-    public function validate($accessToken, $scopes = array()) {
+    public function validate($accessToken, $scopes = [])) {
         // Configure Client
         $this->initApi($accessToken);
 
@@ -233,16 +233,13 @@ class BusinessService implements BusinessServiceInterface
             $catalog = new ProductCatalog($catalogId);
 
             // Create Product Feed
-            $data = $catalog->createProductFeed(
-                array(),
-                array(
-                    'name' => $feedName,
-                    'schedule' => array(
-                        'interval' => 'HOURLY',
-                        'url' => $feedUrl
-                    )
-                )
-            )->exportAllData();
+            $data = $catalog->createProductFeed([], [
+                'name' => $feedName,
+                'schedule' => [
+                    'interval' => 'HOURLY',
+                    'url' => $feedUrl
+                ]
+            ])->exportAllData();
 
             // Return Data Result
             return $data;
@@ -306,7 +303,7 @@ class BusinessService implements BusinessServiceInterface
      * @param string || AccessToken $accessToken
      * @return boolean
      */
-    private function validateAccessToken($accessToken, $scopes = array()) {
+    private function validateAccessToken($accessToken, $scopes = [])) {
         // Get Final Token
         $inputToken = $accessToken; // Assuming this is a Page Token
         if(!empty($accessToken->refresh_token)) {

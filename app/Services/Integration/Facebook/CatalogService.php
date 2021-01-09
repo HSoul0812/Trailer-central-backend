@@ -255,7 +255,7 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Get Catalog
-            $catalog = $this->catalogs->get(['id' => $integration->catalog_id]);
+            $catalog = $this->catalogs->get(['id' => $integration->fb_catalog_id]);
             if(empty($catalog->id)) {
                 continue;
             }
