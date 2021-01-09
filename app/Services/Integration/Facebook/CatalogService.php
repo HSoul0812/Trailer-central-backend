@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Facebook;
 
+use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Catalog;
 use App\Jobs\Integration\Facebook\CatalogJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
