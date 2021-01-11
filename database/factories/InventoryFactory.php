@@ -1,7 +1,8 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+/** @var Factory $factory */
 
+use Illuminate\Database\Eloquent\Factory;
 use Tests\TestCase;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\EntityType;
@@ -12,7 +13,15 @@ use App\Models\Showroom\Showroom;
 use Faker\Generator as Faker;
 use Illuminate\Support\Str;
 
-$factory->define(Inventory::class, function (Faker $faker) {
+$factory->define(Inventory::class, static function (Faker $faker, array $attributes): array {
+    /**
+     * todo:
+     * This have to be change to
+     * $dealer_id = $attributes['dealer_id'] ?? factory(App\Models\User\User::class)->create()->getKey();
+     * and therefore provide TestCase::getTestDealerId() must to be responsibility of the caller
+     */
+    $dealer_id = $attributes['dealer_id'] ?? TestCase::getTestDealerId();
+
     // Get Entity/Category
     $entityType = EntityType::where('entity_type_id', '<>', 2)->inRandomOrder()->first();
     $category = Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first();
@@ -21,10 +30,6 @@ $factory->define(Inventory::class, function (Faker $faker) {
     $mfg = Manufacturers::inRandomOrder()->first();
     $brand = Brand::where('manufacturer_id', $mfg->id)->inRandomOrder()->first();
     $showroom = Showroom::where('manufacturer', $mfg->name)->inRandomOrder()->first();
-
-    // Select Random Values
-    $conditions = ['new', 'used'];
-    $condition = array_rand($conditions);
 
     // Get Prices
     $msrp = $faker->randomFloat(2, 2000, 9999);
@@ -39,7 +44,7 @@ $factory->define(Inventory::class, function (Faker $faker) {
     // Return Overrides
     return [
         'entity_type_id' => $entityType->entity_type_id,
-        'dealer_id' => TestCase::getTestDealerId(),
+        'dealer_id' => $dealer_id,
         'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
         'created_at' => $createdAt,
         'updated_at' => $createdAt,
@@ -53,11 +58,11 @@ $factory->define(Inventory::class, function (Faker $faker) {
         'description' => !empty($showroom->description) ? $showroom->description : $faker->realText,
         'status' => 1,
         'category' => !empty($showroom->type) ? $showroom->type : $category->legacy_category,
-        'vin' => Str::random(18),
+        'vin' => $attributes['vin'] ?? Str::random(18),
         'msrp' => $msrp,
         'price' => $price,
         'year' => $faker->year,
-        'condition' => $conditions[$condition],
+        'condition' => $faker->randomElement(['new', 'used']),
         'notes' => $faker->realText,
         'is_archived' => 0,
         'showroom_id' => !empty($showroom->id) ? $showroom->id : null

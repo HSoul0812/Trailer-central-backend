@@ -2,16 +2,29 @@
 
 namespace App\Repositories\User;
 
-use App\Repositories\User\UserRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\User\User;
 use App\Models\User\NewDealerUser;
+use App\Services\Common\EncrypterServiceInterface;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
 
 class UserRepository implements UserRepositoryInterface {
     use Transaction;
+
+    /**
+     * @var EncrypterServiceInterface
+     */
+    private $encrypterService;
+
+    /**
+     * @param  EncrypterServiceInterface  $encrypterService
+     */
+    public function __construct(EncrypterServiceInterface $encrypterService)
+    {
+        $this->encrypterService = $encrypterService;
+    }
 
     public function create($params) {
         throw new NotImplementedException;
@@ -38,16 +51,23 @@ class UserRepository implements UserRepositoryInterface {
         throw new NotImplementedException;
     }
 
+    /**
+     * @param  string  $email
+     * @param  string  $password
+     * @return User|DealerUser
+     *
+     * @throws ModelNotFoundException when a dealer or user-belonging-to-a-dealer is not found
+     */
     public function findUserByEmailAndPassword($email, $password) {
         $user = User::where('email', $email)->first();
-        if ( $user && ( $user->password == crypt($password, $user->salt) ) ) {
+        if ($user && $this->passwordMatch($user->password, $password, $user->salt)) {
             return $user;
         }
 
         // Check dealer users
         $dealerUser = DealerUser::where('email', $email)->first();
 
-        if ( $dealerUser && ( $dealerUser->password == crypt($password, $dealerUser->salt) ) ) {
+        if ($dealerUser && $this->passwordMatch($dealerUser->password, $password, $dealerUser->salt)) {
             return $dealerUser;
         }
 
@@ -60,7 +80,7 @@ class UserRepository implements UserRepositoryInterface {
 
     /**
      * Get CRM Active Users
-     * 
+     *
      * @param array $params
      * @return Collection of NewDealerUser
      */
@@ -100,4 +120,8 @@ class UserRepository implements UserRepositoryInterface {
         ]);
     }
 
+    private function passwordMatch(string $expectedPassword, string $password, string $salt): bool
+    {
+        return $expectedPassword === $this->encrypterService->encryptBySalt($password, $salt);
+    }
 }
