@@ -242,9 +242,9 @@ class CatalogJob extends Job
 
 
     /**
-     * @var Catalog $catalog
+     * @var string $feedPath
      */
-    private $catalog;
+    private $feedPath;
 
     /**
      * @var array $integration
@@ -257,10 +257,10 @@ class CatalogJob extends Job
      *
      * @return void
      */
-    public function __construct(Catalog $catalog, \stdclass $integration)
+    public function __construct(\stdclass $integration, string $feedPath)
     {
-        // Set Catalog/Integration to Process
-        $this->catalog = $catalog;
+        // Set Feed Path/Integration to Process
+        $this->feedPath = $feedPath;
         $this->integration = $integration;
     }
 
@@ -278,7 +278,7 @@ class CatalogJob extends Job
         }
 
         // No Feed URL?
-        if(empty($this->catalog->feed_path)) {
+        if(empty($this->feedPath)) {
             throw new MissingCatalogFeedPathException;
         }
 
@@ -291,7 +291,7 @@ class CatalogJob extends Job
         }
 
         // Store Final CSV
-        return $this->storeCsv($file, $this->catalog->feed_path);
+        return $this->storeCsv($file, $this->feedPath);
     }
 
 
@@ -416,18 +416,18 @@ class CatalogJob extends Job
     /**
      * Stores CSV on S3 and returns its URL
      *
-     * @param string $filename full filename path on S3
+     * @param string $filePath full filename path on S3
      * @param File $file temporary file to store results for
      * @return string
      */
-    private function storeCsv($file, $filename) {
+    private function storeCsv($file, $filePath) {
         // Get Temp File Contents
         rewind($file);
         $csv = stream_get_contents($file);
         fclose($file); // releases the memory (or tempfile)
 
         // Return Stored File
-        return Storage::disk('s3')->put($filename, $csv, 'public');
+        return Storage::disk('s3')->put($filePath, $csv, 'public');
     }
 
 
