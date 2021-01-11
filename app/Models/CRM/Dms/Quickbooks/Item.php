@@ -15,6 +15,8 @@ class Item extends Model
 {
     protected $table = 'qb_items';
 
+    public $timestamps = false;
+
     const ITEM_TYPES = [
         'TRAILER' => 'trailer',
         'PART' => 'part',

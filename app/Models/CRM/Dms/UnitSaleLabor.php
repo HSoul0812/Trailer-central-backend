@@ -4,6 +4,7 @@ namespace App\Models\CRM\Dms;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class UnitSaleLabor
@@ -30,4 +31,12 @@ class UnitSaleLabor extends Model
     use TableAware;
 
     protected $table = 'dms_unit_sale_labor';
+
+    /**
+     * @return BelongsTo
+     */
+    public function unitSale(): BelongsTo
+    {
+        return $this->belongsTo(UnitSale::class);
+    }
 }

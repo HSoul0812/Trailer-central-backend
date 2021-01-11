@@ -18,6 +18,8 @@ class InvoiceItem extends Model
 {
     protected $table = "qb_invoice_items";
 
+    public $timestamps = false;
+
     public function invoice()
     {
         return $this->belongsTo(Invoice::class, 'invoice_id');
