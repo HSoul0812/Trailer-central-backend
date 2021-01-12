@@ -17,6 +17,7 @@ use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\Traits\TableAware;
+use App\Models\Website\Website;
 
 /**
  * Class Lead
@@ -69,6 +70,12 @@ class Lead extends Model
 
     const NOT_ARCHIVED = 0;
     const LEAD_ARCHIVED = 1;
+    
+    const IS_NOT_SPAM = 0;
+    const IS_SPAM = 1;
+    
+    const IS_IDS_EXPORTED = 1;
+    const IS_NOT_IDS_EXPORTED = 0;
 
     const TABLE_NAME = 'website_lead';
 
@@ -212,6 +219,16 @@ class Lead extends Model
     public function newDealerUser()
     {
         return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
+    }
+    
+    /**
+     * Get Website.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function website()
+    {
+        return $this->belongsTo(Website::class, 'website_id', 'id');
     }
 
     /**
