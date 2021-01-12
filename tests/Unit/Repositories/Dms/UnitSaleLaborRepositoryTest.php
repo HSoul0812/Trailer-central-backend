@@ -427,13 +427,8 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
     /**
      * @covers ::serviceReport
-     * @dataProvider serviceReportProvider
-     *
-     * @param array $unitSaleLabor11
-     * @param array $unitSaleLabor12
-     * @param array $unitSaleLabor21
      */
-    public function testServiceReportWithTechnician(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
+    public function testServiceReportWithTechnician()
     {
         $technician1 = 'unit_test_service_report_technician_1';
         $technician2 = 'unit_test_service_report_technician_2';
@@ -471,7 +466,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $this->assertArrayHasKey($technician2, $result);
     }
 
-    public function serviceReportProvider()
+    public function serviceReportProvider(): array
     {
         return [[
             [

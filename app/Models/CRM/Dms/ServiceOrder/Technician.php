@@ -9,6 +9,8 @@ class Technician extends Model implements Filterable
 {
     protected $table = 'dms_settings_technician';
 
+    public $timestamps = false;
+
     public function jsonApiFilterableColumns(): ?array
     {
         return ['dealer_id'];

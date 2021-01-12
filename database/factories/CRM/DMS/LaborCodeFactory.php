@@ -9,6 +9,6 @@ use Tests\TestCase;
 $factory->define(LaborCode::class, function (Faker $faker) {
     return [
         'dealer_id' => TestCase::getTestDealerId(),
-        'name' => $faker->title
+        'name' => $faker->title . '_' . rand(10000, 10000000000),
     ];
 });

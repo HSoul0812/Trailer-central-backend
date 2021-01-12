@@ -19,6 +19,8 @@ class ServiceItem extends Model
 {
     protected $table = "dms_service_item";
 
+    public $timestamps = false;
+
     public function laborCode()
     {
         return $this->hasOne(LaborCode::class, 'id', 'labor_code_id');

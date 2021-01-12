@@ -13,7 +13,7 @@ $factory->define(UnitSale::class, function (Faker $faker) {
         'buyer_id' => function () {
             return factory(Customer::class)->create()->id;
         },
-        'title' => $faker->title,
+        'title' => $faker->title . '_' . rand(10000, 10000000000),
         'sales_location_id' => TestCase::getTestDealerLocationRandom(),
         'inventory_price' => '123.00',
         'total_price' => '456.00',
