@@ -154,8 +154,15 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function createOrUpdate($params) {
-        // Part is unique if the SKU is unique for the dealer id
-        $part = Part::where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
+        
+        if (isset($params['id'])) {
+            $part = Part::where('id', $params['id'])->where('dealer_id', $params['dealer_id'])->first();
+        } 
+        
+        if (empty($part)) {
+            // Part is unique if the SKU is unique for the dealer id
+            $part = Part::where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
+        }        
 
         if ($part) {
             $params['id'] = $part->id;

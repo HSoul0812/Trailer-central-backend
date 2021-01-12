@@ -32,11 +32,10 @@ class GoogleService implements GoogleServiceInterface
         }
 
         // Initialize Client
-        $this->client = new \Google_Client([
-            'application_name' => $_ENV['GOOGLE_OAUTH_APP_NAME'],
-            'client_id' => $_ENV['GOOGLE_OAUTH_CLIENT_ID'],
-            'client_secret' => $_ENV['GOOGLE_OAUTH_CLIENT_SECRET']
-        ]);
+        $this->client = new \Google_Client();
+        $this->client->setApplicationName($_ENV['GOOGLE_OAUTH_APP_NAME']);
+        $this->client->setClientId($_ENV['GOOGLE_OAUTH_CLIENT_ID']);
+        $this->client->setClientSecret($_ENV['GOOGLE_OAUTH_CLIENT_SECRET']);
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
@@ -80,7 +79,7 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Get Refresh Token
      * 
-     * @param array $params
+     * @param array $accessToken
      * @return array of validation info
      */
     public function refresh($accessToken) {
@@ -128,7 +127,7 @@ class GoogleService implements GoogleServiceInterface
         ];
 
         // Try to Refesh Access Token!
-        if(!empty($accessToken->refresh_token) && $result['is_expired']) {
+        if(!empty($accessToken->refresh_token) && (!$result['is_valid'] || $result['is_expired'])) {
             $refresh = $this->refreshAccessToken();
             $result['is_expired'] = $refresh['expired'];
             if(!empty($refresh['access_token'])) {
@@ -146,7 +145,7 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Validate ID Token
      * 
-     * @param AccessToken $accessToken
+     * @param string $idToken
      * @return boolean
      */
     private function validateIdToken($idToken) {

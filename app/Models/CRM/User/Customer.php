@@ -5,8 +5,10 @@ namespace App\Models\CRM\User;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
+use App\Models\User\User as Dealer;
 
 /**
  * Class Customer
@@ -47,6 +49,8 @@ use Laravel\Scout\Searchable;
  * @property $shipping_country
  * @property $county
  * @property $shipping_county
+ *
+ * @property-read Dealer $dealer
  */
 class Customer extends Model
 {
@@ -108,6 +112,11 @@ class Customer extends Model
                     });
             });
 
+    }
+
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(Dealer::class, 'dealer_id', 'dealer_id');
     }
 
     public function searchableAs()
