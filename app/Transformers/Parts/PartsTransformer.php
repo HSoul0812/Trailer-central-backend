@@ -2,12 +2,18 @@
 
 namespace App\Transformers\Parts;
 
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
+use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
 
 class PartsTransformer extends TransformerAbstract
 {
-    public function transform(Part $part)
+    protected $availableIncludes = [
+        'purchaseOrders',
+    ];
+
+    public function transform(Part $part): array
     {
 	 return [
              'id' => (int)$part->id,
@@ -43,5 +49,25 @@ class PartsTransformer extends TransformerAbstract
              'stock_max' => $part->stock_max,
              'bins' => $part->bins
          ];
+    }
+
+    /**
+     * Include purchases resource object
+     *
+     * @param Part $part
+     * @return Collection
+     */
+    public function includePurchaseOrders(Part $part): Collection
+    {
+        return $this->collection(
+            $part->purchaseOrders,
+            new PurchaseOrderPartTransformer(), 'data')
+            ->setMeta([
+                'has_not_completed' => $part->purchaseOrders->filter(static function (
+                    PurchaseOrderPart $poPart
+                ): bool {
+                    return !$poPart->purchaseOrder->isCompleted();
+                })->isNotEmpty()
+            ]);
     }
 }

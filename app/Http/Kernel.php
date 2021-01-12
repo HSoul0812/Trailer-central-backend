@@ -8,6 +8,7 @@ use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
 use App\Http\Middleware\User\UserValidate;
 use App\Http\Middleware\Website\WebsiteValidate;
+use App\Http\Middleware\Website\FieldMapValidate;
 use App\Http\Middleware\SetDealerIdOnRequest;
 use App\Http\Middleware\SetWebsiteIdOnRequest;
 use App\Http\Middleware\SetUserIdOnRequest;
@@ -84,6 +85,7 @@ class Kernel extends HttpKernel
         'cors' => CorsMiddleware::class,
         'user.validate' => UserValidate::class,
         'website.validate' => WebsiteValidate::class,
+        'forms.field-map.validate' => FieldMapValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
         'setDealerIdFilterOnRequest' => SetDealerIdFilterOnRequest::class,
