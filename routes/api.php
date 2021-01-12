@@ -464,7 +464,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
-            });
+            });            
         });
 
         /*

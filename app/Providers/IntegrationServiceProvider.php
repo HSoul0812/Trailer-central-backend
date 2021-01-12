@@ -46,7 +46,7 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(GmailServiceInterface::class, GmailService::class);
         $this->app->bind(CatalogServiceInterface::class, CatalogService::class);
         $this->app->bind(BusinessServiceInterface::class, BusinessService::class);
-
+        
         // Integration Repositories
         $this->app->bind(TokenRepositoryInterface::class, TokenRepository::class);
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
