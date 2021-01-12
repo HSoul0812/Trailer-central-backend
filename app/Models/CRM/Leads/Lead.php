@@ -70,6 +70,12 @@ class Lead extends Model
 
     const NOT_ARCHIVED = 0;
     const LEAD_ARCHIVED = 1;
+    
+    const IS_NOT_SPAM = 0;
+    const IS_SPAM = 1;
+    
+    const IS_IDS_EXPORTED = 1;
+    const IS_NOT_IDS_EXPORTED = 0;
 
     const TABLE_NAME = 'website_lead';
 

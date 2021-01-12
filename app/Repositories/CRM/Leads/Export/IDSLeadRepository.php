@@ -33,8 +33,8 @@ class IDSLeadRepository implements IDSLeadRepositoryInterface
         Lead::select('website_lead.*')         
                 ->join('website', 'website.id', '=', 'website_lead.website_id')
                 ->join('lead_email', 'lead_email.dealer_id', '=', 'website_lead.dealer_id')
-                ->where('website_lead.is_spam', 0)
-                ->where('website_lead.ids_exported', 0)
+                ->where('website_lead.is_spam', Lead::IS_NOT_SPAM)
+                ->where('website_lead.ids_exported', Lead::IS_NOT_IDS_EXPORTED)
                 ->where('lead_email.export_format', LeadEmail::EXPORT_FORMAT_IDS)
                 ->groupBy('website_lead.identifier')
                 ->chunk($chunkSize, $callable);
