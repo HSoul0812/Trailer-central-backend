@@ -13,5 +13,7 @@ return [
     */
 
     'email' => env('IDS_EMAIL', 'CRMLeadSetup@IDS-Astra.com'),
+    
+    'export_start_date' => env('IDS_EXPORT_START_DATE', '2021-01-13 00:00:00')
 
 ];

@@ -56,11 +56,12 @@ class IDS extends Command
      */
     public function handle()
     {
+        $idsExportStartDate = config('ids.export_start_date');
         $this->idsLeadRepository->getAllNotExportedChunked(function($leads) {
             foreach($leads as $lead) {
                 $this->idsService->export($lead);
             }
-        });
+        }, $idsExportStartDate);
     }
     
 }

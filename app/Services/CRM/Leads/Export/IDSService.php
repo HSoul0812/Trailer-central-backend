@@ -23,7 +23,7 @@ class IDSService implements IDSServiceInterface {
     public function export(Lead $lead) : bool {
         $leadEmail = $this->leadEmailRepository->getLeadEmailByLead($lead);
 
-        if ($leadEmail->export_format !== LeadEMail::EXPORT_FORMAT_IDS) {
+        if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_IDS) {
             return false;
         }
         
