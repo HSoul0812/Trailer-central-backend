@@ -17,6 +17,8 @@ class ServiceItemTechnician extends Model implements Filterable
 {
     protected $table = 'dms_service_technician';
 
+    public $timestamps = false;
+
     public function serviceItem()
     {
         return $this->belongsTo(ServiceItem::class, 'service_item_id', 'id');

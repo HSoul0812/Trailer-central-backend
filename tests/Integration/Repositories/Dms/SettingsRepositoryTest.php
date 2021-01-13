@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Dms;
+namespace Tests\Integration\Repositories\Dms;
 
 use App\Models\CRM\Dms\Settings;
 use App\Repositories\Dms\SettingsRepository;

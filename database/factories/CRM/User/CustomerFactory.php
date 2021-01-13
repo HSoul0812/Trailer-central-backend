@@ -5,9 +5,9 @@ declare(strict_types=1);
 /** @var Factory $factory */
 
 use App\Models\CRM\User\Customer;
-use App\Models\User\User;
 use Illuminate\Database\Eloquent\Factory;
 use Faker\Generator as Faker;
+use Tests\TestCase;
 
 $factory->define(Customer::class, static function (Faker $faker, array $attributes): array {
 
@@ -15,7 +15,7 @@ $factory->define(Customer::class, static function (Faker $faker, array $attribut
     $lastName = $attributes['last_name'] ?? $faker->lastName;
 
     return [
-        'dealer_id' => $attributes['dealer_id'] ?? factory(User::class)->create()->getKey(),
+        'dealer_id' => $attributes['dealer_id'] ?? TestCase::getTestDealerId(),
         'first_name' => $firstName,
         'last_name' => $lastName,
         'display_name' => "$firstName $lastName",
