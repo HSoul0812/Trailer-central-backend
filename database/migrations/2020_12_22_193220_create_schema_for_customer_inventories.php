@@ -16,6 +16,7 @@ class CreateSchemaForCustomerInventories extends Migration
      */
     public function up(): void
     {
+        $this->down();
         $this->createTables();
         // Procedure and triggers are only used as a last resort due that solution has three points where are created
         // references between inventory and customers.
@@ -156,13 +157,15 @@ SQL;
             $table->foreign('customer_id')->references('id')->on('dms_customer')->onDelete('CASCADE')->onUpdate('CASCADE');
             $table->foreign('inventory_id')->references('inventory_id')->on('inventory')->onDelete('CASCADE')->onUpdate('CASCADE');
 
-            $table->primary(['customer_id', 'inventory_id']);
+            $table->unique(['customer_id', 'inventory_id']);
         });
 
         // For the next table we must to define a vacune politic to maintain a good performance
         Schema::create('exception_log', static function (Blueprint $table): void {
-            $table->increments('id')->unsigned()->primary();
-            $table->string('object_name')->comment('procedure, function, or trigger name');
+            $table->increments('id')->unsigned();
+            $table->string('object_name')
+                ->comment('procedure, function, or trigger name')
+                ->index();
             $table->text('message');
             $table->timestamp('created_at')->useCurrent();
         });
@@ -220,7 +223,7 @@ SQL;
 SQL
         );
 
-        Schema::drop('dms_customer_inventory');
-        Schema::drop('exception_log');
+        Schema::dropIfExists('dms_customer_inventory');
+        Schema::dropIfExists('exception_log');
     }
 }
