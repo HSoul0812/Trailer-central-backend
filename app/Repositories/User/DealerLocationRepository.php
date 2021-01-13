@@ -30,8 +30,8 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        
-        return $query->paginate($params['per_page'])->appends($params);        
+
+        return $query->with('salesTax')->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
