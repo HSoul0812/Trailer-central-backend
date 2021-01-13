@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Dms;
+namespace Tests\Integration\Repositories\Dms;
 
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\InvoiceItem;
@@ -15,7 +15,7 @@ use Tests\TestCase;
 
 /**
  * Class UnitSaleLaborRepositoryTest
- * @package Tests\Unit\Repositories\Dms
+ * @package Tests\Integration\Repositories\Dms
  *
  * @coversDefaultClass \App\Repositories\Dms\UnitSaleLaborRepository
  */

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Parts;
+namespace Tests\Integration\Repositories\Parts;
 
 use App\Models\Parts\AuditLog;
 use App\Repositories\Parts\AuditLogRepository;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Repositories\Inventory\Floorplan;
+namespace Tests\Integration\Repositories\Inventory\Floorplan;
 
 use App\Models\Inventory\Floorplan\Vendor;
 use App\Repositories\Inventory\Floorplan\VendorRepository;

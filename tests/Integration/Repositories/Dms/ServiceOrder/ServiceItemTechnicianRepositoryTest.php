@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Dms\ServiceOrder;
+namespace Tests\Integration\Repositories\Dms\ServiceOrder;
 
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\InvoiceItem;
