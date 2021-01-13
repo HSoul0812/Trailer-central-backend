@@ -12,6 +12,8 @@ use App\Repositories\Integration\CollectorRepository;
 use App\Repositories\Integration\CollectorRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepository;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
+use App\Repositories\Integration\Facebook\FeedRepository;
+use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepository;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\CRM\User\SalesAuthService;
@@ -44,10 +46,11 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(GmailServiceInterface::class, GmailService::class);
         $this->app->bind(CatalogServiceInterface::class, CatalogService::class);
         $this->app->bind(BusinessServiceInterface::class, BusinessService::class);
-
+        
         // Integration Repositories
         $this->app->bind(TokenRepositoryInterface::class, TokenRepository::class);
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
+        $this->app->bind(FeedRepositoryInterface::class, FeedRepository::class);
         $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
 
         // Collector Repositories

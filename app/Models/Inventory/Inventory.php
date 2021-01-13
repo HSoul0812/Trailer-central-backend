@@ -2,6 +2,7 @@
 namespace App\Models\Inventory;
 
 use App\Helpers\StringHelper;
+use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
@@ -13,8 +14,16 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 use Laravel\Scout\Searchable;
 
+/**
+ * Class Inventory
+ * @package App\Models\Inventory
+ *
+ * @method static Builder select($columns = ['*'])
+ */
 class Inventory extends Model
 {
     use TableAware, SpatialTrait, Searchable, CustomSearch;
@@ -165,6 +174,11 @@ class Inventory extends Model
     public function floorplanVendor()
     {
         return $this->belongsTo(Vendor::class, 'fp_vendor');
+    }
+
+    public function customerInventories(): HasMany
+    {
+        return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
     public function getColorAttribute()

@@ -72,6 +72,8 @@ use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
+use App\Services\Common\EncrypterServiceInterface;
+use App\Services\Common\SPLEncrypterService;
 use App\Services\User\DealerOptionsService;
 use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
@@ -83,6 +85,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
+use App\Repositories\Dms\Customer\InventoryRepositoryInterface as CustomerInventoryRepositoryInterface;
+use App\Repositories\Dms\Customer\InventoryRepository as CustomerInventoryRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -226,11 +230,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
 
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
+        $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
         $this->app->bind(LogServiceInterface::class, LogService::class);
+        $this->app->bind(EncrypterServiceInterface::class, SPLEncrypterService::class);
 
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
 
