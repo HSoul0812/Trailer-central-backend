@@ -47,6 +47,10 @@ class IDSJob extends Job
 
     public function handle()
     {
+        if ($this->lead->ids_exported) {
+            throw new \Exception('Already Exported');
+        }
+        
         Log::info('Mailing IDS Lead', ['lead' => $this->lead->identifier]);
 
         try {
