@@ -4,6 +4,15 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class NewUser
+ * @package App\Models\User
+ *
+ * @property int $user_id
+ * @property string $username
+ * @property string $email
+ * @property string $password
+ */
 class NewUser extends Model
 {
     const TABLE_NAME = 'new_user';
@@ -54,7 +63,7 @@ class NewUser extends Model
     {
         return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }
@@ -62,7 +71,7 @@ class NewUser extends Model
 
     /**
      * Get Dealer Credentials For Specified User
-     * 
+     *
      * @return type
      */
     public static function getDealerCredential($userId, $salesPersonId = 0) {
