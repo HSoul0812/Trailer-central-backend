@@ -15,7 +15,7 @@ class SupportLeadEmailImportFormat extends Migration
     {
         // Add Import Format
         Schema::table('lead_email', function (Blueprint $table) {
-            $table->int('import_format')->nullable()->after('export_format');
+            $table->integer('import_format')->nullable()->after('export_format');
         });
     }
 
