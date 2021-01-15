@@ -2,6 +2,7 @@
 
 namespace App\Services\User;
 
+use App\Helpers\StringHelper;
 use App\Models\User\NewDealerUser;
 use App\Models\User\NewUser;
 use App\Models\User\User;
@@ -44,25 +45,34 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     private $newUserRepository;
 
     /**
+     * @var StringHelper
+     */
+    private $stringHelper;
+
+    /**
      * DealerOptionsService constructor.
      * @param UserRepositoryInterface $userRepository
      * @param CrmUserRepositoryInterface $crmUserRepository
      * @param CrmUserRoleRepositoryInterface $crmUserRoleRepository
      * @param NewDealerUserRepositoryInterface $newDealerUserRepository
      * @param NewUserRepositoryInterface $newUserRepository
+     * @param StringHelper $stringHelper
      */
     public function __construct(
         UserRepositoryInterface $userRepository,
         CrmUserRepositoryInterface $crmUserRepository,
         CrmUserRoleRepositoryInterface $crmUserRoleRepository,
         NewDealerUserRepositoryInterface $newDealerUserRepository,
-        NewUserRepositoryInterface $newUserRepository
+        NewUserRepositoryInterface $newUserRepository,
+        StringHelper $stringHelper
     ) {
         $this->userRepository = $userRepository;
         $this->crmUserRepository = $crmUserRepository;
         $this->crmUserRoleRepository = $crmUserRoleRepository;
         $this->newDealerUserRepository = $newDealerUserRepository;
         $this->newUserRepository = $newUserRepository;
+
+        $this->stringHelper = $stringHelper;
     }
 
     /**
@@ -165,7 +175,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         $newUserParams = [
             'username' => $user->name,
             'email' => $user->email,
-            'password' => bin2hex(random_bytes(20))
+            'password' => $this->stringHelper->getRandomHex()
         ];
 
         /** @var NewUser $newUser */
@@ -173,7 +183,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
         $newDealerUserParams = [
             'user_id' => $newUser->user_id,
-            'salt' => bin2hex(random_bytes(20)),
+            'salt' => $this->stringHelper->getRandomHex(),
             'auto_import_hide' => 0,
             'auto_msrp' => 0
         ];
