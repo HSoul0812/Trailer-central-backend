@@ -13,5 +13,7 @@ return [
     */
 
     'email' => env('IDS_EMAIL', 'CRMLeadSetup@IDS-Astra.com'),
+    
+    'copied_emails' => env('COPIED_EMAILS', 'alberto@trailercentrail.com')
 
 ];
