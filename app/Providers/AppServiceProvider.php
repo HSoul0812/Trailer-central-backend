@@ -56,10 +56,6 @@ use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
-use App\Repositories\CRM\Leads\LeadRepository;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
-use App\Repositories\CRM\Customer\CustomerRepository;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
@@ -74,15 +70,11 @@ use App\Services\User\DealerOptionsService;
 use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
-use App\Services\CRM\Leads\AutoAssignService;
-use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
-use App\Repositories\Dms\Customer\InventoryRepositoryInterface as CustomerInventoryRepositoryInterface;
-use App\Repositories\Dms\Customer\InventoryRepository as CustomerInventoryRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -193,7 +185,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
-        $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
@@ -219,16 +210,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
 
-        $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
-        $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
-
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
         $this->app->bind(LogServiceInterface::class, LogService::class);
         $this->app->bind(EncrypterServiceInterface::class, SPLEncrypterService::class);
-
-        $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
 
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
 
