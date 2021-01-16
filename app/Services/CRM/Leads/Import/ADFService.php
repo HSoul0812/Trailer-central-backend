@@ -8,6 +8,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Carbon\CarbonImmutable;
 
 class ADFService implements ADFServiceInterface {
     
