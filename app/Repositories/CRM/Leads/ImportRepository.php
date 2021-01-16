@@ -58,7 +58,7 @@ class ImportRepository implements ImportRepositoryInterface
     /**
      * Get All Active Lead Import Emails
      * 
-     * @return Collection<LeadEmail>
+     * @return Collection<LeadImport>
      */
     public function getAllActive() : Collection
     {
@@ -66,7 +66,7 @@ class ImportRepository implements ImportRepositoryInterface
         return LeadImport::select(LeadImport::getTableName() . '.*')
                           ->leftJoin(NewDealerUser::getTableName(),
                                      NewDealerUser::getTableName() . '.id', '=',
-                                     LeadEmail::getTableName() . '.dealer_id')
+                                     LeadImport::getTableName() . '.dealer_id')
                           ->leftJoin(CrmUser::getTableName(),
                                      CrmUser::getTableName() . '.user_id', '=',
                                      NewDealerUser::getTableName() . '.user_id')
