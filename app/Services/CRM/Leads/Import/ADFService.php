@@ -139,6 +139,7 @@ class ADFService implements ADFServiceInterface {
             var_dump($validate['new_token']);
         }
         var_dump($accessToken);
+        var_dump($accessToken->scope);
 
         // Return Access Token
         return $accessToken;
