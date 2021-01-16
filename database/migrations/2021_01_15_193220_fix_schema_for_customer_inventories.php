@@ -16,7 +16,11 @@ class FixSchemaForCustomerInventories extends Migration
      */
     public function up(): void
     {
-        $this->down();
+        // We can't alter o replace triggers, so we need to drop them
+        $this->dropTriggers();
+        $this->dropProcedure();
+        $this->dropTables();
+
         $this->createTables();
         // Procedure and triggers are only used as a last resort due that solution has three points where are created
         // references between inventory and customers.
@@ -208,6 +212,30 @@ SQL;
         DB::unprepared($sqlForMigrateAllData);
     }
 
+    private function dropProcedure(): void
+    {
+        DB::unprepared(<<<SQL
+ DROP PROCEDURE IF EXISTS InventoryForACustomerHandler;
+SQL
+        );
+    }
+
+    private function dropTriggers(): void
+    {
+        DB::unprepared(<<<SQL
+ DROP TRIGGER IF EXISTS AfterInsertRepairOrder;
+ DROP TRIGGER IF EXISTS AfterInsertQbInvoiceItem;
+ DROP TRIGGER IF EXISTS AfterInsertDmsUnitSale;
+SQL
+        );
+    }
+
+    private function dropTables(): void
+    {
+        Schema::dropIfExists('dms_customer_inventory');
+        Schema::dropIfExists('exception_log');
+    }
+
     /**
      * Reverse the migrations.
      *
@@ -215,15 +243,8 @@ SQL;
      */
     public function down(): void
     {
-        DB::unprepared(<<<SQL
- DROP TRIGGER IF EXISTS AfterInsertRepairOrder;
- DROP TRIGGER IF EXISTS AfterInsertQbInvoiceItem;
- DROP TRIGGER IF EXISTS AfterInsertDmsUnitSale;
- DROP PROCEDURE IF EXISTS InventoryForACustomerHandler;
-SQL
-        );
-
-        Schema::dropIfExists('dms_customer_inventory');
-        Schema::dropIfExists('exception_log');
+        $this->dropTriggers();
+        $this->dropProcedure();
+        $this->dropTables();
     }
 }
