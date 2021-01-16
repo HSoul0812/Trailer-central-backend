@@ -6,6 +6,7 @@ use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
 use App\Repositories\CRM\Leads\ImportRepositoryInterface;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Leads\DTOs\ADFLead;
+use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Carbon\CarbonImmutable;
@@ -17,9 +18,12 @@ class ADFService implements ADFServiceInterface {
      */
     protected $imports;
     
-    public function __construct(ImportRepositoryInterface $imports, GmailServiceInterface $service) {
+    public function __construct(ImportRepositoryInterface $imports,
+                                GoogleServiceInterface $google,
+                                GmailServiceInterface $gmail) {
         $this->imports = $imports;
-        $this->service = $service;
+        $this->google = $google;
+        $this->gmail = $gmail;
     }
 
     /**
@@ -118,6 +122,20 @@ class ADFService implements ADFServiceInterface {
             'expires_at' => $carbon->addSeconds($expiresIn)->toDateTimeString(),
             'issued_at' => $issuedAt
         ]);
+
+        // Refresh Token
+        $validate = $this->google->validate($accessToken);
+        if(!empty($validate['new_token'])) {
+            // Refresh Access Token
+            $time = CarbonImmutable::now();
+            $accessToken->fill([
+                'access_token' => $validate['new_token']['access_token'],
+                'id_token' => $validate['new_token']['id_token'],
+                'expires_in' => $validate['new_token']['expires_in'],
+                'expires_at' => $time->addSeconds($validate['new_token']['expires_in'])->toDateTimeString(),
+                'issued_at' => $time->toDateTimeString()
+            ]);
+        }
 
         // Return Access Token
         return $accessToken;
