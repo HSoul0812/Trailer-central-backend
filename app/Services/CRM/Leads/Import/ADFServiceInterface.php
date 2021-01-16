@@ -12,9 +12,9 @@ interface ADFServiceInterface {
     /**
      * Takes a lead and export it to the IDS system in XML format
      * 
-     * @param App\Models\CRM\Leads\Lead $lead lead to export to IDS
+     * @return int total number of imported adf leads
      */
-    public function import(Collection $leadEmails) : bool;
+    public function import() : int;
 
     /**
      * Get ADF and Return Result
