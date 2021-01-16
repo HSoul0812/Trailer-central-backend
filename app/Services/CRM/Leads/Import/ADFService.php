@@ -120,14 +120,14 @@ class ADFService implements ADFServiceInterface {
             'id_token' => config('adf.imports.gmail.id_token'),
             'expires_in' => $expiresIn,
             'expires_at' => $carbon->addSeconds($expiresIn)->toDateTimeString(),
-            'issued_at' => $issuedAt
+            'issued_at' => $issuedAt,
+            'scope' => config('adf.imports.gmail.scope')
         ]);
 
         // Refresh Token
         $validate = $this->google->validate($accessToken);
         if(!empty($validate['new_token'])) {
             // Refresh Access Token
-            var_dump($validate['new_token']);
             $time = CarbonImmutable::now();
             $accessToken->fill([
                 'access_token' => $validate['new_token']['access_token'],
@@ -136,6 +136,7 @@ class ADFService implements ADFServiceInterface {
                 'expires_at' => $time->addSeconds($validate['new_token']['expires_in'])->toDateTimeString(),
                 'issued_at' => $time->toDateTimeString()
             ]);
+            var_dump($validate['new_token']);
         }
         var_dump($accessToken);
 
