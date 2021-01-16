@@ -5,12 +5,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeadImport extends Model
 {
+
+    const TABLE_NAME = 'lead_import';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'lead_import';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
@@ -29,4 +32,8 @@ class LeadImport extends Model
         'dealer_location_id',
         'email'
     ];
+
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }
