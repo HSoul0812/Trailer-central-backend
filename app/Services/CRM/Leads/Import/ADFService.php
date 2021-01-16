@@ -127,7 +127,6 @@ class ADFService implements ADFServiceInterface {
         $validate = $this->google->validate($accessToken);
         if(!empty($validate['new_token'])) {
             // Refresh Access Token
-            var_dump($validate['new_token']);
             $time = CarbonImmutable::now();
             $accessToken->fill([
                 'access_token' => $validate['new_token']['access_token'],
@@ -137,7 +136,6 @@ class ADFService implements ADFServiceInterface {
                 'issued_at' => $time->toDateTimeString()
             ]);
         }
-        var_dump($accessToken);
 
         // Return Access Token
         return $accessToken;
