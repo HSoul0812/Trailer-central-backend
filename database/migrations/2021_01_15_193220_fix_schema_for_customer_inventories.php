@@ -52,12 +52,12 @@ BEGIN
                 @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT;
         SET @full_error = CONCAT('ERROR ', @errno, ' (', @sqlstate, '): ', @text);
 
-        INSERT INTO exception_log (uuid, object_name, message) VALUES (UUID(), 'InventoryForACustomerHandler', @full_error);
+        INSERT INTO exception_log (object_name, message) VALUES ('InventoryForACustomerHandler', @full_error);
     END;
 
     -- lets try to insert the new record
-    INSERT INTO dms_customer_inventory (customer_id, inventory_id)
-    VALUES (customerId, inventoryId);
+    INSERT INTO dms_customer_inventory (uuid, customer_id, inventory_id)
+    VALUES (UUID(), customerId, inventoryId);
 END;
 SQL;
 
