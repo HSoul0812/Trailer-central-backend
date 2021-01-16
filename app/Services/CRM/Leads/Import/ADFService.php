@@ -5,10 +5,11 @@ namespace App\Services\CRM\Leads\Import;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
 use App\Repositories\CRM\Leads\ImportRepositoryInterface;
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 
-class ADFService implements ADFImportServiceInterface {
+class ADFService implements ADFServiceInterface {
     
     /**     
      * @var App\Repositories\CRM\Leads\ImportRepositoryInterface

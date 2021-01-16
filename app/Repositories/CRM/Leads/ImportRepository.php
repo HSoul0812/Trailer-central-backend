@@ -7,7 +7,7 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use Illuminate\Support\Collection;
 
-class ImportRepository implements LeadImportRepositoryInterface 
+class ImportRepository implements ImportRepositoryInterface 
 {
     public function create($params) {
         return LeadImport::create($params);
