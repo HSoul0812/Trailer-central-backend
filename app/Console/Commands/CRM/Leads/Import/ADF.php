@@ -4,7 +4,7 @@ namespace App\Console\Commands\CRM\Leads\Import;
 
 use Illuminate\Console\Command;
 use App\Repositories\CRM\Leads\ImportRepositoryInterface;
-use App\Services\CRM\Leads\Import\ADFImportServiceInterface;
+use App\Services\CRM\Leads\Import\ADFServiceInterface;
 
 /**
  * Import leads in the ADF format
@@ -42,7 +42,7 @@ class ADF extends Command
      * @return void
      */
     public function __construct(ImportRepositoryInterface $imports,
-                                ADFImportServiceInterface $service)
+                                ADFServiceInterface $service)
     {
         parent::__construct();
 
