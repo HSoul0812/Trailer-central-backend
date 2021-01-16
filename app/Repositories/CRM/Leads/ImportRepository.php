@@ -2,7 +2,7 @@
 
 namespace App\Repositories\CRM\Leads;
 
-use App\Models\CRM\Leads\Export\LeadImport;
+use App\Models\CRM\Leads\LeadImport;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use Illuminate\Support\Collection;
