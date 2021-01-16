@@ -3,7 +3,7 @@
 namespace App\Services\CRM\Leads\Import;
 
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
-use App\Repositories\CRM\Leads\LeadImportRepositoryInterface;
+use App\Repositories\CRM\Leads\ImportRepositoryInterface;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
@@ -11,11 +11,11 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 class ADFService implements ADFImportServiceInterface {
     
     /**     
-     * @var App\Repositories\CRM\Leads\LeadImportRepositoryInterface
+     * @var App\Repositories\CRM\Leads\ImportRepositoryInterface
      */
     protected $imports;
     
-    public function __construct(LeadImportRepositoryInterface $imports, GmailServiceInterface $service) {
+    public function __construct(ImportRepositoryInterface $imports, GmailServiceInterface $service) {
         $this->imports = $imports;
         $this->service = $service;
     }

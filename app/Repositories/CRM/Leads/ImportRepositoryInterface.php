@@ -4,4 +4,4 @@ namespace App\Repositories\CRM\Leads;
 
 use App\Repositories\Repository;
 
-interface LeadImportRepositoryInterface extends Repository {}
+interface ImportRepositoryInterface extends Repository {}

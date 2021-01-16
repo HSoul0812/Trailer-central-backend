@@ -15,12 +15,12 @@ class CreateLeadImportTable extends Migration
     {
         Schema::create('lead_import', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('dealer_id');
+            $table->integer('dealer_id')->index();
             $table->integer('dealer_location_id')->index();
-            $table->text('email');
+            $table->text('email')->index();
             $table->timestamps();
 
-            $table->unique(['dealer_id', 'dealer_location_id']);
+            $table->index(['dealer_id', 'dealer_location_id']);
         });
     }
 

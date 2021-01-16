@@ -5,10 +5,9 @@ namespace App\Repositories\CRM\Leads;
 use App\Models\CRM\Leads\Export\LeadImport;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
-use App\Services\CRM\Email\ImapService;
 use Illuminate\Support\Collection;
 
-class LeadImportRepository implements LeadImportRepositoryInterface 
+class ImportRepository implements LeadImportRepositoryInterface 
 {
     public function create($params) {
         return LeadImport::create($params);
@@ -24,10 +23,14 @@ class LeadImportRepository implements LeadImportRepositoryInterface
     }
 
     public function getAll($params) {
-        $query = Lead::where('identifier', '>', 0);
+        $query = LeadImport::where('id', '>', 0);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where('dealer_id', $params['dealer_id']);
+        }
+
+        if (isset($params['dealer_location_id'])) {
+            $query = $query->where('dealer_location_id', $params['dealer_location_id']);
         }
 
         if (!isset($params['per_page'])) {
@@ -59,8 +62,8 @@ class LeadImportRepository implements LeadImportRepositoryInterface
      */
     public function getAllActive() : Collection
     {
-        // Initialize Lead Emails
-        return LeadEmail::select(LeadEmail::getTableName() . '.*')
+        // Initialize Lead Imports
+        return LeadImport::select(LeadImport::getTableName() . '.*')
                           ->leftJoin(NewDealerUser::getTableName(),
                                      NewDealerUser::getTableName() . '.id', '=',
                                      LeadEmail::getTableName() . '.dealer_id')
@@ -69,5 +72,4 @@ class LeadImportRepository implements LeadImportRepositoryInterface
                                      NewDealerUser::getTableName() . '.user_id')
                           ->where(CrmUser::getTableName() . '.active', 1)->get();
     }
-
 }
