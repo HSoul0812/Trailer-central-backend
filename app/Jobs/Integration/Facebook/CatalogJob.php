@@ -7,9 +7,9 @@ use App\Exceptions\Integration\Facebook\FailedCreateTempCatalogCsvException;
 use App\Exceptions\Integration\Facebook\MissingCatalogFeedPathException;
 use App\Jobs\Job;
 use App\Models\Inventory\Inventory;
-use App\Models\Integration\Facebook\Catalog;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class CatalogJob extends Job
 {
@@ -287,7 +287,13 @@ class CatalogJob extends Job
 
         // Process Integration
         foreach($this->integration->listings as $listing) {
-            $this->insertCsvRow($file, $listing);
+            try {
+                $this->insertCsvRow($file, $listing);
+            } catch(\Exception $e) {
+                Log::error("Exception returned processing listing #" . $listing->vehicle_id .
+                            " on catalog # " . $this->interaction->catalog_id . "; " . 
+                            $e->getMessage() . ": " . $e->getTraceAsString());
+            }
         }
 
         // Store Final CSV
@@ -505,7 +511,7 @@ class CatalogJob extends Job
 
         // Check Mapping
         if(isset($this->fuelMap[$fuel])) {
-            $type = $this->bodyMap[$fuel];
+            $type = $this->fuelMap[$fuel];
         }
 
         // Return Result
