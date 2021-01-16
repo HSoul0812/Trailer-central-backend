@@ -52,7 +52,7 @@ BEGIN
                 @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT;
         SET @full_error = CONCAT('ERROR ', @errno, ' (', @sqlstate, '): ', @text);
 
-        INSERT INTO exception_log (object_name, message) VALUES ('InventoryForACustomerHandler', @full_error);
+        INSERT INTO exception_log (uuid, object_name, message) VALUES (UUID(), 'InventoryForACustomerHandler', @full_error);
     END;
 
     -- lets try to insert the new record
@@ -111,7 +111,7 @@ BEGIN
                 @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT;
         SET @full_error = CONCAT('ERROR ', @errno, ' (', @sqlstate, '): ', @text);
 
-        INSERT INTO exception_log (object_name, message) VALUES ('AfterInsertQbInvoiceItem', @full_error);
+        INSERT INTO exception_log (uuid, object_name, message) VALUES (UUID(), 'AfterInsertQbInvoiceItem', @full_error);
     END;
 
     SET itemType = (
@@ -162,7 +162,7 @@ SQL;
 
         // For the next table we must to define a vacune politic to maintain a good performance
         Schema::create('exception_log', static function (Blueprint $table): void {
-            $table->increments('id')->unsigned();
+            $table->string('uuid', 38)->primary();
             $table->string('object_name')
                 ->comment('procedure, function, or trigger name')
                 ->index();
