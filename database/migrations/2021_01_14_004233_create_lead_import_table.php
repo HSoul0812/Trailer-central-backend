@@ -17,7 +17,7 @@ class CreateLeadImportTable extends Migration
             $table->increments('id');
             $table->integer('dealer_id')->index();
             $table->integer('dealer_location_id')->index();
-            $table->text('email')->index();
+            $table->string('email')->index();
             $table->timestamps();
 
             $table->index(['dealer_id', 'dealer_location_id']);
