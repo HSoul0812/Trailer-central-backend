@@ -56,9 +56,11 @@ class IDS extends Command
      */
     public function handle()
     {
+        $this->info("Starting leads export...");
         $this->idsLeadRepository->getAllNotExportedChunked(function($leads) {
             foreach($leads as $lead) {
-                $this->idsService->export($lead);
+                $this->info("Processing lead {$lead->identifier}");
+                $this->idsService->export($lead);                
             }
         });
     }

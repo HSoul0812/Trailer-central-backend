@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Parts;
+namespace Tests\Integration\Repositories\Parts;
 
 use App\Events\Parts\PartQtyUpdated;
 use App\Models\Parts\Bin;

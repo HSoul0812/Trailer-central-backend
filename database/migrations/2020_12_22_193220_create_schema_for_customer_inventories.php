@@ -203,12 +203,10 @@ SQL;
     public function down(): void
     {
         DB::unprepared(<<<SQL
- DROP PROCEDURE IF EXISTS InventoryForACustomerHandler
-SQL
-        );
-
-        DB::unprepared(<<<SQL
- DROP TRIGGER IF EXISTS InventoryForACustomerMaterializer
+ DROP TRIGGER IF EXISTS AfterInsertRepairOrder;
+ DROP TRIGGER IF EXISTS AfterInsertQbInvoiceItem;
+ DROP TRIGGER IF EXISTS AfterInsertDmsUnitSale;
+ DROP PROCEDURE IF EXISTS InventoryForACustomerHandler;
 SQL
         );
 

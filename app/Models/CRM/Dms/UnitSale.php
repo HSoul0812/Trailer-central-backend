@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Dms;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
@@ -19,6 +20,7 @@ use App\Models\CRM\User\Customer;
  */
 class UnitSale extends Model implements GenericSaleInterface
 {
+    use TableAware;
 
     const QUOTE_STATUS_OPEN = 'open';
     const QUOTE_STATUS_DEAL = 'deal';
