@@ -11,7 +11,7 @@ use App\Transformers\Inventory\CategoryTransformer;
 
 class CategoryController extends RestfulController
 {
-    
+
     protected $category;
 
     /**
@@ -23,12 +23,12 @@ class CategoryController extends RestfulController
     {
         $this->category = $category;
     }
-    
+
     /**
      * @OA\Get(
      *     path="/api/inventory/categories",
      *     description="Retrieve a list of inventory categories",
-     
+
      *     tags={"Inventory Category"},
      *     @OA\Parameter(
      *         name="entity_type_id",
@@ -40,10 +40,10 @@ class CategoryController extends RestfulController
      *     @OA\Parameter(
      *         name="sort",
      *         in="query",
-     *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
+     *         description="Sort order can be: label,-label,title,-title",
      *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),  
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of inventory categories",
@@ -57,12 +57,11 @@ class CategoryController extends RestfulController
      */
     public function index(Request $request) {
         $request = new GetCategoryRequest($request->all());
-        
+
         if ( $request->validate() ) {
             return $this->response->collection($this->category->getAll($request->all()), new CategoryTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
-
 }

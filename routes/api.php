@@ -397,6 +397,13 @@ $api->version('v1', function ($route) {
         $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
         $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
         $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        /**
+         * Inventory for customers
+         */
+        $route->get('user/customers/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@index');
+        $route->get('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@getAllByCustomer')->where('customer_id', '[0-9]+');
+        $route->delete('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@bulkDestroy')->where('customer_id', '[0-9]+');
+        $route->post('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@attach')->where('customer_id', '[0-9]+');
 
         /*
         |--------------------------------------------------------------------------
@@ -457,7 +464,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
-            });
+            });            
         });
 
         /*
@@ -574,6 +581,9 @@ $api->version('v1', function ($route) {
         $route->get('service-item-technicians/by-location/{locationId}', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byLocation');
         $route->get('service-item-technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@index');
 
+        $route->get('service-order/technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\TechnicianController@index');
+        $route->get('service-order/types', 'App\Http\Controllers\v1\Dms\ServiceOrder\TypesController@index');
+
         /*
         |--------------------------------------------------------------------------
         | POS
@@ -672,7 +682,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
-
+        $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
 
         /*
         |--------------------------------------------------------------------------
@@ -700,6 +710,8 @@ $api->version('v1', function ($route) {
         $route->get('settings', 'App\Http\Controllers\v1\Dms\SettingsController@show');
         $route->put('settings', 'App\Http\Controllers\v1\Dms\SettingsController@update');
 
+        $route->get('unit-sale-labor/technicians', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getTechnicians');
+        $route->get('unit-sale-labor/service-report', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getServiceReport');
     });
 
     /*

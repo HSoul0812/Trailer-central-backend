@@ -4,6 +4,8 @@ namespace App\Repositories\Inventory;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\Inventory\Category;
+use App\Models\Inventory\EntityType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
 
@@ -22,6 +24,14 @@ class CategoryRepository implements CategoryRepositoryInterface
         ],
         '-label' => [
             'field' => 'label',
+            'direction' => 'ASC'
+        ],
+        'title' => [
+            'field' => 'title',
+            'direction' => 'DESC'
+        ],
+        '-title' => [
+            'field' => 'title',
             'direction' => 'ASC'
         ],
     ];
@@ -51,7 +61,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     public function get($params)
     {
         throw new NotImplementedException;
-    } 
+    }
 
     /**
      * @param $params
@@ -68,10 +78,14 @@ class CategoryRepository implements CategoryRepositoryInterface
      */
     public function getAll($params, bool $paginated = false)
     {
-        $query = Category::select('*');
+        /** @var  Builder $query */
+        $query = Category::select(Category::getTableName() . '.*');
 
         if (isset($params['entity_type_id'])) {
-            $query = $query->where('entity_type_id', $params['entity_type_id']);
+            $query = $query->where(
+                Category::getTableName().'.entity_type_id',
+                $params['entity_type_id']
+            );
         }
 
         if (!isset($params['per_page'])) {
@@ -79,12 +93,23 @@ class CategoryRepository implements CategoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where('label', 'LIKE', '%' . $params['search_term'] . '%');
+            $query = $query->where(
+                'label',
+                'LIKE',
+                '%' . $params['search_term'] . '%'
+            );
         }
 
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
+
+        $query->join(
+            EntityType::getTableName(),
+            EntityType::getTableName() . '.entity_type_id',
+            '=',
+            Category::getTableName() . '.entity_type_id'
+        );
 
         if ($paginated) {
             return $query->paginate($params['per_page'])->appends($params);

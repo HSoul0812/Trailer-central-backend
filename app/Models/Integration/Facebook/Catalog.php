@@ -2,10 +2,10 @@
 
 namespace App\Models\Integration\Facebook;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Integration\Auth\AccessToken;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Catalog
@@ -15,11 +15,6 @@ class Catalog extends Model
 {
     // Define Table Name Constant
     const TABLE_NAME = 'fbapp_catalog';
-
-    /**
-     * Define Catalog URL Prefix
-     */
-    const CATALOG_URL_PREFIX = 'facebook/catalog';
 
     /**
      * @var string
@@ -44,7 +39,6 @@ class Catalog extends Model
         'catalog_id',
         'account_name',
         'account_id',
-        'feed_id',
         'filters',
         'is_active'
     ];
@@ -80,6 +74,16 @@ class Catalog extends Model
     }
 
     /**
+     * Get Feed
+     * 
+     * @return BelongsTo
+     */
+    public function feed()
+    {
+        return $this->belongsTo(Feed::class, 'catalog_id', 'catalog_id');
+    }
+
+    /**
      * Access Token
      * 
      * @return HasOne
@@ -89,36 +93,5 @@ class Catalog extends Model
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('facebook')
                     ->whereRelationType('fbapp_catalog');
-    }
-
-
-    /**
-     * Get Feed Path
-     * 
-     * @return string of calculated feed path
-     */
-    public function getFeedPathAttribute()
-    {
-        return '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page->page_id . '.csv';
-    }
-
-    /**
-     * Get Feed Url
-     * 
-     * @return string of calculated feed url
-     */
-    public function getFeedUrlAttribute()
-    {
-        return $_ENV['AWS_URL'] . '/' . $_ENV['AWS_BUCKET'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page->page_id . '.csv';
-    }
-
-    /**
-     * Get Feed Name
-     * 
-     * @return string of calculated feed name
-     */
-    public function getFeedNameAttribute()
-    {
-        return $this->account_name . "'s Feed for " . $this->page_title;
     }
 }

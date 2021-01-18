@@ -114,7 +114,7 @@ class AutoAssignTest extends TestCase
 
 
         // Loop Leads
-        foreach($leads as $lead) {            
+        foreach($leads as $lead) {
             // Assert a message was sent to the given leads...
             $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
             Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
@@ -176,22 +176,6 @@ class AutoAssignTest extends TestCase
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
                 'dealer_location_id' => $locationId
-            ]);
-        }
-
-        // Force Default On Existing Items
-        $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                 ->where('dealer_location_id', $lastLocationId);
-        $salesQuery->update([
-            'is_inventory' => 1
-        ]);
-
-        // Get Salespeople
-        $salespeople = $salesQuery->get();
-        if(empty($salespeople) || count($salespeople) < 3) {
-            $add = (3 - count($salespeople));
-            factory(SalesPerson::class, $add)->create([
-                'dealer_location_id' => $lastLocationId
             ]);
         }
 
