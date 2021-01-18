@@ -18,7 +18,7 @@ class GetInventoryRequest extends Request
             'search_term' => 'string',
             'dealer_id' => 'integer|min:1|required',
             'customer_id' => 'array|required',
-            'customer_id.*' => 'integer|min:1',
+            'customer_id.*' => 'integer|min:0',
             'customer_condition' => Rule::in(InventoryRepositoryInterface::TENANCY_CONDITION),
         ];
     }
