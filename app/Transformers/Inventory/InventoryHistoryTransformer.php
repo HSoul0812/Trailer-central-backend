@@ -11,6 +11,6 @@ class InventoryHistoryTransformer extends TransformerAbstract
 {
     public function transform(InventoryHistory $transaction): array
     {
-        return $transaction->toArray();
+        return $transaction->asArray();
     }
 }
