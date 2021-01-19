@@ -14,11 +14,17 @@ $factory->define(Customer::class, static function (Faker $faker, array $attribut
     $firstName = $attributes['first_name'] ?? $faker->firstName();
     $lastName = $attributes['last_name'] ?? $faker->lastName;
 
-    return [
+    $overrides = [
         'dealer_id' => $attributes['dealer_id'] ?? factory(User::class)->create()->getKey(),
         'first_name' => $firstName,
         'last_name' => $lastName,
         'display_name' => "$firstName $lastName",
         'email' => $attributes['email'] ?? $faker->email
     ];
+
+    if (isset($attributes['id'])) {
+        $overrides['id'] = $attributes['id'];
+    }
+
+    return $overrides;
 });

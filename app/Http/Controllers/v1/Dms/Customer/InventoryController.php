@@ -170,7 +170,7 @@ class InventoryController extends RestfulController
      *                     property="customer_inventory_ids",
      *                     description="Customer inventory relation IDs",
      *                     type="array",
-     *                     @OA\Items(type="integer"),
+     *                     @OA\Items(type="string"),
      *                 ),
      *             ),
      *         ),

@@ -12,6 +12,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Ramsey\Uuid\Uuid;
 
 class InventoryRepository implements InventoryRepositoryInterface
 {
@@ -61,9 +62,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         return CustomerInventory::create($params);
     }
 
-    public function bulkDestroy(array $ids): bool
+    /**
+     * @param array<string> $uuids
+     * @return bool
+     */
+    public function bulkDestroy(array $uuids): bool
     {
-        return (bool)CustomerInventory::whereIn('id', $ids)->delete();
+        return (bool)CustomerInventory::whereIn('uuid', $uuids)->delete();
     }
 
     /**
@@ -104,7 +109,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                     ): void {
                         $join->on("$customerInventoryTableName.inventory_id", '=', "$inventoryTableName.inventory_id")
                             ->where("$customerInventoryTableName.customer_id", $params['customer_id']);
-                    })->addSelect("$customerInventoryTableName.id as customer_inventory_id");
+                    })->addSelect("$customerInventoryTableName.uuid as customer_inventory_id");
             }
         }
 

@@ -164,6 +164,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
 
     /**
+     * Inventory transactions history
+     */
+    $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
@@ -581,6 +586,9 @@ $api->version('v1', function ($route) {
         $route->get('service-item-technicians/by-location/{locationId}', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byLocation');
         $route->get('service-item-technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@index');
 
+        $route->get('service-order/technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\TechnicianController@index');
+        $route->get('service-order/types', 'App\Http\Controllers\v1\Dms\ServiceOrder\TypesController@index');
+
         /*
         |--------------------------------------------------------------------------
         | POS
@@ -679,7 +687,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
-
+        $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
 
         /*
         |--------------------------------------------------------------------------
@@ -707,6 +715,8 @@ $api->version('v1', function ($route) {
         $route->get('settings', 'App\Http\Controllers\v1\Dms\SettingsController@show');
         $route->put('settings', 'App\Http\Controllers\v1\Dms\SettingsController@update');
 
+        $route->get('unit-sale-labor/technicians', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getTechnicians');
+        $route->get('unit-sale-labor/service-report', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getServiceReport');
     });
 
     /*

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Repositories\Dms\Customer;
+namespace Tests\Integration\Repositories\Dms\Customer;
 
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\Inventory\Inventory;

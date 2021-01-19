@@ -35,23 +35,35 @@ class IDSJob extends Job
     private $copiedEmails;
     
     /**
+     *
+     * @var array
+     */
+    private $hiddenCopiedEmails;
+    
+    /**
      * AutoResponder constructor.
      * @param Lead $lead
      */
-    public function __construct(Lead $lead, array $toEmails, array $copiedEmails)
+    public function __construct(Lead $lead, array $toEmails, array $copiedEmails, array $hiddenCopiedEmails = [])
     {
         $this->lead = $lead;
         $this->toEmails = $toEmails;
         $this->copiedEmails = $copiedEmails;
+        $this->hiddenCopiedEmails = $hiddenCopiedEmails;
     }
 
     public function handle()
     {
+        if ($this->lead->ids_exported) {
+            throw new \Exception('Already Exported');
+        }
+        
         Log::info('Mailing IDS Lead', ['lead' => $this->lead->identifier]);
 
         try {
             Mail::to($this->toEmails) 
                 ->cc($this->copiedEmails)
+                ->bcc($this->hiddenCopiedEmails)
                 ->send(
                     new IDSEmail([
                         'lead' => $this->lead,

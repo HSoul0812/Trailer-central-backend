@@ -33,8 +33,8 @@ interface InventoryRepositoryInterface extends Repository
     public function getAll($params, bool $paginated = false);
 
     /**
-     * @param array $ids  array of ID for dms_customer_inventory records
+     * @param array<string> $uuids  array of ID for dms_customer_inventory records
      * @return bool
      */
-    public function bulkDestroy(array $ids): bool;
+    public function bulkDestroy(array $uuids): bool;
 }

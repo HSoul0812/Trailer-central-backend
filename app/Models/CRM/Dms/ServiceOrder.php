@@ -38,7 +38,18 @@ class ServiceOrder extends Model
         'work_available' => 'Work Available'
     ];
 
-    const SERVICE_ORDER_ESTIMATE = 'estimate';
+    public const TYPES = [
+        self::TYPE_ESTIMATE,
+        self::TYPE_INTERNAL,
+        self::TYPE_RETAIL,
+        self::TYPE_WARRANTY,
+    ];
+
+    public const TYPE_ESTIMATE = 'estimate';
+    public const TYPE_INTERNAL = 'internal';
+    public const TYPE_RETAIL = 'retail';
+    public const TYPE_WARRANTY = 'warranty';
+
     const SERVICE_ORDER_SCHEDULED = 'scheduled';
     const SERVICE_ORDER_COMPLETED = 'completed';
 
