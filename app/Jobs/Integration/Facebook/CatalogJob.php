@@ -334,6 +334,11 @@ class CatalogJob extends Job
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
 
+        // Skip if Fields Missing
+        if(empty($clean->title) || empty($clean->description) || empty($clean->model)) {
+            return false;
+        }
+
         // Create Row
         $row = array();
         foreach($this->csvColumns as $k => $column) {
@@ -341,11 +346,6 @@ class CatalogJob extends Job
             if(isset($clean->{$column}) && $clean->{$column} !== null) {
                 $row[$k] = $clean->{$column};
             }
-        }
-
-        // Skipp if Fields Missing
-        if(empty($row['title']) || empty($row['description']) || empty($row['model'])) {
-            return false;
         }
         ksort($row);
 
