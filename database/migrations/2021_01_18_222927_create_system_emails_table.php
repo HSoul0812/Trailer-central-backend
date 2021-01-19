@@ -4,6 +4,7 @@ use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class CreateSystemEmailsTable extends Migration
 {
@@ -24,7 +25,9 @@ class CreateSystemEmailsTable extends Migration
             $table->timestamps();
         });
 
-        DB::table('system_emails')->insert(self::CUSTOM_EMAILS_INSERT);
+        $insertFields = self::CUSTOM_EMAILS_INSERT;
+        $insertFields['created_at'] = Carbon::now()->toDateTimeString();
+        DB::table('system_emails')->insert($insertFields);
 
         // Update Integration Token Relation Type
         DB::statement("ALTER TABLE integration_token MODIFY COLUMN relation_type ENUM('" . implode("', '", array_keys(AccessToken::RELATION_TYPES)) . "')");
