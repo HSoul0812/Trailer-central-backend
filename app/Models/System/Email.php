@@ -2,6 +2,7 @@
 
 namespace App\Models\System;
 
+use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Database\Eloquent\Model;
 
 /**
