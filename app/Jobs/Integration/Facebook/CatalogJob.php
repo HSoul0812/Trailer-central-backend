@@ -342,12 +342,12 @@ class CatalogJob extends Job
                 $row[$k] = $clean->{$column};
             }
         }
-        ksort($row);
 
         // Skipp if Fields Missing
         if(empty($row['title']) || empty($row['description']) || empty($row['model'])) {
             return false;
         }
+        ksort($row);
 
         // Add Cleaned Results to CSV
         fputcsv($file, $row);
