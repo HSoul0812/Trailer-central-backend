@@ -21,13 +21,7 @@ return [
         ],
         'gmail' => [
             'email' => env('ADF_IMPORT_EMAIL', 'adf@trailercentral.com'),
-            'folder' => env('ADF_IMPORT_FOLDER', 'INBOX'),
-            'access_token' => env('ADF_IMPORT_ACCESS_TOKEN', ''),
-            'id_token' => env('ADF_IMPORT_ID_TOKEN', ''),
-            'refresh_token' => env('ADF_IMPORT_REFRESH_TOKEN', ''),
-            'expires_in' => env('ADF_IMPORT_EXPIRES_IN', '3599'),
-            'issued_at' => env('ADF_IMPORT_ISSUED_AT', date('Y-m-d H:i:s')),
-            'scope' => env('ADF_IMPORT_SCOPES', 'https://mail.google.com/')
+            'folder' => env('ADF_IMPORT_FOLDER', 'INBOX')
         ]
     ]
 ];

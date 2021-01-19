@@ -4,6 +4,8 @@ namespace App\Services\CRM\Leads\Import;
 
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
 use App\Repositories\CRM\Leads\ImportRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Repositories\System\EmailRepositoryInterface;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\Integration\Google\GoogleServiceInterface;
@@ -12,16 +14,40 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Carbon\CarbonImmutable;
 
 class ADFService implements ADFServiceInterface {
-    
+
     /**     
      * @var App\Repositories\CRM\Leads\ImportRepositoryInterface
      */
     protected $imports;
+
+    /**     
+     * @var App\Repositories\System\EmailRepositoryInterface
+     */
+    protected $emails;
+
+    /**
+     * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
+     */
+    protected $tokens;
+
+    /**     
+     * @var App\Services\Integration\Google\GoogleServiceInterface
+     */
+    protected $google;
+
+    /**     
+     * @var App\Services\Integration\Google\GmailServiceInterface
+     */
+    protected $gmail;
     
     public function __construct(ImportRepositoryInterface $imports,
+                                EmailRepositoryInterface $emails,
+                                TokenRepositoryInterface $tokens,
                                 GoogleServiceInterface $google,
                                 GmailServiceInterface $gmail) {
         $this->imports = $imports;
+        $this->emails = $emails;
+        $this->tokens = $tokens;
         $this->google = $google;
         $this->gmail = $gmail;
     }
@@ -105,43 +131,34 @@ class ADFService implements ADFServiceInterface {
      * @return AccessToken
      */
     private function getAccessToken() : AccessToken {
-        // Initialize Access Token
-        $accessToken = new AccessToken();
+        // Get Email
+        $email = config('adf.imports.gmail.email');
 
-        // Get Expires
-        $issuedAt = config('adf.imports.gmail.issued_at');
-        $expiresIn = (int) config('adf.imports.gmail.expires_in');
-        $carbon = CarbonImmutable::parse($issuedAt);
+        // Get System Email With Access Token
+        $systemEmail = $this->emails->find(['email' => $email]);
 
-        // Insert Access Token
-        $accessToken->fill([
-            'access_token' => config('adf.imports.gmail.access_token'),
-            'refresh_token' => config('adf.imports.gmail.refresh_token'),
-            'id_token' => config('adf.imports.gmail.id_token'),
-            'expires_in' => $expiresIn,
-            'expires_at' => $carbon->addSeconds($expiresIn)->toDateTimeString(),
-            'issued_at' => $issuedAt,
-            'scope' => config('adf.imports.gmail.scope')
-        ]);
+        // No Access Token?
+        if(empty($systemEmail->googleToken)) {
+            throw new MissingAdfEmailAccessTokenException;
+        }
 
         // Refresh Token
+        $accessToken = $systemEmail->googleToken;
         $validate = $this->google->validate($accessToken);
         if(!empty($validate['new_token'])) {
             // Refresh Access Token
             $time = CarbonImmutable::now();
-            $accessToken->fill([
+            $accessToken = $this->tokens->update([
+                'id' => $accessToken->id,
                 'access_token' => $validate['new_token']['access_token'],
                 'id_token' => $validate['new_token']['id_token'],
                 'expires_in' => $validate['new_token']['expires_in'],
                 'expires_at' => $time->addSeconds($validate['new_token']['expires_in'])->toDateTimeString(),
                 'issued_at' => $time->toDateTimeString()
             ]);
-            var_dump($validate['new_token']);
         }
-        var_dump($accessToken);
-        var_dump($accessToken->scope);
 
-        // Return Access Token
+        // Return Access Token for Google
         return $accessToken;
     }
 }

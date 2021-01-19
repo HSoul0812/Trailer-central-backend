@@ -64,6 +64,8 @@ use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
+use App\Repositories\System\EmailRepository;
+use App\Repositories\System\EmailRepositoryInterface;
 use App\Services\Common\EncrypterServiceInterface;
 use App\Services\Common\SPLEncrypterService;
 use App\Services\User\DealerOptionsService;
@@ -219,6 +221,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
 
         $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
+
+        $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
     }
 
 }
