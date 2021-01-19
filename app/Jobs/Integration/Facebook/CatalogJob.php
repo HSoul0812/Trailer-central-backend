@@ -430,8 +430,8 @@ class CatalogJob extends Job
     /**
      * Stores CSV on S3 and returns its URL
      *
-     * @param string $filePath full filename path on S3
      * @param File $file temporary file to store results for
+     * @param string $filePath full filename path on S3
      * @return string
      */
     private function storeCsv($file, $filePath) {
@@ -457,11 +457,11 @@ class CatalogJob extends Job
 
         // Check Length
         if(\strlen($clean) === 10) {
-            return '+1' . $clean;
-        } elseif(\strlen($clean) === 11) {
-            return '+' . $clean;
+            $clean = '1' . $clean;
         }
-        return $clean;
+
+        // Return Clean With + at Start
+        return '+' . $clean;
     }
 
     /**
