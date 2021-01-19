@@ -164,6 +164,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
 
     /**
+     * Inventory transactions history
+     */
+    $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
