@@ -456,9 +456,9 @@ class CatalogJob extends Job
         $phone = preg_replace('/[^0-9]/', '', $phone);
 
         // Check Length
-        if(str_len($phone) === 10) {
+        if(\str_len($phone) === 10) {
             return '+1' . $phone;
-        } elseif(str_len($phone) === 11) {
+        } elseif(\str_len($phone) === 11) {
             return '+' . $phone;
         }
         return $phone;
