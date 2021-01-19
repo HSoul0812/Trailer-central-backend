@@ -20,7 +20,7 @@ class CreateSystemEmailsTable extends Migration
     {
         Schema::create('system_emails', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email')->unique();
+            $table->string('email', 50)->unique();
             $table->timestamps();
         });
 
