@@ -63,6 +63,7 @@ class ADFService implements ADFServiceInterface {
         $accessToken = $this->getAccessToken();
         var_dump($accessToken);
         var_dump($accessToken->scope);
+        var_dump($accessToken->scopes);
         $messages = $this->gmail->messages($accessToken, config('adf.imports.gmail.folder'));
 
         // Checking Each Message
