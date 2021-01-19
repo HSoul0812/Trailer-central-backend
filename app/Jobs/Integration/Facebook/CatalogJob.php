@@ -453,15 +453,15 @@ class CatalogJob extends Job
      */
     private function formatDealerPhone($phone) {
         // Get Dealer Phone
-        $phone = preg_replace('/[^0-9]/', '', $phone);
+        $clean = trim(preg_replace('/[^0-9]/', '', $phone));
 
         // Check Length
-        if(\strlen($phone) === 10) {
-            return '+1' . $phone;
-        } elseif(\strlen($phone) === 11) {
-            return '+' . $phone;
+        if(\strlen($clean) === 10) {
+            return '+1' . $clean;
+        } elseif(\strlen($clean) === 11) {
+            return '+' . $clean;
         }
-        return $phone;
+        return $clean;
     }
 
     /**
