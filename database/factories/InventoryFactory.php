@@ -41,8 +41,7 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
     // Get Created Date
     $createdAt = $faker->dateTimeThisMonth;
 
-    // Return Overrides
-    return [
+    $overrides = [
         'entity_type_id' => $entityType->entity_type_id,
         'dealer_id' => $dealer_id,
         'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
@@ -67,4 +66,11 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'is_archived' => 0,
         'showroom_id' => !empty($showroom->id) ? $showroom->id : null
     ];
+
+    if (isset($attributes['inventory_id'])) {
+        $overrides['inventory_id'] = $attributes['inventory_id'];
+    }
+
+    // Return Overrides
+    return $overrides;
 });

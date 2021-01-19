@@ -93,7 +93,7 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
         }
         if (isset($params['status'])) {
             switch ($params['status']) {
-                case ServiceOrder::SERVICE_ORDER_ESTIMATE:
+                case ServiceOrder::TYPE_ESTIMATE:
                     $query = $query
                         ->where('type', '=', 'estimate')
                         ->whereNotIn('status', ['picked_up', 'ready_for_pickup']);
