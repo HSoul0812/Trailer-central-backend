@@ -55,6 +55,7 @@ class ImportRepository implements ImportRepositoryInterface
         return $leadImport;
     }
 
+
     /**
      * Get All Active Lead Import Emails
      * 
@@ -71,5 +72,17 @@ class ImportRepository implements ImportRepositoryInterface
                                      CrmUser::getTableName() . '.user_id', '=',
                                      NewDealerUser::getTableName() . '.user_id')
                           ->where(CrmUser::getTableName() . '.active', 1)->get();
+    }
+
+    /**
+     * From Email Exists in Lead Import Table?
+     * 
+     * @param string $email
+     * @return bool
+     */
+    public function hasEmail($email) : bool
+    {
+        // Lead Import Email Exists?
+        return (LeadImport::where('email', $email)->count() > 0);
     }
 }
