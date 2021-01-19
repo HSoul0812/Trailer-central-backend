@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Integration\Facebook;
+namespace App\Repositories\System;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\System\Email;
