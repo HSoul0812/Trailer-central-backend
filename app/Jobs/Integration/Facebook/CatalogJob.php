@@ -16,6 +16,11 @@ class CatalogJob extends Job
     use Dispatchable;
 
     /**
+     * Specific Data Types
+     */
+    const TC_PRIVACY_POLICY_URL = 'https://trailercentral.com/privacy-policy/';
+
+    /**
      * Facebook Vehicle Types
      */
     const BOAT = 'BOAT';
@@ -356,6 +361,9 @@ class CatalogJob extends Job
         // Get Inventory URL
         $listing->url = $this->getInventoryUrl($listing->vehicle_id);
 
+        // Format Phone Number
+        $listing->dealer_phone = $this->formatDealerPhone($listing->dealer_phone);
+
         // Append Brand to Manufacturer
         if(isset($listing->brand)) {
             $listing->make .= ' ' . $listing->brand;
@@ -413,7 +421,7 @@ class CatalogJob extends Job
         }
 
         // Fix Privacy Policy
-        $listing->dealer_privacy_policy_url = 'https://' . $listing->dealer_privacy_policy_url;
+        $listing->dealer_privacy_policy_url = $this->getPrivacyPolicyUrl($listing->vehicle_id);
 
         // Return Cleaned Up Listing Array
         return $listing;
@@ -438,6 +446,35 @@ class CatalogJob extends Job
 
 
     /**
+     * Fix Formatting Dealer Phone Correctly
+     * 
+     * @param string $phone
+     * @return formatted dealer phone
+     */
+    private function formatDealerPhone($phone) {
+        // Get Dealer Phone
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // Check Length
+        if(str_len($phone) === 10) {
+            return '+1' . $phone;
+        } elseif(str_len($phone) === 11) {
+            return '+' . $phone;
+        }
+        return $phone;
+    }
+
+    /**
+     * Get Inventory URL From Inventory ID
+     * 
+     * @param int $inventoryId
+     * @return return privacy policy url
+     */
+    private function getPrivacyPolicyUrl($inventoryId) {
+        return self::TC_PRIVACY_POLICY_URL;
+    }
+
+    /**
      * Get Inventory URL From Inventory ID
      * 
      * @param int $inventoryId
@@ -460,6 +497,7 @@ class CatalogJob extends Job
         // Return Empty URL
         return '';
     }
+
 
     /**
      * Map Vehicle Type Based on Category
