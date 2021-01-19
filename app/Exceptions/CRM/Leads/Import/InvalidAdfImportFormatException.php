@@ -12,6 +12,6 @@ namespace App\Exceptions\CRM\Leads\Import;
 class InvalidAdfImportFormatException extends \Exception
 {
 
-    protected $message = 'An exception occurred trying to parse ADF email access token.';
+    protected $message = 'An exception occurred trying to parse ADF import email; invalid ADF format.';
 
 }
