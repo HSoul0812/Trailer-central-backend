@@ -422,8 +422,6 @@ class CatalogJob extends Job
 
         // Fix Privacy Policy
         $listing->dealer_privacy_policy_url = $this->getPrivacyPolicyUrl($listing->vehicle_id);
-        var_dump($listing);
-        die;
 
         // Return Cleaned Up Listing Array
         return $listing;
