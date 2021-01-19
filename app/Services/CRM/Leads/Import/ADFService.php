@@ -137,6 +137,7 @@ class ADFService implements ADFServiceInterface {
 
         // Get System Email With Access Token
         $systemEmail = $this->emails->find(['email' => $email]);
+        var_dump($systemEmail);
 
         // No Access Token?
         if(empty($systemEmail->googleToken)) {
