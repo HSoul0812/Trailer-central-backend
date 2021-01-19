@@ -61,6 +61,7 @@ class ADFService implements ADFServiceInterface {
     public function import() : int {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
+        var_dump($accessToken);
         $messages = $this->gmail->messages($accessToken, config('adf.imports.gmail.folder'));
 
         // Checking Each Message
