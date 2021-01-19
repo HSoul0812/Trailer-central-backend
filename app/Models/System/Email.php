@@ -42,7 +42,7 @@ class Email extends Model
     {
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('google')
-                    ->whereRelationType('sales_person');
+                    ->whereRelationType('system_emails');
     }
 
     public static function getTableName() {
