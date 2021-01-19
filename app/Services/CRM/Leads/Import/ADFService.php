@@ -61,16 +61,13 @@ class ADFService implements ADFServiceInterface {
     public function import() : int {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
-        var_dump($accessToken);
-        var_dump($accessToken->scope);
-        var_dump($accessToken->scopes);
         $messages = $this->gmail->messages($accessToken, config('adf.imports.gmail.folder'));
 
         // Checking Each Message
         $total = 0;
         foreach($messages as $mailId) {
             // Get Message Overview
-            $email = $this->gmail->overview($mailId);
+            $email = $this->gmail->message($mailId);
 
             // Does From Match?
             if(!$this->imports->hasEmail($email->getFromEmail())) {
