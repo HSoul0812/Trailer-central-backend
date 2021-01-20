@@ -71,16 +71,19 @@ class ADFService implements ADFServiceInterface {
             // Get Message Overview
             $email = $this->gmail->message($mailId);
 
-            // Find Email
-            $import = $this->imports->find(['email' => $email->getFromEmail()]);
-            if(empty($import->id)) {
-                continue;
-            }
-
             // Find Exceptions
             try {
+                // Validate ADF
+                $adf = $this->parseAdf($email->getBody());
+
+                // Find Email
+                $import = $this->imports->find(['email' => $email->getFromEmail()]);
+                if(empty($import->id)) {
+                    continue;
+                }
+
                 // Process Further
-                $result = $this->importLead($email);
+                $result = $this->importLead($adf);
                 if(!empty($result->identifier)) {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
@@ -120,12 +123,11 @@ class ADFService implements ADFServiceInterface {
     /**
      * Import ADF as Lead
      * 
-     * @param ParsedEmail $email
+     * @param AdfLead $lead
      * @return int 1 = imported, 0 = failed
      */
-    private function importLead(ParsedEmail $email) : int {
-        // Get ADF Data
-        $adf = $this->parseAdf($email->getBody());
+    public function importLead(AdfLead $lead) : int {
+        // Save Lead From ADF Data
 
         // Return Total
         return 1;
