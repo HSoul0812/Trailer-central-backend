@@ -14,6 +14,7 @@ use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\DomCrawler\Crawler;
 
 class ADFService implements ADFServiceInterface {
 
@@ -106,11 +107,10 @@ class ADFService implements ADFServiceInterface {
      */
     public function parseAdf(string $body) : ADFLead {
         // Get XML Parsed Data
-        $parser = \xml_parser_create();
-        $valid = \xml_parse_int_struct($parser, $body, $values, $indexes);
-        \xml_parser_free($parser);
-        var_dump($values);
-        var_dump($indexes);
+        $crawler = new Crawler($body);
+        foreach ($crawler as $domElement) {
+            var_dump($domElement->nodeName);
+        }
 
         // Valid XML?
         if(empty($valid)) {
