@@ -75,13 +75,16 @@ class ADFService implements ADFServiceInterface {
             // Find Exceptions
             try {
                 // Validate ADF
-                $adf = $this->parseAdf($email->getBody());
+                $this->validateAdf($email->getBody());
 
                 // Find Email
                 $import = $this->imports->find(['email' => $email->getFromEmail()]);
                 if(empty($import->id)) {
                     continue;
                 }
+
+                // Validate ADF
+                $adf = $this->parseAdf($import->dealer_id, $email->getBody());
 
                 // Process Further
                 $result = $this->importLead($adf);
@@ -100,10 +103,35 @@ class ADFService implements ADFServiceInterface {
     }
 
     /**
+     * Validate ADF and Return Result
+     * 
+     * @param string $body
+     * @throws InvalidAdfImportFormatException
+     * @return bool
+     */
+    public function validateAdf(string $body) : bool {
+        // Get XML Parsed Data
+        $crawler = new Crawler($body);
+        $adf = null;
+        if(!empty($crawler[0]->nodeName) && $crawler[0]->nodeName === 'adf') {
+            $adf = $crawler[0];
+        }
+
+        // Valid XML?
+        if(empty($adf->nodeName)) {
+            throw new InvalidAdfImportFormatException;
+        }
+
+        // Return True
+        return true;
+    }
+
+    /**
      * Get ADF and Return Result
      * 
      * @param int $dealerId
      * @param string $body
+     * @throws InvalidAdfImportFormatException
      * @return ADFLead
      */
     public function parseAdf(int $dealerId, string $body) : ADFLead {
