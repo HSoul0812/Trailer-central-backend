@@ -138,7 +138,7 @@ class ADFService implements ADFServiceInterface {
         // Get XML Parsed Data
         $crawler = new Crawler($body);
         $adf = null;
-        if(!empty($crawler[0]->nodeName) && $crawler[0]->nodeName === 'adf') {
+        if(!empty($crawler->first()->nodeName) && $crawler->first()->nodeName === 'adf') {
             $adf = $crawler[0];
         }
 
