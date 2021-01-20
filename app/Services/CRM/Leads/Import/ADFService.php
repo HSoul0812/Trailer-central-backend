@@ -13,6 +13,7 @@ use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Log;
 
 class ADFService implements ADFServiceInterface {
 
