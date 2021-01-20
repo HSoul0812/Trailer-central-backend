@@ -33,13 +33,23 @@ interface GmailServiceInterface {
     public function message(string $mailId);
 
     /**
+     * Move Message Labels
+     * 
+     * @param string $mailId mail ID to modify
+     * @param array $labels labels to add by name | required
+     * @param array $remove labels to remove by name | optional
+     * @return true on success, false on failure
+     */
+    public function move(AccessToken $accessToken, string $mailId, array $labels, array $remove = []): bool;
+
+    /**
      * Get All Labels for User
      * 
      * @param AccessToken $accessToken
-     * @param string $search
+     * @param array $search
      * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
      * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
      * @return array of labels
      */
-    public function labels(AccessToken $accessToken, string $search = '');
+    public function labels(AccessToken $accessToken, string $search = []);
 }
