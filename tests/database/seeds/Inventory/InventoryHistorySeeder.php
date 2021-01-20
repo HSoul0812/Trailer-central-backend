@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\database\seeds\Inventory;
 
-use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\Dms\ServiceOrder;
 use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
@@ -18,17 +17,13 @@ use Illuminate\Database\Query\Builder;
 /**
  * @property-read Inventory $inventory
  * @property-read array<Customer> $customers
- * @property-read array<InventoryHistory> $transactions
+ * @property-read Customer $fixedUser
  * @property-read User $dealer
  * @property-read Faker $faker
  */
 class InventoryHistorySeeder extends Seeder
 {
     use WithGetter;
-
-    public const INVENTORY_ID = 1000000000;
-
-    public const CUSTOMER_ID = 2000000000;
 
     /**
      * @var Inventory
@@ -39,6 +34,11 @@ class InventoryHistorySeeder extends Seeder
      * @var array<Customer>
      */
     private $customers = [];
+
+    /**
+     * @var Customer
+     */
+    private $fixedUser;
 
     /**
      * @var User
@@ -60,21 +60,18 @@ class InventoryHistorySeeder extends Seeder
      */
     public function __construct()
     {
-        // It is necessary to clean up before feed because PHPUnit is not able to tearDown when occurs a failure
-        Inventory::destroy(self::INVENTORY_ID);
-        Customer::destroy(self::CUSTOMER_ID);
-
         $this->faker = Faker::create();
 
         $this->dealer = factory(User::class)->create();
         $this->inventory = factory(Inventory::class)->create([
-            'inventory_id' => self::INVENTORY_ID, 'dealer_id' => $this->dealer->getKey()
+            'dealer_id' => $this->dealer->getKey()
         ]);
     }
 
     public function seed(): void
     {
         $dealerId = $this->dealer->getKey();
+        $inventoryId = $this->inventory->getKey();
 
         $customerSeeds = [
             ['first_name' => 'Walter', 'last_name' => 'White'],
@@ -83,7 +80,7 @@ class InventoryHistorySeeder extends Seeder
         ];
 
         // We dont want that Mike be randomly picked up
-        factory(Customer::class)->create(['first_name' => 'Mike', 'last_name' => 'Ehrmantraut', 'id' => self::CUSTOMER_ID]);
+        $this->fixedUser = factory(Customer::class)->create(['first_name' => 'Mike', 'last_name' => 'Ehrmantraut']);
 
         foreach ($customerSeeds as $seed) {
             //Lets create an array of customer indexed by customer name
@@ -93,21 +90,19 @@ class InventoryHistorySeeder extends Seeder
         }
 
         $seeds = [
-            ['dealer_id' => $dealerId, 'customer_id' => $this->customers['Walter White']->id, 'inventory_id' => self::INVENTORY_ID, 'type' => ServiceOrder::TYPE_ESTIMATE],
-            ['dealer_id' => $dealerId, 'customer_id' => $this->getRandomCustomer()->id, 'inventory_id' => self::INVENTORY_ID, 'type' => ServiceOrder::TYPE_ESTIMATE],
-            ['dealer_id' => $dealerId, 'customer_id' => $this->getRandomCustomer()->id, 'inventory_id' => self::INVENTORY_ID, 'type' => ServiceOrder::TYPE_ESTIMATE],
-            ['dealer_id' => $dealerId, 'customer_id' => self::CUSTOMER_ID, 'inventory_id' => self::INVENTORY_ID, 'type' => ServiceOrder::TYPE_RETAIL],
-            ['dealer_id' => $dealerId, 'customer_id' => $this->customers['Jesse Pinkman']->id, 'inventory_id' => self::INVENTORY_ID, 'type' => ServiceOrder::TYPE_ESTIMATE],
-            ['dealer_id' => $dealerId, 'customer_id' => $this->customers['Saul Goodman']->id, 'inventory_id' => self::INVENTORY_ID, 'type' => ServiceOrder::TYPE_WARRANTY],
-            ['dealer_id' => $dealerId, 'customer_id' => $this->getRandomCustomer()->id, 'inventory_id' => self::INVENTORY_ID, 'type' => ServiceOrder::TYPE_ESTIMATE],
-            ['dealer_id' => $dealerId, 'customer_id' => $this->getRandomCustomer()->id, 'inventory_id' => self::INVENTORY_ID, 'type' => ServiceOrder::TYPE_INTERNAL]
+            ['dealer_id' => $dealerId, 'customer_id' => $this->customers['Walter White']->id, 'inventory_id' => $inventoryId, 'type' => ServiceOrder::TYPE_ESTIMATE],
+            ['dealer_id' => $dealerId, 'customer_id' => $this->getRandomCustomer()->id, 'inventory_id' => $inventoryId, 'type' => ServiceOrder::TYPE_ESTIMATE],
+            ['dealer_id' => $dealerId, 'customer_id' => $this->getRandomCustomer()->id, 'inventory_id' => $inventoryId, 'type' => ServiceOrder::TYPE_ESTIMATE],
+            ['dealer_id' => $dealerId, 'customer_id' => $this->fixedUser->getKey(), 'inventory_id' => $inventoryId, 'type' => ServiceOrder::TYPE_RETAIL],
+            ['dealer_id' => $dealerId, 'customer_id' => $this->customers['Jesse Pinkman']->id, 'inventory_id' => $inventoryId, 'type' => ServiceOrder::TYPE_ESTIMATE],
+            ['dealer_id' => $dealerId, 'customer_id' => $this->customers['Saul Goodman']->id, 'inventory_id' => $inventoryId, 'type' => ServiceOrder::TYPE_WARRANTY],
+            ['dealer_id' => $dealerId, 'customer_id' => $this->getRandomCustomer()->id, 'inventory_id' => $inventoryId, 'type' => ServiceOrder::TYPE_ESTIMATE],
+            ['dealer_id' => $dealerId, 'customer_id' => $this->getRandomCustomer()->id, 'inventory_id' => $inventoryId, 'type' => ServiceOrder::TYPE_INTERNAL]
         ];
 
         foreach ($seeds as $seed) {
             factory(ServiceOrder::class)->create($seed);
         }
-
-        $this->transactions = InventoryHistory::where(['inventory_id' => self::INVENTORY_ID])->get()->toArray();
     }
 
     public function cleanUp(): void
