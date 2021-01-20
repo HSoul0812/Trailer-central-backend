@@ -10,280 +10,780 @@ namespace App\Services\CRM\Leads\DTOs;
 class ADFLead
 {
     /**
-     * @const string SSL
+     * @var string Dealer ID for ADF Lead
      */
-    const SSL = 'ssl';
+    private $dealerId;
 
     /**
-     * @const string TLS
+     * @var string Dealer Location ID for ADF Lead
      */
-    const TLS = 'tls';
+    private $locationId;
 
     /**
-     * @const default charset
+     * @var string Date Lead Was Requested
      */
-    const CHARSET_DEFAULT = 'UTF-8';
-
-    /**
-     * @const NTLM charset
-     */
-    const CHARSET_NTLM = 'US-ASCIII';
+    private $requestDate;
 
 
     /**
-     * @var string Username for IMAP
+     * @var string First Name for ADF Lead
      */
-    private $username;
+    private $firstName;
 
     /**
-     * @var string Password for IMAP
+     * @var string Last Name for ADF Lead
      */
-    private $password;
+    private $lastName;
 
     /**
-     * @var string Host Name for IMAP
+     * @var string Email Address for ADF Lead
      */
-    private $host;
+    private $email;
 
     /**
-     * @var int Port for IMAP Host
+     * @var string Phone Number for ADF Lead
      */
-    private $port;
+    private $phone;
 
     /**
-     * @var string ssl || tls (Security Type for IMAP Connection)
+     * @var string Comments for ADF Lead
      */
-    private $security;
-
-    /**
-     * @var string Auth Type for IMAP Connection
-     */
-    private $authType;
-
-    /**
-     * @var string Charset for IMAP Connection
-     */
-    private $charset;
-
-    /**
-     * @var string Folder Name for IMAP Connection
-     */
-    private $folderName;
-
-    /**
-     * @var string Date to Start Importing From
-     */
-    private $startDate;
+    private $comments;
 
 
     /**
-     * Return Username
+     * @var string Street Address for ADF Lead
+     */
+    private $addrStreet;
+
+    /**
+     * @var string City for ADF Lead
+     */
+    private $addrCity;
+
+    /**
+     * @var string State for ADF Lead
+     */
+    private $addrState;
+
+    /**
+     * @var string Zip for ADF Lead
+     */
+    private $addrZip;
+
+
+    /**
+     * @var string Vehicle ID for ADF Lead
+     */
+    private $vehicleId;
+
+    /**
+     * @var string Vehicle Year for ADF Lead
+     */
+    private $vehicleYear;
+
+    /**
+     * @var string Vehicle Make for ADF Lead
+     */
+    private $vehicleMake;
+
+    /**
+     * @var string Vehicle Model for ADF Lead
+     */
+    private $vehicleModel;
+
+    /**
+     * @var string Vehicle Stock for ADF Lead
+     */
+    private $vehicleStock;
+
+    /**
+     * @var string Vehicle VIN for ADF Lead
+     */
+    private $vehicleVin;
+
+
+    /**
+     * @var array Vendor ID's Mapped As [source => text]
+     */
+    private $vendorIds;
+
+    /**
+     * @var array Vendor Contact Name
+     */
+    private $vendorContact;
+
+    /**
+     * @var array Vendor URL
+     */
+    private $vendorUrl;
+
+    /**
+     * @var array Vendor Email Address
+     */
+    private $vendorEmail;
+
+    /**
+     * @var array Vendor Phone Number
+     */
+    private $vendorPhone;
+
+
+    /**
+     * @var array Vendor Street Address
+     */
+    private $vendorAddrStreet;
+
+    /**
+     * @var array Vendor City
+     */
+    private $vendorAddrCity;
+
+    /**
+     * @var array Vendor State
+     */
+    private $vendorAddrState;
+
+    /**
+     * @var array Vendor Zip Code
+     */
+    private $vendorAddrZip;
+
+    /**
+     * @var array Vendor Country
+     */
+    private $vendorAddrCountry;
+
+
+    /**
+     * Return Dealer ID
      * 
-     * @return string $this->username
+     * @return int $this->dealerId
      */
-    public function getUsername(): string
+    public function getDealerId(): int
     {
-        return $this->username;
+        return $this->dealerId;
     }
 
     /**
-     * Set Username
+     * Set Dealer ID
      * 
-     * @param string $username
+     * @param int $dealerId
      * @return void
      */
-    public function setUsername(string $username): void
+    public function setDealerId(int $dealerId): void
     {
-        $this->username = $username;
+        $this->dealerId = $dealerId;
     }
 
 
     /**
-     * Return Password
+     * Return Location ID
      * 
-     * @return string $this->password
+     * @return int $this->locationId
      */
-    public function getPassword(): string
+    public function getLocationId(): int
     {
-        return $this->password;
+        return $this->locationId;
     }
 
     /**
-     * Set Password
+     * Set Dealer Location ID
      * 
-     * @param string $password
+     * @param int $locationId
      * @return void
      */
-    public function setPassword(string $password): void
+    public function setLocationId(int $locationId): void
     {
-        $this->password = $password;
+        $this->locationId = $locationId;
     }
 
 
     /**
-     * Return Host
+     * Return Request Date
      * 
-     * @return string $this->host
+     * @return string $this->requestDate
      */
-    public function getHost(): string
+    public function getRequestDate(): string
     {
-        return $this->host;
+        return $this->requestDate;
     }
 
     /**
-     * Set Host
+     * Set Request Date
      * 
-     * @param string $host
+     * @param string $requestDate
      * @return void
      */
-    public function setHost(string $host): void
+    public function setRequestDate(string $requestDate): void
     {
-        $this->host = $host;
+        $this->requestDate = $requestDate;
     }
 
 
+
     /**
-     * Return Port
+     * Return First Name
      * 
-     * @return int $this->port
+     * @return string $this->firstName
      */
-    public function getPort(): int
+    public function getFirstName(): string
     {
-        return $this->port;
+        return $this->firstName;
     }
 
     /**
-     * Set Port
+     * Set First Name
      * 
-     * @param int $port
+     * @param string $firstName
      * @return void
      */
-    public function setPort(int $port): void
+    public function setFirstName(string $firstName): void
     {
-        $this->port = $port;
+        $this->firstName = $firstName;
     }
 
 
     /**
-     * Return Security
+     * Return Last Name
      * 
-     * @return string $this->security
+     * @return string $this->lastName
      */
-    public function getSecurity(): string
+    public function getLastName(): string
     {
-        return $this->security ?: self::SSL;
+        return $this->lastName;
     }
 
     /**
-     * Set Security
+     * Set Last Name
      * 
-     * @param string $security
+     * @param string $lastName
      * @return void
      */
-    public function setSecurity(string $security): void
+    public function setLastName(string $lastName): void
     {
-        $this->security = $security;
+        $this->lastName = $lastName;
     }
 
 
     /**
-     * Return Auth Type
+     * Return Email
      * 
-     * @return string $this->fileAuth
+     * @return string $this->email
      */
-    public function getAuthType(): string
+    public function getEmail(): string
     {
-        return $this->authType;
+        return $this->email;
     }
 
     /**
-     * Set Auth Type
+     * Set Email
      * 
-     * @param string $authType
+     * @param string $email
      * @return void
      */
-    public function setAuthType(string $authType): void
+    public function setEmail(string $email): void
     {
-        $this->authType = $authType;
+        $this->email = $email;
     }
 
 
     /**
-     * Return Charset
+     * Return Phone
      * 
-     * @return string $this->charset
+     * @return string $this->phone
      */
-    public function getCharset(): string
+    public function getPhone(): string
     {
-        return $this->charset;
+        return $this->phone;
     }
 
     /**
-     * Set Charset
+     * Set Phone
      * 
-     * @param string $charset
+     * @param string $phone
      * @return void
      */
-    public function setCharset(string $charset): void
+    public function setPhone(string $phone): void
     {
-        $this->charset = $charset;
+        $this->phone = $phone;
+    }
+
+
+    /**
+     * Return Comments
+     * 
+     * @return string $this->comments
+     */
+    public function getComments(): string
+    {
+        return $this->comments;
     }
 
     /**
-     * Determine Charset From Auth Type
+     * Set Comments
      * 
+     * @param string $comments
      * @return void
      */
-    public function calcCharset(): void
+    public function setComments(string $comments): void
     {
-        if($this->authType === 'NTLM') {
-            $this->setCharset(self::CHARSET_NTLM);
-        } else {
-            $this->setCharset(self::CHARSET_DEFAULT);
-        }
+        $this->comments = $comments;
     }
 
 
+
     /**
-     * Return Folder Name
+     * Return Street Address
      * 
-     * @return string $this->folderName
+     * @return string $this->addrStreet
      */
-    public function getFolderName(): string
+    public function getAddrStreet(): string
     {
-        return $this->folderName;
+        return $this->addrStreet;
     }
 
     /**
-     * Set Folder Name
+     * Set Street Address
      * 
-     * @param string $folderName
+     * @param string $addrStreet
      * @return void
      */
-    public function setFolderName(string $folderName): void
+    public function setAddrStreet(string $addrStreet): void
     {
-        $this->folderName = $folderName;
+        $this->addrStreet = $addrStreet;
     }
 
 
     /**
-     * Return Start Date
+     * Return City Address
      * 
-     * @return string $this->startDate
+     * @return string $this->addrCity
      */
-    public function getStartDate(): string
+    public function getAddrCity(): string
     {
-        return $this->startDate;
+        return $this->addrCity;
     }
 
     /**
-     * Set Start Date
+     * Set City Address
      * 
-     * @param string $startDate
+     * @param string $addrCity
      * @return void
      */
-    public function setStartDate(string $startDate): void
+    public function setAddrCity(string $addrCity): void
     {
-        $this->startDate = $startDate;
+        $this->addrCity = $addrCity;
+    }
+
+
+    /**
+     * Return State Address
+     * 
+     * @return string $this->addrState
+     */
+    public function getAddrState(): string
+    {
+        return $this->addrState;
+    }
+
+    /**
+     * Set State Address
+     * 
+     * @param string $addrState
+     * @return void
+     */
+    public function setAddrState(string $addrState): void
+    {
+        $this->addrState = $addrState;
+    }
+
+
+    /**
+     * Return Zip Address
+     * 
+     * @return string $this->addrZip
+     */
+    public function getAddrZip(): string
+    {
+        return $this->addrZip;
+    }
+
+    /**
+     * Set Zip Address
+     * 
+     * @param string $addrZip
+     * @return void
+     */
+    public function setAddrZip(string $addrZip): void
+    {
+        $this->addrZip = $addrZip;
+    }
+
+
+
+    /**
+     * Return Vehicle ID
+     * 
+     * @return string $this->vehicleId
+     */
+    public function getVehicleId(): string
+    {
+        return $this->vehicleId;
+    }
+
+    /**
+     * Set Vehicle ID
+     * 
+     * @param string $vehicleId
+     * @return void
+     */
+    public function setVehicleId(string $vehicleId): void
+    {
+        $this->vehicleId = $vehicleId;
+    }
+
+
+    /**
+     * Return Vehicle Year
+     * 
+     * @return string $this->vehicleYear
+     */
+    public function getVehicleYear(): string
+    {
+        return $this->vehicleYear;
+    }
+
+    /**
+     * Set Vehicle Year
+     * 
+     * @param string $vehicleYear
+     * @return void
+     */
+    public function setVehicleYear(string $vehicleYear): void
+    {
+        $this->vehicleYear = $vehicleYear;
+    }
+
+
+    /**
+     * Return Vehicle Make
+     * 
+     * @return string $this->vehicleMake
+     */
+    public function getVehicleMake(): string
+    {
+        return $this->vehicleMake;
+    }
+
+    /**
+     * Set Vehicle Make
+     * 
+     * @param string $vehicleMake
+     * @return void
+     */
+    public function setVehicleMake(string $vehicleMake): void
+    {
+        $this->vehicleMake = $vehicleMake;
+    }
+
+
+    /**
+     * Return Vehicle Model
+     * 
+     * @return string $this->vehicleModel
+     */
+    public function getVehicleModel(): string
+    {
+        return $this->vehicleModel;
+    }
+
+    /**
+     * Set Vehicle Model
+     * 
+     * @param string $vehicleModel
+     * @return void
+     */
+    public function setVehicleModel(string $vehicleModel): void
+    {
+        $this->vehicleModel = $vehicleModel;
+    }
+
+
+    /**
+     * Return Vehicle Stock
+     * 
+     * @return string $this->vehicleStock
+     */
+    public function getVehicleStock(): string
+    {
+        return $this->vehicleStock;
+    }
+
+    /**
+     * Set Vehicle ID
+     * 
+     * @param string $vehicleStock
+     * @return void
+     */
+    public function setVehicleStock(string $vehicleStock): void
+    {
+        $this->vehicleStock = $vehicleStock;
+    }
+
+
+    /**
+     * Return Vehicle VIN
+     * 
+     * @return string $this->vehicleVin
+     */
+    public function getVehicleVin(): string
+    {
+        return $this->vehicleVin;
+    }
+
+    /**
+     * Set Vehicle VIN
+     * 
+     * @param string $vehicleVin
+     * @return void
+     */
+    public function setVehicleVin(string $vehicleVin): void
+    {
+        $this->vehicleVin = $vehicleVin;
+    }
+
+
+
+    /**
+     * Return Vendor ID's Array
+     * 
+     * @return array $this->vendorIds Vendor ID's Mapped As [source => text]
+     */
+    public function getVendorIds(): string
+    {
+        return $this->vendorIds;
+    }
+
+    /**
+     * Set Vendor ID's
+     * 
+     * @param array $vendorIds Vendor ID's Mapped As [source => text]
+     * @return void
+     */
+    public function setVendorIds(array $vendorIds): void
+    {
+        $this->vendorIds = $vendorIds;
+    }
+
+    /**
+     * Add Vendor ID
+     * 
+     * @param string $source Key for the Vendor ID
+     * @param int $vendorId ID to set to vendor
+     * @return void
+     */
+    public function addVendorId(string $source, int $vendorId): void
+    {
+        $this->vendorIds[$source] = $vendorId;
+    }
+
+
+    /**
+     * Return Vendor Contact Name
+     * 
+     * @return string $this->vendorContact
+     */
+    public function getVendorContact(): string
+    {
+        return $this->vendorContact;
+    }
+
+    /**
+     * Set Vendor Contact Name
+     * 
+     * @param string $vendorContact
+     * @return void
+     */
+    public function setVendorContact(string $vendorContact): void
+    {
+        $this->vendorContact = $vendorContact;
+    }
+
+
+    /**
+     * Return Vendor URL
+     * 
+     * @return string $this->vendorUrl
+     */
+    public function getVendorUrl(): string
+    {
+        return $this->vendorUrl;
+    }
+
+    /**
+     * Set Vendor URL
+     * 
+     * @param string $vendorUrl
+     * @return void
+     */
+    public function setVendorUrl(string $vendorUrl): void
+    {
+        $this->vendorUrl = $vendorUrl;
+    }
+
+
+    /**
+     * Return Vendor Email
+     * 
+     * @return string $this->vendorEmail
+     */
+    public function getVendorEmail(): string
+    {
+        return $this->vendorEmail;
+    }
+
+    /**
+     * Set Vendor Email
+     * 
+     * @param string $vendorEmail
+     * @return void
+     */
+    public function setVendorEmail(string $vendorEmail): void
+    {
+        $this->vendorEmail = $vendorEmail;
+    }
+
+
+    /**
+     * Return Vendor Phone
+     * 
+     * @return string $this->vendorPhone
+     */
+    public function getVendorPhone(): string
+    {
+        return $this->vendorPhone;
+    }
+
+    /**
+     * Set Vendor Phone
+     * 
+     * @param string $vendorPhone
+     * @return void
+     */
+    public function setVendorPhone(string $vendorPhone): void
+    {
+        $this->vendorPhone = $vendorPhone;
+    }
+
+
+
+    /**
+     * Return Vendor Street Address
+     * 
+     * @return string $this->vendorAddrStreet
+     */
+    public function getAddrStreet(): string
+    {
+        return $this->vendorAddrStreet;
+    }
+
+    /**
+     * Set Vendor Street Address
+     * 
+     * @param string $addrStreet
+     * @return void
+     */
+    public function setVendorAddrStreet(string $addrStreet): void
+    {
+        $this->vendorAddrStreet = $addrStreet;
+    }
+
+
+    /**
+     * Return Vendor City Address
+     * 
+     * @return string $this->vendorAddrCity
+     */
+    public function getVendorAddrCity(): string
+    {
+        return $this->vendorAddrCity;
+    }
+
+    /**
+     * Set Vendor City Address
+     * 
+     * @param string $addrCity
+     * @return void
+     */
+    public function setVendorAddrCity(string $addrCity): void
+    {
+        $this->vendorAddrCity = $addrCity;
+    }
+
+
+    /**
+     * Return Vendor State Address
+     * 
+     * @return string $this->vendorAddrState
+     */
+    public function getVendorAddrState(): string
+    {
+        return $this->vendorAddrState;
+    }
+
+    /**
+     * Set Vendor State Address
+     * 
+     * @param string $addrState
+     * @return void
+     */
+    public function setVendorAddrState(string $addrState): void
+    {
+        $this->vendorAddrState = $addrState;
+    }
+
+
+    /**
+     * Return Vendor Zip Address
+     * 
+     * @return string $this->vendorAddrZip
+     */
+    public function getVendorAddrZip(): string
+    {
+        return $this->vendorAddrZip;
+    }
+
+    /**
+     * Set Vendor Zip Address
+     * 
+     * @param string $addrZip
+     * @return void
+     */
+    public function setVendorAddrZip(string $addrZip): void
+    {
+        $this->vendorAddrZip = $addrZip;
+    }
+
+
+    /**
+     * Return Vendor Country Address
+     * 
+     * @return string $this->vendorAddrCountry
+     */
+    public function getVendorAddrCountry(): string
+    {
+        return $this->vendorAddrCountry;
+    }
+
+    /**
+     * Set Vendor Country Address
+     * 
+     * @param string $addrCountry
+     * @return void
+     */
+    public function setVendorAddrCountry(string $addrCountry): void
+    {
+        $this->vendorAddrCountry = $addrCountry;
     }
 }
