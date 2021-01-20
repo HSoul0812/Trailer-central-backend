@@ -19,8 +19,9 @@ interface ADFServiceInterface {
     /**
      * Get ADF and Return Result
      * 
+     * @param int $dealerId
      * @param string $body
      * @return ADFLead
      */
-    public function parseAdf(string $body) : ADFLead;
+    public function parseAdf(int $dealerId, string $body) : ADFLead;
 }
