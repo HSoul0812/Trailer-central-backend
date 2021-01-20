@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Leads;
 
+use App\Models\CRM\Leads\LeadImport;
 use App\Repositories\Repository;
 use Illuminate\Support\Collection;
 
