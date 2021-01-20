@@ -75,7 +75,7 @@ class ADFService implements ADFServiceInterface {
             // Find Exceptions
             try {
                 // Validate ADF
-                $this->validateAdf($email->getBody());
+                $crawler = $this->validateAdf($email->getBody());
 
                 // Find Email
                 $import = $this->imports->find(['email' => $email->getFromEmail()]);
@@ -84,7 +84,7 @@ class ADFService implements ADFServiceInterface {
                 }
 
                 // Validate ADF
-                $adf = $this->parseAdf($import->dealer_id, $email->getBody());
+                $adf = $this->parseAdf($import->dealer_id, $crawler);
 
                 // Process Further
                 $result = $this->importLead($adf);
@@ -109,45 +109,29 @@ class ADFService implements ADFServiceInterface {
      * @throws InvalidAdfImportFormatException
      * @return bool
      */
-    public function validateAdf(string $body) : bool {
+    public function validateAdf(string $body) : Crawler {
         // Get XML Parsed Data
         $crawler = new Crawler($body);
         $adf = $crawler->filter('adf')->first();
-        var_dump($adf);
-        if(!empty($crawler->first()->nodeName) && $crawler->first()->nodeName === 'adf') {
-            $adf = $crawler->first();
-        }
 
         // Valid XML?
-        if(empty($adf->nodeName)) {
+        if(empty($adf) || empty($adf->nodeName)) {
             throw new InvalidAdfImportFormatException;
         }
 
         // Return True
-        return true;
+        return $adf;
     }
 
     /**
      * Get ADF and Return Result
      * 
      * @param int $dealerId
-     * @param string $body
+     * @param Crawler $adf
      * @throws InvalidAdfImportFormatException
      * @return ADFLead
      */
-    public function parseAdf(int $dealerId, string $body) : ADFLead {
-        // Get XML Parsed Data
-        $crawler = new Crawler($body);
-        $adf = null;
-        if(!empty($crawler->first()->nodeName) && $crawler->first()->nodeName === 'adf') {
-            $adf = $crawler[0];
-        }
-
-        // Valid XML?
-        if(empty($adf->nodeName)) {
-            throw new InvalidAdfImportFormatException;
-        }
-
+    public function parseAdf(int $dealerId, Crawler $adf) : ADFLead {
         // Create ADF Lead
         $adfLead = new ADFLead();
 
