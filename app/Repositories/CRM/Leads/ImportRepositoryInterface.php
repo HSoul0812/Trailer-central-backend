@@ -14,10 +14,10 @@ interface ImportRepositoryInterface extends Repository {
     public function getAllActive() : Collection;
 
     /**
-     * From Email Exists in Lead Import Table?
+     * Find Import Entry in Lead Import Table?
      * 
-     * @param string $email
-     * @return bool
+     * @param array $params
+     * @return LeadImport
      */
-    public function hasEmail($email) : bool;
+    public function find($params) : LeadImport;
 }

@@ -69,8 +69,9 @@ class ADFService implements ADFServiceInterface {
             // Get Message Overview
             $email = $this->gmail->message($mailId);
 
-            // Does From Match?
-            if(!$this->imports->hasEmail($email->getFromEmail())) {
+            // Find Email
+            $import = $this->imports->find(['email' => $email->getFromEmail()]);
+            if(empty($import->id)) {
                 continue;
             }
 
