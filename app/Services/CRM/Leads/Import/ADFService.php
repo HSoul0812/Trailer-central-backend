@@ -112,10 +112,10 @@ class ADFService implements ADFServiceInterface {
     public function validateAdf(string $body) : bool {
         // Get XML Parsed Data
         $crawler = new Crawler($body);
-        $adf = null;
-        var_dump($crawler->first());
+        $adf = $crawler->filter('adf')->first();
+        var_dump($adf);
         if(!empty($crawler->first()->nodeName) && $crawler->first()->nodeName === 'adf') {
-            $adf = $crawler[0];
+            $adf = $crawler->first();
         }
 
         // Valid XML?
