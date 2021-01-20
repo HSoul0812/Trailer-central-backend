@@ -102,23 +102,37 @@ class ADFService implements ADFServiceInterface {
     /**
      * Get ADF and Return Result
      * 
+     * @param int $dealerId
      * @param string $body
      * @return ADFLead
      */
-    public function parseAdf(string $body) : ADFLead {
+    public function parseAdf(int $dealerId, string $body) : ADFLead {
         // Get XML Parsed Data
         $crawler = new Crawler($body);
-        $adf = $crawler->filter('adf')->eq(0);
-        var_dump($adf);
+        $adf = null;
+        if(!empty($crawler[0]->nodeName) && $crawler[0]->nodeName === 'adf') {
+            $adf = $crawler[0];
+        }
 
         // Valid XML?
-        if(empty($adf->nodeName) || (!empty($adf->nodeName) && $adf->nodeName !== 'adf')) {
+        if(empty($adf->nodeName)) {
             throw new InvalidAdfImportFormatException;
         }
-        var_dump($adf);
+
+        // Create ADF Lead
+        $adfLead = new ADFLead();
+
+        // Get Date
+        $adfLead->setRequestDate($adf->filter('requestdate')->text());
+
+        // Set Contact Details
+        $this->getAdfContact($adfLead, $adf->filter('customer')->children());
+
+        // Set Vehicle Details
+        $this->getAdfInventory($adfLead, $dealerId, $adf->filter('vehicle')->children());
 
         // Get ADF Lead
-        return $this->getAdfLead($adf);
+        return $adfLead;
     }
 
     /**
@@ -173,14 +187,43 @@ class ADFService implements ADFServiceInterface {
     }
 
     /**
-     * Get ADF Lead
+     * Set ADF Contact Details to ADF Lead
      * 
-     * @param AdfLead $adfLead
+     * @param ADFLead $adfLead
+     * @param array $contact
+     * @return ADFLead
      */
-    private function getAdfLead($adf) {
-        // Get ADF Lead
-        $adfLead = new ADFLead();
+    private function getAdfContact(ADFLead $adfLead, $contact): ADFLead {
+        // Parse Contact Details
+        var_dump($contact);
 
-        // Set ADF Lead
+        // Return ADF Lead
+        return $adfLead;
+    }
+
+    /**
+     * Set ADF Contact Details to ADF Lead
+     * 
+     * @param ADFLead $adfLead
+     * @param array $contact
+     * @return ADFLead
+     */
+    private function getAdfInventory(ADFLead $adfLead, int $dealerId, $contact): ADFLead {
+        // Initialize Inventory Params
+        $params = ['dealer_id' => $dealerId];
+
+        // Parse Inventory Details
+        var_dump($contact);
+
+        // Find Inventory Items From DB That Match
+        $inventory = $this->inventory->find($params);
+
+        // Inventory Exists?
+        if(!empty($inventory)) {
+            $adfLead->setInventoryId($inventory->first()->id);
+        }
+
+        // Return ADF Lead
+        return $adfLead;
     }
 }
