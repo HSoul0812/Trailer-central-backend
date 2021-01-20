@@ -4,11 +4,18 @@ namespace App\Http\Controllers\v1\Inventory;
 
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
+use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryService;
+use App\Transformers\Inventory\InventoryHistoryTransformer;
+use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\Inventory\GetInventoryRequest;
 use App\Transformers\Inventory\InventoryTransformer;
+use Dingo\Api\Http\Response;
+use Exception;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Class InventoryController
@@ -27,17 +34,28 @@ class InventoryController extends RestfulController
     protected $inventoryRepository;
 
     /**
+     * @var InventoryHistoryRepositoryInterface
+     */
+    protected $inventoryHistoryRepository;
+
+    /**
      * Create a new controller instance.
      *
-     * @param InventoryService $inventoryService
-     * @param InventoryRepositoryInterface $inventoryRepository
+     * @param  InventoryService  $inventoryService
+     * @param  InventoryRepositoryInterface  $inventoryRepository
+     * @param  InventoryHistoryRepositoryInterface  $inventoryHistoryRepository
      */
-    public function __construct(InventoryService $inventoryService, InventoryRepositoryInterface $inventoryRepository)
+    public function __construct(
+        InventoryService $inventoryService,
+        InventoryRepositoryInterface $inventoryRepository,
+        InventoryHistoryRepositoryInterface $inventoryHistoryRepository
+    )
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
 
         $this->inventoryService = $inventoryService;
         $this->inventoryRepository = $inventoryRepository;
+        $this->inventoryHistoryRepository = $inventoryHistoryRepository;
     }
 
     /**
@@ -161,5 +179,81 @@ class InventoryController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/inventory/{inventory_id}/history",
+     *     description="Retrieve a list of transactions belong to a inventory unit",
+     *     tags={"Inventory"},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Page Limit",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="Sort order can be: in:created_at,-created_at,type,-type,subtype,-subtype,customer_name,-customer_name",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="search_term",
+     *         in="query",
+     *         description="Search String",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="inventory_id",
+     *         in="query",
+     *         description="Inventory identifier",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="customer_id",
+     *         in="query",
+     *         description="Customer identifier",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of transactions belong to a inventory unit",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param  int $inventoryId
+     * @param Request $request
+     * @return Response
+     *
+     * @throws ResourceException when there were some validation error
+     * @throws HttpException when the object does not belong to the current logged-in dealer,
+     *                       or there were some bad request
+     * @throws Exception when there were db errors
+     */
+    public function history(int $inventoryId, Request $request): Response
+    {
+        $request = new GetInventoryHistoryRequest(
+            array_merge(['inventory_id' => $inventoryId], $request->all())
+        );
+
+        if ($request->validate()) {
+            return $this->response->paginator(
+                $this->inventoryHistoryRepository->getAll($request->all(), true),
+                new InventoryHistoryTransformer()
+            );
+        }
+
+        $this->response->errorBadRequest();
     }
 }

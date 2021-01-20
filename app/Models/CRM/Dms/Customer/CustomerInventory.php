@@ -7,9 +7,10 @@ namespace App\Models\CRM\Dms\Customer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Ramsey\Uuid\Uuid;
 
 /**
- * @property int $id
+ * @property string $uuid
  * @property int $customer_id
  * @property int $inventory_id
  * @property string $created_at
@@ -35,5 +36,14 @@ class CustomerInventory extends Model
     public static function getTableName(): string
     {
         return self::TABLE_NAME;
+    }
+
+    public static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(static function (CustomerInventory $model) {
+            $model->uuid = Uuid::uuid4();
+        });
     }
 }
