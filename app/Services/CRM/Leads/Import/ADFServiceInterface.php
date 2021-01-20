@@ -20,8 +20,9 @@ interface ADFServiceInterface {
      * Get ADF and Return Result
      * 
      * @param int $dealerId
-     * @param string $body
+     * @param Crawler $adf
+     * @throws InvalidAdfImportFormatException
      * @return ADFLead
      */
-    public function parseAdf(int $dealerId, string $body) : ADFLead;
+    public function parseAdf(int $dealerId, Crawler $adf) : ADFLead;
 }
