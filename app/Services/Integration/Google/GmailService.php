@@ -216,7 +216,7 @@ class GmailService implements GmailServiceInterface
     public function move(AccessToken $accessToken, string $mailId, array $labels, array $remove = []): bool {
         // Create Modify Message Request
         $newLabels = $this->labels($accessToken, $labels);
-        $modify = new Google_Service_Gmail_ModifyMessageRequest();
+        $modify = new \Google_Service_Gmail_ModifyMessageRequest();
         $modify->setAddLabelIds($this->getLabelIds($newLabels));
 
         // Remove Labels Exist?
