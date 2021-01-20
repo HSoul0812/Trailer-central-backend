@@ -683,7 +683,7 @@ class ADFLead
      * 
      * @return string $this->vendorAddrStreet
      */
-    public function getAddrStreet(): string
+    public function getVendorAddrStreet(): string
     {
         return $this->vendorAddrStreet;
     }
