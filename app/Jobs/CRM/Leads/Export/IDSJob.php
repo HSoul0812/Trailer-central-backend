@@ -35,14 +35,21 @@ class IDSJob extends Job
     private $copiedEmails;
     
     /**
+     *
+     * @var array
+     */
+    private $hiddenCopiedEmails;
+    
+    /**
      * AutoResponder constructor.
      * @param Lead $lead
      */
-    public function __construct(Lead $lead, array $toEmails, array $copiedEmails)
+    public function __construct(Lead $lead, array $toEmails, array $copiedEmails, array $hiddenCopiedEmails = [])
     {
         $this->lead = $lead;
         $this->toEmails = $toEmails;
         $this->copiedEmails = $copiedEmails;
+        $this->hiddenCopiedEmails = $hiddenCopiedEmails;
     }
 
     public function handle()
@@ -56,6 +63,7 @@ class IDSJob extends Job
         try {
             Mail::to($this->toEmails) 
                 ->cc($this->copiedEmails)
+                ->bcc($this->hiddenCopiedEmails)
                 ->send(
                     new IDSEmail([
                         'lead' => $this->lead,

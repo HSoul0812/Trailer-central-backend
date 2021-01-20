@@ -16,6 +16,8 @@ use App\Repositories\Inventory\FileRepository;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepository;
 use App\Repositories\Inventory\ImageRepositoryInterface;
+use App\Repositories\Inventory\InventoryHistoryRepository;
+use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\StatusRepository;
 use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
@@ -190,6 +192,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(InventoryHistoryRepositoryInterface::class, InventoryHistoryRepository::class);
         $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
