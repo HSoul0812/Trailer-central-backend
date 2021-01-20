@@ -108,18 +108,16 @@ class ADFService implements ADFServiceInterface {
     public function parseAdf(string $body) : ADFLead {
         // Get XML Parsed Data
         $crawler = new Crawler($body);
-        foreach ($crawler as $k => $domElement) {
-            var_dump($k);
-            var_dump($domElement->nodeName);
-        }
+        $adf = $crawler->filter('adf')->first();
 
         // Valid XML?
-        if(empty($valid)) {
+        if(empty($adf->nodeName) || (!empty($adf->nodeName) && $adf->nodeName !== 'adf')) {
             throw new InvalidAdfImportFormatException;
         }
+        var_dump($adf);
 
         // Get ADF Lead
-        return $this->getAdfLead($xml);
+        return $this->getAdfLead($adf);
     }
 
     /**
