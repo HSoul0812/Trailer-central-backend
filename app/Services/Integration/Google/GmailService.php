@@ -254,12 +254,11 @@ class GmailService implements GmailServiceInterface
 
         // Get Labels
         $labels = [];
-        var_dump($search);
         foreach($results->getLabels() as $label) {
             // Search for Label Exists?
             if(!empty($search)) {
                 // Skip If Label Doesn't Match!
-                if(in_array($label->getName(), $search)) {
+                if(!in_array($label->getName(), $search)) {
                     continue;
                 }
             }
