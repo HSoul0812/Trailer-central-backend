@@ -108,7 +108,7 @@ class ADFService implements ADFServiceInterface {
     public function parseAdf(string $body) : ADFLead {
         // Get XML Parsed Data
         $crawler = new Crawler($body);
-        $adf = $crawler->filter('adf')->first();
+        $adf = $crawler->filter('adf')->eq(0);
         var_dump($adf);
 
         // Valid XML?
