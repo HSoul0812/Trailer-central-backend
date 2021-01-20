@@ -18,7 +18,7 @@ interface ImportRepositoryInterface extends Repository {
      * Find Import Entry in Lead Import Table?
      * 
      * @param array $params
-     * @return LeadImport
+     * @return LeadImport || null
      */
-    public function find($params) : LeadImport;
+    public function find($params);
 }
