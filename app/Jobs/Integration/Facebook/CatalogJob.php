@@ -7,13 +7,18 @@ use App\Exceptions\Integration\Facebook\FailedCreateTempCatalogCsvException;
 use App\Exceptions\Integration\Facebook\MissingCatalogFeedPathException;
 use App\Jobs\Job;
 use App\Models\Inventory\Inventory;
-use App\Models\Integration\Facebook\Catalog;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class CatalogJob extends Job
 {
     use Dispatchable;
+
+    /**
+     * Specific Data Types
+     */
+    const TC_PRIVACY_POLICY_URL = 'https://trailercentral.com/privacy-policy/';
 
     /**
      * Facebook Vehicle Types
@@ -287,7 +292,13 @@ class CatalogJob extends Job
 
         // Process Integration
         foreach($this->integration->listings as $listing) {
-            $this->insertCsvRow($file, $listing);
+            try {
+                $this->insertCsvRow($file, $listing);
+            } catch(\Exception $e) {
+                Log::error("Exception returned processing listing #" . $listing->vehicle_id .
+                            " on catalog # " . $this->interaction->catalog_id . "; " . 
+                            $e->getMessage() . ": " . $e->getTraceAsString());
+            }
         }
 
         // Store Final CSV
@@ -323,6 +334,11 @@ class CatalogJob extends Job
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
 
+        // Skip if Fields Missing
+        if(empty($clean->title) || empty($clean->description) || empty($clean->model)) {
+            return false;
+        }
+
         // Create Row
         $row = array();
         foreach($this->csvColumns as $k => $column) {
@@ -349,6 +365,9 @@ class CatalogJob extends Job
     private function cleanCsvRow($listing) {
         // Get Inventory URL
         $listing->url = $this->getInventoryUrl($listing->vehicle_id);
+
+        // Format Phone Number
+        $listing->dealer_phone = $this->formatDealerPhone($listing->dealer_phone);
 
         // Append Brand to Manufacturer
         if(isset($listing->brand)) {
@@ -402,12 +421,12 @@ class CatalogJob extends Job
 
         // Append Description
         $listing->description = isset($listing->description) ? trim($listing->description) : '';
-        if($listing->dealer_id == 8757) {
+        if($listing->dealer_id == 8757 && !empty($listing->description)) {
             $listing->description .= 'In some cases, pricing may not include freight, prep, doc/title fees, additional equipment, or sales tax';
         }
 
         // Fix Privacy Policy
-        $listing->dealer_privacy_policy_url = 'https://' . $listing->dealer_privacy_policy_url;
+        $listing->dealer_privacy_policy_url = $this->getPrivacyPolicyUrl($listing->vehicle_id);
 
         // Return Cleaned Up Listing Array
         return $listing;
@@ -416,8 +435,8 @@ class CatalogJob extends Job
     /**
      * Stores CSV on S3 and returns its URL
      *
-     * @param string $filePath full filename path on S3
      * @param File $file temporary file to store results for
+     * @param string $filePath full filename path on S3
      * @return string
      */
     private function storeCsv($file, $filePath) {
@@ -430,6 +449,35 @@ class CatalogJob extends Job
         return Storage::disk('s3')->put($filePath, $csv, 'public');
     }
 
+
+    /**
+     * Fix Formatting Dealer Phone Correctly
+     * 
+     * @param string $phone
+     * @return formatted dealer phone
+     */
+    private function formatDealerPhone($phone) {
+        // Get Dealer Phone
+        $clean = trim(preg_replace('/[^0-9]/', '', $phone));
+
+        // Check Length
+        if(\strlen($clean) === 10) {
+            $clean = '1' . $clean;
+        }
+
+        // Return Clean With + at Start
+        return urlencode('+' . $clean);
+    }
+
+    /**
+     * Get Inventory URL From Inventory ID
+     * 
+     * @param int $inventoryId
+     * @return return privacy policy url
+     */
+    private function getPrivacyPolicyUrl($inventoryId) {
+        return self::TC_PRIVACY_POLICY_URL;
+    }
 
     /**
      * Get Inventory URL From Inventory ID
@@ -454,6 +502,7 @@ class CatalogJob extends Job
         // Return Empty URL
         return '';
     }
+
 
     /**
      * Map Vehicle Type Based on Category
@@ -505,7 +554,7 @@ class CatalogJob extends Job
 
         // Check Mapping
         if(isset($this->fuelMap[$fuel])) {
-            $type = $this->bodyMap[$fuel];
+            $type = $this->fuelMap[$fuel];
         }
 
         // Return Result
