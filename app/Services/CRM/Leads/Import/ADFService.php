@@ -107,8 +107,10 @@ class ADFService implements ADFServiceInterface {
     public function parseAdf(string $body) : ADFLead {
         // Get XML Parsed Data
         $parser = \xml_parser_create();
-        $valid = \xml_parse($parser, $body, true);
+        $valid = \xml_parse_int_struct($parser, $body, $values, $indexes);
         \xml_parser_free($parser);
+        var_dump($values);
+        var_dump($indexes);
 
         // Valid XML?
         if(empty($valid)) {
@@ -118,7 +120,6 @@ class ADFService implements ADFServiceInterface {
         // Get ADF Lead
         return $this->getAdfLead($xml);
     }
-
 
     /**
      * Import ADF as Lead
@@ -132,6 +133,7 @@ class ADFService implements ADFServiceInterface {
         // Return Total
         return 1;
     }
+
 
     /**
      * Get Access Token for ADF
@@ -168,5 +170,17 @@ class ADFService implements ADFServiceInterface {
 
         // Return Access Token for Google
         return $accessToken;
+    }
+
+    /**
+     * Get ADF Lead
+     * 
+     * @param AdfLead $adfLead
+     */
+    private function getAdfLead($adf) {
+        // Get ADF Lead
+        $adfLead = new ADFLead();
+
+        // Set ADF Lead
     }
 }
