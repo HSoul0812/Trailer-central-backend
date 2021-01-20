@@ -138,10 +138,10 @@ class ADFService implements ADFServiceInterface {
     /**
      * Import ADF as Lead
      * 
-     * @param AdfLead $lead
+     * @param ADFLead $lead
      * @return int 1 = imported, 0 = failed
      */
-    public function importLead(AdfLead $lead) : int {
+    public function importLead(ADFLead $lead) : int {
         // Save Lead From ADF Data
 
         // Return Total
