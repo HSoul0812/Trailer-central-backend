@@ -78,24 +78,21 @@ class ImportRepository implements ImportRepositoryInterface
      * Find Import Entry in Lead Import Table?
      * 
      * @param array $params
-     * @return LeadImport
+     * @return LeadImport || null
      */
-    public function find($params) : LeadImport
+    public function find($params)
     {
-        // Set Empty
-        $import = new LeadImport();
-
         // Find Lead Import By ID or Email
         if(isset($params['id'])) {
-            $import = LeadImport::find($params['id']);
+            return LeadImport::find($params['id']);
         }
 
         // Email Set?
         if(isset($params['email']) && empty($import->id)) {
-            $import = LeadImport::where('email', $params['email'])->first();
+            return LeadImport::where('email', $params['email'])->first();
         }
 
         // Return Result
-        return $import;
+        return null;
     }
 }
