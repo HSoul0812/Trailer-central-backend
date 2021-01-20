@@ -13,7 +13,9 @@ return [
         'defaults' => [
             'email' => env('ADF_IMPORT_EMAIL', 'adf@trailercentral.com'),
             'password' => env('ADF_IMPORT_PASSWORD', ''),
-            'folder' => env('ADF_IMPORT_FOLDER', 'INBOX'),
+            'inbox' => env('ADF_IMPORT_INBOX', 'INBOX'),
+            'invalid' => env('ADF_IMPORT_INVALID', 'Invalid'),
+            'processed' => env('ADF_IMPORT_PROCESSED', 'Processed'),
             'driver' => env('ADF_IMPORT_DRIVER', 'smtp'),
             'host' => env('ADF_IMPORT_HOST', 'trailercentral.com'),
             'ssl' => env('ADF_IMPORT_SSL', 'tls'),
@@ -21,7 +23,9 @@ return [
         ],
         'gmail' => [
             'email' => env('ADF_IMPORT_EMAIL', 'adf@trailercentral.com'),
-            'folder' => env('ADF_IMPORT_FOLDER', 'INBOX')
+            'inbox' => env('ADF_IMPORT_INBOX', 'INBOX'),
+            'invalid' => env('ADF_IMPORT_INVALID', 'Invalid'),
+            'processed' => env('ADF_IMPORT_PROCESSED', 'Processed')
         ]
     ]
 ];

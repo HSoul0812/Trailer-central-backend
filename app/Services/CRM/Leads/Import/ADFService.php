@@ -62,7 +62,8 @@ class ADFService implements ADFServiceInterface {
     public function import() : int {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
-        $messages = $this->gmail->messages($accessToken, config('adf.imports.gmail.folder'));
+        $inbox = config('adf.imports.gmail.inbox');
+        $messages = $this->gmail->messages($accessToken, $inbox);
 
         // Checking Each Message
         $total = 0;
@@ -81,9 +82,11 @@ class ADFService implements ADFServiceInterface {
                 // Process Further
                 $result = $this->importLead($email);
                 if(!empty($result->identifier)) {
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }
             } catch(\Exception $e) {
+                $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
                 Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             }
         }

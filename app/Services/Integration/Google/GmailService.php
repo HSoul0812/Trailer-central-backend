@@ -144,7 +144,7 @@ class GmailService implements GmailServiceInterface
         $this->setAccessToken($accessToken);
 
         // Get Labels
-        $labels = $this->labels($accessToken, $folder);
+        $labels = $this->labels($accessToken, [$folder]);
 
         // Imap Inbox ALREADY Exists?
         $q = '';
@@ -206,6 +206,33 @@ class GmailService implements GmailServiceInterface
     }
 
     /**
+     * Move Message Labels
+     * 
+     * @param string $mailId mail ID to modify
+     * @param array $labels labels to add by name | required
+     * @param array $remove labels to remove by name | optional
+     * @return true on success, false on failure
+     */
+    public function move(AccessToken $accessToken, string $mailId, array $labels, array $remove = []): bool {
+        // Create Modify Message Request
+        $newLabels = $this->labels($accessToken, $labels);
+        $modify = new Google_Service_Gmail_ModifyMessageRequest();
+        $modify->setAddLabelIds($this->getLabelIds($newLabels));
+
+        // Remove Labels Exist?
+        if(!empty($remove)) {
+            $removedLabels = $this->labels($accessToken, $remove);
+            $modify->setRemoveLabelIds($this->getLabelIds($removedLabels));
+        }
+
+        // Move Message
+        $result = $this->gmail->users_messages->modify('me', $mailId, $modify);
+
+        // Success?
+        return !empty($result);
+    }
+
+    /**
      * Get All Labels for User
      * 
      * @param AccessToken $accessToken
@@ -215,7 +242,7 @@ class GmailService implements GmailServiceInterface
      * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
      * @return array of labels
      */
-    public function labels(AccessToken $accessToken, string $search = '') {
+    public function labels(AccessToken $accessToken, array $search = []) {
         // Configure Client
         $this->setAccessToken($accessToken);
 
@@ -231,7 +258,7 @@ class GmailService implements GmailServiceInterface
             // Search for Label Exists?
             if(!empty($search)) {
                 // Skip If Label Doesn't Match!
-                if($search !== $label->getName()) {
+                if(in_array($label->getName(), $search)) {
                     continue;
                 }
             }
