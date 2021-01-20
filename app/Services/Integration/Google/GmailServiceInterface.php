@@ -51,5 +51,5 @@ interface GmailServiceInterface {
      * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
      * @return array of labels
      */
-    public function labels(AccessToken $accessToken, string $search = []);
+    public function labels(AccessToken $accessToken, array $search = []);
 }
