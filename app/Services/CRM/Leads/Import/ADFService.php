@@ -267,7 +267,9 @@ class ADFService implements ADFServiceInterface {
 
         // Set Comments
         $cdata = $contact->filter('comments')->text();
-        $comments = str_replace('<![CDATA[', '', str_replace(']]>', '', $cdata));
+        var_dump($cdata);
+        $comments = str_replace(['<![CDATA[', ']]>'], '', $cdata);
+        var_dump($comments);
         $adfLead->setComments($comments);
 
         // Return ADF Lead
@@ -278,8 +280,8 @@ class ADFService implements ADFServiceInterface {
      * Set ADF Contact Details to ADF Lead
      * 
      * @param ADFLead $adfLead
-     * @param int $dealerId
      * @param Crawler $vehicle
+     * @param int $dealerId
      * @return ADFLead
      */
     private function getAdfVehicle(ADFLead $adfLead, Crawler $vehicle, int $dealerId): ADFLead {
