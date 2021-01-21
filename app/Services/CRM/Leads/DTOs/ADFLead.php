@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Leads\DTOs;
 
 use App\Models\CRM\Leads\LeadType;
+use Carbon\Carbon;
 
 /**
  * Class ADFLead
@@ -250,7 +251,7 @@ class ADFLead
      */
     public function getRequestDate(): string
     {
-        return $this->requestDate;
+        return !empty($this->requestDate) ? $this->requestDate : Carbon::now()->toDateTimeString();
     }
 
     /**

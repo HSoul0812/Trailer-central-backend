@@ -14,7 +14,6 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
-use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
@@ -175,12 +174,11 @@ class ADFService implements ADFServiceInterface {
      * Import ADF as Lead
      * 
      * @param ADFLead $adfLead
-     * @return int 1 = imported, 0 = failed
+     * @return Lead
      */
-    public function importLead(ADFLead $adfLead) : int {
+    public function importLead(ADFLead $adfLead) : Lead {
         // Save Lead From ADF Data
-        $date = CarbonImmutable::now()->toDateTimeString();
-        $lead = $this->leads->create([
+        return $this->leads->create([
             'website_id' => $adfLead->getWebsiteId(),
             'dealer_id' => $adfLead->getDealerId(),
             'dealer_location_id' => $adfLead->getLocationId(),
@@ -198,15 +196,12 @@ class ADFService implements ADFServiceInterface {
             'state' => $adfLead->getAddrState(),
             'zip' => $adfLead->getAddrZip(),
             'comments' => $adfLead->getComments(),
-            'contact_email_sent' => $date,
-            'adf_email_sent' => $date,
-            'cdk_email_sent' => $date,
-            'date_submitted' => $date,
+            'contact_email_sent' => $adfLead->getRequestDate(),
+            'adf_email_sent' => $adfLead->getRequestDate(),
+            'cdk_email_sent' => $adfLead->getRequestDate(),
+            'date_submitted' => $adfLead->getRequestDate(),
             'lead_source' => $adfLead->getVendorProvider()
         ]);
-
-        // Return Total
-        return !empty($lead->identifier) ? 1 : 0;
     }
 
 
