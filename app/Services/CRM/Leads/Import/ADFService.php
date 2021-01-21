@@ -128,7 +128,8 @@ class ADFService implements ADFServiceInterface {
      */
     public function validateAdf(string $body) : Crawler {
         // Get XML Parsed Data
-        $crawler = new Crawler($body);
+        $fixed = $this->fixCdata($body);
+        $crawler = new Crawler($fixed);
         $adf = $crawler->filter('adf')->first();
 
         // Valid XML?
@@ -266,11 +267,7 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setAddrZip($contact->filterXPath('//address[@type="home"]/postalcode')->text());
 
         // Set Comments
-        $cdata = $contact->filterXPath('//comments');
-        var_dump($cdata);
-        $comments = str_replace(['<![CDATA[', ']]>'], '', $cdata->html());
-        var_dump($comments);
-        $adfLead->setComments($comments);
+        $adfLead->setComments($contact->filter('comments')->text());
 
         // Return ADF Lead
         return $adfLead;
@@ -345,5 +342,16 @@ class ADFService implements ADFServiceInterface {
 
         // Return ADF Lead
         return $adfLead;
+    }
+
+
+    /**
+     * Strip All CData From XML
+     * 
+     * @param string $xml
+     * @return string
+     */
+    private function fixCdata($xml) {
+        return preg_replace('/<!\[CDATA\[(.*?)\]\]>/g', '$1', $xml);
     }
 }
