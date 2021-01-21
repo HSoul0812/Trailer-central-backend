@@ -5,6 +5,7 @@ namespace App\Services\CRM\Leads\Import;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
 use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
 use App\Repositories\CRM\Leads\ImportRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\System\EmailRepositoryInterface;
@@ -24,6 +25,11 @@ class ADFService implements ADFServiceInterface {
      * @var App\Repositories\CRM\Leads\ImportRepositoryInterface
      */
     protected $imports;
+
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     */
+    protected $leads;
 
     /**     
      * @var App\Repositories\System\EmailRepositoryInterface
@@ -51,12 +57,14 @@ class ADFService implements ADFServiceInterface {
     protected $gmail;
     
     public function __construct(ImportRepositoryInterface $imports,
+                                LeadRepositoryInterface $leads,
                                 EmailRepositoryInterface $emails,
                                 TokenRepositoryInterface $tokens,
                                 InventoryRepositoryInterface $inventory,
                                 GoogleServiceInterface $google,
                                 GmailServiceInterface $gmail) {
         $this->imports = $imports;
+        $this->leads = $leads;
         $this->emails = $emails;
         $this->tokens = $tokens;
         $this->inventory = $inventory;
