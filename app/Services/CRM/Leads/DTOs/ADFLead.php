@@ -270,7 +270,7 @@ class ADFLead
      * 
      * @return string $this->leadType || calculate lead type
      */
-    public function getLeadType(): int
+    public function getLeadType(): string
     {
         // Calculate Lead Type?
         if(empty($this->leadType)) {
