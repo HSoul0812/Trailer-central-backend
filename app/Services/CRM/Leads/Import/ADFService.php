@@ -314,8 +314,8 @@ class ADFService implements ADFServiceInterface {
         $vendorIds = $vendor->filter('id');
         $vendorIdMap = [];
         foreach($vendorIds as $vendorId) {
-            $source = $vendorId->extract('source');
-            $vendorIdMap[$source] = $vendorId->text();
+            $source = $vendorId->getAttribute('source');
+            $vendorIdMap[$source] = $vendorId->textContent;
         }
         $adfLead->setVendorIds($vendorIdMap);
 

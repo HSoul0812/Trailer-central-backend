@@ -623,21 +623,21 @@ class ADFLead
     {
         // Return VIN Filters
         if(!empty($this->getVehicleVin())) {
-            return ['vin' => $this->getVehicleVin()];
+            return ['vin' => [$this->getVehicleVin()]];
         }
 
         // Return Stock Filters
         if(!empty($this->getVehicleStock())) {
-            return ['stock' => $this->getVehicleStock()];
+            return ['stock' => [$this->getVehicleStock()]];
         }
 
         // All Filters Exist?
         if(!empty($this->getVehicleYear()) && !empty($this->getVehicleMake()) && !empty($this->getVehicleModel())) {
             // Return Conditions Array
             return [
-                'year' => $this->getVehicleYear(),
-                'make' => $this->getVehicleMake(),
-                'model' => $this->getVehicleModel()
+                'year' => [$this->getVehicleYear()],
+                'make' => [$this->getVehicleMake()],
+                'model' => [$this->getVehicleModel()]
             ];
         }
 
