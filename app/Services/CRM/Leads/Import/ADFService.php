@@ -330,11 +330,11 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setVendorPhone($vendor->filterXPath('//contact/phone')->text());
 
         // Set Vendor Address Details
-        $adfLead->setAddrStreet($vendor->filterXPath('//address[@type="work"]/street')->text());
-        $adfLead->setAddrCity($vendor->filterXPath('//address[@type="work"]/city')->text());
-        $adfLead->setAddrState($vendor->filterXPath('//address[@type="work"]/regioncode')->text());
-        $adfLead->setAddrZip($vendor->filterXPath('//address[@type="work"]/postalcode')->text());
-        $adfLead->setAddrCountry($vendor->filterXPath('//address[@type="work"]/country')->text());
+        $adfLead->setVendorAddrStreet($vendor->filterXPath('//address[@type="work"]/street')->text());
+        $adfLead->setVendorAddrCity($vendor->filterXPath('//address[@type="work"]/city')->text());
+        $adfLead->setVendorAddrState($vendor->filterXPath('//address[@type="work"]/regioncode')->text());
+        $adfLead->setVendorAddrZip($vendor->filterXPath('//address[@type="work"]/postalcode')->text());
+        $adfLead->setVendorAddrCountry($vendor->filterXPath('//address[@type="work"]/country')->text());
 
         // Return ADF Lead
         return $adfLead;
