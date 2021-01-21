@@ -2,6 +2,8 @@
 
 namespace App\Services\CRM\Leads\DTOs;
 
+use App\Models\CRM\Leads\LeadType;
+
 /**
  * Class ADFLead
  * 
@@ -9,6 +11,11 @@ namespace App\Services\CRM\Leads\DTOs;
  */
 class ADFLead
 {
+    /**
+     * @var string Set Default Source to ADF
+     */
+    const DEFAULT_SOURCE = 'ADF';
+
     /**
      * @var string Dealer ID for ADF Lead
      */
@@ -107,6 +114,16 @@ class ADFLead
      * @var array Vendor ID's Mapped As [source => text]
      */
     private $vendorIds;
+
+    /**
+     * @var array Vendor Provider
+     */
+    private $vendorProvider;
+
+    /**
+     * @var array Vendor Name
+     */
+    private $vendorName;
 
     /**
      * @var array Vendor Contact Name
@@ -221,6 +238,38 @@ class ADFLead
     }
 
 
+    /**
+     * Return Lead Type
+     * 
+     * @return string $this->leadType || calculate lead type
+     */
+    public function getLeadType(): int
+    {
+        // Calculate Lead Type?
+        if(empty($this->leadType)) {
+            if(!empty($this->getVehicleId())) {
+                $this->setLeadType(LeadType::TYPE_INVENTORY);
+            } else {
+                $this->setLeadType(LeadType::TYPE_GENERAL);
+            }
+        }
+
+        // Return Lead Type
+        return $this->leadType;
+    }
+
+    /**
+     * Set Lead Type
+     * 
+     * @param string $leadType
+     * @return void
+     */
+    public function setLeadType(string $leadType): void
+    {
+        $this->leadType = $leadType;
+    }
+
+
 
     /**
      * Return First Name
@@ -285,6 +334,17 @@ class ADFLead
     public function setEmail(string $email): void
     {
         $this->email = $email;
+    }
+
+
+    /**
+     * Return Preferred Contact
+     * 
+     * @return string 'phone' if phone exists, 'email' otherwise
+     */
+    public function getPreferredContact(): string
+    {
+        return !empty($this->getPhone()) ? 'phone' : (!empty($this->getEmail()) ? 'email' : 'phone');
     }
 
 
@@ -554,6 +614,32 @@ class ADFLead
     }
 
 
+    /**
+     * Return Vehicle Filters
+     * 
+     * @return array filters for inventory model
+     */
+    public function getVehicleFilters(): array
+    {
+        // Return VIN Filters
+        if(!empty($this->getVehicleVin())) {
+            return ['vin' => $this->getVehicleVin()];
+        }
+
+        // Return Stock Filters
+        if(!empty($this->getVehicleStock())) {
+            return ['stock' => $this->getVehicleStock()];
+        }
+
+        // Return Conditions Array
+        return [
+            'year' => $this->getVehicleYear(),
+            'make' => $this->getVehicleMake(),
+            'model' => $this->getVehicleModel()
+        ];
+    }
+
+
 
     /**
      * Return Vendor ID's Array
@@ -586,6 +672,50 @@ class ADFLead
     public function addVendorId(string $source, int $vendorId): void
     {
         $this->vendorIds[$source] = $vendorId;
+    }
+
+
+    /**
+     * Return Vendor Provider
+     * 
+     * @return string $this->vendorProvider
+     */
+    public function getVendorProvider(): string
+    {
+        return !empty($this->vendorProvider) ? $this->vendorProvider : self::DEFAULT_SOURCE;
+    }
+
+    /**
+     * Set Vendor Provider
+     * 
+     * @param string $vendorProvider
+     * @return void
+     */
+    public function setVendorProvider(string $vendorProvider): void
+    {
+        $this->vendorProvider = $vendorProvider;
+    }
+
+
+    /**
+     * Return Vendor Name
+     * 
+     * @return string $this->vendorName
+     */
+    public function getVendorName(): string
+    {
+        return $this->vendorName;
+    }
+
+    /**
+     * Set Vendor Name
+     * 
+     * @param string $vendorName
+     * @return void
+     */
+    public function setVendorName(string $vendorName): void
+    {
+        $this->vendorName = $vendorName;
     }
 
 
