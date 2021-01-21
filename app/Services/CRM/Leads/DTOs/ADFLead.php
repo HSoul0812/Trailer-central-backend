@@ -512,20 +512,20 @@ class ADFLead
     /**
      * Return Vehicle ID
      * 
-     * @return string $this->vehicleId
+     * @return int $this->vehicleId
      */
-    public function getVehicleId(): string
+    public function getVehicleId(): int
     {
-        return $this->vehicleId;
+        return $this->vehicleId ?: 0;
     }
 
     /**
      * Set Vehicle ID
      * 
-     * @param string $vehicleId
+     * @param int $vehicleId
      * @return void
      */
-    public function setVehicleId(string $vehicleId): void
+    public function setVehicleId(int $vehicleId): void
     {
         $this->vehicleId = $vehicleId;
     }
