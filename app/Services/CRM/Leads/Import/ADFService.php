@@ -352,6 +352,6 @@ class ADFService implements ADFServiceInterface {
      * @return string
      */
     private function fixCdata($xml) {
-        return preg_replace('/<!\[CDATA\[(.*?)\]\]>/g', '$1', $xml);
+        return preg_replace('/<!\[CDATA\[(.*?)\]\]>/', '$1', $xml);
     }
 }
