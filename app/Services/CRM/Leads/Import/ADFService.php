@@ -267,7 +267,7 @@ class ADFService implements ADFServiceInterface {
 
         // Set Comments
         $cdata = $contact->filter('comments')->text();
-        $comments = preg_replace('/^<!\[CDATA\[(.*?)\]\]>$/', '$1', $cdata);
+        $comments = str_replace('<![CDATA[', '', str_replace(']]>', '', $cdata));
         $adfLead->setComments($comments);
 
         // Return ADF Lead
