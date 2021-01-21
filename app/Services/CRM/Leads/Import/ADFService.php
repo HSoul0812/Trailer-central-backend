@@ -156,6 +156,7 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setRequestDate($adf->filter('requestdate')->text());
         $adfLead->setDealerId($import->dealer_id);
         $adfLead->setLocationId($import->dealer_location_id);
+        $adfLead->setWebsiteId($import->website->website_id);
 
         // Set Contact Details
         $this->getAdfContact($adfLead, $adf->filter('customer'));

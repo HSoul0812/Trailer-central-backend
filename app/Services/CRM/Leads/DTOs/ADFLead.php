@@ -27,6 +27,11 @@ class ADFLead
     private $locationId;
 
     /**
+     * @var string Website ID for ADF Lead
+     */
+    private $websiteId;
+
+    /**
      * @var string Date Lead Was Requested
      */
     private $requestDate;
@@ -213,6 +218,28 @@ class ADFLead
     public function setLocationId(int $locationId): void
     {
         $this->locationId = $locationId;
+    }
+
+
+    /**
+     * Return Website ID
+     * 
+     * @return int $this->websiteId
+     */
+    public function getWebsiteId(): int
+    {
+        return $this->websiteId;
+    }
+
+    /**
+     * Set Website ID
+     * 
+     * @param int $websiteId
+     * @return void
+     */
+    public function setWebsiteId(int $websiteId): void
+    {
+        $this->websiteId = $websiteId;
     }
 
 
