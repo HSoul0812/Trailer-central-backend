@@ -86,6 +86,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('text:deliver-blast')
                 ->withoutOverlapping()
                 ->runInBackground();
+        
+        $schedule->command('leads:import:adf')
+                ->withoutOverlapping()
+                ->runInBackground();
 
 
         /**
