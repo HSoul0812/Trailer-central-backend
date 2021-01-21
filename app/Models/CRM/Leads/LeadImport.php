@@ -63,7 +63,7 @@ class LeadImport extends Model
      */
     public function website()
     {
-        return $this->belongsTo(Website::class, 'dealer_id', 'dealer_id');
+        return $this->belongsTo(Website::class, 'id', 'dealer_id');
     }
 
     public static function getTableName() {
