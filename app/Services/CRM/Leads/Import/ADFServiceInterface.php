@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Leads\Import;
 
+use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadImport;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use Symfony\Component\DomCrawler\Crawler;
@@ -40,7 +41,7 @@ interface ADFServiceInterface {
      * Import ADF as Lead
      * 
      * @param ADFLead $lead
-     * @return int 1 = imported, 0 = failed
+     * @return Lead
      */
-    public function importLead(ADFLead $lead) : int;
+    public function importLead(ADFLead $lead) : Lead;
 }
