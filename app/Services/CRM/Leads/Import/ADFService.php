@@ -266,9 +266,9 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setAddrZip($contact->filterXPath('//address[@type="home"]/postalcode')->text());
 
         // Set Comments
-        $cdata = $contact->filterXPath('//comments')->html();
+        $cdata = $contact->filterXPath('//comments');
         var_dump($cdata);
-        $comments = str_replace(['<![CDATA[', ']]>'], '', $cdata);
+        $comments = str_replace(['<![CDATA[', ']]>'], '', $cdata->html());
         var_dump($comments);
         $adfLead->setComments($comments);
 
