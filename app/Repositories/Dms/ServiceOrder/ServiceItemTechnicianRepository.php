@@ -86,7 +86,7 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
             JOIN dms_service_technician AS s_technician ON technician.id = s_technician.dms_settings_technician_id
             JOIN dms_service_item AS s_item ON s_technician.service_item_id = s_item.id
             JOIN dms_repair_order AS r_order ON s_item.repair_order_id = r_order.id
-            JOIN (
+            LEFT JOIN (
                 /* unit sales */
                 SELECT
                     us.id sale_id, i.id invoice_id, i.doc_num as doc_num, i.total invoice_total,
