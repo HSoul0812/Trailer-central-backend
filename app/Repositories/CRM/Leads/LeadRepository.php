@@ -77,11 +77,15 @@ class LeadRepository implements LeadRepositoryInterface {
         // Get First Lead Type
         if(isset($params['lead_types']) && is_array($params['lead_types'])) {
             $params['lead_type'] = reset($params['lead_types']);
+        } elseif(isset($params['lead_type'])) {
+            $params['lead_types'] = [$params['lead_type']];
         }
 
         // Fix Units of Interest
         if(isset($params['inventory']) && is_array($params['inventory'])) {
             $params['inventory_id'] = reset($params['inventory']);
+        } elseif(isset($params['inventory_id'])) {
+            $params['inventory'] = [$params['inventory_id']];
         }
 
         // Fix Preferred Contact

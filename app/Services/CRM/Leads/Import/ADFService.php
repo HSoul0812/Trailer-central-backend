@@ -184,6 +184,8 @@ class ADFService implements ADFServiceInterface {
             'website_id' => $adfLead->getWebsiteId(),
             'dealer_id' => $adfLead->getDealerId(),
             'dealer_location_id' => $adfLead->getLocationId(),
+            'inventory_id' => $adfLead->getVehicleId(),
+            'lead_type' => $adfLead->getLeadType(),
             'referral' => 'adf',
             'title' => 'ADF Import',
             'first_name' => $adfLead->getFirstName(),
@@ -200,8 +202,6 @@ class ADFService implements ADFServiceInterface {
             'adf_email_sent' => $date,
             'cdk_email_sent' => $date,
             'date_submitted' => $date,
-            'lead_types' => $adfLead->getLeadType(),
-            'inventory' => $adfLead->getVehicleId(),
             'lead_source' => $adfLead->getVendorProvider()
         ]);
 
