@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 class ImportRepository implements ImportRepositoryInterface 
 {
-    public function create($params) {
+    public function create($params): LeadImport {
         return LeadImport::create($params);
     }
 
@@ -29,7 +29,7 @@ class ImportRepository implements ImportRepositoryInterface
         return LeadImport::where('dealer_id', $params['dealer_id'])->delete();
     }
 
-    public function get($params) {
+    public function get($params): LeadImport {
         return LeadImport::findOrFail($params['id']);
     }
 
@@ -55,7 +55,7 @@ class ImportRepository implements ImportRepositoryInterface
         return $query->paginate($params['per_page'])->appends($params);
     }
 
-    public function update($params) {
+    public function update($params): LeadImport {
         $leadImport = LeadImport::findOrFail($params['id']);
 
         DB::transaction(function() use (&$leadImport, $params) {
@@ -89,21 +89,16 @@ class ImportRepository implements ImportRepositoryInterface
      * Find Import Entry in Lead Import Table?
      * 
      * @param array $params
-     * @return LeadImport || null
+     * @return LeadImport
      */
-    public function find($params)
+    public function find($params): LeadImport
     {
-        // Find Lead Import By ID or Email
+        // Find LeadImport By ID
         if(isset($params['id'])) {
             return LeadImport::find($params['id']);
         }
 
-        // Email Set?
-        if(isset($params['email']) && empty($import->id)) {
-            return LeadImport::where('email', $params['email'])->first();
-        }
-
-        // Return Result
-        return null;
+        // Return LeadImport By Email
+        return LeadImport::where('email', $params['email'])->first();
     }
 }

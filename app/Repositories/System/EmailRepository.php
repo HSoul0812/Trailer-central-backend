@@ -4,7 +4,6 @@ namespace App\Repositories\System;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\System\Email;
-use App\Exceptions\NotImplementedException;
 use App\Repositories\Traits\SortTrait;
 
 class EmailRepository implements EmailRepositoryInterface {
@@ -46,9 +45,9 @@ class EmailRepository implements EmailRepositoryInterface {
      * Create System Email
      * 
      * @param array $params
-     * @return System Email
+     * @return App\Models\System\Email
      */
-    public function create($params) {
+    public function create($params): Email {
         // Create System Email
         return Email::create($params);
     }
@@ -57,7 +56,7 @@ class EmailRepository implements EmailRepositoryInterface {
      * Delete System Email
      * 
      * @param int $id
-     * @throws NotImplementedException
+     * @return bool
      */
     public function delete($id) {
         // Delete System Email
@@ -68,9 +67,9 @@ class EmailRepository implements EmailRepositoryInterface {
      * Get System Email
      * 
      * @param array $params
-     * @return System Email
+     * @return App\Models\System\Email
      */
-    public function get($params) {
+    public function get($params): Email {
         // Find System Email By ID
         return Email::findOrFail($params['id']);
     }
@@ -79,7 +78,7 @@ class EmailRepository implements EmailRepositoryInterface {
      * Get All System Emails That Match Params
      * 
      * @param array $params
-     * @return Collection of System Emails
+     * @return Collection<App\Models\System\Email>
      */
     public function getAll($params) {
         $query = Email::where('dealer_id', '=', $params['dealer_id']);
@@ -107,9 +106,9 @@ class EmailRepository implements EmailRepositoryInterface {
      * Update System Email
      * 
      * @param array $params
-     * @return System Email
+     * @return App\Models\System\Email
      */
-    public function update($params) {
+    public function update($params): Email {
         $email = Email::findOrFail($params['id']);
 
         DB::transaction(function() use (&$email, $params) {
@@ -124,9 +123,9 @@ class EmailRepository implements EmailRepositoryInterface {
      * Find System Email
      * 
      * @param array $params
-     * @return Collection of System Emails
+     * @return App\Models\System\Email
      */
-    public function find($params) {
+    public function find($params): Email {
         $query = Email::where('id', '>', 0);
 
         if (isset($params['id'])) {
@@ -136,9 +135,5 @@ class EmailRepository implements EmailRepositoryInterface {
         }
 
         return $query->first();
-    }
-
-    protected function getSortOrders() {
-        return $this->sortOrders;
     }
 }
