@@ -211,8 +211,7 @@ class ADFTest extends TestCase
                      ->with(Mockery::on(function($accessToken, $mailId, $new, $remove)
                                         use($systemEmail, $k, $inbox, $processed, $invalid) {
                         // System Email Matches Relation ID, Mail ID Matches Current Item, Remove is Inbox
-                        if($systemEmail->id == $accessToken->relation_id &&
-                           $mailId === (string) $k && $remove[0] === $inbox) {
+                        if($mailId === (string) $k && $remove[0] === $inbox) {
                             // Vary New Folder
                             if($k > 7 && $new[0] === $invalid || $k < 8 && $new[0] === $processed) {
                                 return true;
@@ -221,11 +220,7 @@ class ADFTest extends TestCase
                         return false;
                      }))
                      ->once()
-                     ->andReturn([
-                        'is_valid' => true,
-                        'is_expired' => false,
-                        'new_token' => []
-                     ]);
+                     ->andReturn(true);
             }
         });
 
