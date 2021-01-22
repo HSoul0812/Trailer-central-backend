@@ -139,6 +139,7 @@ class ADFService implements ADFServiceInterface {
         }
         } catch(\Exception $e) {
             var_dump($body);
+            die;
         }
 
         // Return True
