@@ -57,7 +57,7 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'description' => !empty($showroom->description) ? $showroom->description : $faker->text,
         'status' => 1,
         'category' => !empty($showroom->type) ? $showroom->type : $category->legacy_category,
-        'vin' => $attributes['vin'] ?? Str::random(18),
+        'vin' => $attributes['vin'] ?? Str::random(17),
         'msrp' => $msrp,
         'price' => $price,
         'year' => $faker->year,

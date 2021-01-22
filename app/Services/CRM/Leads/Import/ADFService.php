@@ -289,7 +289,6 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setVehicleModel($vehicle->filter('model')->text());
         $adfLead->setVehicleStock($vehicle->filter('stock')->text());
         $adfLead->setVehicleVin($vehicle->filter('vin')->text());
-        var_dump($adfLead->getVehicleFilters());
 
         // Find Inventory Items From DB That Match
         if(!empty($adfLead->getVehicleFilters())) {
