@@ -811,6 +811,7 @@ class ProcessCampaignTest extends TestCase
         for($n = 0; $n < 10; $n++) {
             // Get Random Date Since "Send After Days"
             $params = [
+                'dealer_id' => self::getTestDealerId(),
                 'date_submitted' => $this->faker->dateTimeBetween('-' . ($campaign->send_after_days + 10) . ' days', '-' . $campaign->send_after_days . ' days')
             ];
 
@@ -863,6 +864,7 @@ class ProcessCampaignTest extends TestCase
             // Add Done Status
             if(isset($filters['action']) && $filters['action'] === 'purchased') {
                 factory(LeadStatus::class)->create([
+                    'dealer_id' => self::getTestDealerId(),
                     'tc_lead_identifier' => $lead->identifier,
                     'status' => Lead::STATUS_WON_CLOSED
                 ]);
@@ -873,7 +875,9 @@ class ProcessCampaignTest extends TestCase
         $leads = array();
         for($n = 0; $n < 5; $n++) {
             // Initialize Empty Params
-            $params = [];
+            $params = [
+                'dealer_id' => self::getTestDealerId()
+            ];
 
             // Insert With Manufacturer or Category
             if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
@@ -932,7 +936,9 @@ class ProcessCampaignTest extends TestCase
         // Create 5 Leads In Last X+10 Days to X+25 Days
         for($n = 0; $n < 5; $n++) {
             // Initialize Empty Params
-            $params = [];
+            $params = [
+                'dealer_id' => self::getTestDealerId()
+            ];
 
             // Insert With Manufacturer or Category
             if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {

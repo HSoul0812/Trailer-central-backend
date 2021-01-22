@@ -57,7 +57,9 @@ class ScrapeRepliesTest extends TestCase
         })->first();
 
         // Create Lead
-        $lead = factory(Lead::class, 1)->create()->first();
+        $lead = factory(Lead::class, 1)->create([
+            'dealer_id' => $dealer->id
+        ])->first();
 
         // Get Folders
         $folders = EmailFolder::getDefaultGmailFolders();
@@ -215,7 +217,9 @@ class ScrapeRepliesTest extends TestCase
         $salesPerson = factory(SalesPerson::class, 1)->create()->first();
 
         // Create Lead
-        $lead = factory(Lead::class, 1)->create()->first();
+        $lead = factory(Lead::class, 1)->create([
+            'dealer_id' => $dealer->id
+        ])->first();
 
         // Get Folders
         $folders = EmailFolder::getDefaultFolders();
@@ -380,7 +384,9 @@ class ScrapeRepliesTest extends TestCase
         })->first();
 
         // Create Lead
-        $lead = factory(Lead::class, 1)->create()->first();
+        $lead = factory(Lead::class, 1)->create([
+            'dealer_id' => $dealer->id
+        ])->first();
 
         // Get Folders
         $folders = EmailFolder::getDefaultGmailFolders();
@@ -544,7 +550,9 @@ class ScrapeRepliesTest extends TestCase
         $salesPerson = factory(SalesPerson::class, 1)->create()->first();
 
         // Create Lead
-        $lead = factory(Lead::class, 1)->create()->first();
+        $lead = factory(Lead::class, 1)->create([
+            'dealer_id' => $dealer->id
+        ])->first();
 
         // Get Folders
         $folders = EmailFolder::getDefaultFolders();

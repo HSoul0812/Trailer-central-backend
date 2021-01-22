@@ -248,7 +248,7 @@ class ParsedEmail
      */
     public function getToName(): string
     {
-        return $this->toName;
+        return $this->toName ?? '';
     }
 
     /**
@@ -329,7 +329,7 @@ class ParsedEmail
      */
     public function getFromName(): string
     {
-        return $this->fromName;
+        return $this->fromName ?? '';
     }
 
     /**

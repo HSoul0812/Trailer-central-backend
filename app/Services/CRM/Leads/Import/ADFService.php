@@ -210,6 +210,7 @@ class ADFService implements ADFServiceInterface {
     /**
      * Get Access Token for ADF
      * 
+     * @throws MissingAdfEmailAccessTokenException
      * @return AccessToken
      */
     private function getAccessToken() : AccessToken {

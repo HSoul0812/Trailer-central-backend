@@ -80,6 +80,7 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 10)->create([
+            'dealer_id' => $dealer->id,
             'lead_type' => 'general'
         ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
@@ -185,6 +186,7 @@ class AutoAssignTest extends TestCase
                               ->where('dealer_location_id', $lastLocationId)->first();
         if(empty($inventory) || empty($inventory->inventory_id)) {
             $inventory = factory(Inventory::class, 1)->create([
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $lastLocationId
             ]);
         }
@@ -196,6 +198,7 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads With Location
         factory(Lead::class, 5)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'inventory_id' => $inventoryId,
             'lead_type' => 'inventory'
@@ -203,6 +206,7 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads With No Location
         factory(Lead::class, 5)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => 0,
             'inventory_id' => $inventoryId,
             'lead_type' => 'inventory'
@@ -210,6 +214,7 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads With No Location or Inventory
         factory(Lead::class, 5)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => 0,
             'inventory_id' => 0,
             'lead_type' => 'inventory'
@@ -323,18 +328,21 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Default Leads With Location
         factory(Lead::class, 5)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => 'general'
         ]);
 
         // Build Random Factory Inventory Leads With Location
         factory(Lead::class, 5)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => 'inventory'
         ]);
 
         // Build Random Factory Trade Leads With Location
         factory(Lead::class, 5)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => 'trade'
         ]);
@@ -485,18 +493,22 @@ class AutoAssignTest extends TestCase
         // Build Random Factory Default Leads For Each Location
         foreach(TestCase::getTestDealerLocationIds() as $locationId) {
             factory(Lead::class, 2)->create([
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => 'general'
             ]);
             factory(Lead::class, 2)->create([
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => 'inventory'
             ]);
             factory(Lead::class, 2)->create([
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => 'trade'
             ]);
             factory(Lead::class, 2)->create([
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => 'financing'
             ]);
@@ -597,6 +609,7 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 1)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
@@ -620,6 +633,7 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 5)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
@@ -644,6 +658,7 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 3)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
@@ -735,6 +750,7 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 5)->create([
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => 'inventory'
         ]);

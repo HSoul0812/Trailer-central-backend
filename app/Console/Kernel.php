@@ -56,7 +56,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('crm:dms:update-po-num-ref')
                 ->daily()
                 ->runInBackground();
-        
+
+        /**
+         * Auto Assign Leads
+         */
         $schedule->command('leads:assign:auto 0 2999')
                 ->withoutOverlapping()
                 ->runInBackground();
@@ -79,15 +82,19 @@ class Kernel extends ConsoleKernel
         
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
         
+        $schedule->command('leads:import:adf')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+
+        /**
+         * Campaigns/Blasts
+         */
         $schedule->command('text:process-campaign')
                 ->withoutOverlapping()
                 ->runInBackground();
         
         $schedule->command('text:deliver-blast')
-                ->withoutOverlapping()
-                ->runInBackground();
-        
-        $schedule->command('leads:import:adf')
                 ->withoutOverlapping()
                 ->runInBackground();
 

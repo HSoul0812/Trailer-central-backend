@@ -6,9 +6,23 @@ use Tests\TestCase;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Inventory\Inventory;
+use App\Models\Website\Website;
 use Faker\Generator as Faker;
 
 $factory->define(Lead::class, function (Faker $faker) {
+    // Get Dealer ID
+    $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
+
+    // Get Dealer Location ID
+    $dealer_location_id = $attributes['dealer_location_id'] ?? factory(DealerLocation::class)->create([
+        'dealer_id' => $dealer_id
+    ])->getKey();
+
+    // Get Website ID
+    $website_id = $attributes['website_id'] ?? factory(Website::class)->create([
+        'dealer_id' => $dealer_id
+    ])->getKey();
+
     // Get Titles
     $leadTypes = ['trade', 'financing', 'build'];
     $formTitles = [
@@ -26,9 +40,9 @@ $factory->define(Lead::class, function (Faker $faker) {
 
     // Return Overrides
     return [
-        'website_id' => TestCase::getTestWebsiteRandom(),
-        'dealer_id' => TestCase::getTestDealerId(),
-        'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
+        'website_id' => $website_id,
+        'dealer_id' => $dealer_id,
+        'dealer_location_id' => $dealer_location_id,
         'inventory_id' => $inventory->inventory_id,
         'lead_type' => $leadType,
         'title' => $formTitles[$leadType],
