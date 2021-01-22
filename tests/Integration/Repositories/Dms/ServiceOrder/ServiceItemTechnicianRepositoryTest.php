@@ -389,17 +389,9 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
      */
     public function testServiceReportWithDates(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
-        $unitSaleId11 = factory(UnitSale::class)->create([
-            'created_at' => $serviceTechnician11['created_at']
-        ])->id;
-
-        $unitSaleId12 = factory(UnitSale::class)->create([
-            'created_at' => $serviceTechnician12['created_at']
-        ])->id;
-
-        $unitSaleId21 = factory(UnitSale::class)->create([
-            'created_at' => $serviceTechnician21['created_at']
-        ])->id;
+        $unitSaleId11 = factory(UnitSale::class)->create()->id;
+        $unitSaleId12 = factory(UnitSale::class)->create()->id;
+        $unitSaleId21 = factory(UnitSale::class)->create()->id;
 
         $technician1 = factory(Technician::class)->create([]);
         $technician2 = factory(Technician::class)->create([]);
@@ -581,7 +573,8 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
     {
         $serviceOrder = factory(ServiceOrder::class)->create([
             'unit_sale_id' => $unitSaleId,
-            'type' => $serviceTechnician['repair_order_type']
+            'type' => $serviceTechnician['repair_order_type'],
+            'created_at' => $serviceTechnician['created_at']
         ]);
 
         $serviceItem = factory(ServiceItem::class)->create([
