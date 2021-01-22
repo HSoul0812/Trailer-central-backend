@@ -129,8 +129,6 @@ class ADFService implements ADFServiceInterface {
     public function validateAdf(string $body) : Crawler {
         // Get XML Parsed Data
         $fixed = $this->fixCdata($body);
-        var_dump($body);
-        die;
         $crawler = new Crawler($fixed);
         $adf = $crawler->filter('adf')->first();
 
