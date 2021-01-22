@@ -84,20 +84,20 @@ class ADFTest extends TestCase
         $noloc = [];
         foreach($vehicles as $vehicle) {
             // Create Leads for Vehicle With Location
-            $leads = array_merge($leads, factory(Lead::class, 1)->make([
+            $leads[] = factory(Lead::class, 1)->make([
                 'website_id' => $websiteId,
                 'dealer_id' => $dealer->dealer_id,
                 'dealer_location_id' => $location->dealer_location_id,
                 'inventory_id' => $vehicle->inventory_id
-            ]));
+            ]);
 
             // Create Leads for Vehicle With No Location
-            $noloc = array_merge($noloc, factory(Lead::class, 1)->make([
+            $noloc[] = factory(Lead::class, 1)->make([
                 'website_id' => $websiteId,
                 'dealer_id' => $dealer->dealer_id,
                 'dealer_location_id' => 0,
                 'inventory_id' => $vehicle->inventory_id
-            ]));
+            ]);
         }
 
         // Create Leads With No Inventory
