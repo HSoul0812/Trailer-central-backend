@@ -192,7 +192,7 @@ class ADFTest extends TestCase
         });
 
         // Mock Gmail Service
-        $this->mock(GmailServiceInterface::class, function ($mock) use($messages, $parsed, $systemEmail, $inbox, $processed, $invalid) {
+        $this->mock(GmailServiceInterface::class, function ($mock) use($messages, $parsed, $noimport) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->once()
@@ -209,7 +209,7 @@ class ADFTest extends TestCase
 
             // Should Receive Move For Every Message
             $mock->shouldReceive('move')
-                 ->times(count($messages))
+                 ->times(count($messages) - count($noimport))
                  ->andReturn(true);
         });
 
