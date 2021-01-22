@@ -291,20 +291,17 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setVehicleVin($vehicle->filter('vin')->text());
 
         // Find Inventory Items From DB That Match
-        var_dump($vehicle);
-        var_dump($adfLead->getVehicleFilters());
         if(!empty($adfLead->getVehicleFilters())) {
             $inventory = $this->inventory->getAll([
                 'dealer_id' => $dealerId,
                 InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => $adfLead->getVehicleFilters()
             ]);
-            var_dump($inventory);
-            var_dump($adfLead->getVehicleFilters());
 
             // Inventory Exists?
             if(!empty($inventory) && $inventory->count() > 0) {
                 $adfLead->setVehicleId($inventory->first()->inventory_id);
             }
+            var_dump($adfLead->getVehicleId());
         }
         die;
 
