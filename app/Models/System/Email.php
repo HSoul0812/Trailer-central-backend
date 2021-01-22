@@ -3,6 +3,7 @@
 namespace App\Models\System;
 
 use App\Models\Integration\Auth\AccessToken;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Email extends Model
 {
+    use TableAware;
+
     // Define Table Name Constant
     const TABLE_NAME = 'system_emails';
 
@@ -43,9 +46,5 @@ class Email extends Model
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('google')
                     ->whereRelationType('system_emails');
-    }
-
-    public static function getTableName() {
-        return self::TABLE_NAME;
     }
 }

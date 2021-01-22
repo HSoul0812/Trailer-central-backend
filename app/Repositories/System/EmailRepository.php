@@ -49,16 +49,6 @@ class EmailRepository implements EmailRepositoryInterface {
      * @return System Email
      */
     public function create($params) {
-        // Active Not Set?
-        if(!isset($params['is_active'])) {
-            $params['is_active'] = 1;
-        }
-
-        // Filters Cannot be null
-        if(empty($params['filters'])) {
-            $params['filters'] = '';
-        }
-
         // Create System Email
         return Email::create($params);
     }
