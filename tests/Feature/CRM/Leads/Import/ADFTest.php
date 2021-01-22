@@ -86,16 +86,16 @@ class ADFTest extends TestCase
             // Create Lead for Inventory
             if(count($leads) > 3) {
                 $noloc[] = factory(Lead::class, 1)->make([
+                    'website_id' => $websiteId,
                     'dealer_id' => $dealer->dealer_id,
                     'dealer_location_id' => 0,
-                    'website_id' => $websiteId,
                     'inventory_id' => $vehicle->inventory_id
                 ]);
             } else {
                 $leads[] = factory(Lead::class, 1)->make([
+                    'website_id' => $websiteId,
                     'dealer_id' => $dealer->dealer_id,
                     'dealer_location_id' => $location->dealer_location_id,
-                    'website_id' => $websiteId,
                     'inventory_id' => $vehicle->inventory_id
                 ]);
             }
@@ -103,33 +103,33 @@ class ADFTest extends TestCase
 
         // Create Leads With No Inventory
         $noinv = factory(Lead::class, 3)->make([
+            'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
-            'website_id' => $websiteId,
             'inventory_id' => 0
         ]);
 
         // Create Leads To Not Be Imported By Email
         $noimport = factory(Lead::class, 2)->make([
+            'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
-            'website_id' => $websiteId,
             'inventory_id' => 0
         ]);
 
         // Create Leads To Not Be Imported By Invalid ADF
         $noadf = factory(Lead::class, 2)->make([
+            'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
-            'website_id' => $websiteId,
             'inventory_id' => 0
         ]);
 
         // Create Leads To Not Be Imported By Invalid XML
         $noxml = factory(Lead::class, 2)->make([
+            'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
-            'website_id' => $websiteId,
             'inventory_id' => 0
         ]);
 

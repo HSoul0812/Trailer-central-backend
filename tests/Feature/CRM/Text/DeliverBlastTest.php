@@ -800,6 +800,10 @@ class DeliverBlastTest extends TestCase
         // Get Existing Unassigned Leads for Dealer ID
         $blast = Blast::find($blastId);
 
+        // Get Website ID
+        $dealer = User::findOrFail(self::getTestDealerId());
+        $websiteId = $dealer->website->id;
+
         // Loop Leads
         if(count($blast->leads) > 0) {
             foreach($blast->leads as $lead) {
@@ -811,7 +815,8 @@ class DeliverBlastTest extends TestCase
         for($n = 0; $n < 10; $n++) {
             // Get Random Date Since "Send After Days"
             $params = [
-                'dealer_id' => self::getTestDealerId(),
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
                 'date_submitted' => $this->faker->dateTimeBetween('-' . $blast->send_after_days . ' days')
             ];
 
@@ -876,7 +881,8 @@ class DeliverBlastTest extends TestCase
         for($n = 0; $n < 5; $n++) {
             // Initialize Empty Params
             $params = [
-                'dealer_id' => self::getTestDealerId()
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
             ];
 
             // Insert With Manufacturer or Category
