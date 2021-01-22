@@ -72,7 +72,7 @@ class ADFTest extends TestCase
         $vehicles = [];
         $inventory = factory(Inventory::class, 7)->create([
             'dealer_id' => $dealer->dealer_id,
-            'dealer_location_id' => 0
+            'dealer_location_id' => $location->dealer_location_id
         ]);
         foreach($inventory as $item) {
             $vehicles[$item->identifier] = $item;
