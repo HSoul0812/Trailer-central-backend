@@ -71,38 +71,37 @@ class ADFTest extends TestCase
 
         // Create Vehicles
         $vehicles = [];
-        $inventory = factory(Inventory::class, 7)->create([
+        $inventory = factory(Inventory::class, 2)->create([
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => $location->dealer_location_id
         ]);
         foreach($inventory as $item) {
-            $vehicles[$item->identifier] = $item;
+            $vehicles[$item->inventory_id] = $item;
         }
 
         // Create Leads
         $leads = [];
         $noloc = [];
         foreach($vehicles as $vehicle) {
-            // Create Lead for Inventory
-            if(count($leads) > 3) {
-                $noloc[] = factory(Lead::class, 1)->make([
-                    'website_id' => $websiteId,
-                    'dealer_id' => $dealer->dealer_id,
-                    'dealer_location_id' => 0,
-                    'inventory_id' => $vehicle->inventory_id
-                ]);
-            } else {
-                $leads[] = factory(Lead::class, 1)->make([
-                    'website_id' => $websiteId,
-                    'dealer_id' => $dealer->dealer_id,
-                    'dealer_location_id' => $location->dealer_location_id,
-                    'inventory_id' => $vehicle->inventory_id
-                ]);
-            }
+            // Create Leads for Vehicle With Location
+            $leads = array_merge($leads, factory(Lead::class, 1)->make([
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->dealer_id,
+                'dealer_location_id' => $location->dealer_location_id,
+                'inventory_id' => $vehicle->inventory_id
+            ]));
+
+            // Create Leads for Vehicle With No Location
+            $noloc = array_merge($noloc, factory(Lead::class, 1)->make([
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->dealer_id,
+                'dealer_location_id' => 0,
+                'inventory_id' => $vehicle->inventory_id
+            ]));
         }
 
         // Create Leads With No Inventory
-        $noinv = factory(Lead::class, 3)->make([
+        $noinv = factory(Lead::class, 2)->make([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
@@ -215,7 +214,7 @@ class ADFTest extends TestCase
                         if($systemEmail->id == $accessToken->relation_id &&
                            $mailId === $k && $remove[0] === $inbox) {
                             // Vary New Folder
-                            if($k > 9 && $add[0] === $invalid || $k < 10 && $add[0] === $processed) {
+                            if($k > 7 && $add[0] === $invalid || $k < 8 && $add[0] === $processed) {
                                 return true;
                             }
                         }
