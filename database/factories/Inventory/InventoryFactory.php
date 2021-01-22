@@ -71,8 +71,6 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
     if (isset($attributes['inventory_id'])) {
         $overrides['inventory_id'] = $attributes['inventory_id'];
     }
-    var_dump($overrides);
-    die;
 
     // Return Overrides
     return $overrides;
