@@ -39,7 +39,8 @@ class ServiceItemTechnicianReportTransformer extends TransformerAbstract
                     'inventory_stock' => $row['inventory_stock'],
                     'inventory_make' => $row['inventory_make'],
                     'inventory_notes' => $row['inventory_notes'],
-                    'paid_retail' => $row['paid_retail']
+                    'paid_retail' => $row['paid_retail'],
+                    'ro_created_at' => $row['ro_created_at'],
                 ];
             }
         }
