@@ -138,6 +138,8 @@ class ADFTest extends TestCase
         $id = 0;
         foreach($leads as $lead) {
             $body = $this->getAdfXml($lead, $dealer, $location, $vehicles[$lead->inventory_id]);
+            var_dump($body);
+            die;
             $parsed[] = $this->getParsedEmail($id, $location->email, $body);
             $messages[] = $id;
             $id++;
@@ -321,7 +323,7 @@ class ADFTest extends TestCase
   <requestdate>' . $lead->date_submitted . '</requestdate>
   <vehicle>
    <year>' . ($inventory->year ?? '') . '</year>
-   <make>' . ($inventory->make ?? '') . '</make>
+   <make>' . ($inventory->manufacturer ?? '') . '</make>
    <model>' . ($inventory->model ?? '') . '</model>
    <stock>' . ($inventory->stock ?? '') . '</stock>
    <vin>' . ($inventory->vin ?? '') . '</vin>
