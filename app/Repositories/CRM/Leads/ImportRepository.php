@@ -89,9 +89,9 @@ class ImportRepository implements ImportRepositoryInterface
      * Find Import Entry in Lead Import Table?
      * 
      * @param array $params
-     * @return LeadImport
+     * @return LeadImport || null
      */
-    public function find($params): LeadImport
+    public function find($params)
     {
         // Find LeadImport By ID
         if(isset($params['id'])) {
