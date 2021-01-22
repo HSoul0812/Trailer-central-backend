@@ -47,6 +47,7 @@ class ADFTest extends TestCase
     /**
      * Test Importing ADF Emails
      *
+     * @covers App\Console\Commands\CRM\Leads\Import\ADF
      * @return void
      */
     public function testADFImport()
@@ -64,11 +65,6 @@ class ADFTest extends TestCase
         // Add Lead Imports
         $this->refreshLeadImports($dealer, $location);
 
-        // Define Folders
-        $inbox = config('adf.imports.gmail.inbox');
-        $processed = config('adf.imports.gmail.processed');
-        $invalid = config('adf.imports.gmail.invalid');
-
         // Create Vehicles
         $vehicles = [];
         $inventory = factory(Inventory::class, 2)->create([
@@ -80,11 +76,11 @@ class ADFTest extends TestCase
         }
 
         // Create Leads
-        $leads = [];
-        $noloc = [];
+        $leadsVehicleLocation = [];
+        $leadsVehicleNoLocation = [];
         foreach($vehicles as $vehicle) {
             // Create Leads for Vehicle With Location
-            $leads[] = factory(Lead::class, 1)->make([
+            $leadsVehicleLocation[] = factory(Lead::class, 1)->make([
                 'website_id' => $websiteId,
                 'dealer_id' => $dealer->dealer_id,
                 'dealer_location_id' => $location->dealer_location_id,
@@ -92,7 +88,7 @@ class ADFTest extends TestCase
             ])->first();
 
             // Create Leads for Vehicle With No Location
-            $noloc[] = factory(Lead::class, 1)->make([
+            $leadsVehicleNoLocation[] = factory(Lead::class, 1)->make([
                 'website_id' => $websiteId,
                 'dealer_id' => $dealer->dealer_id,
                 'dealer_location_id' => 0,
@@ -101,15 +97,15 @@ class ADFTest extends TestCase
         }
 
         // Create Leads With No Inventory
-        $noinv = factory(Lead::class, 2)->make([
+        $leadsNoVehicle = factory(Lead::class, 2)->make([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
             'inventory_id' => 0
         ]);
 
-        // Create Leads To Not Be Imported By Email
-        $noimport = factory(Lead::class, 2)->make([
+        // Create Valid Leads To Not Be Imported By Email
+        $leadsValidNoImport = factory(Lead::class, 2)->make([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
@@ -117,7 +113,7 @@ class ADFTest extends TestCase
         ]);
 
         // Create Leads To Not Be Imported By Invalid ADF
-        $noadf = factory(Lead::class, 2)->make([
+        $leadsInvalidAdf = factory(Lead::class, 2)->make([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
@@ -125,7 +121,7 @@ class ADFTest extends TestCase
         ]);
 
         // Create Leads To Not Be Imported By Invalid XML
-        $noxml = factory(Lead::class, 2)->make([
+        $leadsInvalidXml = factory(Lead::class, 2)->make([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
@@ -136,37 +132,37 @@ class ADFTest extends TestCase
         $messages = [];
         $parsed = [];
         $id = 0;
-        foreach($leads as $lead) {
+        foreach($leadsVehicleLocation as $lead) {
             $body = $this->getAdfXml($lead, $dealer, $location, $vehicles[$lead->inventory_id]);
             $parsed[] = $this->getParsedEmail($id, $location->email, $body);
             $messages[] = $id;
             $id++;
         }
-        foreach($noloc as $lead) {
+        foreach($leadsVehicleNoLocation as $lead) {
             $body = $this->getAdfXml($lead, $dealer, $location, $vehicles[$lead->inventory_id]);
             $parsed[] = $this->getParsedEmail($id, $dealer->email, $body);
             $messages[] = $id;
             $id++;
         }
-        foreach($noinv as $lead) {
+        foreach($leadsNoVehicle as $lead) {
             $body = $this->getAdfXml($lead, $dealer, $location);
             $parsed[] = $this->getParsedEmail($id, $dealer->email, $body);
             $messages[] = $id;
             $id++;
         }
-        foreach($noimport as $lead) {
+        foreach($leadsValidNoImport as $lead) {
             $body = $this->getAdfXml($lead, $dealer, $location);
             $parsed[] = $this->getParsedEmail($id, $lead->email_address, $body);
             $messages[] = $id;
             $id++;
         }
-        foreach($noadf as $lead) {
+        foreach($leadsInvalidAdf as $lead) {
             $body = $this->getNoAdfXml($lead, $dealer, $location);
             $parsed[] = $this->getParsedEmail($id, $lead->email_address, $body);
             $messages[] = $id;
             $id++;
         }
-        foreach($noxml as $lead) {
+        foreach($leadsInvalidXml as $lead) {
             $parsed[] = $this->getParsedEmail($id, $lead->email_address, $lead->comments);
             $messages[] = $id;
             $id++;
@@ -192,7 +188,7 @@ class ADFTest extends TestCase
         });
 
         // Mock Gmail Service
-        $this->mock(GmailServiceInterface::class, function ($mock) use($messages, $parsed, $noimport) {
+        $this->mock(GmailServiceInterface::class, function ($mock) use($messages, $parsed, $leadsValidNoImport) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->once()
@@ -209,7 +205,7 @@ class ADFTest extends TestCase
 
             // Should Receive Move For Every Message
             $mock->shouldReceive('move')
-                 ->times(count($messages) - count($noimport))
+                 ->times(count($messages) - count($leadsValidNoImport))
                  ->andReturn(true);
         });
 
@@ -217,7 +213,7 @@ class ADFTest extends TestCase
         $this->artisan('leads:import:adf')->assertExitCode(0);
 
         // Assert Leads Exist
-        foreach($leads as $lead) {
+        foreach($leadsVehicleLocation as $lead) {
             // Assert a lead was saved...
             $this->assertDatabaseHas('website_lead', [
                 'website_id' => $websiteId,
@@ -232,7 +228,7 @@ class ADFTest extends TestCase
         }
 
         // Assert Leads With No Location Exist
-        foreach($noloc as $lead) {
+        foreach($leadsVehicleNoLocation as $lead) {
             // Assert a lead was saved...
             $this->assertDatabaseHas('website_lead', [
                 'website_id' => $websiteId,
@@ -247,7 +243,7 @@ class ADFTest extends TestCase
         }
 
         // Assert Leads With No Inventory Exist
-        foreach($noinv as $lead) {
+        foreach($leadsNoVehicle as $lead) {
             // Assert a lead was saved...
             $this->assertDatabaseHas('website_lead', [
                 'website_id' => $websiteId,
@@ -262,7 +258,7 @@ class ADFTest extends TestCase
         }
 
         // Assert Leads Don't Exist
-        foreach($noimport as $lead) {
+        foreach($leadsValidNoImport as $lead) {
             // Assert a lead wasn't saved...
             $this->assertDatabaseMissing('website_lead', [
                 'website_id' => $websiteId,
@@ -275,7 +271,7 @@ class ADFTest extends TestCase
                 'phone_number' => $lead->phone_number
             ]);
         }
-        foreach($noadf as $lead) {
+        foreach($leadsInvalidAdf as $lead) {
             // Assert a lead wasn't saved...
             $this->assertDatabaseMissing('website_lead', [
                 'website_id' => $websiteId,
@@ -288,7 +284,7 @@ class ADFTest extends TestCase
                 'phone_number' => $lead->phone_number
             ]);
         }
-        foreach($noxml as $lead) {
+        foreach($leadsInvalidXml as $lead) {
             // Assert a lead wasn't saved...
             $this->assertDatabaseMissing('website_lead', [
                 'website_id' => $websiteId,
