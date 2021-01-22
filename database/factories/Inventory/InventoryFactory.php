@@ -54,7 +54,8 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'manufacturer' => $mfg->name,
         'brand' => !empty($showroom->brand) ? $showroom->brand : (!empty($brand->name) ? $brand->name : ''),
         'model' => !empty($showroom->model) ? $showroom->model : $faker->words(2, true),
-        'description' => !empty($showroom->description) ? $showroom->description : $faker->text,
+        //'description' => !empty($showroom->description) ? $showroom->description : $faker->realText,
+        'description' => $faker->realText,
         'status' => 1,
         'category' => !empty($showroom->type) ? $showroom->type : $category->legacy_category,
         'vin' => $attributes['vin'] ?? Str::random(17),
@@ -62,7 +63,7 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'price' => $price,
         'year' => $faker->year,
         'condition' => $faker->randomElement(['new', 'used']),
-        'notes' => $faker->text,
+        'notes' => $faker->realText,
         'is_archived' => 0,
         'showroom_id' => !empty($showroom->id) ? $showroom->id : null
     ];
