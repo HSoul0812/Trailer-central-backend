@@ -664,7 +664,7 @@ class ADFLead
             // Return Conditions Array
             return [
                 'year' => [$this->getVehicleYear()],
-                'make' => [$this->getVehicleMake()],
+                'manufacturer' => [$this->getVehicleMake()],
                 'model' => [$this->getVehicleModel()]
             ];
         }
