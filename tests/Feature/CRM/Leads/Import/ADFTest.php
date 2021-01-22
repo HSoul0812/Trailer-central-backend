@@ -210,6 +210,15 @@ class ADFTest extends TestCase
                 $mock->shouldReceive('move')
                      ->with(Mockery::on(function($accessToken, $mailId, $new, $remove)
                                         use($systemEmail, $k, $inbox, $processed, $invalid) {
+                        var_dump($systemEmail->id);
+                        var_dump($accessToken->relation_id);
+                        var_dump($k);
+                        var_dump($mailId);
+                        var_dump($remove[0]);
+                        var_dump($inbox);
+                        var_dump($new[0]);
+                        var_dump($invalid);
+                        var_dump($processed);
                         // System Email Matches Relation ID, Mail ID Matches Current Item, Remove is Inbox
                         if($mailId === (string) $k && $remove[0] === $inbox) {
                             // Vary New Folder
