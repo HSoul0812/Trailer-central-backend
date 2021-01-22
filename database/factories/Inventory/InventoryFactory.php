@@ -53,7 +53,7 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'stock' => Str::random(10),
         'manufacturer' => $mfg->name,
         'brand' => !empty($showroom->brand) ? $showroom->brand : (!empty($brand->name) ? $brand->name : ''),
-        'model' => !empty($showroom->model) ? $showroom->model : $faker->title,
+        'model' => !empty($showroom->model) ? $showroom->model : $faker->words(2),
         'description' => !empty($showroom->description) ? $showroom->description : $faker->text,
         'status' => 1,
         'category' => !empty($showroom->type) ? $showroom->type : $category->legacy_category,
