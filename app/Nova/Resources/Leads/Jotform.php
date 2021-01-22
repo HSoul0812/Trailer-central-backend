@@ -52,7 +52,9 @@ class Jotform extends Resource
 
             Text::make('Title', 'title'),
 
-            Text::make('Status', 'status')
+            Text::make('Status', 'status'),
+            
+            Text::make('Username', 'username')
         ];
     }
 
