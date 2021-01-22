@@ -296,12 +296,15 @@ class ADFService implements ADFServiceInterface {
                 'dealer_id' => $dealerId,
                 InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => $adfLead->getVehicleFilters()
             ]);
-        }
+            var_dump($inventory);
+            var_dump($adfLead->getVehicleFilters());
 
-        // Inventory Exists?
-        if(!empty($inventory) && $inventory->count() > 0) {
-            $adfLead->setVehicleId($inventory->first()->inventory_id);
+            // Inventory Exists?
+            if(!empty($inventory) && $inventory->count() > 0) {
+                $adfLead->setVehicleId($inventory->first()->inventory_id);
+            }
         }
+        die;
 
         // Return ADF Lead
         return $adfLead;

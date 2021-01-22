@@ -14,13 +14,19 @@ class ImportRepository implements ImportRepositoryInterface
     }
 
     public function delete($params) {
-        // Delete All for Dealer ID
-        if(isset($params['dealer_id'])) {
-            return LeadImport::where('dealer_id', $params['dealer_id'])->delete();
-        }
-
         // Get Lead Import
         return LeadImport::findOrFail($params['id'])->delete();
+    }
+
+    /**
+     * Delete All For Params (dealer_id required)
+     * 
+     * @param array $params
+     * @return bool
+     */
+    public function deleteAll($params) {
+        // Delete All for Dealer ID
+        return LeadImport::where('dealer_id', $params['dealer_id'])->delete();
     }
 
     public function get($params) {
