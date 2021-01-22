@@ -9,6 +9,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
+use App\Models\System\Email;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
@@ -437,7 +438,7 @@ class ADFTest extends TestCase
      * 
      * @return SystemEmail
      */
-    private function getSystemEmail(): SystemEmail {
+    private function getSystemEmail(): Email {
         // Get Email
         $email = config('adf.imports.gmail.email');
 
