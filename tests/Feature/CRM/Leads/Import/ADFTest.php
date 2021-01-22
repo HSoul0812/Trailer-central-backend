@@ -211,7 +211,7 @@ class ADFTest extends TestCase
                      ->with(Mockery::on(function($accessToken, $mailId, $new, $remove)
                                         use($systemEmail, $k, $inbox, $processed, $invalid) {
                         // System Email Matches Relation ID, Mail ID Matches Current Item, Remove is Inbox
-                        if($mailId === (string) $k) {
+                        if((string) $mailId === (string) $k) {
                             return true;
                         }
                         return false;
