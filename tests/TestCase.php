@@ -51,7 +51,7 @@ abstract class TestCase extends BaseTestCase
     // Get Test Dealer Location ID
     public static function getTestDealerLocationId() {
         // Get Location
-        return reset(self::getTextDealerLocationIds());
+        return reset(self::getTestDealerLocationIds());
     }
 
     // Get Random Test Dealer Location
