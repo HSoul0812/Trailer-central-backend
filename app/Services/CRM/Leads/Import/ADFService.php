@@ -130,16 +130,11 @@ class ADFService implements ADFServiceInterface {
         // Get XML Parsed Data
         $fixed = $this->fixCdata($body);
         $crawler = new Crawler($fixed);
-        try {
         $adf = $crawler->filter('adf')->first();
 
         // Valid XML?
-        if(empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
+        if(empty($adf) || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
             throw new InvalidAdfImportFormatException;
-        }
-        } catch(\Exception $e) {
-            var_dump($body);
-            die;
         }
 
         // Return True
