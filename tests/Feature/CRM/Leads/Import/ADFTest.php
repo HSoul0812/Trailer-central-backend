@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\CRM\Leads\Import;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadImport;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
