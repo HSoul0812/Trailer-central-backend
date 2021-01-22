@@ -301,7 +301,6 @@ class ADFService implements ADFServiceInterface {
             if(!empty($inventory) && $inventory->count() > 0) {
                 $adfLead->setVehicleId($inventory->first()->inventory_id);
             }
-            var_dump($adfLead->getVehicleId());
         }
 
         // Return ADF Lead
