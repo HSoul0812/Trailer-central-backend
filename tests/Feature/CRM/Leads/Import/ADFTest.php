@@ -89,7 +89,7 @@ class ADFTest extends TestCase
                 'dealer_id' => $dealer->dealer_id,
                 'dealer_location_id' => $location->dealer_location_id,
                 'inventory_id' => $vehicle->inventory_id
-            ]);
+            ])->first();
 
             // Create Leads for Vehicle With No Location
             $noloc[] = factory(Lead::class, 1)->make([
@@ -97,7 +97,7 @@ class ADFTest extends TestCase
                 'dealer_id' => $dealer->dealer_id,
                 'dealer_location_id' => 0,
                 'inventory_id' => $vehicle->inventory_id
-            ]);
+            ])->first();
         }
 
         // Create Leads With No Inventory
