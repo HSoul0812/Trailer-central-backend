@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models\Inventory;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
+use App\Contracts\Support\DTO;
+use App\Traits\WithFactory;
+use App\Traits\WithGetter;
 
 /**
+ * #[Immutable]
+ *
  * Abstraction model for `inventory_transaction_history` view which:
  *      1. Its sources are:
  *          a) repair-order:dms_repair_order
@@ -30,18 +33,93 @@ use Illuminate\Database\Query\Builder;
  * @property-read numeric $sub_total for repair-order:dms_service_item.amount, quote:dms_unit_sale.subtotal, POS:(qb_invoice_items.unit_price x qb_invoice_items.qty)
  * @property-read numeric $total for repair-order:dms_repair_order.total_price, quote:dms_unit_sale.total_price, POS:qb_invoices.total
  * @property-read string $type [POS|quote|repair-order]
- *
- * @method static Builder select($columns = ['*'])
- * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
  */
-class InventoryHistory extends Model
+class InventoryHistory implements DTO
 {
+    use WithGetter;
+    use WithFactory;
+
     /**
-     * The table associated with the model.
-     *
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @var int
+     */
+    private $customer_id;
+
+    /**
+     * @var int
+     */
+    private $inventory_id;
+
+    /**
      * @var string
      */
-    protected $table = 'inventory_transaction_history';
+    private $customer_name;
 
-    public $timestamps = false;
+    /**
+     * @var string
+     */
+    private $vin;
+
+    /**
+     * @var string
+     */
+    private $created_at;
+
+    /**
+     * @var string
+     */
+    private $subtype;
+
+    /**
+     * @var string
+     */
+    private $text_1;
+
+    /**
+     * @var string
+     */
+    private $text_2;
+
+    /**
+     * @var string
+     */
+    private $text_3;
+
+    /**
+     * @var float
+     */
+    private $sub_total;
+
+    /**
+     * @var float
+     */
+    private $total;
+
+    /**
+     * @var string
+     */
+    private $type;
+
+    public function asArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'customer_id' => $this->customer_id,
+            'inventory_id' => $this->inventory_id,
+            'customer_name' => $this->customer_name,
+            'vin' => $this->vin,
+            'created_at' => $this->created_at,
+            'subtype' => $this->subtype,
+            'text_1' => $this->text_1,
+            'text_2' => $this->text_2,
+            'text_3' => $this->text_3,
+            'sub_total' => $this->sub_total,
+            'total' => $this->total,
+            'type' => $this->type
+        ];
+    }
 }

@@ -6,8 +6,6 @@ use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Nova\Observer\DealerIncomingMappingObserver;
 use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
-use App\Exceptions\OperationNotAllowedException;
-use App\Models\Inventory\InventoryHistory;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
@@ -181,11 +179,6 @@ class AppServiceProvider extends ServiceProvider
                 );
             });
         }
-
-        // Turn on read-only mode for InventoryHistory
-        InventoryHistory::saving(static function (InventoryHistory $user) {
-            throw new OperationNotAllowedException();
-        });
     }
 
     /**
