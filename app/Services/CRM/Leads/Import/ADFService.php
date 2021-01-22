@@ -303,7 +303,6 @@ class ADFService implements ADFServiceInterface {
             }
             var_dump($adfLead->getVehicleId());
         }
-        die;
 
         // Return ADF Lead
         return $adfLead;
