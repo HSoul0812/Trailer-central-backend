@@ -90,7 +90,7 @@ class ADFService implements ADFServiceInterface {
             $email = $this->gmail->message($mailId);
 
             // Find Exceptions
-            try {
+            //try {
                 // Validate ADF
                 $crawler = $this->validateAdf($email->getBody());
 
@@ -109,10 +109,10 @@ class ADFService implements ADFServiceInterface {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }
-            } catch(\Exception $e) {
-                $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
-                Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
-            }
+            //} catch(\Exception $e) {
+            //    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+            //    Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
+            //}
         }
 
         // Return Total
