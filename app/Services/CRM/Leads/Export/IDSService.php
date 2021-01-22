@@ -29,7 +29,7 @@ class IDSService implements IDSServiceInterface {
         
         $hiddenCopiedEmails = explode(',', config('ids.copied_emails'));
         
-        IDSJob::dispatch($lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails)->onQueue('ids-export');
+        IDSJob::dispatchNow($lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
         
         return true;
     }
