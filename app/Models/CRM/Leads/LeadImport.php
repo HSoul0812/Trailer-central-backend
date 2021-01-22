@@ -4,10 +4,12 @@ namespace App\Models\CRM\Leads;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 class LeadImport extends Model
 {
+    use TableAware;
 
     const TABLE_NAME = 'lead_import';
 
@@ -64,9 +66,5 @@ class LeadImport extends Model
     public function website()
     {
         return $this->belongsTo(Website::class, 'dealer_id', 'dealer_id');
-    }
-
-    public static function getTableName() {
-        return self::TABLE_NAME;
     }
 }
