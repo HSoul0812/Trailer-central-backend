@@ -3,7 +3,6 @@
 /** @var Factory $factory */
 
 use Illuminate\Database\Eloquent\Factory;
-use Tests\TestCase;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Category;

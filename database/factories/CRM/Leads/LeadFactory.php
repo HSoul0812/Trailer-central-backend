@@ -2,14 +2,15 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use Tests\TestCase;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Inventory\Inventory;
+use App\Models\User\User;
+use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
 use Faker\Generator as Faker;
 
-$factory->define(Lead::class, function (Faker $faker) {
+$factory->define(Lead::class, function (Faker $faker, array $attributes) {
     // Get Dealer ID
     $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
 
@@ -36,7 +37,7 @@ $factory->define(Lead::class, function (Faker $faker) {
     $leadType = $leadTypes[$typeKey];
 
     // Get Random Inventory
-    $inventory = Inventory::where('dealer_id', TestCase::getTestDealerId())->inRandomOrder()->first();
+    $inventory = Inventory::where('dealer_id', $dealer_id)->inRandomOrder()->first();
 
     // Return Overrides
     return [
