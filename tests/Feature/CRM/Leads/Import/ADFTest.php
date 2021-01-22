@@ -139,11 +139,11 @@ class ADFTest extends TestCase
         foreach($leads as $lead) {
             $body = $this->getAdfXml($lead, $dealer, $location, $vehicles[$lead->inventory_id]);
             var_dump($body);
+        die;
             $parsed[] = $this->getParsedEmail($id, $location->email, $body);
             $messages[] = $id;
             $id++;
         }
-        die;
         foreach($noloc as $lead) {
             $body = $this->getAdfXml($lead, $dealer, $location, $vehicles[$lead->inventory_id]);
             $parsed[] = $this->getParsedEmail($id, $dealer->email, $body);
