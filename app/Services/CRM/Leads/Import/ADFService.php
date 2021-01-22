@@ -200,7 +200,7 @@ class ADFService implements ADFServiceInterface {
             'comments' => $adfLead->getComments(),
             'contact_email_sent' => $adfLead->getRequestDate(),
             'adf_email_sent' => $adfLead->getRequestDate(),
-            'cdk_email_sent' => $adfLead->getRequestDate(),
+            'cdk_email_sent' => 1,
             'date_submitted' => $adfLead->getRequestDate(),
             'lead_source' => $adfLead->getVendorProvider()
         ]);
