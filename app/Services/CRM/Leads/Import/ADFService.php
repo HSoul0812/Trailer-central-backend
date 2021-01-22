@@ -133,7 +133,11 @@ class ADFService implements ADFServiceInterface {
         $adf = $crawler->filter('adf')->first();
 
         // Valid XML?
-        if(empty($adf) || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
+        if($adf->count() < 1 || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
+            if($adf->count() < 1) {
+                var_dump($body);
+                die;
+            }
             throw new InvalidAdfImportFormatException;
         }
 
