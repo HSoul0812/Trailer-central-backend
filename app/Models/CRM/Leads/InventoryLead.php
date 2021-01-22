@@ -13,25 +13,18 @@ class InventoryLead extends Model
     protected $table = 'crm_inventory_lead';
 
     /**
+     * No timestamps on table
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * The primary key associated with the table.
      *
      * @var string
      */
     protected $primaryKey = 'id';
-
-    /**
-     * The name of the "created at" column.
-     *
-     * @var string
-     */
-    const CREATED_AT = null;
-
-    /**
-     * The name of the "updated at" column.
-     *
-     * @var string
-     */
-    const UPDATED_AT = NULL;
     
     /**
      * The attributes that are mass assignable.
