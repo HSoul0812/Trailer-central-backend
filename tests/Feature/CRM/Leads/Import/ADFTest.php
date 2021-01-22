@@ -53,6 +53,7 @@ class ADFTest extends TestCase
     {
         // Get Dealer
         $dealer = User::findOrFail(self::getTestDealerId());
+        $websiteId = $dealer->website->id;
 
         // Create Dealer Location
         $location = DealerLocation::findOrFail(self::getTestDealerLocationId());
@@ -61,7 +62,7 @@ class ADFTest extends TestCase
         $systemEmail = $this->getSystemEmail();
 
         // Add Lead Imports
-        $imports = $this->refreshLeadImports($dealer, $location);
+        $this->refreshLeadImports($dealer, $location);
 
         // Define Folders
         $inbox = config('adf.imports.gmail.inbox');
@@ -87,12 +88,14 @@ class ADFTest extends TestCase
                 $noloc[] = factory(Lead::class, 1)->make([
                     'dealer_id' => $dealer->dealer_id,
                     'dealer_location_id' => 0,
+                    'website_id' => $websiteId,
                     'inventory_id' => $vehicle->inventory_id
                 ]);
             } else {
                 $leads[] = factory(Lead::class, 1)->make([
                     'dealer_id' => $dealer->dealer_id,
                     'dealer_location_id' => $location->dealer_location_id,
+                    'website_id' => $websiteId,
                     'inventory_id' => $vehicle->inventory_id
                 ]);
             }
@@ -102,6 +105,7 @@ class ADFTest extends TestCase
         $noinv = factory(Lead::class, 3)->make([
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
+            'website_id' => $websiteId,
             'inventory_id' => 0
         ]);
 
@@ -109,6 +113,7 @@ class ADFTest extends TestCase
         $noimport = factory(Lead::class, 2)->make([
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
+            'website_id' => $websiteId,
             'inventory_id' => 0
         ]);
 
@@ -116,6 +121,7 @@ class ADFTest extends TestCase
         $noadf = factory(Lead::class, 2)->make([
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
+            'website_id' => $websiteId,
             'inventory_id' => 0
         ]);
 
@@ -123,6 +129,7 @@ class ADFTest extends TestCase
         $noxml = factory(Lead::class, 2)->make([
             'dealer_id' => $dealer->dealer_id,
             'dealer_location_id' => 0,
+            'website_id' => $websiteId,
             'inventory_id' => 0
         ]);
 
@@ -186,7 +193,7 @@ class ADFTest extends TestCase
         });
 
         // Mock Gmail Service
-        $this->mock(GmailServiceInterface::class, function ($mock) use($messages, $parsed) {
+        $this->mock(GmailServiceInterface::class, function ($mock) use($messages, $parsed, $systemEmail, $inbox, $processed, $invalid) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->once()
@@ -230,6 +237,7 @@ class ADFTest extends TestCase
         foreach($leads as $lead) {
             // Assert a lead was saved...
             $this->assertDatabaseHas('website_lead', [
+                'website_id' => $websiteId,
                 'dealer_id' => $lead->dealer_id,
                 'dealer_location_id' => $lead->dealer_location_id,
                 'inventory_id' => $lead->inventory_id,
@@ -244,6 +252,7 @@ class ADFTest extends TestCase
         foreach($noloc as $lead) {
             // Assert a lead was saved...
             $this->assertDatabaseHas('website_lead', [
+                'website_id' => $websiteId,
                 'dealer_id' => $lead->dealer_id,
                 'dealer_location_id' => 0,
                 'inventory_id' => $lead->inventory_id,
@@ -258,6 +267,7 @@ class ADFTest extends TestCase
         foreach($noinv as $lead) {
             // Assert a lead was saved...
             $this->assertDatabaseHas('website_lead', [
+                'website_id' => $websiteId,
                 'dealer_id' => $lead->dealer_id,
                 'dealer_location_id' => 0,
                 'inventory_id' => 0,
@@ -272,6 +282,7 @@ class ADFTest extends TestCase
         foreach($noimport as $lead) {
             // Assert a lead wasn't saved...
             $this->assertDatabaseMissing('website_lead', [
+                'website_id' => $websiteId,
                 'dealer_id' => $lead->dealer_id,
                 'dealer_location_id' => 0,
                 'inventory_id' => 0,
