@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\Leads;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\LeadImport;
+use App\Models\User\User;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use Illuminate\Support\Collection;
