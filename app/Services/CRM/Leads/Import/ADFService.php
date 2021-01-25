@@ -105,8 +105,12 @@ class ADFService implements ADFServiceInterface {
 
                 // Find Email
                 $dealerId = str_replace('@' . config('adf.imports.gmail.domain'), '', $email->getToEmail());
-                $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
-                if(empty($dealer->dealer_id)) {
+                try {
+                    $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
+                    if(empty($dealer->id)) {
+                        throw new InvalidAdfDealerIdException;
+                    }
+                } catch(\Exception $e) {
                     throw new InvalidAdfDealerIdException;
                 }
 
