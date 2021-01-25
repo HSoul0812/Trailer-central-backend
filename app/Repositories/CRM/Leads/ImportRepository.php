@@ -136,7 +136,7 @@ class ImportRepository implements ImportRepositoryInterface
                            ->where(LeadImport::getTableName() . '.email', $params['email']);
 
         // Name Exists?
-        if(isset($params['email'])) {
+        if(isset($params['name'])) {
             $query->where(User::getTableName() . '.name', $params['name']);
         }
 
