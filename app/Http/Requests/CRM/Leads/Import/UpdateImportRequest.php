@@ -3,7 +3,6 @@
 namespace App\Http\Requests\CRM\Leads\Import;
 
 use App\Http\Requests\Request;
-use App\Models\CRM\Leads\LeadImport;
 
 class UpdateImportRequest extends Request {
 
@@ -12,17 +11,4 @@ class UpdateImportRequest extends Request {
         'emails' => 'required|array',
         'emails.*' => 'required|email'
     ];
-
-    protected function getObject() {
-        return new LeadImport();
-    }
-
-    protected function getObjectIdValue() {
-        return $this->id;
-    }
-
-    protected function validateObjectBelongsToUser() {
-        return true;
-    }
-
 }
