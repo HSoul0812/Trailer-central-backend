@@ -144,6 +144,8 @@ class ADFService implements ADFServiceInterface {
 
         // Valid XML?
         if($adf->count() < 1 || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
+            var_dump($body);
+            die;
             throw new InvalidAdfImportFormatException;
         }
 

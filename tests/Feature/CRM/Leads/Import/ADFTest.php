@@ -156,7 +156,7 @@ class ADFTest extends TestCase
             $messages[] = $id;
             $id++;
         }
-        foreach($leadsInvalidAdf as $lead) {
+        /*foreach($leadsInvalidAdf as $lead) {
             $body = $this->getNoAdfXml($lead, $dealer);
             $parsed[] = $this->getParsedEmail($id, $lead->email_address, $body);
             $messages[] = $id;
@@ -166,7 +166,7 @@ class ADFTest extends TestCase
             $parsed[] = $this->getParsedEmail($id, $lead->email_address, $lead->comments);
             $messages[] = $id;
             $id++;
-        }
+        }*/
 
 
         // Mock Gmail Service
