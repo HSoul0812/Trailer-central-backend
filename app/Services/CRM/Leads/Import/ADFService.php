@@ -3,7 +3,7 @@
 namespace App\Services\CRM\Leads\Import;
 
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
-use App\Exceptions\CRM\Leads\Import\InvalidAdfImportVendorException;
+use App\Exceptions\CRM\Leads\Import\InvalidAdfDealerIdException;
 use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
@@ -83,6 +83,7 @@ class ADFService implements ADFServiceInterface {
     /**
      * Takes a lead and export it to the IDS system in XML format
      * 
+     * @throws InvalidAdfDealerIdException
      * @return int total number of imported adf leads
      */
     public function import() : int {
@@ -106,7 +107,7 @@ class ADFService implements ADFServiceInterface {
                 $dealerId = str_replace('@' . config('adf.imports.gmail.domain'), '', $email->getToEmail());
                 $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
                 if(empty($dealer->dealer_id)) {
-                    continue;
+                    throw new InvalidAdfDealerIdException;
                 }
 
                 // Validate ADF
@@ -118,6 +119,9 @@ class ADFService implements ADFServiceInterface {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }
+            } catch(InvalidAdfDealerIdException $e) {
+                $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             } catch(InvalidAdfImportFormatException $e) {
                 $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
                 Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
@@ -158,7 +162,6 @@ class ADFService implements ADFServiceInterface {
      * 
      * @param User $dealer
      * @param Crawler $adf
-     * @throws InvalidAdfImportVendorException
      * @return ADFLead
      */
     public function parseAdf(User $dealer, Crawler $adf) : ADFLead {

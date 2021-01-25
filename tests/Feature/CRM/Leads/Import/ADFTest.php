@@ -145,18 +145,18 @@ class ADFTest extends TestCase
         }
         foreach($leadsValidNoImport as $lead) {
             $body = $this->getAdfXml($lead, $dealer);
-            $parsed[] = $this->getParsedEmail($id, $lead->email_address, $body);
+            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body, $lead->email_Address);
             $messages[] = $id;
             $id++;
         }
         foreach($leadsInvalidAdf as $lead) {
             $body = $this->getNoAdfXml($lead, $dealer);
-            $parsed[] = $this->getParsedEmail($id, $lead->email_address, $body);
+            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body);
             $messages[] = $id;
             $id++;
         }
         foreach($leadsInvalidXml as $lead) {
-            $parsed[] = $this->getParsedEmail($id, $lead->email_address, $lead->comments);
+            $parsed[] = $this->getParsedEmail($id, $dealer->email, $lead->comments);
             $messages[] = $id;
             $id++;
         }
@@ -181,7 +181,7 @@ class ADFTest extends TestCase
         });
 
         // Mock Gmail Service
-        $this->mock(GmailServiceInterface::class, function ($mock) use($messages, $parsed, $leadsValidNoImport) {
+        $this->mock(GmailServiceInterface::class, function ($mock) use($messages, $parsed) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->once()
@@ -198,7 +198,7 @@ class ADFTest extends TestCase
 
             // Should Receive Move For Every Message
             $mock->shouldReceive('move')
-                 ->times(count($messages) - count($leadsValidNoImport))
+                 ->times(count($messages))
                  ->andReturn(true);
         });
 
@@ -425,14 +425,19 @@ class ADFTest extends TestCase
      * @param EmailHistory $email
      * @return ParsedEmail
      */
-    private function getParsedEmail($id, $email, $body) {
+    private function getParsedEmail($id, $from, $body, $to = null) {
         // Create Parsed Email
         $parsed = new ParsedEmail();
         $parsed->setId((string) $id);
 
+        // To Is Null?
+        if($to === null) {
+            $to = self::getTestDealerId() . '@' . config('adf.imports.gmail.domain');
+        }
+
         // Set To/From
-        $parsed->setToEmail(self::getTestDealerId() . '@' . config('adf.imports.gmail.domain'));
-        $parsed->setFromEmail($email);
+        $parsed->setToEmail($to);
+        $parsed->setFromEmail($from);
 
         // Set Subject/Body
         $parsed->setSubject('ADF Import');

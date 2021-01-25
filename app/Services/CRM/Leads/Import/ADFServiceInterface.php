@@ -14,6 +14,7 @@ interface ADFServiceInterface {
     /**
      * Takes a lead and export it to the IDS system in XML format
      * 
+     * @throws InvalidAdfDealerIdException
      * @return int total number of imported adf leads
      */
     public function import() : int;
@@ -32,7 +33,6 @@ interface ADFServiceInterface {
      * 
      * @param User $dealer
      * @param Crawler $adf
-     * @throws InvalidAdfImportVendorException
      * @return ADFLead
      */
     public function parseAdf(User $dealer, Crawler $adf) : ADFLead;
