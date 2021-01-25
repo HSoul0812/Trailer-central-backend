@@ -365,8 +365,8 @@ $api->version('v1', function ($route) {
         */
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
-        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show');
-        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
+        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show')->where('id', '[0-9]+');
+        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update')->where('id', '[0-9]+');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
 
         /*
