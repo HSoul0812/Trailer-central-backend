@@ -520,14 +520,12 @@ class ADFTest extends TestCase
         $imports = [];
         $imports[] = factory(LeadImport::class, 1)->create([
             'dealer_id' => $dealer->dealer_id,
-            'dealer_location_id' => 0,
             'email' => $dealer->email
         ]);
 
         // Create Lead Import for Location
         $imports[] = factory(LeadImport::class, 1)->create([
             'dealer_id' => $dealer->dealer_id,
-            'dealer_location_id' => $location->dealer_location_id,
             'email' => $location->email
         ]);
 

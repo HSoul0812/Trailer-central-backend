@@ -128,11 +128,18 @@ class ImportRepository implements ImportRepositoryInterface
     public function find($params)
     {
         // Find Lead Imports By Email and Dealer Name
-        return LeadImport::select(LeadImport::getTableName() . '.*')
-                         ->leftJoin(User::getTableName(),
-                                    User::getTableName() . '.dealer_id', '=',
-                                    LeadImport::getTableName() . '.dealer_id')
-                         ->where(LeadImport::getTableName() . '.email', $params['email'])
-                         ->where(User::getTableName() . '.name', $params['name']);
+        $query = LeadImport::select(LeadImport::getTableName() . '.*')
+                           ->leftJoin(User::getTableName(),
+                                      User::getTableName() . '.dealer_id', '=',
+                                      LeadImport::getTableName() . '.dealer_id')
+                           ->where(LeadImport::getTableName() . '.email', $params['email']);
+
+        // Name Exists?
+        if(isset($params['email'])) {
+            $query->where(User::getTableName() . '.name', $params['name']);
+        }
+
+        // Return All Matching Imports
+        return $query->get();
     }
 }

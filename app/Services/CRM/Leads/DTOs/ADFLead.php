@@ -950,4 +950,32 @@ class ADFLead
     {
         $this->vendorAddrCountry = $addrCountry;
     }
+
+
+    /**
+     * Return Vendor Addrss Filters
+     * 
+     * @return array filters for inventory model
+     */
+    public function getVendorAddrFilters(): array
+    {
+        // Initialize Filters
+        $filters = [
+            'dealer_id' => $this->getDealerId()
+        ];
+
+        // Return VIN Filters
+        if(!empty($this->getVendorAddrCity()) && !empty($this->getVendorAddrState())) {
+            $filters['city'] = $this->getVendorAddrCity();
+            $filters['state'] = $this->getVendorAddrState();
+        }
+
+        // Return VIN Filters
+        if(!empty($this->getVendorAddrZip())) {
+            $filters['zip'] = $this->getVendorAddrZip();
+        }
+
+        // Return Filters
+        return $filters;
+    }
 }
