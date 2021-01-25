@@ -401,7 +401,7 @@ class ADFTest extends TestCase
   </customer>
   <vendor>
    <id sequence="1" source="DealerID">' . $dealer->dealer_id . '</id>
-   ' . ($location->dealer_location_id ? '<id sequence="2" source="DealerLocationID">' . $location->dealer_location_id . '</id>' : '') . '
+   ' . (!empty($location->dealer_location_id) ? '<id sequence="2" source="DealerLocationID">' . $location->dealer_location_id . '</id>' : '') . '
    ' . ($lead->identifier ? '<id sequence="3" source="ID">' . $lead->identifier . '</id>' : '') . '
    <vendorname>' . $dealer->name . '</vendorname>
    <contact>
