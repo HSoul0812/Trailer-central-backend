@@ -16,7 +16,7 @@ class CreateLeadImportTable extends Migration
         Schema::create('lead_import', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('dealer_id')->index();
-            $table->string('email')->index();
+            $table->string('email', 50)->index();
             $table->timestamps();
 
             $table->unique(['dealer_id', 'email']);
