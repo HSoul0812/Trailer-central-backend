@@ -317,10 +317,10 @@ class ADFTest extends TestCase
   <requestdate>' . $lead->date_submitted . '</requestdate>
   <vehicle>
    <year>' . ($inventory->year ?? '') . '</year>
-   <make>' . ($inventory->manufacturer ?? '') . '</make>
-   <model>' . ($inventory->model ?? '') . '</model>
-   <stock>' . ($inventory->stock ?? '') . '</stock>
-   <vin>' . ($inventory->vin ?? '') . '</vin>
+   <make>' . (urlencode($inventory->manufacturer) ?? '') . '</make>
+   <model>' . (urlencode($inventory->model) ?? '') . '</model>
+   <stock>' . (urlencode($inventory->stock) ?? '') . '</stock>
+   <vin>' . (urlencode($inventory->vin) ?? '') . '</vin>
   </vehicle>
   <customer>
    <contact>
@@ -341,9 +341,9 @@ class ADFTest extends TestCase
    <id sequence="1" source="DealerID">' . $dealer->dealer_id . '</id>
    ' . (!empty($location->dealer_location_id) ? '<id sequence="2" source="DealerLocationID">' . $location->dealer_location_id . '</id>' : '') . '
    ' . ($lead->identifier ? '<id sequence="3" source="ID">' . $lead->identifier . '</id>' : '') . '
-   <vendorname>' . $dealer->name . '</vendorname>
+   <vendorname>' . urlencode($dealer->name) . '</vendorname>
    <contact>
-    <name part="full">' . ($location->contact ?? $dealer->name) . '</name>
+    <name part="full">' . ($location->contact ?? urlencode($dealer->name)) . '</name>
     <url>' . ($location->domain ?? $dealer->website->domain) . '</url>
     <email>' . ($location->email ?? $dealer->email) . '</email>
     <phone>' . ($location->phone ?? '') . '</phone>
@@ -379,10 +379,10 @@ class ADFTest extends TestCase
   <requestdate>' . $lead->date_submitted . '</requestdate>
   <vehicle>
    <year>' . ($inventory->year ?? '') . '</year>
-   <make>' . ($inventory->make ?? '') . '</make>
-   <model>' . ($inventory->model ?? '') . '</model>
-   <stock>' . ($inventory->stock ?? '') . '</stock>
-   <vin>' . ($inventory->vin ?? '') . '</vin>
+   <make>' . (urlencode($inventory->manufacturer) ?? '') . '</make>
+   <model>' . (urlencode($inventory->model) ?? '') . '</model>
+   <stock>' . (urlencode($inventory->stock) ?? '') . '</stock>
+   <vin>' . (urlencode($inventory->vin) ?? '') . '</vin>
   </vehicle>
   <customer>
    <contact>
@@ -403,9 +403,9 @@ class ADFTest extends TestCase
    <id sequence="1" source="DealerID">' . $dealer->dealer_id . '</id>
    ' . (!empty($location->dealer_location_id) ? '<id sequence="2" source="DealerLocationID">' . $location->dealer_location_id . '</id>' : '') . '
    ' . ($lead->identifier ? '<id sequence="3" source="ID">' . $lead->identifier . '</id>' : '') . '
-   <vendorname>' . $dealer->name . '</vendorname>
+   <vendorname>' . urlencode($dealer->name) . '</vendorname>
    <contact>
-    <name part="full">' . ($location->contact ?? $dealer->name) . '</name>
+    <name part="full">' . ($location->contact ?? urlencode($dealer->name)) . '</name>
     <url>' . ($location->domain ?? $dealer->website->domain) . '</url>
     <email>' . ($location->email ?? $dealer->email) . '</email>
     <phone>' . ($location->phone ?? '') . '</phone>
