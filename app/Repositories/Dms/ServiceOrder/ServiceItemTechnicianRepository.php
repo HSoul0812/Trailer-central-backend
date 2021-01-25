@@ -53,7 +53,7 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
     public function serviceReport($params) :array
     {
         $dbParams = ['dealerId' => $params['dealer_id']];
-        $where = 'WHERE 1=1 ';
+        $where = 'WHERE technician.dealer_id = :dealerId ';
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
             $where .= " AND DATE(r_order.created_at) BETWEEN :fromDate AND :toDate ";
@@ -76,7 +76,7 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
         }
 
         $sql =
-            "SELECT technician.id technician_id, technician.first_name, technician.last_name,
+            "SELECT technician.dealer_id, technician.id technician_id, technician.first_name, technician.last_name,
                     s_technician.act_hrs, s_technician.paid_hrs, s_technician.billed_hrs,
                     r_order.type repair_order_type, r_order.created_at ro_created_at,
                     s_item.amount paid_retail,
@@ -149,8 +149,6 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
                     WHERE qi.type = 'labor'
                     GROUP BY ii.invoice_id
                 ) sales_labor ON i.id = sales_labor.invoice_id
-
-                WHERE us.dealer_id=:dealerId
                 GROUP BY us.id) sales ON r_order.unit_sale_id=sales.sale_id
             {$where}";
 
