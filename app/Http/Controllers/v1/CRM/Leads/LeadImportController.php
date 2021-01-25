@@ -38,7 +38,7 @@ class LeadImportController extends RestfulControllerV2
     public function index(Request $request) {
         $request = new GetImportsRequest($request->all());
         if ($request->validate()) {
-            return $this->response->array($this->imports->getAll($request->all()), $this->transformer);
+            return $this->response->collection($this->imports->getAll($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
