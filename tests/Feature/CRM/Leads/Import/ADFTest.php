@@ -145,7 +145,7 @@ class ADFTest extends TestCase
         }
         foreach($leadsValidNoImport as $lead) {
             $body = $this->getAdfXml($lead, $dealer);
-            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body, $lead->email_Address);
+            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body, $lead->email_address);
             $messages[] = $id;
             $id++;
         }
