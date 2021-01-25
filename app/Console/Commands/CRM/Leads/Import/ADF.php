@@ -3,7 +3,6 @@
 namespace App\Console\Commands\CRM\Leads\Import;
 
 use Illuminate\Console\Command;
-use App\Repositories\CRM\Leads\ImportRepositoryInterface;
 use App\Services\CRM\Leads\Import\ADFServiceInterface;
 
 /**
@@ -32,22 +31,15 @@ class ADF extends Command
     protected $service;
 
     /**
-     * @var App\Repositories\CRM\Leads\ImportRepositoryInterface
-     */
-    protected $imports;
-
-    /**
      * Create a new command instance.
      *
      * @return void
      */
-    public function __construct(ImportRepositoryInterface $imports,
-                                ADFServiceInterface $service)
+    public function __construct(ADFServiceInterface $service)
     {
         parent::__construct();
 
         $this->service = $service;
-        $this->imports = $imports;
     }
 
     /**
@@ -57,10 +49,6 @@ class ADF extends Command
      */
     public function handle()
     {
-        // Get All Imports
-        $imports = $this->imports->getAllActive();
-        $this->info("Importing ADF leads from " . count($imports) . " dealers and locations...");
-
         // Start Importing Leads
         $imported = $this->service->import();
 

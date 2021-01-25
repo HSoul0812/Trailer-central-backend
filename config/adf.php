@@ -22,7 +22,8 @@ return [
             'port' => env('ADF_IMPORT_PORT', 587)
         ],
         'gmail' => [
-            'email' => env('ADF_IMPORT_EMAIL', 'adf@trailercentral.com'),
+            'email' => env('ADF_IMPORT_EMAIL', 'catchall@operatebeyond.com'),
+            'domain' => env('ADF_IMPORT_DOMAIN', 'operatebeyond.com'),
             'inbox' => env('ADF_IMPORT_INBOX', 'INBOX'),
             'invalid' => env('ADF_IMPORT_INVALID', 'Invalid'),
             'processed' => env('ADF_IMPORT_PROCESSED', 'Processed')

@@ -5,11 +5,11 @@ namespace App\Services\CRM\Leads\Import;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportVendorException;
 use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
-use App\Repositories\CRM\Leads\ImportRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\System\EmailRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\Auth\AccessToken;
@@ -21,12 +21,6 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
 
 class ADFService implements ADFServiceInterface {
-
-    /**     
-     * @var App\Repositories\CRM\Leads\ImportRepositoryInterface
-     */
-    protected $imports;
-
     /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
@@ -48,6 +42,11 @@ class ADFService implements ADFServiceInterface {
     protected $inventory;
 
     /**
+     * @var App\Repositories\User\UserRepositoryInterface
+     */
+    protected $dealers;
+
+    /**
      * @var App\Repositories\User\DealerLocationRepositoryInterface
      */
     protected $locations;
@@ -62,19 +61,19 @@ class ADFService implements ADFServiceInterface {
      */
     protected $gmail;
     
-    public function __construct(ImportRepositoryInterface $imports,
-                                LeadRepositoryInterface $leads,
+    public function __construct(LeadRepositoryInterface $leads,
                                 EmailRepositoryInterface $emails,
                                 TokenRepositoryInterface $tokens,
                                 InventoryRepositoryInterface $inventory,
+                                UserRepositoryInterface $dealers,
                                 DealerLocationRepositoryInterface $locations,
                                 GoogleServiceInterface $google,
                                 GmailServiceInterface $gmail) {
-        $this->imports = $imports;
         $this->leads = $leads;
         $this->emails = $emails;
         $this->tokens = $tokens;
         $this->inventory = $inventory;
+        $this->dealers = $dealers;
         $this->locations = $locations;
         $this->google = $google;
         $this->gmail = $gmail;
@@ -103,13 +102,14 @@ class ADFService implements ADFServiceInterface {
                 $crawler = $this->validateAdf($email->getBody());
 
                 // Find Email
-                $imports = $this->imports->find(['email' => $email->getFromEmail()]);
-                if($imports->count() < 1) {
+                $dealerId = str_replace('@' . config('adf.imports.gmail.domain'), '', $email->getToEmail());
+                $dealer = $this->dealers->get($dealerId);
+                if(empty($dealer->dealer_id)) {
                     continue;
                 }
 
                 // Validate ADF
-                $adf = $this->parseAdf($email->getFromEmail(), $crawler);
+                $adf = $this->parseAdf($dealer, $crawler);
 
                 // Process Further
                 $result = $this->importLead($adf);
@@ -155,34 +155,22 @@ class ADFService implements ADFServiceInterface {
     /**
      * Get ADF and Return Result
      * 
-     * @param string $email
+     * @param User $dealer
      * @param Crawler $adf
      * @throws InvalidAdfImportVendorException
      * @return ADFLead
      */
-    public function parseAdf(string $email, Crawler $adf) : ADFLead {
+    public function parseAdf(User $dealer, Crawler $adf) : ADFLead {
         // Create ADF Lead
         $adfLead = new ADFLead();
 
         // Set Vendor Details
         $this->getAdfVendor($adfLead, $adf->filter('vendor'));
 
-        // Find Import Matching Name
-        $imports = $this->imports->find([
-            'email' => $email,
-            'name' => $adfLead->getVendorName()
-        ]);
-
-        // Imports Empty?
-        if($imports->count() < 1) {
-            throw new InvalidAdfImportVendorException;
-        }
-        $import = $imports->first();
-
         // Get Date
         $adfLead->setRequestDate($adf->filter('requestdate')->text());
-        $adfLead->setDealerId($import->dealer_id);
-        $adfLead->setWebsiteId($import->website->id);
+        $adfLead->setDealerId($dealer->dealer_id);
+        $adfLead->setWebsiteId($dealer->website->id);
 
         // Get Vendor Location
         $this->getAdfVendorLocation($adfLead, $adf->filter('vendor'));

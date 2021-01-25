@@ -14,8 +14,6 @@ use App\Repositories\CRM\Leads\Export\IDSLeadRepository;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepository;
-use App\Repositories\CRM\Leads\ImportRepositoryInterface as LeadImportRepositoryInterface;
-use App\Repositories\CRM\Leads\ImportRepository as LeadImportRepository;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\CRM\Customer\CustomerRepository;
 use App\Repositories\Dms\Customer\InventoryRepositoryInterface as CustomerInventoryRepositoryInterface;
@@ -40,7 +38,6 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
         $this->app->bind(IDSLeadRepositoryInterface::class, IDSLeadRepository::class);
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
-        $this->app->bind(LeadImportRepositoryInterface::class, LeadImportRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
     }

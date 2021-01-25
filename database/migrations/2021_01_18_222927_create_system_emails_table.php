@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class CreateSystemEmailsTable extends Migration
 {
     private const CUSTOM_EMAILS_INSERT = [
-        'email' => 'adf@trailercentral.com',
+        'email' => 'catchall@operatebeyond.com',
     ];
 
     /**

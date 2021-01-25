@@ -62,9 +62,6 @@ class ADFTest extends TestCase
         // Get System Email
         $systemEmail = $this->getSystemEmail();
 
-        // Add Lead Imports
-        $this->refreshLeadImports($dealer, $location);
-
         // Create Vehicles
         $vehicles = [];
         $inventory = factory(Inventory::class, 2)->create([
@@ -438,7 +435,7 @@ class ADFTest extends TestCase
         $parsed->setId((string) $id);
 
         // Set To/From
-        $parsed->setToEmail(config('adf.imports.gmail.email'));
+        $parsed->setToEmail(self::getTestDealerId() . '@' . config('adf.imports.gmail.domain'));
         $parsed->setFromEmail($email);
 
         // Set Subject/Body
@@ -503,33 +500,5 @@ class ADFTest extends TestCase
             'issued_at' => env('TEST_ADF_ISSUED_AT'),
             'scopes' => explode(" ", env('TEST_ADF_SCOPES'))
         ]);
-    }
-
-    /**
-     * Refresh Lead Imports
-     * 
-     * @param User $dealer
-     * @param DealerLocation $location
-     * @return array of LeadImport
-     */
-    private function refreshLeadImports(User $dealer, DealerLocation $location) {
-        // Delete Existing Lead Imports
-        $this->imports->delete(['dealer_id' => $dealer->dealer_id]);
-
-        // Create Lead Import for No Location
-        $imports = [];
-        $imports[] = factory(LeadImport::class, 1)->create([
-            'dealer_id' => $dealer->dealer_id,
-            'email' => $dealer->email
-        ]);
-
-        // Create Lead Import for Location
-        $imports[] = factory(LeadImport::class, 1)->create([
-            'dealer_id' => $dealer->dealer_id,
-            'email' => $location->email
-        ]);
-
-        // Return Imports
-        return $imports;
     }
 }
