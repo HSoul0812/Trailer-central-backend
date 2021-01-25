@@ -305,11 +305,11 @@ class ADFTest extends TestCase
      * 
      * @param Lead $lead
      * @param User $dealer
-     * @param DealerLocation $location
+     * @param DealerLocation || null $location
      * @param Inventory || null $inventory
      * @return type
      */
-    private function getAdfXml(Lead $lead, User $dealer, DealerLocation $location, $inventory = null) {
+    private function getAdfXml(Lead $lead, User $dealer, $location = null, $inventory = null) {
         return '<?xml version="1.0" encoding="UTF-8"?>
 <?adf version="1.0"?>
 <adf>
@@ -339,20 +339,20 @@ class ADFTest extends TestCase
   </customer>
   <vendor>
    <id sequence="1" source="DealerID">' . $dealer->dealer_id . '</id>
-   <id sequence="2" source="DealerLocationID">' . $dealer->dealer_location_id . '</id>
+   ' . ($location->dealer_location_id ? '<id sequence="2" source="DealerLocationID">' . $location->dealer_location_id . '</id>' : '') . '
    ' . ($lead->identifier ? '<id sequence="3" source="ID">' . $lead->identifier . '</id>' : '') . '
    <vendorname>' . $dealer->name . '</vendorname>
    <contact>
-    <name part="full">' . $location->contact . '</name>
-    <url>' . $location->domain . '</url>
-    <email>' . $location->email . '</email>
-    <phone>' . $location->phone . '</phone>
+    <name part="full">' . ($location->contact ?? $dealer->name) . '</name>
+    <url>' . ($location->domain ?? $dealer->website->domain) . '</url>
+    <email>' . ($location->email ?? $dealer->email) . '</email>
+    <phone>' . ($location->phone ?? '') . '</phone>
     <address type="work">
-     <street>' . $location->address . '</street>
-     <city>' . $location->city . '</city>
-     <regioncode>' . $location->region . '</regioncode>
-     <postalcode>' . $location->postalcode . '</postalcode>
-     <country>' . $location->country . '</country>
+     <street>' . ($location->address ?? '') . '</street>
+     <city>' . ($location->city ?? '') . '</city>
+     <regioncode>' . ($location->region ?? '') . '</regioncode>
+     <postalcode>' . ($location->postalcode ?? '') . '</postalcode>
+     <country>' . ($location->country ?? '') . '</country>
     </address>
    </contact>
    <provider>
