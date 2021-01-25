@@ -514,7 +514,7 @@ class ADFTest extends TestCase
      */
     private function refreshLeadImports(User $dealer, DealerLocation $location) {
         // Delete Existing Lead Imports
-        $this->imports->deleteAll(['dealer_id' => $dealer->dealer_id]);
+        $this->imports->delete(['dealer_id' => $dealer->dealer_id]);
 
         // Create Lead Import for No Location
         $imports = [];

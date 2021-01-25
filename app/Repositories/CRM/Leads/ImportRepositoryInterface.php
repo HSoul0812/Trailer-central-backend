@@ -8,14 +8,6 @@ use Illuminate\Support\Collection;
 
 interface ImportRepositoryInterface extends Repository {
     /**
-     * Delete All For Params (dealer_id required)
-     * 
-     * @param array $params
-     * @return bool
-     */
-    public function deleteAll($params);
-
-    /**
      * Get All Active Lead Import Emails
      * 
      * @return Collection<LeadImport>

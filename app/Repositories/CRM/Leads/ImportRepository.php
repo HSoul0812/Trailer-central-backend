@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Leads;
 
+use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\LeadImport;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
@@ -9,61 +10,93 @@ use Illuminate\Support\Collection;
 
 class ImportRepository implements ImportRepositoryInterface 
 {
+    /**
+     * Create Import for Dealer
+     * 
+     * @param array $params
+     * @return LeadImport
+     */
     public function create($params): LeadImport {
         return LeadImport::create($params);
     }
 
-    public function delete($params) {
-        // Get Lead Import
-        return LeadImport::findOrFail($params['id'])->delete();
-    }
-
     /**
-     * Delete All For Params (dealer_id required)
+     * Delete All Imports for Dealer
      * 
      * @param array $params
      * @return bool
      */
-    public function deleteAll($params) {
-        // Delete All for Dealer ID
-        return LeadImport::where('dealer_id', $params['dealer_id'])->delete();
+    public function delete($params) {
+        // Get Lead Import
+        $query = LeadImport::where('dealer_id', $params['dealer_id']);
+
+        // Email Set?
+        if(isset($params['email'])) {
+            $query->where('email', $params['email']);
+        }
+
+        // Return Result
+        return $query->delete();
     }
 
-    public function get($params): LeadImport {
-        return LeadImport::findOrFail($params['id']);
+    /**
+     * Get Single Lead Import
+     * 
+     * @param type $params
+     * @throws NotImplementedException
+     */
+    public function get($params) {
+        throw new NotImplementedException;
     }
 
+    /**
+     * Get All Lead Imports By Dealer
+     * 
+     * @param array $params
+     * @return pagination
+     */
     public function getAll($params) {
-        $query = LeadImport::where('id', '>', 0);
+        // Get All By Dealer ID
+        $query = LeadImport::where('dealer_id', $params['dealer_id']);
 
-        if (isset($params['dealer_id'])) {
-            $query = $query->where('dealer_id', $params['dealer_id']);
-        }
-
-        if (isset($params['dealer_location_id'])) {
-            $query = $query->where('dealer_location_id', $params['dealer_location_id']);
-        }
-
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 15;
-        }
-
-        if (isset($params['sort'])) {
+        if(isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
-        return $query->paginate($params['per_page'])->appends($params);
+        return $query->get();
     }
 
-    public function update($params): LeadImport {
-        $leadImport = LeadImport::findOrFail($params['id']);
+    /**
+     * Update All Imports By Dealer
+     * 
+     * @param array $params
+     * @return Collection<LeadImport>
+     */
+    public function update($params): Collection {
+        // Get All Imports
+        $imports = $this->getAll($params);
 
-        DB::transaction(function() use (&$leadImport, $params) {
-            // Fill Lead Import Details
-            $leadImport->fill($params)->save();
+        // Start Transaction
+        DB::transaction(function() use (&$imports, $params) {
+            // Delete Existing
+            $this->delete($params['dealer_id']);
+
+            // Empty Collection
+            $imports = new Collection();
+
+            // Create New For Dealer
+            foreach($params['emails'] as $email) {
+                // Create Import
+                $import = $this->create([
+                    'dealer_id' => $params['dealer_id'],
+                    'email' => $email
+                ]);
+                $imports->push($import);
+            }
         });
 
-        return $leadImport;
+        // Collect Imports
+        return $imports;
     }
 
 
@@ -93,12 +126,12 @@ class ImportRepository implements ImportRepositoryInterface
      */
     public function find($params)
     {
-        // Find LeadImport By ID
-        if(isset($params['id'])) {
-            return LeadImport::find($params['id']);
-        }
-
-        // Return LeadImport By Email
-        return LeadImport::where('email', $params['email'])->first();
+        // Find Lead Imports By Email and Dealer Name
+        return LeadImport::select(LeadImport::getTableName() . '.*')
+                         ->leftJoin(User::getTableName(),
+                                    User::getTableName() . '.dealer_id', '=',
+                                    LeadImport::getTableName() . '.dealer_id')
+                         ->where(LeadImport::getTableName() . '.email', $params['email'])
+                         ->where(User::getTableName() . '.name', $params['name']);
     }
 }

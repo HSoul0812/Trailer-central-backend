@@ -422,6 +422,34 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Leads
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'leads'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | ADF Import
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'import'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@index');
+                $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
+                $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
+            });
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Integrations
         |--------------------------------------------------------------------------
         |
