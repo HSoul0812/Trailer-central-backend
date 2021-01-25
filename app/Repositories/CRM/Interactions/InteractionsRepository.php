@@ -85,7 +85,8 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
                  'interaction_notes',
                  'interaction_time',
                  'sent_by',
-                 'from_email'])->where('tc_lead_id', $params['lead_id']);
+                 'from_email',
+                  DB::raw('"" AS to_no')])->where('tc_lead_id', $params['lead_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -188,6 +189,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             'log_message AS interaction_notes',
             'date_sent AS interaction_time',
             DB::raw('from_number AS from_email'),
+            DB::raw('to_number AS to_no'),
             DB::raw('"" AS sent_by')
         ])->where('lead_id', $params['lead_id']);
 
