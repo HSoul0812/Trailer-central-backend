@@ -124,7 +124,11 @@ class ADFService implements ADFServiceInterface {
                     $total++;
                 }
             } catch(InvalidAdfDealerIdException $e) {
-                $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                if(!empty($dealerId) && is_int($dealerId)) {
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
+                } else {
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                }
                 Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             } catch(InvalidAdfImportFormatException $e) {
                 $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);

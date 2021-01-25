@@ -26,6 +26,7 @@ return [
             'domain' => env('ADF_IMPORT_DOMAIN', 'operatebeyond.com'),
             'inbox' => env('ADF_IMPORT_INBOX', 'INBOX'),
             'invalid' => env('ADF_IMPORT_INVALID', 'Invalid'),
+            'unmapped' => env('ADF_IMPORT_UNMAPPED', 'Unmapped'),
             'processed' => env('ADF_IMPORT_PROCESSED', 'Processed')
         ]
     ]
