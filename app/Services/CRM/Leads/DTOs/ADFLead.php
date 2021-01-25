@@ -207,7 +207,7 @@ class ADFLead
      */
     public function getLocationId(): int
     {
-        return $this->locationId;
+        return $this->locationId ?? 0;
     }
 
     /**
