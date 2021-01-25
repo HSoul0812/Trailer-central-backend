@@ -10,7 +10,7 @@ use App\Http\Requests\CRM\Leads\Import\UpdateImportRequest;
 use App\Http\Requests\CRM\Leads\Import\DeleteImportRequest;
 use App\Transformers\CRM\Leads\ImportTransformer;
 
-class LeadController extends RestfulControllerV2
+class LeadImportController extends RestfulControllerV2
 {
     protected $leads;
     
