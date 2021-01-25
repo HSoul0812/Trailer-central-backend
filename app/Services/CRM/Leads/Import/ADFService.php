@@ -384,6 +384,8 @@ class ADFService implements ADFServiceInterface {
 
             // Vendor Location Exists as Dealer Location?
             if(!empty($location) && $location->count() > 0) {
+                var_dump($location->first());
+                die;
                 $adfLead->setLocationId($location->first()->dealer_location_id);
             }
         }
