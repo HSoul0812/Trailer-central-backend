@@ -10,7 +10,7 @@ use App\Repositories\Inventory\InventoryHistoryRepository;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
 use Tests\TestCase;
 
@@ -24,8 +24,7 @@ class InventoryHistoryRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
      * @note IntegrationTestCase
      */
     public function testIoCIsWorking(): void
@@ -44,8 +43,7 @@ class InventoryHistoryRepositoryTest extends TestCase
      * @param array $params  list of query parameters
      * @param int $expectedTotal
      *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers InventoryHistoryRepository::getAll
      */
@@ -57,7 +55,7 @@ class InventoryHistoryRepositoryTest extends TestCase
         // When I call getAll without pagination and valid parameters
         // Then I got a list of inventory transactions without pagination
         /** @var Collection $inventories */
-        $inventories = $this->getConcreteRepository()->getAll($params);
+        $inventories = $this->getConcreteRepository()->getAll($this->seeder->extractValues($params));
 
         // And That list should be Collection instance
         self::assertInstanceOf(Collection::class, $inventories);
@@ -91,7 +89,7 @@ class InventoryHistoryRepositoryTest extends TestCase
 
         // Given I have a collection of inventory transactions
         /** @var LengthAwarePaginator $transactions */
-        $transactions = $this->getConcreteRepository()->getAll($params, true);
+        $transactions = $this->getConcreteRepository()->getAll($this->seeder->extractValues($params), true);
 
         /** @var InventoryHistory $firstRecord */
         $firstRecord = $transactions->first();
@@ -113,17 +111,22 @@ class InventoryHistoryRepositoryTest extends TestCase
      */
     public function validQueryParametersProvider(): array
     {
-        $inventoryId = InventoryHistorySeeder::INVENTORY_ID;
-        $customerId = InventoryHistorySeeder::CUSTOMER_ID;
+        $inventoryIdLambda = static function (InventoryHistorySeeder $seeder) {
+            return $seeder->inventory->getKey();
+        };
+
+        $customerIdLambda = static function (InventoryHistorySeeder $seeder) {
+            return $seeder->fixedUser->getKey();
+        };
 
         return [                                             // array $parameters, int $expectedTotal, int $expectedLastPage, string $expectedCustomerName
-            'By inventory paged'                             => [['inventory_id' => $inventoryId,'per_page' => 3], 8, 3, 'Walter White'],
-            'By inventory sorted by customer and paged'      => [['inventory_id' => $inventoryId,'per_page' => 3, 'sort' => '-customer_name'], 8, 3, 'Jesse Pinkman'],
-            'By inventory sorted by customer desc and paged' => [['inventory_id' => $inventoryId,'per_page' => 3, 'sort' => 'customer_name'], 8, 3, 'Walter White'],
-            'By inventory and customer'                      => [['inventory_id' => $inventoryId,'customer_id' => $customerId], 1, 1, 'Mike Ehrmantraut'],
-            'By inventory filtered with matches'             => [['inventory_id' => $inventoryId, 'search_term' => 'Ehrmantraut'], 1, 1, 'Mike Ehrmantraut'],
-            'By inventory filtered without matches'          => [['inventory_id' => $inventoryId, 'search_term' => 'Zaul Goodman'], 0, 1, null],
-            'By inventory filtered by `andWhere` condition'  => [['inventory_id' => $inventoryId, 'andWhere' => [['subtype', '=', ServiceOrder::TYPE_RETAIL]]], 1, 1, 'Mike Ehrmantraut'],
+            'By inventory paged'                             => [['inventory_id' => $inventoryIdLambda,'per_page' => 3], 8, 3, 'Walter White'],
+            'By inventory sorted by customer and paged'      => [['inventory_id' => $inventoryIdLambda,'per_page' => 3, 'sort' => '-customer_name'], 8, 3, 'Jesse Pinkman'],
+            'By inventory sorted by customer desc and paged' => [['inventory_id' => $inventoryIdLambda,'per_page' => 3, 'sort' => 'customer_name'], 8, 3, 'Walter White'],
+            'By inventory and customer'                      => [['inventory_id' => $inventoryIdLambda,'customer_id' => $customerIdLambda], 1, 1, 'Mike Ehrmantraut'],
+            'By inventory filtered with matches'             => [['inventory_id' => $inventoryIdLambda, 'search_term' => 'Ehrmantraut'], 1, 1, 'Mike Ehrmantraut'],
+            'By inventory filtered without matches'          => [['inventory_id' => $inventoryIdLambda, 'search_term' => 'Zaul Goodman'], 0, 1, null],
+            'By inventory filtered by `andWhere` condition'  => [['inventory_id' => $inventoryIdLambda, 'andWhere' => [['subtype', '=', ServiceOrder::TYPE_RETAIL]]], 1, 1, 'Mike Ehrmantraut'],
         ];
     }
 
@@ -144,8 +147,7 @@ class InventoryHistoryRepositoryTest extends TestCase
     /**
      * @return InventoryHistoryRepositoryInterface
      *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      */
     protected function getConcreteRepository(): InventoryHistoryRepositoryInterface
