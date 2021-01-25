@@ -380,7 +380,7 @@ class ADFService implements ADFServiceInterface {
         // Get Vendor Location
         $filters = $adfLead->getVendorAddrFilters();
         if(!empty($filters) && count($filters) > 1) {
-            $location = $this->locations->find();
+            $location = $this->locations->find($filters);
 
             // Vendor Location Exists as Dealer Location?
             if(!empty($location) && $location->count() > 0) {
