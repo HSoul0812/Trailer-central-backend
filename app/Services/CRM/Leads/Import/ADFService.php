@@ -378,7 +378,7 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setVendorAddrCountry($vendor->filterXPath('//address[@type="work"]/country')->text());
 
         // Get Vendor Location
-        $filters = $adfLead->getVendorLocationFilters();
+        $filters = $adfLead->getVendorAddrFilters();
         if(!empty($filters) && count($filters) > 1) {
             $location = $this->locations->find();
 
