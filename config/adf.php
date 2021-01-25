@@ -11,18 +11,18 @@ return [
     */
     'imports' => [
         'defaults' => [
-            'email' => env('ADF_IMPORT_EMAIL', 'adf@trailercentral.com'),
+            'email' => env('ADF_IMPORT_EMAIL', 'adf@operatebeyond.com'),
             'password' => env('ADF_IMPORT_PASSWORD', ''),
             'inbox' => env('ADF_IMPORT_INBOX', 'INBOX'),
             'invalid' => env('ADF_IMPORT_INVALID', 'Invalid'),
             'processed' => env('ADF_IMPORT_PROCESSED', 'Processed'),
             'driver' => env('ADF_IMPORT_DRIVER', 'smtp'),
-            'host' => env('ADF_IMPORT_HOST', 'trailercentral.com'),
+            'host' => env('ADF_IMPORT_HOST', 'operatebeyond.com'),
             'ssl' => env('ADF_IMPORT_SSL', 'tls'),
             'port' => env('ADF_IMPORT_PORT', 587)
         ],
         'gmail' => [
-            'email' => env('ADF_IMPORT_EMAIL', 'catchall@operatebeyond.com'),
+            'email' => env('ADF_IMPORT_EMAIL', 'adf@operatebeyond.com'),
             'domain' => env('ADF_IMPORT_DOMAIN', 'operatebeyond.com'),
             'inbox' => env('ADF_IMPORT_INBOX', 'INBOX'),
             'invalid' => env('ADF_IMPORT_INVALID', 'Invalid'),
