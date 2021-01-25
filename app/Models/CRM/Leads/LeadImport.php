@@ -2,7 +2,6 @@
 namespace App\Models\CRM\Leads;
 
 use App\Models\User\User;
-use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
@@ -34,7 +33,6 @@ class LeadImport extends Model
      */
     protected $fillable = [
         'dealer_id',
-        'dealer_location_id',
         'email'
     ];
 
@@ -46,16 +44,6 @@ class LeadImport extends Model
     public function dealer()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
-    }
-
-    /**
-     * LeadImport BelongsTo DealerLocation
-     * 
-     * @return BelongTo
-     */
-    public function dealerLocation()
-    {
-        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
     }
 
     /**
