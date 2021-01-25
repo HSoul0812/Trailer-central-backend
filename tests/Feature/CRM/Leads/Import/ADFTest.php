@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\CRM\Leads\Import;
 
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Leads\LeadImport;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
@@ -21,12 +20,10 @@ class ADFTest extends TestCase
 {
     /**
      * App\Repositories\CRM\Leads\LeadRepositoryInterface $leads
-     * App\Repositories\CRM\Leads\ImportRepositoryInterface $imports
      * App\Repositories\System\EmailRepositoryInterface $emails
      * App\Repositories\Integration\Auth\TokenRepositoryInterface $tokens
      */
     protected $leads;
-    protected $imports;
     protected $emails;
     protected $tokens;
 
@@ -39,7 +36,6 @@ class ADFTest extends TestCase
 
         // Make Repositories
         $this->leads = $this->app->make('App\Repositories\CRM\Leads\LeadRepositoryInterface');
-        $this->imports = $this->app->make('App\Repositories\CRM\Leads\ImportRepositoryInterface');
         $this->emails = $this->app->make('App\Repositories\System\EmailRepositoryInterface');
         $this->tokens = $this->app->make('App\Repositories\Integration\Auth\TokenRepositoryInterface');
     }
