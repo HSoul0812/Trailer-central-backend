@@ -53,11 +53,10 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
     public function serviceReport($params) :array
     {
         $dbParams = ['dealerId' => $params['dealer_id']];
-        $usWhere = "";
         $where = 'WHERE 1=1 ';
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
-            $usWhere .= " AND DATE(us.created_at) BETWEEN :fromDate AND :toDate ";
+            $where .= " AND DATE(r_order.created_at) BETWEEN :fromDate AND :toDate ";
             $dbParams['fromDate'] = $params['from_date'];
             $dbParams['toDate'] = $params['to_date'];
         }
@@ -79,14 +78,14 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
         $sql =
             "SELECT technician.id technician_id, technician.first_name, technician.last_name,
                     s_technician.act_hrs, s_technician.paid_hrs, s_technician.billed_hrs,
-                    r_order.type repair_order_type,
+                    r_order.type repair_order_type, r_order.created_at ro_created_at,
                     s_item.amount paid_retail,
                     sales.*
             FROM dms_settings_technician technician
             JOIN dms_service_technician AS s_technician ON technician.id = s_technician.dms_settings_technician_id
             JOIN dms_service_item AS s_item ON s_technician.service_item_id = s_item.id
             JOIN dms_repair_order AS r_order ON s_item.repair_order_id = r_order.id
-            JOIN (
+            LEFT JOIN (
                 /* unit sales */
                 SELECT
                     us.id sale_id, i.id invoice_id, i.doc_num as doc_num, i.total invoice_total,
@@ -152,7 +151,6 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
                 ) sales_labor ON i.id = sales_labor.invoice_id
 
                 WHERE us.dealer_id=:dealerId
-                {$usWhere}
                 GROUP BY us.id) sales ON r_order.unit_sale_id=sales.sale_id
             {$where}";
 
