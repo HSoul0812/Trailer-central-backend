@@ -53,7 +53,7 @@ class LeadImportController extends RestfulControllerV2
     public function update(Request $request) {
         $request = new UpdateImportRequest($request->all());
         if ($request->validate()) {
-            return $this->response->item($this->imports->update($request->all()), $this->transformer);
+            return $this->response->collection($this->imports->update($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

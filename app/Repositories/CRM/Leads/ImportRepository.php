@@ -80,7 +80,7 @@ class ImportRepository implements ImportRepositoryInterface
         // Start Transaction
         DB::transaction(function() use (&$imports, $params) {
             // Delete Existing
-            $this->delete($params['dealer_id']);
+            $this->delete($params);
 
             // Empty Collection
             $imports = new Collection();
