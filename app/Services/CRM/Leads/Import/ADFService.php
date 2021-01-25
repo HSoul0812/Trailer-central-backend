@@ -144,7 +144,7 @@ class ADFService implements ADFServiceInterface {
 
         // Valid XML?
         if($adf->count() < 1 || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
-            Log::info("Body text failed:\r\n\r\n" . $body);
+            Log::error("Body text failed to parse ADF correctly:\r\n\r\n" . $body);
             throw new InvalidAdfImportFormatException;
         }
 
