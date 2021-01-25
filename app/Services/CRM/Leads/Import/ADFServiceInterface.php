@@ -29,12 +29,12 @@ interface ADFServiceInterface {
     /**
      * Get ADF and Return Result
      * 
-     * @param string $email
+     * @param User $dealer
      * @param Crawler $adf
      * @throws InvalidAdfImportVendorException
      * @return ADFLead
      */
-    public function parseAdf(string $email, Crawler $adf) : ADFLead;
+    public function parseAdf(User $dealer, Crawler $adf) : ADFLead;
 
     /**
      * Import ADF as Lead
