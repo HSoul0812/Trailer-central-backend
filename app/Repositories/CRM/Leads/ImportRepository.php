@@ -7,6 +7,7 @@ use App\Models\CRM\Leads\LeadImport;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ImportRepository implements ImportRepositoryInterface 
 {
