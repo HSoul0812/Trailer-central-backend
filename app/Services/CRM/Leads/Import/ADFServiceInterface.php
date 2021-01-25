@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Leads\Import;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\User\User;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use Symfony\Component\DomCrawler\Crawler;
 
