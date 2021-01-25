@@ -156,7 +156,7 @@ class ADFService implements ADFServiceInterface {
      * 
      * @param string $email
      * @param Crawler $adf
-     * @throws InvalidAdfImportFormatException
+     * @throws InvalidAdfImportVendorException
      * @return ADFLead
      */
     public function parseAdf(string $email, Crawler $adf) : ADFLead {
