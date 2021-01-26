@@ -103,13 +103,10 @@ class ADFService implements ADFServiceInterface {
                 // Validate ADF
                 $crawler = $this->validateAdf($email->getBody());
 
-                // Find Email
+                // Find Dealer ID
                 $dealerId = str_replace('@' . config('adf.imports.gmail.domain'), '', $email->getToEmail());
                 try {
                     $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
-                    if(empty($dealer->dealer_id)) {
-                        throw new InvalidAdfDealerIdException;
-                    }
                 } catch(\Exception $e) {
                     throw new InvalidAdfDealerIdException;
                 }
@@ -124,6 +121,7 @@ class ADFService implements ADFServiceInterface {
                     $total++;
                 }
             } catch(InvalidAdfDealerIdException $e) {
+                var_dump($dealerId);
                 if(!empty($dealerId) && is_int($dealerId)) {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
                 } else {
