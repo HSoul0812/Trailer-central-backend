@@ -48,7 +48,7 @@ class EmailRepository implements EmailRepositoryInterface {
      * @param array $params
      * @return App\Models\System\Email
      */
-    public function create(array $params): Email {
+    public function create($params): Email {
         // Create System Email
         return Email::create($params);
     }
@@ -59,7 +59,7 @@ class EmailRepository implements EmailRepositoryInterface {
      * @param int $id
      * @return bool
      */
-    public function delete(int $id): bool {
+    public function delete($id): bool {
         // Delete System Email
         return Email::findOrFail($id)->delete();
     }
@@ -70,7 +70,7 @@ class EmailRepository implements EmailRepositoryInterface {
      * @param array $params
      * @return App\Models\System\Email
      */
-    public function get(array $params): Email {
+    public function get($params): Email {
         // Find System Email By ID
         return Email::findOrFail($params['id']);
     }
@@ -81,7 +81,7 @@ class EmailRepository implements EmailRepositoryInterface {
      * @param array $params
      * @return Collection<App\Models\System\Email>
      */
-    public function getAll(array $params): Collection {
+    public function getAll($params): Collection {
         $query = Email::where('dealer_id', '=', $params['dealer_id']);
         
         if (!isset($params['per_page'])) {
@@ -109,7 +109,7 @@ class EmailRepository implements EmailRepositoryInterface {
      * @param array $params
      * @return App\Models\System\Email
      */
-    public function update(array $params): Email {
+    public function update($params): Email {
         $email = Email::findOrFail($params['id']);
 
         DB::transaction(function() use (&$email, $params) {
@@ -126,7 +126,7 @@ class EmailRepository implements EmailRepositoryInterface {
      * @param array $params
      * @return App\Models\System\Email
      */
-    public function find(array $params): Email {
+    public function find($params): Email {
         $query = Email::where('id', '>', 0);
 
         if (isset($params['id'])) {

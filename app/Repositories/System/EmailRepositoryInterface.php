@@ -12,5 +12,5 @@ interface EmailRepositoryInterface extends Repository {
      * @param array $params
      * @return App\Models\System\Email
      */
-    public function find(array $params): Email;
+    public function find($params): Email;
 }
