@@ -46,7 +46,7 @@ class ADFTest extends TestCase
      * @covers App\Console\Commands\CRM\Leads\Import\ADF
      * @return void
      */
-    public function testADFImport()
+    public function testADFImport(): void
     {
         // Get Dealer
         $dealer = User::findOrFail(self::getTestDealerId());
@@ -300,9 +300,9 @@ class ADFTest extends TestCase
      * @param User $dealer
      * @param DealerLocation || null $location
      * @param Inventory || null $inventory
-     * @return type
+     * @return string
      */
-    private function getAdfXml(Lead $lead, User $dealer, $location = null, $inventory = null) {
+    private function getAdfXml(Lead $lead, User $dealer, $location = null, $inventory = null): string {
         return '<?xml version="1.0" encoding="UTF-8"?>
 <?adf version="1.0"?>
 <adf>
@@ -363,9 +363,9 @@ class ADFTest extends TestCase
      * @param User $dealer
      * @param DealerLocation || null $location
      * @param Inventory || null $inventory
-     * @return type
+     * @return string
      */
-    private function getNoAdfXml(Lead $lead, User $dealer, $location = null, $inventory = null) {
+    private function getNoAdfXml(Lead $lead, User $dealer, $location = null, $inventory = null): string {
         return '<?xml version="1.0" encoding="UTF-8"?>
 <lead>
  <prospect>
@@ -421,11 +421,13 @@ class ADFTest extends TestCase
     /**
      * Get Parsed Email
      * 
-     * @param string $id
-     * @param EmailHistory $email
+     * @param int $id
+     * @param string $from
+     * @param string $body
+     * @param string || null $to
      * @return ParsedEmail
      */
-    private function getParsedEmail($id, $from, $body, $to = null) {
+    private function getParsedEmail(int $id, string $from, string $body, $to = null): ParsedEmail {
         // Create Parsed Email
         $parsed = new ParsedEmail();
         $parsed->setId((string) $id);
@@ -451,7 +453,7 @@ class ADFTest extends TestCase
     /**
      * Get System Email
      * 
-     * @return SystemEmail
+     * @return Email
      */
     private function getSystemEmail(): Email {
         // Get Email

@@ -5,6 +5,7 @@ namespace App\Models\System;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class Email
@@ -41,7 +42,7 @@ class Email extends Model
      * 
      * @return HasOne
      */
-    public function googleToken()
+    public function googleToken(): HasOne
     {
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('google')

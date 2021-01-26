@@ -17,7 +17,7 @@ interface ADFServiceInterface {
      * @throws InvalidAdfDealerIdException
      * @return int total number of imported adf leads
      */
-    public function import() : int;
+    public function import(): int;
 
     /**
      * Validate ADF and Return Result

@@ -35,7 +35,7 @@ class ADF extends Command
      *
      * @return void
      */
-    public function __construct(ADFServiceInterface $service)
+    public function __construct(ADFServiceInterface $service): void
     {
         parent::__construct();
 
@@ -47,7 +47,7 @@ class ADF extends Command
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         // Start Importing Leads
         $imported = $this->service->import();

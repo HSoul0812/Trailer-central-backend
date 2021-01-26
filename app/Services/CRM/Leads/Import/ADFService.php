@@ -69,7 +69,7 @@ class ADFService implements ADFServiceInterface {
                                 UserRepositoryInterface $dealers,
                                 DealerLocationRepositoryInterface $locations,
                                 GoogleServiceInterface $google,
-                                GmailServiceInterface $gmail) {
+                                GmailServiceInterface $gmail): void {
         $this->leads = $leads;
         $this->emails = $emails;
         $this->tokens = $tokens;
@@ -86,7 +86,7 @@ class ADFService implements ADFServiceInterface {
      * @throws InvalidAdfDealerIdException
      * @return int total number of imported adf leads
      */
-    public function import() : int {
+    public function import(): int {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
         $inbox = config('adf.imports.gmail.inbox');
@@ -169,7 +169,7 @@ class ADFService implements ADFServiceInterface {
      * @param Crawler $adf
      * @return ADFLead
      */
-    public function parseAdf(User $dealer, Crawler $adf) : ADFLead {
+    public function parseAdf(User $dealer, Crawler $adf): ADFLead {
         // Create ADF Lead
         $adfLead = new ADFLead();
 
@@ -200,7 +200,7 @@ class ADFService implements ADFServiceInterface {
      * @param ADFLead $adfLead
      * @return Lead
      */
-    public function importLead(ADFLead $adfLead) : Lead {
+    public function importLead(ADFLead $adfLead): Lead {
         // Save Lead From ADF Data
         return $this->leads->create([
             'website_id' => $adfLead->getWebsiteId(),
@@ -235,7 +235,7 @@ class ADFService implements ADFServiceInterface {
      * @throws MissingAdfEmailAccessTokenException
      * @return AccessToken
      */
-    private function getAccessToken() : AccessToken {
+    private function getAccessToken(): AccessToken {
         // Get Email
         $email = config('adf.imports.gmail.email');
 
@@ -397,7 +397,7 @@ class ADFService implements ADFServiceInterface {
      * @param string $xml
      * @return string
      */
-    private function fixCdata($xml) {
+    private function fixCdata($xml): string {
         return preg_replace('/<!\[CDATA\[(.*?)\]\]>/', '$1', $xml);
     }
 }
