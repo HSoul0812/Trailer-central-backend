@@ -133,6 +133,7 @@ class Lead extends Model
         'comments',
         'note',
         'metadata',
+        'date_submitted',
         'contact_email_sent',
         'adf_email_sent',
         'cdk_email_sent',

@@ -49,10 +49,12 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
         ])->id;
 
         $inventory11 = factory(Inventory::class)->create([
+            'dealer_id' => self::getTestDealerId(),
             'notes' => 'inventory11'
         ]);
 
         $inventory12 = factory(Inventory::class)->create([
+            'dealer_id' => self::getTestDealerId(),
             'notes' => 'inventory12'
         ]);
 

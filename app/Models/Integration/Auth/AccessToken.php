@@ -24,6 +24,7 @@ class AccessToken extends Model
 
     // Define Relation Types
     const RELATION_TYPES = [
+        'system_emails' => 'System Email',
         'sales_person' => 'Sales Person',
         'fbapp_page' => 'Facebook Page',
         'fbapp_catalog' => 'Facebook Catalog'
@@ -31,6 +32,7 @@ class AccessToken extends Model
 
     // Define Supported Token Types
     const RELATION_TOKENS = [
+        'system_emails' => 'google',
         'sales_person' => 'google',
         'fbapp_page' => 'facebook',
         'fbapp_catalog' => 'facebook'
