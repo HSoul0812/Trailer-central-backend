@@ -9,6 +9,7 @@ use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use App\Traits\WithGetter;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\database\seeds\Seeder;
 
@@ -98,6 +99,7 @@ class InventorySeeder extends Seeder
         $dealerId = $this->dealer->getKey();
 
         // Database clean up
+        DB::table('parts_orders_status')->where('dealer_id', '=', $dealerId)->delete();
         Inventory::where('dealer_id', $dealerId)->delete();
         Customer::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);

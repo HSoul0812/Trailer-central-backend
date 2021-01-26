@@ -2,11 +2,15 @@
 
 namespace App\Services\User;
 
+use App\Helpers\StringHelper;
+use App\Models\User\NewDealerUser;
+use App\Models\User\NewUser;
 use App\Models\User\User;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\User\NewDealerUserRepositoryInterface;
+use App\Repositories\User\NewUserRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
-use http\Exception\InvalidArgumentException;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -31,19 +35,44 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     private $crmUserRoleRepository;
 
     /**
+     * @var NewDealerUserRepositoryInterface
+     */
+    private $newDealerUserRepository;
+
+    /**
+     * @var NewUserRepositoryInterface
+     */
+    private $newUserRepository;
+
+    /**
+     * @var StringHelper
+     */
+    private $stringHelper;
+
+    /**
      * DealerOptionsService constructor.
      * @param UserRepositoryInterface $userRepository
      * @param CrmUserRepositoryInterface $crmUserRepository
      * @param CrmUserRoleRepositoryInterface $crmUserRoleRepository
+     * @param NewDealerUserRepositoryInterface $newDealerUserRepository
+     * @param NewUserRepositoryInterface $newUserRepository
+     * @param StringHelper $stringHelper
      */
     public function __construct(
         UserRepositoryInterface $userRepository,
         CrmUserRepositoryInterface $crmUserRepository,
-        CrmUserRoleRepositoryInterface $crmUserRoleRepository
+        CrmUserRoleRepositoryInterface $crmUserRoleRepository,
+        NewDealerUserRepositoryInterface $newDealerUserRepository,
+        NewUserRepositoryInterface $newUserRepository,
+        StringHelper $stringHelper
     ) {
         $this->userRepository = $userRepository;
         $this->crmUserRepository = $crmUserRepository;
         $this->crmUserRoleRepository = $crmUserRoleRepository;
+        $this->newDealerUserRepository = $newDealerUserRepository;
+        $this->newUserRepository = $newUserRepository;
+
+        $this->stringHelper = $stringHelper;
     }
 
     /**
@@ -59,6 +88,10 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $user = $this->userRepository->get(['dealer_id' => $dealerId]);
             $crmUser = $user->crmUser;
             $newDealerUser = $user->newDealerUser;
+
+            if (!$newDealerUser instanceof NewDealerUser) {
+                $newDealerUser = $this->createNewUser($user);
+            }
 
             if ($crmUser) {
                 $crmUserParams = [
@@ -98,7 +131,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
             return true;
         } catch (\Exception $e) {
-            Log::error('CRM activation error', $e->getTrace());
+            Log::error("CRM activation error. dealer_id - {$dealerId}", $e->getTrace());
             $this->userRepository->rollbackTransaction();
 
             return false;
@@ -126,9 +159,40 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
             return true;
         } catch (\Exception $e) {
-            Log::error('CRM deactivation error', $e->getTrace());
+            Log::error("CRM deactivation error. dealer_id - {$dealerId}", $e->getTrace());
 
             return false;
         }
+    }
+
+    /**
+     * @param User $user
+     * @return NewDealerUser
+     * @throws \Exception
+     */
+    private function createNewUser(User $user): NewDealerUser
+    {
+        $newUserParams = [
+            'username' => $user->name,
+            'email' => $user->email,
+            'password' => $this->stringHelper->getRandomHex()
+        ];
+
+        /** @var NewUser $newUser */
+        $newUser = $this->newUserRepository->create($newUserParams);
+
+        $newDealerUserParams = [
+            'user_id' => $newUser->user_id,
+            'salt' => $this->stringHelper->getRandomHex(),
+            'auto_import_hide' => 0,
+            'auto_msrp' => 0
+        ];
+
+        /** @var NewDealerUser $newDealerUser */
+        $newDealerUser = $this->newDealerUserRepository->create($newDealerUserParams);
+
+        $user->newDealerUser()->save($newDealerUser);
+
+        return $newDealerUser;
     }
 }

@@ -144,6 +144,16 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
 
         $this->assertFalse($notExistingKey);
 
+        $this->assertArrayHasKey('dealer_id', $result[$technicianId1][$unitSale11Key]);
+        $this->assertArrayHasKey('dealer_id', $result[$technicianId1][$unitSale12Key]);
+        $this->assertArrayHasKey('dealer_id', $result[$technicianId2][$unitSale21Key]);
+
+        foreach ($result as $technician) {
+            $dealerIds = array_unique(array_column($technician, 'dealer_id'));
+            $this->assertCount(1, $dealerIds);
+            $this->assertEquals($this->getTestDealerId(), $dealerIds[0]);
+        }
+
         $this->assertArrayHasKey('act_hrs', $result[$technicianId1][$unitSale11Key]);
         $this->assertArrayHasKey('act_hrs', $result[$technicianId1][$unitSale12Key]);
         $this->assertArrayHasKey('act_hrs', $result[$technicianId2][$unitSale21Key]);
