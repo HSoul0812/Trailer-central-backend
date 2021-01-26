@@ -30,9 +30,6 @@ class ADF extends Command
      */
     protected $service;
 
-    /**
-     * Create a new command instance.
-     */
     public function __construct(ADFServiceInterface $service)
     {
         parent::__construct();

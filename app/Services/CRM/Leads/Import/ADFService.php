@@ -69,7 +69,7 @@ class ADFService implements ADFServiceInterface {
                                 UserRepositoryInterface $dealers,
                                 DealerLocationRepositoryInterface $locations,
                                 GoogleServiceInterface $google,
-                                GmailServiceInterface $gmail): void {
+                                GmailServiceInterface $gmail) {
         $this->leads = $leads;
         $this->emails = $emails;
         $this->tokens = $tokens;
