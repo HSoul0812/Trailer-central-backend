@@ -121,8 +121,7 @@ class ADFService implements ADFServiceInterface {
                     $total++;
                 }
             } catch(InvalidAdfDealerIdException $e) {
-                var_dump($dealerId);
-                if(!empty($dealerId) && is_int($dealerId)) {
+                if(!empty($dealerId) && is_numeric($dealerId)) {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
                 } else {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
