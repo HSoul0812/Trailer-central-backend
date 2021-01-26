@@ -24,9 +24,9 @@ interface ADFServiceInterface {
      * 
      * @param string $body
      * @throws InvalidAdfImportFormatException
-     * @return bool
+     * @return Crawler
      */
-    public function validateAdf(string $body) : Crawler;
+    public function validateAdf(string $body): Crawler;
 
     /**
      * Get ADF and Return Result
@@ -35,7 +35,7 @@ interface ADFServiceInterface {
      * @param Crawler $adf
      * @return ADFLead
      */
-    public function parseAdf(User $dealer, Crawler $adf) : ADFLead;
+    public function parseAdf(User $dealer, Crawler $adf): ADFLead;
 
     /**
      * Import ADF as Lead

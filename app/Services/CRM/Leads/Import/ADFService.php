@@ -144,9 +144,9 @@ class ADFService implements ADFServiceInterface {
      * 
      * @param string $body
      * @throws InvalidAdfImportFormatException
-     * @return bool
+     * @return Crawler
      */
-    public function validateAdf(string $body) : Crawler {
+    public function validateAdf(string $body): Crawler {
         // Get XML Parsed Data
         $fixed = $this->fixCdata($body);
         $crawler = new Crawler($fixed);
