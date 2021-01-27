@@ -27,21 +27,21 @@ interface GmailServiceInterface {
     /**
      * Get and Parse Individual Message
      * 
-     * @param int $mailId
+     * @param string $mailId
      * @return parsed message details
      */
-    public function message(int $mailId);
+    public function message(string $mailId);
 
     /**
      * Move Message Labels
      * 
      * @param AccessToken $accessToken
-     * @param int $mailId mail ID to modify
+     * @param string $mailId mail ID to modify
      * @param array $labels labels to add by name | required
      * @param array $remove labels to remove by name | optional
      * @return true on success, false on failure
      */
-    public function move(AccessToken $accessToken, int $mailId, array $labels, array $remove = []): bool;
+    public function move(AccessToken $accessToken, string $mailId, array $labels, array $remove = []): bool;
 
     /**
      * Get All Labels for User
