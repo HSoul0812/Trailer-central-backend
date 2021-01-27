@@ -84,7 +84,8 @@ class ImapService implements ImapServiceInterface
      */
     public function overview(int $mailId) {
         // Get Mail
-        $overview = reset($this->imap->getMailsInfo([$mailId]));
+        $mailIds = $this->imap->getMailsInfo([$mailId]);
+        $overview = reset($mailIds);
         if(empty($overview->uid)) {
             return false;
         }
