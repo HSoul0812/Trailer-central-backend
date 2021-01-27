@@ -141,6 +141,16 @@ class ImapService implements ImapServiceInterface
         // Get Mail Data
         $mail = $this->imap->getMail($email->getId(), false);
 
+        // Set To/From
+        if(empty($email->getToEmail()) && !empty($mail->to)) {
+            $email->setTo($mail->to);
+        }
+
+        // Handle Subject
+        if(empty($email->getSubject()) && !empty($mail->subject)) {
+            $email->setSubject($mail->subject);
+        }
+
         // Handle Body
         $email->setBody($mail->textHtml);
         if(empty($email->getBody())) {
