@@ -84,8 +84,8 @@ class ImapService implements ImapServiceInterface
      */
     public function overview(int $mailId) {
         // Get Mail
-        $mailIds = $this->imap->getMailsInfo([$mailId]);
-        $overview = reset($mailIds);
+        $mailInfo = $this->imap->getMailsInfo([$mailId]);
+        $overview = reset($mailInfo);
         if(empty($overview->uid)) {
             return false;
         }
@@ -97,7 +97,9 @@ class ImapService implements ImapServiceInterface
         // Set Message ID's
         $parsed->setMessageId(!empty($overview->in_reply_to) ? trim($overview->in_reply_to) : trim($overview->message_id));
         $parsed->setRootMessageId($parsed->getMessageId());
-        $parsed->setReferences($overview->references);
+        if(!empty($overview->references)) {
+            $parsed->setReferences($overview->references);
+        }
 
         // Handle Overriding Message ID From References
         $references = $parsed->getReferences();

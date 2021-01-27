@@ -164,10 +164,7 @@ class ParsedEmail
      */
     public function getReferences(): array
     {
-        if (empty($this->references)) {
-            return [];
-        }
-        return explode(" ", $parsed['references']);
+        return !empty($this->references) ? explode(" ", $this->references) : [];
     }
 
     /**
@@ -189,13 +186,7 @@ class ParsedEmail
      */
     public function getTo(): string
     {
-        // Name Exists?
-        if(!empty($this->toName)) {
-            return $this->toName . ' <' . $this->to . '>';
-        }
-
-        // Return To Email
-        return $this->to;
+        return !empty($this->toName) ? $this->toName . ' <' . $this->to . '>' : $this->to;
     }
 
     /**
@@ -270,13 +261,7 @@ class ParsedEmail
      */
     public function getFrom(): string
     {
-        // Name Exists?
-        if(!empty($this->fromName)) {
-            return $this->fromName . ' <' . $this->from . '>';
-        }
-
-        // Return From Email
-        return $this->from;
+        return !empty($this->fromName) ? $this->fromName . ' <' . $this->from . '>' : $this->from;
     }
 
     /**
