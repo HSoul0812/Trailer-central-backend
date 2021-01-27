@@ -134,7 +134,7 @@ class ImapService implements ImapServiceInterface
      */
     public function full(ParsedEmail $email) {
         // Get Mail Data
-        $mail = $this->imap->getMail($email->id, false);
+        $mail = $this->imap->getMail($email->getId(), false);
 
         // Handle Body
         $email->setBody($mail->textHtml);
