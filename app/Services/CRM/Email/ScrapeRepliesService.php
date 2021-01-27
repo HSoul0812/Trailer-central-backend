@@ -326,7 +326,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             if(empty($salesperson->googleToken)) {
                 $this->imap->full($email);
             }
-            if(empty($email->getSubject())) {
+            if(empty($email->getSubject()) || empty($email->getToEmail())) {
                 return -1;
             }
 

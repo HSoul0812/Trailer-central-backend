@@ -240,7 +240,7 @@ class ParsedEmail
      */
     public function getToEmail(): string
     {
-        return $this->to;
+        return $this->to ?? '';
     }
 
     /**
@@ -315,7 +315,7 @@ class ParsedEmail
      */
     public function getFromEmail(): string
     {
-        return $this->from;
+        return $this->from ?? '';
     }
 
     /**

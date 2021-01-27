@@ -114,11 +114,9 @@ class ImapService implements ImapServiceInterface
         }
 
         // Set To/From
-        if(empty($overview->to)) {
-            var_dump($overview);
-            die;
+        if(!empty($overview->to)) {
+            $parsed->setTo($overview->to);
         }
-        $parsed->setTo($overview->to);
         $parsed->setFrom($overview->from);
 
         // Handle Subject
