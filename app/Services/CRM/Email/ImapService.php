@@ -7,6 +7,7 @@ use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use App\Services\Integration\Common\DTOs\AttachmentFile;
 use Illuminate\Support\Facades\Log;
 use PhpImap\Mailbox;
 use PhpImap\Exceptions\ConnectionException;
