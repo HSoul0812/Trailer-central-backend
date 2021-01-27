@@ -276,6 +276,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $mailId) {
             // Get Message Overview
             $email = $this->imap->overview($mailId);
+            if(empty($email)) {
+                continue;
+            }
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
