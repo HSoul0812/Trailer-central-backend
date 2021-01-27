@@ -177,10 +177,10 @@ class GmailService implements GmailServiceInterface
     /**
      * Get and Parse Individual Message
      * 
-     * @param string $mailId
+     * @param int $mailId
      * @return parsed message details
      */
-    public function message(string $mailId) {
+    public function message(int $mailId) {
         // Get Message
         $message = $this->gmail->users_messages->get('me', $mailId, ['format' => 'full']);
 
@@ -472,13 +472,13 @@ class GmailService implements GmailServiceInterface
     /**
      * Get Parsed Message
      * 
-     * @param string $mailId
+     * @param int $mailId
      * @param array $headers
      * @param string $body
      * @param Collection<AttachmentFile> $attachments
      * @return ParsedEmail
      */
-    private function getParsedMessage(string $mailId, array $headers, string $body, Collection $attachments) {
+    private function getParsedMessage(int $mailId, array $headers, string $body, Collection $attachments) {
         // Create Parsed Email
         $parsed = new ParsedEmail();
         $parsed->setId($mailId);

@@ -261,7 +261,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
+     * @param EmailFolder $emailFolder
      * @return false || array of email results
      */
     private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
