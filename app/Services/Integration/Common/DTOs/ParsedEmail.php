@@ -174,7 +174,8 @@ class ParsedEmail
      */
     public function getFirstReference(): string
     {
-        return !empty($this->references) ? reset($this->getReferences()) : '';
+        $references = $this->getReferences();
+        return !empty($references) ? reset($references) : '';
     }
 
     /**
@@ -184,7 +185,8 @@ class ParsedEmail
      */
     public function getLastReference(): string
     {
-        return !empty($this->references) ? end($this->getReferences()) : '';
+        $references = $this->getReferences();
+        return !empty($references) ? end($references) : '';
     }
 
     /**
