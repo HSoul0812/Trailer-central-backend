@@ -168,6 +168,26 @@ class ParsedEmail
     }
 
     /**
+     * Return First Reference
+     * 
+     * @return string reset($this->getReferences())
+     */
+    public function getFirstReference(): string
+    {
+        return !empty($this->references) ? reset($this->getReferences()) : '';
+    }
+
+    /**
+     * Return Last Reference
+     * 
+     * @return string end($this->getReferences())
+     */
+    public function getLastReference(): string
+    {
+        return !empty($this->references) ? end($this->getReferences()) : '';
+    }
+
+    /**
      * Set References
      * 
      * @param string $references

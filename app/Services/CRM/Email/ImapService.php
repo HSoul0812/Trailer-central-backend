@@ -104,11 +104,11 @@ class ImapService implements ImapServiceInterface
         // Handle Overriding Message ID From References
         $references = $parsed->getReferences();
         if(!empty($references)) {
-            $parsed->setRootMessageId(reset($parsed['references']));
+            $parsed->setRootMessageId($parsed->getFirstReference());
 
             // Message ID Doesn't Exist?
             if(empty($parsed->getMessageId())) {
-                $parsed->setMessageId(end($parsed['references']));
+                $parsed->setMessageId($parsed->getLastReference());
             }
         }
 
