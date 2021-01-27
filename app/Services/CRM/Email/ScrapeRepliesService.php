@@ -195,7 +195,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             }
             // Get From IMAP Instead
             else {
-                return 0;
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
             }
 
@@ -231,7 +230,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $skipped = 0;
         foreach($messages as $mailId) {
             // Get Parsed Message
-            var_dump($mailId);
             $email = $this->gmail->message($mailId);
 
             // Import Message
