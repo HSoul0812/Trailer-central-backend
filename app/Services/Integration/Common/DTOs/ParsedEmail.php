@@ -13,7 +13,7 @@ use Carbon\Carbon;
 class ParsedEmail
 {
     /**
-     * @var string ID of Email from Source
+     * @var int ID of Email from Source
      */
     private $id = '';
 
@@ -94,9 +94,9 @@ class ParsedEmail
     /**
      * Return ID
      * 
-     * @return string $this->id
+     * @return int $this->id
      */
-    public function getId(): string
+    public function getId(): int
     {
         return $this->id;
     }
@@ -104,10 +104,10 @@ class ParsedEmail
     /**
      * Set ID
      * 
-     * @param string $id
+     * @param int $id
      * @return void
      */
-    public function setId(string$id): void
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
