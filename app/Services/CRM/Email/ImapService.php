@@ -118,11 +118,9 @@ class ImapService implements ImapServiceInterface
         $parsed->setFrom($overview->from);
 
         // Handle Subject
-        if(empty($overview->subject)) {
-            var_dump($overview);
-            die;
+        if(!empty($overview->subject)) {
+            $parsed->setSubject($overview->subject);
         }
-        $parsed->setSubject($overview->subject);
 
         // Set Date
         $parsed->setDate($overview->date);

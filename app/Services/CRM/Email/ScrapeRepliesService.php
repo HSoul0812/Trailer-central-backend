@@ -311,7 +311,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
         // Check if Exists
-        if(empty($email->getSubject()) || empty($email->getMessageId()) ||
+        if(empty($email->getMessageId()) ||
            $this->emails->findMessageId($salesperson->user_id, $email->getMessageId())) {
             $this->deleteAttachments($email->getAttachments());
             return -1;
@@ -325,6 +325,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Only on IMAP
             if(empty($salesperson->googleToken)) {
                 $this->imap->full($email);
+            }
+            if(empty($email->getSubject())) {
+                return -1;
             }
 
             // Get Full IMAP Data
