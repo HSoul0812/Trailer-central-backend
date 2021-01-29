@@ -43,7 +43,7 @@ class CustomerInventory extends Model
         parent::boot();
 
         static::saving(static function (CustomerInventory $model) {
-            $model->uuid = Uuid::uuid4();
+            $model->uuid = Uuid::uuid4()->toString();
         });
     }
 }

@@ -1,22 +1,30 @@
 <?php
 
-
 namespace App\Services\Export;
 
-
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use League\Csv\CannotInsertRecord;
 use League\Csv\Writer;
 
 /**
- * Class FilesystemCsvExporter
+ * Class FilesystemCsvExporterService
  *
  * General purpose export CSV to a `Filesystem` object from query
  *
  * @package App\Services\Export\Parts
  */
-class FilesystemCsvExporter extends AbstractCsvQueryExporter
+class FilesystemCsvExporter extends QueryCsvExporter
 {
-    protected $tmpFileName = null;
+    /**
+     * @var null|string
+     */
+    protected $tmpFileName;
+
+    /**
+     * @var string
+     */
     protected $filename;
 
     /**
@@ -24,20 +32,36 @@ class FilesystemCsvExporter extends AbstractCsvQueryExporter
      */
     protected $filesystem;
 
-    public function __construct($filesystem, $filename, $query=null, $headers=null, $lineMapping=null)
+    /**
+     * FilesystemCsvExporterService constructor.
+     * @param Filesystem $filesystem
+     * @param string $filename
+     * @param Builder|EloquentBuilder|null $query
+     * @param array|null $headers
+     * @param callable|null $lineMapping
+     */
+    public function __construct(
+        Filesystem $filesystem,
+        string $filename,
+        $query = null,
+        ?array $headers = null,
+        ?callable $lineMapping = null
+    )
     {
-        parent::__construct($query, $headers, $lineMapping);
+        parent::__construct($headers, $lineMapping, $query);
+
         $this->filename = $filename;
         $this->filesystem = $filesystem;
     }
 
     /**
      * Crete a fileHandle where a temp csv will be written to
-     * @return FilesystemCsvExporter
+     *
+     * @return self
      */
-    function createFile()
+    public function createFile()
     {
-        $this->tmpFileName = env('APP_TMP_DIR', '/tmp') . '/part-csv-' . date('Y-m-d')  . '-'. uniqid() . '.csv';
+        $this->tmpFileName = env('APP_TMP_DIR', '/tmp') . '/temp-csv-' . date('Y-m-d') . '-' . uniqid() . '.csv';
         $this->tmpFileHandle = fopen($this->tmpFileName, 'w+');
 
         // make a temp file use a league csv writer; fileHandle is called previously
@@ -49,7 +73,7 @@ class FilesystemCsvExporter extends AbstractCsvQueryExporter
     /**
      * Send the temp file to the Filesystem (e.g. `Storage::disk('s3')`)
      */
-    function deliver()
+    public function deliver(): void
     {
         $fr = fopen($this->tmpFileName, 'r');
         $this->filesystem->put($this->filename, $fr);
@@ -60,8 +84,9 @@ class FilesystemCsvExporter extends AbstractCsvQueryExporter
      * Chunked query exporter. Overrides the default exporter to accommodate progress
      *
      * @return void
+     * @throws CannotInsertRecord
      */
-    public function export()
+    public function export(): void
     {
         // init progress details
         $this->setProgressMax($this->query->count());
@@ -98,9 +123,9 @@ class FilesystemCsvExporter extends AbstractCsvQueryExporter
      *
      * @param array $line a line of data to write
      * @return void
-     * @throws \League\Csv\CannotInsertRecord
+     * @throws CannotInsertRecord
      */
-    public function write($line)
+    public function write($line): void
     {
         // for the first write add a header
         if (!$this->headerWritten) {
@@ -112,5 +137,4 @@ class FilesystemCsvExporter extends AbstractCsvQueryExporter
         $callable = $this->lineMapper;
         $this->csvWriter->insertOne($callable($line));
     }
-
 }
