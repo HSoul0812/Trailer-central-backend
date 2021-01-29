@@ -11,6 +11,8 @@
     "require": {
         "php": "^7.2",
         "ext-json": "*",
+        "ext-imap": "*",
+        "ext-pdo": "*",
         "algolia/algoliasearch-client-php": "^2.4",
         "aws/aws-sdk-php": "^3.0",
         "babenkoivan/elastic-migrations": "^1.2",
@@ -65,7 +67,8 @@
             "database/factories"
         ],
         "psr-4": {
-            "App\\": "app/"
+            "App\\": "app/",
+            "Database\\traits\\": "database/traits"
         }
     },
     "autoload-dev": {
