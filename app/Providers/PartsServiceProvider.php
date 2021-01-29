@@ -1,23 +1,25 @@
 <?php
 
-
 namespace App\Providers;
-
 
 use App\Events\Parts\PartQtyUpdated;
 use App\Listeners\Parts\PartQtyAuditLogNotification;
 use App\Listeners\Parts\PartReindexNotification;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
+use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Parts\AuditLogRepository;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
-use App\Services\Export\Parts\CsvExportService;
-use App\Services\Export\Parts\CsvExportServiceInterface;
+use App\Services\Export\Parts\BulkCsvDownloadJobService;
+use App\Services\Export\Parts\BulkDownloadJobServiceInterface;
+use App\Services\Export\Parts\BulkUploadJobService;
+use App\Services\Export\Parts\BulkUploadJobServiceInterface;
+use App\Services\Export\Parts\CsvRunnableService;
+use App\Services\Export\Parts\CsvRunnableServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Parts\PartServiceInterface;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 
 class PartsServiceProvider extends ServiceProvider
@@ -77,13 +79,9 @@ class PartsServiceProvider extends ServiceProvider
 
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
-        $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);
-        $this->app->when(CsvExportService::class)
-            ->needs(Filesystem::class)
-            ->give(function () { return Storage::disk('partsCsvExport');});
-        $this->app->when(CsvExportService::class)
-            ->needs(Filesystem::class)
-            ->give(function () { return Storage::disk('partsCsvExport');});
-
+        $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
+        $this->app->bind(BulkDownloadJobServiceInterface::class, BulkCsvDownloadJobService::class);
+        $this->app->bind(CsvRunnableServiceInterface::class, CsvRunnableService::class);
+        $this->app->bind(BulkUploadJobServiceInterface::class, BulkUploadJobService::class);
     }
 }
