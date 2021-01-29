@@ -15,6 +15,7 @@ use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\ArraySerializer;
 use OpenApi\Annotations as OA;
+use App\Http\Requests\Dms\ServiceOrder\UpdateServiceOrderRequest;
 
 /**
  * @author Marcel
@@ -44,7 +45,7 @@ class ServiceOrderController extends RestfulControllerV2
         ServiceOrderTransformer $transformer,
         Manager $fractal
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update']);
         $this->serviceOrders = $serviceOrders;
 
         $this->fractal = $fractal;
@@ -120,6 +121,20 @@ class ServiceOrderController extends RestfulControllerV2
             'data' => $this->fractal->createData($data)->toArray()
         ]);
     }
+    
+    public function update(int $id, Request $request) {
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new UpdateServiceOrderRequest($requestData);
+
+        if ( $request->validate() ) {
+            return $this->response->item($this->serviceOrders->update($request->all()), $this->transformer);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+    
+
 
     /**
      * Service for create/update invoice for an RO

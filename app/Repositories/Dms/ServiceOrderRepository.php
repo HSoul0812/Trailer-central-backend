@@ -130,7 +130,12 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
     }
 
     public function update($params) {
-        throw new NotImplementedException;
+        $serviceOrder = $this->get($params);
+        
+        $serviceOrder->fill($params);
+        $serviceOrder->save();
+        
+        return $serviceOrder;
     }
 
     private function addSortQuery($query, $sort) {
