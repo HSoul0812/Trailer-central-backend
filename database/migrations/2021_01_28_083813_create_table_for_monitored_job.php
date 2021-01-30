@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\Bulk\Parts\BulkDownload;
+use App\Models\Bulk\Parts\BulkUpload;
 use App\Models\Common\MonitoredJob;
 use Database\traits\WithMysqlServerVersion;
 use Illuminate\Database\Migrations\Migration;
@@ -13,40 +15,14 @@ class CreateTableForMonitoredJob extends Migration
     use WithMysqlServerVersion;
 
     /**
-     * @var CreatePartsBulkDownloadTable
-     */
-    private $bulkDownloadTableMigration;
-
-    /**
-     * @var CreatePartsBulkUpload
-     */
-    private $bulkUploadTableMigration;
-
-    /**
-     * @var AddValidationErrorToBulkUpload
-     */
-    private $bulkUploadUpdateMigration;
-
-    public function __construct()
-    {
-        require_once __DIR__ . '/2020_03_04_193326_create_parts_bulk_download_table.php';
-        require_once __DIR__ . '/2019_10_21_173024_create_parts_bulk_upload.php';
-        require_once __DIR__ . '/2019_10_21_214148_add_validation_error_to_bulk_upload.php';
-
-        $this->bulkDownloadTableMigration = new CreatePartsBulkDownloadTable();
-        $this->bulkUploadTableMigration = new CreatePartsBulkUpload();
-        $this->bulkUploadUpdateMigration = new AddValidationErrorToBulkUpload();
-    }
-
-    /**
      * Run the migrations.
      *
      * @return void
      */
     public function up(): void
     {
-        // $this->bulkDownloadTableMigration->down(); // To prevent any issue while this feature is being developed
-        // $this->bulkUploadTableMigration->down(); // To prevent any issue while this feature is being developed
+        // $this->dropPreviousTables(); // To prevent any issue while this feature is being developed
+
         $version = $this->version();
 
         Schema::create('monitored_job', static function (Blueprint $table) use ($version) {
@@ -106,8 +82,58 @@ class CreateTableForMonitoredJob extends Migration
     public function down(): void
     {
         Schema::dropIfExists('monitored_job');
-        // $this->bulkDownloadTableMigration->up();
-        // $this->bulkUploadTableMigration->up();
-        // $this->bulkUploadUpdateMigration->up();
+        // $this->createPreviousTables(); // To prevent any issue while this feature is being developed
+    }
+
+    private function createPreviousTables(): void
+    {
+        Schema::create('parts_bulk_download', static function (Blueprint $table) {
+            $table->bigIncrements('id');
+
+            $table->integer('dealer_id')->unsigned();
+
+            $table->enum('status', [
+                BulkDownload::STATUS_NEW,
+                BulkDownload::STATUS_PROCESSING,
+                BulkDownload::STATUS_COMPLETED,
+                BulkDownload::STATUS_ERROR,
+            ])->default(BulkDownload::STATUS_NEW);
+
+            $table->string('token');
+
+            $table->string('export_file');
+
+            $table->string('progress')->nullable();
+
+            $table->text('result')->nullable();
+
+            $table->timestamps();
+        });
+
+        Schema::create('parts_bulk_upload', static function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('dealer_id')->unsigned();
+            $table->enum('status', [
+                    BulkUpload::VALIDATION_ERROR,
+                    BulkUpload::PROCESSING,
+                    BulkUpload::COMPLETE]
+            )->default(BulkUpload::PROCESSING);
+
+            $table->text('import_source');
+            $table->text('validation_errors');
+            $table->timestamps();
+
+            $table->foreign('dealer_id')
+                ->references('dealer_id')
+                ->on('dealer')
+                ->onDelete('CASCADE')
+                ->onUpdate('CASCADE');
+        });
+    }
+
+    private function dropPreviousTables():void
+    {
+        Schema::dropIfExists('parts_bulk_download');
+        Schema::dropIfExists('parts_bulk_upload');
     }
 }
