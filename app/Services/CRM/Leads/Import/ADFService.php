@@ -89,7 +89,7 @@ class ADFService implements ADFServiceInterface {
     public function import(): int {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
-        $inbox = config('adf.imports.gmail.processed');
+        $inbox = config('adf.imports.gmail.inbox');
         $messages = $this->gmail->messages($accessToken, $inbox);
 
         // Checking Each Message
@@ -119,7 +119,7 @@ class ADFService implements ADFServiceInterface {
                 $result = $this->importLead($adf);
                 if(!empty($result->identifier)) {
                     Log::info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
-                    //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }
             } catch(InvalidAdfDealerIdException $e) {
