@@ -18,8 +18,6 @@ class BulkUploadResult extends MonitoredJobResult
 
     public function asArray(): array
     {
-        return array_merge(parent::asArray(), [
-            'validation_errors' => $this->validation_errors
-        ]);
+        return array_merge(parent::asArray(), ['validation_errors' => $this->validation_errors]);
     }
 }
