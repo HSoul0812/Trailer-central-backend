@@ -174,7 +174,7 @@ class ADFService implements ADFServiceInterface {
         $adfLead = new ADFLead();
 
         // Set Vendor Provider
-        $adfLead->setVendorProvider($adfLead->filterXPath('//provider/name')->text());
+        $adfLead->setVendorProvider($adf->filterXPath('//provider/name')->text());
 
         // Set Vendor Details
         $this->getAdfVendor($adfLead, $adf->filter('vendor'));
