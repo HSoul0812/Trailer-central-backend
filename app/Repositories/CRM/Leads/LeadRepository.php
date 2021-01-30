@@ -137,6 +137,8 @@ class LeadRepository implements LeadRepositoryInterface {
             $leadStatusUpdates['source'] = $params['lead_source'];
 
             // Send Lead Source
+            var_dump($lead->newDealerUser);
+            die;
             $this->sources->create([
                 'user_id' => $lead->newDealerUser->user_id,
                 'source_name' => $params['lead_source']
