@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Bulk\Parts;
 use App\Http\Controllers\RestfulController;
 use App\Models\Bulk\Parts\BulkUploadPayload;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
-use App\Services\Export\Parts\BulkUploadJobServiceInterface;
+use App\Services\Export\Parts\BulkUploadMonitoredJobServiceInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\Bulk\Parts\CreateBulkUploadRequest;
 use App\Http\Requests\Bulk\Parts\GetBulkUploadsRequest;
@@ -21,7 +21,7 @@ class BulkUploadController extends RestfulController
     protected $repository;
 
     /**
-     * @var BulkUploadJobServiceInterface
+     * @var BulkUploadMonitoredJobServiceInterface
      */
     protected $service;
 
@@ -29,9 +29,9 @@ class BulkUploadController extends RestfulController
      * Create a new controller instance.
      *
      * @param BulkUploadRepositoryInterface $repository
-     * @param BulkUploadJobServiceInterface $service
+     * @param BulkUploadMonitoredJobServiceInterface $service
      */
-    public function __construct(BulkUploadRepositoryInterface $repository, BulkUploadJobServiceInterface $service)
+    public function __construct(BulkUploadRepositoryInterface $repository, BulkUploadMonitoredJobServiceInterface $service)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->repository = $repository;

@@ -6,7 +6,7 @@ use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\Controller;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
-use App\Services\Export\Parts\BulkDownloadJobServiceInterface;
+use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
 use Dingo\Api\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -20,11 +20,11 @@ class BulkDownloadController extends Controller
     private $repository;
 
     /**
-     * @var BulkDownloadJobServiceInterface
+     * @var BulkDownloadMonitoredJobServiceInterface
      */
     private $service;
 
-    public function __construct(BulkDownloadRepositoryInterface $repository, BulkDownloadJobServiceInterface $service)
+    public function __construct(BulkDownloadRepositoryInterface $repository, BulkDownloadMonitoredJobServiceInterface $service)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->repository = $repository;

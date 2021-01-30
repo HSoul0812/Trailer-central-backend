@@ -8,7 +8,7 @@ use App\Models\Bulk\Parts\BulkUpload;
 use App\Models\Bulk\Parts\BulkUploadPayload;
 use App\Services\Common\MonitoredJobServiceInterface;
 
-interface BulkUploadJobServiceInterface extends MonitoredJobServiceInterface
+interface BulkUploadMonitoredJobServiceInterface extends MonitoredJobServiceInterface
 {
     /**
      * @param int $dealerId

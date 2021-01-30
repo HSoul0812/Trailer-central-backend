@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Storage;
  *
  * Builds a parts CSV file for export. Typically called by a Job. This is to decouple service code from the job
  */
-class BulkCsvDownloadJobService implements BulkDownloadJobServiceInterface, RunnableJobServiceInterface, HasExporterInterface
+class BulkCsvDownloadJobService implements BulkDownloadMonitoredJobServiceInterface, RunnableJobServiceInterface, HasExporterInterface
 {
     /**
      * @var BulkDownloadRepositoryInterface

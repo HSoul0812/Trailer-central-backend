@@ -11,7 +11,7 @@ use App\Models\Common\MonitoredJob;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use Illuminate\Contracts\Bus\Dispatcher;
 
-class BulkUploadJobService implements BulkUploadJobServiceInterface
+class BulkUploadJobService implements BulkUploadMonitoredJobServiceInterface
 {
     /**
      * @var BulkUploadRepositoryInterface

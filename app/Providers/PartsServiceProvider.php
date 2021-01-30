@@ -12,9 +12,9 @@ use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Parts\AuditLogRepository;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
-use App\Services\Export\Parts\BulkDownloadJobServiceInterface;
+use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
 use App\Services\Export\Parts\BulkUploadJobService;
-use App\Services\Export\Parts\BulkUploadJobServiceInterface;
+use App\Services\Export\Parts\BulkUploadMonitoredJobServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Parts\PartServiceInterface;
 use Illuminate\Support\Facades\Event;
@@ -78,7 +78,7 @@ class PartsServiceProvider extends ServiceProvider
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
-        $this->app->bind(BulkDownloadJobServiceInterface::class, BulkCsvDownloadJobService::class);
-        $this->app->bind(BulkUploadJobServiceInterface::class, BulkUploadJobService::class);
+        $this->app->bind(BulkDownloadMonitoredJobServiceInterface::class, BulkCsvDownloadJobService::class);
+        $this->app->bind(BulkUploadMonitoredJobServiceInterface::class, BulkUploadJobService::class);
     }
 }

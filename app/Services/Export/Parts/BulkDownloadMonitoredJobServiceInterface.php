@@ -9,7 +9,7 @@ use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Services\Common\MonitoredJobServiceInterface;
 
-interface BulkDownloadJobServiceInterface extends MonitoredJobServiceInterface
+interface BulkDownloadMonitoredJobServiceInterface extends MonitoredJobServiceInterface
 {
     /**
      * @param int $dealerId
