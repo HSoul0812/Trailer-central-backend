@@ -288,10 +288,10 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setPhone($contact->filterXPath('//contact/phone')->text());
 
         // Set Address Details
-        $adfLead->setAddrStreet($contact->filterXPath('//address[@type="home"]/street')->text());
-        $adfLead->setAddrCity($contact->filterXPath('//address[@type="home"]/city')->text());
-        $adfLead->setAddrState($contact->filterXPath('//address[@type="home"]/regioncode')->text());
-        $adfLead->setAddrZip($contact->filterXPath('//address[@type="home"]/postalcode')->text());
+        $adfLead->setAddrStreet($contact->filterXPath('//address/street')->text());
+        $adfLead->setAddrCity($contact->filterXPath('//address/city')->text());
+        $adfLead->setAddrState($contact->filterXPath('//address/regioncode')->text());
+        $adfLead->setAddrZip($contact->filterXPath('//address/postalcode')->text());
 
         // Set Comments
         $adfLead->setComments($contact->filter('comments')->text());
@@ -354,10 +354,10 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setVendorName($vendor->filter('vendorname')->text());
 
         // Parse Vendor Contact Details
-        $adfLead->setVendorContact($vendor->filterXPath('//contact/name')->text());
+        $adfLead->setVendorContact($vendor->filterXPath('//contact/name')->text(''));
         $adfLead->setVendorUrl($vendor->filterXPath('//contact/url')->text(''));
-        $adfLead->setVendorEmail($vendor->filterXPath('//contact/email')->text());
-        $adfLead->setVendorPhone($vendor->filterXPath('//contact/phone')->text());
+        $adfLead->setVendorEmail($vendor->filterXPath('//contact/email')->text(''));
+        $adfLead->setVendorPhone($vendor->filterXPath('//contact/phone')->text(''));
 
         // Return ADF Lead
         return $adfLead;
@@ -372,11 +372,11 @@ class ADFService implements ADFServiceInterface {
      */
     private function getAdfVendorLocation(ADFLead $adfLead, Crawler $vendor): ADFLead {
         // Set Vendor Address Details
-        $adfLead->setVendorAddrStreet($vendor->filterXPath('//address[@type="work"]/street')->text());
-        $adfLead->setVendorAddrCity($vendor->filterXPath('//address[@type="work"]/city')->text());
-        $adfLead->setVendorAddrState($vendor->filterXPath('//address[@type="work"]/regioncode')->text());
-        $adfLead->setVendorAddrZip($vendor->filterXPath('//address[@type="work"]/postalcode')->text());
-        $adfLead->setVendorAddrCountry($vendor->filterXPath('//address[@type="work"]/country')->text());
+        $adfLead->setVendorAddrStreet($vendor->filterXPath('//address/street')->text(''));
+        $adfLead->setVendorAddrCity($vendor->filterXPath('//address/city')->text(''));
+        $adfLead->setVendorAddrState($vendor->filterXPath('//address/regioncode')->text(''));
+        $adfLead->setVendorAddrZip($vendor->filterXPath('//address/postalcode')->text(''));
+        $adfLead->setVendorAddrCountry($vendor->filterXPath('//address/country')->text(''));
 
         // Get Vendor Location
         $filters = $adfLead->getVendorAddrFilters();
