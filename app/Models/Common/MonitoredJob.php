@@ -101,7 +101,9 @@ class MonitoredJob extends Model
         'queue',
         'concurrency_level',
         'name',
-        // no status and progress to prevent any override via http request
+        'result',
+        'queue_job_id',
+        'status'
     ];
 
     /**
