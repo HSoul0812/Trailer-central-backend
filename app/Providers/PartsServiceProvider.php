@@ -15,8 +15,6 @@ use App\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Services\Export\Parts\BulkDownloadJobServiceInterface;
 use App\Services\Export\Parts\BulkUploadJobService;
 use App\Services\Export\Parts\BulkUploadJobServiceInterface;
-use App\Services\Export\Parts\CsvRunnableService;
-use App\Services\Export\Parts\CsvRunnableServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Parts\PartServiceInterface;
 use Illuminate\Support\Facades\Event;
@@ -81,7 +79,6 @@ class PartsServiceProvider extends ServiceProvider
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind(BulkDownloadJobServiceInterface::class, BulkCsvDownloadJobService::class);
-        $this->app->bind(CsvRunnableServiceInterface::class, CsvRunnableService::class);
         $this->app->bind(BulkUploadJobServiceInterface::class, BulkUploadJobService::class);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Jobs\Bulk\Parts;
 
 use App\Jobs\Job;
 use App\Models\Bulk\Parts\BulkDownload;
-use App\Services\Export\Parts\CsvRunnableServiceInterface;
+use App\Services\Common\RunnableJobServiceInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -23,11 +23,11 @@ class CsvExportJob extends Job
     private $download;
 
     /**
-     * @var CsvRunnableServiceInterface
+     * @var RunnableJobServiceInterface
      */
     private $service;
 
-    public function __construct(CsvRunnableServiceInterface $service, BulkDownload $download)
+    public function __construct(RunnableJobServiceInterface $service, BulkDownload $download)
     {
         $this->service = $service;
         $this->download = $download;

@@ -15,7 +15,7 @@ use League\Csv\Writer;
  *
  * @package App\Services\Export\Parts
  */
-class FilesystemCsvExporter extends QueryCsvExporter
+abstract class FilesystemCsvExporter extends QueryCsvExporter
 {
     /**
      * @var null|string
