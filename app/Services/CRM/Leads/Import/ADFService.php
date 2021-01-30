@@ -288,10 +288,10 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setPhone($contact->filterXPath('//contact/phone')->text());
 
         // Set Address Details
-        $adfLead->setAddrStreet($contact->filterXPath('//address/street')->text());
-        $adfLead->setAddrCity($contact->filterXPath('//address/city')->text());
-        $adfLead->setAddrState($contact->filterXPath('//address/regioncode')->text());
-        $adfLead->setAddrZip($contact->filterXPath('//address/postalcode')->text());
+        $adfLead->setAddrStreet($contact->filterXPath('//address/street')->text(''));
+        $adfLead->setAddrCity($contact->filterXPath('//address/city')->text(''));
+        $adfLead->setAddrState($contact->filterXPath('//address/regioncode')->text(''));
+        $adfLead->setAddrZip($contact->filterXPath('//address/postalcode')->text(''));
 
         // Set Comments
         $adfLead->setComments($contact->filter('comments')->text());
