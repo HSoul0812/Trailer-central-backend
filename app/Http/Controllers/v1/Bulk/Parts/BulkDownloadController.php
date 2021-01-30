@@ -3,31 +3,43 @@
 namespace App\Http\Controllers\v1\Bulk\Parts;
 
 use App\Exceptions\Common\BusyJobException;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
+use App\Jobs\Bulk\Parts\CsvExportJob;
+use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
 use Dingo\Api\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class BulkDownloadController extends Controller
+class BulkDownloadController extends MonitoredJobsController
 {
+    protected $failedMessage = 'This file could not be completed. Please request a new file.';
+
     /**
      * @var BulkDownloadRepositoryInterface
      */
-    private $repository;
+    private $bulkRepository;
 
     /**
      * @var BulkDownloadMonitoredJobServiceInterface
      */
     private $service;
 
-    public function __construct(BulkDownloadRepositoryInterface $repository, BulkDownloadMonitoredJobServiceInterface $service)
+    public function __construct(
+        BulkDownloadRepositoryInterface $bulkRepository,
+        MonitoredJobRepositoryInterface $jobsRepository,
+        BulkDownloadMonitoredJobServiceInterface $service
+    )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['create']);
-        $this->repository = $repository;
+        parent::__construct($jobsRepository);
+
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'status', 'create']);
+
+        $this->bulkRepository = $bulkRepository;
         $this->service = $service;
     }
 
@@ -40,6 +52,20 @@ class BulkDownloadController extends Controller
      *
      * @OA\Post(
      *     path="/api/parts/bulk/download",
+     *     description="Create a bulk csv file download request",
+     *     tags={"BulkDownloadParts"},
+     *     @OA\Parameter(
+     *         name="dealer_id",
+     *         description="The dealer ID.",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="token",
+     *         description="The token for the job.",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
      * )
      */
     public function create(Request $request)
@@ -49,7 +75,11 @@ class BulkDownloadController extends Controller
 
         $payload = BulkDownloadPayload::from(['export_file' => 'parts-' . date('Ymd') . '-' . $token . '.csv']);
 
-        $model= $this->service->setup($dealerId, $payload, $token);
+        $model = $this->service
+            ->setup($dealerId, $payload, $token)
+            ->withQueueableJob(static function (BulkDownload $job): CsvExportJob {
+            return new CsvExportJob($job);
+        });
 
         $this->service->dispatch($model);
 
@@ -69,6 +99,8 @@ class BulkDownloadController extends Controller
      *
      * @OA\Get(
      *     path="/api/parts/bulk/file/{token}",
+     *     description="Download the completed CSV file created from the request",
+     *     tags={"BulkDownloadParts"},
      *     @OA\Parameter(
      *         name="token",
      *         in="path",
@@ -78,7 +110,11 @@ class BulkDownloadController extends Controller
      */
     public function read(string $token)
     {
-        $download = $this->repository->findByToken($token);
+        $download = $this->bulkRepository->findByToken($token);
+
+        if ($download === null) {
+            $this->response->errorNotFound('The job was not found');
+        }
 
         if ($download->isPending()) {
             return response()->json(['message' => 'Still processing', 'progress' => $download->progress,], 202);
@@ -97,42 +133,6 @@ class BulkDownloadController extends Controller
         }
 
         return response()->json(['message' => 'Error: unknown status',], 500);
-    }
-
-    /**
-     * Check status of CSV file building
-     *
-     * @param string $token The token returned by the create service
-     * @return JsonResponse|StreamedResponse
-     *
-     * @OA\Get(
-     *     path="/api/parts/bulk/status/{token}",
-     *     @OA\Parameter(
-     *         name="token",
-     *         in="path",
-     *         required=true
-     *     )
-     * )
-     */
-    public function status(string $token)
-    {
-        $download = $this->repository->findByToken($token);
-
-        if ($download->isPending()) {
-            return response()->json(['message' => 'Still processing', 'progress' => $download->progress]);
-        }
-
-        if ($download->isCompleted()) {
-            return response()->json(['message' => 'Completed', 'progress' => $download->progress]);
-        }
-
-        if ($download->isFailed()) {
-            return response()->json([
-                'message' => 'This file could not be completed. Please request a new file.',
-            ], 500);
-        }
-
-        return response()->json(['message' => 'Error: unknown status'], 500);
     }
 
     /**
@@ -163,4 +163,17 @@ class BulkDownloadController extends Controller
 
         return response()->json(['message' => 'Error: unknown status'], 500);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/parts/bulk/status/{token}",
+     *     description="Check status of the process",
+     *     tags={"BulkDownloadParts"},
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="path",
+     *         required=true
+     *     )
+     * )
+     */
 }

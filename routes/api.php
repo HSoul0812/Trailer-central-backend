@@ -85,6 +85,12 @@ $api->version('v1', function ($route) {
 
 
     /**
+     * Monitored jobs
+     */
+    $route->get('jobs', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@index');
+    $route->get('jobs/status/{token}', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@status');
+
+    /**
      * Part Bulk download
      */
     $route->post('parts/bulk/download', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@create');

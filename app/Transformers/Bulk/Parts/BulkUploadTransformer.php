@@ -13,7 +13,7 @@ class BulkUploadTransformer extends TransformerAbstract
             'id' => $bulkUpload->token,
             'status' => $bulkUpload->status,
             'source_file' => $bulkUpload->payload->import_source,
-            'validation_errors' => $bulkUpload->getValidationErrors()
+            'validation_errors' => $bulkUpload->result->validation_errors
         ];
     }
 }

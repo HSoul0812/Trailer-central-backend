@@ -56,8 +56,7 @@ class BulkUploadController extends RestfulController
 
         $this->response->errorBadRequest();
     }
-
-
+    
     /**
      * @param Request $request
      * @return Response|void
@@ -73,16 +72,11 @@ class BulkUploadController extends RestfulController
             $dealerId = $request->get('dealer_id');
             $payload = BulkUploadPayload::from(['csv_file' => $request->get('csv_file')]);
 
-            $model= $this->service->setup(
-                $dealerId,
-                $payload,
-                $token,
-                BulkUpload::QUEUE_NAME,
-                BulkUpload::LEVEL_DEFAULT,
-                BulkUpload::QUEUE_JOB_NAME
-            )->withQueueableJob(static function ($job) {
-                new ProcessBulkUpload($job);
-            });
+            $model = $this->service
+                ->setup($dealerId, $payload, $token, BulkUpload::class)
+                ->withQueueableJob(static function (BulkUpload $job): ProcessBulkUpload {
+                    return new ProcessBulkUpload($job);
+                });
 
             $this->service->dispatch($model);
 
