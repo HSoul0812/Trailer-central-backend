@@ -284,8 +284,8 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setLastName($contact->filterXPath('//contact/name[@part="last"]')->text());
 
         // Set Contact Details
-        $adfLead->setEmail($contact->filterXPath('//contact/email')->text(''));
-        $adfLead->setPhone($contact->filterXPath('//contact/phone')->text(''));
+        $adfLead->setEmail($contact->filterXPath('//contact/email')->text());
+        $adfLead->setPhone($contact->filterXPath('//contact/phone')->text());
 
         // Set Address Details
         $adfLead->setAddrStreet($contact->filterXPath('//address/street')->text(''));
