@@ -90,6 +90,11 @@ class MonitoredJob extends Model
     public $incrementing = false;
 
     /**
+     * @var callable
+     */
+    private $queueableJobDefinition;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -121,6 +126,29 @@ class MonitoredJob extends Model
     ];
 
     /**
+     * @param callable $lambda
+     * @return self
+     */
+    public function withQueueableJob(callable $lambda): self
+    {
+        $this->queueableJobDefinition = $lambda;
+
+        return $this;
+    }
+
+    public function hasQueueableJob(): bool
+    {
+        return is_callable($this->queueableJobDefinition);
+    }
+
+    /**
+     * @return callable|null
+     */
+    public function getQueueableJob(): ?callable
+    {
+        return $this->queueableJobDefinition;
+    }
+        /**
      * Payload mutator
      *
      * @param array $value

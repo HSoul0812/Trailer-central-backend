@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\v1\Bulk\Parts;
 
+use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\RestfulController;
+use App\Jobs\ProcessBulkUpload;
+use App\Models\Bulk\Parts\BulkUpload;
 use App\Models\Bulk\Parts\BulkUploadPayload;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
-use App\Services\Export\Parts\BulkUploadMonitoredJobServiceInterface;
+use App\Services\Common\MonitoredGenericJobServiceInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\Bulk\Parts\CreateBulkUploadRequest;
 use App\Http\Requests\Bulk\Parts\GetBulkUploadsRequest;
@@ -21,7 +24,7 @@ class BulkUploadController extends RestfulController
     protected $repository;
 
     /**
-     * @var BulkUploadMonitoredJobServiceInterface
+     * @var MonitoredGenericJobServiceInterface
      */
     protected $service;
 
@@ -29,9 +32,9 @@ class BulkUploadController extends RestfulController
      * Create a new controller instance.
      *
      * @param BulkUploadRepositoryInterface $repository
-     * @param BulkUploadMonitoredJobServiceInterface $service
+     * @param MonitoredGenericJobServiceInterface $service
      */
-    public function __construct(BulkUploadRepositoryInterface $repository, BulkUploadMonitoredJobServiceInterface $service)
+    public function __construct(BulkUploadRepositoryInterface $repository, MonitoredGenericJobServiceInterface $service)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->repository = $repository;
@@ -59,16 +62,27 @@ class BulkUploadController extends RestfulController
      * @param Request $request
      * @return Response|void
      * @throws HttpException when there was a bad request
+     * @throws BusyJobException when there is currently other job working
      */
     public function create(Request $request): Response
     {
         $request = new CreateBulkUploadRequest($request->all());
 
         if ($request->validate()) {
+            $token = $request->get('token');
             $dealerId = $request->get('dealer_id');
             $payload = BulkUploadPayload::from(['csv_file' => $request->get('csv_file')]);
 
-            $model= $this->service->setup($dealerId, $payload);
+            $model= $this->service->setup(
+                $dealerId,
+                $payload,
+                $token,
+                BulkUpload::QUEUE_NAME,
+                BulkUpload::LEVEL_DEFAULT,
+                BulkUpload::QUEUE_JOB_NAME
+            )->withQueueableJob(static function ($job) {
+                new ProcessBulkUpload($job);
+            });
 
             $this->service->dispatch($model);
 

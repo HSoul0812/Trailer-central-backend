@@ -73,6 +73,8 @@ use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanV
 use App\Repositories\System\EmailRepository;
 use App\Repositories\System\EmailRepositoryInterface;
 use App\Services\Common\EncrypterServiceInterface;
+use App\Services\Common\MonitoredGenericJobServiceInterface;
+use App\Services\Common\MonitoredJobService;
 use App\Services\Common\SPLEncrypterService;
 use App\Services\User\DealerOptionsService;
 use App\Services\User\DealerOptionsServiceInterface;
@@ -232,6 +234,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
 
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
+
+        $this->app->bind(MonitoredGenericJobServiceInterface::class, MonitoredJobService::class);
     }
 
 }
