@@ -48,11 +48,25 @@ class MonitoredJob extends Model
 
     public const STATUS_FAILED = 'failed';
 
+    /**
+     * By dealer concurrency level
+     */
     public const LEVEL_BY_DEALER = 'by-dealer';
 
+    /**
+     * By job concurrency level
+     */
     public const LEVEL_BY_JOB = 'by-job';
 
+    /**
+     * Without restrictions concurrency level
+     */
     public const LEVEL_WITHOUT_RESTRICTIONS = 'without-restrictions';
+
+    /**
+     * Default concurrency level
+     */
+    public const LEVEL_DEFAULT = self::LEVEL_WITHOUT_RESTRICTIONS;
 
     public const QUEUE_NAME = 'default';
 
@@ -126,7 +140,7 @@ class MonitoredJob extends Model
     }
 
     /**
-     * Payload mutator
+     * Result mutator
      *
      * @param array $value
      */
@@ -136,7 +150,7 @@ class MonitoredJob extends Model
     }
 
     /**
-     * Payload accessor
+     * Result accessor
      *
      * @param string|null $value
      * @return MonitoredJobResult
@@ -144,11 +158,6 @@ class MonitoredJob extends Model
     public function getResultAttribute(?string $value): DTO
     {
         return MonitoredJobResult::from(json_decode($value, true));
-    }
-
-    public function getLevelOfConcurrency(): string
-    {
-        return self::LEVEL_WITHOUT_RESTRICTIONS;
     }
 
     public function isCompleted(): bool

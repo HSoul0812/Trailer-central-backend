@@ -8,7 +8,6 @@ use App\Exceptions\Common\BusyJobException;
 use App\Jobs\Bulk\Parts\CsvExportJob;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
-use App\Models\Common\MonitoredJob;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Services\Common\RunnableJobServiceInterface;
@@ -58,7 +57,7 @@ class BulkCsvDownloadJobService implements BulkDownloadMonitoredJobServiceInterf
             'token' => $token,
             'payload' => is_array($payload) ? $payload : $payload->asArray(),
             'queue' => BulkDownload::QUEUE_NAME,
-            'concurrency_level' => MonitoredJob::LEVEL_BY_DEALER,
+            'concurrency_level' => BulkDownload::LEVEL_DEFAULT,
             'name' => BulkDownload::QUEUE_JOB_NAME
         ]);
     }

@@ -23,6 +23,8 @@ class BulkDownload extends MonitoredJob
 
     public const QUEUE_JOB_NAME = 'parts-bulk-download';
 
+    public const LEVEL_DEFAULT = self::LEVEL_BY_DEALER;
+
     /**
      * new and has not started assembling
      */

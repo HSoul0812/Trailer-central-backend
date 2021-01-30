@@ -7,7 +7,6 @@ namespace App\Services\Export\Parts;
 use App\Jobs\ProcessBulkUpload;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Models\Bulk\Parts\BulkUploadPayload;
-use App\Models\Common\MonitoredJob;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use Illuminate\Contracts\Bus\Dispatcher;
 
@@ -36,7 +35,7 @@ class BulkUploadJobService implements BulkUploadMonitoredJobServiceInterface
             'token' => $token,
             'payload' => is_array($payload) ? $payload : $payload->asArray(),
             'queue' => BulkUpload::QUEUE_NAME,
-            'concurrency_level' => MonitoredJob::LEVEL_WITHOUT_RESTRICTIONS,
+            'concurrency_level' => BulkUpload::LEVEL_DEFAULT,
             'name' => BulkUpload::QUEUE_JOB_NAME
         ]);
     }
