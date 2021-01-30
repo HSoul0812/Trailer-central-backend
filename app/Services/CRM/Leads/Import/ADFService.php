@@ -284,8 +284,8 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setLastName($contact->filterXPath('//contact/name[@part="last"]')->text());
 
         // Set Contact Details
-        $adfLead->setEmail($contact->filterXPath('//contact/email')->text());
-        $adfLead->setPhone($contact->filterXPath('//contact/phone')->text());
+        $adfLead->setEmail($contact->filterXPath('//contact/email')->text(''));
+        $adfLead->setPhone($contact->filterXPath('//contact/phone')->text(''));
 
         // Set Address Details
         $adfLead->setAddrStreet($contact->filterXPath('//address/street')->text(''));
@@ -310,11 +310,11 @@ class ADFService implements ADFServiceInterface {
      */
     private function getAdfVehicle(ADFLead $adfLead, Crawler $vehicle): ADFLead {
         // Set Vehicle Details
-        $adfLead->setVehicleYear($vehicle->filter('year')->text());
-        $adfLead->setVehicleMake($vehicle->filter('make')->text());
-        $adfLead->setVehicleModel($vehicle->filter('model')->text());
-        $adfLead->setVehicleStock($vehicle->filter('stock')->text());
-        $adfLead->setVehicleVin($vehicle->filter('vin')->text());
+        $adfLead->setVehicleYear($vehicle->filter('year')->text(''));
+        $adfLead->setVehicleMake($vehicle->filter('make')->text(''));
+        $adfLead->setVehicleModel($vehicle->filter('model')->text(''));
+        $adfLead->setVehicleStock($vehicle->filter('stock')->text(''));
+        $adfLead->setVehicleVin($vehicle->filter('vin')->text(''));
 
         // Find Inventory Items From DB That Match
         if(!empty($adfLead->getVehicleFilters())) {
