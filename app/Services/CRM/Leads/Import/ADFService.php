@@ -89,7 +89,7 @@ class ADFService implements ADFServiceInterface {
     public function import(): int {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
-        $inbox = config('adf.imports.gmail.inbox');
+        $inbox = config('adf.imports.gmail.processed');
         $messages = $this->gmail->messages($accessToken, $inbox);
 
         // Checking Each Message

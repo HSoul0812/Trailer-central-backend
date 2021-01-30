@@ -118,8 +118,6 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Create Lead
         $lead = Lead::create($params);
-        var_dump($lead->newDealerUser);
-        die;
 
         // Create or Update Status
         // TO DO: Implement this functionality to shift Status to its own Repository!
