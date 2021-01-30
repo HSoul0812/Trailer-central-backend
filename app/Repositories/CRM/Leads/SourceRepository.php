@@ -9,9 +9,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class SourceRepository implements SourceRepositoryInterface {
-
-    use SortTrait;
-
     public function create($params): LeadSource {
         // Create Lead Source
         return LeadSource::create($params);
