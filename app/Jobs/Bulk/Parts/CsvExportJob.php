@@ -5,6 +5,7 @@ namespace App\Jobs\Bulk\Parts;
 use App\Jobs\Job;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Services\Common\RunnableJobServiceInterface;
+use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -27,9 +28,9 @@ class CsvExportJob extends Job
      */
     private $service;
 
-    public function __construct(RunnableJobServiceInterface $service, BulkDownload $download)
+    public function __construct(BulkDownload $download)
     {
-        $this->service = $service;
+        $this->service = app(BulkDownloadMonitoredJobServiceInterface::class);
         $this->download = $download;
     }
 
@@ -40,6 +41,10 @@ class CsvExportJob extends Job
     public function handle(): bool
     {
         try {
+            Log::info("Error running export parts CSV export job: ".
+                "token[{$this->download->token}, payload={{$payload}}] exception[{$e->getMessage()}]"
+            );
+
             $this->service->run($this->download);
         } catch (Exception $e) {
             // catch and log

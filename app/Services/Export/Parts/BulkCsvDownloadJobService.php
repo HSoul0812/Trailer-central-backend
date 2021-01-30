@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace App\Services\Export\Parts;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Common\BusyJobException;
-use App\Jobs\Bulk\Parts\CsvExportJob;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
+use App\Services\Common\AbstractMonitoredJobService;
 use App\Services\Common\RunnableJobServiceInterface;
 use App\Services\Export\HasExporterInterface;
 use Exception;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Class CsvExportService
+ * Provide capabilities to setup and dispatch a monitored job for parts bulk cvs download, also provide the runner
+ * to handle the export of the csv file.
  *
- * Builds a parts CSV file for export. Typically called by a Job. This is to decouple service code from the job
+ * This is to decouple service code from the job.
  */
-class BulkCsvDownloadJobService implements BulkDownloadMonitoredJobServiceInterface, RunnableJobServiceInterface, HasExporterInterface
+class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements BulkDownloadMonitoredJobServiceInterface,
+                                                                               RunnableJobServiceInterface,
+                                                                               HasExporterInterface
 {
     /**
      * @var BulkDownloadRepositoryInterface
@@ -33,10 +37,22 @@ class BulkCsvDownloadJobService implements BulkDownloadMonitoredJobServiceInterf
      */
     private $partRepository;
 
-    public function __construct(BulkDownloadRepositoryInterface $bulkRepository,PartRepositoryInterface $partRepository)
+    /**
+     * @var LoggerServiceInterface
+     */
+    private $logger;
+
+    public function __construct(
+        BulkDownloadRepositoryInterface $bulkRepository,
+        PartRepositoryInterface $partRepository,
+        LoggerServiceInterface $logger
+    )
     {
+        parent::__construct(app(MonitoredJobRepositoryInterface::class));
+
         $this->bulkRepository = $bulkRepository;
         $this->partRepository = $partRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -63,34 +79,6 @@ class BulkCsvDownloadJobService implements BulkDownloadMonitoredJobServiceInterf
     }
 
     /**
-     * @param BulkDownload $job
-     */
-    public function dispatch($job): void
-    {
-        // create a queueable job
-        $queueableJob = new CsvExportJob($this, $job);
-
-        // dispatch job to queue
-        $jobId = app(Dispatcher::class)->dispatch($queueableJob->onQueue($job::QUEUE_NAME));
-
-        $this->bulkRepository->update($job->token, ['queue_job_id' => $jobId]);
-    }
-
-    /**
-     * @param BulkDownload $job
-     */
-    public function dispatchNow($job): void
-    {
-        // create a queueable job
-        $queueableJob = new CsvExportJob($this, $job);
-
-        // dispatch job to queue
-        $jobId = app(Dispatcher::class)->dispatchNow($queueableJob->onQueue($job::QUEUE_NAME));
-
-        $this->bulkRepository->update($job->token, ['queue_job_id' => $jobId]);
-    }
-
-    /**
      * Run the service
      *
      * @param BulkDownload $job
@@ -103,6 +91,7 @@ class BulkCsvDownloadJobService implements BulkDownloadMonitoredJobServiceInterf
         $partsQuery = $this->partRepository->queryAllByDealerId($job->dealer_id);
 
         $exporter = $this->getExporter($job);
+
         // prep the exporter
         $exporter->createFile()
             // set the csv headers
@@ -121,6 +110,8 @@ class BulkCsvDownloadJobService implements BulkDownloadMonitoredJobServiceInterf
             // set the exporter's source query
             ->setQuery($partsQuery);
 
+        $this->logger->info(sprintf("[%s:] staring to export the file for the monitored job '%s'", __CLASS__, $job->token));
+
         try {
             $this->bulkRepository->updateProgress($job->token, 0);
 
@@ -130,6 +121,7 @@ class BulkCsvDownloadJobService implements BulkDownloadMonitoredJobServiceInterf
             $this->bulkRepository->setCompleted($job->token);
         } catch (Exception $exception) {
             $this->bulkRepository->setFailed($job->token, ['message' => "Got exception: " . $exception->getMessage()]);
+            $this->logger->error(sprintf('[%s:] got exception: %s', __CLASS__, $exception->getMessage()));
 
             throw $exception;
         }

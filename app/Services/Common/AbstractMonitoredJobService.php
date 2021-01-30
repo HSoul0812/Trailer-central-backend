@@ -6,18 +6,18 @@ namespace App\Services\Common;
 
 use App\Exceptions\Common\HasNotQueueableJob;
 use App\Models\Common\MonitoredJob;
-use App\Repositories\Common\MonitoredJobRepository;
+use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Bus\Dispatcher;
 
 abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterface
 {
     /**
-     * @var MonitoredJobRepository
+     * @var MonitoredJobRepositoryInterface
      */
     protected $repository;
 
-    public function __construct(MonitoredJobRepository $bulkRepository)
+    public function __construct(MonitoredJobRepositoryInterface $bulkRepository)
     {
         $this->repository = $bulkRepository;
     }
@@ -62,8 +62,10 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
     protected function isAvailable(string $concurrencyLevel, int $dealerId, string $jobName): bool
     {
         switch ($concurrencyLevel) {
-            case MonitoredJob::LEVEL_BY_DEALER: return $this->repository->isBusyByDealer($dealerId);
-            case MonitoredJob::LEVEL_BY_JOB: return $this->repository->isBusyByJobName($jobName);
+            case MonitoredJob::LEVEL_BY_DEALER:
+                return $this->repository->isBusyByDealer($dealerId);
+            case MonitoredJob::LEVEL_BY_JOB:
+                return $this->repository->isBusyByJobName($jobName);
         }
 
         return true;
@@ -81,5 +83,14 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
         }
 
         throw new HasNotQueueableJob("This job can't be dispatched due there is not defined a queueable job");
+    }
+
+    /**
+     * @param MonitoredJob $job
+     * @return MonitoredJobRepositoryInterface
+     */
+    protected function repositoryFrom($job)
+    {
+        return app($job::REPOSITORY_INTERFACE_NAME);
     }
 }

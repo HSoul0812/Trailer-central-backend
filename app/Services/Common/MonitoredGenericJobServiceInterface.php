@@ -8,6 +8,7 @@ use App\Contracts\Support\DTO;
 use App\Exceptions\Common\BusyJobException;
 use App\Models\Common\MonitoredJob;
 use App\Models\Common\MonitoredJobPayload;
+use InvalidArgumentException;
 
 interface MonitoredGenericJobServiceInterface extends MonitoredJobServiceInterface
 {
@@ -15,18 +16,10 @@ interface MonitoredGenericJobServiceInterface extends MonitoredJobServiceInterfa
      * @param int $dealerId
      * @param array|MonitoredJobPayload|DTO $payload
      * @param string|null $token
-     * @param string $queueName
-     * @param string $concurrencyLevel
-     * @param string $jobName
+     * @param string $className a monitored job class name (FQN)
      * @return MonitoredJob
      * @throws BusyJobException when there is currently other job working
+     * @throws InvalidArgumentException when the provided $className is not a inherited class from
      */
-    public function setup(
-        int $dealerId,
-        $payload,
-        ?string $token = null,
-        string $queueName = MonitoredJob::QUEUE_NAME,
-        string $concurrencyLevel = MonitoredJob::LEVEL_WITHOUT_RESTRICTIONS,
-        string $jobName = MonitoredJob::QUEUE_JOB_NAME
-    ):MonitoredJob;
+    public function setup(int $dealerId, $payload, ?string $token = null, string $className = MonitoredJob::class);
 }

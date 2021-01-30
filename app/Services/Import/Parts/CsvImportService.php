@@ -3,7 +3,6 @@
 namespace App\Services\Import\Parts;
 
 use App\Events\Parts\PartQtyUpdated;
-use App\Services\Import\Parts\CsvImportServiceInterface;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\Vendor;

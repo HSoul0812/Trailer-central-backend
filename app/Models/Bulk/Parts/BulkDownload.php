@@ -5,6 +5,7 @@ namespace App\Models\Bulk\Parts;
 use App\Contracts\Support\DTO;
 use App\Models\Common\MonitoredJob;
 use App\Models\Common\MonitoredJobResult;
+use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 
 /**
  * Class BulkDownload
@@ -35,15 +36,17 @@ class BulkDownload extends MonitoredJob
      */
     public const STATUS_ERROR = parent::STATUS_FAILED; // for backward compatibility
 
+    public const REPOSITORY_INTERFACE_NAME = BulkDownloadRepositoryInterface::class;
+
     /**
      * Payload accessor
      *
      * @param string|null $value
      * @return BulkDownloadPayload
      */
-    public function getPayloadAttribute(?string $value): DTO
+    public function getPayloadAttribute(?string $value)
     {
-        return BulkDownloadPayload::from(json_decode($value, true));
+        return BulkDownloadPayload::from(json_decode($value ?? '', true));
     }
 }
 

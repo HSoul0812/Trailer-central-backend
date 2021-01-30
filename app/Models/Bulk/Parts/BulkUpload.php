@@ -4,6 +4,7 @@ namespace App\Models\Bulk\Parts;
 
 use App\Contracts\Support\DTO;
 use App\Models\Common\MonitoredJob;
+use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 
 /**
  * @property BulkUploadPayload $payload
@@ -21,15 +22,17 @@ class BulkUpload extends MonitoredJob
 
     public const COMPLETE = parent::STATUS_COMPLETED; // for backward compatibility
 
+    public const REPOSITORY_INTERFACE_NAME = BulkUploadRepositoryInterface::class;
+
     /**
      * Payload accessor
      *
      * @param string|null $value
      * @return BulkUploadPayload
      */
-    public function getPayloadAttribute(?string $value): DTO
+    public function getPayloadAttribute(?string $value)
     {
-        return BulkUploadPayload::from(json_decode($value, true));
+        return BulkUploadPayload::from(json_decode($value ?? '', true));
     }
 
     /**
@@ -40,11 +43,6 @@ class BulkUpload extends MonitoredJob
      */
     public function getResultAttribute(?string $value): DTO
     {
-        return BulkUploadResult::from(json_decode($value, true));
-    }
-
-    public function getValidationErrors(): ?array
-    {
-        return !empty($this->result->validation_errors) ? $this->result->validation_errors : null;
+        return BulkUploadResult::from(json_decode($value ?? '', true));
     }
 }

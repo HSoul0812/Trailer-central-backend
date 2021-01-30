@@ -7,6 +7,7 @@ namespace App\Models\Common;
 use App\Contracts\Support\DTO;
 use App\Models\Observers\Common\MonitoredJobObserver;
 use App\Models\Traits\TableAware;
+use App\Repositories\Common\MonitoredJobRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -71,6 +72,8 @@ class MonitoredJob extends Model
     public const QUEUE_NAME = 'default';
 
     public const QUEUE_JOB_NAME = 'default-monitored-job';
+
+    public const REPOSITORY_INTERFACE_NAME = MonitoredJobRepository::class;
 
     /**
      * @var string
@@ -148,7 +151,8 @@ class MonitoredJob extends Model
     {
         return $this->queueableJobDefinition;
     }
-        /**
+
+    /**
      * Payload mutator
      *
      * @param array $value
@@ -162,11 +166,11 @@ class MonitoredJob extends Model
      * Payload accessor
      *
      * @param string|null $value
-     * @return MonitoredJobPayload
+     * @return array|DTO
      */
-    public function getPayloadAttribute(?string $value): DTO
+    public function getPayloadAttribute(?string $value)
     {
-        return MonitoredJobPayload::from(json_decode($value, true));
+        return json_decode($value ?? '', true);
     }
 
     /**
@@ -183,11 +187,11 @@ class MonitoredJob extends Model
      * Result accessor
      *
      * @param string|null $value
-     * @return MonitoredJobResult
+     * @return array|DTO
      */
-    public function getResultAttribute(?string $value): DTO
+    public function getResultAttribute(?string $value)
     {
-        return MonitoredJobResult::from(json_decode($value, true));
+        return json_decode($value ?? '', true);
     }
 
     public function isCompleted(): bool
