@@ -192,7 +192,6 @@ class ADFService implements ADFServiceInterface {
 
         // Set Vehicle Details
         $this->getAdfVehicle($adfLead, $adf->filter('vehicle'));
-        die;
 
         // Get ADF Lead
         return $adfLead;
