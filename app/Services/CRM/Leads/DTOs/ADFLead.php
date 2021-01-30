@@ -350,6 +350,17 @@ class ADFLead
 
 
     /**
+     * Return Full Name
+     * 
+     * @return string $this->firstName $this->lastName
+     */
+    public function getFullName(): string
+    {
+        return $this->firstName . ' ' . $this->lastName;
+    }
+
+
+    /**
      * Return Email
      * 
      * @return string $this->email
