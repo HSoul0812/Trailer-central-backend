@@ -10,6 +10,10 @@ use App\Services\CRM\Leads\AutoAssignService;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepository;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\SourceRepository;
+use App\Repositories\CRM\Leads\SourceRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepository;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepository;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
@@ -36,6 +40,8 @@ class CrmServiceProvider extends ServiceProvider
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
+        $this->app->bind(SourceRepositoryInterface::class, SourceRepository::class);
+        $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(IDSLeadRepositoryInterface::class, IDSLeadRepository::class);
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
