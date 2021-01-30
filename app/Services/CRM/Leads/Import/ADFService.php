@@ -113,9 +113,11 @@ class ADFService implements ADFServiceInterface {
 
                 // Validate ADF
                 $adf = $this->parseAdf($dealer, $crawler);
+                var_dump($adf);
 
                 // Process Further
                 $result = $this->importLead($adf);
+                var_dump($result);
                 if(!empty($result->identifier)) {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
