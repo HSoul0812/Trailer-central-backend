@@ -18,6 +18,12 @@ class ADFLead
     const DEFAULT_SOURCE = 'ADF';
 
     /**
+     * @var string Set Default Provider to ADF
+     */
+    const DEFAULT_PROVIDER = 'ADF Import';
+
+
+    /**
      * @var string Dealer ID for ADF Lead
      */
     private $dealerId;

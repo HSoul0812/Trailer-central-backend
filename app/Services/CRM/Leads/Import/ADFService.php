@@ -174,7 +174,7 @@ class ADFService implements ADFServiceInterface {
         $adfLead = new ADFLead();
 
         // Set Vendor Provider
-        $adfLead->setVendorProvider($adf->filterXPath('//provider/name')->text());
+        $adfLead->setVendorProvider($adf->filterXPath('//provider/name')->text(ADFLead::DEFAULT_PROVIDER));
 
         // Set Vendor Details
         $this->getAdfVendor($adfLead, $adf->filter('vendor'));
@@ -350,12 +350,12 @@ class ADFService implements ADFServiceInterface {
         }
         $adfLead->setVendorIds($vendorIdMap);
 
-        // Parse Vendor/Provider Details
+        // Parse Vendor Details
         $adfLead->setVendorName($vendor->filter('vendorname')->text());
 
         // Parse Vendor Contact Details
         $adfLead->setVendorContact($vendor->filterXPath('//contact/name')->text());
-        $adfLead->setVendorUrl($vendor->filterXPath('//contact/url')->text());
+        $adfLead->setVendorUrl($vendor->filterXPath('//contact/url')->text(''));
         $adfLead->setVendorEmail($vendor->filterXPath('//contact/email')->text());
         $adfLead->setVendorPhone($vendor->filterXPath('//contact/phone')->text());
 
