@@ -86,16 +86,16 @@ class SourceRepository implements SourceRepositoryInterface {
 
         // Default Exists?
         if(!empty($default->lead_source_id)) {
-            // Source Doesn't Exist on Dealer?
-            if(empty($source->lead_source_id)) {
-                return $default;
+            // If Source Exists on Dealer, Return That
+            if(!empty($source->lead_source_id)) {
+                return $source;
             }
 
-            // It DOES?!
-            return $source;
+            // Source Doesn't Exist on Lead, Return Default
+            return $default;
         }
 
-        // Doesn't Exist
-        return null;
+        // Default Doesn't Exist, Return Source on Lead
+        return $source;
     }
 }
