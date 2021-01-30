@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Nova\Observer\DealerIncomingMappingObserver;
+use App\Repositories\Common\MonitoredJobRepository;
+use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
@@ -73,6 +76,7 @@ use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanV
 use App\Repositories\System\EmailRepository;
 use App\Repositories\System\EmailRepositoryInterface;
 use App\Services\Common\EncrypterServiceInterface;
+use App\Services\Common\LoggerService;
 use App\Services\Common\MonitoredGenericJobServiceInterface;
 use App\Services\Common\MonitoredJobService;
 use App\Services\Common\SPLEncrypterService;
@@ -236,6 +240,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
 
         $this->app->bind(MonitoredGenericJobServiceInterface::class, MonitoredJobService::class);
+        $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);
+
+        $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
     }
 
 }
