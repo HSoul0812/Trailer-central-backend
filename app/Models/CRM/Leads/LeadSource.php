@@ -22,8 +22,20 @@ class LeadSource extends Model
      * @var string
      */
     protected $primaryKey = 'lead_source_id';
-    
-    public $timestamps = false;
+
+    /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'date_added';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
         
      /**
      * The attributes that are mass assignable.
@@ -33,7 +45,6 @@ class LeadSource extends Model
     protected $fillable = [
         'user_id',
         'source_name',
-        'date_added',
         'parent_id',
         'deleted'
     ];

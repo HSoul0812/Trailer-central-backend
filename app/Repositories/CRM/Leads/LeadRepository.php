@@ -2,9 +2,9 @@
 
 namespace App\Repositories\CRM\Leads;
 
-use App\Models\CRM\User\Customer;
-use App\Models\Website\Website;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
+use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -23,6 +23,16 @@ use Illuminate\Support\Facades\DB;
 class LeadRepository implements LeadRepositoryInterface {
 
     use SortTrait;
+
+    /**
+     * @var StatusRepositoryInterface
+     */
+    private $status;
+
+    /**
+     * @var SourceRepositoryInterface
+     */
+    private $sources;
 
     private $sortOrders = [
         'no_due_past_due_future_due' => [
@@ -72,6 +82,16 @@ class LeadRepository implements LeadRepositoryInterface {
         ]
     ];
 
+    /**
+     * LeadRepository constructor.
+     * 
+     * @param StatusRepositoryInterface $status
+     * @param SourceRepositoryInterface $sources
+     */
+    public function __construct(StatusRepositoryInterface $status, SourceRepositoryInterface $sources) {
+        $this->status = $status;
+        $this->sources = $sources;
+    }
 
     public function create($params) {
         // Get First Lead Type
@@ -99,6 +119,12 @@ class LeadRepository implements LeadRepositoryInterface {
         // Create Lead
         $lead = Lead::create($params);
 
+        // Create or Update Status
+        // TO DO: Implement this functionality to shift Status to its own Repository!
+        //$leadStatusParams = $params;
+        //$leadStatusParams['lead_id'] = $lead->identifier;
+        //$this->status->create($leadStatusParams);
+
         // Start Lead Status Updates
         $leadStatusUpdates = [
             'tc_lead_identifier' => $lead->identifier,
@@ -109,6 +135,12 @@ class LeadRepository implements LeadRepositoryInterface {
         // Override Fixes
         if (isset($params['lead_source'])) {
             $leadStatusUpdates['source'] = $params['lead_source'];
+
+            // Send Lead Source
+            $this->sources->create([
+                'user_id' => $lead->newDealerUser->user_id,
+                'source_name' => $params['lead_source']
+            ]);
         }
         if (isset($params['lead_status'])) {
             $leadStatusUpdates['status'] = $params['lead_status'];
@@ -249,12 +281,25 @@ class LeadRepository implements LeadRepositoryInterface {
         DB::transaction(function() use (&$lead, $params) {
             $leadStatusUpdates = [];
 
+            // Create or Update Status
+            // TO DO: Implement this functionality to shift Status to its own Repository!
+            //$leadStatusParams = $params;
+            //$leadStatusParams['lead_id'] = $lead->identifier;
+            //$status = $this->status->createOrUpdate($leadStatusParams);
+            //$lead->setRelation('leadStatus', $status);
+
             if (isset($params['lead_status'])) {
                 $leadStatusUpdates['status'] = $params['lead_status'];
             }
 
             if (isset($params['lead_source'])) {
                 $leadStatusUpdates['source'] = $params['lead_source'];
+
+                // Send Lead Source
+                $this->sources->createOrUpdate([
+                    'user_id' => $lead->newDealerUser->user_id,
+                    'source_name' => $params['lead_source']
+                ]);
             }
 
             if (isset($params['next_contact_date'])) {
