@@ -268,7 +268,7 @@ class ADFLead
      */
     public function setRequestDate(string $requestDate): void
     {
-        $this->requestDate = $requestDate;
+        $this->requestDate = Carbon::parse($requestDate)->toDateTimeString();
     }
 
 
