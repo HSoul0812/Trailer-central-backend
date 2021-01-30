@@ -43,9 +43,16 @@ class MonitoredJobObserver
     public function saving(MonitoredJob $model): void
     {
         if ($model->progress >= 100) {
-            // if the progress is rather than 100 it will marked as completed and its finished_at will be
-            // updated with the current time
+            // if the progress is grater than 100 it will marked as completed and its finished_at will be
+            // finished with the current time
             $model->status = MonitoredJob::STATUS_COMPLETED;
+            $model->finished_at = Carbon::now()->format('Y-m-d H:i:s');
+        }
+
+        if ($model->status = MonitoredJob::STATUS_COMPLETED && $model->progress <= 100) {
+            // if the status is 'completed' and the progress is less than 100, then
+            // it will update the progress to 100 and finished with the current time
+            $model->progress = 100;
             $model->finished_at = Carbon::now()->format('Y-m-d H:i:s');
         }
 
