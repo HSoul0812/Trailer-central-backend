@@ -78,7 +78,7 @@ interface MonitoredJobRepositoryInterface
      * @return bool true if it has updated more than one record
      * @throws ModelNotFoundException when the job does not exists
      */
-    public function updateProgress(string $token, float $progress): bool;
+    public function updateProgress(string $token, $progress): bool;
 
     /**
      * Updates the result of a job by token

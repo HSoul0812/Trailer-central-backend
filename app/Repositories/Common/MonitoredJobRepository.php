@@ -121,7 +121,7 @@ class MonitoredJobRepository implements MonitoredJobRepositoryInterface
      * @return bool true if it has updated more than one record
      * @throws ModelNotFoundException when the job does not exists
      */
-    public function updateProgress(string $token, float $progress): bool
+    public function updateProgress(string $token, $progress): bool
     {
         if ($progress >= 100) {
             return $this->setCompleted($token);
