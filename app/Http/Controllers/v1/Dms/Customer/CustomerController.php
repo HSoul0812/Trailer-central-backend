@@ -55,7 +55,7 @@ class CustomerController extends RestfulController
             'tax_exempt', 'is_financing_company', 'account_number', 'qb_id', 'gender', 'dob', 'deleted_at',
             'is_wholesale', 'default_discount_percent', 'middle_name', 'company_name', 'use_same_address',
             'shipping_address', 'shipping_city', 'shipping_region', 'shipping_postal_code', 'shipping_country',
-            'county', 'shipping_county',
+            'county', 'shipping_county', 'qb_id'
         ]);
 
         try {
