@@ -41,10 +41,6 @@ class CsvExportJob extends Job
     public function handle(): bool
     {
         try {
-            Log::info("Error running export parts CSV export job: ".
-                "token[{$this->download->token}, payload={{$payload}}] exception[{$e->getMessage()}]"
-            );
-
             $this->service->run($this->download);
         } catch (Exception $e) {
             // catch and log
