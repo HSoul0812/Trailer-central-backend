@@ -58,7 +58,7 @@ class CreateTableForMonitoredJob extends Migration
                 ->default(MonitoredJob::STATUS_PENDING)
                 ->index();
 
-            $table->float('progress', 3)->default(0)->comment('progress between 0 to 100');
+            $table->float('progress', 5)->default(0)->comment('progress between 0 to 100');
 
             if ($version < '5.7.0') {
                 $table->text('payload')->nullable()->comment('json data useful for handle the job');
