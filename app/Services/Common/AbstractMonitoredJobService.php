@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Common;
 
-use App\Exceptions\Common\HasNotQueueableJob;
+use App\Exceptions\Common\HasNotQueueableJobException;
 use App\Models\Common\MonitoredJob;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use Illuminate\Bus\Queueable;
@@ -24,7 +24,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
 
     /**
      * @param MonitoredJob $job
-     * @throws HasNotQueueableJob when there is not defined a queueable job
+     * @throws HasNotQueueableJobException when there is not defined a queueable job
      */
     public function dispatch($job): void
     {
@@ -39,7 +39,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
 
     /**
      * @param MonitoredJob $job
-     * @throws HasNotQueueableJob when there is not defined a queueable job
+     * @throws HasNotQueueableJobException when there is not defined a queueable job
      */
     public function dispatchNow($job): void
     {
@@ -74,7 +74,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
     /**
      * @param MonitoredJob $job
      * @return Queueable
-     * @throws HasNotQueueableJob
+     * @throws HasNotQueueableJobException
      */
     protected function createQueueableJob($job)
     {
@@ -82,7 +82,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
             return $job->getQueueableJob()($job);
         }
 
-        throw new HasNotQueueableJob("This job can't be dispatched due there is not defined a queueable job");
+        throw new HasNotQueueableJobException("This job can't be dispatched due there is not defined a queueable job");
     }
 
     /**

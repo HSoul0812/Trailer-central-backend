@@ -6,6 +6,6 @@ namespace App\Exceptions\Common;
 
 use Exception;
 
-class HasNotQueueableJob extends Exception
+class HasNotQueueableJobException extends Exception
 {
 }
