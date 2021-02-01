@@ -23,15 +23,6 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function create($params)
     {
-        // Check if there are any customers with same display_name
-        $duplicatedCustomers = Customer::where([
-            'display_name' => $params['display_name'],
-            'dealer_id' => $params['dealer_id'],
-        ])->whereNull("deleted_at")->get();
-        if (count($duplicatedCustomers)) {
-            throw new \Exception('There are some customers with same display name.');
-        }
-
         $customer = new Customer($params);
         $customer->dealer_id = $params['dealer_id'];
         $customer->save();

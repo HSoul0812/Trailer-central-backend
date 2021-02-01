@@ -8,6 +8,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Http\Requests\Dms\GetCustomersRequest;
+use App\Http\Requests\Dms\CreateCustomerRequest;
 use App\Transformers\Dms\CustomerTransformer;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
@@ -55,14 +56,18 @@ class CustomerController extends RestfulController
             'tax_exempt', 'is_financing_company', 'account_number', 'qb_id', 'gender', 'dob', 'deleted_at',
             'is_wholesale', 'default_discount_percent', 'middle_name', 'company_name', 'use_same_address',
             'shipping_address', 'shipping_city', 'shipping_region', 'shipping_postal_code', 'shipping_country',
-            'county', 'shipping_county', 'qb_id'
+            'county', 'shipping_county'
         ]);
 
         try {
-            $customer = $this->customerRepository->create($customerData);
+            $request = new CreateCustomerRequest($customerData);
+            if ($request->validate()) {
+                $customer = $this->customerRepository->create($customerData);
 
-            return $this->response->item($customer, $this->transformer);
-
+                return $this->response->item($customer, $this->transformer);
+            }
+        
+            return $this->response->errorBadRequest();
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
