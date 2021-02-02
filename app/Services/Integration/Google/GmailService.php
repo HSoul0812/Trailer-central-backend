@@ -346,7 +346,7 @@ class GmailService implements GmailServiceInterface
             'access_token' => $googleToken->getAccessToken(),
             'id_token' => $googleToken->getIdToken(),
             'expires_in' => $googleToken->getExpiresIn(),
-            'created' => $googleToken->getCreatedAt()
+            'created' => $googleToken->getIssuedUnix()
         ]);
         $this->client->setScopes($googleToken->getScope());
 

@@ -253,6 +253,16 @@ class GoogleToken
     }
 
     /**
+     * Return Issued At Unix
+     * 
+     * @return int $this->issuedAt
+     */
+    public function getIssuedUnix(): int
+    {
+        return Carbon::parse($this->issuedAt)->timestamp;
+    }
+
+    /**
      * Set Issued At
      * 
      * @param string $issuedAt
