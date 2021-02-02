@@ -13,7 +13,7 @@ class GoogleTokenTransformer extends TransformerAbstract
             'access_token' => $token->getAccessToken(),
             'refresh_token' => $token->getRefreshToken(),
             'id_token' => $token->getIdToken(),
-            'scopes' => $token->getScopesString(),
+            'scopes' => $token->getScope(),
             'issued_at' => $token->getIssuedAt(),
             'expires_in' => $token->getExpiresIn(),
             'expires_at' => $token->getExpiresAt(),
