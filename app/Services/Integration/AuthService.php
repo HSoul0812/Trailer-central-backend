@@ -4,6 +4,7 @@ namespace App\Services\Integration;
 
 use App\Exceptions\Integration\Auth\MissingAuthLoginTokenTypeScopesException;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
