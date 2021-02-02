@@ -88,9 +88,9 @@ class GoogleService implements GoogleServiceInterface
      * 
      * @param string $redirectUrl url to redirect auth back to again
      * @param string $authCode auth code to get full credentials with
-     * @return GoogleToken containing auth data
+     * @return array created from GoogleTokenTransformer
      */
-    public function auth($redirectUrl, $authCode): GoogleToken {
+    public function auth($redirectUrl, $authCode): array {
         // Set Redirect URL
         $this->client->setRedirectUri($redirectUrl);
 
