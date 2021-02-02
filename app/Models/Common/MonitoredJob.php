@@ -7,9 +7,11 @@ namespace App\Models\Common;
 use App\Contracts\Support\DTO;
 use App\Models\Observers\Common\MonitoredJobObserver;
 use App\Models\Traits\TableAware;
+use App\Models\User\User;
 use App\Repositories\Common\MonitoredJobRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder;
 
 /**
@@ -30,6 +32,8 @@ use Illuminate\Database\Query\Builder;
  * @property string $created_at when the job was created
  * @property string $updated_at when the job was last updated
  * @property string $finished_at when the job was finished (or failed)
+ *
+ * @property User $dealer
  *
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
@@ -127,6 +131,11 @@ class MonitoredJob extends Model
         'finished_at',
         'result'
     ];
+
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
 
     /**
      * @param callable $lambda
