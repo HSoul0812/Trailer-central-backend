@@ -164,11 +164,11 @@ class GoogleToken
     }
 
     /**
-     * Return Scopes String
+     * Return Scope String
      * 
      * @return string implode(", ", $this->scopes)
      */
-    public function getScopesString(): string
+    public function getScope(): string
     {
         return implode(" ", $this->scopes);
     }
