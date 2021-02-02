@@ -60,7 +60,9 @@ class GoogleToken
         $this->setAccessToken($authToken['access_token']);
 
         // Fill Refresh Token
-        $this->setRefreshToken($authToken['refresh_token']);
+        if(isset($authToken['refresh_token'])) {
+            $this->setRefreshToken($authToken['refresh_token']);
+        }
 
         // Fill ID Token
         $this->setIdToken($authToken['id_token']);
@@ -112,7 +114,7 @@ class GoogleToken
      */
     public function getRefreshToken(): string
     {
-        return $this->refreshToken;
+        return $this->refreshToken ?? '';
     }
 
     /**
