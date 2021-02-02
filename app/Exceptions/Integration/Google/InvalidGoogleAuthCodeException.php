@@ -9,7 +9,7 @@ namespace App\Exceptions\Integration\Google;
  *
  * @package App\Exceptions\Integration\Auth
  */
-class InvalidGoogleAuthCodeException extends \Exception
+class InvalidAuthCodeException extends \Exception
 {
     
     protected $message = 'Invalid auth code while trying to get google access token!';
