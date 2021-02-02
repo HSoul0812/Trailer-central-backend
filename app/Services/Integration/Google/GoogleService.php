@@ -87,7 +87,8 @@ class GoogleService implements GoogleServiceInterface
         $authToken = $this->client->fetchAccessTokenWithAuthCode($authCode);
 
         // Return Formatted Auth Token
-        $googleToken = GoogleToken($authToken);
+        $googleToken = new GoogleToken();
+        $googleToken->fill($authToken);
 
         // Get Profile
         $this->gmail->profile($googleToken);
