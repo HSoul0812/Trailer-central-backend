@@ -53,29 +53,29 @@ class GoogleToken
     /**
      * Fill Access Token From Array
      * 
-     * @param stdclass $authToken
+     * @param array $authToken
      */
-    public function fillFromArray(\stdclass $authToken) {
+    public function fillFromArray(array $authToken) {
         // Fill Access Token
-        $this->setAccessToken($authToken->access_token);
+        $this->setAccessToken($authToken['access_token']);
 
         // Fill Refresh Token
-        $this->setRefreshToken($authToken->refresh_token);
+        $this->setRefreshToken($authToken['refresh_token']);
 
         // Fill ID Token
-        $this->setIdToken($authToken->id_token);
+        $this->setIdToken($authToken['id_token']);
 
         // Fill Scopes
-        $this->setScopes($authToken->scopes);
+        $this->setScopes($authToken['scopes']);
 
         // Fill Expires In
-        $this->setExpiresIn($authToken->expires_in);
+        $this->setExpiresIn($authToken['expires_in']);
 
         // Fill Expires At
-        $this->setExpiresAt($authToken->expires_at);
+        $this->setExpiresAt($authToken['expires_at']);
 
         // Fill Issued At
-        $this->setIssuedAt($authToken->issued_at);
+        $this->setIssuedAt($authToken['issued_at']);
     }
 
 
