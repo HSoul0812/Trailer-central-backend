@@ -4,6 +4,7 @@ namespace App\Services\Integration;
 
 use App\Exceptions\Integration\Auth\MissingAuthLoginTokenTypeScopesException;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -185,6 +186,30 @@ class AuthService implements AuthServiceInterface
             } elseif($accessToken->token_type === 'facebook') {
                 $validate = $this->facebook->validate($accessToken);
                 unset($validate['refresh_token']);
+            }
+        }
+
+        // Return Validation
+        return $validate;
+    }
+
+    /**
+     * Validate Custom Access Token
+     * 
+     * @param CommonToken $accessToken general access token filled with data from request
+     * @return array of validation
+     */
+    public function validateCustom(CommonToken $accessToken) {
+        // Initialize Access Token
+        $validate = [
+            'is_valid' => false,
+            'is_expired' => true
+        ];
+
+        // Validate Access Token
+        if(!empty($accessToken->token_type)) {
+            if($accessToken->token_type === 'google') {
+                return $this->google->validateCustom($accessToken);
             }
         }
 
