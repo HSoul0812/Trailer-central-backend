@@ -5,10 +5,9 @@ namespace App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
-use App\Models\User\DealerUser;
-use App\Models\User\AuthToken;
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Query\Builder;
 
 /**
  * Class User
@@ -22,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property string $email
  *
  * @property bool $isCrmActive
+ *
+ * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
 class User extends Model implements Authenticatable
 {
