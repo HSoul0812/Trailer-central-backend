@@ -108,7 +108,7 @@ class GoogleService implements GoogleServiceInterface
         $this->gmail->profile($googleToken);
 
         // Return Transformed Data
-        $data = new Item($googleToken, new GoogleTokenTransformer(), 'data');
+        $data = new Item($googleToken, new GoogleTokenTransformer());
         return $this->fractal->createData($data)->toArray();
     }
 
