@@ -68,7 +68,7 @@ class GoogleToken
         $this->setIdToken($authToken['id_token']);
 
         // Fill Scopes
-        $this->setScopes($authToken['scopes']);
+        $this->setScopes($authToken['scope']);
 
         // Fill Issued At
         if(isset($authToken['created'])) {
