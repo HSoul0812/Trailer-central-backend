@@ -2,7 +2,7 @@
 
 namespace App\Services\Integration\Google;
 
-use App\Services\Integration\Google\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\CommonToken;
 
 interface GoogleServiceInterface {
     /**

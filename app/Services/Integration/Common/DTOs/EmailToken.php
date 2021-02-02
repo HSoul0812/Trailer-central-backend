@@ -7,7 +7,7 @@ use App\Services\Integration\Common\DTOs\CommonToken;
 /**
  * Class EmailToken
  * 
- * @package App\Services\Integration\Google\DTOs
+ * @package App\Services\Integration\Common\DTOs
  */
 class EmailToken extends CommonToken
 {

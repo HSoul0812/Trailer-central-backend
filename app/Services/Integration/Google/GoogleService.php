@@ -3,7 +3,8 @@
 namespace App\Services\Integration\Google;
 
 use App\Services\Integration\Google\GmailServiceInterface;
-use App\Services\Integration\Google\DTOs\EmailToken;
+use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Transformers\Integration\Auth\EmailTokenTransformer;
 use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
