@@ -11,6 +11,7 @@ use App\Exceptions\Integration\Google\MissingGapiClientIdException;
 use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Facades\Log;
 
@@ -32,12 +33,19 @@ class GoogleService implements GoogleServiceInterface
     protected $gmail;
 
     /**
+     * @var Manager
+     */
+    private $fractal;
+
+    /**
      * Construct Google Client
      */
-    public function __construct(GmailServiceInterface $gmail)
+    public function __construct(GmailServiceInterface $gmail, Manager $fractal)
     {
         // Initialize Services
         $this->gmail = $gmail;
+        $this->fractal = $fractal;
+        $this->fractal->setSerializer(new NoDataArraySerializer());
 
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
