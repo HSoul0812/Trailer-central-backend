@@ -60,6 +60,9 @@ class GmailService implements GmailServiceInterface
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
 
+        // Initialize Logger
+        $this->log = Log::channel('google');
+
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
             throw new MissingGapiClientIdException;
@@ -94,7 +97,7 @@ class GmailService implements GmailServiceInterface
             $emailToken->setEmailAddress($profile->getEmailAddress());
         } catch (\Exception $e) {
             // Log Error
-            Log::error('Exception returned on getting gmail profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned on getting gmail profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Google Token
@@ -141,7 +144,7 @@ class GmailService implements GmailServiceInterface
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
-            Log::error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
             if(strpos($error, "invalid authentication") !== FALSE) {
                 throw new InvalidGmailAuthMessageException();
             } else {
@@ -180,7 +183,7 @@ class GmailService implements GmailServiceInterface
                 $q .= $k . ': ' . $v;
             }
         }
-        Log::info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
+        $this->log->info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
 
         // Get Messages
         $results = $this->gmail->users_messages->listUsersMessages('me', [
@@ -190,7 +193,7 @@ class GmailService implements GmailServiceInterface
         $messages = $results->getMessages();
 
         // Return Results
-        Log::info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
+        $this->log->info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
         if (count($messages) == 0) {
             return [];
         }
@@ -225,7 +228,7 @@ class GmailService implements GmailServiceInterface
             $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
         }
         if(count($attachments) > 0) {
-            Log::info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
+            $this->log->info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
         }
 
         // Parse Data
