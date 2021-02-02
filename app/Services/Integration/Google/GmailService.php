@@ -15,7 +15,7 @@ use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
-use App\Services\Integration\Google\DTOs\GoogleToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
 use Google_Service_Gmail_MessagePart;
@@ -78,12 +78,12 @@ class GmailService implements GmailServiceInterface
     /**
      * Get Gmail Profile Email
      * 
-     * @param GoogleToken $googleToken
-     * @return GoogleToken
+     * @param EmailToken $emailToken
+     * @return EmailToken
      */
-    public function profile(GoogleToken $googleToken): GoogleToken {
+    public function profile(EmailToken $emailToken): EmailToken {
         // Get Profile Details
-        $this->setGoogleToken($googleToken);
+        $this->setEmailToken($emailToken);
 
         // Insert Gmail
         try {
@@ -91,14 +91,14 @@ class GmailService implements GmailServiceInterface
             $profile = $this->gmail->users->getProfile('me');
 
             // Append Profile
-            $googleToken->setEmailAddress($profile->getEmailAddress());
+            $emailToken->setEmailAddress($profile->getEmailAddress());
         } catch (\Exception $e) {
             // Log Error
             Log::error('Exception returned on getting gmail profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Google Token
-        return $googleToken;
+        return $emailToken;
     }
 
     /**
@@ -332,23 +332,23 @@ class GmailService implements GmailServiceInterface
     /**
      * Set Google Token on Client
      * 
-     * @param GoogleToken $googleToken
+     * @param EmailToken $emailToken
      * @return void
      */
-    private function setGoogleToken(GoogleToken $googleToken) {
+    private function setEmailToken(EmailToken $emailToken) {
         // ID Token Exists?
-        if(empty($googleToken->getIdToken())) {
+        if(empty($emailToken->getIdToken())) {
             throw new MissingGapiIdTokenException;
         }
 
         // Set Google Token on Client
         $this->client->setAccessToken([
-            'access_token' => $googleToken->getAccessToken(),
-            'id_token' => $googleToken->getIdToken(),
-            'expires_in' => $googleToken->getExpiresIn(),
-            'created' => $googleToken->getIssuedUnix()
+            'access_token' => $emailToken->getAccessToken(),
+            'id_token' => $emailToken->getIdToken(),
+            'expires_in' => $emailToken->getExpiresIn(),
+            'created' => $emailToken->getIssuedUnix()
         ]);
-        $this->client->setScopes($googleToken->getScope());
+        $this->client->setScopes($emailToken->getScope());
 
         // Setup Gmail
         $this->gmail = new \Google_Service_Gmail($this->client);

@@ -2,12 +2,12 @@
 
 namespace App\Transformers\Integration\Google;
 
-use App\Services\Integration\Google\DTOs\GoogleToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
 use League\Fractal\TransformerAbstract;
 
-class GoogleTokenTransformer extends TransformerAbstract
+class EmailTokenTransformer extends TransformerAbstract
 {
-    public function transform(GoogleToken $token)
+    public function transform(EmailToken $token)
     {
         return [
             'access_token' => $token->getAccessToken(),

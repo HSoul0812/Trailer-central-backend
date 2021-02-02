@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Services\Integration\Google\DTOs;
+namespace App\Services\Integration\Common\DTOs;
 
 use Carbon\Carbon;
 
 /**
- * Class GoogleToken
+ * Class CommonToken
  * 
- * @package App\Services\Integration\Google\DTOs
+ * @package App\Services\Integration\Common\DTOs
  */
-class GoogleToken
+class CommonToken
 {
     /**
      * @var string Access Token
@@ -45,11 +45,6 @@ class GoogleToken
      * @var string Issued At Date/Time
      */
     private $issuedAt;
-
-    /**
-     * @var string Email Address Approved For
-     */
-    private $emailAddress;
 
 
     /**
@@ -283,27 +278,5 @@ class GoogleToken
     {
         // Calculate Issued At
         $this->issuedAt = Carbon::createFromTimestamp($issuedAt)->toDateTimeString();
-    }
-
-
-    /**
-     * Return Email Address
-     * 
-     * @return string $this->emailAddress
-     */
-    public function getEmailAddress(): string
-    {
-        return $this->emailAddress;
-    }
-
-    /**
-     * Set Email Address
-     * 
-     * @param string $emailAddress
-     * @return void
-     */
-    public function setEmailAddress(string $emailAddress): void
-    {
-        $this->emailAddress = $emailAddress;
     }
 }

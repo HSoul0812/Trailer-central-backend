@@ -193,6 +193,30 @@ class AuthService implements AuthServiceInterface
     }
 
     /**
+     * Validate Custom Access Token
+     * 
+     * @param CommonToken $accessToken general access token filled with data from request
+     * @return array of validation
+     */
+    public function validateCustom(CommonToken $accessToken) {
+        // Initialize Access Token
+        $validate = [
+            'is_valid' => false,
+            'is_expired' => true
+        ];
+
+        // Validate Access Token
+        if(!empty($accessToken->token_type)) {
+            if($accessToken->token_type === 'google') {
+                $validate = $this->google->validateCustom($accessToken);
+            }
+        }
+
+        // Return Validation
+        return $validate;
+    }
+
+    /**
      * Return Response
      * 
      * @param AccessToken $accessToken
