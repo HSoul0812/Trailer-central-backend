@@ -68,6 +68,13 @@ return [
             'days' => 3,
         ],
 
+        'google' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/google.log'),
+            'level' => 'debug',
+            'days' => 12,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

@@ -49,6 +49,9 @@ class GoogleService implements GoogleServiceInterface
         $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
 
+        // Initialize Logger
+        $this->log = Log::channel('google');
+
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
             throw new MissingGapiClientIdException;
@@ -244,7 +247,7 @@ class GoogleService implements GoogleServiceInterface
         catch (\Exception $e) {
             // We actually just want to verify this is true or false
             // If it throws an exception, that means its false, the token isn't valid
-            Log::error('Exception returned for Google Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned for Google Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Validate
@@ -275,7 +278,7 @@ class GoogleService implements GoogleServiceInterface
         } catch (\Exception $e) {
             // We actually just want to verify this is true or false
             // If it throws an exception, that means its false, the token isn't valid
-            Log::error('Exception returned for Google Refresh Access Token: ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned for Google Refresh Access Token: ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Result
