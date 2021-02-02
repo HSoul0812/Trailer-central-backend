@@ -8,7 +8,7 @@ use App\Transformers\Integration\Google\GoogleTokenTransformer;
 use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGapiClientIdException;
-use App\Exceptions\Integration\Google\InvalidAuthCodeException;
+use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
 use Illuminate\Support\Facades\Log;
@@ -87,7 +87,7 @@ class GoogleService implements GoogleServiceInterface
         // Return Auth URL for Login
         $authToken = $this->client->fetchAccessTokenWithAuthCode($authCode);
         if(empty($authToken['access_token'])) {
-            throw new InvalidAuthCodeException;
+            throw new InvalidGoogleAuthCodeException;
         }
 
         // Return Formatted Auth Token
