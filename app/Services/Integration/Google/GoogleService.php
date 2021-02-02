@@ -12,6 +12,7 @@ use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Facades\Log;
 
