@@ -2,6 +2,8 @@
 
 namespace App\Services\Integration\Google;
 
+use App\Services\Integration\Google\GmailServiceInterface;
+use App\Transformers\Integration\Google\GoogleTokenTransformer;
 use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGapiClientIdException;
@@ -22,10 +24,18 @@ class GoogleService implements GoogleServiceInterface
     protected $client;
 
     /**
+     * @var GmailServiceInterface
+     */
+    protected $gmail;
+
+    /**
      * Construct Google Client
      */
-    public function __construct()
+    public function __construct(GmailServiceInterface $gmail)
     {
+        // Initialize Services
+        $this->gmail = $gmail;
+
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
             throw new MissingGapiClientIdException;
@@ -66,14 +76,24 @@ class GoogleService implements GoogleServiceInterface
      * 
      * @param string $redirectUrl url to redirect auth back to again
      * @param string $authCode auth code to get full credentials with
-     * @return all auth data
+     * @return GoogleToken containing auth data
      */
-    public function auth($redirectUrl, $authCode) {
+    public function auth($redirectUrl, $authCode): GoogleToken {
         // Set Redirect URL
         $this->client->setRedirectUri($redirectUrl);
 
         // Return Auth URL for Login
-        return $this->client->fetchAccessTokenWithAuthCode($authCode);
+        $authToken = $this->client->fetchAccessTokenWithAuthCode($authCode);
+
+        // Return Formatted Auth Token
+        $googleToken = GoogleToken($authToken);
+
+        // Get Profile
+        $this->gmail->profile($googleToken);
+
+        // Return Transformed Data
+        $data = new Item($googleToken, new GoogleTokenTransformer(), 'data');
+        return $this->fractal->createData($data)->toArray();
     }
 
     /**
