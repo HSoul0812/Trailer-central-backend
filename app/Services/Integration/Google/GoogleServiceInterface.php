@@ -2,7 +2,7 @@
 
 namespace App\Services\Integration\Google;
 
-use App\Services\Integration\Google\DTOs\GoogleToken;
+use App\Services\Integration\Google\DTOs\CommonToken;
 
 interface GoogleServiceInterface {
     /**
@@ -38,4 +38,12 @@ interface GoogleServiceInterface {
      * @return array of validation info
      */
     public function validate($accessToken);
+
+    /**
+     * Validate Google API Access Token Exists and Refresh if Possible
+     * 
+     * @param CommonToken $accessToken
+     * @return array of validation info
+     */
+    public function validateCustom(CommonToken $accessToken);
 }
