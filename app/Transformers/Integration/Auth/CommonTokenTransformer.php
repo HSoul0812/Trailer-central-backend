@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Transformers\Integration\Google;
+namespace App\Transformers\Integration\Auth;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
 use League\Fractal\TransformerAbstract;
