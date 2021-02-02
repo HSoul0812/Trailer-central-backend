@@ -2,6 +2,7 @@
 
 /** @var Factory $factory */
 
+use App\Models\User\DealerLocation;
 use Illuminate\Database\Eloquent\Factory;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\EntityType;
