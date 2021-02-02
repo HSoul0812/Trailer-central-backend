@@ -11,6 +11,7 @@ use App\Exceptions\Integration\Google\MissingGapiClientIdException;
 use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
+use League\Fractal\Resource\Item;
 use Illuminate\Support\Facades\Log;
 
 /**
