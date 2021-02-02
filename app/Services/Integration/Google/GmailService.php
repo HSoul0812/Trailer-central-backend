@@ -337,7 +337,7 @@ class GmailService implements GmailServiceInterface
      */
     private function setGoogleToken(GoogleToken $googleToken) {
         // ID Token Exists?
-        if(empty($googleToken->id_token)) {
+        if(empty($googleToken->getIdToken())) {
             throw new MissingGapiIdTokenException;
         }
 
