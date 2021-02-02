@@ -3,6 +3,7 @@
 namespace App\Services\Integration\Google;
 
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Google\DTOs\GoogleToken;
 use App\Transformers\Integration\Google\GoogleTokenTransformer;
 use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
@@ -99,7 +100,7 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Get Refresh Token
      * 
-     * @param array $accessToken
+     * @param AccessToken $accessToken
      * @return array of validation info
      */
     public function refresh($accessToken) {

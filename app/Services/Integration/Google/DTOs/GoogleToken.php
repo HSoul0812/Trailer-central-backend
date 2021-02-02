@@ -50,7 +50,12 @@ class GoogleToken
     private $emailAddress;
 
 
-    public function __construct(array $authToken) {
+    /**
+     * Fill Access Token From Array
+     * 
+     * @param array $authToken
+     */
+    public function fillFromArray(array $authToken) {
         // Fill Access Token
         $this->setAccessToken($authToken['access_token']);
 

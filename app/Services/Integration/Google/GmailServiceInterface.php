@@ -3,8 +3,17 @@
 namespace App\Services\Integration\Google;
 
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\Integration\Google\DTOs\GoogleToken;
 
 interface GmailServiceInterface {
+    /**
+     * Get Gmail Profile Email
+     * 
+     * @param GoogleToken $googleToken
+     * @return GoogleToken
+     */
+    public function profile(GoogleToken $googleToken): GoogleToken;
+
     /**
      * Validate Google API Access Token Exists
      * 
