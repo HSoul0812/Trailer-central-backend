@@ -54,6 +54,20 @@ return [
             'days' => 14,
         ],
 
+        'autoassign' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/auto-assign.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'scrapereplies' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/scrape-replies.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
