@@ -18,7 +18,7 @@ use Tests\database\seeds\Seeder;
  * @property-read User $dealer
  * @property-read array<Inventory> $customerRelatedInventories
  * @property-read array<Inventory> $unrelatedInventories
- * @property-read int[] $customerInventoryIds
+ * @property-read string[] $customerInventoryIds
  */
 class InventorySeeder extends Seeder
 {
@@ -45,7 +45,7 @@ class InventorySeeder extends Seeder
     private $unrelatedInventories = [];
 
     /**
-     * @var int[]
+     * @var string[]
      */
     private $customerInventoryIds = [];
 
