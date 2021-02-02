@@ -2,6 +2,8 @@
 
 namespace App\Services\Integration\Google\DTOs;
 
+use Carbon\Carbon;
+
 /**
  * Class GoogleToken
  * 
