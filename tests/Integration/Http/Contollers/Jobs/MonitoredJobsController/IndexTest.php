@@ -6,7 +6,6 @@ namespace Tests\Integration\Http\Contollers\Jobs\MonitoredJobsController;
 
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Jobs\GetMonitoredJobsRequest;
-use App\Models\Common\MonitoredJob;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\database\seeds\Common\MonitoredJobSeeder;
@@ -26,7 +25,7 @@ class IndexTest extends TestCase
     {
         // Given I'm using the controller "MonitoredJobsController"
         $controller = app(MonitoredJobsController::class);
-        // And I have a poor formed "GetMonitoredJobsRequest"
+        // And I have a bad formed "GetMonitoredJobsRequest"
         $request = new GetMonitoredJobsRequest([]);
 
         // Then I expect to see an "ResourceException" to be thrown
@@ -35,7 +34,7 @@ class IndexTest extends TestCase
         $this->expectExceptionMessage('Validation Failed');
 
         try {
-            // When I call the index action
+            // When I call the index action using the bad formed request
             $controller->index($request);
         } catch (ResourceException $exception) {
             // Then I should see that the first error message has a specific string
@@ -67,7 +66,7 @@ class IndexTest extends TestCase
         // And I have a well formed "GetMonitoredJobsRequest" request
         $request = new GetMonitoredJobsRequest($this->seeder->extractValues($params));
 
-        // When I call the index action
+        // When I call the index action using the well formed request
         $response = $controller->index($request);
         $paginator = $response->original;
 
@@ -75,13 +74,6 @@ class IndexTest extends TestCase
         self::assertSame(200, $response->status());
         // And I should see that the expected total of monitored jobs is the same as monitored jobs retrieved
         self::assertSame($expectedTotal($this->seeder), $paginator->total());
-
-        $expectedJobs($this->seeder)->each(function (MonitoredJob $job) {
-            $this->assertDatabaseHas(
-                MonitoredJob::getTableName(),
-                ['token' => $job->token, 'name' => $job->name, 'status' => $job->status]
-            );
-        });
     }
 
     /**
@@ -119,7 +111,8 @@ class IndexTest extends TestCase
             };
         };
 
-        return [                                   // array $parameters, callable:int $expectedTotal, int $expectedLastPage, callable:\Illuminate\Support\Collection<MonitoredJob> $expectedJobs
+        // array $parameters, callable:int $expectedTotal, int $expectedLastPage, callable:\Illuminate\Support\Collection<MonitoredJob> $expectedJobs
+        return [
             'By dummy dealer paged by 2'           => [['dealer_id' => $dealerLambda(0,'id'), 'per_page' => 2], $dealerLambda(0,'total'), 4, $dealerLambda(0, 'jobs')],
             'By another dummy dealer paged by 100' => [['dealer_id' => $dealerLambda(1, 'id')], $dealerLambda(1,'total'), 1, $dealerLambda(1, 'jobs')]
         ];
