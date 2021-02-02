@@ -68,14 +68,18 @@ class GoogleToken
         // Fill Scopes
         $this->setScopes($authToken['scopes']);
 
+        // Fill Issued At
+        if(isset($authToken['created'])) {
+            $this->calcIssuedAt($authToken['created']);
+        } else {
+            $this->setIssuedAt($authToken['issued_at']);
+        }
+
         // Fill Expires In
         $this->setExpiresIn($authToken['expires_in']);
 
         // Fill Expires At
-        $this->setExpiresAt($authToken['expires_at']);
-
-        // Fill Issued At
-        $this->setIssuedAt($authToken['issued_at']);
+        $this->calcExpiresAt($this->getIssuedAt(), $this->getExpiresIn());
     }
 
 
@@ -220,6 +224,19 @@ class GoogleToken
         $this->expiresAt = $expiresAt;
     }
 
+    /**
+     * Calculate Expires At
+     * 
+     * @param string $issuedAt
+     * @param int $expiresIn
+     * @return void
+     */
+    public function calcExpiresAt(string $issuedAt, int $expiresIn): void
+    {
+        // Calculate Expires At
+        $this->expiresAt = Carbon::parse($issuedAt)->addSeconds($expiresIn)->toDateTimeString();
+    }
+
 
     /**
      * Return Issued At
@@ -240,6 +257,18 @@ class GoogleToken
     public function setIssuedAt(string $issuedAt): void
     {
         $this->issuedAt = $issuedAt;
+    }
+
+    /**
+     * Calculate Issued At
+     * 
+     * @param string $issuedAt
+     * @return void
+     */
+    public function calcIssuedAt(int $issuedAt): void
+    {
+        // Calculate Issued At
+        $this->issuedAt = Carbon::createFromTimestamp($issuedAt)->toDateTimeString();
     }
 
 
