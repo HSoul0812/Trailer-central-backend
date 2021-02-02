@@ -74,7 +74,9 @@ class MonitoredJobsController extends RestfulController
      * Check status of the process
      *
      * @param string $token The token returned by the create service
-     * @return JsonResponse
+     * @param Request $request
+     * @return JsonResponse|void
+     * @throws HttpException when there was a bad request
      *
      * @OA\Get(
      *     path="/api/jobs/status/{token}",
@@ -87,26 +89,28 @@ class MonitoredJobsController extends RestfulController
      *     )
      * )
      */
-    public function status(string $token): JsonResponse
+    public function status(string $token, Request $request): ?JsonResponse
     {
-        $job = $this->repository->findByToken($token);
+        $request = new GetMonitoredJobsRequest(array_merge($request->all(), ['token' => $token]));
 
-        if ($job === null) {
-            $this->response->errorNotFound('The job was not found');
+        if ($request->validate()) {
+            $job = $request->getJob();
+
+            if ($job->isPending()) {
+                return response()->json(['message' => 'Still processing', 'progress' => $job->progress]);
+            }
+
+            if ($job->isCompleted()) {
+                return response()->json(['message' => 'Completed', 'progress' => $job->progress]);
+            }
+
+            if ($job->isFailed()) {
+                return response()->json(['message' => $this->failedMessage], 500);
+            }
+
+            return response()->json(['message' => 'Error: unknown status'], 500);
         }
 
-        if ($job->isPending()) {
-            return response()->json(['message' => 'Still processing', 'progress' => $job->progress]);
-        }
-
-        if ($job->isCompleted()) {
-            return response()->json(['message' => 'Completed', 'progress' => $job->progress]);
-        }
-
-        if ($job->isFailed()) {
-            return response()->json(['message' => $this->failedMessage], 500);
-        }
-
-        return response()->json(['message' => 'Error: unknown status'], 500);
+        $this->response->errorBadRequest();
     }
 }

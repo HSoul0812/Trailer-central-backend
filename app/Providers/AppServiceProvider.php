@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Contracts\LoggerServiceInterface;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Nova\Observer\DealerIncomingMappingObserver;
+use App\Repositories\Bulk\Parts\BulkUploadRepository;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepository;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRepository;
@@ -195,7 +197,7 @@ class AppServiceProvider extends ServiceProvider
         //
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
-        $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
+        $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);

@@ -2,10 +2,9 @@
 
 namespace App\Models\Bulk\Parts;
 
-use App\Contracts\Support\DTO;
 use App\Models\Common\MonitoredJob;
 use App\Models\Common\MonitoredJobResult;
-use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 
 /**
  * Class BulkDownload

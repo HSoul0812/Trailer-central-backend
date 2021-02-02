@@ -36,7 +36,7 @@ class Request extends BaseRequest {
         }
 
         if ($this->validateObjectBelongsToUser()) {
-            $user = Auth::user();
+            $user = Auth::user();//todo: using this facade make this method untestable, it must to be rethink
 
             if ($user) {
                 if ($this->getObjectIdValue()) {

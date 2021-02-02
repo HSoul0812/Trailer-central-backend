@@ -8,7 +8,7 @@ use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Common\BusyJobException;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
-use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;

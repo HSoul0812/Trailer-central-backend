@@ -7,7 +7,7 @@ use App\Http\Controllers\RestfulController;
 use App\Jobs\ProcessBulkUpload;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Models\Bulk\Parts\BulkUploadPayload;
-use App\Repositories\Bulk\BulkUploadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Services\Common\MonitoredGenericJobServiceInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\Bulk\Parts\CreateBulkUploadRequest;
@@ -56,7 +56,7 @@ class BulkUploadController extends RestfulController
 
         $this->response->errorBadRequest();
     }
-    
+
     /**
      * @param Request $request
      * @return Response|void

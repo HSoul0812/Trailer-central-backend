@@ -3,7 +3,7 @@
 namespace App\Console\Commands\Parts\Import;
 
 use Illuminate\Console\Command;
-use App\Repositories\Bulk\BulkUploadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Models\Bulk\Parts\BulkUpload;
 
 /**

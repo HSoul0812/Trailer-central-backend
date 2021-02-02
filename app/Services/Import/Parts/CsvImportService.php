@@ -3,7 +3,7 @@
 namespace App\Services\Import\Parts;
 
 use App\Events\Parts\PartQtyUpdated;
-use App\Repositories\Bulk\BulkUploadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\Vendor;
 use App\Models\Parts\Brand;

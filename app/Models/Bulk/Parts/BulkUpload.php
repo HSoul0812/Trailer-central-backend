@@ -4,7 +4,7 @@ namespace App\Models\Bulk\Parts;
 
 use App\Contracts\Support\DTO;
 use App\Models\Common\MonitoredJob;
-use App\Repositories\Bulk\BulkUploadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 
 /**
  * @property BulkUploadPayload $payload

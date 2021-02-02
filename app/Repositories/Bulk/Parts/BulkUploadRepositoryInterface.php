@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Bulk;
+namespace App\Repositories\Bulk\Parts;
 
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;

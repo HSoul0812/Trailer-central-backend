@@ -10,22 +10,16 @@ use App\Models\Common\MonitoredJob;
 use Dingo\Api\Exception\ResourceException;
 use Exception;
 use Faker\Factory as Faker;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Tests\database\seeds\Common\MonitoredJobSeeder;
-use Tests\TestCase;
+use Tests\Integration\AbstractMonitoredJobsTest;
 
 /**
  * @covers \App\Http\Controllers\v1\Jobs\MonitoredJobsController
  */
-class MonitoredJobsControllerTest extends TestCase
+class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
 {
-    /**
-     * @var MonitoredJobSeeder
-     */
-    private $seeder;
-
     /**
      * @covers ::index
      */
@@ -81,30 +75,48 @@ class MonitoredJobsControllerTest extends TestCase
         $paginator = $response->original;
 
         // Then I should see that response status is 200
-        self::assertSame(200, $response->status());
+        self::assertSame(JsonResponse::HTTP_OK, $response->status());
         // And I should see that the expected total of monitored jobs is the same as monitored jobs retrieved
         self::assertSame($expectedTotal($this->seeder), $paginator->total());
     }
 
     /**
-     * @throws Exception when Uuid::uuid4 cannot generate a uuid
+     * @dataProvider invalidQueryParameterProvider
+     *
+     * @param array $params
+     * @param string $expectedException
+     * @param string $expectedExceptionMessage
+     * @param string $firstExpectedErrorMessage
      *
      * @covers ::status
      */
-    public function testMonitoredJobDoesNotExists(): void
+    public function testStatusWithInvalidParameters(array $params,
+                                                    string $expectedException,
+                                                    string $expectedExceptionMessage,
+                                                    string $firstExpectedErrorMessage): void
     {
-        // Given I have a token of non-existent monitored job
-        $token = Uuid::uuid4()->toString();
+        // Given I have few monitored jobs
+        $this->seeder->seed();
+
         // And I'm using the a "MonitoredJobsController" controller
         $controller = app(MonitoredJobsController::class);
+        // And I have a bad formed "GetMonitoredJobsRequest" request
+        $request = new GetMonitoredJobsRequest($this->seeder->extractValues($params));
 
-        // Then I expect to see an "HttpException" to be thrown
-        $this->expectException(HttpException::class);
+        // Then I expect to see an specific exception to be thrown
+        $this->expectException($expectedException);
         // And I also expect to see an specific exception message
-        $this->expectExceptionMessage('The job was not found');
+        $this->expectExceptionMessage($expectedExceptionMessage);
 
-        // When I call the status action using the token of non-existent monitored job
-        $controller->status($token);
+        try {
+            // When I call the status action using the token of non-existent monitored job
+            $controller->status($request->get('token', ''), $request);
+        } catch (ResourceException $exception) {
+            // Then I should see that the first error message has a specific string
+            self::assertSame($firstExpectedErrorMessage, $exception->getErrors()->first());
+
+            throw $exception;
+        }
     }
 
     /**
@@ -112,7 +124,7 @@ class MonitoredJobsControllerTest extends TestCase
      *
      * @covers ::status
      */
-    public function testListJobsPerDealer(): void
+    public function testStatusWithValidParameters(): void
     {
         /** @var MonitoredJob  $job */
         /** @var array<string, float> $response */
@@ -131,68 +143,43 @@ class MonitoredJobsControllerTest extends TestCase
         // And I'm using the a "MonitoredJobsController" controller
         $controller = app(MonitoredJobsController::class);
 
+        $request = new GetMonitoredJobsRequest(['dealer_id' => $dealerId]);
+
         // When I call the status action using the token of my picked monitored job
-        $response = $controller->status($job->token);
+        $response = $controller->status($job->token, $request);
 
         // Then I should see that response status is 200
-        self::assertSame(200, $response->status());
+        self::assertSame(JsonResponse::HTTP_OK, $response->status());
         // And I should see that the expected response has a specific structure
         self::assertSame(['message' => 'Still processing', 'progress' => $job->progress], $response->original);
     }
 
     /**
-     * Examples of valid query parameter with their respective expected number of records and pages
+     * Examples of invalid query parameter with their respective expected exeception and its message
      *
-     * @return array[]
+     * @return array<string, array>
+     * @throws Exception when Uuid::uuid4 cannot generate a uuid
      */
-    public function validQueryParameterProvider(): array
+    public function invalidQueryParameterProvider(): array
     {
-        /**
-         * Since the data provider is called before the setup, it is necessary to use a lambda to retrieve data
-         *
-         * @param int $index
-         * @param string $keyName
-         * @return callable
-         */
-        $dealerLambda = static function (int $index,string $keyName): callable {
-            /**
-             * @param MonitoredJobSeeder $seeder
-             * @return mixed
-             */
-            return static function (MonitoredJobSeeder $seeder) use ($index, $keyName) {
-                $dealerId = $seeder->dealers[$index]->getKey();
-
-                switch ($keyName) {
-                    case 'id':
-                        return $dealerId;
-                    case 'total':
-                        return count($seeder->jobs[$dealerId]);
-                    case 'jobs':
-                        return $seeder->jobs[$dealerId];
-                }
-
-                return null;
-            };
-        };
-
-        // array $parameters, callable:int $expectedTotal, int $expectedLastPage, callable:\Illuminate\Support\Collection<MonitoredJob> $expectedJobs
-        return [
-            'By dummy dealer paged by 2'           => [['dealer_id' => $dealerLambda(0,'id'), 'per_page' => 2], $dealerLambda(0,'total'), 4, $dealerLambda(0, 'jobs')],
-            'By another dummy dealer paged by 100' => [['dealer_id' => $dealerLambda(1, 'id')], $dealerLambda(1,'total'), 1, $dealerLambda(1, 'jobs')]
+        return [                                                   // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
+            'No dealer'                                            => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
+            'Bad token'                                            => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
+            'Non-existent token'                                   => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => Uuid::uuid4()->toString()], ResourceException::class, 'Validation Failed', 'The job was not found.'],
+            'A token which does not belong to the provided dealer' => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => $this->getSeededData(1,'random-token')], ResourceException::class, 'Validation Failed', 'The job was not found.']
         ];
     }
 
-    public function setUp(): void
+    /**
+     * Examples of valid query parameter with their respective expected number of records and pages
+     *
+     * @return array<string, array>
+     */
+    public function validQueryParameterProvider(): array
     {
-        parent::setUp();
-
-        $this->seeder = new MonitoredJobSeeder();
-    }
-
-    public function tearDown(): void
-    {
-        $this->seeder->cleanUp();
-
-        parent::tearDown();
+        return [                                      // array $parameters, callable:int $expectedTotal, int $expectedLastPage, callable:Collection<MonitoredJob> $expectedJobs
+            'By dummy dealer paged by 2'           => [['dealer_id' => $this->getSeededData(0,'id'), 'per_page' => 2], $this->getSeededData(0,'total'), 4, $this->getSeededData(0, 'jobs')],
+            'By another dummy dealer paged by 100' => [['dealer_id' => $this->getSeededData(1, 'id')], $this->getSeededData(1,'total'), 1, $this->getSeededData(1, 'jobs')]
+        ];
     }
 }

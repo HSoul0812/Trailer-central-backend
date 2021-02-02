@@ -4,10 +4,12 @@ namespace App\Http\Controllers\v1\Bulk\Parts;
 
 use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
+use App\Http\Requests\Bulk\Parts\CreateBulkDownloadRequest;
+use App\Http\Requests\Jobs\GetMonitoredJobsRequest;
 use App\Jobs\Bulk\Parts\CsvExportJob;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
-use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
 use Dingo\Api\Http\Request;
@@ -47,7 +49,7 @@ class BulkDownloadController extends MonitoredJobsController
      * Create a bulk csv file download request
      *
      * @param Request $request
-     * @return JsonResponse|StreamedResponse
+     * @return JsonResponse|StreamedResponse|void
      * @throws BusyJobException when there is currently other job working
      *
      * @OA\Post(
@@ -70,32 +72,38 @@ class BulkDownloadController extends MonitoredJobsController
      */
     public function create(Request $request)
     {
-        $dealerId = $request->input('dealer_id');
-        $token = $request->input('token');
+        $request = new CreateBulkDownloadRequest($request->all());
 
-        $payload = BulkDownloadPayload::from(['export_file' => 'parts-' . date('Ymd') . '-' . $token . '.csv']);
+        if ($request->validate()) {
+            $token = $request->input('token');
 
-        $model = $this->service
-            ->setup($dealerId, $payload, $token)
-            ->withQueueableJob(static function (BulkDownload $job): CsvExportJob {
-            return new CsvExportJob($job);
-        });
+            $payload = BulkDownloadPayload::from(['export_file' => 'parts-' . date('Ymd') . '-' . $token . '.csv']);
 
-        $this->service->dispatch($model);
+            $model = $this->service
+                ->setup($request->input('dealer_id'), $payload, $token)
+                ->withQueueableJob(static function (BulkDownload $job): CsvExportJob {
+                    return new CsvExportJob($job);
+                });
 
-        // if requested, wait for file assembly then download it now. no need for separate api call
-        if ($request->input('wait')) {
-            return $this->waitForFile($model->token);
+            $this->service->dispatch($model);
+
+            // if requested, wait for file assembly then download it now. no need for separate api call
+            if ($request->input('wait')) {
+                return $this->waitForFile($model->token, $request);
+            }
+
+            return response()->json(['token' => $model->token], 202);
         }
 
-        return response()->json(['token' => $model->token], 202);
+        $this->response->errorBadRequest();
     }
 
     /**
      * Download the completed CSV file created from the request
      *
      * @param string $token The token returned by the create service
-     * @return JsonResponse|StreamedResponse
+     * @param Request $request
+     * @return JsonResponse|StreamedResponse|void
      *
      * @OA\Get(
      *     path="/api/parts/bulk/file/{token}",
@@ -108,46 +116,49 @@ class BulkDownloadController extends MonitoredJobsController
      *     )
      * )
      */
-    public function read(string $token)
+    public function read(string $token, Request $request)
     {
-        $download = $this->bulkRepository->findByToken($token);
+        $request = new GetMonitoredJobsRequest($request->all());
 
-        if ($download === null) {
-            $this->response->errorNotFound('The job was not found');
+        if ($request->validate()) {
+            $download = $this->bulkRepository->findByToken($token);
+
+            if ($download->isPending()) {
+                return response()->json(['message' => 'Still processing', 'progress' => $download->progress,], 202);
+            }
+
+            if ($download->isFailed()) {
+                return response()->json([
+                    'message' => 'This file could not be completed. Please request a new file.',
+                ], 500);
+            }
+
+            if ($download->isCompleted()) {
+                return response()->streamDownload(static function () use ($download) {
+                    fpassthru(Storage::disk('partsCsvExports')->readStream($download->payload->export_file));
+                }, $download->export_file);
+            }
+
+            return response()->json(['message' => 'Error: unknown status',], 500);
         }
 
-        if ($download->isPending()) {
-            return response()->json(['message' => 'Still processing', 'progress' => $download->progress,], 202);
-        }
-
-        if ($download->isFailed()) {
-            return response()->json([
-                'message' => 'This file could not be completed. Please request a new file.',
-            ], 500);
-        }
-
-        if ($download->isCompleted()) {
-            return response()->streamDownload(static function() use ($download) {
-                fpassthru(Storage::disk('partsCsvExports')->readStream($download->payload->export_file));
-            }, $download->export_file);
-        }
-
-        return response()->json(['message' => 'Error: unknown status',], 500);
+        $this->response->errorBadRequest();
     }
 
     /**
      * Wait for file assembly then return the file
      *
      * @param string $token
+     * @param Request $request
      * @return JsonResponse|StreamedResponse
      */
-    private function waitForFile(string $token)
+    private function waitForFile(string $token, Request $request)
     {
         $timeStart = time();
 
         // read loop
         while (true) {
-            $result = $this->read($token);
+            $result = $this->read($token, $request);
 
             if (time() - $timeStart > 180) { // 3 minutes
                 break;

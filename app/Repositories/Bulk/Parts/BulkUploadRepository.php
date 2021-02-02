@@ -3,7 +3,6 @@
 namespace App\Repositories\Bulk\Parts;
 
 use App\Models\Bulk\Parts\BulkUpload;
-use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;

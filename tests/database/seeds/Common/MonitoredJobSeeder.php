@@ -30,14 +30,19 @@ class MonitoredJobSeeder extends Seeder
 
     public function seed(): void
     {
-        $this->dealers[] = factory(User::class)->create();
-        $this->dealers[] = factory(User::class)->create();
+        $this->seedDealers();
 
         $dealer1Id = $this->dealers[0]->getKey();
         $dealer2Id = $this->dealers[1]->getKey();
 
         $this->jobs[$dealer1Id] = factory(MonitoredJob::class, 8)->create(['dealer_id' => $dealer1Id]); // 8 new monitored jobs
         $this->jobs[$dealer2Id] = factory(MonitoredJob::class, 4)->create(['dealer_id' => $dealer2Id]); // 4 new monitored jobs
+    }
+
+    public function seedDealers(): void
+    {
+        $this->dealers[] = factory(User::class)->create();
+        $this->dealers[] = factory(User::class)->create();
     }
 
     public function cleanUp(): void

@@ -3,7 +3,6 @@
 namespace App\Repositories\Bulk\Parts;
 
 use App\Models\Bulk\Parts\BulkDownload;
-use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepository;
 
 /**
