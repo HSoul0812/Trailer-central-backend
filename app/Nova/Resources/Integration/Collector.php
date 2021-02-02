@@ -19,7 +19,7 @@ use App\Models\Integration\Collector\Collector as CollectorModel;
  * @package App\Nova\Resources\Integration
  */
 class Collector extends Resource
-{    
+{
     public static $group = 'Integration';
 
     /**
@@ -77,7 +77,7 @@ class Collector extends Resource
                     Select::make('File Format', 'file_format')
                         ->options(array_combine(CollectorModel::FILE_FORMATS, CollectorModel::FILE_FORMATS))
                         ->displayUsingLabels()
-                        ->rules('required'),                    
+                        ->rules('required'),
                     Text::make('Path To Data', 'path_to_data')->hideFromIndex()->help(
                         'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
                     ),
@@ -108,6 +108,12 @@ class Collector extends Resource
                 ),
                 Text::make('Overridable Fields', 'overridable_fields')->rules('max:254')->hideFromIndex()->help(
                     'If certain fields shouldn\'t be overwritten after changing these fields in dashboard, it\'s required to specify a list of these fields separated by commas'
+                ),
+                Text::make('Path To Fields (additional description)', 'path_to_fields_to_description')->rules('max:254')->hideFromIndex()->help(
+                    'The path to the fields that should be added in the description. For instance, "Options" or "Config/Options"'
+                ),
+                Text::make('Fields To Additional Description', 'fields_to_description')->rules('max:254')->hideFromIndex()->help(
+                    'The fields that will be added in description. (a list of fields should be separated with a comma)'
                 ),
             ]),
 

@@ -31,21 +31,25 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $import_description
  * @property string $images_delimiter
  * @property string $overridable_fields
+ * @property string $path_to_fields_to_description
+ * @property string $fields_to_description
  * @property bool $use_secondary_image
  * @property bool $append_floorplan_image
  * @property bool $update_images
  * @property bool $update_files
  * @property bool $import_with_showroom_category
  * @property bool $unarchive_sold_items
+ * @property string $cdk_password
+ * @property string $cdk_username
  */
 class Collector extends Model  implements Filterable
-{ 
+{
     public const FILE_FORMATS = [
         self::FILE_FORMAT_XML,
         self::FILE_FORMAT_CSV,
         self::FILE_FORMAT_CDK
     ];
-    
+
     public const FILE_FORMAT_CDK = 'cdk';
     public const FILE_FORMAT_XML = 'xml';
     public const FILE_FORMAT_CSV = 'csv';
@@ -90,6 +94,8 @@ class Collector extends Model  implements Filterable
         'import_description',
         'images_delimiter',
         'overridable_fields',
+        'path_to_fields_to_description',
+        'fields_to_description',
         'use_secondary_image',
         'append_floorplan_image',
         'update_images',
