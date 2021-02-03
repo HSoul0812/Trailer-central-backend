@@ -18,7 +18,7 @@ interface SourceRepositoryInterface extends Repository {
      * Find Lead Source
      * 
      * @param array $params
-     * @return LeadSource || null
+     * @return LeadSource|null
      */
-    public function find($params);
+    public function find($params): ?LeadSource;
 }

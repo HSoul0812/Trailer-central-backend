@@ -13,8 +13,15 @@ class LeadStatus extends Model
     
     const TYPE_CONTACT = 'CONTACT';
     const TYPE_TASK = 'TASK';
-    
+
+    const STATUS_WON = 'Closed';
+    const STATUS_WON_CLOSED = 'Closed (Won)';
+    const STATUS_LOST = 'Closed (Lost)';
+    const STATUS_HOT = 'Hot';
+    const STATUS_COLD = 'Cold';
+    const STATUS_MEDIUM = 'Medium';
     const STATUS_UNCONTACTED = 'Uncontacted';
+    const STATUS_NEW_INQUIRY = 'New Inquiry';
     
     const TABLE_NAME = 'crm_tc_lead_status';
     /**

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\v1\CRM\Leads;
 
 use App\Http\Controllers\RestfulController;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Leads\GetLeadsStatusRequest;
 
@@ -14,11 +14,11 @@ class LeadStatusController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param Repository $interactions
+     * @param Repository $status
      */
-    public function __construct(LeadRepositoryInterface $leads)
+    public function __construct(StatusRepositoryInterface $status)
     {
-        $this->leads = $leads;
+        $this->status = $status;
     }
 
     public function index(Request $request) {
@@ -27,7 +27,7 @@ class LeadStatusController extends RestfulController
 
         if ($request->validate()) {             
             return $this->response->array([
-                'data' => $this->leads->getStatuses()
+                'data' => $this->status->getAll($request->all())
             ]);
         }
         

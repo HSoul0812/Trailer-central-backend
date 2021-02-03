@@ -73,9 +73,9 @@ class SourceRepository implements SourceRepositoryInterface {
      * Find Lead Source
      * 
      * @param array $params
-     * @return LeadSource || null
+     * @return LeadSource|null
      */
-    public function find($params) {
+    public function find($params): ?LeadSource {
         // Find Defaults
         $default = LeadSource::where('source_name', $params['source_name'])
                              ->where('user_id', 0)->first();

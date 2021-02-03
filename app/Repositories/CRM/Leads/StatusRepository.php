@@ -3,27 +3,11 @@
 namespace App\Repositories\CRM\Leads;
 
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
-use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use Illuminate\Support\Facades\DB;
 
 class StatusRepository implements StatusRepositoryInterface {
-
-    /**
-     * @var SourceRepositoryInterface
-     */
-    private $sources;
-
-    /**
-     * StatusRepository constructor.
-     * 
-     * @param SourceRepositoryInterface $sources
-     */
-    public function __construct(SourceRepositoryInterface $sources) {
-        $this->sources = $sources;
-    }
 
     public function create($params) {
         // Override Lead ID
@@ -36,17 +20,11 @@ class StatusRepository implements StatusRepositoryInterface {
         if (isset($params['lead_source'])) {
             $params['source'] = $params['lead_source'];
             unset($params['lead_source']);
-
-            // Send Lead Source
-            $this->sources->create([
-                'user_id' => $params['tc_lead_identifier'],
-                'source_name' => $params['lead_source']
-            ]);
         }
 
         // Override Status
         if(!isset($params['status'])) {
-            $params['status'] = Lead::STATUS_UNCONTACTED;
+            $params['status'] = LeadStatus::STATUS_UNCONTACTED;
         }
         if (isset($params['lead_status'])) {
             $params['status'] = $params['lead_status'];
@@ -69,39 +47,45 @@ class StatusRepository implements StatusRepositoryInterface {
         return LeadStatus::where('tc_lead_identifier', $params['lead_id'])->first();
     }
 
+    /**
+     * Get All Statuses
+     * 
+     * @param array $params
+     * @return array
+     */
     public function getAll($params) {
         return [
             [
-                'id' => Lead::STATUS_HOT,
-                'name' => Lead::STATUS_HOT
+                'id' => LeadStatus::STATUS_HOT,
+                'name' => LeadStatus::STATUS_HOT
             ],
             [
-                'id' => Lead::STATUS_COLD,
-                'name' => Lead::STATUS_COLD
+                'id' => LeadStatus::STATUS_COLD,
+                'name' => LeadStatus::STATUS_COLD
             ],
             [
-                'id' => Lead::STATUS_LOST,
-                'name' => Lead::STATUS_LOST
+                'id' => LeadStatus::STATUS_LOST,
+                'name' => LeadStatus::STATUS_LOST
             ],
             [
-                'id' => Lead::STATUS_MEDIUM,
-                'name' => Lead::STATUS_MEDIUM
+                'id' => LeadStatus::STATUS_MEDIUM,
+                'name' => LeadStatus::STATUS_MEDIUM
             ],
             [
-                'id' => Lead::STATUS_NEW_INQUIRY,
-                'name' => Lead::STATUS_NEW_INQUIRY
+                'id' => LeadStatus::STATUS_NEW_INQUIRY,
+                'name' => LeadStatus::STATUS_NEW_INQUIRY
             ],
             [
-                'id' => Lead::STATUS_UNCONTACTED,
-                'name' => Lead::STATUS_UNCONTACTED
+                'id' => LeadStatus::STATUS_UNCONTACTED,
+                'name' => LeadStatus::STATUS_UNCONTACTED
             ],
             [
-                'id' => Lead::STATUS_WON,
-                'name' => Lead::STATUS_WON
+                'id' => LeadStatus::STATUS_WON,
+                'name' => LeadStatus::STATUS_WON
             ],
             [
-                'id' => Lead::STATUS_WON_CLOSED,
-                'name' => Lead::STATUS_WON_CLOSED
+                'id' => LeadStatus::STATUS_WON_CLOSED,
+                'name' => LeadStatus::STATUS_WON_CLOSED
             ]
         ];
     }
@@ -120,17 +104,11 @@ class StatusRepository implements StatusRepositoryInterface {
             if (isset($params['lead_source'])) {
                 $params['source'] = $params['lead_source'];
                 unset($params['lead_source']);
-
-                // Send Lead Source
-                $this->sources->createOrUpdate([
-                    'user_id' => $params['tc_lead_identifier'],
-                    'source_name' => $params['lead_source']
-                ]);
             }
 
             // Override Status
             if(!isset($params['status'])) {
-                $params['status'] = Lead::STATUS_UNCONTACTED;
+                $params['status'] = LeadStatus::STATUS_UNCONTACTED;
             }
             if (isset($params['lead_status'])) {
                 $params['status'] = $params['lead_status'];
