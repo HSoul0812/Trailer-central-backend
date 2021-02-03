@@ -315,7 +315,9 @@ class CsvImportService implements CsvImportServiceInterface
             $keyToIndexMapping[$value] = $index;
         }
 
-        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first();
+        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])
+            ->where('dealer_id', $this->bulkUpload->dealer_id)
+            ->first();
 
         $part = [];
         $part['dealer_id'] = $this->bulkUpload->dealer_id;
