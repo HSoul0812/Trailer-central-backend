@@ -231,12 +231,12 @@ class AuthController extends RestfulControllerV2
         // Validate Auth Request
         $request = new ValidateTokenRequest($request->all());
         if ( $request->validate() ) {
-            // Get Access Token
-            $accessToken = new AccessToken();
+            // Get Common Token
+            $accessToken = new CommonToken();
             $accessToken->fill($request->all());
 
             // Return Auth
-            return $this->response->array($this->auth->validate($accessToken));
+            return $this->response->array($this->auth->validateCustom($accessToken));
         }
         
         return $this->response->errorBadRequest();

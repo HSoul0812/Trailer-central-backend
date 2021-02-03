@@ -15,6 +15,7 @@ use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
+use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
 use Google_Service_Gmail_MessagePart;
@@ -59,6 +60,9 @@ class GmailService implements GmailServiceInterface
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
 
+        // Initialize Logger
+        $this->log = Log::channel('google');
+
         // No Client ID?!
         if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
             throw new MissingGapiClientIdException;
@@ -75,7 +79,33 @@ class GmailService implements GmailServiceInterface
     }
 
     /**
-     * Send Email Email
+     * Get Gmail Profile Email
+     * 
+     * @param EmailToken $emailToken
+     * @return EmailToken
+     */
+    public function profile(EmailToken $emailToken): EmailToken {
+        // Get Profile Details
+        $this->setEmailToken($emailToken);
+
+        // Insert Gmail
+        try {
+            // Get Gmail Profile
+            $profile = $this->gmail->users->getProfile('me');
+
+            // Append Profile
+            $emailToken->setEmailAddress($profile->getEmailAddress());
+        } catch (\Exception $e) {
+            // Log Error
+            $this->log->error('Exception returned on getting gmail profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+
+        // Return Google Token
+        return $emailToken;
+    }
+
+    /**
+     * Send Gmail Email
      * 
      * @param AccessToken $accessToken
      * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
@@ -114,7 +144,7 @@ class GmailService implements GmailServiceInterface
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
-            Log::error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
             if(strpos($error, "invalid authentication") !== FALSE) {
                 throw new InvalidGmailAuthMessageException();
             } else {
@@ -153,7 +183,7 @@ class GmailService implements GmailServiceInterface
                 $q .= $k . ': ' . $v;
             }
         }
-        Log::info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
+        $this->log->info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
 
         // Get Messages
         $results = $this->gmail->users_messages->listUsersMessages('me', [
@@ -163,7 +193,7 @@ class GmailService implements GmailServiceInterface
         $messages = $results->getMessages();
 
         // Return Results
-        Log::info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
+        $this->log->info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
         if (count($messages) == 0) {
             return [];
         }
@@ -198,7 +228,7 @@ class GmailService implements GmailServiceInterface
             $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
         }
         if(count($attachments) > 0) {
-            Log::info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
+            $this->log->info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
         }
 
         // Parse Data
@@ -208,6 +238,7 @@ class GmailService implements GmailServiceInterface
     /**
      * Move Message Labels
      * 
+     * AccessToken $accessToken
      * @param string $mailId mail ID to modify
      * @param array $labels labels to add by name | required
      * @param array $remove labels to remove by name | optional
@@ -301,6 +332,32 @@ class GmailService implements GmailServiceInterface
         // Setup Gmail
         $this->gmail = new \Google_Service_Gmail($this->client);
     }
+
+    /**
+     * Set Google Token on Client
+     * 
+     * @param EmailToken $emailToken
+     * @return void
+     */
+    private function setEmailToken(EmailToken $emailToken) {
+        // ID Token Exists?
+        if(empty($emailToken->getIdToken())) {
+            throw new MissingGapiIdTokenException;
+        }
+
+        // Set Google Token on Client
+        $this->client->setAccessToken([
+            'access_token' => $emailToken->getAccessToken(),
+            'id_token' => $emailToken->getIdToken(),
+            'expires_in' => $emailToken->getExpiresIn(),
+            'created' => $emailToken->getIssuedUnix()
+        ]);
+        $this->client->setScopes($emailToken->getScope());
+
+        // Setup Gmail
+        $this->gmail = new \Google_Service_Gmail($this->client);
+    }
+
 
     /**
      * Prepare Message to Send to Gmail

@@ -37,6 +37,8 @@ class CollectorTransformer extends TransformerAbstract
             'import_description' => $collector->import_description,
             'images_delimiter' => $collector->images_delimiter,
             'overridable_fields' => $collector->overridable_fields,
+            'path_to_fields_to_description' => $collector->path_to_fields_to_description,
+            'fields_to_description' => $collector->fields_to_description,
             'use_secondary_image' => $collector->use_secondary_image,
             'append_floorplan_image' => $collector->append_floorplan_image,
             'update_images' => $collector->update_images,
@@ -45,7 +47,7 @@ class CollectorTransformer extends TransformerAbstract
             'unarchive_sold_items' => $collector->unarchive_sold_items,
             'active' => $collector->active,
             'cdk_password' => $collector->cdk_password,
-            'cdk_username' => $collector->cdk_username 
+            'cdk_username' => $collector->cdk_username
         ];
     }
 }

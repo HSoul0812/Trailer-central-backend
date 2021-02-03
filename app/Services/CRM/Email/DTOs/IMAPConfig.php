@@ -29,6 +29,16 @@ class ImapConfig
      */
     const CHARSET_NTLM = 'US-ASCIII';
 
+    /**
+     * @const No Certificate Suffix
+     */
+    const NO_CERT_SUFFIX = 'novalidate-cert';
+
+    /**
+     * @const No Valid Certificates
+     */
+    const NO_CERT_HOSTS = ['imap.gmail.com'];
+
 
     /**
      * @var string Username for IMAP
@@ -171,7 +181,16 @@ class ImapConfig
      */
     public function getSecurity(): string
     {
-        return $this->security ?: self::SSL;
+        // Set Security Default
+        $security = $this->security ?: self::SSL;
+
+        // Append No Certificate on Gmail
+        if($this->isNoCert()) {
+            $security .= '/' . self::NO_CERT_SUFFIX;
+        }
+
+        // Return Security
+        return $security;
     }
 
     /**
@@ -285,5 +304,16 @@ class ImapConfig
     public function setStartDate(string $startDate): void
     {
         $this->startDate = $startDate;
+    }
+
+
+    /**
+     * Current IMAP Config Appends No Certificate?
+     * 
+     * @return bool
+     */
+    public function isNoCert(): bool {
+        // Validate if Host is No Certificate
+        return (!empty($this->host) && in_array($this->host, self::NO_CERT_HOSTS));
     }
 }
