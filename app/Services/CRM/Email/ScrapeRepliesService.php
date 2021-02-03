@@ -31,6 +31,13 @@ use Carbon\Carbon;
 class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 {
     /**
+     * @const int
+     */
+    const IMPORT_SUCCESS = 1;
+    const IMPORT_PROCESSED = 0;
+    const IMPORT_SKIPPED = -1;
+
+    /**
      * @var App\Services\Integration\Google\GoogleServiceInterface
      */
     protected $google;
@@ -223,7 +230,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
+     * @param EmailFolder $emailFolder
      * @return false || array of email results
      */
     private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
@@ -290,9 +297,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
-            if($result === 1) {
+            if($result === self::IMPORT_SUCCESS) {
                 $total++;
-            } elseif($result === 0) {
+            } elseif($result === self::IMPORT_PROCESSED) {
                 $skipped++;
             }
         }
@@ -318,14 +325,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param ParsedEmail $email
-     * @return int | -1=skipped | 0=processed | 1=imported
+     * @return int self::IMPORT_SKIPPED | self::IMPORT_PROCESSED | self::IMPORT_SUCCESS
      */
     private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
         // Check if Exists
         if(empty($email->getMessageId()) ||
            $this->emails->findMessageId($salesperson->user_id, $email->getMessageId())) {
             $this->deleteAttachments($email->getAttachments());
-            return -1;
+            return self::IMPORT_SKIPPED;
         }
 
         // Find Lead
@@ -338,7 +345,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->imap->full($email);
             }
             if(empty($email->getSubject()) || empty($email->getToEmail())) {
-                return -1;
+                return self::IMPORT_SKIPPED;
             }
 
             // Get Full IMAP Data
@@ -346,12 +353,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Delete Attachments
             $this->deleteAttachments($email->getAttachments());
-            return 1;
+            return self::IMPORT_SUCCESS;
         }
 
         // Marked as Processed
         $this->emails->createProcessed($salesperson->user_id, $email->getMessageId());
-        return 0;
+        return self::IMPORT_PROCESSED;
     }
 
     /**
