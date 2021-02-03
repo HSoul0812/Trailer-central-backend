@@ -142,6 +142,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             }
         }
 
+        // Sleep for a Second to Prevent Rate Limiting
+        sleep(1);
+
         // Return Imported Email Count for Dealer
         return $imported;
     }
