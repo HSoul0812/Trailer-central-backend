@@ -120,7 +120,7 @@ class InteractionService implements InteractionServiceInterface
      * @param type $leadId
      * @param type $userId
      * @param type $params
-     * @return type
+     * @return Interaction
      */
     private function saveEmail($leadId, $userId, $params) {
         // Initialize Transaction
