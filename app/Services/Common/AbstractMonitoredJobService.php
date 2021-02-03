@@ -59,7 +59,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
      * @param string $jobName
      * @return bool
      */
-    protected function isAvailable(string $concurrencyLevel, int $dealerId, string $jobName): bool
+    protected function isNotAvailable(string $concurrencyLevel, int $dealerId, string $jobName): bool
     {
         switch ($concurrencyLevel) {
             case MonitoredJob::LEVEL_BY_DEALER:
@@ -68,7 +68,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
                 return $this->repository->isBusyByJobName($jobName);
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -79,7 +79,9 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
     protected function createQueueableJob($job)
     {
         if ($job->hasQueueableJob()) {
-            return $job->getQueueableJob()($job);
+            $queueableJobDefinition = $job->getQueueableJob();
+
+            return $queueableJobDefinition($job->withoutQueueableJob());
         }
 
         throw new HasNotQueueableJobException("This job can't be dispatched due there is not defined a queueable job");

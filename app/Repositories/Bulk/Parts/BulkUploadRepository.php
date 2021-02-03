@@ -8,7 +8,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use App\Jobs\ProcessBulkUpload;
 
 /**
  * Implementation for bulk upload repository
@@ -28,17 +27,12 @@ class BulkUploadRepository extends MonitoredJobRepository implements BulkUploadR
 
     public function create(array $params): BulkUpload
     {
-        $csvKey = $this->storeCsv($params['payload']['csv_file']);
+        $csvFile = $params['payload']['csv_file'];
+        unset($params['payload']['csv_file']); // to do not store it
 
-        unset($params['payload']['csv_file']);
+        $params['payload']['import_source'] = $csvFile;
 
-        $params['status'] = BulkUpload::PROCESSING;
-        $params['payload']['import_source'] = $csvKey;
-
-        $bulkUpload = BulkUpload::create($params);
-        dispatch((new ProcessBulkUpload($bulkUpload))->onQueue('parts'));
-
-        return $bulkUpload;
+        return BulkUpload::create($params);
     }
 
     /**

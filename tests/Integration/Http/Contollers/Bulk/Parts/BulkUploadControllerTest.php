@@ -5,22 +5,21 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Contollers\Bulk\Parts;
 
 use App\Exceptions\Common\BusyJobException;
-use App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController;
-use App\Http\Requests\Bulk\Parts\CreateBulkDownloadRequest;
-use App\Jobs\Bulk\Parts\CsvExportJob;
-use App\Models\Bulk\Parts\BulkDownload;
-use App\Models\Common\MonitoredJob;
+use App\Http\Controllers\v1\Bulk\Parts\BulkUploadController;
+use App\Http\Requests\Bulk\Parts\CreateBulkUploadRequest;
+use App\Jobs\ProcessBulkUpload;
 use Dingo\Api\Exception\ResourceException;
-use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
 use Ramsey\Uuid\Uuid;
 use Tests\Integration\AbstractMonitoredJobsTest;
+use Exception;
 
 /**
- * @covers \App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController
+ * @covers \App\Http\Controllers\v1\Bulk\Parts\BulkUploadController
  */
-class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
+class BulkUploadControllerTest extends AbstractMonitoredJobsTest
 {
     /**
      * @dataProvider invalidQueryParameterProvider
@@ -40,24 +39,11 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         // Given I have few dealers
         $this->seeder->seedDealers();
 
-        // And I'm using the controller "BulkDownloadController"
-        $controller = app(BulkDownloadController::class);
+        // And I'm using the controller "BulkUploadController"
+        $controller = app(BulkUploadController::class);
 
-        $paramsExtracted = $this->seeder->extractValues($params);
-
-        if ($expectedException === BusyJobException::class) {
-            // And I have a monitored job "parts-export-new" which is currently running
-            factory(MonitoredJob::class)->create([
-                'dealer_id' => $paramsExtracted['dealer_id'],
-                'name' => BulkDownload::QUEUE_JOB_NAME,
-                'concurrency_level' => BulkDownload::LEVEL_DEFAULT,
-                'queue' => BulkDownload::QUEUE_NAME,
-                'status' => BulkDownload::STATUS_PROCESSING
-            ]);
-        }
-
-        // And I have a bad formed "CreateBulkDownloadRequest" request
-        $request = new CreateBulkDownloadRequest($paramsExtracted);
+        // And I have a bad formed "CreateBulkUploadRequest" request
+        $request = new CreateBulkUploadRequest($this->seeder->extractValues($params));
 
         // Then I expect to see an specific exception to be thrown
         $this->expectException($expectedException);
@@ -87,10 +73,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         // Given I have few dealers
         $this->seeder->seedDealers();
 
-        // And I'm using the controller "BulkDownloadController"
-        $controller = app(BulkDownloadController::class);
-        // And I have a well formed "CreateBulkDownloadRequest" request
-        $request = new CreateBulkDownloadRequest($this->seeder->extractValues($params));
+        // And I'm using the controller "BulkUploadController"
+        $controller = app(BulkUploadController::class);
+        // And I have a well formed "CreateBulkUploadRequest" request
+        $request = new CreateBulkUploadRequest($this->seeder->extractValues($params));
 
         Bus::fake();
 
@@ -98,9 +84,9 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         $response = $controller->create($request);
 
         // Then I should see that job wit a specific name was enqueued
-        Bus::assertDispatched(CsvExportJob::class);
-        // And I should see that response status is 202
-        self::assertEquals(JsonResponse::HTTP_ACCEPTED, $response->status());
+        Bus::assertDispatched(ProcessBulkUpload::class);
+        // And I should see that response status is 200
+        self::assertEquals(JsonResponse::HTTP_OK, $response->status());
     }
 
     /**
@@ -111,11 +97,12 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      */
     public function invalidQueryParameterProvider(): array
     {
+        $fileUploaded = UploadedFile::fake()->create('some-filename.csv', 7800);
+
         return [                                            // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
             'No dealer'                                     => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
-            'Bad token'                                     => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
-            'There is another job working'                  => [['dealer_id' => $this->getSeededData(0,'id')], BusyJobException::class, "This job can't be set up due there is currently other job working", null],
-            'There is another job working (token provided)' => [['dealer_id' => $this->getSeededData(0,'id'),'token' => Uuid::uuid4()->toString()], BusyJobException::class, "This job can't be set up due there is currently other job working", null]
+            'No scv file'                                   => [['dealer_id' => 666999], ResourceException::class, 'Validation Failed', 'The csv file field is required.'],
+            'Bad token'                                     => [['dealer_id' => 666999, 'csv_file' => $fileUploaded, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.']
         ];
     }
 
@@ -127,9 +114,11 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      */
     public function validQueryParameterProvider(): array
     {
+        $fileUploaded = UploadedFile::fake()->create('some-filename.csv', 7800);
+
         return [           // array $parameters
-            'No token'   => [['dealer_id' => $this->getSeededData(0,'id')]],
-            'With token' => [['dealer_id' => $this->getSeededData(1,'id'), 'token' => Uuid::uuid4()->toString()]]
+            'No token'   => [['dealer_id' => $this->getSeededData(0,'id'), 'csv_file' => $fileUploaded]],
+            'With token' => [['dealer_id' => $this->getSeededData(1,'id'), 'csv_file' => $fileUploaded, 'token' => Uuid::uuid4()->toString()]],
         ];
     }
 }

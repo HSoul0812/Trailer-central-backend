@@ -16,10 +16,17 @@ class BulkUploadPayload extends MonitoredJobPayload
      */
     protected $import_source;
 
+    /**
+     * @var string
+     */
+    protected $csv_file;
+
     public function asArray(): array
     {
-        return [
+        $data = [
             'import_source' => $this->import_source
         ];
+
+        return !empty($this->csv_file) ? array_merge($data, ['csv_file' => $this->csv_file]) : $data;
     }
 }

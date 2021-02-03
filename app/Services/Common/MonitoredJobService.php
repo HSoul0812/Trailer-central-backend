@@ -9,6 +9,8 @@ use App\Exceptions\Common\BusyJobException;
 use App\Models\Common\MonitoredJob;
 use App\Models\Common\MonitoredJobPayload;
 use InvalidArgumentException;
+use Error;
+use Exception;
 
 /**
  * Provide a generic way to set up and dispatch monitored jobs
@@ -22,12 +24,20 @@ class MonitoredJobService extends AbstractMonitoredJobService implements Monitor
      * @param string $className a monitored job class name (FQN)
      * @return MonitoredJob a inherited object from MonitoredJob or a MonitoredJob object
      * @throws BusyJobException when there is currently other job working
-     * @throws InvalidArgumentException when the provided $className is not a inherited class from
+     * @throws InvalidArgumentException when the provided $className is not inherited class from MonitoredJob
+     * @throws InvalidArgumentException when the provided $className is not instantiable
      */
     public function setup(int $dealerId, $payload, ?string $token = null, string $className = MonitoredJob::class): MonitoredJob
     {
         /** @var MonitoredJob $monitoredJob */
-        $monitoredJob = with($className);
+
+        try {
+            $monitoredJob = app($className);
+        } catch (Exception | Error $exception) {
+            throw new InvalidArgumentException(
+                sprintf('%s must be instantiable but an throwable with the "%s" message was caught', $className, $exception->getMessage())
+            );
+        }
 
         if (!$monitoredJob instanceof MonitoredJob) {
             throw new InvalidArgumentException(
@@ -39,7 +49,7 @@ class MonitoredJobService extends AbstractMonitoredJobService implements Monitor
         $queueName = $monitoredJob::QUEUE_NAME;
         $jobName = $monitoredJob::QUEUE_JOB_NAME;
 
-        if ($this->isAvailable($concurrencyLevel, $dealerId, $jobName)) {
+        if ($this->isNotAvailable($concurrencyLevel, $dealerId, $jobName)) {
             throw new BusyJobException("This job can't be set up due there is currently other job working");
         }
 

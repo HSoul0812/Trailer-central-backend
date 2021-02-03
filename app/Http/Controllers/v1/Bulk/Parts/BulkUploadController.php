@@ -68,12 +68,10 @@ class BulkUploadController extends RestfulController
         $request = new CreateBulkUploadRequest($request->all());
 
         if ($request->validate()) {
-            $token = $request->get('token');
-            $dealerId = $request->get('dealer_id');
             $payload = BulkUploadPayload::from(['csv_file' => $request->get('csv_file')]);
 
             $model = $this->service
-                ->setup($dealerId, $payload, $token, BulkUpload::class)
+                ->setup($request->get('dealer_id'), $payload, $request->get('token'), BulkUpload::class)
                 ->withQueueableJob(static function (BulkUpload $job): ProcessBulkUpload {
                     return new ProcessBulkUpload($job);
                 });

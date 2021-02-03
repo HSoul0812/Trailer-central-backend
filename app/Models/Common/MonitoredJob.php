@@ -161,6 +161,14 @@ class MonitoredJob extends Model
         return $this->queueableJobDefinition;
     }
 
+    public function withoutQueueableJob(): self
+    {
+        $that = clone $this;
+        $that->queueableJobDefinition = null;
+
+        return $that;
+    }
+
     /**
      * Payload mutator
      *
