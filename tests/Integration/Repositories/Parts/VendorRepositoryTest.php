@@ -59,6 +59,7 @@ class VendorRepositoryTest extends TestCase
      */
     public function queryParametersAndSummariesForGetAllProvider(): array
     {
+        $this->setup();
         $this->seeder->seed();
 
         $dealerId = $this->seeder->getDealerId();
