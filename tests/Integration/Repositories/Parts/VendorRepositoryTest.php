@@ -9,10 +9,16 @@ use App\Repositories\Parts\VendorRepository;
 use App\Repositories\Parts\VendorRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Tests\database\seeds\Part\PartSeeder;
 use Tests\TestCase;
 
 class VendorRepositoryTest extends TestCase
 {
+    /**
+     * @var PartSeeder
+     */
+    private $seeder;
+
     /**
      * Test that SUT is properly bound by the application
      *
@@ -53,11 +59,15 @@ class VendorRepositoryTest extends TestCase
      */
     public function queryParametersAndSummariesForGetAllProvider(): array
     {
+        $this->seeder->seed();
+
+        $dealerId = $this->seeder->getDealerId();
         $countOfVendors = Vendor::count();
+        $countOfDealerVendors = Vendor::where('dealer_id', $dealerId)->count();
 
         return [                // array $parameters, int $expectedTotal
             'Without dealer'    => [[], $countOfVendors],
-            'With dealer'       => [['dealer_id' => 1001, 'name' => 'Big Tex'], 1],
+            'With dealer'       => [['dealer_id' => $dealerId], $countOfDealerVendors],
         ];
     }
 
@@ -71,5 +81,19 @@ class VendorRepositoryTest extends TestCase
     protected function getConcreteRepository(): VendorRepositoryInterface
     {
         return $this->app->make(VendorRepositoryInterface::class);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seeder = new PartSeeder();
+    }
+
+    public function tearDown(): void
+    {
+        $this->seeder->cleanUp();
+
+        parent::tearDown();
     }
 }
