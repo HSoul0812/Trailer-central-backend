@@ -7,6 +7,7 @@ use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use App\Services\Integration\Common\DTOs\AttachmentFile;
 use Illuminate\Support\Facades\Log;
 use PhpImap\Mailbox;
 use PhpImap\Exceptions\ConnectionException;
@@ -79,42 +80,49 @@ class ImapService implements ImapServiceInterface
     /**
      * Get Basic Overview
      * 
-     * @param int $mailId
+     * @param string $mailId
      * @return array of parsed data
      */
-    public function overview(int $mailId) {
+    public function overview(string $mailId) {
         // Get Mail
-        $overview = reset($this->imap->getMailsInfo([$mailId]));
+        $mailInfo = $this->imap->getMailsInfo([(int) $mailId]);
+        $overview = reset($mailInfo);
         if(empty($overview->uid)) {
             return false;
         }
 
         // Initialize Parsed Email
         $parsed = new ParsedEmail();
-        $parsed->setId($overview->uid);
+        $parsed->setId((string) $overview->uid);
 
         // Set Message ID's
         $parsed->setMessageId(!empty($overview->in_reply_to) ? trim($overview->in_reply_to) : trim($overview->message_id));
         $parsed->setRootMessageId($parsed->getMessageId());
-        $parsed->setReferences($overview->references);
+        if(!empty($overview->references)) {
+            $parsed->setReferences($overview->references);
+        }
 
         // Handle Overriding Message ID From References
         $references = $parsed->getReferences();
         if(!empty($references)) {
-            $parsed->setRootMessageId(reset($parsed['references']));
+            $parsed->setRootMessageId($parsed->getFirstReference());
 
             // Message ID Doesn't Exist?
             if(empty($parsed->getMessageId())) {
-                $parsed->setMessageId(end($parsed['references']));
+                $parsed->setMessageId($parsed->getLastReference());
             }
         }
 
         // Set To/From
-        $parsed->setTo($overview->to);
+        if(!empty($overview->to)) {
+            $parsed->setTo($overview->to);
+        }
         $parsed->setFrom($overview->from);
 
         // Handle Subject
-        $parsed->setSubject($overview->subject);
+        if(!empty($overview->subject)) {
+            $parsed->setSubject($overview->subject);
+        }
 
         // Set Date
         $parsed->setDate($overview->date);
@@ -131,7 +139,17 @@ class ImapService implements ImapServiceInterface
      */
     public function full(ParsedEmail $email) {
         // Get Mail Data
-        $mail = $this->imap->getMail($email->id, false);
+        $mail = $this->imap->getMail((int) $email->getId(), false);
+
+        // Set To/From
+        if(empty($email->getToEmail()) && !empty($mail->to)) {
+            $email->setTo($mail->to);
+        }
+
+        // Handle Subject
+        if(empty($email->getSubject()) && !empty($mail->subject)) {
+            $email->setSubject($mail->subject);
+        }
 
         // Handle Body
         $email->setBody($mail->textHtml);

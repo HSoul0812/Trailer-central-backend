@@ -107,6 +107,9 @@ class ScrapeReplies extends Command
             $this->error("{$this->command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
         }
 
+        // Sleep for a Second to Prevent Rate Limiting
+        sleep(1);
+
         // Log End
         $datetime = new \DateTime();
         $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
