@@ -44,6 +44,7 @@ interface GmailServiceInterface {
     /**
      * Move Message Labels
      * 
+     * @param AccessToken $accessToken
      * @param string $mailId mail ID to modify
      * @param array $labels labels to add by name | required
      * @param array $remove labels to remove by name | optional

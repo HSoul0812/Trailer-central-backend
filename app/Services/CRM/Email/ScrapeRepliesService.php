@@ -269,7 +269,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
+     * @param EmailFolder $emailFolder
      * @return false || array of email results
      */
     private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
@@ -284,6 +284,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $mailId) {
             // Get Message Overview
             $email = $this->imap->overview($mailId);
+            if(empty($email)) {
+                continue;
+            }
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
@@ -319,7 +322,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
         // Check if Exists
-        if(empty($email->getSubject()) || empty($email->getMessageId()) ||
+        if(empty($email->getMessageId()) ||
            $this->emails->findMessageId($salesperson->user_id, $email->getMessageId())) {
             $this->deleteAttachments($email->getAttachments());
             return -1;
@@ -333,6 +336,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Only on IMAP
             if(empty($salesperson->googleToken)) {
                 $this->imap->full($email);
+            }
+            if(empty($email->getSubject()) || empty($email->getToEmail())) {
+                return -1;
             }
 
             // Get Full IMAP Data
