@@ -211,7 +211,7 @@ class LeadServiceTest extends TestCase
         $this->assertSame($result->leadStatus->id, $status->id);
 
         // Assert Match
-        $this->assertSame($result->leadStatus->source, $source->id);
+        $this->assertSame($result->leadStatus->source, $source->source_name);
 
 
         // Match All Types
@@ -360,7 +360,7 @@ class LeadServiceTest extends TestCase
         $this->assertSame($result->leadStatus->id, $status->id);
 
         // Assert Match
-        $this->assertSame($result->leadStatus->source, $source->id);
+        $this->assertSame($result->leadStatus->source, $source->source_name);
 
 
         // Match All Types
