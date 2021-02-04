@@ -47,7 +47,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
     }
 
     /**
-     * @dataProvider validQueryParameterProvider
+     * @dataProvider validParametersProvider
      *
      * @param array $params
      * @param callable $expectedTotal callable(): int
@@ -81,7 +81,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
     }
 
     /**
-     * @dataProvider invalidQueryParameterProvider
+     * @dataProvider invalidParametersProvider
      *
      * @param array $params
      * @param string $expectedException
@@ -155,12 +155,12 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
     }
 
     /**
-     * Examples of invalid query parameter with their respective expected exeception and its message
+     * Examples of invalid query parameter with their respective expected exception and its message
      *
      * @return array<string, array>
      * @throws Exception when Uuid::uuid4 cannot generate a uuid
      */
-    public function invalidQueryParameterProvider(): array
+    public function invalidParametersProvider(): array
     {
         return [                                                   // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
             'No dealer'                                            => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
@@ -175,7 +175,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
      *
      * @return array<string, array>
      */
-    public function validQueryParameterProvider(): array
+    public function validParametersProvider(): array
     {
         return [                                      // array $parameters, callable:int $expectedTotal, int $expectedLastPage, callable:Collection<MonitoredJob> $expectedJobs
             'By dummy dealer paged by 2'           => [['dealer_id' => $this->getSeededData(0,'id'), 'per_page' => 2], $this->getSeededData(0,'total'), 4, $this->getSeededData(0, 'jobs')],

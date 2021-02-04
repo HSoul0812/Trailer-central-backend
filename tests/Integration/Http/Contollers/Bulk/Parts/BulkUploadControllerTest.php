@@ -7,6 +7,7 @@ namespace Tests\Integration\Http\Contollers\Bulk\Parts;
 use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Bulk\Parts\BulkUploadController;
 use App\Http\Requests\Bulk\Parts\CreateBulkUploadRequest;
+use App\Http\Requests\Bulk\Parts\GetBulkUploadsRequest;
 use App\Jobs\ProcessBulkUpload;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,33 @@ use Exception;
 class BulkUploadControllerTest extends AbstractMonitoredJobsTest
 {
     /**
-     * @dataProvider invalidQueryParameterProvider
+     * @covers ::index
+     */
+    public function testIndexListJobsWithBadParameters(): void
+    {
+        // Given I'm using the controller "BulkUploadController"
+        $controller = app(BulkUploadController::class);
+        // And I have a bad formed "GetBulkUploadsRequest"
+        $request = new GetBulkUploadsRequest([]);
+
+        // Then I expect to see an specific exception to be thrown
+        $this->expectException(ResourceException::class);
+        // And I also expect to see an specific exception message
+        $this->expectExceptionMessage('Validation Failed');
+
+        try {
+            // When I call the index action using the bad formed request
+            $controller->index($request);
+        } catch (ResourceException $exception) {
+            // Then I should see that the first error message has a specific string
+            self::assertSame('The dealer id field is required.', $exception->getErrors()->first());
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @dataProvider invalidParametersForCreationProvider
      *
      * @param array $params
      * @param string $expectedException
@@ -62,7 +89,7 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
     }
 
     /**
-     * @dataProvider validQueryParameterProvider
+     * @dataProvider validParametersForCreationProvider
      *
      * @param array $params
      *
@@ -90,18 +117,18 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
     }
 
     /**
-     * Examples of invalid query parameter with their respective expected exeception and its message
+     * Examples of invalid query parameter with their respective expected exception and its message
      *
      * @return array<string, array>
      * @throws Exception when Uuid::uuid4 cannot generate a uuid
      */
-    public function invalidQueryParameterProvider(): array
+    public function invalidParametersForCreationProvider(): array
     {
         $fileUploaded = UploadedFile::fake()->create('some-filename.csv', 7800);
 
         return [                                            // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
             'No dealer'                                     => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
-            'No scv file'                                   => [['dealer_id' => 666999], ResourceException::class, 'Validation Failed', 'The csv file field is required.'],
+            'No csv file'                                   => [['dealer_id' => 666999], ResourceException::class, 'Validation Failed', 'The csv file field is required.'],
             'Bad token'                                     => [['dealer_id' => 666999, 'csv_file' => $fileUploaded, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.']
         ];
     }
@@ -112,7 +139,7 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
      * @return array<string, array>
      * @throws Exception when Uuid::uuid4 cannot generate a uuid
      */
-    public function validQueryParameterProvider(): array
+    public function validParametersForCreationProvider(): array
     {
         $fileUploaded = UploadedFile::fake()->create('some-filename.csv', 7800);
 
