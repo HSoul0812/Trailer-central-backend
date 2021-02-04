@@ -45,10 +45,11 @@ class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements B
     public function __construct(
         BulkDownloadRepositoryInterface $bulkRepository,
         PartRepositoryInterface $partRepository,
-        LoggerServiceInterface $logger
+        LoggerServiceInterface $logger,
+        MonitoredJobRepositoryInterface $monitoredJobsRepository
     )
     {
-        parent::__construct(app(MonitoredJobRepositoryInterface::class));
+        parent::__construct($monitoredJobsRepository);
 
         $this->bulkRepository = $bulkRepository;
         $this->partRepository = $partRepository;

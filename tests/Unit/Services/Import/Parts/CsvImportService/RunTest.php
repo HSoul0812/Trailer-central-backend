@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Services\Import\Parts\CsvImportService;
 
 use App\Models\Bulk\Parts\BulkUpload;
-use App\Repositories\Bulk\Parts\BulkUploadRepository;
-use App\Repositories\Parts\PartRepository;
 use App\Services\Import\Parts\CsvImportService;
 use Illuminate\Support\Facades\Log;
 use Mockery\LegacyMockInterface;
@@ -27,9 +25,6 @@ class RunTest extends TestCase
      */
     public function testWithNotSetUpBulkUpload(): void
     {
-        /** @var BulkUploadRepository $bulkUploadRepository */
-        /** @var PartRepository $partsRepository */
-
         // Given I have the three dependencies for "CsvImportService" creation
         $repositories = new CsvImportServiceDependencies();
         // And I have a "CsvImportService" properly created
@@ -55,8 +50,6 @@ class RunTest extends TestCase
      */
     public function testWillFailBecauseAnException(): void
     {
-        /** @var BulkUploadRepository $bulkUploadRepository */
-        /** @var PartRepository $partsRepository */
         /** @var MockInterface|LegacyMockInterface|CsvImportService $service */
 
         // Given I have the three required dependencies for "CsvImportService" creation
@@ -82,8 +75,7 @@ class RunTest extends TestCase
                         'file' => $exception->getFile(),
                         'line' => $exception->getLine()
                     ]
-                ],
-
+                ]
             ])
             ->andReturn(true);
 
@@ -121,8 +113,6 @@ class RunTest extends TestCase
      */
     public function testWillFailBecauseValidation(): void
     {
-        /** @var BulkUploadRepository $bulkUploadRepository */
-        /** @var PartRepository $partsRepository */
         /** @var MockInterface|LegacyMockInterface|CsvImportService $service */
 
         // Given I have the three required dependencies for "CsvImportService" creation
@@ -173,8 +163,6 @@ class RunTest extends TestCase
      */
     public function testWillNotFail(): void
     {
-        /** @var BulkUploadRepository $bulkUploadRepository */
-        /** @var PartRepository $partsRepository */
         /** @var MockInterface|LegacyMockInterface|CsvImportService $service */
 
         // Given I have the three required dependencies for "CsvImportService" creation
