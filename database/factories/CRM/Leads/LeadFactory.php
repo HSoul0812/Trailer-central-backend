@@ -60,6 +60,6 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
         'zip' => $faker->postcode,
         'comments' => $faker->realText,
         'note' => $faker->realText,
-        'date_submitted' => $faker->dateTimeThisMonth->toDateTimeString()
+        'date_submitted' => $faker->dateTimeThisMonth->format('Y-m-d H:i:s')
     ];
 });

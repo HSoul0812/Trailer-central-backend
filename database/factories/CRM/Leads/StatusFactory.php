@@ -21,7 +21,7 @@ $factory->define(LeadStatus::class, function (Faker $faker, array $attributes) {
         'tc_lead_identifier' => $lead_id,
         'status' => $faker->randomElement(LeadStatus::STATUS_ARRAY),
         'source' => $faker->company,
-        'next_contact_date' => $faker->dateTimeBetween('now', '+1 month'),
+        'next_contact_date' => $faker->dateTimeBetween('now', '+1 month')->format('Y-m-d H:i:s'),
         'sales_person_id' => $sales_person_id,
         'contact_type' => $faker->randomElement([LeadStatus::TYPE_CONTACT, LeadStatus::TYPE_TASK]),
     ];
