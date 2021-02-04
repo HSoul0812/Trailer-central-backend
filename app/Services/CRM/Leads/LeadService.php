@@ -182,6 +182,8 @@ class LeadService implements LeadServiceInterface
 
         // Set Lead Types to Lead
         $lead->setRelation('leadTypes', $types);
+        var_dump($types);
+        die;
 
         // Return Array of Lead Types
         return $types;
