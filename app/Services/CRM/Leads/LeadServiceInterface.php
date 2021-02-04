@@ -1,35 +1,23 @@
 <?php
 
-namespace App\Services\CRM\Email;
+namespace App\Services\CRM\Leads;
 
-use App\Models\User\NewDealerUser;
-use App\Models\CRM\User\SalesPerson;
-use App\Models\CRM\User\EmailFolder;
+use App\Models\CRM\Leads\Lead;
 
-interface ScrapeRepliesServiceInterface {
+interface LeadServiceInterface {
     /**
-     * Process Dealer
+     * Create Lead
      * 
-     * @param User $dealer
+     * @param array $rawParams
+     * @return Lead
      */
-    public function dealer(NewDealerUser $dealer);
-
-    /**
-     * Process Sales Person
-     * 
-     * @param NewDealerUser $dealer
-     * @param SalesPerson $salesperson
-     * @return false || array of EmailHistory
-     */
-    public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson);
+    public function create(array $rawParams): Lead;
 
     /**
-     * Import Single Folder
+     * Update Lead
      * 
-     * @param NewDealerUser $dealer
-     * @param SalesPerson $salesperson
-     * @param Folder $folder
-     * @return total number of imported emails
+     * @param array $rawParams
+     * @return Lead
      */
-    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder);
+    public function update(array $rawParams): Lead;
 }

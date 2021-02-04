@@ -65,7 +65,7 @@ class LeadService implements LeadServiceInterface
      * @param array $rawParams
      * @return Lead
      */
-    public function create($rawParams) {
+    public function create(array $rawParams): Lead {
         // Fix Params
         $params = $this->fixCleanParams($rawParams);
 
@@ -106,7 +106,7 @@ class LeadService implements LeadServiceInterface
      * @param array $rawParams
      * @return Lead
      */
-    public function update($rawParams) {
+    public function update(array $rawParams): Lead {
         // Fix Params
         $params = $this->fixCleanParams($rawParams);
 
