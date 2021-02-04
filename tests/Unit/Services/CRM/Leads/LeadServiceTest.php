@@ -7,12 +7,12 @@ use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\InventoryLead;
+use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface; 
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
-use App\Services\CRM\User\SalesAuthService;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Mockery;
@@ -28,11 +28,6 @@ use Tests\TestCase;
  */
 class LeadServiceTest extends TestCase
 {
-    /**
-     * @var LegacyMockInterface|LeadServiceInterface
-     */
-    private $leadServiceMock;
-
     /**
      * @var LegacyMockInterface|LeadRepositoryInterface
      */
