@@ -262,7 +262,7 @@ class LeadServiceTest extends TestCase
             'source_name' => $status->source
         ]);
         $type = factory(LeadType::class)->create([
-            'lead_id' => $userId,
+            'lead_id' => $lead->identifier,
             'lead_type' => $lead->lead_type
         ]);
         $types = collect([$type]);
