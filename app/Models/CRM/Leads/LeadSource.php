@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Models\CRM\Leads;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +8,7 @@ class LeadSource extends Model
 {    
     
     const TABLE_NAME = 'crm_lead_sources';
+
     /**
      * The table associated with the model.
      *

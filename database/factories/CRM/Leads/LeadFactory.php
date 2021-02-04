@@ -60,11 +60,3 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
         'date_submitted' => $faker->dateTimeThisMonth
     ];
 });
-
-$factory->define(LeadStatus::class, function (Faker $faker) {
-    // Return Overrides
-    return [
-        'status' => Lead::STATUS_UNCONTACTED,
-        'contact_type' => LeadStatus::TYPE_CONTACT
-    ];
-});

@@ -54,40 +54,15 @@ class StatusRepository implements StatusRepositoryInterface {
      * @return array
      */
     public function getAll($params) {
-        return [
-            [
-                'id' => LeadStatus::STATUS_HOT,
-                'name' => LeadStatus::STATUS_HOT
-            ],
-            [
-                'id' => LeadStatus::STATUS_COLD,
-                'name' => LeadStatus::STATUS_COLD
-            ],
-            [
-                'id' => LeadStatus::STATUS_LOST,
-                'name' => LeadStatus::STATUS_LOST
-            ],
-            [
-                'id' => LeadStatus::STATUS_MEDIUM,
-                'name' => LeadStatus::STATUS_MEDIUM
-            ],
-            [
-                'id' => LeadStatus::STATUS_NEW_INQUIRY,
-                'name' => LeadStatus::STATUS_NEW_INQUIRY
-            ],
-            [
-                'id' => LeadStatus::STATUS_UNCONTACTED,
-                'name' => LeadStatus::STATUS_UNCONTACTED
-            ],
-            [
-                'id' => LeadStatus::STATUS_WON,
-                'name' => LeadStatus::STATUS_WON
-            ],
-            [
-                'id' => LeadStatus::STATUS_WON_CLOSED,
-                'name' => LeadStatus::STATUS_WON_CLOSED
-            ]
-        ];
+        // Return Unique Lead Status
+        $statuses = [];
+        foreach(LeadStatus::STATUS_ARRAY as $status) {
+            $statuses[] = [
+                'id' => $status,
+                'name' => $status
+            ];
+        }
+        return $statuses;
     }
 
     public function update($params) {

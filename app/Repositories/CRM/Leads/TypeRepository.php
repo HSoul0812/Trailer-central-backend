@@ -47,51 +47,14 @@ class TypeRepository implements TypeRepositoryInterface {
      * @return array
      */
     public function getAllUnique() {
-        return [
-            [
-                'id' => LeadType::TYPE_BUILD,
-                'name' => ucfirst(LeadType::TYPE_BUILD)
-            ],
-            [
-                'id' => LeadType::TYPE_CALL,
-                'name' => ucfirst(LeadType::TYPE_CALL)
-            ],
-            [
-                'id' => LeadType::TYPE_GENERAL,
-                'name' => ucfirst(LeadType::TYPE_GENERAL)
-            ],
-            [
-                'id' => LeadType::TYPE_CRAIGSLIST,
-                'name' => ucfirst(LeadType::TYPE_CRAIGSLIST)
-            ],
-            [
-                'id' => LeadType::TYPE_INVENTORY,
-                'name' => ucfirst(LeadType::TYPE_INVENTORY)
-            ],
-            [
-                'id' => LeadType::TYPE_TEXT,
-                'name' => ucfirst(LeadType::TYPE_TEXT)
-            ],
-            [
-                'id' => LeadType::TYPE_SHOWROOM_MODEL,
-                'name' => ucfirst(LeadType::TYPE_SHOWROOM_MODEL)
-            ],
-            [
-                'id' => LeadType::TYPE_RENTALS,
-                'name' => ucfirst(LeadType::TYPE_RENTALS)
-            ],
-            [
-                'id' => LeadType::TYPE_FINANCING,
-                'name' => ucfirst(LeadType::TYPE_FINANCING)
-            ],
-            [
-                'id' => LeadType::TYPE_SERVICE,
-                'name' => ucfirst(LeadType::TYPE_SERVICE)
-            ],
-            [
-                'id' => LeadType::TYPE_TRADE,
-                'name' => ucfirst(LeadType::TYPE_TRADE)
-            ]
-        ];
+        // Return Unique Lead Types
+        $leadTypes = [];
+        foreach(LeadType::TYPE_ARRAY as $type) {
+            $leadTypes[] = [
+                'id' => $type,
+                'name' => ucfirst($type)
+            ];
+        }
+        return $leadTypes;
     }
 }
