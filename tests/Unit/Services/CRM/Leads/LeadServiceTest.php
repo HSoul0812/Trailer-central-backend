@@ -98,7 +98,7 @@ class LeadServiceTest extends TestCase
         // Create Source/Type/InventoryLead
         $source = factory(LeadSource::class)->create([
             'user_id' => $userId,
-            'source_name' => $status->lead_source
+            'source_name' => $status->source
         ]);
         $type = factory(LeadType::class)->create([
             'user_id' => $userId,
@@ -135,8 +135,8 @@ class LeadServiceTest extends TestCase
             'adf_email_sent' => $lead->date_submitted,
             'cdk_email_sent' => 1,
             'is_spam' => 0,
-            'lead_source' => $status->lead_source,
-            'lead_status' => $status->lead_status,
+            'lead_source' => $status->source,
+            'lead_status' => $status->status,
             'next_contact_date' => $status->next_contact_date,
             'contact_type' => $status->task,
             'sales_person_id' => $status->sales_person_id
@@ -242,7 +242,7 @@ class LeadServiceTest extends TestCase
         // Create Source/Type/InventoryLead
         $source = factory(LeadSource::class)->create([
             'user_id' => $userId,
-            'source_name' => $status->lead_source
+            'source_name' => $status->source
         ]);
         $type = factory(LeadType::class)->create([
             'user_id' => $userId,
@@ -280,8 +280,8 @@ class LeadServiceTest extends TestCase
             'adf_email_sent' => $lead->date_submitted,
             'cdk_email_sent' => 1,
             'is_spam' => 0,
-            'lead_source' => $status->lead_source,
-            'lead_status' => $status->lead_status,
+            'lead_source' => $status->source,
+            'lead_status' => $status->status,
             'next_contact_date' => $status->next_contact_date,
             'contact_type' => $status->task,
             'sales_person_id' => $status->sales_person_id
