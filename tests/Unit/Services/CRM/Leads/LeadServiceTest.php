@@ -7,6 +7,7 @@ use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\InventoryLead;
+use App\Models\Inventory\Inventory;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
@@ -82,14 +83,22 @@ class LeadServiceTest extends TestCase
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
         $websiteId = self::getTestWebsiteRandom();
         $dealer = NewDealerUser::find($dealerId);
         $userId = $dealer->user_id;
 
+        // Create Dummy Inventory
+        $inventory = factory(Inventory::class)->create([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId
+        ]);
+
         // Get Test Lead
         $lead = factory(Lead::class)->create([
             'dealer_id' => $dealerId,
-            'website_id' => $websiteId
+            'website_id' => $websiteId,
+            'inventory_id' => $inventory->inventory_id
         ]);
         $status = factory(LeadStatus::class)->create([
             'tc_lead_identifier' => $lead->identifier
