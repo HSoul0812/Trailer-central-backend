@@ -97,6 +97,10 @@ class MonitoredJobsController extends RestfulController
             $job = $request->getJob();
 
             if ($job->isPending()) {
+                return response()->json(['message' => 'It is pending', 'progress' => $job->progress]);
+            }
+
+            if ($job->isProcessing()) {
                 return response()->json(['message' => 'Still processing', 'progress' => $job->progress]);
             }
 
@@ -104,11 +108,7 @@ class MonitoredJobsController extends RestfulController
                 return response()->json(['message' => 'Completed', 'progress' => $job->progress]);
             }
 
-            if ($job->isFailed()) {
-                return response()->json(['message' => $this->failedMessage], 500);
-            }
-
-            return response()->json(['message' => 'Error: unknown status'], 500);
+            return response()->json(['message' => $this->failedMessage], 500);
         }
 
         $this->response->errorBadRequest();

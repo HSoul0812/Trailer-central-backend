@@ -115,7 +115,8 @@ class MonitoredJob extends Model
         'name',
         'result',
         'queue_job_id',
-        'status'
+        'status',
+        'progress'
     ];
 
     /**
@@ -124,12 +125,9 @@ class MonitoredJob extends Model
      * @var array
      */
     protected $guarded = [
-        'status',
-        'progress',
         'created_at',
         'updated_at',
-        'finished_at',
-        'result'
+        'finished_at'
     ];
 
     public function dealer(): BelongsTo
@@ -218,7 +216,12 @@ class MonitoredJob extends Model
 
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING || $this->status === self::STATUS_PROCESSING;
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function isProcessing(): bool
+    {
+        return $this->status === self::STATUS_PROCESSING;
     }
 
     public function isFailed(): bool

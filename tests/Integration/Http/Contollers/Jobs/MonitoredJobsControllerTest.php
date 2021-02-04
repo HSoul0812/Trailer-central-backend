@@ -7,9 +7,10 @@ namespace Tests\Integration\Http\Contollers\Jobs;
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Jobs\GetMonitoredJobsRequest;
 use App\Models\Common\MonitoredJob;
+use App\Repositories\Common\MonitoredJobRepository;
+use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use Dingo\Api\Exception\ResourceException;
 use Exception;
-use Faker\Factory as Faker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Ramsey\Uuid\Uuid;
@@ -109,7 +110,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
         $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
-            // When I call the status action using the token of non-existent monitored job
+            // When I call the status action using the token and the bad formed request
             $controller->status($request->get('token', ''), $request);
         } catch (ResourceException $exception) {
             // Then I should see that the first error message has a specific string
@@ -120,38 +121,64 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
     }
 
     /**
-     * @throws Exception when Uuid::uuid4 cannot generate a uuid
+     * @dataProvider responseAccordingToJobStatusProvider
+     *
+     * @param array $params
+     * @param string $jobStatus
+     * @param int $expectedHttpCodeStatus
+     * @param array $expectedPayloadResponse
      *
      * @covers ::status
      */
-    public function testStatusWithValidParameters(): void
+    public function testStatusWithValidParameters(array $params,
+                                                  string $jobStatus,
+                                                  int $expectedHttpCodeStatus,
+                                                  array $expectedPayloadResponse): void
     {
-        /** @var MonitoredJob  $job */
-        /** @var array<string, float> $response */
+        /** @var MonitoredJobRepository $repository */
+        $repository = app(MonitoredJobRepositoryInterface::class);
 
-        $faker = Faker::create();
+        /** @var array<string, float> $response */
 
         // Given I have few monitored jobs
         $this->seeder->seed();
+        // And I've picked one job
 
-        // And I'm a dealer with a specific id
-        $dealerId = $this->seeder->dealers[0]->getKey();
-
-        // And I've randomly picked one of my monitored jobs
-        $job = $this->seeder->jobs[$dealerId]->get($faker->unique()->numberBetween(0, 7));
+        $extractedParams = $this->seeder->extractValues($params);
+        // And I know that my picked job has a specific status
+        $repository->update(
+            $extractedParams['token'],
+            ['status' => $jobStatus, 'progress' => $expectedPayloadResponse['progress'] ?? 0]
+        );
 
         // And I'm using the a "MonitoredJobsController" controller
         $controller = app(MonitoredJobsController::class);
+        // And I have a well formed "GetMonitoredJobsRequest" request
+        $request = new GetMonitoredJobsRequest($extractedParams);
 
-        $request = new GetMonitoredJobsRequest(['dealer_id' => $dealerId]);
+        // When I call the status action using the provided token and request
+        $response = $controller->status($extractedParams['token'], $request);
 
-        // When I call the status action using the token of my picked monitored job
-        $response = $controller->status($job->token, $request);
+        // Then I should see that response status is the same as expected
+        self::assertSame($expectedHttpCodeStatus, $response->status());
+        // And I should see that response has a specific structures as expected
+        self::assertSame($expectedPayloadResponse, $response->original);
+    }
 
-        // Then I should see that response status is 200
-        self::assertSame(JsonResponse::HTTP_OK, $response->status());
-        // And I should see that the expected response has a specific structure
-        self::assertSame(['message' => 'Still processing', 'progress' => $job->progress], $response->original);
+    /**
+     * Examples of invalid query parameter with their respective expected exception and its message
+     *
+     * @return array<string, array>
+     * @throws Exception when Uuid::uuid4 cannot generate a uuid
+     */
+    public function responseAccordingToJobStatusProvider(): array
+    {
+        return [               // array $parameters, string $jobStatus, int $expectedHttpCodeStatus, array $expectedPayloadResponse
+            'pending job'    => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => $this->getSeededData(0,'random-token')], MonitoredJob::STATUS_PENDING, JsonResponse::HTTP_OK, ['message' => 'It is pending', 'progress' => 0.0]],
+            'processing job' => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => $this->getSeededData(0,'random-token')], MonitoredJob::STATUS_PROCESSING, JsonResponse::HTTP_OK, ['message' => 'Still processing', 'progress' => 50.0]],
+            'completed job'  => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => $this->getSeededData(0,'random-token')], MonitoredJob::STATUS_COMPLETED, JsonResponse::HTTP_OK, ['message' => 'Completed', 'progress' => 100.0]],
+            'failed job'     => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => $this->getSeededData(0,'random-token')], MonitoredJob::STATUS_FAILED, JsonResponse::HTTP_INTERNAL_SERVER_ERROR, ['message' => 'This process could not be completed. Please request a new job.']]
+        ];
     }
 
     /**

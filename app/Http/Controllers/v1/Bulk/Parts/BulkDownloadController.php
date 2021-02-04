@@ -19,6 +19,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BulkDownloadController extends MonitoredJobsController
 {
+    /**
+     * seconds that it will wait for the stream
+     */
+    public const DEFAULT_READ_TIMEOUT = 180; // 3 minutes
+
     protected $failedMessage = 'This file could not be completed. Please request a new file.';
 
     /**
@@ -30,6 +35,11 @@ class BulkDownloadController extends MonitoredJobsController
      * @var BulkDownloadMonitoredJobServiceInterface
      */
     private $service;
+
+    /**
+     * @var int seconds that it will wait for the stream
+     */
+    private $readTimeOut;
 
     public function __construct(
         BulkDownloadRepositoryInterface $bulkRepository,
@@ -43,6 +53,7 @@ class BulkDownloadController extends MonitoredJobsController
 
         $this->bulkRepository = $bulkRepository;
         $this->service = $service;
+        $this->readTimeOut = self::DEFAULT_READ_TIMEOUT;
     }
 
     /**
@@ -118,13 +129,17 @@ class BulkDownloadController extends MonitoredJobsController
      */
     public function read(string $token, Request $request)
     {
-        $request = new GetMonitoredJobsRequest($request->all());
+        $request = new GetMonitoredJobsRequest(array_merge($request->all(), ['token' => $token]));
 
         if ($request->validate()) {
             $download = $this->bulkRepository->findByToken($token);
 
             if ($download->isPending()) {
-                return response()->json(['message' => 'Still processing', 'progress' => $download->progress,], 202);
+                return response()->json(['message' => 'It is pending', 'progress' => $download->progress], 202);
+            }
+
+            if ($download->isProcessing()) {
+                return response()->json(['message' => 'Still processing', 'progress' => $download->progress]);
             }
 
             if ($download->isFailed()) {
@@ -133,13 +148,9 @@ class BulkDownloadController extends MonitoredJobsController
                 ], 500);
             }
 
-            if ($download->isCompleted()) {
-                return response()->streamDownload(static function () use ($download) {
-                    fpassthru(Storage::disk('partsCsvExports')->readStream($download->payload->export_file));
-                }, $download->export_file);
-            }
-
-            return response()->json(['message' => 'Error: unknown status',], 500);
+            return response()->streamDownload(static function () use ($download) {
+                fpassthru(Storage::disk('partsCsvExports')->readStream($download->payload->export_file));
+            }, $download->export_file);
         }
 
         $this->response->errorBadRequest();
@@ -160,7 +171,7 @@ class BulkDownloadController extends MonitoredJobsController
         while (true) {
             $result = $this->read($token, $request);
 
-            if (time() - $timeStart > 180) { // 3 minutes
+            if (time() - $timeStart > $this->readTimeOut) {
                 break;
             }
 
@@ -173,6 +184,11 @@ class BulkDownloadController extends MonitoredJobsController
         }
 
         return response()->json(['message' => 'Error: unknown status'], 500);
+    }
+
+    public function setReadTimeOut(int $readTimeOut): void
+    {
+        $this->readTimeOut = $readTimeOut;
     }
 
     /**

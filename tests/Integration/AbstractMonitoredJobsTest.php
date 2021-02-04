@@ -27,7 +27,7 @@ abstract class AbstractMonitoredJobsTest extends TestCase
 
         $this->faker = $this->faker ?? Faker::create();
 
-        $this->seeder = new MonitoredJobSeeder();
+        $this->seeder = $this->seeder ?? new MonitoredJobSeeder();
     }
 
     public function tearDown(): void
