@@ -105,11 +105,6 @@ class LeadService implements LeadServiceInterface
         if (isset($params['inventory'])) {
             $this->updateUnitsOfInterest($lead, $params['inventory']);
         }
-        
-        $get = $this->leads->get(['id' => $lead->identifier]);
-        var_dump($get);
-        var_dump($get->leadTypes);
-        die;
 
         // Return Full Lead Details
         return $lead;
