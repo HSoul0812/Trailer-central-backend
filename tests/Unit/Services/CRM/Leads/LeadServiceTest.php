@@ -140,9 +140,9 @@ class LeadServiceTest extends TestCase
             'state' => $lead->state,
             'zip' => $lead->zip,
             'comments' => $lead->comments,
-            'date_submitted' => $lead->date_submitted,
-            'contact_email_sent' => $lead->date_submitted,
-            'adf_email_sent' => $lead->date_submitted,
+            'date_submitted' => $lead->date_submitted->toDateTimeString(),
+            'contact_email_sent' => $lead->date_submitted->toDateTimeString(),
+            'adf_email_sent' => $lead->date_submitted->toDateTimeString(),
             'cdk_email_sent' => 1,
             'is_spam' => 0,
             'lead_source' => $status->source,
@@ -312,6 +312,11 @@ class LeadServiceTest extends TestCase
         $updateLeadParams['inventory'] = [$updateRequestParams['inventory_id']];
         $updateLeadParams['lead_types'] = [$updateRequestParams['lead_type']];
         $updateLeadParams['preferred_contact'] = 'phone';
+
+        // Create Lead Status Params
+        $updateStatusParams = $updateLeadParams;
+        $updateStatusParams['lead_id'] = $updateStatusParams['id'];
+        unset($updateStatusParams['id']);
 
         // Create Source Params
         $createSourceParams = [
