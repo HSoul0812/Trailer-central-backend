@@ -66,7 +66,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
 
         // Given I have few monitored jobs which belongs to a specific dealer
         $this->seeder->seed();
-        // And I'm using the a "MonitoredJobsController" controller
+        // And I'm using the "MonitoredJobsController" controller
         $controller = app(MonitoredJobsController::class);
         // And I have a well formed "GetMonitoredJobsRequest" request
         $request = new GetMonitoredJobsRequest($this->seeder->extractValues($params));
@@ -99,7 +99,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
         // Given I have few monitored jobs
         $this->seeder->seed();
 
-        // And I'm using the a "MonitoredJobsController" controller
+        // And I'm using the "MonitoredJobsController" controller
         $controller = app(MonitoredJobsController::class);
         // And I have a bad formed "GetMonitoredJobsRequest" request
         $request = new GetMonitoredJobsRequest($this->seeder->extractValues($params));
@@ -151,7 +151,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
             ['status' => $jobStatus, 'progress' => $expectedPayloadResponse['progress'] ?? 0]
         );
 
-        // And I'm using the a "MonitoredJobsController" controller
+        // And I'm using the "MonitoredJobsController" controller
         $controller = app(MonitoredJobsController::class);
         // And I have a well formed "GetMonitoredJobsRequest" request
         $request = new GetMonitoredJobsRequest($extractedParams);

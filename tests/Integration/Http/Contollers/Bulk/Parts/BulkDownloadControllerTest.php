@@ -107,6 +107,9 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * Test that when the user has provided the `wait` parameter, then then action controller will wait, but since
+     * there is not job working on it, it will response a 500 http status code
+     *
      * @throws BusyJobException
      */
     public function testCreateWithWaitParameter(): void
@@ -149,7 +152,7 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         // Given I have few monitored jobs
         $this->seeder->seed();
 
-        // And I'm using the a "BulkDownloadController" controller
+        // And I'm using the "BulkDownloadController" controller
         $controller = app(BulkDownloadController::class);
         // And I have a bad formed "GetMonitoredJobsRequest" request
         $request = new GetMonitoredJobsRequest($this->seeder->extractValues($params));
@@ -201,7 +204,7 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
             ['status' => $jobStatus, 'progress' => $expectedPayloadResponse['progress'] ?? 0]
         );
 
-        // And I'm using the a "MonitoredJobsController" controller
+        // And I'm using the "MonitoredJobsController" controller
         $controller = app(BulkDownloadController::class);
         // And I have a well formed "GetMonitoredJobsRequest" request
         $request = new GetMonitoredJobsRequest($extractedParams);
