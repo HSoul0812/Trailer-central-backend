@@ -399,13 +399,10 @@ class LeadServiceTest extends TestCase
             $this->unitRepositoryMock
                 ->shouldReceive('create')
                 ->once()
-                ->with(Mockery::on(function($lead, $inventoryIds) use($unit) {
-                    if(in_array($unit->inventory_id, $inventoryIds) &&
-                       $lead->inventory_id === $unit->inventory_id) {
-                        return true;
-                    }
-                    return false;
-                }))
+                ->with([
+                    'website_lead_id' => $lead->identifier,
+                    'inventory_id' => $unit->inventory_id
+                ])
                 ->andReturn($unit);
         }
     }
@@ -432,13 +429,10 @@ class LeadServiceTest extends TestCase
             $this->typeRepositoryMock
                 ->shouldReceive('create')
                 ->once()
-                ->with(Mockery::on(function($lead, $types) use($type) {
-                    if(in_array($type->lead_type, $types) &&
-                       $lead->lead_type === $type->lead_type) {
-                        return true;
-                    }
-                    return false;
-                }))
+                ->with([
+                    'lead_id' => $lead->identifier,
+                    'lead_type' => $type->lead_type
+                ])
                 ->andReturn($type);
         }
     }
