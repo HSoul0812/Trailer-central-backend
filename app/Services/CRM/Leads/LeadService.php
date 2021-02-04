@@ -88,14 +88,14 @@ class LeadService implements LeadServiceInterface
             ]);
         }
 
-        // Update Units of Inventory
-        if (isset($params['inventory'])) {
-            $this->updateUnitsOfInterest($lead, $params['inventory']);
-        }
-
         // Update Lead Types
         if (isset($params['lead_types'])) {
             $this->updateLeadTypes($lead, $params['lead_types']);
+        }
+
+        // Update Units of Inventory
+        if (isset($params['inventory'])) {
+            $this->updateUnitsOfInterest($lead, $params['inventory']);
         }
 
         // Return Full Lead Details
