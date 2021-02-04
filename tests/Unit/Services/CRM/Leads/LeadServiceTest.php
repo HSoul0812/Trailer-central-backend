@@ -316,7 +316,6 @@ class LeadServiceTest extends TestCase
         // Create Lead Status Params
         $updateStatusParams = $updateLeadParams;
         $updateStatusParams['lead_id'] = $updateStatusParams['id'];
-        unset($updateStatusParams['id']);
 
         // Create Source Params
         $createSourceParams = [
