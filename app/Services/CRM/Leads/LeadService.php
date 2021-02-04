@@ -220,6 +220,8 @@ class LeadService implements LeadServiceInterface
                 'inventory_id' => $inventoryIds
             ]
         ]);
+        var_dump($inventory->count());
+        var_dump($units->count());
 
         // Set Units of Interest to Lead
         $lead->setRelation('units', $inventory);
