@@ -8,6 +8,7 @@ use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -44,13 +45,19 @@ class LeadService implements LeadServiceInterface
     protected $units;
 
     /**
+     * @var App\Repositories\Inventory\InventoryRepositoryInterface
+     */
+    protected $inventory;
+
+    /**
      * LeadService constructor.
      */
     public function __construct(LeadRepositoryInterface $leads,
                                 StatusRepositoryInterface $status,
                                 SourceRepositoryInterface $sources,
                                 TypeRepositoryInterface $types,
-                                UnitRepositoryInterface $units)
+                                UnitRepositoryInterface $units,
+                                InventoryRepositoryInterface $inventory)
     {
         // Initialize Repositories
         $this->leads = $leads;
@@ -58,6 +65,7 @@ class LeadService implements LeadServiceInterface
         $this->sources = $sources;
         $this->types = $types;
         $this->units = $units;
+        $this->inventory = $inventory;
     }
 
 
@@ -156,7 +164,7 @@ class LeadService implements LeadServiceInterface
     private function updateLeadTypes(Lead $lead, array $leadTypes) {
         // Nothing to Update
         if (empty($leadTypes)) {
-            return collect($leadTypes);
+            return collect([]);
         }
 
         // Delete Existing Lead Types!
@@ -189,7 +197,7 @@ class LeadService implements LeadServiceInterface
     private function updateUnitsOfInterest(Lead $lead, array $inventoryIds) {
         // Nothing to Update
         if (empty($inventoryIds)) {
-            return collect($inventoryIds);
+            return collect([]);
         }
 
         // Delete Existing Units of Interest!
@@ -205,8 +213,14 @@ class LeadService implements LeadServiceInterface
             $units->push($unit);
         }
 
+        // Get Inventory
+        $inventory = $this->inventory->getAll([
+            'dealer_id' => $lead->dealer_id,
+            self::CONDITION_AND_WHERE_IN => $inventoryIds
+        ]);
+
         // Set Units of Interest to Lead
-        $lead->setRelation('units', $units);
+        $lead->setRelation('units', $inventory);
 
         // Return Array of Inventory Lead
         return $units;
