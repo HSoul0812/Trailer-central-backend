@@ -169,7 +169,7 @@ class LeadService implements LeadServiceInterface
                 'lead_id' => $lead->identifier,
                 'lead_type' => $leadType
             ]);
-            $types->append($type);
+            $types->push($type);
         }
 
         // Set Lead Types to Lead
@@ -202,7 +202,7 @@ class LeadService implements LeadServiceInterface
                 'website_lead_id' => $lead->identifier,
                 'inventory_id' => $inventoryId
             ]);
-            $units->append($unit);
+            $units->push($unit);
         }
 
         // Set Units of Interest to Lead
