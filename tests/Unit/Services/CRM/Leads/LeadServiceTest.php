@@ -208,10 +208,10 @@ class LeadServiceTest extends TestCase
         $this->assertSame($result->identifier, (int) $lead->identifier);
 
         // Assert Match
-        $this->assertSame($result->status->id, $status->id);
+        $this->assertSame($result->leadStatus->id, $status->id);
 
         // Assert Match
-        $this->assertSame($result->status->source, $source->id);
+        $this->assertSame($result->leadStatus->source, $source->id);
 
 
         // Match All Types
@@ -330,7 +330,7 @@ class LeadServiceTest extends TestCase
 
         // Mock Sales Person Repository
         $this->statusRepositoryMock
-            ->shouldReceive('update')
+            ->shouldReceive('createOrUpdate')
             ->once()
             ->with($updateLeadParams)
             ->andReturn($status);
@@ -357,10 +357,10 @@ class LeadServiceTest extends TestCase
         $this->assertSame($result->identifier, (int) $lead->identifier);
 
         // Assert Match
-        $this->assertSame($result->status->id, $status->id);
+        $this->assertSame($result->leadStatus->id, $status->id);
 
         // Assert Match
-        $this->assertSame($result->status->source, $source->id);
+        $this->assertSame($result->leadStatus->source, $source->id);
 
 
         // Match All Types
