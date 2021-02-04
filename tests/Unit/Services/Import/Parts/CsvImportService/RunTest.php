@@ -61,7 +61,7 @@ class RunTest extends TestCase
         // And I know that it should throw an exception
         $exception = new Exception('This a dummy exception', 500);
 
-        // Then I expect that repository update method is called with certainly arguments
+        // Then I expect that repository update method is called with certain arguments
         $repositories->bulkUploadRepository
             ->shouldReceive('update')
             ->with($token, [
@@ -97,7 +97,7 @@ class RunTest extends TestCase
         // And I expect that outputValidationErrors method is called once and return certainly list of errors
         $service->shouldReceive('outputValidationErrors')->once()->andReturn($validationErrors);
         // And I expect that a log entry is stored
-        Log::shouldReceive('info');
+        Log::shouldReceive('info')->twice();
 
         // When I call the run method
         $result = $service->run();
@@ -122,7 +122,7 @@ class RunTest extends TestCase
         // And I have an expected list of validation errors
         $validationErrors = ['There was an error in the line 123', 'The column XXX is required'];
 
-        // Then I expect that repository update method is called with certainly arguments
+        // Then I expect that repository update method is called with certain arguments
         $repositories->bulkUploadRepository
             ->shouldReceive('update')
             ->with($token, [
@@ -145,11 +145,11 @@ class RunTest extends TestCase
         $service->setBulkUpload($bulkUpload);
 
         // Then I expect that validate method is called once and return false because it has failed
-        $service->shouldReceive('validate')->once()->andReturn(false);
-        // And I expect that outputValidationErrors method is called once and return certainly list of errors
+        $service->shouldReceive('validate')->once()->andReturnFalse();
+        // And I expect that outputValidationErrors method is called once and return certain list of errors
         $service->shouldReceive('outputValidationErrors')->once()->andReturn($validationErrors);
         // And I expect that a log entry is stored
-        Log::shouldReceive('info');
+        Log::shouldReceive('info')->twice();
 
         // When I call the run method
         $result = $service->run();
@@ -182,11 +182,11 @@ class RunTest extends TestCase
         $service->setBulkUpload($bulkUpload);
 
         // Then I expect that validate method is called once and return false because it has passed its validations rules
-        $service->shouldReceive('validate')->once()->andReturn(true);
+        $service->shouldReceive('validate')->once()->andReturnTrue();
         // And I expect that a log entry is stored
-        Log::shouldReceive('info');
+        Log::shouldReceive('info')->twice();
         // And I expect that import method is called once
-        $service->shouldReceive('import')->once()->andReturn(true);
+        $service->shouldReceive('import')->once()->andReturnTrue();
 
         // When I call the run method
         $result = $service->run();

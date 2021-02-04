@@ -9,8 +9,6 @@ use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Services\Import\Parts\CsvImportService;
-use Faker\Factory as Faker;
-use Faker\Generator;
 use Mockery\LegacyMockInterface;
 use Mockery\MockInterface;
 use Tests\Unit\TestCase;
@@ -22,11 +20,6 @@ use Exception;
  */
 class SetupTest extends TestCase
 {
-    /**
-     * @var Generator
-     */
-    private $faker;
-
     /**
      * Test that when there is another monitored job working (same dealer), it will throw a `BusyJobException`
      *
@@ -43,7 +36,7 @@ class SetupTest extends TestCase
         // And I have a specific payload
         $payload = BulkDownloadPayload::from(['export_file' => 'parts-' . date('Ymd') . '-' . $token . '.csv']);
 
-        // Then I expect that repository isBusyByDealer method is called with certainly arguments and it will return true
+        // Then I expect that repository isBusyByDealer method is called with certain arguments and it will return true
         $dependencies->bulkDownloadRepository
             ->shouldReceive('isBusyByDealer')
             ->with($dealerId)
@@ -82,22 +75,22 @@ class SetupTest extends TestCase
         // And I have a specific payload
         $payload = BulkDownloadPayload::from(['export_file' => 'parts-' . date('Ymd') . '-' . $token . '.csv']);
 
-        // Then I expect that a "BulkDownload" model is returned
+        // Then I expect that a known "BulkDownload" model is going to be returned
         $expectedBulkDownload = new BulkDownload([
             'dealer_id' => $dealerId,
             'token' => $token,
-            'payload' => is_array($payload) ? $payload : $payload->asArray(),
+            'payload' => $payload->asArray(),
             'queue' => BulkDownload::QUEUE_NAME,
             'concurrency_level' => BulkDownload::LEVEL_DEFAULT,
             'name' => BulkDownload::QUEUE_JOB_NAME
         ]);
 
-        // And I expect that repository isBusyByDealer method is called with certainly arguments and it will return false
+        // And I expect that repository isBusyByDealer method is called with certain arguments and it will return false
         $dependencies->bulkDownloadRepository
             ->shouldReceive('isBusyByDealer')
             ->with($dealerId)
             ->andReturn(false);
-        // And I expect that repository create method is called with certainly arguments
+        // And I expect that repository create method is called with certain arguments
         $dependencies->bulkDownloadRepository
             ->shouldReceive('create')
             ->with([
@@ -123,12 +116,5 @@ class SetupTest extends TestCase
 
         // Then I expect to receive a false value
         self::assertSame($expectedBulkDownload, $bulkDownload);
-    }
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->faker = Faker::create();
     }
 }
