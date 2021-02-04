@@ -339,7 +339,7 @@ class LeadServiceTest extends TestCase
         $this->statusRepositoryMock
             ->shouldReceive('createOrUpdate')
             ->once()
-            ->with($updateLeadParams)
+            ->with($updateStatusParams)
             ->andReturn($status);
 
         // Mock Source Repository
