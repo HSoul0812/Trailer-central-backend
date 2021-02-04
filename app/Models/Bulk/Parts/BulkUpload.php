@@ -18,6 +18,8 @@ class BulkUpload extends MonitoredJob
 
     public const VALIDATION_ERROR = 'validation_error';
 
+    public const EXCEPTION_ERROR = 'exception_error';
+
     public const PROCESSING = parent::STATUS_PROCESSING; // for backward compatibility
 
     public const COMPLETE = parent::STATUS_COMPLETED; // for backward compatibility
