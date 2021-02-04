@@ -202,6 +202,7 @@ class LeadServiceTest extends TestCase
 
         // Validate Create Catalog Result
         $result = $service->create($createRequestParams);
+        var_dump($result);
 
 
         // Assert Match
@@ -216,14 +217,12 @@ class LeadServiceTest extends TestCase
 
         // Match All Types
         $this->assertSame(count($result->leadTypes), count($types));
-        var_dump($result->leadTypes);
         foreach($types as $k => $single) {
             $this->assertSame($result->leadTypes[$k]->id, $single->id);
         }
 
         // Match All Inventory Leads
         $this->assertSame(count($result->units), count($units));
-        var_dump($result->inventory);
         foreach($units as $k => $single) {
             $this->assertSame($result->inventory[$k]->id, $single->id);
         }
