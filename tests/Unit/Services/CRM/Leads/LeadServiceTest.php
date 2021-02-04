@@ -98,7 +98,7 @@ class LeadServiceTest extends TestCase
         // Create Source/Type/InventoryLead
         $source = factory(LeadSource::class)->create([
             'user_id' => $userId,
-            'name' => $status->lead_source
+            'source_name' => $status->lead_source
         ]);
         $type = factory(LeadType::class)->create([
             'user_id' => $userId,
@@ -155,7 +155,7 @@ class LeadServiceTest extends TestCase
         // Create Source Params
         $createSourceParams = [
             'user_id' => $userId,
-            'name' => $createRequestParams['source_name']
+            'source_name' => $createRequestParams['source_name']
         ];
 
 
@@ -242,7 +242,7 @@ class LeadServiceTest extends TestCase
         // Create Source/Type/InventoryLead
         $source = factory(LeadSource::class)->create([
             'user_id' => $userId,
-            'name' => $status->lead_source
+            'source_name' => $status->lead_source
         ]);
         $type = factory(LeadType::class)->create([
             'user_id' => $userId,
@@ -296,7 +296,7 @@ class LeadServiceTest extends TestCase
         // Create Source Params
         $createSourceParams = [
             'user_id' => $userId,
-            'name' => $updateRequestParams['source_name']
+            'source_name' => $updateRequestParams['source_name']
         ];
 
 
