@@ -13,7 +13,7 @@ use App\Models\User\User;
 use Faker\Generator as Faker;
 
 $factory->define(LeadStatus::class, function (Faker $faker, array $attributes) {
-    $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create()->getKey();
+    $lead_id = $attributes['tc_lead_identifier'] ?? factory(Lead::class)->create()->getKey();
     $sales_person_id = $attributes['sales_person_id'] ?? factory(SalesPerson::class)->create()->getKey();
 
     // Return Overrides

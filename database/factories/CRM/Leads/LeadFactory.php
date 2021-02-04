@@ -37,14 +37,17 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
     $leadType = $leadTypes[$typeKey];
 
     // Get Random Inventory
-    $inventory = Inventory::where('dealer_id', $dealer_id)->inRandomOrder()->first();
+    $inventory_id = $attributes['inventory_id'] ?? factory(Inventory::class)->create([
+        'dealer_id' => $dealer_id,
+        'dealer_location_id' => $dealer_location_id
+    ])->getKey();
 
     // Return Overrides
     return [
         'website_id' => $website_id,
         'dealer_id' => $dealer_id,
         'dealer_location_id' => $dealer_location_id,
-        'inventory_id' => $inventory->inventory_id,
+        'inventory_id' => $inventory_id,
         'lead_type' => $leadType,
         'title' => $formTitles[$leadType],
         'referral' => $faker->url,
