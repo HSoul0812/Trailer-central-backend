@@ -12,13 +12,14 @@ use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use Faker\Generator as Faker;
 
-$factory->define(LeadStatus::class, function (Faker $faker) {
+$factory->define(LeadStatus::class, function (Faker $faker, array $attributes) {
+    $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create()->getKey();
     $sales_person_id = $attributes['sales_person_id'] ?? factory(SalesPerson::class)->create()->getKey();
 
     // Return Overrides
     return [
+        'tc_lead_identifier' => $lead_id,
         'status' => $faker->randomElement(LeadStatus::STATUS_ARRAY),
-        'contact_type' => LeadStatus::TYPE_CONTACT,
         'source' => $faker->company,
         'next_contact_date' => $faker->dateTimeBetween('now', '+1 month'),
         'sales_person_id' => $sales_person_id,
@@ -26,7 +27,7 @@ $factory->define(LeadStatus::class, function (Faker $faker) {
     ];
 });
 
-$factory->define(LeadSource::class, function (Faker $faker) {
+$factory->define(LeadSource::class, function (Faker $faker, array $attributes) {
     $user_id = $attributes['user_id'] ?? factory(User::class)->create()->getKey();
 
     // Return Overrides
@@ -36,7 +37,7 @@ $factory->define(LeadSource::class, function (Faker $faker) {
     ];
 });
 
-$factory->define(LeadType::class, function (Faker $faker) {
+$factory->define(LeadType::class, function (Faker $faker, array $attributes) {
     $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create()->getKey();
 
     // Return Overrides
@@ -46,7 +47,7 @@ $factory->define(LeadType::class, function (Faker $faker) {
     ];
 });
 
-$factory->define(InventoryLead::class, function (Faker $faker) {
+$factory->define(InventoryLead::class, function (Faker $faker, array $attributes) {
     $inventory = factory(Inventory::class)->create();
     $inventory_id = $attributes['inventory_id'] ?? $inventory->getKey();
     $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create([

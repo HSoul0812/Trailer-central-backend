@@ -92,7 +92,7 @@ class LeadServiceTest extends TestCase
             'website_id' => $websiteId
         ]);
         $status = factory(LeadStatus::class)->create([
-            'tc_lead_identifier' => $lead->identifier
+            'lead_id' => $lead->identifier
         ]);
 
         // Create Source/Type/InventoryLead
