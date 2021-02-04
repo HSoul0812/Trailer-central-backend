@@ -216,10 +216,10 @@ class LeadServiceTest extends TestCase
 
         // Match All Types
         var_dump($result->leadTypes);
-        echo count($types);
+        var_dump(count($types));
         $this->assertSame(count($result->leadTypes), count($types));
         foreach($types as $k => $single) {
-            echo $single->index();
+            var_dump($k);
             $this->assertSame($result->leadTypes[$k], $single->id);
         }
 
