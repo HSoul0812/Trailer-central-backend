@@ -57,14 +57,14 @@ $factory->define(InventoryLead::class, function (Faker $faker, array $attributes
     $inventory_id = $attributes['inventory_id'] ?? $inventory->getKey();
 
     // Get Lead
-    $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create([
+    $lead_id = $attributes['website_lead_id'] ?? factory(Lead::class)->create([
         'dealer_id' => $inventory->dealer_id,
         'inventory_id' => $inventory_id
     ])->getKey();
 
     // Return Overrides
     return [
-        'lead_id' => $lead_id,
+        'website_lead_id' => $lead_id,
         'inventory_id' => $inventory_id
     ];
 });
