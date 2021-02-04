@@ -226,14 +226,22 @@ class LeadServiceTest extends TestCase
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
         $websiteId = self::getTestWebsiteRandom();
         $dealer = NewDealerUser::find($dealerId);
         $userId = $dealer->user_id;
 
+        // Create Dummy Inventory
+        $inventory = factory(Inventory::class)->create([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId
+        ]);
+
         // Get Test Lead
         $lead = factory(Lead::class)->create([
             'dealer_id' => $dealerId,
-            'website_id' => $websiteId
+            'website_id' => $websiteId,
+            'inventory_id' => $inventory->inventory_id
         ]);
         $status = factory(LeadStatus::class)->create([
             'tc_lead_identifier' => $lead->identifier
@@ -251,7 +259,7 @@ class LeadServiceTest extends TestCase
         $types = collect([$type]);
         $unit = factory(InventoryLead::class)->create([
             'website_lead_id' => $lead->identifier,
-            'inventory_id' => $lead->inventory_id
+            'inventory_id' => $inventory->inventory_id
         ]);
         $units = collect([$unit]);
 
