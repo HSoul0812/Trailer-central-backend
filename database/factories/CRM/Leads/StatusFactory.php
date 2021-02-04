@@ -48,8 +48,15 @@ $factory->define(LeadType::class, function (Faker $faker, array $attributes) {
 });
 
 $factory->define(InventoryLead::class, function (Faker $faker, array $attributes) {
-    $inventory = factory(Inventory::class)->create();
+    // Get Inventory By Default
+    if(!empty($attributes['inventory_id'])) {
+        $inventory = Inventory::find($attributes['inventory_id']);
+    } else {
+        $inventory = factory(Inventory::class)->create();
+    }
     $inventory_id = $attributes['inventory_id'] ?? $inventory->getKey();
+
+    // Get Lead
     $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create([
         'dealer_id' => $inventory->dealer_id,
         'inventory_id' => $inventory_id
