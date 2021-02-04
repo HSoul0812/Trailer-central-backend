@@ -16,6 +16,7 @@ use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Support\Collection;
 use Mockery;
 use Tests\TestCase;
 
