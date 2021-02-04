@@ -216,7 +216,7 @@ class LeadService implements LeadServiceInterface
         // Get Inventory
         $inventory = $this->inventory->getAll([
             'dealer_id' => $lead->dealer_id,
-            self::CONDITION_AND_WHERE_IN => $inventoryIds
+            InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => $inventoryIds
         ]);
 
         // Set Units of Interest to Lead
