@@ -32,7 +32,7 @@ $factory->define(LeadSource::class, function (Faker $faker) {
     // Return Overrides
     return [
         'user_id' => $user_id,
-        'source' => $faker->company
+        'source_name' => $faker->company
     ];
 });
 
