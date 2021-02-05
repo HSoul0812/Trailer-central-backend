@@ -544,14 +544,14 @@ class LeadServiceTest extends TestCase
 
         // Match All Types
         $this->assertSame(count($result->leadTypes), $types->count());
-        foreach($types as $k => $single) {
-            $this->assertSame($result->leadTypes[$k], $single->lead_type);
+        foreach($result->leadTypes as $k => $single) {
+            $this->assertTrue(in_array($single->lead_type, $leadTypes));
         }
 
         // Match All Inventory Leads
         $this->assertSame($result->units->count(), $units->count());
         foreach($units as $k => $single) {
-            $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
+            $this->assertTrue(in_array($single->inventory_id, $unitsInterest));
         }
     }
 
@@ -717,14 +717,14 @@ class LeadServiceTest extends TestCase
 
         // Match All Types
         $this->assertSame(count($result->leadTypes), $types->count());
-        foreach($types as $k => $single) {
-            $this->assertSame($result->leadTypes[$k], $single->lead_type);
+        foreach($result->leadTypes as $k => $single) {
+            $this->assertTrue(in_array($single->lead_type, $leadTypes));
         }
 
         // Match All Inventory Leads
         $this->assertSame($result->units->count(), $units->count());
         foreach($units as $k => $single) {
-            $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
+            $this->assertTrue(in_array($single->inventory_id, $unitsInterest));
         }
     }
 
