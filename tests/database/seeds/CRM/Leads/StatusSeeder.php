@@ -53,7 +53,7 @@ class StatusSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
-        $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->user_id]);
+        $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->dealer_id]);
     }
 
     public function seed(): void
