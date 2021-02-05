@@ -81,7 +81,7 @@ class LeadServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    /*public function testCreateSingleType()
+    public function testCreateSingleType()
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
@@ -170,7 +170,7 @@ class LeadServiceTest extends TestCase
         ];
 
 
-        // @var LeadServiceInterface $service
+        /** @var LeadServiceInterface $service */
         $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Lead
@@ -226,14 +226,14 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
         }
-    }*/
+    }
 
     /**
      * @covers ::update
      *
      * @throws BindingResolutionException
      */
-    /*public function testUpdateSingleType()
+    public function testUpdateSingleType()
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
@@ -323,7 +323,7 @@ class LeadServiceTest extends TestCase
         ];
 
 
-        // @var LeadServiceInterface $service
+        /** @var LeadServiceInterface $service */
         $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Lead
@@ -379,7 +379,7 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
         }
-    }*/
+    }
 
 
     /**
@@ -636,7 +636,7 @@ class LeadServiceTest extends TestCase
             'last_name' => $lead->last_name,
             'email_address' => $lead->email_address,
             'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
+            'preferred_contact' => 'email',
             'address' => $lead->address,
             'city' => $lead->city,
             'state' => $lead->state,
@@ -658,7 +658,6 @@ class LeadServiceTest extends TestCase
         $updateLeadParams = $updateRequestParams;
         $updateLeadParams['inventory_id'] = reset($unitsInterest);
         $updateLeadParams['lead_type'] = reset($leadTypes);
-        var_dump($updateLeadParams);
 
         // Update Lead Status Params
         $updateStatusParams = $updateLeadParams;
