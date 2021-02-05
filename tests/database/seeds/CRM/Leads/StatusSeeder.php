@@ -40,7 +40,12 @@ class StatusSeeder extends Seeder
     /**
      * @var LeadStatus[]
      */
-    private $statuses = [];
+    private $missingStatus = [];
+
+    /**
+     * @var LeadStatus[]
+     */
+    private $createdStatus = [];
 
     /**
      * InventorySeeder constructor.
@@ -58,12 +63,12 @@ class StatusSeeder extends Seeder
         $seeds = [
             ['source' => ''],
             ['source' => 'Facebook - Podium'],
-            ['source' => 'TrailerCentral'],
-            ['source' => ''],
-            ['source' => ''],
+            ['source' => '', 'sales_id' => $salesId],
             ['source' => 'RVTrader.com', 'sales_id' => $salesId],
-            ['source' => 'HorseTrailerWorld', 'sales_id' => $salesId],
-            ['source' => '', 'sales_id' => $salesId]
+            ['source' => 'TrailerCentral', 'action' => 'create'],
+            ['source' => '', 'action' => 'create'],
+            ['source' => 'HorseTrailerWorld', 'sales_id' => $salesId, 'action' => 'create'],
+            ['source' => '', 'sales_id' => $salesId, 'action' => 'create']
         ];
 
         collect($seeds)->each(function (array $seed): void {
@@ -73,13 +78,27 @@ class StatusSeeder extends Seeder
             $leadId = $lead->getKey();
             $this->leads[$leadId] = $lead;
 
+            // Create Status
+            if(isset($seed['action']) && $seed['action'] === 'create') {
+                // Make Status
+                $status = factory(LeadStatus::class)->make([
+                    'tc_lead_identifier' => $leadId,
+                    'source' => $seed['source'],
+                    'sales_person_id' => $seed['sales_id'] ?? 0
+                ]);
+
+                $this->createdStatus[$leadId] = $status;
+                return;
+            }
+
+            // Make Status
             $status = factory(LeadStatus::class)->make([
                 'tc_lead_identifier' => $leadId,
                 'source' => $seed['source'],
                 'sales_person_id' => $seed['sales_id'] ?? 0
             ]);
 
-            $this->statuses[$leadId] = $status;
+            $this->missingStatus[$leadId] = $status;
         });
     }
 
