@@ -425,6 +425,7 @@ class LeadServiceTest extends TestCase
             'source_name' => $status->source
         ]);
 
+
         // Create Dummy Lead Types
         $types = collect([]);
         $types->push(factory(LeadType::class)->create([
@@ -597,10 +598,21 @@ class LeadServiceTest extends TestCase
             'source_name' => $status->source
         ]);
 
+
         // Create Dummy Lead Types
-        $types = factory(LeadType::class, 4)->create([
-            'lead_id' => $lead->identifier
-        ]);
+        $types = collect([]);
+        $types->push(factory(LeadType::class)->create([
+            'lead_id' => $lead->identifier,
+            'lead_type' => LeadType::TYPE_GENERAL
+        ]));
+        $types->push(factory(LeadType::class)->create([
+            'lead_id' => $lead->identifier,
+            'lead_type' => LeadType::TYPE_BUILD
+        ]));
+        $types->push(factory(LeadType::class)->create([
+            'lead_id' => $lead->identifier,
+            'lead_type' => LeadType::TYPE_FINANCING
+        ]));
         $leadType = $types->first();
         $lead->lead_type = $leadType->lead_type;
 
