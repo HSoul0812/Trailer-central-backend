@@ -51,18 +51,20 @@ class StatusRepository implements StatusRepositoryInterface {
      * Get All Statuses
      * 
      * @param array $params
-     * @return array
+     * @return Collection<SimpleData>
      */
     public function getAll($params) {
         // Return Unique Lead Status
-        $statuses = [];
+        $statuses = collect([]);
         foreach(LeadStatus::STATUS_ARRAY as $status) {
-            $statuses[] = [
-                'id' => $status,
-                'name' => $status
-            ];
+            $simple = new SimpleData();
+            $simple->setIndex($status);
+            $simple->setName($status);
+            $statuses->push($simple);
         }
-        return collect($statuses);
+
+        // Return Collection of Status
+        return $statuses;
     }
 
     public function update($params) {
