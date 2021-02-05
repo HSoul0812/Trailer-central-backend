@@ -97,6 +97,9 @@ return [
 //            'url' => env('AWS_URL'),
         ],
 
+        'tmp' => [
+            'driver' => 'local',
+            'root' =>  env('APP_TMP_DIR', '/tmp')
+        ],
     ],
-
 ];
