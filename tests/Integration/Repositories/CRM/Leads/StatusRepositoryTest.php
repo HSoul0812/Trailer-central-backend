@@ -158,7 +158,7 @@ class StatusRepositoryTest extends TestCase
         $this->seeder->seed();
 
         // Given I have a collection of statuses
-        $statuses = $this->seeder->createdStatus;
+        $statuses = $this->seeder->missingStatus;
 
         // Get Status
         $status = $statuses[array_rand($statuses, 1)];

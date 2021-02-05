@@ -15,8 +15,8 @@ use Tests\database\seeds\Seeder;
  * @property-read User $dealer
  * @property-read SalesPerson $sales
  * @property-read Lead $leads
- * @property-read array<LeadStatus> $unassignedLeads
- * @property-read array<LeadStatus> $salespeopleLeads
+ * @property-read array<LeadStatus> $missingStatus
+ * @property-read array<LeadStatus> $createdStatus
  */
 class StatusSeeder extends Seeder
 {

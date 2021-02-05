@@ -57,13 +57,15 @@ class SourceRepository implements SourceRepositoryInterface {
     public function createOrUpdate($params): LeadSource {
         // Source Exists?
         $source = $this->find($params);
-        if(!empty($source->user_id)) {
-            return $source;
-        }
 
-        // Source Exists?
-        if(!empty($source->id)) {
+        // Source Override Exists?
+        if(!empty($source->lead_source_id) && !empty($source->user_id)) {
             return $this->update($params);
+        }
+        // Source Lead Source/User ID Exists
+        elseif(!empty($source->lead_source_id) && empty($source->user_id)) {
+            // Create Source
+            $params['parent_id'] = $source->lead_source_id;
         }
 
         // Create Source
@@ -85,13 +87,13 @@ class SourceRepository implements SourceRepositoryInterface {
         $source = LeadSource::where('source_name', $params['source_name'])
                             ->where('user_id', $params['user_id'])->first();
 
+        // If Source Exists on Dealer, Return That
+        if(!empty($source->lead_source_id)) {
+            return $source;
+        }
+
         // Default Exists?
         if(!empty($default->lead_source_id)) {
-            // If Source Exists on Dealer, Return That
-            if(!empty($source->lead_source_id)) {
-                return $source;
-            }
-
             // Source Doesn't Exist on Lead, Return Default
             return $default;
         }
