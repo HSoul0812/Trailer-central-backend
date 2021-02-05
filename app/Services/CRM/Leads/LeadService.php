@@ -126,7 +126,6 @@ class LeadService implements LeadServiceInterface
             // Update Lead
             $lead = $this->leads->update($params);
             $params = $this->appendRelationParams($lead, $params);
-            var_dump(array_keys($params));
 
             // Create or Update Status
             $params['lead_id'] = $lead->identifier;
