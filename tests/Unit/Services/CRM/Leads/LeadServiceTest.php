@@ -81,7 +81,7 @@ class LeadServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    public function testCreateSingleType()
+    /*public function testCreateSingleType()
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
@@ -170,7 +170,7 @@ class LeadServiceTest extends TestCase
         ];
 
 
-        /** @var LeadServiceInterface $service */
+        // @var LeadServiceInterface $service
         $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Lead
@@ -226,14 +226,14 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
         }
-    }
+    }*/
 
     /**
      * @covers ::update
      *
      * @throws BindingResolutionException
      */
-    public function testUpdateSingleType()
+    /*public function testUpdateSingleType()
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
@@ -323,7 +323,7 @@ class LeadServiceTest extends TestCase
         ];
 
 
-        /** @var LeadServiceInterface $service */
+        // @var LeadServiceInterface $service
         $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Lead
@@ -379,7 +379,7 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
         }
-    }
+    }*/
 
 
     /**
