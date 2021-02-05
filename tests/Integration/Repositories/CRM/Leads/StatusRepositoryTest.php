@@ -55,7 +55,7 @@ class StatusRepositoryTest extends TestCase
         // When I call getAll
         // Then I got a list of status types
         /** @var Collection $statuses */
-        $statuses = $this->getConcreteRepository()->getAll();
+        $statuses = $this->getConcreteRepository()->getAll([]);
 
         // And That list should be Collection instance
         self::assertInstanceOf(Collection::class, $statuses);

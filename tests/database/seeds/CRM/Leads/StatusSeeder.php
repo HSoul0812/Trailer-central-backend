@@ -9,6 +9,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
 use App\Models\User\NewUser;
+use App\Models\Website\Website;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
@@ -110,12 +111,17 @@ class StatusSeeder extends Seeder
         $salesId = $this->sales->getKey();
 
         // Database clean up
-        foreach($this->leads as $lead) {
-            $leadId = $lead->identifier;
-            LeadStatus::where('tc_lead_identifier', $leadId)->delete();
-            Lead::destroy($leadId);
+        if(!empty($this->leads) && count($this->leads)) {
+            foreach($this->leads as $lead) {
+                $leadId = $lead->identifier;
+                LeadStatus::where('tc_lead_identifier', $leadId)->delete();
+                Lead::destroy($leadId);
+            }
         }
         SalesPerson::destroy($salesId);
+        Website::destroy($dealerId);
+        NewUser::destroy($dealerId);
+        DealerLocation::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);
     }
 }
