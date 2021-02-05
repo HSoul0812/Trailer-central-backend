@@ -41,8 +41,6 @@ class StatusRepositoryTest extends TestCase
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
      * @typeOfTest IntegrationTestCase
-     * @dataProvider validQueryParametersProviderl
-     *
      *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
