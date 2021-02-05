@@ -33,4 +33,9 @@ class CsvImportServiceDependencies
         $this->partsRepository = Mockery::mock(PartRepository::class);
         $this->binRepository = Mockery::mock(BinRepository::class);
     }
+
+    public function getOrderedArguments(): array
+    {
+        return [$this->bulkUploadRepository, $this->partsRepository, $this->binRepository];
+    }
 }

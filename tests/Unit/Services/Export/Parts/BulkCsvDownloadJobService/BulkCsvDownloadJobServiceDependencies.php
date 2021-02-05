@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Services\Export\Parts\BulkCsvDownloadJobService;
 
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
-use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Common\MonitoredJobRepository;
 use App\Repositories\Parts\PartRepository;
 use App\Services\Common\LoggerService;
@@ -15,7 +14,7 @@ use Mockery;
 
 class BulkCsvDownloadJobServiceDependencies
 {   /**
-     * @var BulkUploadRepository|LegacyMockInterface|MockInterface
+     * @var BulkDownloadRepository|LegacyMockInterface|MockInterface
      */
     public $bulkDownloadRepository;
 
@@ -40,5 +39,10 @@ class BulkCsvDownloadJobServiceDependencies
         $this->partsRepository = Mockery::mock(PartRepository::class);
         $this->loggerService = Mockery::mock(LoggerService::class);
         $this->jobsRepository = Mockery::mock(MonitoredJobRepository::class);
+    }
+
+    public function getOrderedArguments(): array
+    {
+        return [$this->bulkDownloadRepository, $this->partsRepository, $this->loggerService, $this->jobsRepository];
     }
 }

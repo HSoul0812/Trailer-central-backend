@@ -39,6 +39,7 @@ class SetupTest extends TestCase
         // Then I expect that repository isBusyByDealer method is called with certain arguments and it will return true
         $dependencies->bulkDownloadRepository
             ->shouldReceive('isBusyByDealer')
+            ->once()
             ->with($dealerId)
             ->andReturn(true);
 
@@ -88,11 +89,13 @@ class SetupTest extends TestCase
         // And I expect that repository isBusyByDealer method is called with certain arguments and it will return false
         $dependencies->bulkDownloadRepository
             ->shouldReceive('isBusyByDealer')
+            ->once()
             ->with($dealerId)
             ->andReturn(false);
         // And I expect that repository create method is called with certain arguments
         $dependencies->bulkDownloadRepository
             ->shouldReceive('create')
+            ->once()
             ->with([
                 'dealer_id' => $dealerId,
                 'token' => $token,
@@ -114,7 +117,7 @@ class SetupTest extends TestCase
         // When I call the run method
         $bulkDownload = $service->setup($dealerId, $payload, $token);
 
-        // Then I expect to receive a false value
+        // Then I expect to receive a new "BulkDownload" model
         self::assertSame($expectedBulkDownload, $bulkDownload);
     }
 }
