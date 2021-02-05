@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
+use App\Models\User\NewUser;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
@@ -53,6 +54,7 @@ class StatusSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
+        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
         $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->dealer_id]);
     }
 
