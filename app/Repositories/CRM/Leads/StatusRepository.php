@@ -2,9 +2,10 @@
 
 namespace App\Repositories\CRM\Leads;
 
-use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
+use App\Services\Common\DTOs\SimpleData;
 use Illuminate\Support\Facades\DB;
 
 class StatusRepository implements StatusRepositoryInterface {
