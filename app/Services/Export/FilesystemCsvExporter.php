@@ -2,9 +2,12 @@
 
 namespace App\Services\Export;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Writer;
 
@@ -33,7 +36,6 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
     protected $filesystem;
 
     /**
-     * FilesystemCsvExporterService constructor.
      * @param Filesystem $filesystem
      * @param string $filename
      * @param Builder|EloquentBuilder|null $query
@@ -58,26 +60,25 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
      * Crete a fileHandle where a temp csv will be written to
      *
      * @return self
+     * @throws FileNotFoundException
      */
-    public function createFile()
+    public function createFile(): self
     {
-        $this->tmpFileName = env('APP_TMP_DIR', '/tmp') . '/temp-csv-' . date('Y-m-d') . '-' . uniqid() . '.csv';
-        $this->tmpFileHandle = fopen($this->tmpFileName, 'w+');
-
-        // make a temp file use a league csv writer; fileHandle is called previously
-        // TODO see if a temp file can be skipped and data can be streamed directly to Storage::put()
+        $this->tmpFileName = sprintf('/csv-exported-%s-%s.csv', date('Y-m-d'), Str::random());
+        $this->tmpFileHandle = Storage::disk('tmp')->readStream($this->tmpFileName);
         $this->csvWriter = Writer::createFromStream($this->tmpFileHandle);
+
         return $this;
     }
 
     /**
      * Send the temp file to the Filesystem (e.g. `Storage::disk('s3')`)
+     *
+     * @throws FileNotFoundException
      */
     public function deliver(): void
     {
-        $fr = fopen($this->tmpFileName, 'r');
-        $this->filesystem->put($this->filename, $fr);
-        fclose($fr);
+        $this->filesystem->put($this->filename, Storage::disk('tmp')->readStream($this->tmpFileName));
     }
 
     /**
@@ -85,6 +86,7 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
      *
      * @return void
      * @throws CannotInsertRecord
+     * @throws FileNotFoundException
      */
     public function export(): void
     {
