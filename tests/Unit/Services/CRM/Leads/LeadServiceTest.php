@@ -656,8 +656,10 @@ class LeadServiceTest extends TestCase
 
         // Update Lead Params
         $updateLeadParams = $updateRequestParams;
-        $updateLeadParams['inventory_id'] = reset($updateRequestParams['inventory']);
-        $updateLeadParams['lead_type'] = reset($updateRequestParams['lead_types']);
+        $updateLeadParams['inventory_id'] = reset($unitsInterest);
+        $updateLeadParams['lead_type'] = reset($leadTypes);
+        var_dump($unitsInterest);
+        var_dump($leadTypes);
 
         // Update Lead Status Params
         $updateStatusParams = $updateLeadParams;
