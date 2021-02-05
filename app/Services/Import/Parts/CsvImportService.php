@@ -315,7 +315,9 @@ class CsvImportService implements CsvImportServiceInterface
             $keyToIndexMapping[$value] = $index;
         }
 
-        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first();
+        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])
+            ->where('dealer_id', $this->bulkUpload->dealer_id)
+            ->first();
 
         $part = [];
         $part['dealer_id'] = $this->bulkUpload->dealer_id;
@@ -375,7 +377,7 @@ class CsvImportService implements CsvImportServiceInterface
         switch($type) {
             case self::VENDOR:
                 if (!empty($value)) {
-                    $vendor = Vendor::where('name', $value)->first();
+                    $vendor = Vendor::where('name', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
                     if (empty($vendor)) {
                         return "Vendor {$value} does not exist in the system.";
                     }

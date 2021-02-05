@@ -117,19 +117,19 @@ class Part extends Model
         'dealer_cost' => 'float'
     ];
 
-    public static function boot() {
+    public static function boot() { 
         parent::boot();
 
         static::created(function ($part) {
 
             $part->updateCacheStoreTimes();
-
+            $part->searchable();
         });
 
         static::updated(function ($part) {
 
             $part->updateCacheStoreTimes();
-
+            $part->searchable();
         });
     }
 
