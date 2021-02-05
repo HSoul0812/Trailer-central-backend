@@ -9,7 +9,15 @@ use App\Http\Requests\CRM\Leads\GetLeadsStatusRequest;
 
 class LeadStatusController extends RestfulController
 {
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     */
     protected $leads;
+
+    /**
+     * @var App\Transformers\CRM\Leads\StatusTransformer
+     */
+    protected $transformer;
 
     /**
      * Create a new controller instance.
@@ -26,9 +34,7 @@ class LeadStatusController extends RestfulController
         $requestData = $request->all();
 
         if ($request->validate()) {             
-            return $this->response->array([
-                'data' => $this->status->getAll($request->all())
-            ]);
+            return $this->response->collection($this->status->getAll());
         }
         
         return $this->response->errorBadRequest();

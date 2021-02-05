@@ -62,7 +62,7 @@ class StatusRepository implements StatusRepositoryInterface {
                 'name' => $status
             ];
         }
-        return $statuses;
+        return collect($statuses);
     }
 
     public function update($params) {
