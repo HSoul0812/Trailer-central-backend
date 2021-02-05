@@ -256,7 +256,6 @@ class LeadService implements LeadServiceInterface
                 $params['preferred_contact'] = 'email';
             }
         }
-        var_dump($params);
 
         // Return Params
         return $params;
