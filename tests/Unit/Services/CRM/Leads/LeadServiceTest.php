@@ -75,12 +75,13 @@ class LeadServiceTest extends TestCase
         $this->app->instance(UnitRepositoryInterface::class, $this->unitRepositoryMock);
     }
 
+
     /**
      * @covers ::create
      *
      * @throws BindingResolutionException
      */
-    public function testCreateSingle()
+    public function testCreateSingleType()
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
@@ -232,7 +233,7 @@ class LeadServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    public function testUpdateSingle()
+    public function testUpdateSingleType()
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
@@ -382,6 +383,331 @@ class LeadServiceTest extends TestCase
 
 
     /**
+     * @covers ::create
+     *
+     * @throws BindingResolutionException
+     */
+    public function testCreateMultiTypes()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        $websiteId = self::getTestWebsiteRandom();
+        $dealer = NewDealerUser::find($dealerId);
+        $userId = $dealer->user_id;
+
+        // Create Dummy Inventory
+        $units = factory(Inventory::class, 5)->create([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId
+        ]);
+        $inventory = $units->first();
+
+        // Create Units of Interest Array
+        $unitsInterest = [];
+        foreach($units as $item) {
+            $unitsInterest[] = $item->inventory_id;
+        }
+
+        // Get Test Lead
+        $lead = factory(Lead::class)->create([
+            'dealer_id' => $dealerId,
+            'website_id' => $websiteId,
+            'inventory_id' => $inventory->inventory_id
+        ]);
+        $status = factory(LeadStatus::class)->create([
+            'tc_lead_identifier' => $lead->identifier
+        ]);
+
+        // Create Source/Type/InventoryLead
+        $source = factory(LeadSource::class)->create([
+            'user_id' => $userId,
+            'source_name' => $status->source
+        ]);
+
+        // Create Dummy Lead Types
+        $types = factory(LeadType::class, 4)->create([
+            'lead_id' => $lead->identifier
+        ]);
+        $leadType = $types->first();
+        $lead->lead_type = $leadType->lead_type;
+
+        // Get Lead Types
+        $leadTypes = [];
+        foreach($types as $type) {
+            $leadTypes[] = $type->lead_type;
+        }
+
+
+        // Create Base Lead Params
+        $createRequestParams = [
+            'website_id' => $lead->website_id,
+            'dealer_id' => $lead->dealer_id,
+            'dealer_location_id' => $lead->dealer_location_id,
+            'inventory' => $unitsInterest,
+            'lead_types' => $leadTypes,
+            'referral' => $lead->referral,
+            'title' => $lead->title,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => $lead->phone_number,
+            'preferred_contact' => 'email',
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
+            'comments' => $lead->comments,
+            'date_submitted' => $lead->date_submitted->toDateTimeString(),
+            'contact_email_sent' => $lead->date_submitted->toDateTimeString(),
+            'adf_email_sent' => $lead->date_submitted->toDateTimeString(),
+            'cdk_email_sent' => 1,
+            'is_spam' => 0,
+            'lead_source' => $status->source,
+            'lead_status' => $status->status,
+            'next_contact_date' => $status->next_contact_date,
+            'contact_type' => $status->task,
+            'sales_person_id' => $status->sales_person_id
+        ];
+
+        // Create Lead Params
+        $createLeadParams = $createRequestParams;
+        $createLeadParams['inventory_id'] = reset($createRequestParams['inventory']);
+        $createLeadParams['lead_type'] = reset($createRequestParams['lead_types']);
+
+        // Create Status Params
+        $createStatusParams = $createLeadParams;
+        $createStatusParams['lead_id'] = $lead->identifier;
+
+        // Create Source Params
+        $createSourceParams = [
+            'user_id' => $userId,
+            'source_name' => $createRequestParams['lead_source']
+        ];
+
+
+        /** @var LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createLeadParams)
+            ->andReturn($lead);
+
+        // Mock Sales Person Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createStatusParams)
+            ->andReturn($status);
+
+        // Mock Source Repository
+        $this->sourceRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once()
+            ->with($createSourceParams)
+            ->andReturn($source);
+
+        // Mock Units of Interest
+        $this->mockUnitsOfInterest($lead, $units);
+
+        // Mock Lead Types
+        $this->mockLeadTypes($lead, $types);
+
+
+        // Validate Create Catalog Result
+        $result = $service->create($createRequestParams);
+
+
+        // Assert Match
+        $this->assertSame($result->identifier, (int) $lead->identifier);
+
+        // Assert Match
+        $this->assertSame($result->leadStatus->id, $status->id);
+
+        // Assert Match
+        $this->assertSame($result->leadStatus->source, $source->source_name);
+
+
+        // Match All Types
+        $this->assertSame(count($result->leadTypes), $types->count());
+        foreach($types as $k => $single) {
+            $this->assertSame($result->leadTypes[$k], $single->lead_type);
+        }
+
+        // Match All Inventory Leads
+        $this->assertSame($result->units->count(), $units->count());
+        foreach($units as $k => $single) {
+            $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
+        }
+    }
+
+    /**
+     * @covers ::update
+     *
+     * @throws BindingResolutionException
+     */
+    public function testUpdateMultiTypes()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        $websiteId = self::getTestWebsiteRandom();
+        $dealer = NewDealerUser::find($dealerId);
+        $userId = $dealer->user_id;
+
+        // Create Dummy Inventory
+        $units = factory(Inventory::class, 5)->create([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId
+        ]);
+        $inventory = $units->first();
+
+        // Create Units of Interest Array
+        $unitsInterest = [];
+        foreach($units as $item) {
+            $unitsInterest[] = $item->inventory_id;
+        }
+
+        // Get Test Lead
+        $lead = factory(Lead::class)->create([
+            'dealer_id' => $dealerId,
+            'website_id' => $websiteId,
+            'inventory_id' => $inventory->inventory_id
+        ]);
+        $status = factory(LeadStatus::class)->create([
+            'tc_lead_identifier' => $lead->identifier
+        ]);
+
+        // Create Source/Type/InventoryLead
+        $source = factory(LeadSource::class)->create([
+            'user_id' => $userId,
+            'source_name' => $status->source
+        ]);
+
+        // Create Dummy Lead Types
+        $types = factory(LeadType::class, 4)->create([
+            'lead_id' => $lead->identifier
+        ]);
+        $leadType = $types->first();
+        $lead->lead_type = $leadType->lead_type;
+
+        // Get Lead Types
+        $leadTypes = [];
+        foreach($types as $type) {
+            $leadTypes[] = $type->lead_type;
+        }
+
+        // Update Base Lead Params
+        $updateRequestParams = [
+            'id' => $lead->identifier,
+            'website_id' => $lead->website_id,
+            'dealer_id' => $lead->dealer_id,
+            'dealer_location_id' => $lead->dealer_location_id,
+            'inventory' => $unitsInterest,
+            'lead_types' => $leadTypes,
+            'referral' => $lead->referral,
+            'title' => $lead->title,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => $lead->phone_number,
+            'preferred_contact' => '',
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
+            'comments' => $lead->comments,
+            'date_submitted' => $lead->date_submitted->toDateTimeString(),
+            'contact_email_sent' => $lead->date_submitted->toDateTimeString(),
+            'adf_email_sent' => $lead->date_submitted->toDateTimeString(),
+            'cdk_email_sent' => 1,
+            'is_spam' => 0,
+            'lead_source' => $status->source,
+            'lead_status' => $status->status,
+            'next_contact_date' => $status->next_contact_date,
+            'contact_type' => $status->task,
+            'sales_person_id' => $status->sales_person_id
+        ];
+
+        // Update Lead Params
+        $updateLeadParams = $updateRequestParams;
+        $updateLeadParams['inventory_id'] = reset($updateRequestParams['inventory']);
+        $updateLeadParams['lead_type'] = reset($updateRequestParams['lead_types']);
+
+        // Update Lead Status Params
+        $updateStatusParams = $updateLeadParams;
+        $updateStatusParams['lead_id'] = $updateStatusParams['id'];
+
+        // Create Source Params
+        $createSourceParams = [
+            'user_id' => $userId,
+            'source_name' => $updateRequestParams['lead_source']
+        ];
+
+
+        /** @var LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with($updateLeadParams)
+            ->andReturn($lead);
+
+        // Mock Sales Person Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once()
+            ->with($updateStatusParams)
+            ->andReturn($status);
+
+        // Mock Source Repository
+        $this->sourceRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once()
+            ->with($createSourceParams)
+            ->andReturn($source);
+
+        // Mock Units of Interest
+        $this->mockUnitsOfInterest($lead, $units);
+
+        // Mock Lead Types
+        $this->mockLeadTypes($lead, $types);
+        
+
+        // Validate Update Catalog Result
+        $result = $service->update($updateRequestParams);
+
+
+        // Assert Match
+        $this->assertSame($result->identifier, (int) $lead->identifier);
+
+        // Assert Match
+        $this->assertSame($result->leadStatus->id, $status->id);
+
+        // Assert Match
+        $this->assertSame($result->leadStatus->source, $source->source_name);
+
+
+        // Match All Types
+        $this->assertSame(count($result->leadTypes), $types->count());
+        foreach($types as $k => $single) {
+            $this->assertSame($result->leadTypes[$k], $single->lead_type);
+        }
+
+        // Match All Inventory Leads
+        $this->assertSame($result->units->count(), $units->count());
+        foreach($units as $k => $single) {
+            $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
+        }
+    }
+
+
+    /**
      * Mock All Units of Interest
      * 
      * This is the same regardless of what test its on.
@@ -417,7 +743,7 @@ class LeadServiceTest extends TestCase
      * This is the same regardless of what test its on.
      * 
      * @param Lead $lead
-     * @param Collection<LeadType> $units
+     * @param Collection<LeadType> $types
      * @return void
      */
     private function mockLeadTypes(Lead $lead, Collection $types): void {
