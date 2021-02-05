@@ -34,7 +34,7 @@ class LeadStatusController extends RestfulController
         $requestData = $request->all();
 
         if ($request->validate()) {             
-            return $this->response->collection($this->status->getAll());
+            return $this->response->collection($this->status->getAll($request->all()));
         }
         
         return $this->response->errorBadRequest();
