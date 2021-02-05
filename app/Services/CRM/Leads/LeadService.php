@@ -105,6 +105,8 @@ class LeadService implements LeadServiceInterface
         if (isset($params['inventory'])) {
             $this->updateUnitsOfInterest($lead, $params['inventory']);
         }
+        var_dump($lead->inventory->count());
+        var_dump($units->count());
 
         // Return Full Lead Details
         return $lead;
@@ -220,8 +222,6 @@ class LeadService implements LeadServiceInterface
                 'inventory_id' => $inventoryIds
             ]
         ]);
-        var_dump($inventory->count());
-        var_dump($units->count());
 
         // Set Units of Interest to Lead
         $lead->setRelation('units', $inventory);
