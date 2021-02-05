@@ -221,11 +221,9 @@ class LeadServiceTest extends TestCase
         }
 
         // Match All Inventory Leads
-        var_dump($result->inventory->count());
-        var_dump($units->count());
-        $this->assertSame($result->inventory->count(), $units->count());
+        $this->assertSame($result->units->count(), $units->count());
         foreach($units as $k => $single) {
-            $this->assertSame($result->inventory[$k]->inventory_id, $single->inventory_id);
+            $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
         }
     }
 
@@ -376,9 +374,9 @@ class LeadServiceTest extends TestCase
         }
 
         // Match All Inventory Leads
-        $this->assertSame($result->inventory->count(), $units->count());
+        $this->assertSame($result->units->count(), $units->count());
         foreach($units as $k => $single) {
-            $this->assertSame($result->inventory[$k]->inventory_id, $single->inventory_id);
+            $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
         }
     }
 
