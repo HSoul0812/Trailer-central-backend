@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_units=1);
+declare(strict_types=1);
 
 namespace Tests\Integration\Repositories\CRM\Leads;
 
@@ -9,7 +9,6 @@ use App\Repositories\CRM\Leads\UnitRepository;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Collection;
-use PDOException;
 use Tests\database\seeds\CRM\Leads\UnitSeeder;
 use Tests\TestCase;
 use Tests\Unit\WithMySqlConstraintViolationsParser;
