@@ -9,6 +9,7 @@ use App\Repositories\CRM\Leads\SourceRepository;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Collection;
+use PDOException;
 use Tests\database\seeds\CRM\Leads\SourceSeeder;
 use Tests\TestCase;
 use Tests\Unit\WithMySqlConstraintViolationsParser;
@@ -83,19 +84,22 @@ class SourceRepositoryTest extends TestCase
         // Given I have a collection of leads
         $this->seeder->seed();
 
+        // Parse Values
+        $values = $this->seeder->extractValues($params);
+
         // When I call find
         // Then I got a single lead source
         /** @var LeadSource $source */
-        $source = $this->getConcreteRepository()->find($this->seeder->extractValues($params));
+        $source = $this->getConcreteRepository()->find($values);
 
         // Find must be LeadSource
         self::assertInstanceOf(LeadSource::class, $source);
 
         // Source user id matches param user id
-        self::assertSame($source->user_id, $params['user_id']);
+        self::assertSame($source->user_id, $values['user_id']);
 
         // Source name matches param source name
-        self::assertSame($source->source_name, $params['source_name']);
+        self::assertSame($source->source_name, $values['source_name']);
     }
 
 
@@ -473,7 +477,7 @@ class SourceRepositoryTest extends TestCase
             return $sources[array_rand($sources, 1)]->source_name;
         };
 
-        return [                 // array $parameters, int $expectedTotal
+        return [                                // array $parameters, int $expectedTotal
             'By dummy dealer\'s source name' => [['user_id' => $dealerIdLambda, 'source_name' => $sourceNameLambda], 1],
         ];
     }
