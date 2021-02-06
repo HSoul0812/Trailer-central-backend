@@ -6,6 +6,7 @@ namespace Tests\database\seeds\CRM\Leads;
 
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
+use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
