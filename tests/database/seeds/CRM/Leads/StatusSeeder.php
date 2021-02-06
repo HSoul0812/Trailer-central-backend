@@ -93,7 +93,7 @@ class StatusSeeder extends Seeder
             // Create Status
             if(isset($seed['action']) && $seed['action'] === 'create') {
                 // Make Status
-                $status = factory(LeadStatus::class)->make([
+                $status = factory(LeadStatus::class)->create([
                     'tc_lead_identifier' => $leadId,
                     'source' => $seed['source'],
                     'sales_person_id' => $seed['sales_id'] ?? 0
