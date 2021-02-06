@@ -121,7 +121,6 @@ class StatusRepositoryTest extends TestCase
 
         // Get Status
         $status = $statuses[array_rand($statuses, 1)];
-        var_dump($status);
 
         // Lead Status Should be 1 Before
         self::assertSame(1, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
@@ -161,6 +160,7 @@ class StatusRepositoryTest extends TestCase
 
         // Get Status
         $status = $statuses[array_rand($statuses, 1)];
+        var_dump($status);
 
         // And I should see that lead status related to the lead has incremented in one record
         self::assertSame(0, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
