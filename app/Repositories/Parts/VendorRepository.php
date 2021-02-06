@@ -27,9 +27,11 @@ class VendorRepository implements VendorRepositoryInterface {
     }
 
     public function getAll($params) {
-        if (isset($params['dealer_id'])) {
+        $isSetDealerId = isset($params['dealer_id']);
+        if ($isSetDealerId) {
+            $dealers = is_array($params['dealer_id']) ? $params['dealer_id'] : [$params['dealer_id']];
             $query = Part::with('vendor');
-            $query = $query->whereIn('dealer_id', $params['dealer_id'])
+            $query = $query->whereIn('dealer_id', $dealers)
                     ->whereNotNull('vendor_id')
                     ->groupBy('parts_v1.vendor_id');
         } else {
@@ -41,29 +43,43 @@ class VendorRepository implements VendorRepositoryInterface {
         }
         
         if (isset($params['show_on_part'])) {
-            $query = $query->whereHas('vendor', function($q) use ($params) {
-                $q->where('show_on_part', $params['show_on_part']);
-            });
+            if ($isSetDealerId) {
+                $query = $query->whereHas('vendor', function($q) use ($params) {
+                    $q->where('show_on_part', $params['show_on_part']);
+                });
+            } else {
+                $query = $query->where('show_on_part', $params['show_on_part']);
+            }
         }
         
         if (isset($params['show_on_inventory'])) {
-            $query = $query->whereHas('vendor', function($q) use ($params) {
-                $q->where('show_on_inventory', $params['show_on_inventory']);
-            });
+            if ($isSetDealerId) {
+                $query = $query->whereHas('vendor', function($q) use ($params) {
+                    $q->where('show_on_inventory', $params['show_on_inventory']);
+                });
+            } else {
+                $query = $query->where('show_on_inventory', $params['show_on_inventory']);
+            }
         }
         
         if (isset($params['show_on_floorplan'])) {
-            $query = $query->whereHas('vendor', function($q) use ($params) {
-                $q->where('show_on_floorplan', $params['show_on_floorplan']);
-            });
+            if ($isSetDealerId) {
+                $query = $query->whereHas('vendor', function($q) use ($params) {
+                    $q->where('show_on_floorplan', $params['show_on_floorplan']);
+                });
+            } else {
+                $query = $query->where('show_on_floorplan', $params['show_on_floorplan']);
+            }
         }
                 
-        if (isset($params['name']) && !isset($params['dealer_id'])) {
-            $query = $query->where('name', 'like', '%'.$params['name'].'%');
-        } else if (isset($params['name'])) {
-            $query = $query->whereHas('category', function($q) use ($params) {
-                $q->where('name', 'like', '%'.$params['name'].'%');
-            });
+        if (isset($params['name'])) {
+            if ($isSetDealerId) {
+                $query = $query->whereHas('vendor', function($q) use ($params) {
+                    $q->where('name', 'like', '%'.$params['name'].'%');
+                });
+            } else {
+                $query = $query->where('name', 'like', '%'.$params['name'].'%');
+            }
         }
         
         return $query->paginate($params['per_page'])->appends($params);

@@ -47,7 +47,7 @@ class AttachmentFile
      */
     public function getTmpName(): string
     {
-        return $this->tmpName;
+        return $this->tmpName ?? '';
     }
 
     /**
@@ -69,7 +69,7 @@ class AttachmentFile
      */
     public function getFilePath(): string
     {
-        return $this->filePath;
+        return $this->filePath ?? '';
     }
 
     /**
@@ -91,7 +91,7 @@ class AttachmentFile
      */
     public function getFileName(): string
     {
-        return $this->fileName;
+        return $this->fileName ?? '';
     }
 
     /**
@@ -113,7 +113,7 @@ class AttachmentFile
      */
     public function getFileSize(): int
     {
-        return $this->fileSize;
+        return $this->fileSize ?? 0;
     }
 
     /**

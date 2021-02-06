@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\v1\CRM\Leads;
 
 use App\Http\Controllers\RestfulController;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Leads\GetLeadsTypeRequest;
 
 class LeadTypeController extends RestfulController
 {
-    protected $leads;
+    protected $types;
 
     /**
      * Create a new controller instance.
      *
-     * @param Repository $leads
+     * @param Repository $types
      */
-    public function __construct(LeadRepositoryInterface $leads)
+    public function __construct(TypeRepositoryInterface $types)
     {
-        $this->leads = $leads;
+        $this->types = $types;
     }
 
     public function index(Request $request) {
@@ -27,7 +27,7 @@ class LeadTypeController extends RestfulController
 
         if ($request->validate()) {             
             return $this->response->array([
-                'data' => $this->leads->getTypes()
+                'data' => $this->types->getAllUnique()
             ]);
         }
         

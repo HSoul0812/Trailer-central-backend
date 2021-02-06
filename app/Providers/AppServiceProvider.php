@@ -121,6 +121,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_relation_type', 'App\Rules\Integration\Auth\ValidRelationType@passes');
         \Validator::extend('valid_part_order_status', 'App\Rules\Parts\ValidOrderStatus@passes');
         \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
+        \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {

@@ -7,7 +7,7 @@ namespace App\Exceptions\Integration\Google;
  *
  * Use this instead of \Exception to throw any kind of missing gmail labels in Gmail API
  *
- * @package App\Exceptions\Integration\Auth
+ * @package App\Exceptions\Integration\Google
  */
 class MissingGmailLabelsException extends \Exception
 {
