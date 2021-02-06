@@ -246,7 +246,7 @@ class GmailService implements GmailServiceInterface
     /**
      * Move Message Labels
      * 
-     * AccessToken $accessToken
+     * @param AccessToken $accessToken
      * @param string $mailId mail ID to modify
      * @param array $labels labels to add by name | required
      * @param array $remove labels to remove by name | optional

@@ -2,20 +2,32 @@
 
 namespace App\Http\Controllers\v1\CRM\Leads;
 
-use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use Dingo\Api\Http\Request;
+use App\Http\Controllers\RestfulController;
 use App\Http\Requests\CRM\Leads\GetLeadsRequest;
-use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
 use App\Http\Requests\CRM\Leads\CreateLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadRequest;
+use App\Services\CRM\Leads\LeadServiceInterface;
+use App\Transformers\CRM\Leads\LeadTransformer;
+use Dingo\Api\Http\Request;
 
 class LeadController extends RestfulController
 {
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     */
     protected $leads;
-    
+
+    /**
+     * @var App\Services\CRM\Leads\LeadServiceInterface
+     */
+    protected $service;
+
+    /**
+     * @var App\Transformers\CRM\Leads\LeadTransformer
+     */
     protected $transformer;
 
     /**
@@ -23,11 +35,12 @@ class LeadController extends RestfulController
      *
      * @param Repository $leads
      */
-    public function __construct(LeadRepositoryInterface $leads)
+    public function __construct(LeadRepositoryInterface $leads, LeadServiceInterface $service)
     {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
+        $this->service = $service;
         $this->transformer = new LeadTransformer;
     }
 
@@ -35,7 +48,7 @@ class LeadController extends RestfulController
         $request = new GetLeadsRequest($request->all());
         $requestData = $request->all();
 
-        if ($request->validate()) {             
+        if ($request->validate()) {
             return $this->response->paginator($this->leads->getAll($requestData), $this->transformer)
                         ->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id'], $requestData));
         }
@@ -62,7 +75,7 @@ class LeadController extends RestfulController
         $request = new CreateLeadRequest($request->all());
         
         if ($request->validate()) {             
-            return $this->response->item($this->leads->create($request->all()), $this->transformer);
+            return $this->response->item($this->service->create($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -74,7 +87,7 @@ class LeadController extends RestfulController
         $request = new UpdateLeadRequest($requestData);
         
         if ($request->validate()) {
-            return $this->response->item($this->leads->update($request->all()), $this->transformer);
+            return $this->response->item($this->service->update($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

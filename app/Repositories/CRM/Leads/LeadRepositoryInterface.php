@@ -55,20 +55,6 @@ interface LeadRepositoryInterface extends Repository {
     public function getCustomers($params = []);
 
     /**
-     * Returns lead types
-     *
-     * @return array
-     */
-    public function getTypes();
-
-    /**
-     * Returns lead statuses
-     *
-     * @return array
-     */
-    public function getStatuses();
-
-    /**
      * Returns list of available sort fields
      *
      * @return array
