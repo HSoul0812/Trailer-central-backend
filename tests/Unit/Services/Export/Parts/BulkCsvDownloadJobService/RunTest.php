@@ -7,19 +7,22 @@ namespace Tests\Unit\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Services\Export\Parts\FilesystemCsvExporter;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Mockery\LegacyMockInterface;
 use Mockery\MockInterface;
-use Tests\Unit\TestCase;
 use Exception;
 use Ramsey\Uuid\Uuid;
+use Tests\TestCase;
 
 /**
  * @covers \App\Services\Export\Parts\BulkCsvDownloadJobService::run
  */
 class RunTest extends TestCase
 {
+    use WithFaker;
+
     /**
      * @throws Exception
      */

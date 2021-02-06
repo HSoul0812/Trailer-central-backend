@@ -9,9 +9,10 @@ use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Services\Import\Parts\CsvImportService;
+use Illuminate\Foundation\Testing\WithFaker;
 use Mockery\LegacyMockInterface;
 use Mockery\MockInterface;
-use Tests\Unit\TestCase;
+use Tests\TestCase;
 use Ramsey\Uuid\Uuid;
 use Exception;
 
@@ -20,6 +21,8 @@ use Exception;
  */
 class SetupTest extends TestCase
 {
+    use WithFaker;
+
     /**
      * Test that when there is another monitored job working (same dealer), it will throw a `BusyJobException`
      *

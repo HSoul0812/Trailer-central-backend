@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\Log;
 use Mockery\LegacyMockInterface;
 use Mockery\MockInterface;
 use Ramsey\Uuid\Uuid;
-use Tests\Unit\TestCase;
 use Mockery;
 use RuntimeException;
 use Exception;
+use Tests\TestCase;
 
 /**
  * @covers \App\Services\Import\Parts\CsvImportService::run

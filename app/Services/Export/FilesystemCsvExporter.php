@@ -7,7 +7,6 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Writer;
 
@@ -64,8 +63,7 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
      */
     public function createFile(): self
     {
-        $this->tmpFileName = sprintf('/csv-exported-%s-%s.csv', date('Y-m-d'), Str::random());
-        $this->tmpFileHandle = Storage::disk('tmp')->readStream($this->tmpFileName);
+        $this->tmpFileHandle = Storage::disk('tmp')->readStream($this->touch());
         $this->csvWriter = Writer::createFromStream($this->tmpFileHandle);
 
         return $this;
@@ -138,5 +136,13 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
         // insert to csv using the supplied line mapper
         $callable = $this->lineMapper;
         $this->csvWriter->insertOne($callable($line));
+    }
+
+    private function touch(): string
+    {
+        $this->tmpFileName = sprintf('/exported-%s-%s.csv', date('Y-m-d-H-i-s'), uniqid('', false));
+        Storage::disk('tmp')->put($this->tmpFileName, '');
+
+        return $this->tmpFileName;
     }
 }
