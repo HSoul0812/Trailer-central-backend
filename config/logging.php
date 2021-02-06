@@ -51,7 +51,7 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
-            'days' => 14,
+            'days' => 7,
         ],
 
         'autoassign' => [
@@ -72,7 +72,7 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/services/google.log'),
             'level' => 'debug',
-            'days' => 12,
+            'days' => 7,
         ],
 
         'slack' => [

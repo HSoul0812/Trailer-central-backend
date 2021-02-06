@@ -7,7 +7,7 @@ namespace App\Exceptions\Integration\Google;
  *
  * Use this instead of \Exception to throw any kind of invalid authentication sending gmail email
  *
- * @package App\Exceptions\Integration\Auth
+ * @package App\Exceptions\Integration\Google
  */
 class InvalidGmailAuthMessageException extends \Exception
 {

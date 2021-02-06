@@ -7,6 +7,7 @@ use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGapiClientIdException;
 use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
+use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
 use App\Exceptions\Integration\Google\MissingGmailLabelsException;
 use App\Exceptions\Integration\Google\MissingGmailLabelException;
 use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
@@ -108,6 +109,7 @@ class GmailService implements GmailServiceInterface
      * Send Gmail Email
      * 
      * @param AccessToken $accessToken
+     * @throws App\Exceptions\Integration\Google\InvalidToEmailAddressException
      * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
      * @throws App\Exceptions\Integration\Google\FailedInitializeGmailMessageException
      * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
@@ -131,7 +133,13 @@ class GmailService implements GmailServiceInterface
             // Create Message
             $message = $this->prepareMessage($params);
         } catch (\Exception $e) {
-            throw new FailedInitializeGmailMessageException($e->getMessage() . ': ' . $e->getTraceAsString());
+            // Check Error
+            $error = $e->getMessage();
+            if(strpos($error, 'Address in mailbox given') !== FALSE) {
+                throw new InvalidToEmailAddressException;
+            }
+
+            throw new FailedInitializeGmailMessageException($error . ': ' . $e->getTraceAsString());
         }
         if(empty($message)) {
             throw new FailedInitializeGmailMessageException();

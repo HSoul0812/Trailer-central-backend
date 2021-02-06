@@ -177,6 +177,11 @@ class GoogleService implements GoogleServiceInterface
             }
         }
 
+        // Not Valid?
+        if(empty($result['is_valid'])) {
+            $result['is_expired'] = true;
+        }
+
         // Return Payload Results
         return $result;
     }
