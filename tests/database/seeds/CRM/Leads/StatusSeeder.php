@@ -16,6 +16,7 @@ use Tests\database\seeds\Seeder;
 
 /**
  * @property-read User $dealer
+ * @property-read Website $website
  * @property-read SalesPerson $sales
  * @property-read Lead $leads
  * @property-read array<LeadStatus> $missingStatus
@@ -29,6 +30,11 @@ class StatusSeeder extends Seeder
      * @var User
      */
     private $dealer;
+
+    /**
+     * @var Website
+     */
+    private $website;
 
     /**
      * @var SalesPerson
@@ -56,6 +62,7 @@ class StatusSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
+        $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
         $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->dealer_id]);
     }
@@ -77,7 +84,8 @@ class StatusSeeder extends Seeder
 
         collect($seeds)->each(function (array $seed): void {
             $lead = factory(Lead::class)->create([
-                'dealer_id' => $this->dealer->getKey()
+                'dealer_id' => $this->dealer->getKey(),
+                'website_id' => $this->website->getKey()
             ]);
             $leadId = $lead->getKey();
             $this->leads[$leadId] = $lead;
@@ -120,9 +128,9 @@ class StatusSeeder extends Seeder
             }
         }
         SalesPerson::destroy($salesId);
-        Website::destroy($dealerId);
         NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
+        Website::where('dealer_id', $dealerId)->delete();                
         User::destroy($dealerId);
     }
 }
