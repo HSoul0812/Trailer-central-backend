@@ -283,7 +283,7 @@ class SourceRepositoryTest extends TestCase
         self::assertInstanceOf(LeadSource::class, $leadSourceForDealer);
 
         // Lead source did not exist before but does now after create
-        self::assertSame(1, LeadSource::where(['tc_lead_identifier' => $source->tc_lead_identifier])->count());
+        self::assertSame(1, LeadSource::where(['user_id' => $source->user_id, 'source_name' => $source->source_name])->count());
     }
 
     /**
