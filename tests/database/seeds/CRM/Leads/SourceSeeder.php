@@ -60,7 +60,7 @@ class SourceSeeder extends Seeder
             // Create Source
             if(isset($seed['action']) && $seed['action'] === 'create') {
                 // Make Source
-                $source = factory(LeadSource::class)->make([
+                $source = factory(LeadSource::class)->create([
                     'user_id' => $userId,
                     'source' => $seed['source'],
                     'parent_id' => $seed['parent_id'] ?? 0
