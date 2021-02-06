@@ -62,7 +62,7 @@ class SourceSeeder extends Seeder
                 // Make Source
                 $source = factory(LeadSource::class)->create([
                     'user_id' => $userId,
-                    'source' => $seed['source'],
+                    'source_name' => $seed['source'],
                     'parent_id' => $seed['parent_id'] ?? 0
                 ]);
 
@@ -73,7 +73,7 @@ class SourceSeeder extends Seeder
             // Make Source
             $source = factory(LeadSource::class)->make([
                 'user_id' => $userId,
-                'source' => $seed['source'],
+                'source_name' => $seed['source'],
                 'parent_id' => $seed['parent_id'] ?? 0
             ]);
 
