@@ -125,13 +125,13 @@ class TypeRepositoryTest extends TestCase
         self::assertSame(count($types), LeadType::where(['lead_id' => $leadId])->count());
 
         // When I call create with valid parameters
-        /** @var bool $deleted */
+        /** @var int $deleted */
         $deleted = $this->getConcreteRepository()->delete([
             'lead_id' => $leadId
         ]);
 
         // Then I should get true
-        self::assertTrue($deleted);
+        self::assertSame(count($types), $deleted);
 
         // Lead type had entries before and are now all gone
         self::assertSame(0, LeadType::where(['lead_id' => $leadId])->count());
