@@ -41,7 +41,7 @@ class SourceRepositoryTest extends TestCase
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
      * @typeOfTest IntegrationTestCase
-     * @dataProvider validQueryParametersProviderl
+     * @dataProvider validQueryParametersProvider
      *
      *
      * @throws BindingResolutionException when there is a problem with resolution
@@ -70,7 +70,7 @@ class SourceRepositoryTest extends TestCase
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
      * @typeOfTest IntegrationTestCase
-     * @dataProvider validQueryParametersProviderl
+     * @dataProvider validQueryParametersProvider
      *
      *
      * @throws BindingResolutionException when there is a problem with resolution
@@ -172,6 +172,47 @@ class SourceRepositoryTest extends TestCase
 
         // Lead source did not exist before but does now after create
         self::assertSame(1, LeadSource::where(['user_id' => $source->user_id, 'source_name' => $source->source_name])->count());
+    }
+
+    /**
+     * Test that SUT is throwing a PDOException when some constraint is not being satisfied
+     *
+     * @typeOfTest IntegrationTestCase
+     * @dataProvider invalidPropertiesProvider
+     *
+     * @param  array  $properties
+     * @param  string|callable  $expectedPDOExceptionMessage
+     *
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
+     *
+     * @covers InventoryRepository::create
+     */
+    public function testCreateWithException(
+        array $properties,
+        $expectedPDOExceptionMessage
+    ): void {
+        // Given I have a collection of inventories
+        $this->seeder->seed();
+
+        $properties = $this->seeder->extractValues($properties);
+        $expectedPDOExceptionMessage = is_callable($expectedPDOExceptionMessage) ?
+            $expectedPDOExceptionMessage($properties['user_id'], $properties['source_name']) :
+            $expectedPDOExceptionMessage;
+
+        // When I call create with invalid parameters
+        // Then I expect see that one exception have been thrown with a specific message
+        $this->expectException(PDOException::class);
+        $this->expectExceptionMessage($expectedPDOExceptionMessage);
+
+
+        /** @var null $leadSourceForDealer */
+        $leadSourceForDealer = $this->getConcreteRepository()->create([
+            'user_id' => $properties['user_id'],
+            'source_name' => $properties['source_name'],
+        ]);
+
+        // And I should get a null value
+        self::assertNull($leadSourceForDealer);
     }
 
     /**
@@ -398,6 +439,50 @@ class SourceRepositoryTest extends TestCase
 
         // Lead source should still exist after update
         self::assertSame(1, LeadSource::where(['user_id' => $source->user_id, 'source_name' => $source->source_name])->count());
+    }
+
+    /**
+     * Examples of parameters with expected total, last page numbers, and the first inventory title name.
+     *
+     * @return array[]
+     */
+    public function validQueryParametersProvider(): array
+    {
+        $dealerIdLambda = static function (SourceSeeder $seeder) {
+            return $seeder->dealer->getKey();
+        };
+
+        return [                 // array $parameters, int $expectedTotal
+            'By dummy dealer' => [['user_id' => $dealerIdLambda], 4],
+        ];
+    }
+
+    /**
+     * Examples of invalid customer-inventory id properties with theirs expected exception messages.
+     *
+     * @return array[]
+     */
+    public function invalidPropertiesProvider(): array
+    {
+        $userIdLambda = static function (SourceSeeder $seeder) {
+            return $seeder->dealer->getKey();
+        };
+
+        $sourceNameLambda = static function (SourceSeeder $seeder): int {
+            $sources = $seeder->createdSources;
+            return $sources[array_rand($sources, 1)]->getKey();
+        };
+
+        $duplicateEntryLambda = function (int $userId, string $sourceName) {
+            return $this->getDuplicateEntryMessage(
+                "$userId-$sourceName",
+                'user_source'
+            );
+        };
+
+        return [                      // array $properties, string $expectedPDOExceptionMessage
+            'With duplicate entry' => [['user_id' => $userIdLambda, 'source_name' => $sourceNameLambda], $duplicateEntryLambda],
+        ];
     }
 
 
