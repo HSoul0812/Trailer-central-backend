@@ -7,7 +7,6 @@ use App\Models\CRM\Leads\Lead;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
 use App\Transformers\User\DealerLocationTransformer;
-use Illuminate\Database\Eloquent\Collection;
 
 class LeadTransformer extends TransformerAbstract {
     
