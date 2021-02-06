@@ -9,6 +9,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
 use App\Models\User\NewUser;
+use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;

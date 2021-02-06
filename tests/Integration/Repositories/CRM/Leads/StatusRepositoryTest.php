@@ -8,7 +8,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Repositories\CRM\Leads\StatusRepository;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Tests\database\seeds\CRM\Leads\StatusSeeder;
 use Tests\TestCase;
 use Tests\Unit\WithMySqlConstraintViolationsParser;
