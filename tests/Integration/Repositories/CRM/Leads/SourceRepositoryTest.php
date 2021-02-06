@@ -453,7 +453,7 @@ class SourceRepositoryTest extends TestCase
         };
 
         return [                 // array $parameters, int $expectedTotal
-            'By dummy dealer' => [['user_id' => $dealerIdLambda], 4],
+            'By dummy dealer' => [['user_id' => $dealerIdLambda], 3],
         ];
     }
 
@@ -468,7 +468,7 @@ class SourceRepositoryTest extends TestCase
             return $seeder->dealer->getKey();
         };
 
-        $sourceNameLambda = static function (SourceSeeder $seeder): int {
+        $sourceNameLambda = static function (SourceSeeder $seeder): string {
             $sources = $seeder->createdSources;
             return $sources[array_rand($sources, 1)]->source_name;
         };
@@ -489,7 +489,7 @@ class SourceRepositoryTest extends TestCase
             return $seeder->dealer->getKey();
         };
 
-        $sourceNameLambda = static function (SourceSeeder $seeder): int {
+        $sourceNameLambda = static function (SourceSeeder $seeder): string {
             $sources = $seeder->createdSources;
             return $sources[array_rand($sources, 1)]->source_name;
         };
