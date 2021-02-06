@@ -12,7 +12,12 @@ use App\Models\CRM\Account\Payment;
  * @author Marcel
  */
 class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
-
+    
+    /**
+     * @var App\Models\CRM\Dms\ServiceOrder 
+     */
+    protected $model;
+        
     private $sortOrders = [
         'user_defined_id' => [
             'field' => 'user_defined_id',
@@ -55,6 +60,10 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
             'direction' => 'ASC'
         ],
     ];
+    
+    public function __construct(ServiceOrder $serviceOrder) {
+        $this->model = $serviceOrder;
+    }
 
 
     public function create($params) {
@@ -66,14 +75,14 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
     }
 
     public function get($params) {
-        return ServiceOrder::findOrFail($params['id']);
+        return $this->model->findOrFail($params['id']);
     }
 
     public function getAll($params) {
         if (isset($params['dealer_id'])) {
-            $query = ServiceOrder::where('dealer_id', '=', $params['dealer_id']);
+            $query = $this->model->where('dealer_id', '=', $params['dealer_id']);
         } else {
-            $query = ServiceOrder::where('id', '>', 0);
+            $query = $this->model->where('id', '>', 0);
         }
         // Filter out service orders which location doesn't exist
         $query = $query->where('location', '>', 0);
