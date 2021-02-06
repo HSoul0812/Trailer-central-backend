@@ -99,7 +99,6 @@ class StatusRepository implements StatusRepositoryInterface {
 
             // Update Lead Status
             $status->fill($params)->save();
-
         });
 
         // Return Full Lead Status Details
