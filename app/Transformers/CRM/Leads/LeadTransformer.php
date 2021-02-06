@@ -4,14 +4,17 @@ namespace App\Transformers\CRM\Leads;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Leads\Lead;
+use App\Transformers\CRM\Interactions\InteractionTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
-use Illuminate\Database\Eloquent\Collection;
 use App\Transformers\User\DealerLocationTransformer;
+use Illuminate\Database\Eloquent\Collection;
 
 class LeadTransformer extends TransformerAbstract {
     
     protected $defaultIncludes = [
-        'preferredLocation'
+        'preferredLocation',
+        'interactions',
+        'inventoryInterestedIn'
     ];
     
     protected $inventoryTransformer;
@@ -35,8 +38,6 @@ class LeadTransformer extends TransformerAbstract {
             'dealer_id' => $lead->dealer_id,
             'name' => $lead->full_name,
             'lead_types' => $lead->lead_types,
-            'inventory_interested_in' => $lead->units ? $this->transformInventory($lead->units) : [],
-            'interactions' => $lead->interactions,
             'email' => $lead->email_address,
             'phone' => $lead->phone_number,
             'preferred_contact' => $lead->preferred_contact,
@@ -59,7 +60,7 @@ class LeadTransformer extends TransformerAbstract {
         return $transformedLead;
     }
     
-    public function includePreferredLocation($lead)
+    public function includePreferredLocation(Lead $lead)
     {
         if (empty($lead->preferred_dealer_location)) {
             return null;
@@ -68,13 +69,21 @@ class LeadTransformer extends TransformerAbstract {
         return $this->item($lead->preferred_dealer_location, new DealerLocationTransformer());
     }
     
-    private function transformInventory(Collection $inventory)
+    public function includeInteractions(Lead $lead)
     {
-        $ret = [];
-        foreach($inventory as $inv) {
-            $ret[] = $this->inventoryTransformer->transform($inv);
+        if (empty($lead->preferred_dealer_location)) {
+            return $this->array([]);
         }
-        return $ret;
+        
+        return $this->collection($lead->interactions, new InteractionTransformer());
     }
     
+    public function includeInventoryInterestedIn(Lead $lead)
+    {
+        if (empty($lead->units)) {
+            return $this->array([]);
+        }
+        
+        return $this->collection($lead->units, new InventoryTransformer());
+    }
 }
