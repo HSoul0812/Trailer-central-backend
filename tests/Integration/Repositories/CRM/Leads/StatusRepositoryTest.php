@@ -160,7 +160,6 @@ class StatusRepositoryTest extends TestCase
 
         // Get Status
         $status = $statuses[array_rand($statuses, 1)];
-        var_dump($status);
 
         // And I should see that lead status related to the lead has incremented in one record
         self::assertSame(0, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
@@ -168,9 +167,9 @@ class StatusRepositoryTest extends TestCase
         // When I call create with valid parameters
         /** @var LeadStatus $leadStatusToCustomer */
         $leadStatusToLead = $this->getConcreteRepository()->createOrUpdate([
-            'lead_id' => $status->tc_lead_identifier,
-            'status' => $status->status,
-            'source' => $status->source,
+            'tc_lead_identifier' => $status->tc_lead_identifier,
+            'lead_status' => $status->status,
+            'lead_source' => $status->source,
             'next_contact_date' => $status->next_contact_date,
             'sales_person_id' => $status->sales_person_id,
             'contact_type' => $status->contact_type
