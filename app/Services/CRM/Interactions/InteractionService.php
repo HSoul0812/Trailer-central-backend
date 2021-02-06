@@ -89,7 +89,7 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Set Lead Details
-        $params['to_email'] = $lead->email_address;
+        $params['to_email'] = trim($lead->email_address);
         $params['to_name']  = $lead->full_name;
 
         // Append Attachments
@@ -120,7 +120,7 @@ class InteractionService implements InteractionServiceInterface
      * @param type $leadId
      * @param type $userId
      * @param type $params
-     * @return type
+     * @return Interaction
      */
     private function saveEmail($leadId, $userId, $params) {
         // Initialize Transaction

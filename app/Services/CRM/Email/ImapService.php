@@ -31,6 +31,11 @@ class ImapService implements ImapServiceInterface
     protected $attachmentDir;
 
     /**
+     * @var Illuminate\Support\Facades\Log
+     */
+    protected $log;
+
+    /**
      * ScrapeRepliesService constructor.
      */
     public function __construct()
@@ -39,6 +44,9 @@ class ImapService implements ImapServiceInterface
         if(!file_exists($this->attachmentDir)) {
             mkdir($this->attachmentDir);
         }
+
+        // Initialize Logger
+        $this->log = Log::channel('scrapereplies');
     }
 
     /**
@@ -161,7 +169,7 @@ class ImapService implements ImapServiceInterface
         // Handle Attachments
         $email->setAttachments($this->parseAttachments($mail));
         if(count($email->getAttachments()) > 0) {
-            Log::info('Found ' . count($email->getAttachments()) . ' total attachments on Message ' . $email->getMessageId());
+            $this->log->info('Found ' . count($email->getAttachments()) . ' total attachments on Message ' . $email->getMessageId());
         }
 
         // Return Updated ParsedEmail
@@ -187,18 +195,18 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Imap Inbox ALREADY Exists?
-            Log::info("Connecting to IMAP host: " . $hostname . " with email: " . $username);
+            $this->log->info("Connecting to IMAP host: " . $hostname . " with email: " . $username);
             $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
-            Log::info('Connected to IMAP for email address: ' . $username);
+            $this->log->info('Connected to IMAP for email address: ' . $username);
         } catch (\Exception $e) {
             // Logged Exceptions
             $this->imap = null;
             $error = $e->getMessage() . ': ' . $e->getTraceAsString();
-            Log::error('Cannot connect to ' . $username . ' via IMAP, exception returned: ' . $error);
+            $this->log->error('Cannot connect to ' . $username . ' via IMAP, exception returned: ' . $error);
 
             // Check for Chartype Error
             if(strpos($error, "BADCHARSET") !== FALSE) {
-                Log::error('Detected bad CHARSET, cannot import emails on ' . $username);
+                $this->log->error('Detected bad CHARSET, cannot import emails on ' . $username);
             }
         }
 
@@ -231,10 +239,10 @@ class ImapService implements ImapServiceInterface
         }
 
         // Imap Inbox ALREADY Exists?
-        Log::info('Getting Messages From IMAP With Filter: "' . $search . '"');
+        $this->log->info('Getting Messages From IMAP With Filter: "' . $search . '"');
         $mailIds = $this->imap->searchMailbox($search);
         if(count($mailIds) > 0) {
-            Log::info('Found ' . count($mailIds) . ' Message ID\'s to Process');
+            $this->log->info('Found ' . count($mailIds) . ' Message ID\'s to Process');
             return $mailIds;
         }
 
