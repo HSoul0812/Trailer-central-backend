@@ -37,7 +37,6 @@ class StatusRepository implements StatusRepositoryInterface {
         }
 
         // Create Lead Status
-        var_dump($params);
         return LeadStatus::create($params);
     }
 
@@ -119,10 +118,10 @@ class StatusRepository implements StatusRepositoryInterface {
 
         // Status Exists?
         if(!empty($status->id)) {
-            return $this->update($status);
+            return $this->update($params);
         }
 
         // Create Status!
-        return $this->create($status);
+        return $this->create($params);
     }
 }

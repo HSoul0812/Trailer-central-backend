@@ -74,7 +74,7 @@ class StatusRepositoryTest extends TestCase
      *
      * @covers StatusRepository::create
      */
-    /*public function testCreate(): void {
+    public function testCreate(): void {
         $this->seeder->seed();
 
         // Given I have a collection of statuses
@@ -87,7 +87,7 @@ class StatusRepositoryTest extends TestCase
         self::assertSame(0, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
 
         // When I call create with valid parameters
-        /** @var LeadStatus $leadStatusToCustomer *
+        /** @var LeadStatus $leadStatusToCustomer */
         $leadStatusToLead = $this->getConcreteRepository()->create([
             'lead_id' => $status->tc_lead_identifier,
             'status' => $status->status,
@@ -102,7 +102,7 @@ class StatusRepositoryTest extends TestCase
 
         // And I should see that lead status related to the lead has incremented in one record
         self::assertSame(1, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
-    }*/
+    }
 
     /**
      * Test that SUT is inserting correctly
@@ -113,7 +113,7 @@ class StatusRepositoryTest extends TestCase
      *
      * @covers StatusRepository::create
      */
-    /*public function testUpdate(): void {
+    public function testUpdate(): void {
         $this->seeder->seed();
 
         // Given I have a collection of statuses
@@ -126,7 +126,7 @@ class StatusRepositoryTest extends TestCase
         self::assertSame(1, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
 
         // When I call update with valid parameters
-        /** @var LeadStatus $leadStatus *
+        /** @var LeadStatus $leadStatus */
         $leadStatus = $this->getConcreteRepository()->update([
             'lead_id' => $status->tc_lead_identifier,
             'status' => $status->status,
@@ -141,7 +141,7 @@ class StatusRepositoryTest extends TestCase
 
         // Lead Status Should be 1 After
         self::assertSame(1, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
-    }*/
+    }
 
     /**
      * Test that SUT is inserting correctly
@@ -163,12 +163,6 @@ class StatusRepositoryTest extends TestCase
 
         // And I should see that lead status related to the lead has incremented in one record
         self::assertSame(0, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
-        var_dump($status->tc_lead_identifier);
-        var_dump($status->status);
-        var_dump($status->source);
-        var_dump($status->next_contact_date);
-        var_dump($status->sales_person_id);
-        var_dump($status->contact_type);
 
         // When I call create with valid parameters
         /** @var LeadStatus $leadStatusToCustomer */
@@ -197,7 +191,7 @@ class StatusRepositoryTest extends TestCase
      *
      * @covers StatusRepository::create
      */
-    /*public function testCreateOrUpdateUpdate(): void {
+    public function testCreateOrUpdateUpdate(): void {
         $this->seeder->seed();
 
         // Given I have a collection of statuses
@@ -210,7 +204,7 @@ class StatusRepositoryTest extends TestCase
         self::assertSame(1, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
 
         // When I call update with valid parameters
-        /** @var LeadStatus $leadStatus *
+        /** @var LeadStatus $leadStatus */
         $leadStatus = $this->getConcreteRepository()->createOrUpdate([
             'lead_id' => $status->tc_lead_identifier,
             'status' => $status->status,
@@ -225,7 +219,7 @@ class StatusRepositoryTest extends TestCase
 
         // Lead Status Should be 1 After
         self::assertSame(1, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
-    }*/
+    }
 
 
     public function setUp(): void
