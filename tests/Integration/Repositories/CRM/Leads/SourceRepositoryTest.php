@@ -49,7 +49,7 @@ class SourceRepositoryTest extends TestCase
      *
      * @covers SourceRepository::getAll
      */
-    public function testGetAllWithBasicOperations(array $params, int $expectedTotal): void
+    public function testGetAll(array $params, int $expectedTotal): void
     {
         // Given I have a collection of inventories
         $this->seeder->seed();
