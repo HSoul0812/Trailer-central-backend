@@ -70,7 +70,7 @@ class SourceRepositoryTest extends TestCase
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
      * @typeOfTest IntegrationTestCase
-     * @dataProvider validQueryParametersProvider
+     * @dataProvider validFindParametersProvider
      *
      *
      * @throws BindingResolutionException when there is a problem with resolution
@@ -442,7 +442,7 @@ class SourceRepositoryTest extends TestCase
     }
 
     /**
-     * Examples of parameters with expected total, last page numbers, and the first inventory title name.
+     * Examples of parameters with expected total.
      *
      * @return array[]
      */
@@ -454,6 +454,27 @@ class SourceRepositoryTest extends TestCase
 
         return [                 // array $parameters, int $expectedTotal
             'By dummy dealer' => [['user_id' => $dealerIdLambda], 4],
+        ];
+    }
+
+    /**
+     * Examples of parameters with expected total.
+     *
+     * @return array[]
+     */
+    public function validFindParametersProvider(): array
+    {
+        $dealerIdLambda = static function (SourceSeeder $seeder) {
+            return $seeder->dealer->getKey();
+        };
+
+        $sourceNameLambda = static function (SourceSeeder $seeder): int {
+            $sources = $seeder->createdSources;
+            return $sources[array_rand($sources, 1)]->source_name;
+        };
+
+        return [                 // array $parameters, int $expectedTotal
+            'By dummy dealer\'s source name' => [['user_id' => $dealerIdLambda, 'source_name' => $sourceNameLambda], 1],
         ];
     }
 
@@ -470,7 +491,7 @@ class SourceRepositoryTest extends TestCase
 
         $sourceNameLambda = static function (SourceSeeder $seeder): int {
             $sources = $seeder->createdSources;
-            return $sources[array_rand($sources, 1)]->getKey();
+            return $sources[array_rand($sources, 1)]->source_name;
         };
 
         $duplicateEntryLambda = function (int $userId, string $sourceName) {
