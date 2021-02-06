@@ -121,6 +121,7 @@ class StatusRepositoryTest extends TestCase
 
         // Get Status
         $status = $statuses[array_rand($statuses, 1)];
+        var_dump($status);
 
         // Lead Status Should be 1 Before
         self::assertSame(1, LeadStatus::where(['tc_lead_identifier' => $status->tc_lead_identifier])->count());
