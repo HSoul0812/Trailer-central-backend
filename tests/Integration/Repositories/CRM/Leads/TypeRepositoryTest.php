@@ -90,7 +90,7 @@ class TypeRepositoryTest extends TestCase
         self::assertSame(0, LeadType::where(['lead_id' => $type->lead_id, 'lead_type' => $type->lead_type])->count());
 
         // When I call create with valid parameters
-        /** @var LeadType $leadTypeToCustomer */
+        /** @var LeadType $leadTypeForLead */
         $leadTypeForLead = $this->getConcreteRepository()->create([
             'lead_id' => $type->lead_id,
             'lead_type' => $type->lead_type
@@ -102,6 +102,41 @@ class TypeRepositoryTest extends TestCase
         // Lead type did not exist before but does now after create
         self::assertSame(1, LeadType::where(['lead_id' => $type->lead_id, 'lead_type' => $type->lead_type])->count());
     }
+
+    /**
+     * Test that SUT is deleting correctly
+     *
+     * @unitOfTest IntegrationTestCase
+     *
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
+     *
+     * @covers UnitRepository::delete
+     */
+    public function testDelete(): void {
+        $this->seeder->seed();
+
+        // Get Lead
+        $leadId = $this->seeder->lead->getKey();
+
+        // Given I have a collection of lead types
+        $types = $this->seeder->createdTypes;
+
+        // Lead types already exist
+        self::assertSame(count($types), LeadType::where(['lead_id' => $leadId])->count());
+
+        // When I call create with valid parameters
+        /** @var bool $deleted */
+        $deleted = $this->getConcreteRepository()->delete([
+            'lead_id' => $leadId
+        ]);
+
+        // Then I should get true
+        self::assertTrue($deleted);
+
+        // Lead type had entries before and are now all gone
+        self::assertSame(0, LeadType::where(['lead_id' => $leadId])->count());
+    }
+
 
     /**
      * Test that SUT is throwing a PDOException when some constraint is not being satisfied
@@ -144,41 +179,6 @@ class TypeRepositoryTest extends TestCase
         self::assertNull($leadTypeForLead);
     }
 
-    /**
-     * Test that SUT is inserting correctly
-     *
-     * @typeOfTest IntegrationTestCase
-     *
-     * @throws BindingResolutionException when there is a problem with resolution of concreted class
-     *
-     * @covers TypeRepository::create
-     */
-    public function testUpdate(): void {
-        $this->seeder->seed();
-
-        // Given I have a collection of created types
-        $types = $this->seeder->createdTypes;
-
-        // Get Type
-        $type = end($types);
-
-        // Lead type already exists
-        self::assertSame(1, LeadType::where(['lead_id' => $type->lead_id, 'lead_type' => $type->lead_type])->count());
-
-        // When I call update with valid parameters
-        /** @var LeadType $leadType */
-        $leadType = $this->getConcreteRepository()->update([
-            'lead_id' => $type->lead_id,
-            'lead_type' => $type->lead_type
-        ]);
-
-        // Then I should get a class which is an instance of LeadType
-        self::assertInstanceOf(LeadType::class, $leadType);
-
-        // Lead type should still exist after update
-        self::assertSame(1, LeadType::where(['lead_id' => $type->lead_id, 'lead_type' => $type->lead_type])->count());
-    }
-
 
     /**
      * Examples of parameters with expected total.
@@ -192,7 +192,7 @@ class TypeRepositoryTest extends TestCase
         };
 
         return [                 // array $parameters, int $expectedTotal
-            'By dummy lead' => [['lead_id' => $leadIdLambda], 4],
+            'By dummy lead' => [['lead_id' => $leadIdLambda], 3],
         ];
     }
 

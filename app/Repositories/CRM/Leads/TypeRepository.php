@@ -2,10 +2,10 @@
 
 namespace App\Repositories\CRM\Leads;
 
+use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\LeadType;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class TypeRepository implements TypeRepositoryInterface {
 
@@ -29,16 +29,8 @@ class TypeRepository implements TypeRepositoryInterface {
         return LeadType::where('lead_id', $params['lead_id'])->get();
     }
 
-    public function update($params): LeadType {
-        $leadType = $this->get($params);
-
-        DB::transaction(function() use (&$leadType, $params) {
-            // Update Lead Status
-            $leadType->fill($params)->save();
-        });
-
-        // Return Full Lead Type Details
-        return $leadType;
+    public function update($params) {
+        throw new NotImplementedException;
     }
 
     /**

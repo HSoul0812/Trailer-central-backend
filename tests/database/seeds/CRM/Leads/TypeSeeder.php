@@ -100,15 +100,11 @@ class TypeSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $leadId = $this->lead->getKey();
 
         // Database clean up
-        if(!empty($this->leads) && count($this->leads)) {
-            foreach($this->leads as $lead) {
-                $leadId = $lead->identifier;
-                LeadType::where('lead_id', $leadId)->delete();
-                Lead::destroy($leadId);
-            }
-        }
+        LeadType::where('lead_id', $leadId)->delete();
+        Lead::destroy($leadId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();                
         User::destroy($dealerId);
