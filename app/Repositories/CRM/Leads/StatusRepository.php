@@ -37,6 +37,7 @@ class StatusRepository implements StatusRepositoryInterface {
         }
 
         // Create Lead Status
+        var_dump($params);
         return LeadStatus::create($params);
     }
 
