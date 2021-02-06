@@ -83,7 +83,7 @@ class TypeSeeder extends Seeder
                     'lead_type' => $seed['lead_type']
                 ]);
 
-                $this->createdTypes[$leadId] = $type;
+                $this->createdTypes[] = $type;
                 return;
             }
 
@@ -93,7 +93,7 @@ class TypeSeeder extends Seeder
                 'lead_type' => $seed['lead_type']
             ]);
 
-            $this->missingTypes[$leadId] = $type;
+            $this->missingTypes[] = $type;
         });
     }
 

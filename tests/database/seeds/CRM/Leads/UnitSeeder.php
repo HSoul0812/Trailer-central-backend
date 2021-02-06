@@ -109,7 +109,7 @@ class UnitSeeder extends Seeder
         $leadId = $this->lead->getKey();
 
         // Database clean up
-        InventoryLead::where('lead_id', $leadId)->delete();
+        InventoryLead::where('website_lead_id', $leadId)->delete();
         Lead::destroy($leadId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();                
