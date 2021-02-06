@@ -66,7 +66,7 @@ class SourceSeeder extends Seeder
                     'parent_id' => $seed['parent_id'] ?? 0
                 ]);
 
-                $this->createdSources[$leadId] = $source;
+                $this->createdSources[] = $source;
                 return;
             }
 
@@ -77,7 +77,7 @@ class SourceSeeder extends Seeder
                 'parent_id' => $seed['parent_id'] ?? 0
             ]);
 
-            $this->missingSources[$leadId] = $source;
+            $this->missingSources[] = $source;
         });
     }
 
