@@ -34,7 +34,7 @@ class UpdateLeadRequest extends Request {
         'is_spam' => 'boolean',
         'is_archived' => 'boolean',
         'dealer_location_id' => 'dealer_location_valid',
-        'lead_source' => 'lead_source_valid',
+        'lead_source' => 'string',
         'lead_status' => 'lead_status_valid',
         'next_contact_date' => 'date_format:Y-m-d H:i:s',
         'contact_type' => 'in:CONTACT,TASK',

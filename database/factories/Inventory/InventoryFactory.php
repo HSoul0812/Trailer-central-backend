@@ -3,24 +3,25 @@
 /** @var Factory $factory */
 
 use Illuminate\Database\Eloquent\Factory;
-use Tests\TestCase;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Manufacturers\Manufacturers;
 use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\Showroom\Showroom;
+use App\Models\User\User;
+use App\Models\User\DealerLocation;
 use Faker\Generator as Faker;
 use Illuminate\Support\Str;
 
 $factory->define(Inventory::class, static function (Faker $faker, array $attributes): array {
-    /**
-     * todo:
-     * This have to be change to
-     * $dealer_id = $attributes['dealer_id'] ?? factory(App\Models\User\User::class)->create()->getKey();
-     * and therefore provide TestCase::getTestDealerId() must to be responsibility of the caller
-     */
-    $dealer_id = $attributes['dealer_id'] ?? TestCase::getTestDealerId();
+    // Get Dealer ID
+    $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
+
+    // Get Dealer Location ID
+    $dealer_location_id = $attributes['dealer_location_id'] ?? factory(DealerLocation::class)->create([
+        'dealer_id' => $dealer_id
+    ])->getKey();
 
     // Get Entity/Category
     $entityType = EntityType::where('entity_type_id', '<>', 2)->inRandomOrder()->first();
@@ -41,11 +42,10 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
     // Get Created Date
     $createdAt = $faker->dateTimeThisMonth;
 
-    // Return Overrides
-    return [
+    $overrides = [
         'entity_type_id' => $entityType->entity_type_id,
         'dealer_id' => $dealer_id,
-        'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
+        'dealer_location_id' => $dealer_location_id,
         'created_at' => $createdAt,
         'updated_at' => $createdAt,
         'updated_at_auto' => $createdAt,
@@ -54,11 +54,12 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'stock' => Str::random(10),
         'manufacturer' => $mfg->name,
         'brand' => !empty($showroom->brand) ? $showroom->brand : (!empty($brand->name) ? $brand->name : ''),
-        'model' => !empty($showroom->model) ? $showroom->model : $faker->title,
-        'description' => !empty($showroom->description) ? $showroom->description : $faker->realText,
+        'model' => !empty($showroom->model) ? $showroom->model : $faker->words(2, true),
+        //'description' => !empty($showroom->description) ? $showroom->description : $faker->realText,
+        'description' => $faker->realText,
         'status' => 1,
         'category' => !empty($showroom->type) ? $showroom->type : $category->legacy_category,
-        'vin' => $attributes['vin'] ?? Str::random(18),
+        'vin' => $attributes['vin'] ?? Str::random(17),
         'msrp' => $msrp,
         'price' => $price,
         'year' => $faker->year,
@@ -67,4 +68,11 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'is_archived' => 0,
         'showroom_id' => !empty($showroom->id) ? $showroom->id : null
     ];
+
+    if (isset($attributes['inventory_id'])) {
+        $overrides['inventory_id'] = $attributes['inventory_id'];
+    }
+
+    // Return Overrides
+    return $overrides;
 });

@@ -194,6 +194,7 @@ class TokenRepository implements TokenRepositoryInterface {
         return $this->update([
             'id' => $tokenId,
             'access_token' => $newToken['access_token'],
+            'refresh_token' => $newToken['refresh_token'],
             'id_token' => $newToken['id_token'],
             'expires_in' => $newToken['expires_in'],
             'expires_at' => $time->addSeconds($newToken['expires_in'])->toDateTimeString(),

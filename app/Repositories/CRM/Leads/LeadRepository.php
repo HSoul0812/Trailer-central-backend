@@ -2,9 +2,9 @@
 
 namespace App\Repositories\CRM\Leads;
 
-use App\Models\CRM\User\Customer;
-use App\Models\Website\Website;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
+use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -23,6 +23,16 @@ use Illuminate\Support\Facades\DB;
 class LeadRepository implements LeadRepositoryInterface {
 
     use SortTrait;
+
+    /**
+     * @var StatusRepositoryInterface
+     */
+    private $status;
+
+    /**
+     * @var SourceRepositoryInterface
+     */
+    private $sources;
 
     private $sortOrders = [
         'no_due_past_due_future_due' => [
@@ -72,68 +82,20 @@ class LeadRepository implements LeadRepositoryInterface {
         ]
     ];
 
+    /**
+     * LeadRepository constructor.
+     * 
+     * @param StatusRepositoryInterface $status
+     * @param SourceRepositoryInterface $sources
+     */
+    public function __construct(StatusRepositoryInterface $status, SourceRepositoryInterface $sources) {
+        $this->status = $status;
+        $this->sources = $sources;
+    }
 
     public function create($params) {
-        // Get First Lead Type
-        if(isset($params['lead_types']) && is_array($params['lead_types'])) {
-            $params['lead_type'] = reset($params['lead_types']);
-        }
-
-        // Fix Units of Interest
-        if(isset($params['inventory']) && is_array($params['inventory'])) {
-            $params['inventory_id'] = reset($params['inventory']);
-        }
-
-        // Fix Preferred Contact
-        if(empty($params['preferred_contact'])) {
-            $params['preferred_contact'] = 'phone';
-            if(empty($params['phone_number']) && !empty($params['email_address'])) {
-                $params['preferred_contact'] = 'email';
-            }
-        }
-
         // Create Lead
-        $lead = Lead::create($params);
-
-        // Start Lead Status Updates
-        $leadStatusUpdates = [
-            'tc_lead_identifier' => $lead->identifier,
-            'contact_type' => LeadStatus::TYPE_CONTACT,
-            'status' => Lead::STATUS_UNCONTACTED
-        ];
-
-        // Override Fixes
-        if (isset($params['lead_source'])) {
-            $leadStatusUpdates['source'] = $params['lead_source'];
-        }
-        if (isset($params['lead_status'])) {
-            $leadStatusUpdates['status'] = $params['lead_status'];
-        }
-        if (isset($params['next_contact_date'])) {
-            $leadStatusUpdates['next_contact_date'] = $params['next_contact_date'];
-        }
-        if (isset($params['contact_type'])) {
-            $leadStatusUpdates['contact_type'] = $params['contact_type'];
-        }
-        if (isset($params['sales_person_id'])) {
-            $leadStatusUpdates['sales_person_id'] = $params['sales_person_id'];
-        }
-
-        // Create Lead Status
-        LeadStatus::create($leadStatusUpdates);
-
-        // Update Units of Inventory
-        if (isset($params['inventory'])) {
-            $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
-        }
-
-        // Update Lead Types
-        if (isset($params['lead_types'])) {
-            $this->updateLeadTypes($lead->identifier, $params['lead_types']);
-        }
-
-        // Return Full Lead Details
-        return Lead::find($lead->identifier);
+        return Lead::create($params);
     }
 
     public function delete($params) {
@@ -240,122 +202,16 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     public function update($params) {
+        // Get Lead
         $lead = Lead::findOrFail($params['id']);
 
+        // Update Lead
         DB::transaction(function() use (&$lead, $params) {
-            $leadStatusUpdates = [];
-
-            if (isset($params['lead_status'])) {
-                $leadStatusUpdates['status'] = $params['lead_status'];
-            }
-
-            if (isset($params['lead_source'])) {
-                $leadStatusUpdates['source'] = $params['lead_source'];
-            }
-
-            if (isset($params['next_contact_date'])) {
-                $leadStatusUpdates['next_contact_date'] = $params['next_contact_date'];
-            }
-
-            if (isset($params['contact_type'])) {
-                $leadStatusUpdates['contact_type'] = $params['contact_type'];
-            }
-
-            if (isset($params['sales_person_id'])) {
-                $leadStatusUpdates['sales_person_id'] = $params['sales_person_id'];
-            }
-
-            if (!empty($leadStatusUpdates)) {
-                if ($lead->leadStatus) {
-                    $lead->leadStatus()->update($leadStatusUpdates);
-                } else {
-                    if (empty($leadStatusUpdates['status'])) {
-                        $leadStatusUpdates['status'] = Lead::STATUS_UNCONTACTED;
-                    }
-                    $lead->leadStatus()->create($leadStatusUpdates);
-                }
-            }
-
-            // Update Units of Inventory
-            if (isset($params['inventory']) && is_array($params['inventory'])) {
-                if(!in_array($lead->inventory_id, $params['inventory'])) {
-                    $params['inventory_id'] = reset($params['inventory']);
-                }
-
-                // Update Units of Interest
-                $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
-            }
-
-            // Process Lead Types
-            if(isset($params['lead_types']) && is_array($params['lead_types'])) {
-                if(!in_array($lead->lead_type, $params['lead_types'])) {
-                    $params['lead_type'] = reset($params['lead_types']);
-                }
-
-                // Update Lead Types
-                $this->updateLeadTypes($lead->identifier, $params['lead_types']);
-            }
-
             $lead->fill($params)->save();
-
         });
 
         // Return Full Lead Details
         return $lead;
-    }
-
-    /**
-     * Delete Existing Lead Types and Insert New Ones
-     *
-     * @param int $leadId
-     * @param array $leadTypes
-     * @return array of LeadType
-     */
-    public function updateLeadTypes($leadId, $leadTypes) {
-        // Initialize Lead Type
-        $leadTypeModels = array();
-        DB::transaction(function() use (&$leadTypeModels, $leadId, $leadTypes) {
-            // Delete Existing Lead Types!
-            LeadType::whereLeadId($leadId)->delete();
-
-            // Loop Lead Types
-            foreach($leadTypes as $leadType) {
-                $leadTypeModels[] = LeadType::create([
-                    'lead_id' => $leadId,
-                    'lead_type' => $leadType
-                ]);
-            }
-        });
-
-        // Return Array of Lead Types
-        return $leadTypeModels;
-    }
-
-    /**
-     * Delete Existing Units of Interest and Insert New Ones
-     *
-     * @param int $leadId
-     * @param array $inventoryIds
-     * @return array of InventoryLead
-     */
-    public function updateUnitsOfInterest($leadId, $inventoryIds) {
-        // Initialize Lead Type
-        $inventoryLeads = array();
-        DB::transaction(function() use (&$inventoryLeads, $leadId, $inventoryIds) {
-            // Delete Existing Units of Interest!
-            InventoryLead::where('website_lead_id', $leadId)->delete();
-
-            // Loop Lead Types
-            foreach($inventoryIds as $inventoryId) {
-                $inventoryLeads[] = InventoryLead::create([
-                    'website_lead_id' => $leadId,
-                    'inventory_id' => $inventoryId
-                ]);
-            }
-        });
-
-        // Return Array of Inventory Lead
-        return $inventoryLeads;
     }
 
     /**
@@ -399,118 +255,6 @@ class LeadRepository implements LeadRepositoryInterface {
         $query = $query->orderBy('last_name', 'DESC');
 
         return $query->paginate($params['per_page'])->appends($params);
-    }
-
-    /**
-     * Get All Lead Statuses
-     *
-     * @return type
-     */
-    public function getStatuses() {
-        return [
-            [
-                'id' => Lead::STATUS_HOT,
-                'name' => Lead::STATUS_HOT
-            ],
-            [
-                'id' => Lead::STATUS_COLD,
-                'name' => Lead::STATUS_COLD
-            ],
-            [
-                'id' => Lead::STATUS_LOST,
-                'name' => Lead::STATUS_LOST
-            ],
-            [
-                'id' => Lead::STATUS_MEDIUM,
-                'name' => Lead::STATUS_MEDIUM
-            ],
-            [
-                'id' => Lead::STATUS_NEW_INQUIRY,
-                'name' => Lead::STATUS_NEW_INQUIRY
-            ],
-            [
-                'id' => Lead::STATUS_UNCONTACTED,
-                'name' => Lead::STATUS_UNCONTACTED
-            ],
-            [
-                'id' => Lead::STATUS_WON,
-                'name' => Lead::STATUS_WON
-            ],
-            [
-                'id' => Lead::STATUS_WON_CLOSED,
-                'name' => Lead::STATUS_WON_CLOSED
-            ]
-        ];
-    }
-
-    /**
-     * Get All Lead Types
-     *
-     * @return type
-     */
-    public function getTypes() {
-        return [
-            [
-                'id' => LeadType::TYPE_BUILD,
-                'name' => ucfirst(LeadType::TYPE_BUILD)
-            ],
-            [
-                'id' => LeadType::TYPE_CALL,
-                'name' => ucfirst(LeadType::TYPE_CALL)
-            ],
-            [
-                'id' => LeadType::TYPE_GENERAL,
-                'name' => ucfirst(LeadType::TYPE_GENERAL)
-            ],
-            [
-                'id' => LeadType::TYPE_CRAIGSLIST,
-                'name' => ucfirst(LeadType::TYPE_CRAIGSLIST)
-            ],
-            [
-                'id' => LeadType::TYPE_INVENTORY,
-                'name' => ucfirst(LeadType::TYPE_INVENTORY)
-            ],
-            [
-                'id' => LeadType::TYPE_TEXT,
-                'name' => ucfirst(LeadType::TYPE_TEXT)
-            ],
-            [
-                'id' => LeadType::TYPE_SHOWROOM_MODEL,
-                'name' => ucfirst(LeadType::TYPE_SHOWROOM_MODEL)
-            ],
-            [
-                'id' => LeadType::TYPE_JOTFORM,
-                'name' => ucfirst(LeadType::TYPE_JOTFORM)
-            ],
-            [
-                'id' => LeadType::TYPE_RENTALS,
-                'name' => ucfirst(LeadType::TYPE_RENTALS)
-            ],
-            [
-                'id' => LeadType::TYPE_FINANCING,
-                'name' => ucfirst(LeadType::TYPE_FINANCING)
-            ],
-            [
-                'id' => LeadType::TYPE_SERVICE,
-                'name' => ucfirst(LeadType::TYPE_SERVICE)
-            ],
-            [
-                'id' => LeadType::TYPE_TRADE,
-                'name' => ucfirst(LeadType::TYPE_TRADE)
-            ]
-        ];
-    }
-
-    /**
-     * Get All Default Lead Sources
-     *
-     * @return type
-     */
-    public function getSources() {
-        return LeadSource::select(['lead_source_id AS id', 'source_name AS name'])
-                         ->where('user_id', 0)
-                         ->orderBy('lead_source_id', 'ASC')
-                         ->get();
     }
 
     /**

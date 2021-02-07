@@ -7,7 +7,7 @@ namespace App\Exceptions\Integration\Google;
  *
  * Use this instead of \Exception to throw any kind of invalid ID token on Google API
  *
- * @package App\Exceptions\Integration\Auth
+ * @package App\Exceptions\Integration\Google
  */
 class InvalidGapiIdTokenException extends \Exception
 {

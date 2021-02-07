@@ -27,10 +27,11 @@ class InteractionTransformer extends TransformerAbstract
         return [
             'id' => $interaction->interaction_id,
             'type' => $interaction->interaction_type,
-            'time' => Carbon::parse($interaction->interaction_time),
+            'time' => Carbon::parse($interaction->interaction_time)->format('F d, Y g:i A'),
             'notes' => $interaction->interaction_notes,
             'contact_name' => $interaction->lead->full_name,
-            'username' => $interaction->real_username
+            'username' => $interaction->real_username,
+            'to_no' => $interaction->to_no
         ];
     }
 
@@ -41,7 +42,7 @@ class InteractionTransformer extends TransformerAbstract
 
     public function includeSalesPerson(Interaction $interaction)
     {
-        if ($interaction->leadStatus) {
+        if ($interaction->leadStatus && $interaction->leadStatus->salesPerson) {
             return $this->item($interaction->leadStatus->salesPerson, new SalesPersonTransformer());
         } else {
             return $this->null();

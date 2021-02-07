@@ -164,6 +164,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
 
     /**
+     * Inventory transactions history
+     */
+    $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
@@ -360,8 +365,8 @@ $api->version('v1', function ($route) {
         */
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
-        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show');
-        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
+        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show')->where('id', '[0-9]+');
+        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update')->where('id', '[0-9]+');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
 
         /*
@@ -414,6 +419,34 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Leads
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'leads'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | ADF Import
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'import'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@index');
+                $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
+                $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
+            });
+        });
 
         /*
         |--------------------------------------------------------------------------

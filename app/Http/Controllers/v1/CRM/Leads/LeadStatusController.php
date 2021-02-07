@@ -2,23 +2,33 @@
 
 namespace App\Http\Controllers\v1\CRM\Leads;
 
-use App\Http\Controllers\RestfulController;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Leads\GetLeadsStatusRequest;
+use App\Http\Controllers\RestfulController;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
+use App\Transformers\SimpleTransformer;
+use Dingo\Api\Http\Request;
 
 class LeadStatusController extends RestfulController
 {
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     */
     protected $leads;
+
+    /**
+     * @var App\Transformers\CRM\Leads\StatusTransformer
+     */
+    protected $transformer;
 
     /**
      * Create a new controller instance.
      *
-     * @param Repository $interactions
+     * @param Repository $status
      */
-    public function __construct(LeadRepositoryInterface $leads)
+    public function __construct(StatusRepositoryInterface $status)
     {
-        $this->leads = $leads;
+        $this->status = $status;
+        $this->transformer = new SimpleTransformer;
     }
 
     public function index(Request $request) {
@@ -26,9 +36,7 @@ class LeadStatusController extends RestfulController
         $requestData = $request->all();
 
         if ($request->validate()) {             
-            return $this->response->array([
-                'data' => $this->leads->getStatuses()
-            ]);
+            return $this->response->collection($this->status->getAll($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

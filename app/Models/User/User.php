@@ -17,6 +17,10 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * @package App\Models\User
  *
+ * @property int $dealer_id
+ * @property string $name
+ * @property string $email
+ *
  * @property bool $isCrmActive
  */
 class User extends Model implements Authenticatable

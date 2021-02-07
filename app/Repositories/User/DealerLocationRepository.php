@@ -40,6 +40,52 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
 
 
     /**
+     * Find Dealer Location By Various Options
+     * 
+     * @param array $params
+     * @return Collection<DealerLocation>
+     */
+    public function find($params)
+    {
+        // Get First Dealer Location SMS Numbers
+        $query = DealerLocation::where('dealer_id', $params['dealer_id']);
+
+        // Match Name
+        if(isset($params['name'])) {
+            $query->where('name', $params['name']);
+        }
+
+        // Match Phone
+        if(isset($params['phone'])) {
+            $query->where('phone', $params['phone']);
+        }
+
+        // Match Email
+        if(isset($params['email'])) {
+            $query->where('email', $params['email']);
+        }
+
+        // Match City
+        if(isset($params['city'])) {
+            $query->where('city', $params['city']);
+        }
+
+        // Match State
+        if(isset($params['region'])) {
+            $query->where('region', $params['region']);
+        }
+
+        // Match Zip
+        if(isset($params['zip'])) {
+            $query->where('postalcode', $params['zip']);
+        }
+
+        // Return Locations Found
+        return $query->get();
+    }
+
+
+    /**
      * Get First Dealer SMS Number
      * 
      * @param int $dealerId

@@ -13,10 +13,29 @@ class LeadStatus extends Model
     
     const TYPE_CONTACT = 'CONTACT';
     const TYPE_TASK = 'TASK';
-    
+
+    const STATUS_WON = 'Closed';
+    const STATUS_WON_CLOSED = 'Closed (Won)';
+    const STATUS_LOST = 'Closed (Lost)';
+    const STATUS_HOT = 'Hot';
+    const STATUS_COLD = 'Cold';
+    const STATUS_MEDIUM = 'Medium';
     const STATUS_UNCONTACTED = 'Uncontacted';
-    
+    const STATUS_NEW_INQUIRY = 'New Inquiry';
+
+    const STATUS_ARRAY = [
+        self::STATUS_HOT,
+        self::STATUS_COLD,
+        self::STATUS_LOST,
+        self::STATUS_MEDIUM,
+        self::STATUS_NEW_INQUIRY,
+        self::STATUS_UNCONTACTED,
+        self::STATUS_WON_CLOSED,
+        self::STATUS_WON
+    ];
+
     const TABLE_NAME = 'crm_tc_lead_status';
+
     /**
      * The table associated with the model.
      *

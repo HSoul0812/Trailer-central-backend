@@ -49,10 +49,12 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
         ])->id;
 
         $inventory11 = factory(Inventory::class)->create([
+            'dealer_id' => self::getTestDealerId(),
             'notes' => 'inventory11'
         ]);
 
         $inventory12 = factory(Inventory::class)->create([
+            'dealer_id' => self::getTestDealerId(),
             'notes' => 'inventory12'
         ]);
 
@@ -141,6 +143,16 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
         $this->assertNotFalse($unitSale21Key);
 
         $this->assertFalse($notExistingKey);
+
+        $this->assertArrayHasKey('dealer_id', $result[$technicianId1][$unitSale11Key]);
+        $this->assertArrayHasKey('dealer_id', $result[$technicianId1][$unitSale12Key]);
+        $this->assertArrayHasKey('dealer_id', $result[$technicianId2][$unitSale21Key]);
+
+        foreach ($result as $technician) {
+            $dealerIds = array_unique(array_column($technician, 'dealer_id'));
+            $this->assertCount(1, $dealerIds);
+            $this->assertEquals($this->getTestDealerId(), $dealerIds[0]);
+        }
 
         $this->assertArrayHasKey('act_hrs', $result[$technicianId1][$unitSale11Key]);
         $this->assertArrayHasKey('act_hrs', $result[$technicianId1][$unitSale12Key]);
@@ -389,17 +401,9 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
      */
     public function testServiceReportWithDates(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
-        $unitSaleId11 = factory(UnitSale::class)->create([
-            'created_at' => $serviceTechnician11['created_at']
-        ])->id;
-
-        $unitSaleId12 = factory(UnitSale::class)->create([
-            'created_at' => $serviceTechnician12['created_at']
-        ])->id;
-
-        $unitSaleId21 = factory(UnitSale::class)->create([
-            'created_at' => $serviceTechnician21['created_at']
-        ])->id;
+        $unitSaleId11 = factory(UnitSale::class)->create()->id;
+        $unitSaleId12 = factory(UnitSale::class)->create()->id;
+        $unitSaleId21 = factory(UnitSale::class)->create()->id;
 
         $technician1 = factory(Technician::class)->create([]);
         $technician2 = factory(Technician::class)->create([]);
@@ -581,7 +585,8 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
     {
         $serviceOrder = factory(ServiceOrder::class)->create([
             'unit_sale_id' => $unitSaleId,
-            'type' => $serviceTechnician['repair_order_type']
+            'type' => $serviceTechnician['repair_order_type'],
+            'created_at' => $serviceTechnician['created_at']
         ]);
 
         $serviceItem = factory(ServiceItem::class)->create([
