@@ -474,6 +474,7 @@ class AutoAssignTest extends TestCase
                 } else {
                     // Create Sales Person!
                     $params = [
+                        'user_id' => $dealer->crmUser->user_id,
                         'dealer_location_id' => $locationId,
                         'is_default' => 0,
                         'is_inventory' => 0,
@@ -483,6 +484,9 @@ class AutoAssignTest extends TestCase
                     $params['is_' . $salesType] = 1;
                     $salespeople = factory(SalesPerson::class, 1)->create($params);
                     $salesPerson = reset($salespeople);
+                    var_dump($salespeople);
+                    var_dump($salesPerson);
+                    die;
                 }
 
                 // Set Sales Person ID
