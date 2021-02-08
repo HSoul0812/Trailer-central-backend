@@ -484,12 +484,14 @@ class AutoAssignTest extends TestCase
                     $params['is_' . $salesType] = 1;
                     $salespeople = factory(SalesPerson::class, 1)->create($params);
                     $salesPerson = reset($salespeople);
+                }
+
+                // Set Sales Person ID
+                if(empty($salesPerson->id)) {
                     var_dump($salespeople);
                     var_dump($salesPerson);
                     die;
                 }
-
-                // Set Sales Person ID
                 $this->roundRobin[$dealer->id][$locationId][$salesType] = $salesPerson->id;
             }
 
