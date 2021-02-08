@@ -13,7 +13,7 @@ use Tests\database\seeds\Dms\ServiceOrderSeeder;
 use Tests\TestCase;
 
 /**
- * @covers App\Repositories\Dms\ServiceOrderRepository
+ * @coversDefaultClass App\Repositories\Dms\ServiceOrderRepository
  */
 class ServiceOrderRepositoryTest extends TestCase
 {    
@@ -49,6 +49,9 @@ class ServiceOrderRepositoryTest extends TestCase
         self::assertInstanceOf(ServiceOrderRepository::class, $concreteRepository);
     } 
     
+    /**
+     * @covers ::update
+     */
     public function testUpdateServiceOrderStatus(): void 
     {
         $this->seeder->seed();

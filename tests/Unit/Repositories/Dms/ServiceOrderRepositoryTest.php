@@ -13,7 +13,7 @@ use Mockery;
 use Tests\TestCase;
 
 /**
- * @covers App\Repositories\Dms\ServiceOrderRepository
+ * @@coversDefaultClass App\Repositories\Dms\ServiceOrderRepository
  */
 class ServiceOrderRepositoryTest extends TestCase
 {
@@ -41,6 +41,9 @@ class ServiceOrderRepositoryTest extends TestCase
         $this->serviceOrderMock->status = ServiceOrder::SERVICE_ORDER_STATUS['ready_for_pickup'];
     }
     
+    /**
+     * @covers ::update
+     */
     public function testUpdateServiceOrderStatus(): void 
     {
         $serviceRepoParams = [
@@ -74,6 +77,9 @@ class ServiceOrderRepositoryTest extends TestCase
         $this->assertEquals($result->id, $this->serviceOrderMock->id);
     }
     
+    /**
+     * @covers ::get
+     */
     public function testGetServiceOrder(): void 
     {
         $serviceRepoParams = [
