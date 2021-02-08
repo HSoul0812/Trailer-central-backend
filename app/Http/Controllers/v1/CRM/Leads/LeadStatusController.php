@@ -11,9 +11,9 @@ use Dingo\Api\Http\Request;
 class LeadStatusController extends RestfulController
 {
     /**
-     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     * @var App\Repositories\CRM\Leads\StatusRepositoryInterface
      */
-    protected $leads;
+    protected $status;
 
     /**
      * @var App\Transformers\CRM\Leads\StatusTransformer

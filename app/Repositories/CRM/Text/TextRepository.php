@@ -4,7 +4,7 @@ namespace App\Repositories\CRM\Text;
 
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
 use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
@@ -22,9 +22,9 @@ class TextRepository implements TextRepositoryInterface {
     private $service;
 
     /**
-     * @var LeadRepositoryInterface
+     * @var StatusRepositoryInterface
      */
-    private $leads;
+    private $leadStatus;
 
     /**
      * @var DealerLocationRepositoryInterface
@@ -47,10 +47,10 @@ class TextRepository implements TextRepositoryInterface {
      * 
      * @param TextServiceInterface $service
      */
-    public function __construct(TextServiceInterface $service, LeadRepositoryInterface $leads, DealerLocationRepositoryInterface $dealerLocation)
+    public function __construct(TextServiceInterface $service, StatusRepositoryInterface $leadStatus, DealerLocationRepositoryInterface $dealerLocation)
     {
         $this->service = $service;
-        $this->leads = $leads;
+        $this->leadStatus = $leadStatus;
         $this->dealerLocation = $dealerLocation;
     }
     
@@ -144,7 +144,7 @@ class TextRepository implements TextRepositoryInterface {
         $this->service->send($from_number, $to_number, $textMessage, $fullName);
 
         // Save Lead Status
-        $this->leads->update([
+        $this->leadStatus->update([
             'id' => $lead->identifier,
             'lead_status' => Lead::STATUS_MEDIUM,
             'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()

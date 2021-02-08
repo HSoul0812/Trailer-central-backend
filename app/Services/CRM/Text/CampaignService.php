@@ -8,7 +8,7 @@ use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\CampaignSent;
 use App\Services\CRM\Text\TextServiceInterface;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
@@ -58,7 +58,7 @@ class CampaignService implements CampaignServiceInterface
      * CampaignService constructor.
      */
     public function __construct(TextServiceInterface $text,
-                                LeadRepositoryInterface $leadRepo,
+                                StatusRepositoryInterface $leadStatus,
                                 TextRepositoryInterface $textRepo,
                                 CampaignRepositoryInterface $campaignRepo,
                                 TemplateRepositoryInterface $templateRepo,
@@ -68,7 +68,7 @@ class CampaignService implements CampaignServiceInterface
         $this->textService = $text;
 
         // Initialize Repositories
-        $this->leads = $leadRepo;
+        $this->leadStatus = $leadStatus;
         $this->texts = $textRepo;
         $this->campaigns = $campaignRepo;
         $this->templates = $templateRepo;
@@ -160,7 +160,7 @@ class CampaignService implements CampaignServiceInterface
         $textLog = null;
         DB::transaction(function() use ($from_number, $campaign, $lead, $textMessage, &$status, &$textLog) {
             // Save Lead Status
-            $this->leads->update([
+            $this->leadStatus->update([
                 'id' => $lead->identifier,
                 'lead_status' => Lead::STATUS_MEDIUM,
                 'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
