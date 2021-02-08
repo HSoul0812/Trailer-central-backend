@@ -123,7 +123,7 @@ class ServiceOrderController extends RestfulControllerV2
     }
     
     /**
-     * @OA\Get(
+     * @OA\Put(
      *     path="/api/dms/service-order/{id}",
      *     description="Updates a given service order",
      *     tags={"Service Orders"},
