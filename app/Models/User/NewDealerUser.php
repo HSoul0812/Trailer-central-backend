@@ -68,6 +68,14 @@ class NewDealerUser extends Model
     }
 
     /**
+     * @return get the website
+     */
+    public function website()
+    {
+        return $this->hasOne(Website::class, 'dealer_id', 'id');
+    }
+
+    /**
      * Get the crm user
      */
     public function crmUser()
