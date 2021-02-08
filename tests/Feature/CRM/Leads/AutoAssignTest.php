@@ -84,6 +84,7 @@ class AutoAssignTest extends TestCase
         factory(Lead::class, 10)->create([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->id,
+            'dealer_location_id' => $locationId,
             'lead_type' => 'general'
         ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
