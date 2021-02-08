@@ -61,7 +61,8 @@ class ScrapeRepliesTest extends TestCase
         $lead = factory(Lead::class, 1)->create([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->id,
-            'dealer_location_id' => 0
+            'dealer_location_id' => 0,
+            'inventory_id' => 0
         ])->first();
 
         // Get Folders
@@ -224,7 +225,8 @@ class ScrapeRepliesTest extends TestCase
         $lead = factory(Lead::class, 1)->create([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->id,
-            'dealer_location_id' => 0
+            'dealer_location_id' => 0,
+            'inventory_id' => 0
         ])->first();
 
         // Get Folders
@@ -394,7 +396,8 @@ class ScrapeRepliesTest extends TestCase
         $lead = factory(Lead::class, 1)->create([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->id,
-            'dealer_location_id' => 0
+            'dealer_location_id' => 0,
+            'inventory_id' => 0
         ])->first();
 
         // Get Folders
@@ -563,7 +566,8 @@ class ScrapeRepliesTest extends TestCase
         $lead = factory(Lead::class, 1)->create([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->id,
-            'dealer_location_id' => 0
+            'dealer_location_id' => 0,
+            'inventory_id' => 0
         ])->first();
 
         // Get Folders
