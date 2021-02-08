@@ -84,6 +84,13 @@ class ScrapeRepliesTest extends TestCase
             'from_name' => $salesPerson->full_name,
             'subject' => ''
         ]);
+        $noto = factory(EmailHistory::class, 2)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => '',
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name
+        ]);
         $noid = factory(EmailHistory::class, 2)->make([
             'lead_id' => $lead->identifier,
             'to_email' => $lead->email_address,
@@ -104,6 +111,11 @@ class ScrapeRepliesTest extends TestCase
             $id++;
         }
         foreach($nosub as $reply) {
+            $messages[] = $id;
+            $parsed[] = $this->getParsedEmail($id, $reply);
+            $id++;
+        }
+        foreach($noto as $reply) {
             $messages[] = $id;
             $parsed[] = $this->getParsedEmail($id, $reply);
             $id++;
@@ -188,6 +200,13 @@ class ScrapeRepliesTest extends TestCase
                 'message_id' => $email->message_id
             ]);
         }
+        foreach($noto as $email) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseMissing('crm_email_processed', [
+                'user_id' => $salesPerson->user_id,
+                'message_id' => $email->message_id
+            ]);
+        }
         foreach($noid as $email) {
             // Assert a lead status entry was saved...
             $this->assertDatabaseMissing('crm_email_processed', [
@@ -248,6 +267,13 @@ class ScrapeRepliesTest extends TestCase
             'from_name' => $salesPerson->full_name,
             'subject' => ''
         ]);
+        $noto = factory(EmailHistory::class, 2)->make([
+            'lead_id' => $lead->identifier,
+            'to_email' => '',
+            'to_name' => $lead->full_name,
+            'from_email' => $salesPerson->email,
+            'from_name' => $salesPerson->full_name
+        ]);
         $noid = factory(EmailHistory::class, 2)->make([
             'lead_id' => $lead->identifier,
             'to_email' => $lead->email_address,
@@ -272,6 +298,11 @@ class ScrapeRepliesTest extends TestCase
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
+        foreach($noto as $reply) {
+            $messages[] = $id;
+            $parsed[] = $this->getParsedEmail($id, $reply);
+            $id++;
+        }
         foreach($noid as $reply) {
             $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
@@ -285,7 +316,7 @@ class ScrapeRepliesTest extends TestCase
 
 
         // Mock Imap Service
-        $this->mock(ImapServiceInterface::class, function ($mock) use($folders, $messages, $parsed, $replies) {
+        $this->mock(ImapServiceInterface::class, function ($mock) use($folders, $messages, $parsed, $replies, $nosub, $noto) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->times(count($folders))
@@ -300,7 +331,7 @@ class ScrapeRepliesTest extends TestCase
                      ->andReturn($email);
 
                 // Exists in Replies?
-                if(isset($replies[$id])) {
+                if(isset($replies[$id]) || isset($nosub[$id]) || isset($noto[$id])) {
                     // Should Receive Full Details Once Per Folder Per Reply!
                     $mock->shouldReceive('full')
                          ->with(Mockery::on(function($overview) use($email) {
@@ -347,6 +378,13 @@ class ScrapeRepliesTest extends TestCase
 
         // Mock Skipping Entirely
         foreach($nosub as $email) {
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseMissing('crm_email_processed', [
+                'user_id' => $salesPerson->user_id,
+                'message_id' => $email->message_id
+            ]);
+        }
+        foreach($noto as $email) {
             // Assert a lead status entry was saved...
             $this->assertDatabaseMissing('crm_email_processed', [
                 'user_id' => $salesPerson->user_id,
