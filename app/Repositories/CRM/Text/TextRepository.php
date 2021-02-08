@@ -145,7 +145,7 @@ class TextRepository implements TextRepositoryInterface {
 
         // Save Lead Status
         $this->leadStatus->update([
-            'id' => $lead->identifier,
+            'lead_id' => $lead->identifier,
             'lead_status' => Lead::STATUS_MEDIUM,
             'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
         ]);

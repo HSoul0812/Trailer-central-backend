@@ -161,7 +161,7 @@ class CampaignService implements CampaignServiceInterface
         DB::transaction(function() use ($from_number, $campaign, $lead, $textMessage, &$status, &$textLog) {
             // Save Lead Status
             $this->leadStatus->update([
-                'id' => $lead->identifier,
+                'lead_id' => $lead->identifier,
                 'lead_status' => Lead::STATUS_MEDIUM,
                 'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
             ]);

@@ -164,7 +164,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
                 $this->setLeadExplanationNotes($lead->identifier, 'Assigning Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName);
                 $this->log->info("AutoAssignService assigning next sales person {$salesPerson->id} for lead {$leadName}");
                 $this->leadStatus->update([
-                    'id' => $lead->identifier,
+                    'lead_id' => $lead->identifier,
                     'sales_person_id' => $salesPerson->id,
                     'next_contact_date' => $nextContactGmt
                 ]);
