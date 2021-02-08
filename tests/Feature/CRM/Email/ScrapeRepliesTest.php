@@ -270,7 +270,7 @@ class ScrapeRepliesTest extends TestCase
         $noto = factory(EmailHistory::class, 2)->make([
             'lead_id' => $lead->identifier,
             'to_email' => '',
-            'to_name' => $lead->full_name,
+            'to_name' => '',
             'from_email' => $salesPerson->email,
             'from_name' => $salesPerson->full_name
         ]);
