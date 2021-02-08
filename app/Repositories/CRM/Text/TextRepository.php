@@ -144,9 +144,9 @@ class TextRepository implements TextRepositoryInterface {
         $this->service->send($from_number, $to_number, $textMessage, $fullName);
 
         // Save Lead Status
-        $this->leadStatus->update([
+        $this->leadStatus->createOrUpdate([
             'lead_id' => $lead->identifier,
-            'lead_status' => Lead::STATUS_MEDIUM,
+            'status' => Lead::STATUS_MEDIUM,
             'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
         ]);
 
