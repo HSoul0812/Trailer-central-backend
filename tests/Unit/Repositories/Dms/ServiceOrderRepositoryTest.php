@@ -13,7 +13,7 @@ use Mockery;
 use Tests\TestCase;
 
 /**
- * @@coversDefaultClass App\Repositories\Dms\ServiceOrderRepository
+ * @coversDefaultClass App\Repositories\Dms\ServiceOrderRepository
  */
 class ServiceOrderRepositoryTest extends TestCase
 {
