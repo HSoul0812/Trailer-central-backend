@@ -27,7 +27,7 @@ class ImapConfig
     /**
      * @const NTLM charset
      */
-    const CHARSET_NTLM = 'US-ASCIII';
+    const CHARSET_NTLM = 'US-ASCII';
 
     /**
      * @const No Certificate Suffix
