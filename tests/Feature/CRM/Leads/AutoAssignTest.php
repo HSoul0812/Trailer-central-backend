@@ -70,6 +70,7 @@ class AutoAssignTest extends TestCase
             if(empty($salespeople) || count($salespeople) < 3) {
                 $add = (3 - count($salespeople));
                 factory(SalesPerson::class, $add)->create([
+                    'user_id' => $dealer->crmUser->user_id,
                     'dealer_location_id' => $locationId
                 ]);
             }
@@ -179,6 +180,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId
             ]);
         }
@@ -324,6 +326,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId,
                 'is_trade' => 0
             ]);
@@ -487,11 +490,6 @@ class AutoAssignTest extends TestCase
                 }
 
                 // Set Sales Person ID
-                if(empty($salesPerson->id)) {
-                    var_dump($salespeople);
-                    var_dump($salesPerson);
-                    die;
-                }
                 $this->roundRobin[$dealer->id][$locationId][$salesType] = $salesPerson->id;
             }
 
@@ -617,6 +615,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => $salesType
             ]);
@@ -766,6 +765,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId
             ]);
         }
