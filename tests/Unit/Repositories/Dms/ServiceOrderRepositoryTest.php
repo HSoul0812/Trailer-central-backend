@@ -12,6 +12,9 @@ use App\Models\CRM\Dms\ServiceOrder;
 use Mockery;
 use Tests\TestCase;
 
+/**
+ * @covers App\Repositories\Dms\ServiceOrderRepository
+ */
 class ServiceOrderRepositoryTest extends TestCase
 {
     

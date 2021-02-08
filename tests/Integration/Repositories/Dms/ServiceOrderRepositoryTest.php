@@ -12,6 +12,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\database\seeds\Dms\ServiceOrderSeeder;
 use Tests\TestCase;
 
+/**
+ * @covers App\Repositories\Dms\ServiceOrderRepository
+ */
 class ServiceOrderRepositoryTest extends TestCase
 {    
     /**

@@ -122,6 +122,36 @@ class ServiceOrderController extends RestfulControllerV2
         ]);
     }
     
+    /**
+     * @OA\Get(
+     *     path="/api/dms/service-order/{id}",
+     *     description="Updates a given service order",
+     *     tags={"Service Orders"},
+     *   @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Status of service order",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns the updated service order",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     )
+     * )
+     *
+     * @param Request $request
+     * @return Response
+     *
+     * @throws ResourceException when there were some validation error
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */ 
     public function update(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
