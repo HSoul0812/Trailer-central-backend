@@ -24,6 +24,11 @@ class Integration extends Model
     protected $primaryKey = 'integration_id';
 
     /**
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
