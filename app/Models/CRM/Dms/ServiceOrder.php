@@ -59,6 +59,10 @@ class ServiceOrder extends Model
      * @var string
      */
     protected $table = 'dms_repair_order';
+    
+    protected $fillable = [
+        'status'
+    ];
 
     const UPDATED_AT = null;
 

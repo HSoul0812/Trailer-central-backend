@@ -610,6 +610,7 @@ $api->version('v1', function ($route) {
         */
         $route->get('service-orders', 'App\Http\Controllers\v1\Dms\ServiceOrderController@index');
         $route->get('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@show');
+        $route->put('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@update');
         $route->get('service-item-technicians/by-dealer', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byDealer');
         $route->get('service-item-technicians/by-location/{locationId}', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byLocation');
         $route->get('service-item-technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@index');
