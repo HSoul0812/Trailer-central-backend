@@ -17,6 +17,7 @@ use App\Services\Export\FilesystemPdfExporter;
 use App\Services\Export\HasExporterInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use InvalidArgumentException;
 use Throwable;
 
 /**
@@ -146,9 +147,14 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
     /**
      * @param BulkReport $job
      * @return FilesystemPdfExporter
+     * @throws InvalidArgumentException when the job has a payload without a filename
      */
     public function getExporter($job): FilesystemPdfExporter
     {
+        if ($job->payload->filename === '' || $job->payload->filename === null) {
+            throw new InvalidArgumentException('This job has a payload without a filename');
+        }
+
         return new FilesystemPdfExporter(Storage::disk('tmp'), $job->payload->filename);
     }
 }
