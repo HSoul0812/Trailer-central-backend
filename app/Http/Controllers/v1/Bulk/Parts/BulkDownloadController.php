@@ -88,8 +88,9 @@ class BulkDownloadController extends MonitoredJobsController
         if ($request->validate()) {
             $token = $request->input('token');
 
-            $payload = BulkDownloadPayload::from(['export_file' => 'parts-' . date('Ymd') . '-' . $token . '.csv']);
-
+            $payload = BulkDownloadPayload::from([
+                'export_file' => str_replace('.', '-', uniqid('parts-' . date('Ymd'), true)) . '.csv']
+            );
             $model = $this->service
                 ->setup($request->input('dealer_id'), $payload, $token)
                 ->withQueueableJob(static function (BulkDownload $job): CsvExportJob {

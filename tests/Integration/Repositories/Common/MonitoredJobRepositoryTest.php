@@ -18,6 +18,7 @@ use Exception;
 
 /**
  * @covers \App\Repositories\Common\MonitoredJobRepository
+ * @group MonitoredJobs
  */
 class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 {

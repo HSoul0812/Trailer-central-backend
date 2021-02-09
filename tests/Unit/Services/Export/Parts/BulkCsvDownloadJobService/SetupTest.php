@@ -18,6 +18,7 @@ use Exception;
 
 /**
  * @covers \App\Services\Export\Parts\BulkCsvDownloadJobService::setup
+ * @group MonitoredJobs
  */
 class SetupTest extends TestCase
 {

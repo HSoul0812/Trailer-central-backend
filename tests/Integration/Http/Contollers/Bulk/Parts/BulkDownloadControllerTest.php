@@ -22,11 +22,14 @@ use Tests\Integration\AbstractMonitoredJobsTest;
 
 /**
  * @covers \App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController
+ * @group MonitoredJobs
  */
 class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
 {
     /**
      * @dataProvider invalidParametersForCreationProvider
+     *
+     * @covers ::create
      *
      * @param array $params
      * @param string $expectedException
@@ -81,6 +84,8 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
     /**
      * @dataProvider validParametersCreationProvider
      *
+     * @covers ::create
+     *
      * @param array $params
      *
      * @throws BusyJobException
@@ -109,6 +114,8 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
     /**
      * Test that when the user has provided the `wait` parameter, then then action controller will wait, but since
      * there is not job working on it, it will response a 500 http status code
+     *
+     * @covers ::create
      *
      * @throws BusyJobException
      */

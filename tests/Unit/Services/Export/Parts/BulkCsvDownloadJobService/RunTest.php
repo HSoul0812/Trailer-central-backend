@@ -18,6 +18,7 @@ use Tests\TestCase;
 
 /**
  * @covers \App\Services\Export\Parts\BulkCsvDownloadJobService::run
+ * @group MonitoredJobs
  */
 class RunTest extends TestCase
 {

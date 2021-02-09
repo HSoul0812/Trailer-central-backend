@@ -19,7 +19,7 @@ class GetMonitoredJobsRequest extends Request
     {
         return [
             'dealer_id' => 'required|integer',
-            'token' => ['required', 'uuid', $this->validaTokenBelongsToDealer()]
+            'token' => ['uuid', $this->validaTokenBelongsToDealer()]
         ];
     }
 

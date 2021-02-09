@@ -19,6 +19,7 @@ use Exception;
 
 /**
  * @covers \App\Http\Controllers\v1\Bulk\Parts\BulkUploadController
+ * @group MonitoredJobs
  */
 class BulkUploadControllerTest extends AbstractMonitoredJobsTest
 {
@@ -50,6 +51,8 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
 
     /**
      * @dataProvider invalidParametersForCreationProvider
+     *
+     * @covers ::create
      *
      * @param array $params
      * @param string $expectedException
@@ -90,6 +93,8 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
 
     /**
      * @dataProvider validParametersForCreationProvider
+     *
+     * @covers ::create
      *
      * @param array $params
      *

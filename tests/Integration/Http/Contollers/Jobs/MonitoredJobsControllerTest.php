@@ -18,6 +18,7 @@ use Tests\Integration\AbstractMonitoredJobsTest;
 
 /**
  * @covers \App\Http\Controllers\v1\Jobs\MonitoredJobsController
+ * @group MonitoredJobs
  */
 class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
 {
@@ -89,6 +90,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
      * @param string $expectedExceptionMessage
      * @param string $firstExpectedErrorMessage
      *
+     * @covers ::statusByToken
      * @covers ::status
      */
     public function testStatusByTokenWithInvalidParameters(array $params,
@@ -128,6 +130,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
      * @param int $expectedHttpCodeStatus
      * @param array $expectedPayloadResponse
      *
+     * @covers ::statusByToken
      * @covers ::status
      */
     public function testStatusByTokenWithValidParameters(array $params,

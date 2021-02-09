@@ -17,6 +17,7 @@ use Tests\TestCase;
 
 /**
  * @covers \App\Services\Import\Parts\CsvImportService::run
+ * @group MonitoredJobs
  */
 class RunTest extends TestCase
 {
