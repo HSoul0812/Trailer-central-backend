@@ -308,11 +308,11 @@ class ScrapeRepliesTest extends TestCase
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
-        foreach($unused as $reply) {
+        /*foreach($unused as $reply) {
             $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
-        }
+        }*/
 
 
         // Mock Imap Service
