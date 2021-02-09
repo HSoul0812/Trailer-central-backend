@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Leads;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\LeadType;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
+use App\Services\Common\DTOs\SimpleData;
 use Illuminate\Support\Collection;
 
 class TypeRepository implements TypeRepositoryInterface {
