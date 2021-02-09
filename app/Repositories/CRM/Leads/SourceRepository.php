@@ -33,7 +33,7 @@ class SourceRepository implements SourceRepositoryInterface {
         }
 
         // Get Default and Dealer Sources
-        $sources = LeadSource::where('user_id', $params['user_id'])
+        $sources = LeadSource::orWhere('user_id', $params['user_id'])
                              ->orWhere('user_id', 0)
                              ->orderBy('lead_source_id', 'ASC')
                              ->get();
