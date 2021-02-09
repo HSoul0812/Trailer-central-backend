@@ -4,7 +4,6 @@ namespace App\Http\Controllers\v1\Inventory\Floorplan\Bulk;
 
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
-use Illuminate\Support\Facades\Redis;
 
 use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 use App\Transformers\Inventory\Floorplan\PaymentTransformer;
@@ -12,11 +11,7 @@ use App\Http\Requests\Inventory\Floorplan\Bulk\CreatePaymentsRequest;
 
 class PaymentController extends RestfulController
 {
-    /**
-     * @var Connection
-     */
-    private $redis;
-
+    
     protected $payment;
     
     /**
@@ -27,7 +22,6 @@ class PaymentController extends RestfulController
     public function __construct(PaymentRepositoryInterface $payment)
     {
         $this->payment = $payment;
-        $this->redis = Redis::connection();
 
         $this->middleware('setDealerIdOnRequest')->only(['create']);
     }
@@ -93,15 +87,8 @@ class PaymentController extends RestfulController
     public function create(Request $request) {
         $request = new CreatePaymentsRequest($request->all());
 
-        $requests = $request->all();
-        $bulkFloorplanPaymentKey = 'bulk_floorplan_payment_' . $requests['dealer_id'];
-        if ($this->redis->get($bulkFloorplanPaymentKey) === $requests['paymentUUID']) {
-            throw new \Exception('This floorplan payment is duplicated.');
-        }
-
         if ( $request->validate() ) {
-            $payments = $this->payment->createBulk($requests['payments']);
-            $this->redis->set($bulkFloorplanPaymentKey, $requests['paymentUUID']);
+            $payments = $this->payment->createBulk($request->all());
 
             return $this->response->collection($payments, new PaymentTransformer());
         }  

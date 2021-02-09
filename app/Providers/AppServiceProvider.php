@@ -74,6 +74,8 @@ use App\Repositories\System\EmailRepository;
 use App\Repositories\System\EmailRepositoryInterface;
 use App\Services\Common\EncrypterServiceInterface;
 use App\Services\Common\SPLEncrypterService;
+use App\Services\Common\RedisServiceInterface;
+use App\Services\Common\RedisService;
 use App\Services\User\DealerOptionsService;
 use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
@@ -122,6 +124,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_part_order_status', 'App\Rules\Parts\ValidOrderStatus@passes');
         \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
         \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
+        \Validator::extend('payment_uuid_valid', 'App\Rules\Inventory\Floorplan\PaymentUUIDValid@validate');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -233,6 +236,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
 
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
+        $this->app->bind(RedisServiceInterface::class, RedisService::class);
     }
 
 }
