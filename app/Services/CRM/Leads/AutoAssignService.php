@@ -185,7 +185,6 @@ class AutoAssignService implements AutoAssignServiceInterface {
                     $credential = NewUser::getDealerCredential($dealer->user_id);
                     
                     // Send Email to Sales Person
-                    $salesEmail = 'david@trailercentral.com';
                     Mail::to($salesEmail ?? "" )->send(
                         new AutoAssignEmail([
                             'date' => Carbon::now()->toDateTimeString(),
