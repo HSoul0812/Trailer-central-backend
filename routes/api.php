@@ -55,7 +55,8 @@ $api->version('v1', function ($route) {
     $route->get('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@show')->where('id', '[0-9]+');
     $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
-
+    $route->post('reports/financials-parts', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financials');
+    $route->get('reports/read', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@read');
 
     /**
      * Part Categories
@@ -88,7 +89,8 @@ $api->version('v1', function ($route) {
      * Monitored jobs
      */
     $route->get('jobs', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@index');
-    $route->get('jobs/status/{token}', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@status');
+    $route->get('jobs/status/{token}', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@statusByToken');
+    $route->get('jobs/status', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@status');
 
     /**
      * Part Bulk download
