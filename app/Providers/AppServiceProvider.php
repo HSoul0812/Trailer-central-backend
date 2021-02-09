@@ -82,6 +82,8 @@ use App\Services\Common\LoggerService;
 use App\Services\Common\MonitoredGenericJobServiceInterface;
 use App\Services\Common\MonitoredJobService;
 use App\Services\Common\SPLEncrypterService;
+use App\Services\Export\DomPdfExporterService;
+use App\Services\Export\DomPdfExporterServiceInterface;
 use App\Services\User\DealerOptionsService;
 use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
@@ -245,6 +247,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);
 
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
-    }
 
+        $this->app->bind(DomPdfExporterServiceInterface::class, DomPdfExporterService::class);
+    }
 }
