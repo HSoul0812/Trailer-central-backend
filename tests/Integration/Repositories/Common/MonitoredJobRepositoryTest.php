@@ -16,6 +16,9 @@ use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
 use Exception;
 
+/**
+ * @covers \App\Repositories\Common\MonitoredJobRepository
+ */
 class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 {
     /**
@@ -33,6 +36,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @covers ::get
      * @throws BindingResolutionException
      * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
      */
@@ -62,6 +66,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @covers ::findByToken
      * @throws BindingResolutionException
      * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
      */
@@ -90,6 +95,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @covers ::getAll
      * @dataProvider queryParametersAndSummariesProvider
      *
      * @param array $params list of query parameters
@@ -120,6 +126,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @covers ::update
      * @throws BindingResolutionException
      * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
      */
@@ -173,6 +180,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @covers ::updateProgress
      * @throws BindingResolutionException
      */
     public function testUpdateProgressIsWorkingProperly(): void
@@ -201,6 +209,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @covers ::updateProgress
      * Test that SUT is updating the job status to `completed` when the progress is greater or equal than 100
      *
      * @throws BindingResolutionException
@@ -233,6 +242,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @covers ::setFailed
      * @throws BindingResolutionException
      */
     public function testSetFailedIsWorkingProperly(): void
@@ -263,6 +273,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @covers ::updateResult
      * @throws BindingResolutionException
      */
     public function testUpdateResultIsWorkingProperly(): void
@@ -290,6 +301,11 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * Test that SUT throws an specific exception when there is not a monitored job according to the provided token
+     *
+     * @covers ::setCompleted
+     * @covers ::updateProgress
+     * @covers ::updateResult
+     * @covers ::setFailed
      *
      * @dataProvider availableMethodsProvider
      *
@@ -321,6 +337,10 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
      * Test that SUT is creating the monitored job as expected with the status `processing`,
      * also it make sure that since there is a previously created job, when it is call `isBusyByDealer` it returns true,
      * and when it is call `isBusyByJobName` it returns true as well.
+     *
+     * @covers ::create
+     * @covers ::isBusyByDealer
+     * @covers ::isBusyByJobName
      *
      * @throws BindingResolutionException
      * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
@@ -402,11 +422,11 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
      */
     public function queryParametersAndSummariesProvider(): array
     {
-        return [                                          // array $parameters, int $expectedTotal, int $expectedLastPage
-            'No parameters'                               => [[], 12, 1],
-            'By dummy dealer paged at 2'                  => [['dealer_id' => $this->getSeededData(0,'id'), 'per_page' => 2], 8, 4],
-            'By other dummy dealer paged at 2'            => [['dealer_id' => $this->getSeededData(1,'id'), 'per_page' => 1], 4, 4],
-            'By dummy dealer paged at 100 (default)'      => [['dealer_id' => $this->getSeededData(0,'id')], 8, 1]
+        return [                                     // array $parameters, int $expectedTotal, int $expectedLastPage
+            'No parameters'                          => [[], 12, 1],
+            'By dummy dealer page by 2'              => [['dealer_id' => $this->getSeededData(0,'id'), 'per_page' => 2], 8, 4],
+            'By other dummy dealer page by 2'        => [['dealer_id' => $this->getSeededData(1,'id'), 'per_page' => 1], 4, 4],
+            'By dummy dealer paged at 100 (default)' => [['dealer_id' => $this->getSeededData(0,'id')], 8, 1]
         ];
     }
 
