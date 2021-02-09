@@ -12,6 +12,8 @@ use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class MonitoredJobsController extends RestfulController
@@ -89,7 +91,7 @@ class MonitoredJobsController extends RestfulController
      *     )
      * )
      */
-    public function status(string $token, Request $request): ?JsonResponse
+    public function statusByToken(string $token, Request $request): ?JsonResponse
     {
         $request = new GetMonitoredJobsRequest(array_merge($request->all(), ['token' => $token]));
 
@@ -112,5 +114,29 @@ class MonitoredJobsController extends RestfulController
         }
 
         $this->response->errorBadRequest();
+    }
+
+    /**
+     * Check status of the process
+     *
+     * @param Request $request
+     * @return JsonResponse|void
+     * @throws HttpException when there was a bad request
+     *
+     * @OA\Get(
+     *     path="/api/jobs/status",
+     *     description="Check status of the process",
+     *     tags={"MonitoredJobs"},
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="query",
+     *         description="The job token",
+     *         required=true
+     *     )
+     * )
+     */
+    public function status(Request $request): ?JsonResponse
+    {
+        return $this->statusByToken($request->get('token'), $request);
     }
 }

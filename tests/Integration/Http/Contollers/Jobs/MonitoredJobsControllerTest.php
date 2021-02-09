@@ -91,7 +91,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::status
      */
-    public function testStatusWithInvalidParameters(array $params,
+    public function testStatusByTokenWithInvalidParameters(array $params,
                                                     string $expectedException,
                                                     string $expectedExceptionMessage,
                                                     string $firstExpectedErrorMessage): void
@@ -111,7 +111,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
 
         try {
             // When I call the status action using the token and the bad formed request
-            $controller->status($request->get('token', ''), $request);
+            $controller->statusByToken($request->get('token', ''), $request);
         } catch (ResourceException $exception) {
             // Then I should see that the first error message has a specific string
             self::assertSame($firstExpectedErrorMessage, $exception->getErrors()->first());
@@ -130,7 +130,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::status
      */
-    public function testStatusWithValidParameters(array $params,
+    public function testStatusByTokenWithValidParameters(array $params,
                                                   string $jobStatus,
                                                   int $expectedHttpCodeStatus,
                                                   array $expectedPayloadResponse): void
@@ -157,7 +157,7 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
         $request = new GetMonitoredJobsRequest($extractedParams);
 
         // When I call the status action using the provided token and request
-        $response = $controller->status($extractedParams['token'], $request);
+        $response = $controller->statusByToken($extractedParams['token'], $request);
 
         // Then I should see that response status is the same as expected
         self::assertSame($expectedHttpCodeStatus, $response->status());
