@@ -36,7 +36,7 @@ class SourceRepository implements SourceRepositoryInterface {
         $sources = LeadSource::orWhere('user_id', $params['user_id'])
                              ->orWhere('user_id', 0)
                              ->orderBy('lead_source_id', 'ASC')
-                             ->get();
+                             ->cursor();
 
         // Loop Sources
         $names = [];

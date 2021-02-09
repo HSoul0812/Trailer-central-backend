@@ -67,7 +67,7 @@ class NewDealerUser extends Model
     }
 
     /**
-     * @return get the website
+     * @return App\Models\Website\Website
      */
     public function website()
     {
