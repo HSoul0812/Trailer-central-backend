@@ -285,22 +285,26 @@ class ScrapeRepliesTest extends TestCase
         $unused = factory(EmailHistory::class, 5)->make();
 
         // Get Messages
+        $full = [];
         $parsed = [];
         $messages = [];
         $id = 0;
         foreach($replies as $reply) {
             $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
+            $full[$id] = true;
             $id++;
         }
         foreach($nosub as $reply) {
             $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
+            $full[$id] = true;
             $id++;
         }
         foreach($noto as $reply) {
             $messages[] = $id;
-            $parsed[] = $this->getParsedEmail($id, $reply);
+            $parsed[$id] = $this->getParsedEmail($id, $reply);
+            $full[$id] = true;
             $id++;
         }
         foreach($noid as $reply) {
@@ -308,15 +312,15 @@ class ScrapeRepliesTest extends TestCase
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
         }
-        /*foreach($unused as $reply) {
+        foreach($unused as $reply) {
             $messages[] = $id;
             $parsed[$id] = $this->getParsedEmail($id, $reply);
             $id++;
-        }*/
+        }
 
 
         // Mock Imap Service
-        $this->mock(ImapServiceInterface::class, function ($mock) use($folders, $messages, $parsed, $replies, $nosub, $noto) {
+        $this->mock(ImapServiceInterface::class, function ($mock) use($folders, $messages, $parsed, $full) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->times(count($folders))
@@ -330,8 +334,8 @@ class ScrapeRepliesTest extends TestCase
                      ->times(count($folders))
                      ->andReturn($email);
 
-                // Exists in Replies?
-                if(isset($replies[$id]) || isset($nosub[$id]) || isset($noto[$id])) {
+                // Must Reach Full Method?
+                if(isset($full[$id])) {
                     // Should Receive Full Details Once Per Folder Per Reply!
                     $mock->shouldReceive('full')
                          ->with(Mockery::on(function($overview) use($email) {
@@ -363,7 +367,7 @@ class ScrapeRepliesTest extends TestCase
         }
 
         // Mock Skipped Replies
-        /*foreach($unused as $email) {
+        foreach($unused as $email) {
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_email_processed', [
                 'user_id' => $salesPerson->user_id,
@@ -374,7 +378,7 @@ class ScrapeRepliesTest extends TestCase
             $this->assertDatabaseMissing('crm_email_history', [
                 'message_id' => $email->message_id
             ]);
-        }*/
+        }
 
         // Mock Skipping Entirely
         foreach($nosub as $email) {
