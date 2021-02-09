@@ -4,7 +4,9 @@ namespace App\Repositories\Parts;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\Parts\Bin;
-use App\Repositories\Parts\BinRepositoryInterface;
+use App\Models\Parts\BinQuantity;
+use App\Models\Parts\Part;
+use Illuminate\Support\Facades\DB;
 
 /**
  *
@@ -98,11 +100,11 @@ class BinRepository implements BinRepositoryInterface
                     'dealer_id' => $dealerId,
                     'bin_name' => $csvData[$keyToIndexMapping[$id]],
                 ));
-                
+
                 if (empty($bin)) {
                     break;
                 }
-                
+
                 $binId = $bin->id;
 
                 // Return Bin Array
@@ -121,4 +123,36 @@ class BinRepository implements BinRepositoryInterface
         return $bins;
     }
 
+
+    /**
+     * @param int $dealerId
+     * @return array
+     */
+    public function financialReportByDealer(int $dealerId): array
+    {
+        $binTable = Bin::getTableName();
+        $binQtyTable = BinQuantity::getTableName();
+        $partTable = Part::getTableName();
+
+        $bins = Bin::select(DB::raw("{$binQtyTable}.qty, {$binTable}.bin_name, {$binQtyTable}.bin_id, {$partTable}.id," .
+            " title, sku, price, dealer_cost"))
+            ->leftJoin($binQtyTable, static function ($join) use ($binTable, $binQtyTable) {
+                return $join->on("{$binQtyTable}.bin_id", '=', "{$binTable}.id")
+                    ->where("{$binQtyTable}.bin_id", '>', 0);
+            })
+            ->leftJoin($partTable, static function ($join) use ($dealerId, $partTable, $binQtyTable) {
+                return $join->on("{$partTable}.id", '=', "{$binQtyTable}.part_id")
+                    ->where("{$partTable}.dealer_id", '=', $dealerId);
+            })
+            ->whereNotNull("{$partTable}.id")->cursor();
+
+        $report = [];
+
+        /** @var Bin $bin */
+        foreach ($bins as $bin) {
+            $report[$bin->id][$bin->bin_id]['part'] = $bin->toArray();
+        }
+
+        return $report;
+    }
 }

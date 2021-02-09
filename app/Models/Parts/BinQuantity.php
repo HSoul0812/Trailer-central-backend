@@ -2,12 +2,15 @@
 
 namespace App\Models\Parts;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
-class BinQuantity extends Model {
-    
+class BinQuantity extends Model
+{
+    use TableAware;
+
     protected $table = 'part_bin_qty';
-    
+
     /**
      * The attributes that are mass assignable.
      *

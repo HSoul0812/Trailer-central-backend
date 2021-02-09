@@ -2,6 +2,7 @@
 
 namespace App\Models\Parts;
 
+use App\Models\Traits\TableAware;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -25,8 +26,7 @@ use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
  */
 class Part extends Model
 {
-
-    use Searchable, CustomSearch;
+    use Searchable, CustomSearch, TableAware;
 
     protected $table = 'parts_v1';
 
@@ -220,7 +220,7 @@ class Part extends Model
     {
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
     }
-    
+
     public function getTotalQtyAttribute()
     {
         return ($this->bins instanceof Collection)?
