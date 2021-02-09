@@ -182,7 +182,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
                     $this->setLeadExplanationNotes($lead->identifier, 'Attempting to Send Notification Email to: ' . $salesEmail . ' for Lead: ' . $leadName);
                     $this->log->info("AutoAssignService sending notification email to {$salesEmail} for lead {$leadName}");
                     
-                    $credential = NewUser::getDealerCredential($dealer->user_id);
+                    $credential = NewUser::getDealerCredential($dealer->user_id, $salesPerson->id);
                     
                     // Send Email to Sales Person
                     Mail::to($salesEmail ?? "" )->send(
