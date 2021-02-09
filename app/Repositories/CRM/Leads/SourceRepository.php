@@ -25,15 +25,38 @@ class SourceRepository implements SourceRepositoryInterface {
     }
 
     public function getAll($params): Collection {
-        // Set User ID By Default
-        if(!isset($params['user_id'])) {
-            $params['user_id'] = 0;
-        }
-
-        // Return Lead Sources
-        return LeadSource::where('user_id', $params['user_id'])
+        // User ID Set?
+        if(empty($params['user_id'])) {
+            return LeadSource::where('user_id', 0)
                          ->orderBy('lead_source_id', 'ASC')
                          ->get();
+        }
+
+        // Get Default and Dealer Sources
+        $sources = LeadSource::where('user_id', $params['user_id'])
+                             ->orWhere('user_id', 0)
+                             ->orderBy('lead_source_id', 'ASC')
+                             ->get();
+
+        // Loop Sources
+        $names = [];
+        $overrides = [];
+        foreach($sources as $source) {
+            // Get Source ID
+            $sourceId = $source->parent_id ?? $source->lead_source_id;
+            if(!in_array($source->source_name, $names)) {
+                $overrides[$sourceId] = $source;
+            }
+
+            // Skip Sources
+            if($source->deleted) {
+                unset($overrides[$sourceId]);
+            }
+            $names[] = $source->source_name;
+        }
+
+        // Collect Overrides
+        return collect($overrides);
     }
 
     public function update($params): LeadSource {

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\v1\CRM\Leads;
 
-use App\Http\Requests\CRM\Leads\GetLeadsStatusRequest;
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\CRM\Leads\GetLeadsStatusRequest;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Transformers\SimpleTransformer;
 use Dingo\Api\Http\Request;
@@ -16,7 +16,7 @@ class LeadStatusController extends RestfulController
     protected $status;
 
     /**
-     * @var App\Transformers\CRM\Leads\StatusTransformer
+     * @var App\Transformers\SimpleTransformer
      */
     protected $transformer;
 

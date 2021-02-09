@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v1\CRM\Leads;
 
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\CRM\Leads\GetLeadsTypeRequest;
-use App\Transformers\SimpleTransformer;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
+use App\Transformers\SimpleTransformer;
 use Dingo\Api\Http\Request;
 
 class LeadTypeController extends RestfulController
@@ -13,7 +13,7 @@ class LeadTypeController extends RestfulController
     protected $types;
 
     /**
-     * @var App\Http\Requests\CRM\Leads\GetLeadsTypeRequest
+     * @var App\Transformers\SimpleTransformer
      */
     protected $transformer;
 
