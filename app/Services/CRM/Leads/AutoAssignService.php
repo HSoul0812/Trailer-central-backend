@@ -4,6 +4,7 @@ namespace App\Services\CRM\Leads;
 
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User\NewUser;
@@ -18,9 +19,14 @@ class AutoAssignService implements AutoAssignServiceInterface {
     use MailHelper;
     
     /**     
-     * @var App\Repositories\CRM\Leads\LeadRepository
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
-    protected $leadRepository;
+    protected $leads;
+    
+    /**     
+     * @var App\Repositories\CRM\Leads\StatusRepositoryInterface
+     */
+    protected $leadStatus;
     
     /**     
      * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
@@ -44,8 +50,9 @@ class AutoAssignService implements AutoAssignServiceInterface {
     
     private $datetime;
     
-    public function __construct(LeadRepositoryInterface $leadRepo, SalesPersonRepositoryInterface $salesPersonRepo) {
-        $this->leadRepository = $leadRepo;
+    public function __construct(LeadRepositoryInterface $leads, StatusRepositoryInterface $leadStatus, SalesPersonRepositoryInterface $salesPersonRepo) {
+        $this->leads = $leads;
+        $this->leadStatus = $leadStatus;
         $this->salesPersonRepository = $salesPersonRepo;
         
         date_default_timezone_set(env('DB_TIMEZONE'));
@@ -120,7 +127,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
             $this->setLeadExplanationNotes($lead->identifier, 'Couldn\'t Find Salesperson ID to Assign Lead #' . $leadName . ' to, skipping temporarily!');
             $this->log->error("AutoAssignService couldn't find next sales person for lead {$leadName}");
             $status = 'skipped';
-            $this->leadRepository->assign([
+            $this->leads->assign([
                 'dealer_id' => $dealer->id,
                 'lead_id' => $lead->identifier,
                 'dealer_location_id' => $dealerLocationId,
@@ -156,8 +163,8 @@ class AutoAssignService implements AutoAssignServiceInterface {
                 $status = 'assigning';
                 $this->setLeadExplanationNotes($lead->identifier, 'Assigning Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName);
                 $this->log->info("AutoAssignService assigning next sales person {$salesPerson->id} for lead {$leadName}");
-                $this->leadRepository->update([
-                    'id' => $lead->identifier,
+                $this->leadStatus->createOrUpdate([
+                    'lead_id' => $lead->identifier,
                     'sales_person_id' => $salesPerson->id,
                     'next_contact_date' => $nextContactGmt
                 ]);
@@ -210,7 +217,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         }
 
         // Log Details for Process
-        $this->leadRepository->assign([
+        $this->leads->assign([
             'dealer_id' => $dealer->id,
             'lead_id' => $lead->identifier,
             'dealer_location_id' => $dealerLocationId,
