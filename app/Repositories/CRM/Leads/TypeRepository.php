@@ -40,13 +40,15 @@ class TypeRepository implements TypeRepositoryInterface {
      */
     public function getAllUnique() {
         // Return Unique Lead Types
-        $leadTypes = [];
+        $leadTypes = collect([]);
         foreach(LeadType::TYPE_ARRAY as $type) {
-            $leadTypes[] = [
-                'id' => $type,
-                'name' => ucfirst($type)
-            ];
+            $simple = new SimpleData();
+            $simple->setIndex($type);
+            $simple->setName(ucfirst($type));
+            $leadTypes->push($simple);
         }
+
+        // Return Collection of Types
         return $leadTypes;
     }
 }

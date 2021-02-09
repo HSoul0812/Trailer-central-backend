@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\v1\CRM\Leads;
 
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\CRM\Leads\GetLeadsTypeRequest;
+use App\Transformers\SimpleTransformer;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\CRM\Leads\GetLeadsTypeRequest;
 
 class LeadTypeController extends RestfulController
 {
     protected $types;
+
+    /**
+     * @var App\Http\Requests\CRM\Leads\GetLeadsTypeRequest
+     */
+    protected $transformer;
 
     /**
      * Create a new controller instance.
@@ -19,16 +25,15 @@ class LeadTypeController extends RestfulController
     public function __construct(TypeRepositoryInterface $types)
     {
         $this->types = $types;
+        $this->transformer = new SimpleTransformer;
     }
 
     public function index(Request $request) {
         $request = new GetLeadsTypeRequest($request->all());
         $requestData = $request->all();
 
-        if ($request->validate()) {             
-            return $this->response->array([
-                'data' => $this->types->getAllUnique()
-            ]);
+        if ($request->validate()) {
+            return $this->response->collection($this->types->getAllUnique(), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
