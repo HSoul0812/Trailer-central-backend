@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class GoogleService
- * 
+ *
  * @package App\Services\Integration\Google
  */
 class GoogleService implements GoogleServiceInterface
@@ -53,15 +53,15 @@ class GoogleService implements GoogleServiceInterface
         $this->log = Log::channel('google');
 
         // No Client ID?!
-        if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
+        if(empty(env('GOOGLE_OAUTH_CLIENT_ID'))) {
             throw new MissingGapiClientIdException;
         }
 
         // Initialize Client
         $this->client = new \Google_Client();
-        $this->client->setApplicationName($_ENV['GOOGLE_OAUTH_APP_NAME']);
-        $this->client->setClientId($_ENV['GOOGLE_OAUTH_CLIENT_ID']);
-        $this->client->setClientSecret($_ENV['GOOGLE_OAUTH_CLIENT_SECRET']);
+        $this->client->setApplicationName(env('GOOGLE_OAUTH_APP_NAME'));
+        $this->client->setClientId(env('GOOGLE_OAUTH_CLIENT_ID'));
+        $this->client->setClientSecret(env('GOOGLE_OAUTH_CLIENT_SECRET'));
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
@@ -74,7 +74,7 @@ class GoogleService implements GoogleServiceInterface
 
     /**
      * Get Login URL
-     * 
+     *
      * @param string $redirectUrl url to redirect auth back to again
      * @param array $scopes scopes requested by login
      * @return login url with offline access support
@@ -89,7 +89,7 @@ class GoogleService implements GoogleServiceInterface
 
     /**
      * Get Auth URL
-     * 
+     *
      * @param string $redirectUrl url to redirect auth back to again
      * @param string $authCode auth code to get full credentials with
      * @return array created from EmailTokenTransformer
@@ -118,7 +118,7 @@ class GoogleService implements GoogleServiceInterface
 
     /**
      * Get Refresh Token
-     * 
+     *
      * @param AccessToken $accessToken
      * @return array of validation info
      */
@@ -139,7 +139,7 @@ class GoogleService implements GoogleServiceInterface
 
     /**
      * Validate Google API Access Token Exists and Refresh if Possible
-     * 
+     *
      * @param AccessToken $accessToken
      * @return array of validation info
      */
@@ -188,7 +188,7 @@ class GoogleService implements GoogleServiceInterface
 
     /**
      * Validate Google API Access Token Exists and Refresh if Possible
-     * 
+     *
      * @param CommonToken $accessToken
      * @return array of validation info
      */
@@ -233,7 +233,7 @@ class GoogleService implements GoogleServiceInterface
 
     /**
      * Validate ID Token
-     * 
+     *
      * @param string $idToken
      * @return boolean
      */
@@ -261,7 +261,7 @@ class GoogleService implements GoogleServiceInterface
 
     /**
      * Refresh Access Token
-     * 
+     *
      * @return array of expired status, also return new token if available
      */
     private function refreshAccessToken() {

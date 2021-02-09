@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\Leads;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\LeadType;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
+use App\Services\Common\DTOs\SimpleData;
 use Illuminate\Support\Collection;
 
 class TypeRepository implements TypeRepositoryInterface {
@@ -40,13 +41,15 @@ class TypeRepository implements TypeRepositoryInterface {
      */
     public function getAllUnique() {
         // Return Unique Lead Types
-        $leadTypes = [];
+        $leadTypes = collect([]);
         foreach(LeadType::TYPE_ARRAY as $type) {
-            $leadTypes[] = [
-                'id' => $type,
-                'name' => ucfirst($type)
-            ];
+            $simple = new SimpleData();
+            $simple->setIndex($type);
+            $simple->setName(ucfirst($type));
+            $leadTypes->push($simple);
         }
+
+        // Return Collection of Types
         return $leadTypes;
     }
 }

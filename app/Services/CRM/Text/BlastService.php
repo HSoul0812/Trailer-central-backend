@@ -8,7 +8,7 @@ use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\BlastSent;
 use App\Services\CRM\Text\TextServiceInterface;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
@@ -30,9 +30,9 @@ class BlastService implements BlastServiceInterface
     protected $textService;
 
     /**
-     * @var App\Repositories\CRM\Leads\LeadRepository
+     * @var App\Repositories\CRM\Leads\StatusRepository
      */
-    protected $leads;
+    protected $leadStatus;
 
     /**
      * @var App\Repositories\CRM\Text\TextRepository
@@ -58,7 +58,7 @@ class BlastService implements BlastServiceInterface
      * BlastService constructor.
      */
     public function __construct(TextServiceInterface $text,
-                                LeadRepositoryInterface $leadRepo,
+                                StatusRepositoryInterface $leadStatus,
                                 TextRepositoryInterface $textRepo,
                                 BlastRepositoryInterface $blastRepo,
                                 TemplateRepositoryInterface $templateRepo,
@@ -68,7 +68,7 @@ class BlastService implements BlastServiceInterface
         $this->textService = $text;
 
         // Initialize Repositories
-        $this->leads = $leadRepo;
+        $this->leadStatus = $leadStatus;
         $this->texts = $textRepo;
         $this->blasts = $blastRepo;
         $this->templates = $templateRepo;
@@ -165,9 +165,9 @@ class BlastService implements BlastServiceInterface
         $textLog = null;
         DB::transaction(function() use ($from_number, $blast, $lead, $textMessage, &$status, &$textLog) {
             // Save Lead Status
-            $this->leads->update([
-                'id' => $lead->identifier,
-                'lead_status' => Lead::STATUS_MEDIUM,
+            $this->leadStatus->createOrUpdate([
+                'lead_id' => $lead->identifier,
+                'status' => Lead::STATUS_MEDIUM,
                 'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
             ]);
             $status = BlastSent::STATUS_LEAD;

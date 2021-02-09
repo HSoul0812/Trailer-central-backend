@@ -70,6 +70,7 @@ class AutoAssignTest extends TestCase
             if(empty($salespeople) || count($salespeople) < 3) {
                 $add = (3 - count($salespeople));
                 factory(SalesPerson::class, $add)->create([
+                    'user_id' => $dealer->crmUser->user_id,
                     'dealer_location_id' => $locationId
                 ]);
             }
@@ -83,6 +84,7 @@ class AutoAssignTest extends TestCase
         factory(Lead::class, 10)->create([
             'website_id' => $websiteId,
             'dealer_id' => $dealer->id,
+            'dealer_location_id' => $locationId,
             'lead_type' => 'general'
         ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
@@ -106,7 +108,7 @@ class AutoAssignTest extends TestCase
             // Find Next!
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
-            $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
+            $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $leadSalesPeople[$lead->identifier]);
         }
 
         // Fake Mail
@@ -179,6 +181,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId
             ]);
         }
@@ -324,6 +327,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId,
                 'is_trade' => 0
             ]);
@@ -474,6 +478,7 @@ class AutoAssignTest extends TestCase
                 } else {
                     // Create Sales Person!
                     $params = [
+                        'user_id' => $dealer->crmUser->user_id,
                         'dealer_location_id' => $locationId,
                         'is_default' => 0,
                         'is_inventory' => 0,
@@ -611,6 +616,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => $salesType
             ]);
@@ -760,6 +766,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId
             ]);
         }
