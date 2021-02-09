@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class GoogleService
- * 
+ *
  * @package App\Services\Integration\Google
  */
 class GmailService implements GmailServiceInterface
@@ -65,14 +65,14 @@ class GmailService implements GmailServiceInterface
         $this->log = Log::channel('google');
 
         // No Client ID?!
-        if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
+        if(empty(env('GOOGLE_OAUTH_CLIENT_ID'))) {
             throw new MissingGapiClientIdException;
         }
 
         // Initialize Client
         $this->client = new \Google_Client();
-        $this->client->setApplicationName($_ENV['GOOGLE_OAUTH_APP_NAME']);
-        $this->client->setClientId($_ENV['GOOGLE_OAUTH_CLIENT_ID']);
+        $this->client->setApplicationName(env('GOOGLE_OAUTH_APP_NAME'));
+        $this->client->setClientId(env('GOOGLE_OAUTH_CLIENT_ID'));
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
@@ -81,7 +81,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get Gmail Profile Email
-     * 
+     *
      * @param EmailToken $emailToken
      * @return EmailToken
      */
@@ -107,7 +107,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Send Gmail Email
-     * 
+     *
      * @param AccessToken $accessToken
      * @throws App\Exceptions\Integration\Google\InvalidToEmailAddressException
      * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
@@ -171,7 +171,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get All Messages With Label
-     * 
+     *
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
      * @param array $params
@@ -214,7 +214,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get and Parse Individual Message
-     * 
+     *
      * @param string $mailId
      * @return parsed message details
      */
@@ -245,7 +245,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Move Message Labels
-     * 
+     *
      * @param AccessToken $accessToken
      * @param string $mailId mail ID to modify
      * @param array $labels labels to add by name | required
@@ -273,7 +273,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get All Labels for User
-     * 
+     *
      * @param AccessToken $accessToken
      * @param string $search
      * @param bool $single
@@ -318,7 +318,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Set Access Token on Client
-     * 
+     *
      * @param type $accessToken
      * @return void
      */
@@ -343,7 +343,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Set Google Token on Client
-     * 
+     *
      * @param EmailToken $emailToken
      * @return void
      */
@@ -369,7 +369,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Prepare Message to Send to Gmail
-     * 
+     *
      * @param array $params
      * @return Google_Service_Gmail_Message
      */
@@ -425,7 +425,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get All Label ID's for User
-     * 
+     *
      * @param array labels
      * @return array of label ID's
      */
@@ -442,7 +442,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Parse Message Headers Into More Reasonable Format
-     * 
+     *
      * @param array $headers
      * @return array
      */
@@ -465,7 +465,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Parse Message Into Body
-     * 
+     *
      * @param string $message_id
      * @param Google_Service_Gmail_MessagePart|array $payload
      * @source https://stackoverflow.com/a/32660892
@@ -503,7 +503,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Parse Message Into Attachments
-     * 
+     *
      * @param string $message_id
      * @param array $parts
      * @source https://stackoverflow.com/a/59400043
@@ -536,7 +536,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get Parsed Message
-     * 
+     *
      * @param string $mailId
      * @param array $headers
      * @param string $body
