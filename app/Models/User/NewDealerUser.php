@@ -67,7 +67,7 @@ class NewDealerUser extends Model
     }
 
     /**
-     * @return App\Models\Website\Website
+     * @return Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function website()
     {
