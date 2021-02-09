@@ -9,6 +9,7 @@ use App\Models\Observers\Common\MonitoredJobObserver;
 use App\Models\Traits\TableAware;
 use App\Models\User\User;
 use App\Repositories\Common\MonitoredJobRepository;
+use DateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,9 +30,9 @@ use Illuminate\Database\Query\Builder;
  * @property float $progress progress between 0 to 100
  * @property MonitoredJobPayload $payload json data useful for handle the job
  * @property MonitoredJobResult $result json data resulting
- * @property string $created_at when the job was created
- * @property string $updated_at when the job was last updated
- * @property string $finished_at when the job was finished (or failed)
+ * @property DateTime $created_at when the job was created
+ * @property DateTime $updated_at when the job was last updated
+ * @property DateTime $finished_at when the job was finished (or failed)
  *
  * @property User $dealer
  *
@@ -40,6 +41,7 @@ use Illuminate\Database\Query\Builder;
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  * @method static Collection|static create(array $attributes = [])
  * @method static static findOrFail($id, $columns = ['*'])
+ * @method static truncate()
  */
 class MonitoredJob extends Model
 {
@@ -125,6 +127,12 @@ class MonitoredJob extends Model
      * @var array
      */
     protected $guarded = [
+        'created_at',
+        'updated_at',
+        'finished_at'
+    ];
+
+    protected $dates = [
         'created_at',
         'updated_at',
         'finished_at'

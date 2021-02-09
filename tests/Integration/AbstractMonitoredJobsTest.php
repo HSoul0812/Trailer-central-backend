@@ -65,6 +65,15 @@ abstract class AbstractMonitoredJobsTest extends TestCase
                     $max = count($jobs);
 
                     return $jobs[$this->faker->numberBetween(0, $max - 1)]->token;
+                case 'random-job':
+                    $jobs = $seeder->jobs[$dealerId];
+                    $max = count($jobs);
+
+                    return $jobs[$this->faker->numberBetween(0, $max - 1)];
+                case 'first-job-name':
+                    $jobs = $seeder->jobs[$dealerId];
+
+                    return $jobs[0]->name;
             }
 
             return null;

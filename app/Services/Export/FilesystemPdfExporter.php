@@ -53,8 +53,6 @@ class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
     public function export(): void
     {
         $this->engine->loadHTML($this->view->render());
-        //$fileName = sprintf('/exported-%s-%s.pdf', date('Y-m-d-H-i-s'), uniqid('', false));
-
         Storage::disk('tmp')->put($this->filename, $this->engine->output());
     }
 }

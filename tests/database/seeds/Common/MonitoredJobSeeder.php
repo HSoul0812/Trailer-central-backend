@@ -52,7 +52,7 @@ class MonitoredJobSeeder extends Seeder
         });
 
         // Database clean up
-        MonitoredJob::whereIn('dealer_id', $dealersId)->delete();
+        MonitoredJob::truncate();
         User::whereIn('dealer_id', $dealersId)->delete();
     }
 }
