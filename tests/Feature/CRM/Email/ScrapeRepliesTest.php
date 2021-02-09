@@ -320,7 +320,7 @@ class ScrapeRepliesTest extends TestCase
 
 
         // Mock Imap Service
-        $this->mock(ImapServiceInterface::class, function ($mock) use($folders, $messages, $parsed, $full) {
+        $this->mock(ImapServiceInterface::class, function ($mock) use($folders, $messages, $parsed, $replies, $full) {
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('messages')
                  ->times(count($folders))
@@ -334,14 +334,22 @@ class ScrapeRepliesTest extends TestCase
                      ->times(count($folders))
                      ->andReturn($email);
 
-                // Must Reach Full Method?
-                if(isset($full[$id])) {
-                    // Should Receive Full Details Once Per Folder Per Reply!
+                // Actually Imported as Reply?
+                if(isset($replies[$id])) {
+                    // Should Receive Full Details Once
                     $mock->shouldReceive('full')
                          ->with(Mockery::on(function($overview) use($email) {
                             return ($overview->getMessageId() == $email->getMessageId());
                          }))
                          ->once()
+                         ->andReturn($email);
+                } elseif(isset($full[$id])) {
+                    // Should Receive Full Details Once Per Folder
+                    $mock->shouldReceive('full')
+                         ->with(Mockery::on(function($overview) use($email) {
+                            return ($overview->getMessageId() == $email->getMessageId());
+                         }))
+                         ->times(count($folders))
                          ->andReturn($email);
                 } else {
                     // Should NOT Receive Full Details; This One Is Invalid and Skipped
