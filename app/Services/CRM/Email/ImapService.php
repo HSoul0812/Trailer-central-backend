@@ -15,7 +15,7 @@ use Carbon\Carbon;
 
 /**
  * Class ScrapeRepliesService
- * 
+ *
  * @package App\Services\CRM\Email
  */
 class ImapService implements ImapServiceInterface
@@ -40,7 +40,7 @@ class ImapService implements ImapServiceInterface
      */
     public function __construct()
     {
-        $this->attachmentDir = $_ENV['MAIL_ATTACHMENT_DIR'];
+        $this->attachmentDir = env('MAIL_ATTACHMENT_DIR');
         if(!file_exists($this->attachmentDir)) {
             mkdir($this->attachmentDir);
         }
@@ -51,7 +51,7 @@ class ImapService implements ImapServiceInterface
 
     /**
      * Import Email Replies
-     * 
+     *
      * @param ImapConfig $imapConfig
      * @throws App\Exceptions\CRM\Email\ImapConnectionFailedException
      * @throws App\Exceptions\CRM\Email\ImapFolderConnectionFailedException
@@ -87,7 +87,7 @@ class ImapService implements ImapServiceInterface
 
     /**
      * Get Basic Overview
-     * 
+     *
      * @param string $mailId
      * @return array of parsed data
      */
@@ -141,7 +141,7 @@ class ImapService implements ImapServiceInterface
 
     /**
      * Full Reply Details to Clean Up Result
-     * 
+     *
      * @param ParsedEmail $email
      * @return ParsedEmail updated with additional details
      */
@@ -179,7 +179,7 @@ class ImapService implements ImapServiceInterface
 
     /**
      * Connect to IMAP
-     * 
+     *
      * @param string $folder
      * @param array $config
      * @return type
@@ -216,7 +216,7 @@ class ImapService implements ImapServiceInterface
 
     /**
      * Get Messages After Set Date
-     * 
+     *
      * @param string $time days || all || DATETIME
      * @param int $days
      * @return array of emails
@@ -252,7 +252,7 @@ class ImapService implements ImapServiceInterface
 
     /**
      * Parse Attachments From
-     * 
+     *
      * @param Mail $mail
      * @return array of files
      */
