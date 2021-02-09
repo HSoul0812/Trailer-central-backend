@@ -181,7 +181,7 @@ return [
         App\Providers\IntegrationServiceProvider::class,
         App\Providers\InteractionServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
-
+        App\Providers\JobServiceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -194,6 +194,7 @@ return [
         ElasticScoutDriverPlus\ServiceProvider::class,
         ElasticMigrations\ServiceProvider::class,
         App\Providers\SpatialServiceProvider::class,
+        Barryvdh\DomPDF\ServiceProvider::class,
 
         /*
          * Nova stuff
@@ -248,8 +249,7 @@ return [
         'Str' => Illuminate\Support\Str::class,
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
-        'View' => Illuminate\Support\Facades\View::class,
-
+        'View' => Illuminate\Support\Facades\View::class
     ],
 
 ];
