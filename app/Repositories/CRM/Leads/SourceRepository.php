@@ -43,7 +43,7 @@ class SourceRepository implements SourceRepositoryInterface {
         $overrides = [];
         foreach($sources as $source) {
             // Get Source ID
-            $sourceId = $source->parent_id ?? $source->lead_source_id;
+            $sourceId = !empty($source->parent_id) ? $source->parent_id : $source->lead_source_id;
             if(!in_array($source->source_name, $names)) {
                 $overrides[$sourceId] = $source;
             }
