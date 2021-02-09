@@ -13,6 +13,7 @@ use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Faker\Factory as Faker;
+use Faker\Provider\Uuid;
 use Tests\TestCase;
 
 class PaymentRepositoryTest extends TestCase
@@ -37,10 +38,45 @@ class PaymentRepositoryTest extends TestCase
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      * @note IntegrationTestCase
      */
-    public function testCreateBulkAsExpected(): void {
+    public function testNumberOfBulkPaymentsCreatedAsExpected(): void {
+        $paymentsData = $this->generatePaymentsData();
+        $payments = $this->getConcreteRepository()->createBulk([
+            'payments' => $paymentsData['payments'],
+            'dealer_id' => $paymentsData['dealerId'],
+            'paymentUUID' => Uuid::uuid()
+        ]);
+
+        self::assertSame(count($paymentsData), count($payments));
+    }
+
+    /**
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
+     * @note IntegrationTestCase
+     */
+    public function testCreateFloorplanPaymentAsExpected(): void {
+        $paymentsData = $this->generatePaymentsData(1);
+        $payment = $this->getConcreteRepository()->create($paymentsData['payments'][0]);
+
+        self::assertInstanceOf(Payment::class, $payment);
+    }
+
+    /**
+     * @return PaymentRepositoryInterface
+     *
+     * @throws BindingResolutionException when there is a problem with resolution
+     *                                    of concreted class
+     *
+     */
+    protected function getConcreteRepository(): PaymentRepositoryInterface
+    {
+        return $this->app->make(PaymentRepositoryInterface::class);
+    }
+
+    private function generatePaymentsData($maxOfPayments = 5)
+    {
         $paymentsData = [];
         $faker = Faker::create();
-        $countOfPayments = $faker->numberBetween(1, 5);
+        $countOfPayments = $faker->numberBetween(1, $maxOfPayments);
         $dealerId = factory(User::class)->create()->getKey();
 
         foreach (range(1, $countOfPayments) as $paymentIndex) {
@@ -55,20 +91,7 @@ class PaymentRepositoryTest extends TestCase
                 'amount' => $faker->randomFloat(2, 100, 500)
             ];
         }
-        $payments = $this->getConcreteRepository()->createBulk($paymentsData);
 
-        self::assertSame($countOfPayments, count($payments));
-    }
-
-    /**
-     * @return PaymentRepositoryInterface
-     *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
-     *
-     */
-    protected function getConcreteRepository(): PaymentRepositoryInterface
-    {
-        return $this->app->make(PaymentRepositoryInterface::class);
+        return ['payments' => $paymentsData, 'dealerId' => $dealerId];
     }
 }
