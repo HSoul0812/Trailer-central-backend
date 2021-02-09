@@ -104,7 +104,7 @@ class ImapService implements ImapServiceInterface
         $parsed->setId((string) $overview->uid);
 
         // Set Message ID's
-        $parsed->setMessageId(!empty($overview->in_reply_to) ? trim($overview->in_reply_to) : trim($overview->message_id));
+        $parsed->setMessageId(!empty($overview->in_reply_to) ? trim($overview->in_reply_to) : (!empty($overview->message_id) ? trim($overview->message_id) : ''));
         $parsed->setRootMessageId($parsed->getMessageId());
         if(!empty($overview->references)) {
             $parsed->setReferences($overview->references);
