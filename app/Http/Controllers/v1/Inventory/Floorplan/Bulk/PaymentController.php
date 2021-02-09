@@ -5,23 +5,26 @@ namespace App\Http\Controllers\v1\Inventory\Floorplan\Bulk;
 use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 
-use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 use App\Transformers\Inventory\Floorplan\PaymentTransformer;
 use App\Http\Requests\Inventory\Floorplan\Bulk\CreatePaymentsRequest;
+use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 
 class PaymentController extends RestfulController
 {
     
-    protected $payment;
+    /**
+     * @var PaymentServiceInterface
+     */
+    private $paymentService;
     
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(PaymentRepositoryInterface $payment)
+    public function __construct(PaymentServiceInterface $paymentService)
     {
-        $this->payment = $payment;
+        $this->paymentService = $paymentService;
 
         $this->middleware('setDealerIdOnRequest')->only(['create']);
     }
@@ -88,7 +91,12 @@ class PaymentController extends RestfulController
         $request = new CreatePaymentsRequest($request->all());
 
         if ( $request->validate() ) {
-            $payments = $this->payment->createBulk($request->all());
+            $allRequests = $request->all();
+            $payments = $this->paymentService->createBulk(
+                $allRequests['dealer_id'],
+                $allRequests['payments'],
+                $allRequests['paymentUUID']
+            );
 
             return $this->response->collection($payments, new PaymentTransformer());
         }  

@@ -7,18 +7,12 @@ use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\Floorplan\Payment;
-use App\Services\Common\RedisServiceInterface;
 
 /**
  *  
  * @author Marcel
  */
 class PaymentRepository implements PaymentRepositoryInterface {
-
-    /**
-     * @var RedisServiceInterface
-     */
-    private $redisService;
 
     private $sortOrders = [
         'type' => [ 
@@ -55,11 +49,6 @@ class PaymentRepository implements PaymentRepositoryInterface {
         ]
     ];
 
-    public function __construct(RedisServiceInterface $redisService)
-    {
-        $this->redisService = $redisService;
-    }
-
     public function create($params) {
         DB::beginTransaction();
 
@@ -76,19 +65,18 @@ class PaymentRepository implements PaymentRepositoryInterface {
         return $floorplanPayment;
     }
     
-    public function createBulk($params) {
+    public function createBulk($payments) {
         // Should probably queue this
         $floorplanPayments = [];
         DB::beginTransaction();
         
         try {
-            foreach($params['payments'] as $paymentData) {
+            foreach($payments as $paymentData) {
                 $floorplanPayment = Payment::create($paymentData);
                 $this->adjustBalance($floorplanPayment, $paymentData);
                 $floorplanPayments[] = $floorplanPayment;
             }
             DB::commit();
-            $this->redisService->setPaymentUUID($params['dealer_id'], $params['paymentUUID']);
         } catch (\Exception $ex) {
             DB::rollBack();
             throw new \Exception($ex->getMessage());

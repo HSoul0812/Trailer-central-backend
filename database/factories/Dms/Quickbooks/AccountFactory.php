@@ -14,7 +14,7 @@ $factory->define(Account::class, static function (Faker $faker, array $attribute
     return [
         'dealer_id' => $dealer_id,
         'name' => $attributes['name'] ?? $faker->name . '_' . rand(10000, 10000000000),
-        'type' => $attributes['type'] ?? $faker->randomElement(Account::TYPE_ARRAY),
+        'type' => $attributes['type'] ?? $faker->randomElement(Account::ACCOUNT_TYPES),
         'sub_type' => $attributes['sub_type'] ?? $faker->name . '_' . rand(10000, 10000000000),
     ];
 });

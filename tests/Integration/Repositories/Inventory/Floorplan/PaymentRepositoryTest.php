@@ -40,13 +40,9 @@ class PaymentRepositoryTest extends TestCase
      */
     public function testNumberOfBulkPaymentsCreatedAsExpected(): void {
         $paymentsData = $this->generatePaymentsData();
-        $payments = $this->getConcreteRepository()->createBulk([
-            'payments' => $paymentsData['payments'],
-            'dealer_id' => $paymentsData['dealerId'],
-            'paymentUUID' => Uuid::uuid()
-        ]);
+        $payments = $this->getConcreteRepository()->createBulk($paymentsData['payments']);
 
-        self::assertSame(count($paymentsData), count($payments));
+        self::assertSame(count($paymentsData['payments']), count($payments));
     }
 
     /**

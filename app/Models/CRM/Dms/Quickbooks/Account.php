@@ -25,7 +25,7 @@ class Account extends Model
     const TYPE_INCOME = 'Income';
     const TYPE_OTHER_INCOME = 'Other Income';
     
-    const TYPE_ARRAY = [
+    const ACCOUNT_TYPES = [
         self::TYPE_BANK,
         self::TYPE_OTHER_CURRENT_ASSET,
         self::TYPE_FIXED_ASSET,

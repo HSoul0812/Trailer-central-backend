@@ -74,8 +74,8 @@ use App\Repositories\System\EmailRepository;
 use App\Repositories\System\EmailRepositoryInterface;
 use App\Services\Common\EncrypterServiceInterface;
 use App\Services\Common\SPLEncrypterService;
-use App\Services\Common\RedisServiceInterface;
-use App\Services\Common\RedisService;
+use App\Services\Inventory\Floorplan\PaymentServiceInterface;
+use App\Services\Inventory\Floorplan\PaymentService;
 use App\Services\User\DealerOptionsService;
 use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
@@ -236,7 +236,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
 
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
-        $this->app->bind(RedisServiceInterface::class, RedisService::class);
+        $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
     }
 
 }

@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Services\Common;
+namespace App\Services\Inventory\Floorplan;
 
-interface RedisServiceInterface {
+use Illuminate\Support\Collection;
+
+interface PaymentServiceInterface {
     /**
      * Validate an UUID before creating a floorplan payment
      * 
@@ -19,4 +21,15 @@ interface RedisServiceInterface {
      * @param string $paymentUUID
      */
     public function setPaymentUUID(int $dealerId, string $paymentUUID);
+
+    /**
+     * Create bulk floorplan payments for a dealer
+     * 
+     * @param int $dealerId
+     * @param array $payments
+     * @param string $paymentUUID
+     * 
+     * @return Collection
+     */
+    public function createBulk(int $dealerId, array $payments, string $paymentUUID);
 }

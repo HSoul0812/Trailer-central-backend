@@ -3,25 +3,25 @@
 namespace App\Rules\Inventory\Floorplan;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Services\Common\RedisServiceInterface;
+use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 
 class PaymentUUIDValid implements Rule
 {
     /**
-     * @var RedisServiceInterface
+     * @var PaymentServiceInterface
      */
-    private $redisService;
+    private $paymentService;
 
-    public function __construct(RedisServiceInterface $redisService)
+    public function __construct(PaymentServiceInterface $paymentService)
     {
-        $this->redisService = $redisService;
+        $this->paymentService = $paymentService;
     }
 
     public function validate($attribute, $value, $parameters) {   
         if (!empty($parameters)) {
             $dealerId = current($parameters);            
 
-            return $this->redisService->validatePaymentUUID($dealerId, $value);
+            return $this->paymentService->validatePaymentUUID($dealerId, $value);
         }
         
         return false;        
