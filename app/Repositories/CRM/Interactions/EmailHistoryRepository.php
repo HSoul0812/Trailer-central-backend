@@ -200,7 +200,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
      */
     public function findMessageId($userId, $messageId) {
         // Message ID Exists in Processed?
-        $processed = Processed::where('user_id', $userId)->where('message_id', $messageId)->get();
+        $processed = Processed::where('message_id', $messageId)->get();
         if(count($processed) > 0) {
             return true;
         }
