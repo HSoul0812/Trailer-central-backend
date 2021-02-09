@@ -325,7 +325,7 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
         // And I have a non existing token
         $nonExistingToken = Uuid::uuid4()->toString();
 
-        // Then I expect to see an "ResourceException" to be thrown
+        // Then I expect to see an "ModelNotFoundException" to be thrown
         $this->expectException(ModelNotFoundException::class);
         // And I also expect to see an specific exception message
         $this->expectExceptionMessage(sprintf('No query results for model [%s] %s', MonitoredJob::class, $nonExistingToken));
