@@ -7,14 +7,5 @@ namespace App\Services\Export;
  */
 interface ExporterInterface
 {
-    /**
-     * @return mixed
-     */
-    public function createFile();
-
-    public function write($line): void;
-
-    public function deliver(): void;
-
-    public function export(): void;
+    public function export();
 }

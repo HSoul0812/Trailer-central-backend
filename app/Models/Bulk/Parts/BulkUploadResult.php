@@ -21,7 +21,6 @@ class BulkUploadResult extends MonitoredJobResult
      */
     protected $exception;
 
-
     /**
      * @var string
      */
@@ -32,7 +31,7 @@ class BulkUploadResult extends MonitoredJobResult
         return array_merge(parent::asArray(), [
             'validation_errors' => $this->validation_errors,
             'status' => $this->status,
-            'exception' => $this->exception,
+            'exception' => $this->exception
         ]);
     }
 }

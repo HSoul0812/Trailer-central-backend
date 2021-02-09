@@ -14,9 +14,9 @@ interface BulkDownloadRepositoryInterface extends MonitoredJobRepositoryInterfac
      * Find a download job by token
      *
      * @param string $token
-     * @return BulkDownload
+     * @return BulkDownload|null
      */
-    public function findByToken(string $token): BulkDownload;
+    public function findByToken(string $token): ?BulkDownload;
 
     /**
      * Create a download job by token

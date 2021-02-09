@@ -10,6 +10,7 @@ use App\Traits\WithGetter;
 
 /**
  * @property-read string $message the result message
+ * @property-read string $filename file result of the job
  */
 class MonitoredJobResult implements DTO
 {
@@ -21,10 +22,16 @@ class MonitoredJobResult implements DTO
      */
     protected $message;
 
+    /**
+     * @var string
+     */
+    protected $filename;
+
     public function asArray(): array
     {
         return [
-            'message' => $this->message
+            'message' => $this->message,
+            'filename' => $this->filename
         ];
     }
 }

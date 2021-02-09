@@ -12,9 +12,9 @@ class BulkDownloadRepository extends MonitoredJobRepository implements BulkDownl
 {
     /**
      * @param string $token
-     * @return BulkDownload
+     * @return BulkDownload|null
      */
-    public function findByToken(string $token): BulkDownload
+    public function findByToken(string $token): ?BulkDownload
     {
         return BulkDownload::where('token', $token)->get()->first();
     }

@@ -134,6 +134,10 @@ class BulkDownloadController extends MonitoredJobsController
         if ($request->validate()) {
             $download = $this->bulkRepository->findByToken($token);
 
+            if ($download === null) {
+                $this->response->errorNotFound('Job not found');
+            }
+
             if ($download->isPending()) {
                 return response()->json(['message' => 'It is pending', 'progress' => $download->progress], 202);
             }
@@ -150,7 +154,7 @@ class BulkDownloadController extends MonitoredJobsController
 
             return response()->streamDownload(static function () use ($download) {
                 fpassthru(Storage::disk('partsCsvExports')->readStream($download->payload->export_file));
-            }, $download->export_file);
+            }, $download->payload->export_file);
         }
 
         $this->response->errorBadRequest();
