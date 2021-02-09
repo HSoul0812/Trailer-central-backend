@@ -686,7 +686,7 @@ class ScrapeRepliesTest extends TestCase
                      ->andReturn($message);
 
                 // Actually Imported as Reply?
-                if(isset($replies[$id])) {
+                if(isset($replies[$k])) {
                     // Should Receive Full Details Once
                     $mock->shouldReceive('full')
                          ->with(Mockery::on(function($overview) use($message) {
