@@ -111,7 +111,7 @@ class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements B
             // set the exporter's source query
             ->setQuery($partsQuery);
 
-        $this->logger->info(sprintf("[%s:] staring to export the file for the monitored job '%s'", __CLASS__, $job->token));
+        $this->logger->info(sprintf("[%s:] starting to export the file for the monitored job '%s'", __CLASS__, $job->token));
 
         try {
             $this->bulkRepository->updateProgress($job->token, 0);

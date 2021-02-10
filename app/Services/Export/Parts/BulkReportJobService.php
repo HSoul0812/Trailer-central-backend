@@ -86,15 +86,15 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
      */
     public function run($job)
     {
-        $this->logger->info(sprintf("[%s:] staring to export the pdf file for the monitored job '%s'", __CLASS__, $job->token));
-
-        $this->bulkRepository->updateProgress($job->token, 0);
-
-        $data = $this->getData($job);
-
-        $this->bulkRepository->updateProgress($job->token, 10);
-
         try {
+            $this->logger->info(sprintf("[%s:] starting to export the pdf file for the monitored job '%s'", __CLASS__, $job->token));
+
+            $this->bulkRepository->updateProgress($job->token, 0);
+
+            $data = $this->getData($job);
+
+            $this->bulkRepository->updateProgress($job->token, 10);
+
             // do the export
             $this->getExporter($job)
                 ->withView($this->resolveView($job))
@@ -102,6 +102,8 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
                 ->export();
 
             $this->bulkRepository->setCompleted($job->token);
+
+            $this->logger->info(sprintf("[%s:] process to export the pdf file for the monitored job '%s' was completed", __CLASS__, $job->token));
         } catch (Throwable $exception) {
             $this->bulkRepository->setFailed($job->token, ['message' => "Got exception: {$exception->getMessage()}"]);
             $this->logger->error(sprintf('[%s:] got exception: %s', __CLASS__, $exception->getMessage()));
