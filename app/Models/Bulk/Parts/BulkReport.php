@@ -19,6 +19,8 @@ class BulkReport extends MonitoredJob
 
     public const TYPE_FINANCIALS = 'financials';
 
+    public const QUEUE_NAME = 'reports';
+
     public const REPOSITORY_INTERFACE_NAME = BulkReportRepositoryInterface::class;
 
     /**
