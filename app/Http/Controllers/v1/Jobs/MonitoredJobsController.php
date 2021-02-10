@@ -12,8 +12,6 @@ use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class MonitoredJobsController extends RestfulController
@@ -27,7 +25,7 @@ class MonitoredJobsController extends RestfulController
 
     public function __construct(MonitoredJobRepositoryInterface $repository)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'status']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'status', 'statusByToken']);
 
         $this->repository = $repository;
     }
