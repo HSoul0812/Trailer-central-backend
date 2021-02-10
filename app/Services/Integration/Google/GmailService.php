@@ -73,10 +73,14 @@ class GmailService implements GmailServiceInterface
         $this->client = new \Google_Client();
         $this->client->setApplicationName(env('GOOGLE_OAUTH_APP_NAME'));
         $this->client->setClientId(env('GOOGLE_OAUTH_CLIENT_ID'));
+        $this->client->setClientSecret(env('GOOGLE_OAUTH_CLIENT_SECRET'));
         if(empty($this->client)) {
             throw new FailedConnectGapiClientException;
         }
+
+        // Set Defaults
         $this->client->setAccessType('offline');
+        $this->client->setIncludeGrantedScopes(true);
     }
 
     /**
