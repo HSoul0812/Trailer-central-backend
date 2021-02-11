@@ -12,7 +12,6 @@ use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Parts\BinRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
-use App\Services\Common\RunnableJobServiceInterface;
 use App\Services\Export\FilesystemPdfExporter;
 use App\Services\Export\HasExporterInterface;
 use Illuminate\Support\Facades\Storage;
@@ -26,9 +25,7 @@ use Throwable;
  *
  * This is to decouple service code from the job.
  */
-class BulkReportJobService extends AbstractMonitoredJobService implements BulkReportJobServiceInterface,
-    RunnableJobServiceInterface,
-    HasExporterInterface
+class BulkReportJobService extends AbstractMonitoredJobService implements BulkReportJobServiceInterface, HasExporterInterface
 {
     /**
      * @var BulkReportRepositoryInterface

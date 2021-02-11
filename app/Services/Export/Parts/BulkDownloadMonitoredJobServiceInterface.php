@@ -8,8 +8,9 @@ use App\Exceptions\Common\BusyJobException;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Services\Common\MonitoredJobServiceInterface;
+use App\Services\Common\RunnableJobServiceInterface;
 
-interface BulkDownloadMonitoredJobServiceInterface extends MonitoredJobServiceInterface
+interface BulkDownloadMonitoredJobServiceInterface extends MonitoredJobServiceInterface, RunnableJobServiceInterface
 {
     /**
      * @param int $dealerId

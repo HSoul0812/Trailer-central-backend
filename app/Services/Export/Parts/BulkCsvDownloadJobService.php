@@ -13,7 +13,6 @@ use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
-use App\Services\Common\RunnableJobServiceInterface;
 use App\Services\Export\HasExporterInterface;
 use Exception;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +24,6 @@ use Illuminate\Support\Facades\Storage;
  * This is to decouple service code from the job.
  */
 class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements BulkDownloadMonitoredJobServiceInterface,
-                                                                               RunnableJobServiceInterface,
                                                                                HasExporterInterface
 {
     /**
