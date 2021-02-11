@@ -42,13 +42,8 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct(GmailServiceInterface $gmail, Manager $fractal)
+    public function __construct()
     {
-        // Initialize Services
-        $this->gmail = $gmail;
-        $this->fractal = $fractal;
-        $this->fractal->setSerializer(new NoDataArraySerializer());
-
         // Initialize Logger
         $this->log = Log::channel('google');
     }
@@ -98,36 +93,6 @@ class GoogleService implements GoogleServiceInterface
 
         // Return Auth URL for Login
         return $this->client->createAuthUrl($scopes);
-    }
-
-    /**
-     * Get Auth URL
-     *
-     * @param string $redirectUrl url to redirect auth back to again
-     * @param string $authCode auth code to get full credentials with
-     * @return array created from EmailTokenTransformer
-     */
-    public function auth($redirectUrl, $authCode): array {
-        // Set Redirect URL
-        $this->getClient();
-        $this->client->setRedirectUri($redirectUrl);
-
-        // Return Auth URL for Login
-        $authToken = $this->client->fetchAccessTokenWithAuthCode($authCode);
-        if(empty($authToken['access_token'])) {
-            throw new InvalidGoogleAuthCodeException;
-        }
-
-        // Return Formatted Auth Token
-        $emailToken = new EmailToken();
-        $emailToken->fillFromArray($authToken);
-
-        // Get Profile
-        $this->gmail->profile($emailToken);
-
-        // Return Transformed Data
-        $data = new Item($emailToken, new EmailTokenTransformer());
-        return $this->fractal->createData($data)->toArray();
     }
 
     /**
