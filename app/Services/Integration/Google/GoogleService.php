@@ -4,17 +4,10 @@ namespace App\Services\Integration\Google;
 
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
-use App\Services\Integration\Common\DTOs\EmailToken;
-use App\Transformers\Integration\Auth\EmailTokenTransformer;
-use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGapiClientIdException;
-use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
-use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
-use App\Utilities\Fractal\NoDataArraySerializer;
-use League\Fractal\Manager;
-use League\Fractal\Resource\Item;
+use Google_Client;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -35,11 +28,6 @@ class GoogleService implements GoogleServiceInterface
     protected $gmail;
 
     /**
-     * @var Manager
-     */
-    private $fractal;
-
-    /**
      * Construct Google Client
      */
     public function __construct()
@@ -52,18 +40,18 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Get Fresh Client
      * 
-     * @return type
      * @throws MissingGapiClientIdException
      * @throws FailedConnectGapiClientException
+     * @return Google_Client
      */
-    public function getClient() {
+    public function getClient(): Google_Client {
         // No Client ID?!
         if(empty(env('GOOGLE_OAUTH_CLIENT_ID'))) {
             throw new MissingGapiClientIdException;
         }
 
         // Initialize Client
-        $client = new \Google_Client();
+        $client = new Google_Client();
         $client->setApplicationName(env('GOOGLE_OAUTH_APP_NAME'));
         $client->setClientId(env('GOOGLE_OAUTH_CLIENT_ID'));
         $client->setClientSecret(env('GOOGLE_OAUTH_CLIENT_SECRET'));
