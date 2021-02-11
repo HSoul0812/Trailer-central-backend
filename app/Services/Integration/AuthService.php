@@ -7,6 +7,7 @@ use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
+use App\Services\Integration\Google\GmailServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use League\Fractal\Manager;
@@ -30,6 +31,11 @@ class AuthService implements AuthServiceInterface
     protected $google;
 
     /**
+     * @var GmailServiceInterface
+     */
+    protected $gmail;
+
+    /**
      * @var BusinessServiceInterface
      */
     protected $facebook;
@@ -45,11 +51,13 @@ class AuthService implements AuthServiceInterface
     public function __construct(
         TokenRepositoryInterface $tokens,
         GoogleServiceInterface $google,
+        GmailServiceInterface $gmail,
         BusinessServiceInterface $facebook,
         Manager $fractal
     ) {
         $this->tokens = $tokens;
         $this->google = $google;
+        $this->gmail = $gmail;
         $this->facebook = $facebook;
         $this->fractal = $fractal;
 
