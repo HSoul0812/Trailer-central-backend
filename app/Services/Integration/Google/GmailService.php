@@ -16,6 +16,7 @@ use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
+use App\Transformers\Integration\Auth\EmailTokenTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Google_Service_Gmail;
 use Google_Service_Gmail_MessagePart;
