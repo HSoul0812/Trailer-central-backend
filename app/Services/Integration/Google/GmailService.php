@@ -20,6 +20,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use Google_Service_Gmail;
 use Google_Service_Gmail_MessagePart;
 use League\Fractal\Manager;
+use League\Fractal\Resource\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
