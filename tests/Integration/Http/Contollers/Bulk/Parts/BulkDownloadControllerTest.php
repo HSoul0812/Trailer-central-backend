@@ -7,7 +7,7 @@ namespace Tests\Integration\Http\Contollers\Bulk\Parts;
 use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController;
 use App\Http\Requests\Bulk\Parts\CreateBulkDownloadRequest;
-use App\Http\Requests\Jobs\GetMonitoredJobsRequest;
+use App\Http\Requests\Jobs\ReadMonitoredJobsRequest;
 use App\Jobs\Bulk\Parts\CsvExportJob;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Common\MonitoredJob;
@@ -18,6 +18,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Bus;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Integration\AbstractMonitoredJobsTest;
 
@@ -138,8 +139,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
 
         // Then I should see that job wit a specific name was enqueued
         Bus::assertDispatched(CsvExportJob::class);
-        // And I should see that response status is 500
-        self::assertEquals(JsonResponse::HTTP_INTERNAL_SERVER_ERROR, $response->status());
+        // And I should see that response status is 200
+        self::assertEquals(JsonResponse::HTTP_OK, $response->getStatusCode());
+        // And I should see that response is a stream
+        self::assertInstanceOf(StreamedResponse::class, $response);
     }
 
     /**
@@ -163,7 +166,7 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         // And I'm using the "BulkDownloadController" controller
         $controller = app(BulkDownloadController::class);
         // And I have a bad formed "GetMonitoredJobsRequest" request
-        $request = new GetMonitoredJobsRequest($this->seeder->extractValues($params));
+        $request = new ReadMonitoredJobsRequest($this->seeder->extractValues($params));
 
         // Then I expect to see an specific exception to be thrown
         $this->expectException($expectedException);
@@ -172,7 +175,7 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
 
         try {
             // When I call the read action using the token and the bad formed request
-            $controller->read($request->get('token', ''), $request);
+            $controller->read($request);
         } catch (ResourceException $exception) {
             // Then I should see that the first error message has a specific string
             self::assertSame($firstExpectedErrorMessage, $exception->getErrors()->first());
@@ -215,10 +218,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         // And I'm using the "MonitoredJobsController" controller
         $controller = app(BulkDownloadController::class);
         // And I have a well formed "GetMonitoredJobsRequest" request
-        $request = new GetMonitoredJobsRequest($extractedParams);
+        $request = new ReadMonitoredJobsRequest($extractedParams);
 
         // When I call the status action using the provided token and request
-        $response = $controller->read($extractedParams['token'], $request);
+        $response = $controller->read($request);
 
         // Then I should see that response status is the same as expected
         self::assertSame($expectedHttpCodeStatus, $response->getStatusCode());
@@ -257,7 +260,7 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
     public function invalidParametersForReadProvider(): array
     {
         return [                     // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
-            'No token'           => [[], HttpException::class, 'Job not found', null],
+            'No token'           => [[], ResourceException::class, 'Validation Failed', 'The token field is required.'],
             'Bad token'          => [['token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
             'Non-existent token' => [['token' => Uuid::uuid4()->toString()], HttpException::class, 'Job not found', null]
         ];

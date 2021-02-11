@@ -26,9 +26,7 @@ class GetMonitoredJobsRequest extends Request
     public function getJob(): ?MonitoredJob
     {
         if ($this->job === null) {
-            $repository = $this->getRepository();
-
-            $job = $repository->findByToken($this->get('token'));
+            $job = $this->getRepository()->findByToken($this->get('token'));
 
             if ($job !== null && $job->dealer_id !== $this->get('dealer_id')) {
                 return null; // It is a token from  other dealer

@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\v1\Jobs;
 
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Jobs\GetMonitoredJobsRequest;
+use App\Http\Requests\Jobs\ReadMonitoredJobsRequest;
+use App\Models\Common\MonitoredJob;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Transformers\Jobs\MonitoredJobsTransformer;
 use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class MonitoredJobsController extends RestfulController
 {
@@ -54,10 +58,10 @@ class MonitoredJobsController extends RestfulController
      * )
      *
      * @param Request $request
-     * @throws ResourceException when there were some validation error
-     * @throws HttpException when there was a bad request
      * @return Response|void
      *
+     * @throws HttpException when there was a bad request
+     * @throws ResourceException when there were some validation error
      */
     public function index(Request $request): Response
     {
@@ -95,6 +99,10 @@ class MonitoredJobsController extends RestfulController
 
         if ($request->validate()) {
             $job = $request->getJob();
+
+            if ($job === null) {
+                $this->response->errorNotFound('Job not found');
+            }
 
             if ($job->isPending()) {
                 return response()->json(['message' => 'It is pending', 'progress' => $job->progress]);
@@ -135,6 +143,77 @@ class MonitoredJobsController extends RestfulController
      */
     public function status(Request $request): ?JsonResponse
     {
-        return $this->statusByToken($request->get('token'), $request);
+        $request = new GetMonitoredJobsRequest($request->all(), ['token' => $token]);
+
+        if ($request->validate()) {
+            return $this->statusByToken($request->get('token'), $request);
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * Download the completed file created from the request
+     *
+     * @param string $token
+     * @param Request $request
+     * @return JsonResponse|StreamedResponse|void
+     */
+    public function readByToken(string $token, Request $request)
+    {
+        $request = new ReadMonitoredJobsRequest(array_merge($request->all(), ['token' => $token]));
+
+        if ($request->validate()) {
+            $job = $this->repository->findByToken($request->get('token'));
+
+            if ($job === null) {
+                $this->response->errorNotFound('Job not found');
+            }
+
+            if ($job->isPending()) {
+                return response()->json(['message' => 'It is pending', 'progress' => $job->progress], 202);
+            }
+
+            if ($job->isProcessing()) {
+                return response()->json(['message' => 'Still processing', 'progress' => $job->progress]);
+            }
+
+            if ($job->isFailed()) {
+                return response()->json([
+                    'message' => 'This file could not be completed. Please request a new file.',
+                ], 500);
+            }
+
+            return $this->readStream($job);
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * Download the completed file created from the request
+     *
+     * @param Request $request
+     * @return JsonResponse|StreamedResponse|void
+     */
+    public function read(Request $request)
+    {
+        $request = new ReadMonitoredJobsRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->readByToken($request->get('token'), $request);
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param MonitoredJob $job
+     * @return StreamedResponse
+     * @throws NotImplementedException
+     */
+    protected function readStream($job): StreamedResponse
+    {
+        throw new NotImplementedException('Not implemented yet');
     }
 }

@@ -28,8 +28,8 @@ use Illuminate\Database\Query\Builder;
  * @property string $name the key name of the job
  * @property string $status it could be: processing, completed, or failed
  * @property float $progress progress between 0 to 100
- * @property MonitoredJobPayload $payload json data useful for handle the job
- * @property MonitoredJobResult $result json data resulting
+ * @property array $payload json data useful for handle the job
+ * @property array $result json data resulting
  * @property DateTime $created_at when the job was created
  * @property DateTime $updated_at when the job was last updated
  * @property DateTime $finished_at when the job was finished (or failed)

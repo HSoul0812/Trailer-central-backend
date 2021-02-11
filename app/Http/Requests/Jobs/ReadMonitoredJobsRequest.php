@@ -11,7 +11,7 @@ class ReadMonitoredJobsRequest extends Request
     public function getRules(): array
     {
         return [
-            'token' => ['uuid']
+            'token' => 'required|uuid'
         ];
     }
 }

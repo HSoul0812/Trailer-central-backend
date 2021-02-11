@@ -5,31 +5,27 @@ namespace App\Http\Controllers\v1\Bulk\Parts;
 use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Bulk\Parts\CreateBulkDownloadRequest;
-use App\Http\Requests\Jobs\ReadMonitoredJobsRequest;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Jobs\Bulk\Parts\CsvExportJob;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
-use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
+use App\Models\Common\MonitoredJob;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
 use Dingo\Api\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BulkDownloadController extends MonitoredJobsController
 {
+    protected $fileNameProperty = 'export_file';
+
     /**
      * seconds that it will wait for the stream
      */
     public const DEFAULT_READ_TIMEOUT = 180; // 3 minutes
 
     protected $failedMessage = 'This file could not be completed. Please request a new file.';
-
-    /**
-     * @var BulkDownloadRepositoryInterface
-     */
-    private $bulkRepository;
 
     /**
      * @var BulkDownloadMonitoredJobServiceInterface
@@ -42,7 +38,6 @@ class BulkDownloadController extends MonitoredJobsController
     private $readTimeOut;
 
     public function __construct(
-        BulkDownloadRepositoryInterface $bulkRepository,
         MonitoredJobRepositoryInterface $jobsRepository,
         BulkDownloadMonitoredJobServiceInterface $service
     )
@@ -51,7 +46,6 @@ class BulkDownloadController extends MonitoredJobsController
 
         $this->middleware('setDealerIdOnRequest')->only(['index', 'status', 'create']);
 
-        $this->bulkRepository = $bulkRepository;
         $this->service = $service;
         $this->readTimeOut = self::DEFAULT_READ_TIMEOUT;
     }
@@ -97,12 +91,14 @@ class BulkDownloadController extends MonitoredJobsController
                     return new CsvExportJob($job);
                 });
 
-            $this->service->dispatch($model);
-
             // if requested, wait for file assembly then download it now. no need for separate api call
             if ($request->input('wait')) {
-                return $this->waitForFile($model->token, $request);
+                $this->service->dispatchNow($model);
+
+                return $this->readStream($model);
             }
+
+            $this->service->dispatch($model);
 
             return response()->json(['token' => $model->token], 202);
         }
@@ -110,14 +106,26 @@ class BulkDownloadController extends MonitoredJobsController
         $this->response->errorBadRequest();
     }
 
+    public function setReadTimeOut(int $readTimeOut): void
+    {
+        $this->readTimeOut = $readTimeOut;
+    }
+
     /**
-     * Download the completed CSV file created from the request
-     *
-     * @param string $token The token returned by the create service
-     * @param Request $request
-     * @return JsonResponse|StreamedResponse|void
-     *
-     * @OA\Get(
+     * @param MonitoredJob|BulkDownload $job
+     * @return StreamedResponse
+     */
+    protected function readStream($job): StreamedResponse
+    {
+        $payload = BulkDownloadPayload::from($job instanceof BulkDownload ? $job->payload->asArray() : $job->payload);
+
+        return response()->streamDownload(static function () use ($payload) {
+            fpassthru(Storage::disk('partsCsvExports')->readStream($payload->export_file));
+        }, $payload->export_file);
+    }
+
+    /**
+     *  @OA\Get(
      *     path="/api/parts/bulk/file/{token}",
      *     description="Download the completed CSV file created from the request",
      *     tags={"BulkDownloadParts"},
@@ -127,76 +135,7 @@ class BulkDownloadController extends MonitoredJobsController
      *         required=true
      *     )
      * )
-     */
-    public function read(string $token, Request $request)
-    {
-        $request = new ReadMonitoredJobsRequest(array_merge($request->all(), ['token' => $token]));
-
-        if ($request->validate()) {
-            $download = $this->bulkRepository->findByToken($token);
-
-            if ($download === null) {
-                $this->response->errorNotFound('Job not found');
-            }
-
-            if ($download->isPending()) {
-                return response()->json(['message' => 'It is pending', 'progress' => $download->progress], 202);
-            }
-
-            if ($download->isProcessing()) {
-                return response()->json(['message' => 'Still processing', 'progress' => $download->progress]);
-            }
-
-            if ($download->isFailed()) {
-                return response()->json([
-                    'message' => 'This file could not be completed. Please request a new file.',
-                ], 500);
-            }
-
-            return response()->streamDownload(static function () use ($download) {
-                fpassthru(Storage::disk('partsCsvExports')->readStream($download->payload->export_file));
-            }, $download->payload->export_file);
-        }
-
-        $this->response->errorBadRequest();
-    }
-
-    /**
-     * Wait for file assembly then return the file
      *
-     * @param string $token
-     * @param Request $request
-     * @return JsonResponse|StreamedResponse
-     */
-    private function waitForFile(string $token, Request $request)
-    {
-        $timeStart = time();
-
-        // read loop
-        while (true) {
-            $result = $this->read($token, $request);
-
-            if (time() - $timeStart > $this->readTimeOut) {
-                break;
-            }
-
-            if ($result->getStatusCode() === 202) {
-                sleep(10);
-                continue;
-            }
-
-            return $result;
-        }
-
-        return response()->json(['message' => 'Error: unknown status'], 500);
-    }
-
-    public function setReadTimeOut(int $readTimeOut): void
-    {
-        $this->readTimeOut = $readTimeOut;
-    }
-
-    /**
      * @OA\Get(
      *     path="/api/parts/bulk/status/{token}",
      *     description="Check status of the process",

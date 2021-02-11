@@ -4,25 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\v1\Bulk\Parts;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Bulk\Parts\CreateBulkReportRequest;
-use App\Http\Requests\Jobs\ReadMonitoredJobsRequest;
-use App\Jobs\Bulk\Parts\FinancialReportExportJob;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Jobs\Bulk\Parts\FinancialReportExportJob;
+use App\Models\Common\MonitoredJob;
+use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Models\Bulk\Parts\BulkReport;
 use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
-use Dingo\Api\Routing\Helpers as ControllerHelpers;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Dingo\Api\Http\Request;
 use Exception;
 
-class BulkReportsController extends Controller
+class BulkReportsController extends MonitoredJobsController
 {
-    use ControllerHelpers;
-
     /**
      * @var BulkReportRepositoryInterface
      */
@@ -35,10 +33,15 @@ class BulkReportsController extends Controller
 
     /**
      * @param BulkReportRepositoryInterface $repository
+     * @param MonitoredJobRepositoryInterface $jobsRepository
      * @param BulkReportJobServiceInterface $service
      */
-    public function __construct(BulkReportRepositoryInterface $repository, BulkReportJobServiceInterface $service)
+    public function __construct(BulkReportRepositoryInterface $repository,
+                                MonitoredJobRepositoryInterface $jobsRepository,
+                                BulkReportJobServiceInterface $service)
     {
+        parent::__construct($jobsRepository);
+
         $this->middleware('setDealerIdOnRequest')->only(['financials']);
 
         $this->repository = $repository;
@@ -96,11 +99,19 @@ class BulkReportsController extends Controller
     }
 
     /**
-     * Download the completed file created from the request
-     *
-     * @param Request $request
-     * @return JsonResponse|StreamedResponse|void
-     *
+     * @param MonitoredJob $job
+     * @return StreamedResponse
+     */
+    protected function readStream($job): StreamedResponse
+    {
+        $payload = BulkReportPayload::from($job->payload);
+
+        return response()->streamDownload(static function () use ($payload) {
+            fpassthru(Storage::disk('tmp')->readStream($payload->filename));
+        }, $payload);
+    }
+
+    /**
      * @OA\Get(
      *     path="/api/reports/read",
      *     description="Download the completed file created from the request",
@@ -113,36 +124,4 @@ class BulkReportsController extends Controller
      *     )
      * )
      */
-    public function read(Request $request)
-    {
-        $request = new ReadMonitoredJobsRequest($request->all());
-
-        if ($request->validate()) {
-            $job = $this->repository->findByToken($request->get('token'));
-
-            if ($job === null) {
-                $this->response->errorNotFound('Job not found');
-            }
-
-            if ($job->isPending()) {
-                return response()->json(['message' => 'It is pending', 'progress' => $job->progress], 202);
-            }
-
-            if ($job->isProcessing()) {
-                return response()->json(['message' => 'Still processing', 'progress' => $job->progress]);
-            }
-
-            if ($job->isFailed()) {
-                return response()->json([
-                    'message' => 'This file could not be completed. Please request a new file.',
-                ], 500);
-            }
-
-            return response()->streamDownload(static function () use ($job) {
-                fpassthru(Storage::disk('tmp')->readStream($job->payload->filename));
-            }, $job->payload->filename);
-        }
-
-        $this->response->errorBadRequest();
-    }
 }
