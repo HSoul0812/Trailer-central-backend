@@ -165,10 +165,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         if(!empty($salesperson->googleToken)) {
             // Refresh Token
             $validate = $this->google->validate($salesperson->googleToken);
+            var_dump($salesperson->googleToken);
+            var_dump($validate);
             if(!empty($validate['new_token'])) {
                 $accessToken = $this->tokens->refresh($salesperson->googleToken->id, $validate['new_token']);
                 $salesperson->setRelation('googleToken', $accessToken);
+                var_dump($accessToken);
             }
+            die;
         }
 
         // Process Messages
@@ -236,8 +240,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
         // Get Emails From Gmail
         $this->log->info("Connecting to Gmail with email: " . $salesperson->smtp_email);
-        //var_dump($salesperson->googleToken);
-        //var_dump($salesperson->googleToken->scope);
         $messages = $this->gmail->messages($salesperson->googleToken, $emailFolder->name, [
             'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
         ]);
