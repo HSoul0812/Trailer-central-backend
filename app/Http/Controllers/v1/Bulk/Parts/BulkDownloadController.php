@@ -20,22 +20,12 @@ class BulkDownloadController extends MonitoredJobsController
 {
     protected $fileNameProperty = 'export_file';
 
-    /**
-     * seconds that it will wait for the stream
-     */
-    public const DEFAULT_READ_TIMEOUT = 180; // 3 minutes
-
     protected $failedMessage = 'This file could not be completed. Please request a new file.';
 
     /**
      * @var BulkDownloadMonitoredJobServiceInterface
      */
     private $service;
-
-    /**
-     * @var int seconds that it will wait for the stream
-     */
-    private $readTimeOut;
 
     public function __construct(
         MonitoredJobRepositoryInterface $jobsRepository,
@@ -47,7 +37,6 @@ class BulkDownloadController extends MonitoredJobsController
         $this->middleware('setDealerIdOnRequest')->only(['index', 'status', 'create']);
 
         $this->service = $service;
-        $this->readTimeOut = self::DEFAULT_READ_TIMEOUT;
     }
 
     /**
@@ -104,11 +93,6 @@ class BulkDownloadController extends MonitoredJobsController
         }
 
         $this->response->errorBadRequest();
-    }
-
-    public function setReadTimeOut(int $readTimeOut): void
-    {
-        $this->readTimeOut = $readTimeOut;
     }
 
     /**

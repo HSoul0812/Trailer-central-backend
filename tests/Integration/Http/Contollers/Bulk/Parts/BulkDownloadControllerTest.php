@@ -130,8 +130,6 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         $controller = app(BulkDownloadController::class);
         // And I have a well formed "CreateBulkDownloadRequest" request with wait parameter
         $request = new CreateBulkDownloadRequest(['dealer_id' => $this->seeder->dealers[0]->dealer_id, 'wait' => 1]);
-        // And I want that it just wait one second
-        $controller->setReadTimeOut(1); // Since the controller will wait 10 seconds when the job is pending, so this will be 11 seconds
 
         Bus::fake();
         // When I call the create action using the well formed request
