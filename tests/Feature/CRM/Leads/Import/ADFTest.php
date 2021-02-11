@@ -299,10 +299,10 @@ class ADFTest extends TestCase
      * @covers App\Console\Commands\CRM\Leads\Import\ADF
      * @return void
      */
-    public function testADFImportWithSource(): void
+    /*public function testADFImportWithSource(): void
     {
         
-    }
+    }*/
 
 
     /**

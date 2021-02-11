@@ -235,6 +235,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
         // Get Emails From Gmail
+        $this->log->info("Connecting to Gmail with email: " . $salesperson->smtp_email);
         $messages = $this->gmail->messages($salesperson->googleToken, $emailFolder->name, [
             'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
         ]);
