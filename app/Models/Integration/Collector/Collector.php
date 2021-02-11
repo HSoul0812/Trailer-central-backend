@@ -22,6 +22,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property boolean $active
  * @property string $file_format
  * @property string $path_to_data
+ * @property boolean $create_items
+ * @property string $update_items
+ * @property string $archive_items
  * @property string $length_format
  * @property string $width_format
  * @property string $height_format
@@ -84,6 +87,9 @@ class Collector extends Model  implements Filterable
         'ftp_password',
         'file_format',
         'path_to_data',
+        'create_items',
+        'update_items',
+        'archive_items',
         'length_format',
         'width_format',
         'height_format',

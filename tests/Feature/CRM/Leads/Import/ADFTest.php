@@ -40,6 +40,7 @@ class ADFTest extends TestCase
         $this->tokens = $this->app->make('App\Repositories\Integration\Auth\TokenRepositoryInterface');
     }
 
+
     /**
      * Test Importing ADF Emails
      *
@@ -290,6 +291,17 @@ class ADFTest extends TestCase
                 'phone_number' => $lead->phone_number
             ]);
         }
+    }
+
+    /**
+     * Test Importing ADF Email and Inserting Lead Source
+     *
+     * @covers App\Console\Commands\CRM\Leads\Import\ADF
+     * @return void
+     */
+    public function testADFImportWithSource(): void
+    {
+        
     }
 
 

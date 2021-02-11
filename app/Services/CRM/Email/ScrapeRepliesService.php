@@ -345,6 +345,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->imap->full($email);
             }
             if(empty($email->getSubject()) || empty($email->getToEmail())) {
+                $this->deleteAttachments($email->getAttachments());
                 return self::IMPORT_SKIPPED;
             }
 
