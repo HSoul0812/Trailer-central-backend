@@ -123,7 +123,6 @@ class BinRepository implements BinRepositoryInterface
         return $bins;
     }
 
-
     /**
      * @param int $dealerId
      * @return array
@@ -138,7 +137,7 @@ class BinRepository implements BinRepositoryInterface
             " title, sku, price, dealer_cost"))
             ->leftJoin($binQtyTable, static function ($join) use ($binTable, $binQtyTable) {
                 return $join->on("{$binQtyTable}.bin_id", '=', "{$binTable}.id")
-                    ->where("{$binQtyTable}.bin_id", '>', 0);
+                    ->where("{$binQtyTable}.qty", '>', 0);
             })
             ->leftJoin($partTable, static function ($join) use ($dealerId, $partTable, $binQtyTable) {
                 return $join->on("{$partTable}.id", '=', "{$binQtyTable}.part_id")

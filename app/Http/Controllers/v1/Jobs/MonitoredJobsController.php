@@ -143,7 +143,7 @@ class MonitoredJobsController extends RestfulController
      */
     public function status(Request $request): ?JsonResponse
     {
-        $request = new GetMonitoredJobsRequest($request->all(), ['token' => $token]);
+        $request = new GetMonitoredJobsRequest($request->all());
 
         if ($request->validate()) {
             return $this->statusByToken($request->get('token'), $request);

@@ -108,7 +108,7 @@ class BulkReportsController extends MonitoredJobsController
 
         return response()->streamDownload(static function () use ($payload) {
             fpassthru(Storage::disk('tmp')->readStream($payload->filename));
-        }, $payload);
+        }, $payload->filename);
     }
 
     /**
