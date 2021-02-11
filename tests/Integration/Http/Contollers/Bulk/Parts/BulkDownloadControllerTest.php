@@ -18,6 +18,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Bus;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Integration\AbstractMonitoredJobsTest;
 
 /**
@@ -255,11 +256,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      */
     public function invalidParametersForReadProvider(): array
     {
-        return [                                                   // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
-            'No dealer'                                            => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
-            'Bad token'                                            => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
-            'Non-existent token'                                   => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => Uuid::uuid4()->toString()], ResourceException::class, 'Validation Failed', 'The job was not found.'],
-            'A token which does not belong to the provided dealer' => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => $this->getSeededData(1,'random-token')], ResourceException::class, 'Validation Failed', 'The job was not found.']
+        return [                     // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
+            'No token'           => [[], HttpException::class, 'Job not found', null],
+            'Bad token'          => [['token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
+            'Non-existent token' => [['token' => Uuid::uuid4()->toString()], HttpException::class, 'Job not found', null]
         ];
     }
 

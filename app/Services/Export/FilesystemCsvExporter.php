@@ -33,6 +33,11 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
     protected $filesystem;
 
     /**
+     * @var false|resource
+     */
+    private $reader;
+
+    /**
      * @param Filesystem $filesystem
      * @param string $filename
      * @param Builder|EloquentBuilder|null $query
@@ -67,8 +72,6 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
 
     /**
      * Send the temp file to the Filesystem (e.g. `Storage::disk('s3')`)
-     *
-     * @throws FileNotFoundException
      */
     public function deliver(): void
     {
@@ -139,28 +142,23 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
      */
     private function writeStream()
     {
-        return fopen($this->touch(), 'wb+');
+        $this->tmpFileName = sprintf('exported-%s-%s.csv', date('Y-m-d-H-i-s'), uniqid('', false));
+
+        return fopen(Storage::disk('tmp')->path($this->tmpFileName), 'wb+');
     }
 
     /**
      * @return resource
-     * @throws FileNotFoundException
      */
     private function readStream()
     {
-        return Storage::disk('tmp')->readStream($this->tmpFileName)['stream'];
+        return $this->reader = fopen(Storage::disk('tmp')->path($this->tmpFileName), 'rb');
     }
 
-    /**
-     * Initializes the file
-     *
-     * @return string
-     */
-    private function touch(): string
+    public function __destruct()
     {
-        $this->tmpFileName = sprintf('exported-%s-%s.csv', date('Y-m-d-H-i-s'), uniqid('', false));
-        Storage::disk('tmp')->put($this->tmpFileName, '');
-
-        return $this->tmpFileName;
+        if (is_resource($this->reader)) {
+            fclose($this->reader);
+        }
     }
 }

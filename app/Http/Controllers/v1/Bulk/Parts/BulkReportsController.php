@@ -6,7 +6,7 @@ namespace App\Http\Controllers\v1\Bulk\Parts;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bulk\Parts\CreateBulkReportRequest;
-use App\Http\Requests\Bulk\Parts\GetBulkReportRequest;
+use App\Http\Requests\Jobs\ReadMonitoredJobsRequest;
 use App\Jobs\Bulk\Parts\FinancialReportExportJob;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Bulk\Parts\BulkReport;
@@ -115,7 +115,7 @@ class BulkReportsController extends Controller
      */
     public function read(Request $request)
     {
-        $request = new GetBulkReportRequest($request->all());
+        $request = new ReadMonitoredJobsRequest($request->all());
 
         if ($request->validate()) {
             $job = $this->repository->findByToken($request->get('token'));

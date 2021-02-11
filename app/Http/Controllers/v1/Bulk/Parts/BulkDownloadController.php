@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Bulk\Parts;
 use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Bulk\Parts\CreateBulkDownloadRequest;
-use App\Http\Requests\Jobs\GetMonitoredJobsRequest;
+use App\Http\Requests\Jobs\ReadMonitoredJobsRequest;
 use App\Jobs\Bulk\Parts\CsvExportJob;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
@@ -130,7 +130,7 @@ class BulkDownloadController extends MonitoredJobsController
      */
     public function read(string $token, Request $request)
     {
-        $request = new GetMonitoredJobsRequest(array_merge($request->all(), ['token' => $token]));
+        $request = new ReadMonitoredJobsRequest(array_merge($request->all(), ['token' => $token]));
 
         if ($request->validate()) {
             $download = $this->bulkRepository->findByToken($token);
