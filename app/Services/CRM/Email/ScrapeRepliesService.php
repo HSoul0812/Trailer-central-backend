@@ -165,8 +165,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         if(!empty($salesperson->googleToken)) {
             // Refresh Token
             $validate = $this->google->validate($salesperson->googleToken);
-            var_dump($salesperson->googleToken);
-            var_dump($validate);
             if(!empty($validate['new_token'])) {
                 $accessToken = $this->tokens->refresh($salesperson->googleToken->id, $validate['new_token']);
                 $salesperson->setRelation('googleToken', $accessToken);

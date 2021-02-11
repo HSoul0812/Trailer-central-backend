@@ -337,10 +337,6 @@ class GmailService implements GmailServiceInterface
             'created' => strtotime($accessToken->issued_at) * 1000
         ]);
         $this->client->setScopes($accessToken->scope);
-        var_dump($this->client);
-        var_dump($this->client->isAccessTokenExpired());
-        var_dump($this->client->verifyIdToken($accessToken->id_token));
-        die;
 
         // Setup Gmail
         $this->gmail = new \Google_Service_Gmail($this->client);
