@@ -17,4 +17,9 @@ class CreatePaymentsRequest extends Request {
         'payments.*.check_number' => 'string|nullable',
     ];
 
+    public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null) {
+        parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
+        $this->rules['paymentUUID'] = 'required|uuid|payment_uuid_valid:'.$this->input('dealer_id');
+    }
+
 }
