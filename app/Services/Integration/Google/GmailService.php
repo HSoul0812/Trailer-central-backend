@@ -16,7 +16,10 @@ use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
+use App\Utilities\Fractal\NoDataArraySerializer;
+use Google_Service_Gmail;
 use Google_Service_Gmail_MessagePart;
+use League\Fractal\Manager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -355,7 +358,7 @@ class GmailService implements GmailServiceInterface
         $client->setScopes($accessToken->scope);
 
         // Setup Gmail
-        $this->gmail = new \Google_Service_Gmail($client);
+        $this->gmail = new Google_Service_Gmail($client);
         return $this->gmail;
     }
 
@@ -382,7 +385,7 @@ class GmailService implements GmailServiceInterface
         $client->setScopes($emailToken->getScope());
 
         // Setup Gmail
-        $this->gmail = new \Google_Service_Gmail($client);
+        $this->gmail = new Google_Service_Gmail($client);
         return $this->gmail;
     }
 
