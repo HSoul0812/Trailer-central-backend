@@ -172,7 +172,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $salesperson->setRelation('googleToken', $accessToken);
                 var_dump($accessToken);
             }
-            die;
         }
 
         // Process Messages
