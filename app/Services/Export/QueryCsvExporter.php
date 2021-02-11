@@ -46,11 +46,6 @@ abstract class QueryCsvExporter implements CsvExporterInterface
     protected $query;
 
     /**
-     * @var resource
-     */
-    protected $tmpFileHandle;
-
-    /**
      * @param Builder|EloquentBuilder|null $query source query
      * @param array|null $headers array of csv headers
      * @param Callable|null $lineMapper a function that maps db columns to csv column

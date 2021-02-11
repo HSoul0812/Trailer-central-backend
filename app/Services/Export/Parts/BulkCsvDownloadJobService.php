@@ -8,6 +8,7 @@ use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Common\BusyJobException;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
+use App\Models\Parts\Part;
 use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
@@ -99,8 +100,8 @@ class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements B
             ->setHeaders($exporter->getHeaders())
 
             // a line mapper maps the db columns by name to csv column by position
-            ->setLineMapper(static function ($line) use ($job, $exporter) {
-                return $exporter->getLineMapper($line);
+            ->setLineMapper(static function (Part $part) use ($exporter): array {
+                return $exporter->getLineMapper($part);
             })
 
             // if progress has incremented, save progress

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Export;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -11,11 +13,7 @@ use League\Csv\CannotInsertRecord;
 use League\Csv\Writer;
 
 /**
- * Class FilesystemCsvExporterService
- *
  * General purpose export CSV to a `Filesystem` object from query
- *
- * @package App\Services\Export\Parts
  */
 abstract class FilesystemCsvExporter extends QueryCsvExporter
 {
@@ -59,12 +57,10 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
      * Crete a fileHandle where a temp csv will be written to
      *
      * @return self
-     * @throws FileNotFoundException
      */
     public function createFile(): self
     {
-        $this->tmpFileHandle = Storage::disk('tmp')->readStream($this->touch());
-        $this->csvWriter = Writer::createFromStream($this->tmpFileHandle);
+        $this->csvWriter = Writer::createFromStream($this->writeStream());
 
         return $this;
     }
@@ -76,7 +72,7 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
      */
     public function deliver(): void
     {
-        $this->filesystem->put($this->filename, Storage::disk('tmp')->readStream($this->tmpFileName));
+       $this->filesystem->put($this->filename, $this->readStream());
     }
 
     /**
@@ -138,9 +134,31 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
         $this->csvWriter->insertOne($callable($line));
     }
 
+    /**
+     * @return resource
+     */
+    private function writeStream()
+    {
+        return fopen($this->touch(), 'wb+');
+    }
+
+    /**
+     * @return resource
+     * @throws FileNotFoundException
+     */
+    private function readStream()
+    {
+        return Storage::disk('tmp')->readStream($this->tmpFileName)['stream'];
+    }
+
+    /**
+     * Initializes the file
+     *
+     * @return string
+     */
     private function touch(): string
     {
-        $this->tmpFileName = sprintf('/exported-%s-%s.csv', date('Y-m-d-H-i-s'), uniqid('', false));
+        $this->tmpFileName = sprintf('exported-%s-%s.csv', date('Y-m-d-H-i-s'), uniqid('', false));
         Storage::disk('tmp')->put($this->tmpFileName, '');
 
         return $this->tmpFileName;
