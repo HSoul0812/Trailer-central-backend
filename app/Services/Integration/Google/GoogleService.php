@@ -134,7 +134,6 @@ class GoogleService implements GoogleServiceInterface
             'is_valid' => $this->validateIdToken($accessToken->id_token),
             'is_expired' => $this->client->isAccessTokenExpired()
         ];
-        var_dump($result);
 
         // Try to Refesh Access Token!
         if(!empty($accessToken->refresh_token) && (!$result['is_valid'] || $result['is_expired'])) {
@@ -146,7 +145,6 @@ class GoogleService implements GoogleServiceInterface
                 $result['new_token'] = $refresh;
             }
         }
-        var_dump($result['new_token']);
 
         // Not Valid?
         if(empty($result['is_valid'])) {
