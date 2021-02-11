@@ -285,6 +285,7 @@ class GmailService implements GmailServiceInterface
     public function labels(AccessToken $accessToken, array $search = []) {
         // Configure Client
         $this->setAccessToken($accessToken);
+        var_dump($this->gmail);
 
         // Get Labels
         $results = $this->gmail->users_labels->listUsersLabels('me');
@@ -337,8 +338,6 @@ class GmailService implements GmailServiceInterface
             'created' => strtotime($accessToken->issued_at) * 1000
         ]);
         $this->client->setScopes($accessToken->scope);
-        var_dump($accessToken->relation_id);
-        var_dump($accessToken->access_token);
 
         // Setup Gmail
         $this->gmail = new \Google_Service_Gmail($this->client);
