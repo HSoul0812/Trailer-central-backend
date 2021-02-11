@@ -182,9 +182,6 @@ class GmailService implements GmailServiceInterface
      * @return whether the email was sent successfully or not
      */
     public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []) {
-        // Configure Client
-        $this->setAccessToken($accessToken);
-
         // Get Labels
         $labels = $this->labels($accessToken, [$folder]);
 
