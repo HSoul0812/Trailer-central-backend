@@ -54,7 +54,7 @@ class GmailService implements GmailServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct(InteractionEmailServiceInterface $interactionEmail, GoogleServiceInterface $google) {
+    public function __construct(InteractionEmailServiceInterface $interactionEmail) {
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
 
@@ -302,14 +302,14 @@ class GmailService implements GmailServiceInterface
      * @param type $accessToken
      * @return void
      */
-    private function setAccessToken(AccessToken $accessToken) {
+    private function setAccessToken(AccessToken $accessToken, GoogleServiceInterface $google) {
         // ID Token Exists?
         if(empty($accessToken->id_token)) {
             throw new MissingGapiIdTokenException;
         }
 
         // Set Access Token on Client
-        $client = $this->google->getClient();
+        $client = $google->getClient();
         $client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
@@ -329,14 +329,14 @@ class GmailService implements GmailServiceInterface
      * @param EmailToken $emailToken
      * @return void
      */
-    private function setEmailToken(EmailToken $emailToken) {
+    private function setEmailToken(EmailToken $emailToken, GoogleServiceInterface $google) {
         // ID Token Exists?
         if(empty($emailToken->getIdToken())) {
             throw new MissingGapiIdTokenException;
         }
 
         // Set Google Token on Client
-        $client = $this->google->getClient();
+        $client = $google->getClient();
         $client->setAccessToken([
             'access_token' => $emailToken->getAccessToken(),
             'id_token' => $emailToken->getIdToken(),
