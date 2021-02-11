@@ -51,24 +51,36 @@ class GoogleService implements GoogleServiceInterface
 
         // Initialize Logger
         $this->log = Log::channel('google');
+    }
 
+
+    /**
+     * Get Fresh Client
+     * 
+     * @return type
+     * @throws MissingGapiClientIdException
+     * @throws FailedConnectGapiClientException
+     */
+    public function getClient() {
         // No Client ID?!
         if(empty(env('GOOGLE_OAUTH_CLIENT_ID'))) {
             throw new MissingGapiClientIdException;
         }
 
         // Initialize Client
-        $this->client = new \Google_Client();
-        $this->client->setApplicationName(env('GOOGLE_OAUTH_APP_NAME'));
-        $this->client->setClientId(env('GOOGLE_OAUTH_CLIENT_ID'));
-        $this->client->setClientSecret(env('GOOGLE_OAUTH_CLIENT_SECRET'));
-        if(empty($this->client)) {
+        $client = new \Google_Client();
+        $client->setApplicationName(env('GOOGLE_OAUTH_APP_NAME'));
+        $client->setClientId(env('GOOGLE_OAUTH_CLIENT_ID'));
+        $client->setClientSecret(env('GOOGLE_OAUTH_CLIENT_SECRET'));
+        if(empty($client)) {
             throw new FailedConnectGapiClientException;
         }
 
         // Set Defaults
-        $this->client->setAccessType('offline');
-        $this->client->setIncludeGrantedScopes(true);
+        $client->setAccessType('offline');
+        $client->setIncludeGrantedScopes(true);
+        $this->client = $client;
+        return $client;
     }
 
 
@@ -81,6 +93,7 @@ class GoogleService implements GoogleServiceInterface
      */
     public function login($redirectUrl, $scopes) {
         // Set Redirect URL
+        $this->getClient();
         $this->client->setRedirectUri($redirectUrl);
 
         // Return Auth URL for Login
@@ -96,6 +109,7 @@ class GoogleService implements GoogleServiceInterface
      */
     public function auth($redirectUrl, $authCode): array {
         // Set Redirect URL
+        $this->getClient();
         $this->client->setRedirectUri($redirectUrl);
 
         // Return Auth URL for Login
@@ -124,6 +138,7 @@ class GoogleService implements GoogleServiceInterface
      */
     public function refresh($accessToken) {
         // Configure Client
+        $this->getClient();
         $this->client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
@@ -150,6 +165,7 @@ class GoogleService implements GoogleServiceInterface
         }
 
         // Configure Client
+        $this->getClient();
         $this->client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
@@ -199,6 +215,7 @@ class GoogleService implements GoogleServiceInterface
         }
 
         // Configure Client
+        $this->getClient();
         $this->client->setAccessToken([
             'access_token' => $accessToken->getAccessToken(),
             'refresh_token' => $accessToken->getRefreshToken(),
@@ -244,6 +261,7 @@ class GoogleService implements GoogleServiceInterface
         // Validate ID Token
         try {
             // Verify ID Token is Valid
+            $this->getClient();
             $payload = $this->client->verifyIdToken($idToken);
             if ($payload) {
                 $validate = true;
@@ -274,6 +292,7 @@ class GoogleService implements GoogleServiceInterface
         // Validate If Expired
         try {
             // Refresh the token if possible, else fetch a new one.
+            $this->getClient();
             if ($refreshToken = $this->client->getRefreshToken()) {
                 if($newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken)) {
                     $result = $newToken;

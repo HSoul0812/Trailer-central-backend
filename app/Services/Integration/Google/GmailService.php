@@ -2,21 +2,18 @@
 
 namespace App\Services\Integration\Google;
 
-use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
-use App\Exceptions\Integration\Google\MissingGapiClientIdException;
-use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
 use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
 use App\Exceptions\Integration\Google\MissingGmailLabelsException;
 use App\Exceptions\Integration\Google\MissingGmailLabelException;
-use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
 use Google_Service_Gmail_MessagePart;
@@ -38,14 +35,14 @@ class GmailService implements GmailServiceInterface
     protected $interactionEmail;
 
     /**
-     * @var Google_Client
+     * @var App\Services\Integration\Google\GoogleServiceInterface
      */
-    protected $client;
+    protected $google;
 
     /**
-     * @var Google_Service_Gmail_Message
+     * @var Google_Service_Gmail
      */
-    protected $message;
+    protected $gmail;
 
     /**
      * @var array
@@ -57,30 +54,12 @@ class GmailService implements GmailServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct(InteractionEmailServiceInterface $interactionEmail) {
+    public function __construct(InteractionEmailServiceInterface $interactionEmail, GoogleServiceInterface $google) {
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
 
         // Initialize Logger
         $this->log = Log::channel('google');
-
-        // No Client ID?!
-        if(empty(env('GOOGLE_OAUTH_CLIENT_ID'))) {
-            throw new MissingGapiClientIdException;
-        }
-
-        // Initialize Client
-        $this->client = new \Google_Client();
-        $this->client->setApplicationName(env('GOOGLE_OAUTH_APP_NAME'));
-        $this->client->setClientId(env('GOOGLE_OAUTH_CLIENT_ID'));
-        $this->client->setClientSecret(env('GOOGLE_OAUTH_CLIENT_SECRET'));
-        if(empty($this->client)) {
-            throw new FailedConnectGapiClientException;
-        }
-
-        // Set Defaults
-        $this->client->setAccessType('offline');
-        $this->client->setIncludeGrantedScopes(true);
     }
 
     /**
@@ -285,7 +264,6 @@ class GmailService implements GmailServiceInterface
     public function labels(AccessToken $accessToken, array $search = []) {
         // Configure Client
         $this->setAccessToken($accessToken);
-        var_dump($this->gmail);
 
         // Get Labels
         $results = $this->gmail->users_labels->listUsersLabels('me');
@@ -331,16 +309,18 @@ class GmailService implements GmailServiceInterface
         }
 
         // Set Access Token on Client
-        $this->client->setAccessToken([
+        $client = $this->google->getClient();
+        $client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'expires_in' => $accessToken->expires_in,
             'created' => strtotime($accessToken->issued_at) * 1000
         ]);
-        $this->client->setScopes($accessToken->scope);
+        $client->setScopes($accessToken->scope);
 
         // Setup Gmail
-        $this->gmail = new \Google_Service_Gmail($this->client);
+        $this->gmail = new \Google_Service_Gmail($client);
+        return $this->gmail;
     }
 
     /**
@@ -356,16 +336,18 @@ class GmailService implements GmailServiceInterface
         }
 
         // Set Google Token on Client
-        $this->client->setAccessToken([
+        $client = $this->google->getClient();
+        $client->setAccessToken([
             'access_token' => $emailToken->getAccessToken(),
             'id_token' => $emailToken->getIdToken(),
             'expires_in' => $emailToken->getExpiresIn(),
             'created' => $emailToken->getIssuedUnix()
         ]);
-        $this->client->setScopes($emailToken->getScope());
+        $client->setScopes($emailToken->getScope());
 
         // Setup Gmail
-        $this->gmail = new \Google_Service_Gmail($this->client);
+        $this->gmail = new \Google_Service_Gmail($client);
+        return $this->gmail;
     }
 
 
@@ -383,7 +365,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Create Swift Message
-        $message = (new \Swift_Message($params['subject']))
+        $swift = (new \Swift_Message($params['subject']))
             ->setFrom($from)
             ->setTo([$params['to_email'] => $params['to_name']])
             ->setContentType('text/html')
@@ -391,14 +373,14 @@ class GmailService implements GmailServiceInterface
             ->setBody($params['body']);
 
         // Set Message ID
-        $message->getHeaders()->get('Message-ID')->setId($params['message_id']);
+        $swift->getHeaders()->get('Message-ID')->setId($params['message_id']);
 
         // Add Existing Attachments
         if(isset($params['files'])) {
             $files = $this->interactionEmail->cleanAttachments($params['files']);
             foreach($files as $attachment) {
                 // Optionally add any attachments
-                $message->attach((new \Swift_Attachment(file_get_contents($attachment['path']), $attachment['as'], $attachment['mime'])));
+                $swift->attach((new \Swift_Attachment(file_get_contents($attachment['path']), $attachment['as'], $attachment['mime'])));
             }
         }
 
@@ -407,21 +389,21 @@ class GmailService implements GmailServiceInterface
             $attachments = $this->interactionEmail->getAttachments($params['attachments']);
             foreach($attachments as $attachment) {
                 // Optionally add any attachments
-                $message->attach(\Swift_Attachment::fromPath($attachment['path'])->setFilename($attachment['as']));
+                $swift->attach(\Swift_Attachment::fromPath($attachment['path'])->setFilename($attachment['as']));
             }
         }
 
         // Get Raw Message
         $msg_base64 = (new \Swift_Mime_ContentEncoder_Base64ContentEncoder())
-                        ->encodeString($message->toString());
+                        ->encodeString($swift->toString());
         $msg_base64 = preg_replace('/(\s|\r)*/', '', $msg_base64);
 
         // Set Message and Return
-        $this->message = new \Google_Service_Gmail_Message();
-        $this->message->setRaw($msg_base64);
+        $message = new \Google_Service_Gmail_Message();
+        $message->setRaw($msg_base64);
 
         // Return Message
-        return $this->message;
+        return $message;
     }
 
 
