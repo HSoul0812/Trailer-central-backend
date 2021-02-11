@@ -178,6 +178,7 @@ class GoogleService implements GoogleServiceInterface
                 $result['new_token'] = $refresh;
             }
         }
+        var_dump($result['new_token']);
 
         // Not Valid?
         if(empty($result['is_valid'])) {
