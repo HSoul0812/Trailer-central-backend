@@ -338,6 +338,8 @@ class GmailService implements GmailServiceInterface
         ]);
         $this->client->setScopes($accessToken->scope);
         var_dump($this->client);
+        var_dump($this->client->isAccessTokenExpired());
+        var_dump($this->client->verifyIdToken($accessToken->id_token));
         die;
 
         // Setup Gmail
