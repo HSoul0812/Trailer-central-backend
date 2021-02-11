@@ -18,11 +18,6 @@ use Illuminate\Support\Facades\Log;
 class GoogleService implements GoogleServiceInterface
 {
     /**
-     * @var Google_Client
-     */
-    protected $client;
-
-    /**
      * @var GmailServiceInterface
      */
     protected $gmail;
@@ -62,7 +57,6 @@ class GoogleService implements GoogleServiceInterface
         // Set Defaults
         $client->setAccessType('offline');
         $client->setIncludeGrantedScopes(true);
-        $this->client = $client;
         return $client;
     }
 
@@ -76,11 +70,11 @@ class GoogleService implements GoogleServiceInterface
      */
     public function login($redirectUrl, $scopes) {
         // Set Redirect URL
-        $this->getClient();
-        $this->client->setRedirectUri($redirectUrl);
+        $client = $this->getClient();
+        $client->setRedirectUri($redirectUrl);
 
         // Return Auth URL for Login
-        return $this->client->createAuthUrl($scopes);
+        return $client->createAuthUrl($scopes);
     }
 
     /**
@@ -91,18 +85,18 @@ class GoogleService implements GoogleServiceInterface
      */
     public function refresh($accessToken) {
         // Configure Client
-        $this->getClient();
-        $this->client->setAccessToken([
+        $client = $this->getClient();
+        $client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
             'id_token' => $accessToken->id_token,
             'expires_in' => $accessToken->expires_in,
             'created' => strtotime($accessToken->issued_at)
         ]);
-        $this->client->setScopes($accessToken->scope);
+        $client->setScopes($accessToken->scope);
 
         // Get New Token
-        return $this->client->fetchAccessTokenWithRefreshToken($accessToken->refresh_token);
+        return $client->fetchAccessTokenWithRefreshToken($accessToken->refresh_token);
     }
 
     /**
@@ -118,21 +112,21 @@ class GoogleService implements GoogleServiceInterface
         }
 
         // Configure Client
-        $this->getClient();
-        $this->client->setAccessToken([
+        $client = $this->getClient();
+        $client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
             'id_token' => $accessToken->id_token,
             'expires_in' => $accessToken->expires_in,
             'created' => strtotime($accessToken->issued_at)
         ]);
-        $this->client->setScopes($accessToken->scope);
+        $client->setScopes($accessToken->scope);
 
         // Initialize Vars
         $result = [
             'new_token' => [],
             'is_valid' => $this->validateIdToken($accessToken->id_token),
-            'is_expired' => $this->client->isAccessTokenExpired()
+            'is_expired' => $client->isAccessTokenExpired()
         ];
 
         // Try to Refesh Access Token!
@@ -168,21 +162,21 @@ class GoogleService implements GoogleServiceInterface
         }
 
         // Configure Client
-        $this->getClient();
-        $this->client->setAccessToken([
+        $client = $this->getClient();
+        $client->setAccessToken([
             'access_token' => $accessToken->getAccessToken(),
             'refresh_token' => $accessToken->getRefreshToken(),
             'id_token' => $accessToken->getIdToken(),
             'expires_in' => $accessToken->getExpiresIn(),
             'created' => $accessToken->getIssuedUnix()
         ]);
-        $this->client->setScopes($accessToken->getScope());
+        $client->setScopes($accessToken->getScope());
 
         // Initialize Vars
         $result = [
             'new_token' => [],
             'is_valid' => $this->validateIdToken($accessToken->getIdToken()),
-            'is_expired' => $this->client->isAccessTokenExpired()
+            'is_expired' => $client->isAccessTokenExpired()
         ];
 
         // Try to Refesh Access Token!
@@ -214,8 +208,8 @@ class GoogleService implements GoogleServiceInterface
         // Validate ID Token
         try {
             // Verify ID Token is Valid
-            $this->getClient();
-            $payload = $this->client->verifyIdToken($idToken);
+            $client = $this->getClient();
+            $payload = $client->verifyIdToken($idToken);
             if ($payload) {
                 $validate = true;
             }
@@ -245,9 +239,9 @@ class GoogleService implements GoogleServiceInterface
         // Validate If Expired
         try {
             // Refresh the token if possible, else fetch a new one.
-            $this->getClient();
-            if ($refreshToken = $this->client->getRefreshToken()) {
-                if($newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken)) {
+            $client = $this->getClient();
+            if ($refreshToken = $client->getRefreshToken()) {
+                if($newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken)) {
                     $result = $newToken;
                     $result['expired'] = false;
                 }
