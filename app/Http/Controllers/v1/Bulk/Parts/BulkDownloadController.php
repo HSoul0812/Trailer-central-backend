@@ -18,8 +18,6 @@ use Illuminate\Support\Facades\Storage;
 
 class BulkDownloadController extends MonitoredJobsController
 {
-    protected $fileNameProperty = 'export_file';
-
     protected $failedMessage = 'This file could not be completed. Please request a new file.';
 
     /**
