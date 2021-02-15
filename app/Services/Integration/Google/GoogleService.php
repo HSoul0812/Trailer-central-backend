@@ -227,6 +227,7 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Refresh Access Token
      *
+     * @param Google_Client $client
      * @return array of expired status, also return new token if available
      */
     private function refreshAccessToken(Google_Client $client) {
