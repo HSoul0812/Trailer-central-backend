@@ -131,7 +131,7 @@ class GoogleService implements GoogleServiceInterface
 
         // Try to Refesh Access Token!
         if(!empty($accessToken->refresh_token) && (!$result['is_valid'] || $result['is_expired'])) {
-            $refresh = $this->refreshAccessToken();
+            $refresh = $this->refreshAccessToken($client);
             $result['is_expired'] = $refresh['expired'];
             if(!empty($refresh['access_token'])) {
                 unset($refresh['expired']);
@@ -181,7 +181,7 @@ class GoogleService implements GoogleServiceInterface
 
         // Try to Refesh Access Token!
         if(!empty($accessToken->getRefreshToken()) && (!$result['is_valid'] || $result['is_expired'])) {
-            $refresh = $this->refreshAccessToken();
+            $refresh = $this->refreshAccessToken($client);
             $result['is_expired'] = $refresh['expired'];
             if(!empty($refresh['access_token'])) {
                 unset($refresh['expired']);
@@ -229,7 +229,7 @@ class GoogleService implements GoogleServiceInterface
      *
      * @return array of expired status, also return new token if available
      */
-    private function refreshAccessToken() {
+    private function refreshAccessToken(Google_Client $client) {
         // Set Expired
         $result = [
             'new_token' => [],
@@ -239,7 +239,6 @@ class GoogleService implements GoogleServiceInterface
         // Validate If Expired
         try {
             // Refresh the token if possible, else fetch a new one.
-            $client = $this->getClient();
             if ($refreshToken = $client->getRefreshToken()) {
                 if($newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken)) {
                     $result = $newToken;
