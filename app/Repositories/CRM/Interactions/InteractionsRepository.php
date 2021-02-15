@@ -34,10 +34,10 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     
     private $sortOrdersNames = [
         'created_at' => [
-            'name' => 'Newest Tasks to Oldest Tasks, then Future Tasks',
+            'name' => 'Newest Tasks to Oldest Tasks',
         ],
         '-created_at' => [
-            'name' => 'Oldest Tasks to Newest Tasks, then Future Tasks',
+            'name' => 'Oldest Tasks to Newest Tasks',
         ],
     ];
 
@@ -93,7 +93,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         }
 
         if(!isset($params['sort'])) {
-            $params['sort'] = '-created_at';
+            $params['sort'] = 'created_at';
         }
 
         if (!isset($params['include_texts']) || !empty($params['include_texts'])) {
