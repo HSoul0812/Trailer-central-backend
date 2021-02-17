@@ -32,4 +32,13 @@ interface PaymentServiceInterface {
      * @return Collection
      */
     public function createBulk(int $dealerId, array $payments, string $paymentUUID);
+
+    /**
+     * Create a check expense for floorplan payments
+     * 
+     * @param array $params
+     * 
+     * @return Collection
+     */
+    public function create(array $params);
 }

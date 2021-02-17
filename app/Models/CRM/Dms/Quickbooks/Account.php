@@ -43,6 +43,8 @@ class Account extends Model
         self::TYPE_OTHER_INCOME,
     ];
 
+    const FLOORING_DEBT_PREFIX = 'Flooring Debt - ';
+
     protected $table = 'qb_accounts';
 
     protected $guarded = ['qb_id'];
