@@ -3,8 +3,18 @@
 namespace App\Services\Integration\Google;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
+use Google_Client;
 
 interface GoogleServiceInterface {
+    /**
+     * Get Fresh Client
+     * 
+     * @throws MissingGapiClientIdException
+     * @throws FailedConnectGapiClientException
+     * @return Google_Client
+     */
+    public function getClient(): Google_Client;
+
     /**
      * Get Login URL
      * 
@@ -13,15 +23,6 @@ interface GoogleServiceInterface {
      * @return login url with offline access support
      */
     public function login($redirectUrl, $scopes);
-
-    /**
-     * Get Auth URL
-     * 
-     * @param string $redirectUrl url to redirect auth back to again
-     * @param string $authCode auth code to get full credentials with
-     * @return array created from GoogleTokenTransformer
-     */
-    public function auth($redirectUrl, $authCode): array;
 
     /**
      * Get Refresh Token

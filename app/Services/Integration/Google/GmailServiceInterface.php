@@ -7,6 +7,15 @@ use App\Services\Integration\Common\DTOs\EmailToken;
 
 interface GmailServiceInterface {
     /**
+     * Get Auth URL
+     * 
+     * @param string $redirectUrl url to redirect auth back to again
+     * @param string $authCode auth code to get full credentials with
+     * @return array created from GoogleTokenTransformer
+     */
+    public function auth($redirectUrl, $authCode): array;
+
+    /**
      * Get Gmail Profile Email
      * 
      * @param EmailToken $emailToken

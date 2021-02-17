@@ -3,10 +3,10 @@
 namespace App\Repositories\Website\Forms;
 
 use App\Exceptions\NotImplementedException;
-use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\Website\Forms\FieldMap;
 use App\Transformers\Website\Forms\FieldMapTransformer;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class FieldMapRepository
@@ -32,7 +32,7 @@ class FieldMapRepository implements FieldMapRepositoryInterface
                             ->where('form_field', $params['form_field'])
                             ->first();
         if(!empty($fieldMap->id)) {
-            return $this-update($params);
+            return $this->update($params);
         }
 
         // Get DB Table
