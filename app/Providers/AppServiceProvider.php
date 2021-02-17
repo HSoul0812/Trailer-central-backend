@@ -28,6 +28,8 @@ use App\Repositories\Dms\Quickbooks\AccountRepository;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\ExpenseRepository;
 use App\Repositories\Dms\Quickbooks\ExpenseRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\ItemNewRepository;
+use App\Repositories\Dms\Quickbooks\ItemNewRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
@@ -224,6 +226,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(ExpenseRepositoryInterface::class, ExpenseRepository::class);
+        $this->app->bind(ItemNewRepositoryInterface::class, ItemNewRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);

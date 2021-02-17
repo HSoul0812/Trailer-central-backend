@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\ExpenseRepositoryInterface;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Models\CRM\Dms\Quickbooks\Expense;
 use App\Models\CRM\Dms\Quickbooks\ItemNew;
 use App\Models\Inventory\Floorplan\Payment;
-use App\Models\Inventory\Inventory;
 use App\Services\Quickbooks\NewItemService;
 use App\Services\Quickbooks\AccountService;
 
@@ -43,11 +43,17 @@ class PaymentService implements PaymentServiceInterface
      */
     private $accountService;
 
+    /**
+     * @var InventoryRepositoryInterface
+     */
+    private $inventoryRepository;
+
     public function __construct(
         PaymentRepositoryInterface $payment,
         ExpenseRepositoryInterface $expenseRepo,
         NewItemService $newItemService,
-        AccountService $accountService
+        AccountService $accountService,
+        InventoryRepositoryInterface $inventoryRepository
     )
     {
         $this->redis = Redis::connection();
@@ -55,6 +61,7 @@ class PaymentService implements PaymentServiceInterface
         $this->expenseRepo = $expenseRepo;
         $this->newItemService = $newItemService;
         $this->accountService = $accountService;
+        $this->inventoryRepository = $inventoryRepository;
     }
 
     public function validatePaymentUUID(int $dealerId, string $paymentUUID)
@@ -97,7 +104,7 @@ class PaymentService implements PaymentServiceInterface
             $categories = [];
             foreach ($params['payments'] as $payment) {
                 $isBalancePayment = $payment['type'] === Payment::PAYMENT_CATEGORIES['Balance'];
-                $inventory = Inventory::findOrFail($payment['inventory_id']);
+                $inventory = $this->inventoryRepository->get(['id' => $payment['inventory_id']]);
                 $categories[] = [
                     'account_id' => $isBalancePayment ? $flooringDebtAccountId : $interestAccountId,
                     'amount' => $payment['amount'],
@@ -105,11 +112,15 @@ class PaymentService implements PaymentServiceInterface
                 ];
                 // Adjust balance
                 if ($isBalancePayment) {
-                    Inventory::find($payment['inventory_id'])
-                        ->update(['fp_balance' => (float) $inventory->fp_balance - (float) $payment['amount']]);
+                    $this->inventoryRepository->update([
+                        'inventory_id' => $payment['inventory_id'],
+                        'fp_balance' => (float) $inventory->fp_balance - (float) $payment['amount']
+                    ]);
                 } else {
-                    Inventory::find($payment['inventory_id'])
-                        ->update(['fp_interest_paid' => (float) $inventory->fp_interest_paid + (float) $payment['amount']]);
+                    $this->inventoryRepository->update([
+                        'inventory_id' => $payment['inventory_id'],
+                        'fp_interest_paid' => (float) $inventory->fp_interest_paid + (float) $payment['amount']
+                    ]);
                 }
             }
 
@@ -125,7 +136,7 @@ class PaymentService implements PaymentServiceInterface
                 // Categories
                 'categories' => $categories
             ]);
-            // $this->setPaymentUUID($dealerId, $paymentUUID);
+            $this->setPaymentUUID($params['dealer_id'], $params['paymentUUID']);
 
             DB::commit();
         } catch (\Exception $ex) {
