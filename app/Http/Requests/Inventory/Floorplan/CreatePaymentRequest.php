@@ -13,7 +13,7 @@ class CreatePaymentRequest extends Request {
     protected $rules = [
         'vendor_id' => 'integer|required',
         'account_id' => 'integer|required',
-        'total_amount' => 'integer|required',
+        'total_amount' => 'numeric|required',
         'check_number' => 'string|nullable',
         'payments' => 'required',
         'payments.*.inventory_id' => 'integer|required',

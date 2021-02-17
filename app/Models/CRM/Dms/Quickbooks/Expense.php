@@ -3,6 +3,8 @@
 namespace App\Models\CRM\Dms\Quickbooks;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @author Marcel
@@ -38,22 +40,22 @@ class Expense extends Model
 
     protected $guarded = ['qb_id'];
 
-    public function categories()
+    public function categories(): HasMany
     {
         return $this->hasMany(ExpenseCategory::class);
     }
 
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(ExpenseItem::class);
     }
 
-    public function account()
+    public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
     }
 
-    public function paymentMethod()
+    public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class);
     }

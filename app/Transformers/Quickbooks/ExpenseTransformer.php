@@ -9,10 +9,10 @@ use League\Fractal\TransformerAbstract;
 
 class ExpenseTransformer extends TransformerAbstract
 {
-    public function transform(Expense $expense)
+    public function transform(Expense $expense): array
     {
         return [
-            'id' => (int)$expense->id,
+            'id' => (int) $expense->id,
             'account' => $expense->account,
             'payment_method' => $expense->paymentMethod,
             'txn_date' => $expense->txn_date,
