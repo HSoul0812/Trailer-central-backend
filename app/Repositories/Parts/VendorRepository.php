@@ -23,7 +23,16 @@ class VendorRepository implements VendorRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        if (isset($params['vendor_id'])) {
+            return Vendor::findOrFail($params['vendor_id']);
+        }
+
+        $query = Vendor::where('id', '>', 0);
+        if (isset($params['dealer_id'])) {
+            $query = $query->where('dealer_id', $params['dealer_id']);
+        }
+
+        return $query->first();
     }
 
     public function getAll($params) {
