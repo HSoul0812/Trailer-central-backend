@@ -32,10 +32,33 @@ class AddTaxFieldsToDealerSalesHistoryTable extends Migration
                     }
 
                     DB::table('dealer_sales_history')
-                        ->where(['tb_name' => 'qb_invoices', 'tb_primary_id' => $dealerSale->tb_primary_id])
+                        ->where([
+                            ['tb_name', '=', 'qb_invoices'],
+                            ['tb_primary_id', '=', $dealerSale->tb_primary_id]
+                        ])
                         ->update(['tax_rate' => $invoice->tax_rate]);
                 }
         });
+
+        DB::table('dealer_sales_history')
+            ->select('tb_primary_id', 'total')
+            ->orderBy('id')
+            ->where([
+                ['state_tax', '=', 0],
+                ['county_tax', '=', 0],
+                ['city_tax', '=', 0],
+                ['district1_tax', '=', 0],
+                ['district2_tax', '=', 0],
+                ['district3_tax', '=', 0],
+                ['district4_tax', '=', 0],
+            ])
+            ->chunk(500, function ($dealerSales) {
+                foreach ($dealerSales as $dealerSale) {
+                    DB::table('dealer_sales_history')
+                        ->where(['tb_primary_id' => $dealerSale->tb_primary_id])
+                        ->update(['non_taxable' => $dealerSale->total]);
+                }
+            });
     }
 
     /**
