@@ -15,13 +15,13 @@ trait MailHelper
         if (!empty($salesPerson->smtp_server)) {
             $config = [
                 'driver'        => 'smtp',
-                'host'          => $salesPerson->smtp_server,
+                'host'          => trim($salesPerson->smtp_server),
                 'port'          => $salesPerson->smtp_port ?? '2525',
-                'username'      => $salesPerson->smtp_email,
-                'password'      => $salesPerson->smtp_password,
+                'username'      => trim($salesPerson->smtp_email),
+                'password'      => trim($salesPerson->smtp_password),
                 'encryption'    => $salesPerson->smtp_security ?? 'tls',
                 'from'          => [
-                    'address'   => $salesPerson->smtp_email,
+                    'address'   => trim($salesPerson->smtp_email),
                     'name'      => $salesPerson->full_name
                 ]
             ];
