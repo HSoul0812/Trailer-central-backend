@@ -14,10 +14,10 @@ class AddNewCustomerActionsToCampaign extends Migration
     public function up()
     {
         // Update Customer Actions for Drip Campaigns
-        DB::statement("ALTER TABLE crm_drip_campaigns MODIFY COLUMN action ENUM('" . implode("', '", array_keys(Campaign::STATUS_ACTIONS)) . "')");
+        DB::statement("ALTER TABLE crm_drip_campaigns MODIFY COLUMN action ENUM('" . implode("', '", Campaign::STATUS_ACTIONS) . "')");
 
         // Update Customer Actions for Email Blast
-        DB::statement("ALTER TABLE crm_email_blasts MODIFY COLUMN action ENUM('" . implode("', '", array_keys(Blast::STATUS_ACTIONS)) . "')");
+        DB::statement("ALTER TABLE crm_email_blasts MODIFY COLUMN action ENUM('" . implode("', '", Blast::STATUS_ACTIONS) . "')");
     }
 
     /**
