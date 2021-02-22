@@ -165,10 +165,6 @@ class GmailService implements GmailServiceInterface
         try {
             // Send Message
             $sent = $this->gmail->users_messages->send('me', $message);
-
-            // Get Message ID From Gmail
-            $full = $this->message($sent->id);
-            $params['message_id'] = $full->messageId;
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
@@ -178,6 +174,15 @@ class GmailService implements GmailServiceInterface
             } else {
                 throw new FailedSendGmailMessageException();
             }
+        }
+
+        // Get Message ID From Gmail
+        try {
+            $full = $this->message($sent->id);
+            $params['message_id'] = $full->messageId;
+        } catch (\Exception $e) {
+            // Report Error, but Don't Stop Process
+            $this->log->error('Exception returned getting Gmail Message ID; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Store Attachments
