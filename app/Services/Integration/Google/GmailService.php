@@ -173,6 +173,10 @@ class GmailService implements GmailServiceInterface
         try {
             // Send Message
             $sent = $this->gmail->users_messages->send('me', $message);
+
+            // Get Full Message Details
+            $message = $this->message($sent->id);
+            var_dump($message);
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
@@ -183,8 +187,6 @@ class GmailService implements GmailServiceInterface
                 throw new FailedSendGmailMessageException();
             }
         }
-        var_dump($sent->id);
-        die;
 
         // Store Attachments
         if(isset($params['attachments'])) {
