@@ -7,11 +7,11 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 
 /**
- * Class Email Campaign
+ * Class Email Blast
  *
  * @package App\Models\CRM\Email
  */
-class Campaign extends Model
+class Blast extends Model
 {
 
     // Define Constants to Make it Easier to Autocomplete
@@ -33,14 +33,14 @@ class Campaign extends Model
      *
      * @var string
      */
-    protected $table = 'crm_drip_campaigns';
+    protected $table = 'crm_email_blasts';
 
     /**
      * The primary key associated with the table.
      *
      * @var string
      */
-    protected $primaryKey = 'drip_campaigns_id';
+    protected $primaryKey = 'email_blasts_id';
 
     /**
      * Enable Timestamps
@@ -64,7 +64,8 @@ class Campaign extends Model
         'location_id',
         'send_after_days',
         'include_archived',
-        'is_enabled'
+        'delivered',
+        'cancelled',
     ];
 
     /**
