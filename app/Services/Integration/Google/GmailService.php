@@ -179,7 +179,7 @@ class GmailService implements GmailServiceInterface
         // Get Message ID From Gmail
         try {
             $full = $this->message($sent->id);
-            $params['message_id'] = $full->messageId;
+            $params['message_id'] = $full->getMessageId();
         } catch (\Exception $e) {
             // Report Error, but Don't Stop Process
             $this->log->error('Exception returned getting Gmail Message ID; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
