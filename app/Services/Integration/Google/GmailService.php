@@ -183,7 +183,7 @@ class GmailService implements GmailServiceInterface
                 throw new FailedSendGmailMessageException();
             }
         }
-        var_dump($sent);
+        var_dump($sent->id);
         die;
 
         // Store Attachments
