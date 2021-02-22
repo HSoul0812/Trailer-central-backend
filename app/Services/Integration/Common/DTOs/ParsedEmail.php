@@ -485,7 +485,7 @@ class ParsedEmail
      */
     public function setDate(string $date): void
     {
-        $this->date = Carbon::parse($date)->toDateTimeString();
+        $this->date = Carbon::parse($date, 'UTC')->toDateTimeString();
     }
 
 
