@@ -183,6 +183,8 @@ class GmailService implements GmailServiceInterface
                 throw new FailedSendGmailMessageException();
             }
         }
+        var_dump($sent);
+        die;
 
         // Store Attachments
         if(isset($params['attachments'])) {
@@ -412,9 +414,6 @@ class GmailService implements GmailServiceInterface
             ->setContentType('text/html')
             ->setCharset('utf-8')
             ->setBody($params['body']);
-
-        // Set Message ID
-        $swift->getHeaders()->get('Message-ID')->setId($params['message_id']);
 
         // Add Existing Attachments
         if(isset($params['files'])) {
