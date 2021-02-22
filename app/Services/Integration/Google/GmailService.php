@@ -143,14 +143,6 @@ class GmailService implements GmailServiceInterface
         // Set Access Token
         $this->setAccessToken($accessToken);
 
-        // Create Message ID
-        if(empty($params['message_id'])) {
-            $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
-        } else {
-            $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
-        }
-        $params['message_id'] = $messageId;
-
 
         // Insert Gmail
         try {
@@ -174,9 +166,9 @@ class GmailService implements GmailServiceInterface
             // Send Message
             $sent = $this->gmail->users_messages->send('me', $message);
 
-            // Get Full Message Details
-            $message = $this->message($sent->id);
-            var_dump($message);
+            // Get Message ID From Gmail
+            $full = $this->message($sent->id);
+            $params['message_id'] = $full->messageId;
         } catch (\Exception $e) {
             // Get Message
             $error = $e->getMessage();
