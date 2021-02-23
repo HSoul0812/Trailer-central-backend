@@ -143,14 +143,6 @@ class GmailService implements GmailServiceInterface
         // Set Access Token
         $this->setAccessToken($accessToken);
 
-        // Create Message ID
-        if(empty($params['message_id'])) {
-            $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
-        } else {
-            $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
-        }
-        $params['message_id'] = $messageId;
-
 
         // Insert Gmail
         try {
@@ -182,6 +174,15 @@ class GmailService implements GmailServiceInterface
             } else {
                 throw new FailedSendGmailMessageException();
             }
+        }
+
+        // Get Message ID From Gmail
+        try {
+            $full = $this->message($sent->id);
+            $params['message_id'] = $full->getMessageId();
+        } catch (\Exception $e) {
+            // Report Error, but Don't Stop Process
+            $this->log->error('Exception returned getting Gmail Message ID; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Store Attachments
@@ -412,9 +413,6 @@ class GmailService implements GmailServiceInterface
             ->setContentType('text/html')
             ->setCharset('utf-8')
             ->setBody($params['body']);
-
-        // Set Message ID
-        $swift->getHeaders()->get('Message-ID')->setId($params['message_id']);
 
         // Add Existing Attachments
         if(isset($params['files'])) {

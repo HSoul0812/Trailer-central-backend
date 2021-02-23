@@ -68,7 +68,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 'email' => $params['to_email'],
                 'name' => $params['to_name']
             ]))->send(new InteractionEmail([
-                'date' => Carbon::now()->toDateTimeString(),
+                'date' => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
                 'replyToEmail' => $params['from_email'] ?? "",
                 'replyToName' => $params['from_name'],
                 'subject' => $params['subject'],

@@ -132,7 +132,7 @@ class InteractionService implements InteractionServiceInterface
                 'user_id'           => $userId,
                 'interaction_type'  => "EMAIL",
                 'interaction_notes' => "E-Mail Sent: {$params['subject']}",
-                'interaction_time'  => Carbon::now()->toDateTimeString(),
+                'interaction_time'  => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
             ]);
 
             // Set Interaction ID!
