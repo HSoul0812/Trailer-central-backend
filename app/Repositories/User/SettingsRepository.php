@@ -23,7 +23,7 @@ class SettingsRepository implements SettingsRepositoryInterface {
     public function getAll($params) {
         $query = Settings::where('dealer_id', $params['dealer_id']);
 
-        if (!isset($params['setting'])) {
+        if (isset($params['setting'])) {
             $query->where('setting', $params['setting']);
         }
 
