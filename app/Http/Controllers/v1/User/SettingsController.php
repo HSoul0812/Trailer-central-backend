@@ -59,7 +59,7 @@ class SettingsController extends RestfulControllerV2
         $request = new GetSettingsRequest($request->all());
         if ( $request->validate() ) {
             // Return Settings
-            return $this->response->collection($this->settings->get($request->all()), new SettingsTransformer());
+            return $this->response->collection($this->repository->get($request->all()), new SettingsTransformer());
         }
 
         return $this->response->errorBadRequest();
@@ -86,7 +86,7 @@ class SettingsController extends RestfulControllerV2
         $request = new UpdateSettingsRequest($request->all());
         if ( $request->validate() ) {
             // Return Settings
-            return $this->response->collection($this->settings->createOrUpdate($request->all()), new SettingsTransformer());
+            return $this->response->collection($this->repository->createOrUpdate($request->all()), new SettingsTransformer());
         }
 
         return $this->response->errorBadRequest();
