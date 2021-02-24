@@ -27,11 +27,7 @@ class SettingsRepository implements SettingsRepositoryInterface {
             $query->where('setting', $params['setting']);
         }
 
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 1000;
-        }
-
-        return $query->paginate($params['per_page'])->appends($params);
+        return $query->get();
     }
 
     public function update($params) {
