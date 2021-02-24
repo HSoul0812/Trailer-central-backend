@@ -38,10 +38,6 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
-use App\Repositories\User\NewDealerUserRepository;
-use App\Repositories\User\NewDealerUserRepositoryInterface;
-use App\Repositories\User\NewUserRepository;
-use App\Repositories\User\NewUserRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
@@ -68,10 +64,6 @@ use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
-use App\Repositories\User\UserRepositoryInterface;
-use App\Repositories\User\UserRepository;
-use App\Repositories\User\DealerLocationRepository;
-use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 use App\Repositories\System\EmailRepository;
@@ -80,8 +72,6 @@ use App\Services\Common\EncrypterServiceInterface;
 use App\Services\Common\SPLEncrypterService;
 use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 use App\Services\Inventory\Floorplan\PaymentService;
-use App\Services\User\DealerOptionsService;
-use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use Illuminate\Database\Eloquent\Builder;
@@ -213,12 +203,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
-        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
         $this->app->bind(CrmUserRoleRepositoryInterface::class, CrmUserRoleRepository::class);
-        $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
-        $this->app->bind(NewUserRepositoryInterface::class, NewUserRepository::class);
-        $this->app->bind(NewDealerUserRepositoryInterface::class, NewDealerUserRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
@@ -238,8 +224,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EncrypterServiceInterface::class, SPLEncrypterService::class);
 
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
-
-        $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
 
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
         $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
