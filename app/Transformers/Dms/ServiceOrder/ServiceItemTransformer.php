@@ -34,11 +34,7 @@ class ServiceItemTransformer extends TransformerAbstract
 
     public function includeLaborCode(ServiceItem $item)
     {
-        if(!empty($item->laborCode)) {
-            return $this->item($item->laborCode, new LaborCodeTransformer());
-        }
-
-        return $this->item(new LaborCode(), new LaborCodeTransformer());
+        return $this->item($item->laborCode ?: new LaborCode(), new LaborCodeTransformer());
     }
 
     public function includeTechnicians(ServiceItem $item)
