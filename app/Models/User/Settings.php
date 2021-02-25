@@ -3,6 +3,7 @@
 namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Settings extends Model
 {
@@ -69,7 +70,7 @@ class Settings extends Model
      * 
      * @return HasOne
      */
-    public function dealer() {
+    public function dealer(): BelongsTo {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 }

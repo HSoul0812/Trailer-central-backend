@@ -8,6 +8,7 @@ use App\Transformers\User\SettingsTransformer;
 use App\Http\Requests\User\Settings\GetSettingsRequest;
 use App\Http\Requests\User\Settings\UpdateSettingsRequest;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 /**
  * Class SettingsController
@@ -54,7 +55,7 @@ class SettingsController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function index(Request $request) {
+    public function index(Request $request): Response {
         // Get Settings Request
         $request = new GetSettingsRequest($request->all());
         if ( $request->validate() ) {
@@ -81,7 +82,7 @@ class SettingsController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function update(Request $request) {
+    public function update(Request $request): Response {
         // Update Settings Request
         $request = new UpdateSettingsRequest($request->all());
         if ( $request->validate() ) {

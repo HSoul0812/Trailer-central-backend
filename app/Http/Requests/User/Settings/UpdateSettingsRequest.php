@@ -12,7 +12,7 @@ use App\Http\Requests\Request;
 class UpdateSettingsRequest extends Request {
     
     protected $rules = [
-        'dealer_id' => 'required|integer',
+        'dealer_id' => 'required|integer|exists:dealer,dealer_id',
         'settings' => 'required|array',
         'settings.setting' => 'string|max:255',
         'settings.value' => 'string|max:255',
