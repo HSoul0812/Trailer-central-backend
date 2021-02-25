@@ -31,6 +31,7 @@ class SettingsRepository implements SettingsRepositoryInterface {
     }
 
     public function update($params) {
+        var_dump($params);
         $settings = Settings::findOrFail($params['id']);
 
         DB::transaction(function() use (&$settings, $params) {
@@ -85,6 +86,7 @@ class SettingsRepository implements SettingsRepositoryInterface {
                 // Update Existing
                 if(!empty($setting->id)) {
                     $updates['id'] = $setting->id;
+                    var_dump($updates);
                     $settings[] = $this->update($updates);
                     continue;
                 }
