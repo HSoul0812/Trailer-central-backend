@@ -34,6 +34,11 @@ class Settings extends Model
     ];
 
     /**
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * Get Dealer
      * 
      * @return HasOne
