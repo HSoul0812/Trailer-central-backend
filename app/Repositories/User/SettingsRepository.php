@@ -5,6 +5,7 @@ namespace App\Repositories\User;
 use App\Models\User\Settings;
 use App\Repositories\User\SettingsRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use Illuminate\Support\Facades\DB;
 
 class SettingsRepository implements SettingsRepositoryInterface {
     
