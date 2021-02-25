@@ -227,7 +227,7 @@ class SettingsRepositoryTest extends TestCase
         ]);
 
         // Then I should get a class which is an instance of Settings
-        self::assertInstanceOf(Collection::class, $settingsForDealer);
+        self::assertInstanceOf(\Illuminate\Support\Collection::class, $settingsForDealer);
 
         // Setting did not exist before but does now after create
         self::assertSame(count($created) + count($missing), Settings::where(['dealer_id' => $dealerId])->count());
