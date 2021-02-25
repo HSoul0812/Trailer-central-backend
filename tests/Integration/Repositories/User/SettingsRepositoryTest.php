@@ -203,7 +203,7 @@ class SettingsRepositoryTest extends TestCase
             // Add Setting
             $settings[] = [
                 'setting' => $setting->setting,
-                'setting_value' => $setting->setting_value
+                'value' => $setting->setting_value
             ];
         }
 
@@ -215,7 +215,7 @@ class SettingsRepositoryTest extends TestCase
             // Add Setting
             $settings[] = [
                 'setting' => $setting->setting,
-                'setting_value' => $setting->setting_value
+                'value' => $setting->setting_value
             ];
         }
 
