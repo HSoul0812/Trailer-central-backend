@@ -17,6 +17,7 @@ use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
 use Laravel\Scout\Searchable;
+use App\Models\Inventory\Category;
 
 /**
  * Class Inventory
@@ -84,7 +85,8 @@ class Inventory extends Model
         'fp_interest_paid',
         'length',
         'width',
-        'height'
+        'height',
+        'true_cost'
     ];
 
     protected $casts = [
@@ -179,6 +181,17 @@ class Inventory extends Model
     public function customerInventories(): HasMany
     {
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
+    }
+    
+    public function getCategoryLabelAttribute()
+    {
+        $category = Category::where('legacy_category', $this->category)->first();
+        
+        if (empty($category)) {
+            return null;
+        }
+        
+        return $category->label;
     }
 
     public function getColorAttribute()

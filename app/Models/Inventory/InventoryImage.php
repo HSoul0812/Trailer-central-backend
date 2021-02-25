@@ -12,5 +12,8 @@ class InventoryImage extends Model {
      */
     protected $table = 'inventory_image';
 
-    
+    protected $fillable = [
+        'inventory_id',
+        'image_id'
+    ];
 }
