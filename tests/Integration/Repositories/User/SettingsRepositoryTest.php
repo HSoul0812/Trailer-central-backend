@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories\User;
 
-use App\Models\CRM\Leads\Settings;
+use App\Models\User\Settings;
 use App\Repositories\User\SettingsRepository;
 use App\Repositories\User\SettingsRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
