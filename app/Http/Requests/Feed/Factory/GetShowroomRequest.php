@@ -14,6 +14,9 @@ class GetShowroomRequest extends Request {
         'search_term' => 'string|nullable',
         'manufacturer' => 'string|nullable',
         'model' => 'string|nullable',
+        'select' => 'array',
+        'select.*' => 'string|in:model,id',
+        'with' => 'array',
+        'with.*' => 'string|in:images,category,features',
     ];
-    
 }

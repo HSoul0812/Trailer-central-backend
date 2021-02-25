@@ -13,9 +13,9 @@ use App\Http\Requests\Feed\Factory\GetShowroomRequest;
  */
 class ShowroomController extends RestfulController
 {
-    
+
     protected $showroom;
-    
+
     /**
      * Create a new controller instance.
      *
@@ -25,11 +25,11 @@ class ShowroomController extends RestfulController
     {
         $this->showroom = $showroom;
     }
-    
+
     /**
      * @OA\Get(
      *     path="/api/feed/factory/showroom",
-     *     description="Retrieve a list of showroom",     
+     *     description="Retrieve a list of showroom",
      *     tags={"Feed"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -63,15 +63,17 @@ class ShowroomController extends RestfulController
      *     ),
      * )
      */
-    public function index(Request $request) 
+    public function index(Request $request)
     {
         $request = new GetShowroomRequest($request->all());
-        
+
         if ($request->validate()) {
-            return $this->response->paginator($this->showroom->getAll($request->all()), new ShowroomTransformer);
+            $response = $this->response->paginator($this->showroom->getAll($request->all()), app()->make(ShowroomTransformer::class));
         }
-        
+
+        return $response;
+
         return $this->response->errorBadRequest();
     }
-    
+
 }
