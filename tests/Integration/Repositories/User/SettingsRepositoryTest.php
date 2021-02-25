@@ -117,7 +117,7 @@ class SettingsRepositoryTest extends TestCase
         // Get Settings
         $setting = $settings[array_rand($settings, 1)];
 
-        // Lead source does not exist yet
+        // Setting does not exist yet
         self::assertSame(0, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
 
         // When I call create with valid parameters
@@ -131,7 +131,7 @@ class SettingsRepositoryTest extends TestCase
         // Then I should get a class which is an instance of Settings
         self::assertInstanceOf(Settings::class, $settingsForDealer);
 
-        // Lead source did not exist before but does now after create
+        // Setting did not exist before but does now after create
         self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
     }
 
@@ -153,7 +153,7 @@ class SettingsRepositoryTest extends TestCase
         // Get Settings
         $setting = $settings[array_rand($settings, 1)];
 
-        // Lead source already exists
+        // Setting already exists
         self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
 
         // When I call update with valid parameters
@@ -168,7 +168,7 @@ class SettingsRepositoryTest extends TestCase
         // Then I should get a class which is an instance of Settings
         self::assertInstanceOf(Settings::class, $settingsForDealer);
 
-        // Lead source should still exist after update
+        // Setting should still exist after update
         self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
     }
 
@@ -182,67 +182,55 @@ class SettingsRepositoryTest extends TestCase
      *
      * @covers SettingsRepository::create
      */
-    public function testCreateOrUpdateCreate(): void {
+    public function testCreateOrUpdate(): void {
         $this->seeder->seed();
 
         // Given I have a collection of missing sources
-        $settings = $this->seeder->missingSettings;
+        $missing = $this->seeder->missingSettings;
+        $created = $this->seeder->createdSettings;
 
-        // Get Settings
-        $setting = $settings[array_rand($settings, 1)];
+        // Setting is missing
+        $first = reset($created);
+        $dealerId = $first->dealer_id;
+        self::assertSame(count($created), Settings::where(['dealer_id' => $dealerId])->count());
 
-        // Lead source is missing
-        self::assertSame(0, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
+        // Create Missing Settings
+        $settings = [];
+        foreach($missing as $setting) {
+            // Setting is missing
+            self::assertSame(0, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
+
+            // Add Setting
+            $settings[] = [
+                'setting' => $setting->setting,
+                'setting_value' => $setting->setting_value
+            ];
+        }
+
+        // Create Updated Settings
+        foreach($created as $setting) {
+            // Setting is missing
+            self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
+
+            // Add Setting
+            $settings[] = [
+                'setting' => $setting->setting,
+                'setting_value' => $setting->setting_value
+            ];
+        }
 
         // When I call create with valid parameters
         /** @var Settings $leadSettingsToCustomer */
         $settingsForDealer = $this->getConcreteRepository()->createOrUpdate([
             'dealer_id' => $setting->dealer_id,
-            'setting' => $setting->setting,
-            'setting_value' => $setting->setting_value
+            'settings' => $settings
         ]);
 
         // Then I should get a class which is an instance of Settings
-        self::assertInstanceOf(Settings::class, $settingsForDealer);
+        self::assertInstanceOf(Collection::class, $settingsForDealer);
 
-        // Lead source did not exist before but does now after create
-        self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
-    }
-
-    /**
-     * Test that SUT is inserting correctly
-     *
-     * @typeOfTest IntegrationTestCase
-     *
-     * @throws BindingResolutionException when there is a problem with resolution of concreted class
-     *
-     * @covers SettingsRepository::create
-     */
-    public function testCreateOrUpdateUpdate(): void {
-        $this->seeder->seed();
-
-        // Given I have a collection of sources
-        $settings = $this->seeder->createdSettings;
-
-        // Get Settings
-        $setting = $settings[array_rand($settings, 1)];
-
-        // Lead source already exists
-        self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
-
-        // When I call update with valid parameters
-        /** @var Settings $leadSettings */
-        $settings = $this->getConcreteRepository()->createOrUpdate([
-            'dealer_id' => $setting->dealer_id,
-            'setting' => $setting->setting,
-            'setting_value' => $setting->setting_value
-        ]);
-
-        // Then I should get a class which is an instance of Settings
-        self::assertInstanceOf(Settings::class, $settings);
-
-        // Lead source should still exist after update
-        self::assertSame(1, Settings::where(['dealer_id' => $settings->dealer_id, 'setting' => $settings->setting])->count());
+        // Setting did not exist before but does now after create
+        self::assertSame(count($created) + count($missing), Settings::where(['dealer_id' => $dealerId])->count());
     }
 
     /**
