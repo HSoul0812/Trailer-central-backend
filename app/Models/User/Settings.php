@@ -20,7 +20,7 @@ class Settings extends Model
      *
      * @var string
      */
-    protected $primaryKey = 'dealer_id';
+    protected $primaryKey = 'id';
 
     /**
      * The attributes that are mass assignable.
