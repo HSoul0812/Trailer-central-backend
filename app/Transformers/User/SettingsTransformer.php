@@ -10,6 +10,7 @@ class SettingsTransformer extends TransformerAbstract
     public function transform(Settings $settings)
     {
         return [
+            'id' => $settings->id,
             'dealer_id' => $settings->dealer_id,
             'setting' => $settings->setting,
             'value' => $settings->setting_value
