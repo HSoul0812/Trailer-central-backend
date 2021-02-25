@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\database\seeds\User;
 
-use App\Models\CRM\Leads\Settings;
+use App\Models\User\Settings;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use App\Models\Website\Website;
