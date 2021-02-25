@@ -132,7 +132,7 @@ class SettingsRepositoryTest extends TestCase
         self::assertInstanceOf(Settings::class, $settingsForDealer);
 
         // Lead source did not exist before but does now after create
-        self::assertSame(1, Settings::where(['dealer_id' => $settings->dealer_id, 'setting' => $settings->setting])->count());
+        self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
     }
 
     /**
@@ -169,7 +169,7 @@ class SettingsRepositoryTest extends TestCase
         self::assertInstanceOf(Settings::class, $settingsForDealer);
 
         // Lead source should still exist after update
-        self::assertSame(1, Settings::where(['dealer_id' => $settings->dealer_id, 'setting' => $settings->setting])->count());
+        self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
     }
 
     
@@ -192,7 +192,7 @@ class SettingsRepositoryTest extends TestCase
         $setting = $settings[array_rand($settings, 1)];
 
         // Lead source is missing
-        self::assertSame(0, Settings::where(['dealer_id' => $settings->dealer_id, 'setting' => $settings->setting])->count());
+        self::assertSame(0, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
 
         // When I call create with valid parameters
         /** @var Settings $leadSettingsToCustomer */
@@ -206,7 +206,7 @@ class SettingsRepositoryTest extends TestCase
         self::assertInstanceOf(Settings::class, $settingsForDealer);
 
         // Lead source did not exist before but does now after create
-        self::assertSame(1, Settings::where(['dealer_id' => $settings->dealer_id, 'setting' => $settings->setting])->count());
+        self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
     }
 
     /**
@@ -228,7 +228,7 @@ class SettingsRepositoryTest extends TestCase
         $setting = $settings[array_rand($settings, 1)];
 
         // Lead source already exists
-        self::assertSame(1, Settings::where(['dealer_id' => $settings->dealer_id, 'setting' => $settings->setting])->count());
+        self::assertSame(1, Settings::where(['dealer_id' => $setting->dealer_id, 'setting' => $setting->setting])->count());
 
         // When I call update with valid parameters
         /** @var Settings $leadSettings */
