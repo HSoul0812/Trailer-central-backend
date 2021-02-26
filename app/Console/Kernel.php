@@ -68,11 +68,19 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
         
-        $schedule->command('leads:assign:auto 6000 8999')
+        $schedule->command('leads:assign:auto 6000 6623')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 6625 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
         
         $schedule->command('leads:assign:auto 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 0 0 6624')
                 ->withoutOverlapping()
                 ->runInBackground();
         
