@@ -91,7 +91,7 @@ class LeadService implements LeadServiceInterface
         if (isset($params['lead_source'])) {
             // Send Lead Source
             $this->sources->createOrUpdate([
-                'user_id' => $lead->newDealerUser->user_id,
+                'user_id' => $lead->newDealerUser->user_id ?? $lead->dealer_id,
                 'source_name' => $params['lead_source']
             ]);
         }
