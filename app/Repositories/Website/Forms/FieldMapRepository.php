@@ -71,6 +71,9 @@ class FieldMapRepository implements FieldMapRepositoryInterface
                (array_key_exists('map_field', $params) && $params['map_field'] === null)))) {
                 $params['map_field'] = '';
             }
+            if(array_key_exists('map_field', $params) && $params['map_field'] === null) {
+                var_dump($params['map_field']);
+            }
 
             // Update Field Map
             $fieldMap->fill($params)->save();
