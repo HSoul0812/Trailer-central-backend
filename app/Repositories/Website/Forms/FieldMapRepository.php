@@ -72,10 +72,7 @@ class FieldMapRepository implements FieldMapRepositoryInterface
             }
             var_dump($params['map_field']);
             if(empty($params['map_field'])) {
-                var_dump($params['map_field']);
-            }
-            if(isset($params['map_field'])) {
-                var_dump($params['map_field']);
+                var_dump($params);
             }
 
             // Update Field Map
