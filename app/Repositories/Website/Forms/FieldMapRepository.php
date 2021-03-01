@@ -67,10 +67,9 @@ class FieldMapRepository implements FieldMapRepositoryInterface
         DB::beginTransaction();
         try {
             // Map Field Empty?
-            if(empty($fieldMap->map_field) && !isset($params['map_field'])) {
+            if((empty($fieldMap->map_field) && !isset($params['map_field'])) ||
+               (isset($params['map_field']) && $params['map_field'] === null)) {
                 $params['map_field'] = '';
-            } else {
-                var_dump($params['map_field']);
             }
 
             // Update Field Map
