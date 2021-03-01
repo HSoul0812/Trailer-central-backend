@@ -14,7 +14,7 @@ class CreateFieldMapRequest extends Request {
     protected $rules = [
         'type'       => 'required|valid_form_map_type',
         'form_field' => 'required|string|max:50',
-        'map_field'  => 'nullable|valid_form_map_field',
+        'map_field'  => 'valid_form_map_field',
         'db_table'   => 'nullable|valid_form_map_table',
         'details'    => 'nullable|string'
     ];
