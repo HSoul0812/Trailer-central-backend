@@ -70,6 +70,12 @@ class FieldMapRepository implements FieldMapRepositoryInterface
             if(empty($fieldMap->map_field) && empty($params['map_field'])) {
                 $params['map_field'] = '';
             }
+            if(empty($params['map_field'])) {
+                var_dump($params['map_field']);
+            }
+            if(isset($params['map_field'])) {
+                var_dump($params['map_field']);
+            }
 
             // Update Field Map
             $fieldMap->fill($params)->save();
