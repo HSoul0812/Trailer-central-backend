@@ -17,7 +17,10 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 use Laravel\Scout\Searchable;
 
@@ -328,78 +331,77 @@ class Inventory extends Model
         'geolocation'
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 
-    public function lead()
+    public function lead(): BelongsTo
     {
         return $this->belongsTo(Lead::class, 'inventory_id', 'inventory_id', InventoryLead::class);
     }
 
-    public function attribute()
+    public function attribute(): HasManyThrough
     {
         return $this->hasManyThrough(Attribute::class, 'eav_attribute_value', 'attribute_id', 'inventory_id');
     }
 
-    public function dealerLocation()
+    public function dealerLocation(): BelongsTo
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
     }
 
-    public function floorplanPayments()
+    public function floorplanPayments(): HasMany
     {
         return $this->hasMany('App\Models\Inventory\Floorplan\Payment', 'inventory_id', 'inventory_id');
     }
 
-    public function inventoryImages()
+    public function inventoryImages(): HasMany
     {
         return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
     }
 
-    public function images()
+    public function images(): HasManyThrough
     {
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
     }
 
-    public function inventoryFiles()
+    public function inventoryFiles(): HasMany
     {
         return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
     }
 
-    public function files()
+    public function files(): HasManyThrough
     {
         return $this->hasManyThrough(File::class, InventoryFile::class, 'inventory_id', 'id', 'inventory_id', 'file_id');
     }
 
-    public function inventoryFeatures()
+    public function inventoryFeatures(): HasMany
     {
         return $this->hasMany(InventoryFeature::class, 'inventory_id', 'inventory_id');
     }
 
-    public function clapps()
+    public function clapps(): HasMany
     {
         return $this->hasMany(InventoryClapp::class, 'inventory_id', 'inventory_id');
     }
 
-    public function attributeValues()
+    public function attributeValues(): HasMany
     {
         return $this->hasMany(AttributeValue::class, 'inventory_id', 'inventory_id');
     }
 
-    public function lotVantageInventory()
+    public function lotVantageInventory(): HasOne
     {
         return $this->hasOne(DealerInventory::class, 'inventory_id', 'inventory_id');
     }
 
-
-    public function status()
+    public function status(): BelongsTo
     {
         return $this->belongsTo(Status::class, 'status');
     }
 
-    public function floorplanVendor()
+    public function floorplanVendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class, 'fp_vendor');
     }

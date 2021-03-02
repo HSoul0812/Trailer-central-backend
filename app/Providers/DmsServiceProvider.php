@@ -11,7 +11,6 @@ use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
 use App\Models\CRM\Dms\ServiceOrder\Type;
 use App\Models\CRM\Dms\TaxCalculator;
-use App\Models\CRM\User\SalesPerson;
 use App\Models\Pos\Sale;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
