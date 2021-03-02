@@ -15,7 +15,7 @@ class PurchaseOrderPartTransformer extends TransformerAbstract
             'id' => $poPart->id,
             'act_cost' => $poPart->act_cost,
             'qty' => $poPart->qty,
-            'qb_item' => (new ItemTransformer())->transform($poPart->qbItem)
+            'qb_item' => empty($poPart->qbItem) ? null : (new ItemTransformer())->transform($poPart->qbItem)
         ];
     }
 

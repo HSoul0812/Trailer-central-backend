@@ -54,6 +54,7 @@ class AutoAssignTest extends TestCase
         $dealer->crmUser()->update([
             'enable_assign_notification' => 1
         ]);
+        $websiteId = $dealer->website->id;
 
         // Build Random Factory Salespeople
         foreach(TestCase::getTestDealerLocationIds() as $locationId) {
@@ -69,6 +70,7 @@ class AutoAssignTest extends TestCase
             if(empty($salespeople) || count($salespeople) < 3) {
                 $add = (3 - count($salespeople));
                 factory(SalesPerson::class, $add)->create([
+                    'user_id' => $dealer->crmUser->user_id,
                     'dealer_location_id' => $locationId
                 ]);
             }
@@ -80,6 +82,9 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 10)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
+            'dealer_location_id' => $locationId,
             'lead_type' => 'general'
         ]);
         $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
@@ -103,7 +108,7 @@ class AutoAssignTest extends TestCase
             // Find Next!
             $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
-            $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
+            $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $leadSalesPeople[$lead->identifier]);
         }
 
         // Fake Mail
@@ -114,7 +119,7 @@ class AutoAssignTest extends TestCase
 
 
         // Loop Leads
-        foreach($leads as $lead) {            
+        foreach($leads as $lead) {
             // Assert a message was sent to the given leads...
             $salesPerson = SalesPerson::find($leadSalesPeople[$lead->identifier]);
             Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
@@ -156,6 +161,7 @@ class AutoAssignTest extends TestCase
         $dealer->crmUser()->update([
             'enable_assign_notification' => 1
         ]);
+        $websiteId = $dealer->website->id;
 
         // Build Random Factory Salespeople
         $locationIds = TestCase::getTestDealerLocationIds();
@@ -175,23 +181,8 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId
-            ]);
-        }
-
-        // Force Default On Existing Items
-        $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                 ->where('dealer_location_id', $lastLocationId);
-        $salesQuery->update([
-            'is_inventory' => 1
-        ]);
-
-        // Get Salespeople
-        $salespeople = $salesQuery->get();
-        if(empty($salespeople) || count($salespeople) < 3) {
-            $add = (3 - count($salespeople));
-            factory(SalesPerson::class, $add)->create([
-                'dealer_location_id' => $lastLocationId
             ]);
         }
 
@@ -201,6 +192,7 @@ class AutoAssignTest extends TestCase
                               ->where('dealer_location_id', $lastLocationId)->first();
         if(empty($inventory) || empty($inventory->inventory_id)) {
             $inventory = factory(Inventory::class, 1)->create([
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $lastLocationId
             ]);
         }
@@ -212,6 +204,8 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads With Location
         factory(Lead::class, 5)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'inventory_id' => $inventoryId,
             'lead_type' => 'inventory'
@@ -219,6 +213,8 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads With No Location
         factory(Lead::class, 5)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => 0,
             'inventory_id' => $inventoryId,
             'lead_type' => 'inventory'
@@ -226,6 +222,8 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads With No Location or Inventory
         factory(Lead::class, 5)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => 0,
             'inventory_id' => 0,
             'lead_type' => 'inventory'
@@ -310,6 +308,7 @@ class AutoAssignTest extends TestCase
         $dealer->crmUser()->update([
             'enable_assign_notification' => 1
         ]);
+        $websiteId = $dealer->website->id;
 
         // Build Random Factory Salespeople
         $locationIds = TestCase::getTestDealerLocationIds();
@@ -328,6 +327,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId,
                 'is_trade' => 0
             ]);
@@ -339,18 +339,24 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Default Leads With Location
         factory(Lead::class, 5)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => 'general'
         ]);
 
         // Build Random Factory Inventory Leads With Location
         factory(Lead::class, 5)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => 'inventory'
         ]);
 
         // Build Random Factory Trade Leads With Location
         factory(Lead::class, 5)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => 'trade'
         ]);
@@ -436,6 +442,7 @@ class AutoAssignTest extends TestCase
         $dealer->crmUser()->update([
             'enable_assign_notification' => 1
         ]);
+        $websiteId = $dealer->website->id;
 
         // Clean Up Salespeople
         $this->roundRobin[$dealer->id] = array();
@@ -471,6 +478,7 @@ class AutoAssignTest extends TestCase
                 } else {
                     // Create Sales Person!
                     $params = [
+                        'user_id' => $dealer->crmUser->user_id,
                         'dealer_location_id' => $locationId,
                         'is_default' => 0,
                         'is_inventory' => 0,
@@ -501,18 +509,26 @@ class AutoAssignTest extends TestCase
         // Build Random Factory Default Leads For Each Location
         foreach(TestCase::getTestDealerLocationIds() as $locationId) {
             factory(Lead::class, 2)->create([
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => 'general'
             ]);
             factory(Lead::class, 2)->create([
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => 'inventory'
             ]);
             factory(Lead::class, 2)->create([
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => 'trade'
             ]);
             factory(Lead::class, 2)->create([
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => 'financing'
             ]);
@@ -581,6 +597,7 @@ class AutoAssignTest extends TestCase
         $dealer->crmUser()->update([
             'enable_assign_notification' => 1
         ]);
+        $websiteId = $dealer->website->id;
 
         // Build Random Factory Salespeople
         $locationIds = TestCase::getTestDealerLocationIds();
@@ -599,6 +616,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId,
                 'lead_type' => $salesType
             ]);
@@ -613,6 +631,8 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 1)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
@@ -636,6 +656,8 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 5)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
@@ -660,6 +682,8 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 3)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
@@ -724,6 +748,7 @@ class AutoAssignTest extends TestCase
         $dealer->crmUser()->update([
             'enable_assign_notification' => 0
         ]);
+        $websiteId = $dealer->website->id;
 
         // Build Random Factory Salespeople
         $locationIds = TestCase::getTestDealerLocationIds();
@@ -741,6 +766,7 @@ class AutoAssignTest extends TestCase
         if(empty($salespeople) || count($salespeople) < 3) {
             $add = (3 - count($salespeople));
             factory(SalesPerson::class, $add)->create([
+                'user_id' => $dealer->crmUser->user_id,
                 'dealer_location_id' => $locationId
             ]);
         }
@@ -751,6 +777,8 @@ class AutoAssignTest extends TestCase
 
         // Build Random Factory Leads
         factory(Lead::class, 5)->create([
+            'website_id' => $websiteId,
+            'dealer_id' => $dealer->id,
             'dealer_location_id' => $locationId,
             'lead_type' => 'inventory'
         ]);

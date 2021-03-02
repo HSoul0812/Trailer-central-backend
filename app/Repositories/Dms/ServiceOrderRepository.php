@@ -12,7 +12,12 @@ use App\Models\CRM\Account\Payment;
  * @author Marcel
  */
 class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
-
+    
+    /**
+     * @var App\Models\CRM\Dms\ServiceOrder 
+     */
+    protected $model;
+        
     private $sortOrders = [
         'user_defined_id' => [
             'field' => 'user_defined_id',
@@ -55,6 +60,10 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
             'direction' => 'ASC'
         ],
     ];
+    
+    public function __construct(ServiceOrder $serviceOrder) {
+        $this->model = $serviceOrder;
+    }
 
 
     public function create($params) {
@@ -66,14 +75,14 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
     }
 
     public function get($params) {
-        return ServiceOrder::findOrFail($params['id']);
+        return $this->model->findOrFail($params['id']);
     }
 
     public function getAll($params) {
         if (isset($params['dealer_id'])) {
-            $query = ServiceOrder::where('dealer_id', '=', $params['dealer_id']);
+            $query = $this->model->where('dealer_id', '=', $params['dealer_id']);
         } else {
-            $query = ServiceOrder::where('id', '>', 0);
+            $query = $this->model->where('id', '>', 0);
         }
         // Filter out service orders which location doesn't exist
         $query = $query->where('location', '>', 0);
@@ -82,6 +91,7 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
                 $q->where('user_defined_id', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('total_price', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('type', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhereHas('customer', function($q) use($params) {
                         $q->where('display_name', 'LIKE', '%' . $params['search_term'] . '%');
                     });
@@ -92,7 +102,7 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
         }
         if (isset($params['status'])) {
             switch ($params['status']) {
-                case ServiceOrder::SERVICE_ORDER_ESTIMATE:
+                case ServiceOrder::TYPE_ESTIMATE:
                     $query = $query
                         ->where('type', '=', 'estimate')
                         ->whereNotIn('status', ['picked_up', 'ready_for_pickup']);
@@ -111,11 +121,30 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
+        if (isset($params['created_at_or_closed_at_lte'])) {
+            $query = $query->where(function($q) use($params) {
+                $q->where('created_at', '<=', $params['created_at_or_closed_at_lte'])
+                    ->orWhere('closed_at', '<=', $params['created_at_or_closed_at_lte']);
+            });
+        }
+
+        if (isset($params['created_at_or_closed_at_gte'])) {
+            $query = $query->where(function($q) use($params) {
+                $q->where('created_at', '>=', $params['created_at_or_closed_at_gte'])
+                    ->orWhere('closed_at', '>=', $params['created_at_or_closed_at_gte']);
+            });
+        }
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
-        throw new NotImplementedException;
+        $serviceOrder = $this->get($params);
+        
+        $serviceOrder->fill($params);
+        $serviceOrder->save();
+        
+        return $serviceOrder;
     }
 
     private function addSortQuery($query, $sort) {

@@ -12,6 +12,6 @@ namespace App\Exceptions\CRM\Text;
 class NoLeadSmsNumberAvailableException extends \Exception
 {
     
-    protected $message = 'Could not find find sms number for lead!';
+    protected $message = 'Could not find sms number for lead!';
 
 }

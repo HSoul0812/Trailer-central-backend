@@ -47,4 +47,20 @@ class Attribute extends Model
     {
         return $this->hasMany(EntityTypeAttribute::class, 'attribute_id', 'attribute_id');
     }
+
+    /**
+     * @return array
+     */
+    public function getValuesArray()
+    {
+        $values = explode(',', $this->values);
+
+        $array = [];
+        foreach ($values as $value) {
+            $value = explode(':', $value);
+            $array[$value[0]] = $value[1];
+        }
+
+        return $array;
+    }
 }

@@ -2,16 +2,21 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 class EntityType extends Model {
-    
+
+    use TableAware;
+
+    public const TABLE_NAME = 'eav_entity_type';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'eav_entity_type';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.
@@ -22,4 +27,8 @@ class EntityType extends Model {
 
     public $timestamps = false;
 
+    public static function getTableName(): string
+    {
+        return self::TABLE_NAME;
+    }
 }

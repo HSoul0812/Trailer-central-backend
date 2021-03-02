@@ -25,7 +25,7 @@ trait CompositePrimaryKeys
     /**
      * {@inheritDoc}
      */
-    public function getIncrementing()
+    public function getIncrementing(): bool
     {
         return false;
     }

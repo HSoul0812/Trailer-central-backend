@@ -3,10 +3,10 @@
 namespace App\Repositories\Website\Forms;
 
 use App\Exceptions\NotImplementedException;
-use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\Website\Forms\FieldMap;
 use App\Transformers\Website\Forms\FieldMapTransformer;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class FieldMapRepository
@@ -32,7 +32,7 @@ class FieldMapRepository implements FieldMapRepositoryInterface
                             ->where('form_field', $params['form_field'])
                             ->first();
         if(!empty($fieldMap->id)) {
-            return $this-update($params);
+            return $this->update($params);
         }
 
         // Get DB Table
@@ -67,7 +67,8 @@ class FieldMapRepository implements FieldMapRepositoryInterface
         DB::beginTransaction();
         try {
             // Map Field Empty?
-            if(empty($params['map_field'])) {
+            if((array_key_exists('map_field', $params) && $params['map_field'] === null) ||
+               (empty($fieldMap->map_field) && empty($params['map_field']))) {
                 $params['map_field'] = '';
             }
 
@@ -142,8 +143,14 @@ class FieldMapRepository implements FieldMapRepositoryInterface
     public function getMap($params)
     {
         // Get All Sorted by Types
-        $types = array();
+        $types = [];
         foreach(FieldMap::MAP_TYPES as $type => $name) {
+            // Type Exists?
+            if(isset($params['type']) && $params['type'] !== $type) {
+                continue;
+            }
+
+            // Get Fields By Type
             $fields = $this->getAll(['type' => $type]);
             $types[$type] = $fields->mapWithKeys(function($fieldMap) {
                 return [$fieldMap->form_field => $this->transformer->transform($fieldMap)];
@@ -152,5 +159,16 @@ class FieldMapRepository implements FieldMapRepositoryInterface
 
         // Return Sorted Types Array
         return $types;
+    }
+
+    /**
+     * Get Field Map Types
+     * 
+     * @return Collection
+     */
+    public function getTypes()
+    {
+        // Get All Field Map Types
+        return collect(array_keys(FieldMap::MAP_TYPES));
     }
 }

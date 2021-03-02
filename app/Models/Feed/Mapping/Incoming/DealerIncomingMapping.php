@@ -2,6 +2,7 @@
 
 namespace App\Models\Feed\Mapping\Incoming;
 
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
 
 class DealerIncomingMapping extends Model {
@@ -19,9 +20,15 @@ class DealerIncomingMapping extends Model {
     const NOSE_TYPE = 'nose_type';
     const CONSTRUCTION = 'construction';
     const FUEL_TYPE = 'fuel_type';
+    const COLOR = 'color';
     const BRAND = 'brand';
     const MANUFACTURER_BRAND = 'manufacturer_brand';
     const LOCATION = 'dealer_location';
+    const TRANSMISSION = 'transmission';
+    const DRIVE_TRAIL = 'drive_trail';
+    const ENGINE_SIZE = 'engine_size';
+    const FIELDS = 'fields';
+    const DEFAULT_VALUES = 'default_values';
 
     public static $types = [
         self::MAKE => 'Manufacturer',
@@ -34,8 +41,14 @@ class DealerIncomingMapping extends Model {
         self::NOSE_TYPE => 'Nose Type',
         self::CONSTRUCTION => 'Construction',
         self::FUEL_TYPE => 'Fuel Type',
+        self::COLOR => 'Color',
         self::BRAND => 'Brand',
-        self::LOCATION => 'Dealer Location'
+        self::LOCATION => 'Dealer Location',
+        self::TRANSMISSION => 'Transmission',
+        self::DRIVE_TRAIL => 'Drive Trail',
+        self::ENGINE_SIZE => 'Engine Size',
+        self::FIELDS => 'Fields',
+        self::DEFAULT_VALUES => 'Default Values'
     ];
 
     protected $fillable = [
@@ -44,4 +57,9 @@ class DealerIncomingMapping extends Model {
         'map_to',
         'type'
     ];
+
+    public function dealers()
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
 }

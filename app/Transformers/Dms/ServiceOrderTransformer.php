@@ -5,15 +5,15 @@ namespace App\Transformers\Dms;
 use App\Transformers\Dms\ServiceOrder\MiscPartItemTransformer;
 use App\Transformers\Dms\ServiceOrder\OtherItemTransformer;
 use App\Transformers\Dms\ServiceOrder\PartItemTransformer;
-use App\Transformers\Dms\ServiceOrder\ServiceItemTechnicianTransformer;
 use App\Transformers\Dms\ServiceOrder\ServiceItemTransformer;
+use App\Transformers\Inventory\InventoryTransformerV2;
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Dms\ServiceOrder;
 
 class ServiceOrderTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'serviceItems', 'partItems', 'miscPartItems', 'otherItems', 'invoice'
+        'serviceItems', 'partItems', 'miscPartItems', 'otherItems', 'invoice', 'inventory'
     ];
 
     public function transform($serviceOrder)
@@ -28,6 +28,7 @@ class ServiceOrderTransformer extends TransformerAbstract
             'date_in' => $serviceOrder->date_in,
             'date_out' => $serviceOrder->date_out,
             'closed_at' => $serviceOrder->closed_at,
+            'type'      => $serviceOrder->type,
             'total_price' => $serviceOrder->total_price,
             'invoice' => $serviceOrder->invoice,
             'receipts' => $this->getReceipts($serviceOrder),
@@ -74,6 +75,14 @@ class ServiceOrderTransformer extends TransformerAbstract
         }
         
         return $receipts;
+    }
+
+    public function includeInventory(ServiceOrder $serviceOrder)
+    {
+        if (!empty($serviceOrder->inventory)) {
+            return $this->item($serviceOrder->inventory, new InventoryTransformerV2());
+        }
+        return null;
     }
 
 }

@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\NewDealerUser;
 use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
@@ -21,8 +22,31 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $this->withQuery($baseQuery);
     }
 
+    /**
+     * Create Sales Person
+     * 
+     * @param array $params
+     * @return SalesPerson
+     */
     public function create($params) {
-        throw NotImplementedException;
+        return SalesPerson::create($params);
+    }
+
+    /**
+     * Update Sales Person
+     * 
+     * @param array $params
+     * @return SalesPerson
+     */
+    public function update($params) {
+        $salesPerson = SalesPerson::findOrFail($params['id']);
+
+        DB::transaction(function() use (&$salesPerson, $params) {
+            // Fill Text Details
+            $salesPerson->fill($params)->save();
+        });
+
+        return $salesPerson;
     }
 
     /**
@@ -43,7 +67,11 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $dealerId = $params['dealer_id'] ?? $this->requestQueryableRequest->input('dealer_id');
         if ($dealerId) {
             $newDealerUser = NewDealerUser::findOrFail($dealerId);
-            $query = $query->WHERE('user_id', $newDealerUser->user_id);
+            $query = $query->where('user_id', $newDealerUser->user_id);
+        }
+
+        if (isset($params['user_id'])) {
+            $query = $query->where('user_id', $params['user_id']);
         }
 
         return $query->get();
@@ -56,11 +84,32 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @return type
      */
     public function getAll($params) {
-        $query = SalesPerson::SELECT('*');
+        $query = SalesPerson::select('*');
 
         if (isset($params['dealer_id'])) {
             $newDealerUser = NewDealerUser::findOrFail($params['dealer_id']);
-            $query = $query->WHERE('user_id', $newDealerUser->user_id);
+            $query = $query->where('user_id', $newDealerUser->user_id);
+        }
+
+        if (isset($params['user_id'])) {
+            $query = $query->where('user_id', $params['user_id']);
+        }
+
+        // Get Sales People With IMAP and/or Gmail Credentials
+        if (!empty($params['has_imap'])) {
+            // Require Sales Person ID NULL or 0
+            $query = $query->where(function($query) {
+                $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
+                      ->orWhere(LeadStatus::getTableName().'.sales_person_id', 0);
+            })->where(Lead::getTableName().'.is_archived', 0)
+              ->where(Lead::getTableName().'.is_spam', 0)
+              ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY');
+            $select->where("imap_password IS NOT NULL AND imap_password <> ''");
+            $select->where("imap_server IS NOT NULL AND imap_server <> ''");
+            $select->where("imap_port IS NOT NULL AND imap_port <> ''");
+            $select->where("(imap_failed IS NULL or imap_failed = 0)");
+            $select->where("deleted_at IS NULL");
+            $query = $query->where('user_id', $params['user_id']);
         }
 
         if (!isset($params['per_page'])) {
@@ -70,6 +119,37 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * Get All Salespeople w/Imap Credentials
+     *
+     * @param int $userId
+     * @return Collection of SalesPerson
+     */
+    public function getAllImap($userId) {
+        return SalesPerson::select(SalesPerson::getTableName().'.*')
+                                ->leftJoin(AccessToken::getTableName(), function($join) {
+            $join->on(AccessToken::getTableName().'.relation_id', '=', SalesPerson::getTableName().'.id')
+                 ->whereTokenType('google')
+                 ->whereRelationType('sales_person');
+        })->where('user_id', $userId)->where(function($query) {
+            $query->whereNotNull(AccessToken::getTableName().'.id')
+                  ->orWhere(function($query) {
+                    $query->whereNotNull('imap_password')
+                          ->where('imap_password', '<>', '')
+                          ->whereNotNull('imap_server')
+                          ->where('imap_server', '<>', '')
+                          ->whereNotNull('imap_port')
+                          ->where('imap_port', '<>', '');
+            });
+        })->get();
+    }
+
+    /**
+     * Get Sales Report
+     * 
+     * @param array $params
+     * @return array
+     */
     public function salesReport($params)
     {
         $dbParams = ['dealerId1' => $params['dealer_id']];
@@ -107,25 +187,32 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     SUM(sales_parts.cost_amount) part_cost_amount,
 
                     SUM(sales_labor.sale_amount) labor_sale_amount,
-                    SUM(sales_labor.cost_amount) labor_cost_amount
+                    SUM(sales_labor.cost_amount) labor_cost_amount,
+                    inventory.stock as inventory_stock,
+                    inventory.manufacturer as inventory_make,
+                    inventory.notes as inventory_notes
 
                 FROM dms_unit_sale us
                 LEFT JOIN dms_unit_sale_accessory usa ON usa.unit_sale_id=us.id
                 LEFT JOIN dms_customer c ON us.buyer_id=c.id
                 LEFT JOIN qb_invoices i ON i.unit_sale_id=us.id
-
+                LEFT JOIN inventory ON inventory.inventory_id = us.inventory_id
+                
                 /* use this to prevent getting DP invoices */
-                JOIN qb_invoice_items ii ON i.id=ii.invoice_id
+                /* JOIN qb_invoice_items ii ON i.id=ii.invoice_id */
 
                 LEFT JOIN (
                     SELECT
                        ii.invoice_id,
-                       SUM(ii.unit_price * ii.qty) sale_amount,
+                       qb_invoices.total as sale_amount,
                        SUM(COALESCE(qi.cost, inv.true_cost, 0)) cost_amount
                     FROM qb_invoice_items ii
                     LEFT JOIN qb_items qi ON qi.id=ii.item_id
                     LEFT JOIN inventory inv ON qi.item_primary_id=inv.inventory_id
-                    WHERE qi.type = 'trailer'
+                    INNER JOIN
+                        qb_invoices 
+                        ON qb_invoices.id = ii.invoice_id
+                    WHERE qi.type = 'trailer' OR qi.type = 'deposit_down_payment'
                     GROUP BY ii.invoice_id
                 ) sales_units ON i.id = sales_units.invoice_id
 
@@ -165,7 +252,10 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     SUM(sales_part.sale_amount) as part_sale_amount,
                     SUM(sales_part.cost_amount) as part_cost_amount,
                     SUM(sales_labor.sale_amount) as labor_sale_amount,
-                    SUM(sales_labor.cost_amount) as labor_cost_amount
+                    SUM(sales_labor.cost_amount) as labor_cost_amount, 
+                    NULL as inventory_stock,
+                    NULL as inventory_make,
+                    NULL as inventory_notes
 
                 FROM crm_pos_sales ps
                     LEFT JOIN dms_customer c ON ps.customer_id=c.id

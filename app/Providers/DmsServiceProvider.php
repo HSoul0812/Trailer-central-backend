@@ -8,6 +8,10 @@ use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Dms\FinancingCompany;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
+use App\Models\CRM\Dms\ServiceOrder\Technician;
+use App\Models\CRM\Dms\ServiceOrder\Type;
+use App\Models\CRM\Dms\TaxCalculator;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\Pos\Sale;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
@@ -29,10 +33,18 @@ use App\Repositories\Dms\QuoteRepository;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepository;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepositoryInterface;
+use App\Repositories\Dms\ServiceOrder\TechnicianRepository;
+use App\Repositories\Dms\ServiceOrder\TechnicianRepositoryInterface;
+use App\Repositories\Dms\ServiceOrder\TypeRepository;
+use App\Repositories\Dms\ServiceOrder\TypeRepositoryInterface;
 use App\Repositories\Dms\ServiceOrderRepository;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Repositories\Dms\SettingsRepository;
 use App\Repositories\Dms\SettingsRepositoryInterface;
+use App\Repositories\Dms\TaxCalculatorRepository;
+use App\Repositories\Dms\TaxCalculatorRepositoryInterface;
+use App\Repositories\Dms\UnitSaleLaborRepository;
+use App\Repositories\Dms\UnitSaleLaborRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
@@ -48,6 +60,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
+        $this->app->bind(UnitSaleLaborRepositoryInterface::class, UnitSaleLaborRepository::class);
         $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
 
         $this->app->bind(SaleRepositoryInterface::class, function () {
@@ -68,6 +81,18 @@ class DmsServiceProvider extends ServiceProvider
 
         $this->app->bind(ServiceItemTechnicianRepositoryInterface::class, function () {
             return new ServiceItemTechnicianRepository(ServiceItemTechnician::query());
+        });
+
+        $this->app->bind(TaxCalculatorRepositoryInterface::class, function () {
+            return new TaxCalculatorRepository(TaxCalculator::query());
+        });
+
+        $this->app->bind(TechnicianRepositoryInterface::class, function () {
+            return new TechnicianRepository(Technician::query());
+        });
+
+        $this->app->bind(TypeRepositoryInterface::class, function () {
+            return new TypeRepository(Type::query());
         });
     }
 }

@@ -6,6 +6,25 @@ namespace App\Models\CRM\Dms\Quickbooks;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class QuickbookApproval
+ * @package App\Models\CRM\Dms\Quickbooks
+ *
+ * @property $id
+ * @property $dealer_id
+ * @property $tb_name
+ * @property $tb_primary_id
+ * @property $action_type
+ * @property $send_to_quickbook
+ * @property $qb_obj
+ * @property $is_approved
+ * @property $sort_order
+ * @property $created_at
+ * @property $exported_at
+ * @property $qb_id
+ * @property $error_result
+ *
+ */
 class QuickbookApproval extends Model
 {
     // Statuses of Quickbook Approvals

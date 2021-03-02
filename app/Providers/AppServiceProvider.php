@@ -2,36 +2,34 @@
 
 namespace App\Providers;
 
-use App\Repositories\Inventory\FileRepository;
-use App\Repositories\Inventory\FileRepositoryInterface;
-use App\Repositories\Inventory\ImageRepository;
-use App\Repositories\Inventory\ImageRepositoryInterface;
-use App\Repositories\Inventory\StatusRepository;
-use App\Repositories\Inventory\StatusRepositoryInterface;
-use App\Repositories\Website\DealerProxyRedisRepository;
-use App\Repositories\Website\DealerProxyRepositoryInterface;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\ServiceProvider;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Nova\Observer\DealerIncomingMappingObserver;
-use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
-use App\Repositories\Bulk\Parts\BulkDownloadRepository;
-use App\Repositories\Dms\FinancingCompanyRepository;
-use App\Repositories\Dms\FinancingCompanyRepositoryInterface;
+use App\Repositories\CRM\User\CrmUserRepository;
+use App\Repositories\CRM\User\CrmUserRepositoryInterface;
+use App\Repositories\CRM\User\CrmUserRoleRepository;
+use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
+use App\Repositories\Inventory\FileRepository;
+use App\Repositories\Inventory\FileRepositoryInterface;
+use App\Repositories\Inventory\ImageRepository;
+use App\Repositories\Inventory\ImageRepositoryInterface;
+use App\Repositories\Inventory\InventoryHistoryRepository;
+use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
+use App\Repositories\Inventory\StatusRepository;
+use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 use App\Repositories\Dms\ServiceOrderRepository;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\AccountRepository;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\ExpenseRepository;
+use App\Repositories\Dms\Quickbooks\ExpenseRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\ItemNewRepository;
+use App\Repositories\Dms\Quickbooks\ItemNewRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
@@ -40,6 +38,12 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
+use App\Repositories\User\NewDealerUserRepository;
+use App\Repositories\User\NewDealerUserRepositoryInterface;
+use App\Repositories\User\NewUserRepository;
+use App\Repositories\User\NewUserRepositoryInterface;
+use App\Repositories\Website\DealerProxyRedisRepository;
+use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
 use App\Repositories\Website\TowingCapacity\MakesRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\VehiclesRepository;
@@ -62,53 +66,29 @@ use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
-use App\Repositories\CRM\Leads\LeadRepository;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Repositories\CRM\Interactions\InteractionsRepository;
-use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
-use App\Repositories\CRM\Interactions\EmailHistoryRepository;
-use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
-use App\Repositories\CRM\Text\BlastRepository;
-use App\Repositories\CRM\Text\BlastRepositoryInterface;
-use App\Repositories\CRM\Text\CampaignRepository;
-use App\Repositories\CRM\Text\CampaignRepositoryInterface;
-use App\Repositories\CRM\Text\TemplateRepository;
-use App\Repositories\CRM\Text\TemplateRepositoryInterface;
-use App\Repositories\CRM\Text\TextRepository;
-use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\CRM\Text\NumberRepository;
-use App\Repositories\CRM\Text\NumberRepositoryInterface;
-use App\Repositories\CRM\User\SalesPersonRepository;
-use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
-use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
-use App\Repositories\CRM\Customer\CustomerRepository;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Services\Export\Parts\CsvExportService;
-use App\Services\Export\Parts\CsvExportServiceInterface;
-use App\Services\CRM\Text\TwilioService;
-use App\Services\CRM\Text\TextServiceInterface;
-use App\Services\CRM\Text\BlastService;
-use App\Services\CRM\Text\BlastServiceInterface;
-use App\Services\CRM\Text\CampaignService;
-use App\Services\CRM\Text\CampaignServiceInterface;
-use App\Services\CRM\Interactions\InteractionEmailService;
-use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
-use App\Services\Parts\PartServiceInterface;
-use App\Services\Parts\PartService;
-use App\Services\Website\Log\LogServiceInterface;
-use App\Services\Website\Log\LogService;
-use App\Services\CRM\Leads\AutoAssignService;
-use App\Services\CRM\Leads\AutoAssignServiceInterface;
-use App\Jobs\Mailer\UserMailerJob;
-use App\Rules\CRM\Leads\ValidLeadSource;
-use Laravel\Nova\Nova;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
+use App\Repositories\System\EmailRepository;
+use App\Repositories\System\EmailRepositoryInterface;
+use App\Services\Common\EncrypterServiceInterface;
+use App\Services\Common\SPLEncrypterService;
+use App\Services\Inventory\Floorplan\PaymentServiceInterface;
+use App\Services\Inventory\Floorplan\PaymentService;
+use App\Services\User\DealerOptionsService;
+use App\Services\User\DealerOptionsServiceInterface;
+use App\Services\Website\Log\LogServiceInterface;
+use App\Services\Website\Log\LogService;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Nova\Nova;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -146,8 +126,12 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
         \Validator::extend('valid_form_map_field', 'App\Rules\Website\Forms\ValidMapField@passes');
         \Validator::extend('valid_form_map_table', 'App\Rules\Website\Forms\ValidMapTable@passes');
+        \Validator::extend('valid_token_type', 'App\Rules\Integration\Auth\ValidTokenType@passes');
+        \Validator::extend('valid_relation_type', 'App\Rules\Integration\Auth\ValidRelationType@passes');
         \Validator::extend('valid_part_order_status', 'App\Rules\Parts\ValidOrderStatus@passes');
         \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
+        \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
+        \Validator::extend('payment_uuid_valid', 'App\Rules\Inventory\Floorplan\PaymentUUIDValid@validate');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -189,7 +173,7 @@ class AppServiceProvider extends ServiceProvider
 
             // utilities
             __DIR__ . '/../../database/migrations/utilities',
-            
+
             // configuration tables
             __DIR__ . '/../../database/migrations/config',
         ]);
@@ -216,23 +200,14 @@ class AppServiceProvider extends ServiceProvider
         //
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
-        $this->app->bind(TextServiceInterface::class, TwilioService::class);
-        $this->app->bind(BlastServiceInterface::class, BlastService::class);
-        $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
-        $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
-        $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
-        $this->app->bind(TextRepositoryInterface::class, TextRepository::class);
-        $this->app->bind(TemplateRepositoryInterface::class, TemplateRepository::class);
-        $this->app->bind(CampaignRepositoryInterface::class, CampaignRepository::class);
-        $this->app->bind(BlastRepositoryInterface::class, BlastRepository::class);
-        $this->app->bind(NumberRepositoryInterface::class, NumberRepository::class);
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(InventoryHistoryRepositoryInterface::class, InventoryHistoryRepository::class);
         $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
@@ -242,22 +217,35 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
+        $this->app->bind(CrmUserRoleRepositoryInterface::class, CrmUserRoleRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
-        $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
-        $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
+        $this->app->bind(NewUserRepositoryInterface::class, NewUserRepository::class);
+        $this->app->bind(NewDealerUserRepositoryInterface::class, NewDealerUserRepository::class);
+        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
+        $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
+        $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
+        $this->app->bind(PurchaseOrderReceiptRepositoryInterface::class, PurchaseOrderReceiptRepository::class);
+        $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
+        $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
+        $this->app->bind(ExpenseRepositoryInterface::class, ExpenseRepository::class);
+        $this->app->bind(ItemNewRepositoryInterface::class, ItemNewRepository::class);
+        $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
-        
-        $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
         $this->app->bind(VehiclesRepositoryInterface::class, VehiclesRepository::class);
         $this->app->bind(LogServiceInterface::class, LogService::class);
-
-        $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
+        $this->app->bind(EncrypterServiceInterface::class, SPLEncrypterService::class);
 
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
+
+        $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
+
+        $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
+        $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
     }
 
 }

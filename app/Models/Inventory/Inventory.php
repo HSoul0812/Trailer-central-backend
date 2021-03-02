@@ -2,6 +2,8 @@
 namespace App\Models\Inventory;
 
 use App\Helpers\SanitizeHelper;
+use App\Helpers\StringHelper;
+use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
@@ -15,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 use Laravel\Scout\Searchable;
 
 /**
@@ -115,6 +119,8 @@ use Laravel\Scout\Searchable;
  * @property bool $has_stock_images,
  * @property bool $qb_sync_processed,
  * @property string $changed_fields_in_dashboard
+ *
+ * @method static Builder select($columns = ['*'])
  */
 class Inventory extends Model
 {
@@ -145,6 +151,16 @@ class Inventory extends Model
         self::STATUS_ON_ORDER       => self::STATUS_ON_ORDER_LABEL,
         self::STATUS_PENDING_SALE   => self::STATUS_PENDING_SALE_LABEL,
         self::STATUS_SPECIAL_ORDER  => self::STATUS_SPECIAL_ORDER_LABEL
+    ];
+
+    const CONDITION_NEW = 'new';
+    const CONDITION_USED = 'used';
+    const CONDITION_RE_MFG = 'remfg';
+
+    const CONDITION_MAPPING = [
+        self::CONDITION_NEW => 'New',
+        self::CONDITION_USED => 'Used',
+        self::CONDITION_RE_MFG => 'Re-manufactured',
     ];
 
     const OVERLAY_ENABLED_PRIMARY = 1;
@@ -386,6 +402,11 @@ class Inventory extends Model
     public function floorplanVendor()
     {
         return $this->belongsTo(Vendor::class, 'fp_vendor');
+    }
+
+    public function customerInventories(): HasMany
+    {
+        return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
     public function getColorAttribute()

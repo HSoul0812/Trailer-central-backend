@@ -68,6 +68,15 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        's3email' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('MAIL_BUCKET'),
+            'url' => env('AWS_URL'),
+        ],
+
         'ses' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

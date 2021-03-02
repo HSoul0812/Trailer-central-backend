@@ -62,12 +62,12 @@ class AttributeRepository implements AttributeRepositoryInterface
     }
 
     /**
-     * @param $params
-     * @throw NotImplementedException
+     * @param array $params
+     * @return mixed
      */
     public function getAll($params)
     {
-        throw new NotImplementedException;
+        return Attribute::select('*')->get();
     }
 
     /**

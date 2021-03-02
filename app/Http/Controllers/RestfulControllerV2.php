@@ -14,4 +14,14 @@ use Dingo\Api\Routing\Helpers;
 class RestfulControllerV2 extends Controller
 {
     use Helpers;
+
+    /**
+     * @return \Dingo\Api\Http\Response
+     */
+    protected function successResponse()
+    {
+        return $this->response->array([
+            'response' => ['status' => 'success']
+        ]);
+    }
 }

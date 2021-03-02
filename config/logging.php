@@ -51,7 +51,28 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
-            'days' => 14,
+            'days' => 7,
+        ],
+
+        'autoassign' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/auto-assign.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'scrapereplies' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/scrape-replies.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'google' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/google.log'),
+            'level' => 'debug',
+            'days' => 7,
         ],
 
         'slack' => [

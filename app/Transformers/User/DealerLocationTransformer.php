@@ -5,20 +5,28 @@ namespace App\Transformers\User;
 use League\Fractal\TransformerAbstract;
 use App\Models\User\DealerLocation;
 
-class DealerLocationTransformer extends TransformerAbstract 
+class DealerLocationTransformer extends TransformerAbstract
 {
     public function transform(DealerLocation $dealerLocation)
     {
 	return [
             'id' => $dealerLocation->dealer_location_id,
             'name' => $dealerLocation->name,
-            'county' => $dealerLocation->county,
+            'contact' => $dealerLocation->contact,
+            'website' => $dealerLocation->website,
             'phone' => $dealerLocation->phone,
+            'fax' => $dealerLocation->fax,
+            'email' => $dealerLocation->email,
+            'address' => $dealerLocation->address,
+            'city' => $dealerLocation->city,
+            'county' => $dealerLocation->county,
+            'region' => $dealerLocation->region,
+            'postal' => $dealerLocation->postalcode,
+            'country' => $dealerLocation->country,
             'federal_id' => $dealerLocation->federal_id,
             'sales_tax' => $dealerLocation->salesTax,
-            'location_id' => $dealerLocation->location_id,
             'dealer_location_no' => $dealerLocation->dealer_license_no,
-            'federal_id' => $dealerLocation->federal_id	
+            'dealer_location_id' => $dealerLocation->location_id
         ];
     }
 }

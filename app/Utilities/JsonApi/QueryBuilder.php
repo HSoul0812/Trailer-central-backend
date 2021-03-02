@@ -100,6 +100,7 @@ class QueryBuilder implements QueryBuilderInterface
             ->buildRelations()
             ->buildSearch()
             ->buildFilter()
+            ->buildFilters()
             ->buildLimit()
             ->buildSort()
             ->buildPagination();
@@ -171,8 +172,7 @@ class QueryBuilder implements QueryBuilderInterface
     private function buildPagination()
     {
         // if limit and offset are specified, skip this
-        if ($this->request->input('limit', null) &&
-            $this->request->input('offset', null))
+        if ($this->request->input('limit', null) !== null && $this->request->input('offset', null) !== null)
         {
             return $this;
         }
@@ -234,6 +234,65 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
+    /**
+     * @return $this
+     * @throws GenericClientException
+     */
+    private function buildFilters()
+    {
+        $filters = $this->request->input('filters');
+        if (!is_array($filters)) {
+            return $this;
+        }
+
+        // if model is not filterable
+        /** @var Filterable $model */
+        $model = $this->query->getModel();
+        if (!($model instanceof Filterable)) {
+            return $this;
+        }
+
+        $filterableColumns = $model->jsonApiFilterableColumns();
+        if (!$filterableColumns) { // if empty means all columns are filterable
+            return $this;
+        }
+
+        foreach ($filters as $conditions) {
+            $operatorFunctions = [];
+
+            foreach ($conditions as $condition => $filter) {
+                foreach ($filter as $column => $operators) {
+                    // if column is not specified as filterable then skip this filter item
+                    if (!in_array('*', $filterableColumns) && !in_array($column, $filterableColumns)) continue;
+
+                    foreach ($operators as $operator => $value) {
+                        $operatorFunctions[] = [
+                            'function' => $this->operatorFunction($operator, $condition),
+                            'column' => $column,
+                            'value' => $value,
+                            'isRelation' => strpos($column, '.') !== false
+                        ];
+                    }
+                }
+            }
+
+            $this->query = $this->query->where(function($q) use ($operatorFunctions) {
+                foreach ($operatorFunctions as $operatorFunction) {
+                    if ($operatorFunction['isRelation']) {
+                        $pos = strrpos($operatorFunction['column'], '.');
+                        $myRelation = substr($operatorFunction['column'], 0, $pos);
+                        $myColumn = substr($operatorFunction['column'], $pos + 1);
+                        $operatorFunction['function']($myColumn, $operatorFunction['value'], $q->getRelation($myRelation)->getQuery()); // dot means this is a relation
+                    } else {
+                        $operatorFunction['function']($operatorFunction['column'], $operatorFunction['value'], $q); // this is my column
+                    }
+                }
+            });
+        }
+
+        return $this;
+    }
+
     private function buildSort()
     {
         $sortQuery = $this->request->input('sort');
@@ -279,53 +338,56 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    private function operatorFunction(string $operator)
+    private function operatorFunction(string $operator, string $condition = 'and')
     {
+        $where = strcasecmp(trim($condition), 'or') === 0 ? 'orWhere' : 'where';
+
         switch ($operator) {
             case 'eq':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, '=', $value);
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, '=', $value);
                 };
             case 'lt':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, '<', $value);
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, '<', $value);
                 };
             case 'lte':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, '<=', $value);
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, '<=', $value);
                 };
             case 'gt':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, '>', $value);
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, '>', $value);
                 };
             case 'gte':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, '>=', $value);
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, '>=', $value);
                 };
             case 'ne':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, '<>', $value);
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, '<>', $value);
                 };
             case 'between':
-                return function ($column, $value, Builder $query) {
+                return function ($column, $value, Builder $query) use ($where) {
                     list($valueFrom, $valueTo) = explode(',', $value);
-                    $query->whereBetween($column, $valueFrom, $valueTo);
+                    $whereBetween = $where . 'Between';
+                    $query->{$whereBetween}($column, $valueFrom, $valueTo);
                 };
             case 'contains':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, 'LIKE', "%{$value}%");
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, 'LIKE', "%{$value}%");
                 };
             case 'notcontains':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, 'NOT LIKE', "%{$value}%");
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, 'NOT LIKE', "%{$value}%");
                 };
             case 'startswith':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, 'LIKE', "{$value}%");
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, 'LIKE', "{$value}%");
                 };
             case 'endswith':
-                return function ($column, $value, Builder $query) {
-                    $query->where($column, 'LIKE', "%{$value}");
+                return function ($column, $value, Builder $query) use ($where) {
+                    $query->{$where}($column, 'LIKE', "%{$value}");
                 };
             default:
                 if (isset($this->operatorFunctions[$operator])) {

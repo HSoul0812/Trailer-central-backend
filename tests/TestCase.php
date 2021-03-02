@@ -40,12 +40,19 @@ abstract class TestCase extends BaseTestCase
 
     // Get Test Dealer Location ID's
     public static function getTestDealerLocationIds() {
-        // Get Location
+        // Get Locations
         $locationId = env('TEST_LOCATION_ID');
         if(empty($locationId)) {
             throw new MissingTestDealerLocationIdException();
         }
         return explode(",", $locationId);
+    }
+
+    // Get Test Dealer Location ID
+    public static function getTestDealerLocationId() {
+        // Get Location
+        $locationIds = self::getTestDealerLocationIds();
+        return reset($locationIds);
     }
 
     // Get Random Test Dealer Location

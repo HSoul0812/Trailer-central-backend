@@ -158,6 +158,15 @@ $api->version('v1', function ($route) {
      * Inventory Statuses
      */
     $route->get('inventory/statuses', 'App\Http\Controllers\v1\Inventory\StatusController@index');
+    /**
+     * Inventory Attributes
+     */
+    $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
+
+    /**
+     * Inventory transactions history
+     */
+    $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
 
     /**
      * Inventory
@@ -233,8 +242,11 @@ $api->version('v1', function ($route) {
     /**
      * Website Forms
      */
-    $route->get('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@index');
-    $route->put('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@create');
+    $route->group(['middleware' => 'forms.field-map.validate'], function ($route) {
+        $route->get('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@index');
+        $route->put('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@create');
+        $route->get('website/forms/field-map/types', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@types');
+    });
 
 
     /*
@@ -353,8 +365,8 @@ $api->version('v1', function ($route) {
         */
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
-        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show');
-        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
+        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show')->where('id', '[0-9]+');
+        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update')->where('id', '[0-9]+');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
 
         /*
@@ -375,16 +387,6 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/sales-people', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sales People
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
 
         /*
@@ -396,7 +398,17 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
+        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
+        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
         $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
+        $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        /**
+         * Inventory for customers
+         */
+        $route->get('user/customers/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@index');
+        $route->get('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@getAllByCustomer')->where('customer_id', '[0-9]+');
+        $route->delete('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@bulkDestroy')->where('customer_id', '[0-9]+');
+        $route->post('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@attach')->where('customer_id', '[0-9]+');
 
         /*
         |--------------------------------------------------------------------------
@@ -408,6 +420,85 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Leads
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'leads'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | ADF Import
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'import'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@index');
+                $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
+                $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
+            });
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Integrations
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'integration'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Integration Auth
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'auth',
+                'middleware' => 'integration.auth.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Integration\AuthController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Integration\AuthController@create');
+                $route->post('/', 'App\Http\Controllers\v1\Integration\AuthController@valid');
+                $route->put('login', 'App\Http\Controllers\v1\Integration\AuthController@login');
+                $route->get('{id}', 'App\Http\Controllers\v1\Integration\AuthController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Integration\AuthController@update')->where('id', '[0-9]+');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Facebook
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'facebook',
+                'middleware' => 'facebook.catalog.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Integration\FacebookController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Integration\FacebookController@create');
+                $route->post('/', 'App\Http\Controllers\v1\Integration\FacebookController@payload');
+                $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
+            });            
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -420,6 +511,30 @@ $api->version('v1', function ($route) {
         $route->group([
             'prefix' => 'user'
         ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Sales People
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'sales-people',
+                'middleware' => 'sales-person.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
+                $route->put('/', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@create');
+                $route->get('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
+
+                // Sales People w/Auth
+                $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
+                $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');
+                $route->post('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@update')->where('id', '[0-9]+');
+            });
+
             /*
             |--------------------------------------------------------------------------
             | Texts
@@ -495,9 +610,13 @@ $api->version('v1', function ($route) {
         */
         $route->get('service-orders', 'App\Http\Controllers\v1\Dms\ServiceOrderController@index');
         $route->get('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@show');
+        $route->put('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@update');
         $route->get('service-item-technicians/by-dealer', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byDealer');
         $route->get('service-item-technicians/by-location/{locationId}', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byLocation');
         $route->get('service-item-technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@index');
+
+        $route->get('service-order/technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\TechnicianController@index');
+        $route->get('service-order/types', 'App\Http\Controllers\v1\Dms\ServiceOrder\TypesController@index');
 
         /*
         |--------------------------------------------------------------------------
@@ -560,6 +679,16 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Tax Calculator
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('tax-calculators', 'App\Http\Controllers\v1\Dms\TaxCalculatorController@index');
+
+        /*
+        |--------------------------------------------------------------------------
         | Quickbooks
         |--------------------------------------------------------------------------
         |
@@ -587,7 +716,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
-
+        $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
 
         /*
         |--------------------------------------------------------------------------
@@ -615,6 +744,18 @@ $api->version('v1', function ($route) {
         $route->get('settings', 'App\Http\Controllers\v1\Dms\SettingsController@show');
         $route->put('settings', 'App\Http\Controllers\v1\Dms\SettingsController@update');
 
+        $route->get('unit-sale-labor/technicians', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getTechnicians');
+        $route->get('unit-sale-labor/service-report', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getServiceReport');
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Integration
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
+    $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
 });

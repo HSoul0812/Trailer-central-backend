@@ -17,6 +17,8 @@ class ServiceItemTechnician extends Model implements Filterable
 {
     protected $table = 'dms_service_technician';
 
+    public $timestamps = false;
+
     public function serviceItem()
     {
         return $this->belongsTo(ServiceItem::class, 'service_item_id', 'id');
@@ -29,6 +31,6 @@ class ServiceItemTechnician extends Model implements Filterable
 
     public function jsonApiFilterableColumns(): ?array
     {
-        return ['start_date'];
+        return ['start_date', 'completed_date'];
     }
 }

@@ -17,7 +17,44 @@ use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\Traits\TableAware;
+use App\Models\Website\Website;
 
+/**
+ * Class Lead
+ * @package App\Models\CRM\Leads
+ *
+ * @property $identifier
+ * @property $website_id
+ * @property $lead_type
+ * @property $inventory_id
+ * @property $referral
+ * @property $title
+ * @property $first_name
+ * @property $last_name
+ * @property $email_address
+ * @property $address
+ * @property $city
+ * @property $state
+ * @property $zip
+ * @property $preferred_contact
+ * @property $phone_number
+ * @property $status
+ * @property $comments
+ * @property $next_followup
+ * @property $date_submitted
+ * @property $is_spam
+ * @property $contact_email_sent
+ * @property $adf_email_sent
+ * @property $cdk_email_sent
+ * @property $metadata
+ * @property $newsletter
+ * @property $note
+ * @property $is_from_classifieds
+ * @property $dealer_id
+ * @property $dealer_location_id
+ * @property $is_archived
+ * @property $unique_id
+ */
 class Lead extends Model
 {
     use TableAware;
@@ -33,6 +70,12 @@ class Lead extends Model
 
     const NOT_ARCHIVED = 0;
     const LEAD_ARCHIVED = 1;
+    
+    const IS_NOT_SPAM = 0;
+    const IS_SPAM = 1;
+    
+    const IS_IDS_EXPORTED = 1;
+    const IS_NOT_IDS_EXPORTED = 0;
 
     const TABLE_NAME = 'website_lead';
 
@@ -90,6 +133,7 @@ class Lead extends Model
         'comments',
         'note',
         'metadata',
+        'date_submitted',
         'contact_email_sent',
         'adf_email_sent',
         'cdk_email_sent',
@@ -176,6 +220,16 @@ class Lead extends Model
     public function newDealerUser()
     {
         return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
+    }
+    
+    /**
+     * Get Website.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function website()
+    {
+        return $this->belongsTo(Website::class, 'website_id', 'id');
     }
 
     /**

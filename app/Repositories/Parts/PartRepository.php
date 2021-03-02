@@ -91,6 +91,9 @@ class PartRepository implements PartRepositoryInterface {
         ]
     ];
 
+    /**
+     * list if ES index fields that have a 'keyword' field
+     */
     private $indexKeywordFields = [
         'subcategory' => 'subcategory.keyword',
         'title' => 'title.keyword',
@@ -151,8 +154,15 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function createOrUpdate($params) {
-        // Part is unique if the SKU is unique for the dealer id
-        $part = Part::where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
+        
+        if (isset($params['id'])) {
+            $part = Part::where('id', $params['id'])->where('dealer_id', $params['dealer_id'])->first();
+        } 
+        
+        if (empty($part)) {
+            // Part is unique if the SKU is unique for the dealer id
+            $part = Part::where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
+        }        
 
         if ($part) {
             $params['id'] = $part->id;
@@ -259,7 +269,7 @@ class PartRepository implements PartRepositoryInterface {
                 $query = $query->where('subcategory', 'LIKE', '%' . $params['subcategory'] . '%');
             }
         }
-        
+
         if (isset($params['sku'])) {
             if (isset($params['sku']['contain'])) {
                 $query = $query->where(function ($query) use ($params) {
@@ -534,7 +544,7 @@ class PartRepository implements PartRepositoryInterface {
                 $search->filter('range', ['bins_total_qty' => ['gt' => 0]]);
             } else if ($query['in_stock'] == 2) {
                 $search->filter('range', ['bins_total_qty' => ['lte' => 0]]);
-            }
+            } 
         }
 
         // filter by dealer
@@ -552,7 +562,7 @@ class PartRepository implements PartRepositoryInterface {
         }
 
         // load relations
-        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins']);
+        $search->load(['brand', 'manufacturer', 'type', 'category', 'images', 'bins', 'purchaseOrders']);
 
         // if a paginator is requested
         if ($options['page'] ?? null) {
@@ -584,5 +594,4 @@ class PartRepository implements PartRepositoryInterface {
 
         return $search->execute()->models();
     }
-
 }

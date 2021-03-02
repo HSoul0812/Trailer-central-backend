@@ -2,9 +2,9 @@
 
 namespace App\Repositories\Dms\Quickbooks;
 
+use App\Models\CRM\User\Customer;
 use Illuminate\Support\Facades\DB;
 
-use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 
@@ -41,12 +41,104 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
     ];
 
 
-    public function create($params) {
-        throw new NotImplementedException;
+    public function createForCustomer(Customer $customer)
+    {
+        $qbInfo = [
+            'BillAddr' => [
+                'Line1' => $customer->address,
+                'City' => $customer->city,
+                'Country' => $customer->country,
+                'PostalCode' => $customer->postal_code,
+                'CountrySubDivisionCode' => $customer->region,
+            ],
+            'ShipAddr' => [
+                'Line1' => $customer->shipping_address,
+                'City' => $customer->shipping_city,
+                'Country' => $customer->shipping_country,
+                'PostalCode' => $customer->shipping_postal_code,
+                'CountrySubDivisionCode' => $customer->shipping_region
+            ],
+            'Mobile' => [
+                'FreeFormNumber' => $customer->cell_phone
+            ],
+            'PrimaryPhone' => [
+                'FreeFormNumber' => $customer->work_phone
+            ],
+            'AlternatePhone' => [
+                'FreeFormNumber' => $customer->home_phone
+            ],
+            'GivenName' => $customer->first_name,
+            'MiddleName' => $customer->middle_name,
+            'FamilyName' => $customer->last_name,
+            'DisplayName' => $customer->display_name,
+            'CompanyName' => $customer->company_name,
+            'FullyQualifiedName' => $customer->display_name,
+            'PrimaryEmailAddr' => [
+                'Address' => $customer->email
+            ]
+        ];
+
+        return $this->create([
+            'dealer_id' => $customer->dealer_id,
+            'tb_name' => 'dms_customer',
+            'tb_primary_id' => $customer->id,
+            'qb_info' => $qbInfo,
+            'qb_id' => $customer->qb_id,
+        ]);
     }
 
-    public function delete($params) {
-        throw new NotImplementedException;
+    /**
+     * Create an approval object
+     *
+     * @note code lifted from crm
+     * @param $params
+     * @return mixed|void
+     * @throws \Exception
+     */
+    public function create($params)
+    {
+        if (empty($params['dealer_id'])) {
+            throw new \Exception('Cannot create QB approval object: customer dealer id empty');
+        }
+        $dealerId = $params['dealer_id'];
+
+        // Remove existing approval object
+        $this->delete([
+            'dealer_id' => $dealerId,
+            'tb_name' => $params['tb_name'],
+            'tb_primary_id' => $params['tb_primary_id']
+        ]);
+
+        // reinstate these when they're needed
+//        if ($data['tbName'] === 'qb_item_category') {
+//            $em->getRepository(QbItemCategory::class)->removeQbApproval($data['tbPrimaryId']);
+//        } else if ($data['tbName'] === 'qb_items_new') {
+//            $em->getRepository(QbItemsNew::class)->removeQbApproval($data['tbPrimaryId']);
+//        }
+
+        // not sure what this is for yet; just copied from original
+        if (empty($params['qb_id']) && isset($params['qb_info']['Active']) && !$params['qb_info']['Active']) return;
+
+        $qbApproval = new QuickbookApproval();
+        $qbApproval->dealer_id = $dealerId;
+        $qbApproval->tb_name = $params['tb_name'];
+        $qbApproval->qb_obj = json_encode($params['qb_info']);
+        $qbApproval->tb_primary_id = $params['tb_primary_id'];
+        if (isset($params['sort_order'])) {
+            $qbApproval->sort_order = $params['sort_order'];
+        }
+        if (!empty($params['qb_id'])) {
+            $qbApproval->action_type = 'update';
+            $qbApproval->qb_id = $params['qb_id'];
+        }
+
+        $qbApproval->save();
+        return $qbApproval;
+    }
+
+    public function delete($params)
+    {
+        QuickbookApproval::where($params)->delete();
     }
 
     public function get($params) {
