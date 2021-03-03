@@ -71,6 +71,12 @@ class Collector extends Resource
                 Text::make('CDK Password', 'cdk_password')->rules('max:128')->hideFromIndex()->help(
                     "Only needed if file format is CDK"
                 ),
+                Text::make('IDS Token', 'ids_token')->rules('max:256')->hideFromIndex()->help(
+                    "Only needed if file format is IDS"
+                ),
+                Text::make('IDS Default Location', 'ids_default_location')->rules('max:256')->hideFromIndex()->help(
+                    "Only needed if file format is IDS"
+                ),
                 Select::make('File Format', 'file_format')
                     ->options(array_combine(CollectorModel::FILE_FORMATS, CollectorModel::FILE_FORMATS))
                     ->displayUsingLabels()
