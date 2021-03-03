@@ -3,8 +3,8 @@
 namespace Tests\Unit\Models\User;
 
 use App\Models\User\DealerUser;
-use App\Models\User\DealerUserPermission;
 use App\Models\User\Interfaces\PermissionsInterface;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Mockery\LegacyMockInterface;
 use Tests\TestCase;
@@ -29,7 +29,7 @@ class DealerUserTest extends TestCase
     {
         /** @var LegacyMockInterface|DealerUser $dealerUser */
         $dealerUser = $this->getEloquentMock(DealerUser::class);
-        $dealerUserPermission = $this->getEloquentMock(DealerUserPermission::class);
+        $hasMany = \Mockery::mock(HasMany::class)->shouldAllowMockingProtectedMethods();
 
         $dealerUser
             ->shouldReceive('getPermissions')
@@ -39,9 +39,9 @@ class DealerUserTest extends TestCase
             ->shouldReceive('perms')
             ->once()
             ->with()
-            ->andReturn($dealerUserPermission);
+            ->andReturn($hasMany);
 
-        $dealerUserPermission
+        $hasMany
             ->shouldReceive('get')
             ->once()
             ->with()
@@ -67,7 +67,7 @@ class DealerUserTest extends TestCase
     {
         /** @var LegacyMockInterface|DealerUser $dealerUser */
         $dealerUser = $this->getEloquentMock(DealerUser::class);
-        $dealerUserPermission = $this->getEloquentMock(DealerUserPermission::class);
+        $hasMany = \Mockery::mock(HasMany::class)->shouldAllowMockingProtectedMethods();
 
         $dealerUser
             ->shouldReceive('getPermissions')
@@ -81,9 +81,9 @@ class DealerUserTest extends TestCase
             ->shouldReceive('perms')
             ->once()
             ->with()
-            ->andReturn($dealerUserPermission);
+            ->andReturn($hasMany);
 
-        $dealerUserPermission
+        $hasMany
             ->shouldReceive('get')
             ->once()
             ->with()
@@ -110,7 +110,7 @@ class DealerUserTest extends TestCase
     {
         /** @var LegacyMockInterface|DealerUser $dealerUser */
         $dealerUser = $this->getEloquentMock(DealerUser::class);
-        $dealerUserPermission = $this->getEloquentMock(DealerUserPermission::class);
+        $hasMany = \Mockery::mock(HasMany::class)->shouldAllowMockingProtectedMethods();
         $collection = new Collection();
 
         $dealerUser
@@ -121,9 +121,9 @@ class DealerUserTest extends TestCase
             ->shouldReceive('perms')
             ->once()
             ->with()
-            ->andReturn($dealerUserPermission);
+            ->andReturn($hasMany);
 
-        $dealerUserPermission
+        $hasMany
             ->shouldReceive('get')
             ->once()
             ->with()
@@ -143,7 +143,7 @@ class DealerUserTest extends TestCase
     {
         /** @var LegacyMockInterface|DealerUser $dealerUser */
         $dealerUser = $this->getEloquentMock(DealerUser::class);
-        $dealerUserPermission = $this->getEloquentMock(DealerUserPermission::class);
+        $hasMany = \Mockery::mock(HasMany::class)->shouldAllowMockingProtectedMethods();
         $collection = new Collection();
 
         $dealerUser
@@ -158,9 +158,9 @@ class DealerUserTest extends TestCase
             ->shouldReceive('perms')
             ->once()
             ->with()
-            ->andReturn($dealerUserPermission);
+            ->andReturn($hasMany);
 
-        $dealerUserPermission
+        $hasMany
             ->shouldReceive('get')
             ->once()
             ->with()
@@ -176,7 +176,7 @@ class DealerUserTest extends TestCase
     /**
      * @return Collection[][]
      */
-    public function permissionProvider()
+    public function permissionProvider(): array
     {
         return [[
             new Collection([

@@ -174,29 +174,6 @@ class Inventory extends Model
         self::OVERLAY_ENABLED_ALL,
     ];
 
-    const SUPER_ADMIN_FIELDS = [
-        'true_cost',
-        'pac_amount',
-        'pac_type',
-        'fp_balance',
-        'fp_committed',
-        'fp_paid',
-        'fp_interest_paid',
-        'fp_vendor',
-        'l_holder',
-        'l_attn',
-        'l_name_on_account',
-        'l_address',
-        'l_account',
-        'l_city',
-        'l_state',
-        'l_zip_code',
-        'l_payoff',
-        'l_phone',
-        'l_paid',
-        'l_fax',
-    ];
-
     /**
      * The table associated with the model.
      *

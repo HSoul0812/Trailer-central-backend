@@ -7,6 +7,7 @@ use App\Traits\Models\HasPermissions;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DealerUser extends Model implements Authenticatable, PermissionsInterface
 {
@@ -142,9 +143,9 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
     }
 
     /**
-     * @return mixed
+     * @return hasMany
      */
-    public function perms()
+    public function perms(): hasMany
     {
         return $this->hasMany(DealerUserPermission::class, 'dealer_user_id', 'dealer_user_id');
     }

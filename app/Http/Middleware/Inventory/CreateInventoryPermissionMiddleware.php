@@ -14,6 +14,29 @@ use Closure;
  */
 class CreateInventoryPermissionMiddleware
 {
+    const SUPER_ADMIN_FIELDS = [
+        'true_cost',
+        'pac_amount',
+        'pac_type',
+        'fp_balance',
+        'fp_committed',
+        'fp_paid',
+        'fp_interest_paid',
+        'fp_vendor',
+        'l_holder',
+        'l_attn',
+        'l_name_on_account',
+        'l_address',
+        'l_account',
+        'l_city',
+        'l_state',
+        'l_zip_code',
+        'l_payoff',
+        'l_phone',
+        'l_paid',
+        'l_fax',
+    ];
+
     /**
      * Handle an incoming request.
      *
@@ -42,7 +65,7 @@ class CreateInventoryPermissionMiddleware
 
         if (!$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)) {
             foreach ($request->request->all() as $key => $param) {
-                if (in_array($key, Inventory::SUPER_ADMIN_FIELDS)) {
+                if (in_array($key, self::SUPER_ADMIN_FIELDS)) {
                     $request->request->remove($key);
                 }
             }
