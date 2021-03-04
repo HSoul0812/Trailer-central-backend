@@ -40,9 +40,10 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
     public function getByYear(int $year, int $dealerId) : Builder
     {
         return $this->model
-                    ->select("parts_audit_log.*", "parts_v1.id", "parts_v1.dealer_id")
+                    ->select("parts_audit_log.*", "parts_v1.id", "parts_v1.dealer_id", "parts_v1.dealer_cost", "parts_v1.price", "parts_v1.vendor_id")
                     ->join('parts_v1', 'parts_v1.id', '=', 'parts_audit_log.part_id')
                     ->whereBetween('parts_audit_log.created_at', ["$year-01-01 00:00:00", "$year-12-31 23:59:59"])
+                    ->where('parts_audit_log.balance', '>', 0)
                     ->where('parts_v1.dealer_id', $dealerId)
                     ->orderBy('parts_audit_log.created_at', 'DESC');
     }
