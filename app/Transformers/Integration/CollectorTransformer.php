@@ -52,7 +52,8 @@ class CollectorTransformer extends TransformerAbstract
             'cdk_password' => $collector->cdk_password,
             'cdk_username' => $collector->cdk_username,
             'ids_token' => $collector->ids_token,
-            'ids_default_location' => $collector->ids_default_location
+            'ids_default_location' => $collector->ids_default_location,
+            'use_factory_mapping' => $collector->use_factory_mapping
         ];
     }
 }
