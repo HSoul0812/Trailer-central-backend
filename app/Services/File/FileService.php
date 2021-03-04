@@ -26,14 +26,16 @@ class FileService extends AbstractFileService
 
         $localFilename = $this->uploadLocalByUrl($url, $dealerId, $identifier, $skipNotExisting);
 
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($localFilename);
+        if ($localFilename) {
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($localFilename);
+        }
 
-        if (!$skipNotExisting && !$mimeType) {
+        if (!$skipNotExisting && !isset($mimeType)) {
             throw new FileUploadException("Can't get content. Url - {$url}");
         }
 
-        if ($skipNotExisting && !$mimeType) {
+        if ($skipNotExisting && !isset($mimeType)) {
             return null;
         }
 
