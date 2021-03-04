@@ -85,6 +85,12 @@ class Collector extends Resource
                     'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
                 ),
             ]),
+            
+            new Panel('Factory Settings', [
+                Boolean::make('Use Factory Mapping', 'use_factory_mapping')->hideFromIndex()->help(
+                    'Whether or not to use the data from FV to populate these units'
+                ),
+            ]),
 
             new Panel('Actions With Items', [
                 Boolean::make('Create Items')->withMeta(['value' => $this->create_items ?? true])->hideFromIndex(),

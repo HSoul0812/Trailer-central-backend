@@ -111,7 +111,8 @@ class Collector extends Model  implements Filterable
         'import_with_showroom_category',
         'unarchive_sold_items',
         'cdk_password',
-        'cdk_username'
+        'cdk_username',
+        'use_factory_mapping'
     ];
 
     public function dealers()
