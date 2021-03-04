@@ -51,13 +51,15 @@ class ImageService extends AbstractFileService
 
         $localFilename = $this->uploadLocalByUrl($url, $dealerId, $identifier, $skipNotExisting);
 
-        $imageInfo = getimagesize($localFilename);
+        if ($localFilename) {
+            $imageInfo = getimagesize($localFilename);
+        }
 
-        if (!$skipNotExisting && !isset($imageInfo['mime']) || !in_array($imageInfo['mime'], array_keys(self::EXTENSION_MAPPING))) {
+        if (!$skipNotExisting && (!isset($imageInfo['mime']) || !in_array($imageInfo['mime'], array_keys(self::EXTENSION_MAPPING)))) {
             throw new ImageUploadException("Not expected mime-type. Url - {$url}");
         }
 
-        if ($skipNotExisting && !isset($imageInfo['mime']) || !in_array($imageInfo['mime'], array_keys(self::EXTENSION_MAPPING))) {
+        if ($skipNotExisting && (!isset($imageInfo['mime']) || !in_array($imageInfo['mime'], array_keys(self::EXTENSION_MAPPING)))) {
             return null;
         }
 

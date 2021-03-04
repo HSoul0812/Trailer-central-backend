@@ -140,7 +140,7 @@ abstract class AbstractFileService
         $fileContents = $this->httpClient->get($url, ['http_errors' => false])->getBody()->getContents();
 
         if (!$skipNotExisting && !$fileContents) {
-            throw new FileUploadException("Can't get file contents. Url - {$url}");
+            throw new FileUploadException("Can't get file contents. Url - {$url}, dealer_id - {$dealerId}, id - $identifier");
         }
 
         if ($skipNotExisting && !$fileContents) {
@@ -150,7 +150,7 @@ abstract class AbstractFileService
         $result = $localDisk->put($filename, $fileContents);
 
         if (!$result) {
-            throw new FileUploadException("Can't upload file - {$url}");
+            throw new FileUploadException("Can't upload file. Url - {$url}, dealer_id - {$dealerId}, id - $identifier");
         }
 
         return $localDisk->path($filename);
