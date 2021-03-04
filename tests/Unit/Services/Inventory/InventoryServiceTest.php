@@ -3,12 +3,18 @@
 namespace Tests\Unit\Services\Inventory;
 
 use App\Jobs\Files\DeleteS3FilesJob;
+use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
+use App\Models\Inventory\Inventory;
+use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
+use App\Services\File\FileService;
+use App\Services\File\ImageService;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
@@ -29,6 +35,11 @@ use Tests\TestCase;
 class InventoryServiceTest extends TestCase
 {
     const TEST_DEALER_ID = PHP_INT_MAX;
+    const TEST_INVENTORY_ID = PHP_INT_MAX - 1;
+    const TEST_VIN = 'test_vin';
+    const TEST_MODEL = 'test_model';
+    const TEST_TITLE = 'test_tile';
+    const TEST_STOCK = 'test_stock';
 
     /**
      * @var LegacyMockInterface|InventoryRepositoryInterface
@@ -45,6 +56,26 @@ class InventoryServiceTest extends TestCase
      */
     private $fileRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|BillRepositoryInterface
+     */
+    private $billRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|QuickbookApprovalRepositoryInterface
+     */
+    private $quickbookApprovalRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|ImageService
+     */
+    private $imageServiceMock;
+
+    /**
+     * @var LegacyMockInterface|FileService
+     */
+    private $fileServiceMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -57,6 +88,618 @@ class InventoryServiceTest extends TestCase
 
         $this->fileRepositoryMock = Mockery::mock(FileRepositoryInterface::class);
         $this->app->instance(FileRepositoryInterface::class, $this->fileRepositoryMock);
+
+        $this->billRepositoryMock = Mockery::mock(BillRepositoryInterface::class);
+        $this->app->instance(BillRepositoryInterface::class, $this->billRepositoryMock);
+
+        $this->quickbookApprovalRepositoryMock = Mockery::mock(QuickbookApprovalRepositoryInterface::class);
+        $this->app->instance(QuickbookApprovalRepositoryInterface::class, $this->quickbookApprovalRepositoryMock);
+
+        $this->imageServiceMock = Mockery::mock(ImageService::class);
+        $this->app->instance(ImageService::class, $this->imageServiceMock);
+
+        $this->fileServiceMock = Mockery::mock(FileService::class);
+        $this->app->instance(FileService::class, $this->fileServiceMock);
+    }
+
+    /**
+     * @covers ::create
+     * @dataProvider createParamsProvider
+     *
+     * @param array $params
+     * @throws BindingResolutionException
+     */
+    public function testCreateWithoutFilesAndBill(array $params)
+    {
+        $params['new_files'] = [];
+
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($params)
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('update')
+            ->never();
+
+        $this->imageServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->fileServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('update')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->quickbookApprovalRepositoryMock
+            ->shouldReceive('deleteByTbPrimaryId')
+            ->never();
+
+        Log::shouldReceive('info')
+            ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->create($params);
+
+        $this->assertEquals($inventory, $result);
+    }
+
+    /**
+     * @covers ::create
+     * @dataProvider createParamsProvider
+     *
+     * @param array $params
+     * @throws BindingResolutionException
+     */
+    public function testCreateWithImages(array $params)
+    {
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+
+        $params['new_images'] = [
+            [
+                'url' => 'http://test_image1.test',
+                'position' => 0
+            ],
+            [
+                'url' => 'http://test_file2.test',
+                'position' => 1
+            ]
+        ];
+
+        $params['overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
+        $params['new_files'] = [];
+
+        $overlayEnabledParams = ['overlayText' => $params['stock']];
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $expectedParams = $params;
+
+        foreach ($params['new_images'] as $key => $image) {
+            $newImage = ['path' => 'path' . $key, 'hash' => 'hash' . $key];
+            $newImageWithOverlay = ['path' => 'path_with_overlay' . $key, 'hash' => 'hash_with_overlay' . $key];
+
+            $this->imageServiceMock
+                ->shouldReceive('upload')
+                ->once()
+                ->with($image['url'], $params['title'], self::TEST_DEALER_ID)
+                ->andReturn($newImage);
+
+            if ($image['position'] == 0) {
+                $this->imageServiceMock
+                    ->shouldReceive('upload')
+                    ->once()
+                    ->with($image['url'], $params['title'], self::TEST_DEALER_ID, null, $overlayEnabledParams)
+                    ->andReturn($newImageWithOverlay);
+            }
+
+            if ($image['position'] == 0) {
+                $expectedParams['new_images'][$key]['filename'] = $newImageWithOverlay['path'];
+                $expectedParams['new_images'][$key]['filename_noverlay'] = $newImage['path'];
+                $expectedParams['new_images'][$key]['hash'] = $newImageWithOverlay['hash'];
+            } else {
+                $expectedParams['new_images'][$key]['filename'] = $newImage['path'];
+                $expectedParams['new_images'][$key]['filename_noverlay'] = '';
+                $expectedParams['new_images'][$key]['hash'] = $newImage['hash'];
+            }
+        }
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($expectedParams)
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->fileServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('update')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->quickbookApprovalRepositoryMock
+            ->shouldReceive('deleteByTbPrimaryId')
+            ->never();
+
+        Log::shouldReceive('info')
+            ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->create($params);
+
+        $this->assertEquals($inventory, $result);
+    }
+
+    /**
+     * @covers ::create
+     * @dataProvider createParamsProvider
+     *
+     * @param array $params
+     * @throws BindingResolutionException
+     */
+    public function testCreateWithFiles(array $params)
+    {
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+
+        $params['new_files'] = [
+            [
+                'url' => 'http://test_file1.test',
+                'title' => 'test_file1_title',
+            ],
+            [
+                'url' => 'http://test_file2.test',
+                'title' => 'test_file2_title',
+            ]
+        ];
+
+        $params['hidden_files'] = [
+            [
+                'url' => 'http://test_file_hidden.test',
+                'title' => 'test_file_hidden_title'
+            ]
+        ];
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $expectedParams = $params;
+        $expectedParams['new_files'] = array_merge($expectedParams['new_files'], $expectedParams['hidden_files']);
+        unset($expectedParams['hidden_files']);
+
+        foreach (array_merge($params['new_files'], $params['hidden_files']) as $key => $file) {
+            $newFile = ['path' => 'path' . $key, 'type' => 'type' . $key];
+
+            $this->fileServiceMock
+                ->shouldReceive('upload')
+                ->once()
+                ->with($file['url'], $file['title'], self::TEST_DEALER_ID)
+                ->andReturn($newFile);
+
+            $expectedParams['new_files'][$key] = array_merge($expectedParams['new_files'][$key], $newFile);
+        }
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($expectedParams)
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->imageServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('update')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->quickbookApprovalRepositoryMock
+            ->shouldReceive('deleteByTbPrimaryId')
+            ->never();
+
+        Log::shouldReceive('info')
+            ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->create($params);
+
+        $this->assertEquals($inventory, $result);
+    }
+
+    /**
+     * @covers ::create
+     * @dataProvider createParamsProvider
+     *
+     * @param array $params
+     * @throws BindingResolutionException
+     */
+    public function testCreateWithNewBillVendorAndBillExists(array $params)
+    {
+        $params['new_files'] = [];
+
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+        $inventory->dealer_id = self::TEST_DEALER_ID;
+
+        /** @var Bill|LegacyMockInterface $bill */
+        $bill = $this->getEloquentMock(Bill::class);
+        $bill->id = self::TEST_INVENTORY_ID;
+
+        $billInfo = $this->getBillInfo($inventory, $params);
+
+        $inventoryUpdateParams = $this->getBillInventoryUpdateParams($inventory, $bill, $billInfo);
+
+        $params['add_bill'] = true;
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($params)
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->imageServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->fileServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->quickbookApprovalRepositoryMock
+            ->shouldReceive('deleteByTbPrimaryId')
+            ->once()
+            ->with($bill->id);
+
+        $this->billRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with($billInfo)
+            ->andReturn($bill);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with($inventoryUpdateParams)
+            ->andReturn($inventory);
+
+        Log::shouldReceive('info')
+            ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->create($params);
+
+        $this->assertEquals($inventory, $result);
+    }
+
+    /**
+     * @covers ::create
+     * @dataProvider createParamsProvider
+     *
+     * @param array $params
+     * @throws BindingResolutionException
+     */
+    public function testCreateWithNewBillVendorAndBillNotExists(array $params)
+    {
+        $params['new_files'] = [];
+        unset($params['b_id']);
+
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+        $inventory->dealer_id = self::TEST_DEALER_ID;
+
+        /** @var Bill|LegacyMockInterface $bill */
+        $bill = $this->getEloquentMock(Bill::class);
+        $bill->id = self::TEST_INVENTORY_ID;
+
+        $billInfo = $this->getBillInfo($inventory, $params);
+        $billInfo['total'] = 0;
+
+        $inventoryUpdateParams = $this->getBillInventoryUpdateParams($inventory, $bill, $billInfo);
+        unset($inventoryUpdateParams['qb_sync_processed']);
+
+        $params['add_bill'] = true;
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($params)
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->imageServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->fileServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('update')
+            ->never();
+
+        $this->quickbookApprovalRepositoryMock
+            ->shouldReceive('deleteByTbPrimaryId')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($billInfo)
+            ->andReturn($bill);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with($inventoryUpdateParams)
+            ->andReturn($inventory);
+
+        Log::shouldReceive('info')
+            ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->create($params);
+
+        $this->assertEquals($inventory, $result);
+    }
+
+    /**
+     * @covers ::create
+     * @dataProvider createParamsProvider
+     *
+     * @param array $params
+     * @throws BindingResolutionException
+     */
+    public function testCreateWithNewBillWithoutInventoryBill(array $params)
+    {
+        $params['add_bill'] = true;
+        $params['new_files'] = [];
+        unset($params['b_vendorId']);
+        unset($params['b_isFloorPlan']);
+
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+        $inventory->dealer_id = self::TEST_DEALER_ID;
+        $inventory->true_cost = 100;
+        $inventory->fp_balance = 50;
+        $inventory->fp_vendor = 1;
+
+        /** @var Bill|LegacyMockInterface $bill */
+        $bill = $this->getEloquentMock(Bill::class);
+        $bill->id = self::TEST_INVENTORY_ID;
+
+        $billInfo = $this->getBillInfo($inventory, $params);
+
+        $expectedBillParams = [
+            'dealer_id' => $inventory->dealer_id,
+            'total' => 0,
+            'vendor_id' => $inventory->fp_vendor,
+            'status' => 'due',
+            'doc_num' => 'fp_auto_' . $inventory->inventory_id
+        ];
+
+        $expectedInventoryParams = [
+            'inventory_id' => $inventory->inventory_id,
+            'send_to_quickbooks' => 1,
+            'bill_id' => $bill->id,
+            'is_floorplan_bill'=> $billInfo['is_floor_plan']
+        ];
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($params)
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->imageServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->fileServiceMock
+            ->shouldReceive('upload')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('update')
+            ->never();
+
+        $this->quickbookApprovalRepositoryMock
+            ->shouldReceive('deleteByTbPrimaryId')
+            ->never();
+
+        $this->billRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($expectedBillParams)
+            ->andReturn($bill);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with($expectedInventoryParams)
+            ->andReturn($inventory);
+
+        Log::shouldReceive('info')
+            ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->create($params);
+
+        $this->assertEquals($inventory, $result);
+    }
+
+    /**
+     * @covers ::create
+     * @dataProvider createParamsProvider
+     *
+     * @param array $params
+     * @throws BindingResolutionException
+     */
+    public function testCreateWithoutInventory(array $params)
+    {
+        $params['new_files'] = [];
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($params)
+            ->andReturn(null);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->once()
+            ->with();
+
+        Log::shouldReceive('error')
+            ->with('Item hasn\'t been created.', ['params' => $params]);
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->create($params);
+
+        $this->assertNull($result);
+    }
+
+    /**
+     * @covers ::create
+     * @dataProvider createParamsProvider
+     *
+     * @param array $params
+     * @throws BindingResolutionException
+     */
+    public function testCreateWithException(array $params)
+    {
+        $exception = new \Exception();
+        $params['new_files'] = [];
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($params)
+            ->andThrow($exception);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->once()
+            ->with();
+
+        Log::shouldReceive('error')
+            ->with('Item create error. Params - ' . json_encode($params), $exception->getTrace());
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->create($params);
+
+        $this->assertNull($result);
     }
 
     /**
@@ -312,7 +955,11 @@ class InventoryServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->inventoryRepositoryMock,
                 $this->imageRepositoryMock,
-                $this->fileRepositoryMock
+                $this->fileRepositoryMock,
+                $this->billRepositoryMock,
+                $this->quickbookApprovalRepositoryMock,
+                $this->imageServiceMock,
+                $this->fileServiceMock
             ])
             ->onlyMethods(['delete'])
             ->getMock();
@@ -375,7 +1022,11 @@ class InventoryServiceTest extends TestCase
         $inventoryServiceMock = Mockery::mock(InventoryService::class, [
             $this->inventoryRepositoryMock,
             $this->imageRepositoryMock,
-            $this->fileRepositoryMock
+            $this->fileRepositoryMock,
+            $this->billRepositoryMock,
+            $this->quickbookApprovalRepositoryMock,
+            $this->imageServiceMock,
+            $this->fileServiceMock
         ]);
 
         $inventoryServiceMock->shouldReceive('deleteDuplicates')->passthru();
@@ -400,7 +1051,34 @@ class InventoryServiceTest extends TestCase
         $this->assertSame($assertedResult, $result);
     }
 
-    public function deleteParamsProvider()
+    /**
+     * @return \array[][]
+     */
+    public function createParamsProvider(): array
+    {
+        return [[
+            [
+                'dealer_id' => self::TEST_DEALER_ID,
+                'vin' => self::TEST_VIN,
+                'stock' => self::TEST_STOCK,
+                'model' => self::TEST_MODEL,
+                'title' => self::TEST_TITLE,
+                'b_vendorId' => 123,
+                'b_status' => 345,
+                'b_docNum' => 789,
+                'b_receivedDate' => '11.11.11',
+                'b_dueDate' => '12.12.12',
+                'b_memo' => 'b_memo',
+                'b_id' => '555',
+                'b_isFloorPlan' => true
+            ]
+        ]];
+    }
+
+    /**
+     * @return \string[][][]
+     */
+    public function deleteParamsProvider(): array
     {
         return [[
             [Repository::RELATION_WITH_COUNT => 'inventoryImages'],
@@ -408,7 +1086,10 @@ class InventoryServiceTest extends TestCase
         ]];
     }
 
-    public function deleteDuplicatesParamsProvider()
+    /**
+     * @return \array[][]
+     */
+    public function deleteDuplicatesParamsProvider(): array
     {
         return [[
             [
@@ -422,5 +1103,43 @@ class InventoryServiceTest extends TestCase
                 Repository::CONDITION_AND_WHERE_IN => ['stock' => []],
             ]
         ]];
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @param array $params
+     * @return array
+     */
+    private function getBillInfo(Inventory $inventory, array $params): array
+    {
+        return [
+            'dealer_id' => $inventory->dealer_id,
+            'inventory_id' => $inventory->inventory_id,
+            'vendor_id' => $params['b_vendorId'] ?? null,
+            'status' => $params['b_status'] ?? null,
+            'doc_num' => $params['b_docNum'] ?? null,
+            'received_date' => $params['b_receivedDate'] ?? null,
+            'due_date' => $params['b_dueDate'] ?? null,
+            'memo' => $params['b_memo'] ?? null,
+            'id' => $params['b_id'] ?? null,
+            'is_floor_plan' => $params['b_isFloorPlan'] ?? 0
+        ];
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @param Bill $bill
+     * @param array $billInfo
+     * @return array
+     */
+    private function getBillInventoryUpdateParams(Inventory $inventory, Bill $bill, array $billInfo): array
+    {
+        return  [
+            'inventory_id' => $inventory->inventory_id,
+            'send_to_quickbooks' => 1,
+            'bill_id' => $bill->id,
+            'is_floorplan_bill' => $billInfo['is_floor_plan'],
+            'qb_sync_processed' => 0,
+        ];
     }
 }

@@ -95,6 +95,8 @@ class InventoryService
     public function create(array $params): ?Inventory
     {
         try {
+            $this->inventoryRepository->beginTransaction();
+
             $newImages = $params['new_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
             $hiddenFiles = $params['hidden_files'] ?? [];
@@ -118,8 +120,6 @@ class InventoryService
                 $params['clapps']['default-image'] = $clappImage['path'];
             }
 
-            $this->inventoryRepository->beginTransaction();
-
             $inventory = $this->inventoryRepository->create($params);
 
             if (!$inventory instanceof Inventory) {
@@ -137,7 +137,7 @@ class InventoryService
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item create error.', $e->getTrace());
+            Log::error('Item create error. Params - ' . json_encode($params), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             return null;
@@ -425,7 +425,7 @@ class InventoryService
             $billParams = [
                 'dealer_id' => $inventory->dealer_id,
                 'total' => 0,
-                'vendor_id' => $params['b_vendorId'],
+                'vendor_id' => $fpVendor,
                 'status' => $billStatus,
                 'doc_num' => $billNo
             ];

@@ -118,6 +118,7 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('getDateFormat')->passthru();
         $mock->shouldReceive('getRelationValue')->passthru();
         $mock->shouldReceive('relationLoaded')->passthru();
+        $mock->shouldReceive('fromFloat')->passthru();
 
         return $mock;
     }
