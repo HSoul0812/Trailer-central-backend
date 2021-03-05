@@ -163,7 +163,9 @@ class SaveInventoryTransformer implements TransformerInterface
                 $feetSecond = sprintf(self::FEET_SECOND_FORMAT, $feetInchesField);
                 $inchesSecond = sprintf(self::INCHES_SECOND_FORMAT, $feetInchesField);
 
-                $createParams[$feetInchesField] = $convertHelper->feetInchesToFeet((float)$feetSecond, (float)$inchesSecond);
+                if (isset($createParams[$feetSecond]) && isset($createParams[$inchesSecond])) {
+                    $createParams[$feetInchesField] = $convertHelper->feetInchesToFeet((float)$createParams[$feetSecond], (float)$createParams[$inchesSecond]);
+                }
             }
 
             foreach (self::VIDEO_EMBED_FIELDS as $embedField) {

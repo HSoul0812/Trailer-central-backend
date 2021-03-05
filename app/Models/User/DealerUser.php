@@ -29,6 +29,8 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
      */
     protected $primaryKey = "dealer_user_id";
 
+    public $timestamps = false;
+
     /**
      * Get the name of the unique identifier for the user.
      *

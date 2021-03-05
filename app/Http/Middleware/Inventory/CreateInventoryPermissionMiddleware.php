@@ -64,8 +64,10 @@ class CreateInventoryPermissionMiddleware
         }
 
         if (!$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)) {
+
             foreach ($request->request->all() as $key => $param) {
                 if (in_array($key, self::SUPER_ADMIN_FIELDS)) {
+                    unset($request[$key]);
                     $request->request->remove($key);
                 }
             }

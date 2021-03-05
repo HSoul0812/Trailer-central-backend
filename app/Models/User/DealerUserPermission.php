@@ -22,6 +22,8 @@ class DealerUserPermission extends Model
      */
     protected $hidden = [];
 
+    public $timestamps = false;
+
     public function dealerUser()
     {
         return $this->hasOne(DealerUser::class, 'dealer_user_id', 'dealer_user_id');

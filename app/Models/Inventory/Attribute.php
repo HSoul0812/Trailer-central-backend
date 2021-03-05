@@ -27,6 +27,8 @@ class Attribute extends Model
      */
     protected $primaryKey = 'attribute_id';
 
+    public $timestamps = false;
+
     public function inventory()
     {
         return $this->hasManyThrough(Inventory::class, 'eav_attribute_value', 'inventory_id', 'attribute_id');
