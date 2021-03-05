@@ -6,7 +6,6 @@ use App\Helpers\ArrayHelper;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
-use App\Models\User\Interfaces\PermissionsInterface as Permissions;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
@@ -17,14 +16,13 @@ use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Class InventoryService
  * @package App\Services\Inventory
  */
-class InventoryService
+class InventoryService implements InventoryServiceInterface
 {
     use DispatchesJobs;
 

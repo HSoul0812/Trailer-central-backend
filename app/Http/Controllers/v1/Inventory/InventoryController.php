@@ -8,7 +8,7 @@ use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Services\Inventory\InventoryService;
+use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\SaveInventoryTransformer;
 use App\Transformers\Inventory\InventoryHistoryTransformer;
 use Dingo\Api\Exception\ResourceException;
@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class InventoryController extends RestfulController
 {
     /**
-     * @var InventoryService
+     * @var InventoryServiceInterface
      */
     protected $inventoryService;
 
@@ -43,12 +43,12 @@ class InventoryController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param  InventoryService  $inventoryService
+     * @param  InventoryServiceInterface  $inventoryService
      * @param  InventoryRepositoryInterface  $inventoryRepository
      * @param  InventoryHistoryRepositoryInterface  $inventoryHistoryRepository
      */
     public function __construct(
-        InventoryService $inventoryService,
+        InventoryServiceInterface $inventoryService,
         InventoryRepositoryInterface $inventoryRepository,
         InventoryHistoryRepositoryInterface $inventoryHistoryRepository
     )
