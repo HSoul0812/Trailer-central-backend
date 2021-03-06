@@ -360,6 +360,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Marked as Processed
         $this->emails->createProcessed($salesperson->user_id, $email->getMessageId());
+        $this->deleteAttachments($email->getAttachments());
         return self::IMPORT_PROCESSED;
     }
 
