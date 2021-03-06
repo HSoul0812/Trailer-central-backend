@@ -479,14 +479,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             }
 
             // Upload File
-            $s3Image = $this->uploadAttachment($dealerId, $messageId, $file);
+            try {
+                $s3Image = $this->uploadAttachment($dealerId, $messageId, $file);
 
-            // Add Attachments to Array
-            $attachments[] = Attachment::create([
-                'message_id' => $messageId,
-                'filename' => $s3Image,
-                'original_filename' => $file->getFileName()
-            ]);
+                // Add Attachments to Array
+                $attachments[] = Attachment::create([
+                    'message_id' => $messageId,
+                    'filename' => $s3Image,
+                    'original_filename' => $file->getFileName()
+                ]);
+            } catch(\Exception $e) {
+                $this->log->error("Exception returned uploading attachment {$file->getFileName()} on Message ID #{$messageId}; {$e->getMessage()}: {$e->getTraceAsString()}");
+            }
         }
 
         // Return Collection of Attachment
