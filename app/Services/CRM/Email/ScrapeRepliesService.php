@@ -255,6 +255,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             } elseif($result === 0) {
                 $skipped++;
             }
+            $this->deleteAttachments($email->getAttachments());
         }
 
         // Process Skipped Message ID's
