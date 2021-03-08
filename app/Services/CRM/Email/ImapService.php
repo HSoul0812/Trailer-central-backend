@@ -98,15 +98,14 @@ class ImapService implements ImapServiceInterface
         if(empty($overview->uid)) {
             return false;
         }
-        var_dump($overview);
 
         // Initialize Parsed Email
         $parsed = new ParsedEmail();
         $parsed->setId((string) $overview->uid);
 
         // Set Message ID's
-        $parsed->setMessageId(!empty($overview->in_reply_to) ? trim($overview->in_reply_to) : (!empty($overview->message_id) ? trim($overview->message_id) : ''));
-        $parsed->setRootMessageId($parsed->getMessageId());
+        $parsed->setMessageId(!empty($overview->message_id) ? trim($overview->message_id) : '');
+        $parsed->setRootMessageId(!empty($overview->in_reply_to) ? trim($overview->in_reply_to) : ($parsed->getMessageId()));
         if(!empty($overview->references)) {
             $parsed->setReferences($overview->references);
         }
@@ -149,7 +148,6 @@ class ImapService implements ImapServiceInterface
     public function full(ParsedEmail $email) {
         // Get Mail Data
         $mail = $this->imap->getMail((int) $email->getId(), false);
-        var_dump($mail);
 
         // Set To/From
         if(empty($email->getToEmail()) && !empty($mail->to)) {
