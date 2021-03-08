@@ -29,4 +29,14 @@ interface AuditLogRepositoryInterface extends Repository
      * @return Illuminate\Database\Eloquent\Collection
      */
     public function getByYear(int $year, int $dealerId) : Builder;
+    
+    /**
+     * Does the same thing as getByYear but saves to CSV and returns the path
+     * 
+     * @param int $year
+     * @param int $dealerId
+     * 
+     * @return array
+     */
+    public function getByYearCsv(int $year, int $dealerId) : array;
 }

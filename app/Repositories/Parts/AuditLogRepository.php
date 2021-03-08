@@ -8,6 +8,7 @@ use App\Utilities\JsonApi\WithRequestQueryable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use App\Transformers\Parts\AuditLogDateTransformer;
 
 class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositoryInterface
 {
@@ -18,9 +19,15 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
      */
     protected $model;
     
+    /**
+     * @var App\Transformers\Parts\AuditLogDateTransformer
+     */
+    protected $auditLogDateTransformer;
+    
     public function __construct(AuditLog $auditLog)
     {
         $this->model = $auditLog;
+        $this->auditLogDateTransformer = new AuditLogDateTransformer();
     }
 
     public function getAll($params)
@@ -46,6 +53,22 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
                     ->where('parts_audit_log.balance', '>', 0)
                     ->where('parts_v1.dealer_id', $dealerId)
                     ->orderBy('parts_audit_log.created_at', 'DESC');
+    }
+    
+    public function getByYearCsv(int $year, int $dealerId) : array
+    {
+        $fileName = '/'.uniqid().".csv";
+        $fileExport = "/var/www/html/public/storage$fileName";
+        $fp = fopen($fileExport, 'w+');
+        $this->getByYear($year, $dealerId)->chunk(100, function($auditLogs) use (&$fp) {
+            foreach($auditLogs as $auditLog) {
+                fputcsv($fp, array_values($this->auditLogDateTransformer->transform($auditLog)));
+            }
+        });
+        fclose($fp);
+        return [
+            'export_file' => env('APP_URL').'/storage'.$fileName
+        ];
     }
 
     /**

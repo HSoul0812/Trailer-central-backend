@@ -6,6 +6,7 @@ namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Parts\AuditLogRepository;
+use App\Transformers\Parts\AuditLogDateCsvTransformer;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
 use App\Transformers\Parts\AuditLogDateTransformer;
 use Dingo\Api\Http\Request;
@@ -37,7 +38,7 @@ class AuditLogDateController extends RestfulControllerV2
         $this->auditLogRepository = $auditLogRepository;
         $this->auditLogTransformer = $auditLogTransformer;
 
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'csv']);
     }
     
     /**
@@ -71,6 +72,18 @@ class AuditLogDateController extends RestfulControllerV2
             return $this->response->paginator(
                     $this->auditLogRepository->getByYear((int)$request->year, (int)$request->dealer_id)->paginate($request->per_page)->appends($request->all()), 
                     $this->auditLogTransformer);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+    
+    public function csv(Request $request)
+    {
+        $request = new GetAuditLogDate($request->all());
+        if ($request->validate()) {
+            return $this->response->array(
+                    $this->auditLogRepository->getByYearCsv((int)$request->year, (int)$request->dealer_id), 
+                    new AuditLogDateCsvTransformer);
         }
         
         return $this->response->errorBadRequest();
