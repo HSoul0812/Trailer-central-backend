@@ -98,6 +98,7 @@ class ImapService implements ImapServiceInterface
         if(empty($overview->uid)) {
             return false;
         }
+        var_dump($overview);
 
         // Initialize Parsed Email
         $parsed = new ParsedEmail();
@@ -148,6 +149,7 @@ class ImapService implements ImapServiceInterface
     public function full(ParsedEmail $email) {
         // Get Mail Data
         $mail = $this->imap->getMail((int) $email->getId(), false);
+        var_dump($mail);
 
         // Set To/From
         if(empty($email->getToEmail()) && !empty($mail->to)) {
