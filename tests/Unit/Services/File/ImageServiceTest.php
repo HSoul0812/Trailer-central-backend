@@ -6,6 +6,7 @@ use App\Exceptions\File\FileUploadException;
 use App\Exceptions\File\ImageUploadException;
 use App\Helpers\ImageHelper;
 use App\Helpers\SanitizeHelper;
+use App\Services\File\DTOs\FileDto;
 use App\Services\File\ImageService;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -128,11 +129,11 @@ class ImageServiceTest extends TestCase
         $imageService = app()->make(ImageService::class);
         $result = $imageService->upload($url, $title, $dealerId);
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('path', $result);
-        $this->assertArrayHasKey('hash', $result);
+        $this->assertInstanceOf(FileDto::class, $result);
+        $this->assertNotNull($result->getPath());
+        $this->assertNotNull($result->getHash());
 
-        Storage::disk('s3')->assertExists($result['path']);
+        Storage::disk('s3')->assertExists($result->getPath());
     }
 
     /**
@@ -183,11 +184,11 @@ class ImageServiceTest extends TestCase
         $imageService = app()->make(ImageService::class);
         $result = $imageService->upload($url, $title, $dealerId, null, $params);
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('path', $result);
-        $this->assertArrayHasKey('hash', $result);
+        $this->assertInstanceOf(FileDto::class, $result);
+        $this->assertNotNull($result->getPath());
+        $this->assertNotNull($result->getHash());
 
-        Storage::disk('s3')->assertExists($result['path']);
+        Storage::disk('s3')->assertExists($result->getPath());
     }
 
     /**

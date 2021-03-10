@@ -318,20 +318,20 @@ class InventoryService implements InventoryServiceInterface
         }
 
         foreach ($withoutOverlay as &$image) {
-            $result = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
+            $fileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
 
-            $image['filename'] = $result['path'];
+            $image['filename'] = $fileDto->getPath();
             $image['filename_noverlay'] = '';
-            $image['hash'] = $result['hash'];
+            $image['hash'] = $fileDto->getHash();
         }
 
         foreach ($withOverlay as &$image) {
-            $noOverlayResult = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
-            $overlayResult = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
+            $noOverlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
+            $overlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
 
-            $image['filename'] = $overlayResult['path'];
-            $image['filename_noverlay'] = $noOverlayResult['path'];
-            $image['hash'] = $overlayResult['hash'];
+            $image['filename'] = $overlayFileDto->getPath();
+            $image['filename_noverlay'] = $noOverlayFileDto->getPath();
+            $image['hash'] = $overlayFileDto->getHash();
         }
 
         return array_merge($withOverlay, $withoutOverlay);
@@ -348,10 +348,10 @@ class InventoryService implements InventoryServiceInterface
         $files = $params[$filesKey];
 
         foreach ($files as &$file) {
-            $result = $this->fileService->upload($file['url'], $file['title'], $params['dealer_id']);
+            $fileDto = $this->fileService->upload($file['url'], $file['title'], $params['dealer_id']);
 
-            $file['path'] = $result['path'];
-            $file['type'] = $result['type'];
+            $file['path'] = $fileDto->getPath();
+            $file['type'] = $fileDto->getMimeType();
         }
 
         return $files;

@@ -21,10 +21,9 @@ class ConvertHelper
     /**
      * @param int|string $input
      * @param int|null $round
-     * @param bool $returnFloat
-     * @return float|int
+     * @return float
      */
-    public function toFeetDecimal($input, ?int $round = null, bool $returnFloat = true)
+    public function toFeetDecimal($input, ?int $round = null): float
     {
         $input = str_replace(',', '', $input);
         $feetDec = floatval($input);
@@ -51,16 +50,13 @@ class ConvertHelper
         if($feet) {
             $feetDec = floatval($feet);
         }
+
         if($inches) {
             if($inches > 12) {
                 $feetDec += intval($inches / 12);
                 $inches = ($inches % 12);
             }
             $feetDec += floatval($inches / 12);
-        }
-
-        if ($returnFloat) {
-            $feetDec = floatval($feetDec);
         }
 
         if ($round !== null) {
@@ -73,10 +69,10 @@ class ConvertHelper
     /**
      * @param $input
      * @param int|null $round
-     * @param bool $returnFloat
-     * @return float|int
+     * @return float
      */
-    public function toPoundsDecimal($input, ?int $round = null, bool $returnFloat = true) {
+    public function toPoundsDecimal($input, ?int $round = null): float
+    {
         $input = str_replace(',', '', $input);
         $lbsDec = floatval($input);
 
@@ -102,16 +98,13 @@ class ConvertHelper
         if($pounds) {
             $lbsDec = floatval($pounds);
         }
+
         if($ounces) {
             if($ounces > 16) {
                 $lbsDec += intval($ounces / 16);
                 $ounces = ($ounces % 16);
             }
             $lbsDec += floatval($ounces / 16);
-        }
-
-        if ($returnFloat) {
-            $lbsDec = floatval($lbsDec);
         }
 
         if ($round !== null) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\Inventory;
 
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
@@ -17,6 +18,7 @@ use App\Http\Requests\Inventory\GetInventoryRequest;
 use App\Transformers\Inventory\InventoryTransformer;
 use Dingo\Api\Http\Response;
 use Exception;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -149,8 +151,12 @@ class InventoryController extends RestfulController
 
     /**
      * @param Request $request
+     * @return Response
+     *
+     * @throws NoObjectIdValueSetException
+     * @throws BindingResolutionException
      */
-    public function create(Request $request)
+    public function create(Request $request): Response
     {
         $inventoryRequest = new CreateInventoryRequest($request->all());
 

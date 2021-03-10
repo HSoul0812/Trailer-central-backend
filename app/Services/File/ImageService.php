@@ -6,6 +6,7 @@ use App\Exceptions\File\FileUploadException;
 use App\Exceptions\File\ImageUploadException;
 use App\Helpers\ImageHelper;
 use App\Helpers\SanitizeHelper;
+use App\Services\File\DTOs\FileDto;
 use App\Traits\CompactHelper;
 use GuzzleHttp\Client;
 
@@ -39,12 +40,12 @@ class ImageService extends AbstractFileService
      * @param int|null $dealerId
      * @param int|null $identifier
      * @param array $params
-     * @return array|null
+     * @return FileDto|null
      *
      * @throws ImageUploadException
      * @throws FileUploadException
      */
-    public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?array
+    public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?FileDto
     {
         $skipNotExisting = $params['skipNotExisting'] ?? false;
         $overlayText = $params['overlayText'] ?? null;
@@ -79,9 +80,6 @@ class ImageService extends AbstractFileService
         $hash = sha1_file($localFilename);
         unlink($localFilename);
 
-        return [
-            'path' => $s3Path,
-            'hash' => $hash,
-        ];
+        return new FileDto($s3Path, $hash);
     }
 }

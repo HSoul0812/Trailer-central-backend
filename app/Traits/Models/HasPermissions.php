@@ -2,6 +2,8 @@
 
 namespace App\Traits\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 
 /**
@@ -41,5 +43,10 @@ trait HasPermissions
         return !empty($currentPermission);
     }
 
+    /**
+     * The method must return Relation class or Builder class object, for getting DealerUserPermission Collection.
+     *
+     * @return Relation|Builder
+     */
     abstract public function perms();
 }

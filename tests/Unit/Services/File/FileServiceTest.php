@@ -5,6 +5,7 @@ namespace Tests\Unit\Services\File;
 
 use App\Exceptions\File\FileUploadException;
 use App\Helpers\SanitizeHelper;
+use App\Services\File\DTOs\FileDto;
 use App\Services\File\FileService;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Storage;
@@ -115,11 +116,11 @@ class FileServiceTest extends TestCase
         $imageService = app()->make(FileService::class);
         $result = $imageService->upload($url, $title, $dealerId);
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('path', $result);
-        $this->assertArrayHasKey('type', $result);
+        $this->assertInstanceOf(FileDto::class, $result);
+        $this->assertNotNull($result->getPath());
+        $this->assertNotNull($result->getMimeType());
 
-        Storage::disk('s3')->assertExists($result['path']);
+        Storage::disk('s3')->assertExists($result->getPath());
     }
 
     /**

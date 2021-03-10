@@ -14,8 +14,6 @@ class ImageHelper
      * @param int $height
      * @param bool $proportional
      * @param string|null $output
-     * @param bool $deleteOriginal
-     * @param false $useLinuxCommands
      * @return bool|resource
      */
     public function resize(
@@ -23,9 +21,7 @@ class ImageHelper
         int $width = 800,
         int $height = 800,
         bool $proportional = true,
-        ?string $output = 'file',
-        bool $deleteOriginal = true,
-        bool $useLinuxCommands = false
+        ?string $output = 'file'
     ) {
         if($height <= 0 && $width <= 0) {
             return false;
@@ -113,13 +109,7 @@ class ImageHelper
 
         imagecopyresampled($image_resized, $image, 0, 0, 0, 0, $final_width, $final_height, $width_old, $height_old);
 
-        if($deleteOriginal) {
-            if($useLinuxCommands) {
-                exec('rm ' . $file);
-            } else {
-                @unlink($file);
-            }
-        }
+        @unlink($file);
 
         switch(strtolower($output)) {
             case 'browser':

@@ -111,6 +111,11 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
             ->once()
             ->andReturn($dealerUser);
 
+        $request
+            ->shouldReceive('offsetUnset')
+            ->twice()
+            ->andReturn(true);
+
         $dealerUser
             ->shouldReceive('hasPermission')
             ->once()

@@ -3,6 +3,7 @@
 namespace App\Services\File;
 
 use App\Exceptions\File\FileUploadException;
+use App\Services\File\DTOs\FileDto;
 
 /**
  * Class FileService
@@ -18,9 +19,9 @@ class FileService extends AbstractFileService
      * @param array $params
      * @return array|null
      *
-     * @throws \App\Exceptions\File\FileUploadException
+     * @throws FileUploadException
      */
-    public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?array
+    public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?FileDto
     {
         $skipNotExisting = $params['skipNotExisting'] ?? false;
 
@@ -43,9 +44,6 @@ class FileService extends AbstractFileService
 
         $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, ['mimetype' => $mimeType]);
 
-        return [
-            'path' => $s3Path,
-            'type' => $mimeType
-        ];
+        return new FileDto($s3Path, null, $mimeType);
     }
 }

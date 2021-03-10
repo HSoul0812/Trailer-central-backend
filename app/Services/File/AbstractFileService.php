@@ -4,6 +4,7 @@ namespace App\Services\File;
 
 use App\Exceptions\File\FileUploadException;
 use App\Helpers\SanitizeHelper;
+use App\Services\File\DTOs\FileDto;
 use App\Traits\CompactHelper;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Storage;
@@ -124,7 +125,7 @@ abstract class AbstractFileService
      *
      * @throws FileUploadException
      */
-    protected function uploadLocalByUrl(string $url, ?int $dealerId = null, ?int $identifier = null, $skipNotExisting = false): ?string
+    protected function uploadLocalByUrl(string $url, ?int $dealerId = null, ?int $identifier = null, bool $skipNotExisting = false): ?string
     {
         $localDisk = Storage::disk('local_tmp');
 
@@ -190,7 +191,7 @@ abstract class AbstractFileService
      * @param int|null $dealerId
      * @param int|null $identifier
      * @param array $params
-     * @return array|null
+     * @return FileDto|null
      */
-    abstract public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?array;
+    abstract public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?FileDto;
 }

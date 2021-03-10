@@ -13,6 +13,7 @@ use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
+use App\Services\File\DTOs\FileDto;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use App\Services\Inventory\InventoryService;
@@ -205,8 +206,8 @@ class InventoryServiceTest extends TestCase
         $expectedParams = $params;
 
         foreach ($params['new_images'] as $key => $image) {
-            $newImage = ['path' => 'path' . $key, 'hash' => 'hash' . $key];
-            $newImageWithOverlay = ['path' => 'path_with_overlay' . $key, 'hash' => 'hash_with_overlay' . $key];
+            $newImage = new FileDto('path' . $key, 'hash' . $key);
+            $newImageWithOverlay = new FileDto('path_with_overlay' . $key, 'hash_with_overlay' . $key);
 
             $this->imageServiceMock
                 ->shouldReceive('upload')
@@ -223,13 +224,13 @@ class InventoryServiceTest extends TestCase
             }
 
             if ($image['position'] == 0) {
-                $expectedParams['new_images'][$key]['filename'] = $newImageWithOverlay['path'];
-                $expectedParams['new_images'][$key]['filename_noverlay'] = $newImage['path'];
-                $expectedParams['new_images'][$key]['hash'] = $newImageWithOverlay['hash'];
+                $expectedParams['new_images'][$key]['filename'] = $newImageWithOverlay->getPath();
+                $expectedParams['new_images'][$key]['filename_noverlay'] = $newImage->getPath();
+                $expectedParams['new_images'][$key]['hash'] = $newImageWithOverlay->getHash();
             } else {
-                $expectedParams['new_images'][$key]['filename'] = $newImage['path'];
+                $expectedParams['new_images'][$key]['filename'] = $newImage->getPath();
                 $expectedParams['new_images'][$key]['filename_noverlay'] = '';
-                $expectedParams['new_images'][$key]['hash'] = $newImage['hash'];
+                $expectedParams['new_images'][$key]['hash'] = $newImage->getHash();
             }
         }
 
@@ -312,7 +313,7 @@ class InventoryServiceTest extends TestCase
         unset($expectedParams['hidden_files']);
 
         foreach (array_merge($params['new_files'], $params['hidden_files']) as $key => $file) {
-            $newFile = ['path' => 'path' . $key, 'type' => 'type' . $key];
+            $newFile = new FileDto('path' . $key, null, 'type' . $key);
 
             $this->fileServiceMock
                 ->shouldReceive('upload')
@@ -320,7 +321,10 @@ class InventoryServiceTest extends TestCase
                 ->with($file['url'], $file['title'], self::TEST_DEALER_ID)
                 ->andReturn($newFile);
 
-            $expectedParams['new_files'][$key] = array_merge($expectedParams['new_files'][$key], $newFile);
+            $expectedParams['new_files'][$key] = array_merge($expectedParams['new_files'][$key], [
+                'path' => $newFile->getPath(),
+                'type' => $newFile->getMimeType()
+            ]);
         }
 
         $this->inventoryRepositoryMock
