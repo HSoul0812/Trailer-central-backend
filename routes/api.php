@@ -731,6 +731,8 @@ $api->version('v1', function ($route) {
          * Parts audit logs
          */
         $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
+        $route->get('parts/audit-logs/date', 'App\Http\Controllers\v1\Parts\AuditLogDateController@index'); 
+        $route->get('parts/audit-logs/date/csv', 'App\Http\Controllers\v1\Parts\AuditLogDateController@csv'); 
 
         /*
         |--------------------------------------------------------------------------
