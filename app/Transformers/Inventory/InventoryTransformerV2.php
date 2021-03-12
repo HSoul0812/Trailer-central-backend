@@ -29,6 +29,7 @@ class InventoryTransformerV2 extends TransformerAbstract
             'archived_at' => $inventory->archived_at,
             'availability' => $inventory->availability,
             'bill_id' => $inventory->bill_id,
+            'brand' => $inventory->brand,
             'category' => $inventory->category,
             'condition' => $inventory->condition,
             'created_at' => $inventory->created_at,
