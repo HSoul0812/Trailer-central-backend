@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Website\Forms\FieldMap;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +14,7 @@ class AddLeadTypeNonLead extends Migration
      */
     public function up()
     {
-        // Update Customer Actions for Email Blast
+        // Update Mappable Fields For Form Field Map
         DB::statement("ALTER TABLE website_form_field_map MODIFY COLUMN map_field ENUM('" . implode("', '", array_keys(FieldMap::getNovaMapFields())) . "')");
 
         // Mark Vendor as Non-Lead
