@@ -38,6 +38,8 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
+use App\Repositories\Pos\SalesReportRepository;
+use App\Repositories\Pos\SalesReportRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepository;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\User\NewUserRepository;
@@ -221,6 +223,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(NewDealerUserRepositoryInterface::class, NewDealerUserRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
+        $this->app->bind(SalesReportRepositoryInterface::class, SalesReportRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(PurchaseOrderReceiptRepositoryInterface::class, PurchaseOrderReceiptRepository::class);
         $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
