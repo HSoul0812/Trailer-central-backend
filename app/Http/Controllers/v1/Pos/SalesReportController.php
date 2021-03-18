@@ -15,6 +15,7 @@ use Dingo\Api\Http\Response;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use OpenApi\Annotations as OA;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Controller for Sales Reports API
@@ -34,6 +35,7 @@ class SalesReportController extends RestfulControllerV2
     public function __construct(SalesReportRepositoryInterface $salesRepository, Manager $fractal)
     {
         $this->salesRepository = $salesRepository;
+        $this->middleware('setDealerIdOnRequest')->only(['customReport']);
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -50,6 +52,7 @@ class SalesReportController extends RestfulControllerV2
      * )
      *
      * @throws NoObjectIdValueSetException
+     * @throws HttpException when there is a bad request
      */
     public function customReport(Request $request): Response
     {

@@ -10,6 +10,7 @@ class PostCustomSalesReportRequest extends Request
 {
 
     protected $rules = [
+        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
         'part_category' => 'nullable|integer|exists:part_categories,id',
         'major_unit_category' => 'nullable|integer|exists:inventory_category,inventory_category_id',
         'fee_type' => 'array',
