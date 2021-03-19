@@ -46,7 +46,7 @@ class SalesReportController extends RestfulControllerV2
      *
      * @param Request $request
      *
-     * @return Response
+     * @return Response|void when there is a bad request it will throw an HttpException and request life cycle ends
      * @OA\Post(
      *     path="/reports/custom-sales"
      * )
