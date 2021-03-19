@@ -103,7 +103,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
-        \Validator::extend('inventory_mfg_exists', 'App\Rules\Inventory\ManufacturerValid@passes');
+        \Validator::extend('inventory_mfg_exists', 'App\Rules\Inventory\ManufacturerExists@passes');
         \Validator::extend('inventory_mfg_valid', 'App\Rules\Inventory\ManufacturerValid@passes');
         \Validator::extend('inventory_cat_exists', 'App\Rules\Inventory\CategoryExists@passes');
         \Validator::extend('inventory_cat_valid', 'App\Rules\Inventory\CategoryValid@passes');
