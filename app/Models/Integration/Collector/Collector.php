@@ -51,13 +51,15 @@ class Collector extends Model  implements Filterable
         self::FILE_FORMAT_XML,
         self::FILE_FORMAT_CSV,
         self::FILE_FORMAT_CDK,
-        self::FILE_FORMAT_IDS
+        self::FILE_FORMAT_IDS,
+        self::FILE_FORMAT_XML_URL
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
     public const FILE_FORMAT_XML = 'xml';
     public const FILE_FORMAT_CSV = 'csv';
     public const FILE_FORMAT_IDS = 'ids';
+    public const FILE_FORMAT_XML_URL = 'xml_url';
 
     public const MEASURE_FORMATS = [
         'Feet' => 'feet',

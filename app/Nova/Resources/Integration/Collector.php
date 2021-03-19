@@ -77,6 +77,9 @@ class Collector extends Resource
                 Text::make('IDS Default Location', 'ids_default_location')->rules('max:256')->hideFromIndex()->help(
                     "Only needed if file format is IDS"
                 ),
+                Text::make('XML URL', 'xml_url')->hideFromIndex()->help(
+                    "Only needed if file format is xml_url"
+                ),
                 Select::make('File Format', 'file_format')
                     ->options(array_combine(CollectorModel::FILE_FORMATS, CollectorModel::FILE_FORMATS))
                     ->displayUsingLabels()
