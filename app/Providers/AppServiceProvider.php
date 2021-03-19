@@ -40,6 +40,8 @@ use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
+use App\Repositories\User\DealerLocationQuoteFeeRepository;
+use App\Repositories\User\DealerLocationQuoteFeeRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepository;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\User\NewUserRepository;
@@ -219,6 +221,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
         $this->app->bind(CrmUserRoleRepositoryInterface::class, CrmUserRoleRepository::class);
         $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
+        $this->app->bind(DealerLocationQuoteFeeRepositoryInterface::class, DealerLocationQuoteFeeRepository::class);
         $this->app->bind(NewUserRepositoryInterface::class, NewUserRepository::class);
         $this->app->bind(NewDealerUserRepositoryInterface::class, NewDealerUserRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
