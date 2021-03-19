@@ -107,6 +107,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
         \Validator::extend('inventory_mfg_exists', 'App\Rules\Inventory\ManufacturerExists@passes');
         \Validator::extend('inventory_mfg_valid', 'App\Rules\Inventory\ManufacturerValid@passes');
+        \Validator::extend('inventory_mfg_id_valid', 'App\Rules\Inventory\MfgIdExists@passes');
+        \Validator::extend('inventory_mfg_name_valid', 'App\Rules\Inventory\MfgNameValid@passes');
         \Validator::extend('inventory_cat_exists', 'App\Rules\Inventory\CategoryExists@passes');
         \Validator::extend('inventory_cat_valid', 'App\Rules\Inventory\CategoryValid@passes');
         \Validator::extend('inventory_brand_exists', 'App\Rules\Inventory\BrandValid@passes');

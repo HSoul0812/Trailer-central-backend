@@ -10,9 +10,9 @@ class GetManufacturersRequest extends Request {
         'per_page' => 'integer',
         'search_term' => 'string|nullable',
         'ids' => 'array',
-        'ids.*' => 'inventory_mfg_exists',
+        'ids.*' => 'inventory_mfg_id_valid',
         'name' => 'array',
-        'name.*' => 'inventory_mfg_valid',
+        'name.*' => 'inventory_mfg_name_valid',
     ];
     
 }
