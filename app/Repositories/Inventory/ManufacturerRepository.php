@@ -55,7 +55,7 @@ class ManufacturerRepository implements ManufacturerRepositoryInterface
         $query = InventoryMfg::where('id', '>', 0);
 
         if (isset($params['ids'])) {
-            $query = $query->whereIn('ids', $params['ids']);
+            $query = $query->whereIn('id', $params['ids']);
         }
 
         if (isset($params['name'])) {
