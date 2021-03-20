@@ -9,8 +9,11 @@ use InvalidArgumentException;
 
 class SalesReportRepository implements SalesReportRepositoryInterface
 {
+    public const MIXED_REPORT_TYPE = 'mixed';
+    public const PARTS_REPORT_TYPE = 'parts';
+    public const UNITS_REPORT_TYPE = 'units';
+
     private $customReportHelpers = [
-        'filteredByInventoryField' => false, // In case it would have any exclusive inventory filter then this will be true
         'partBoundParams' => [],
         'inventoryBoundParams' => [],
         'partsWhere' => ['part_qb' => '', 'part_pos' => ''],
@@ -41,6 +44,19 @@ class SalesReportRepository implements SalesReportRepositoryInterface
             throw new InvalidArgumentException('Parameters "from_date" and "to_date" are required');
         }
 
+        if (empty($params['report_type'])) {
+            $params['report_type'] = self::MIXED_REPORT_TYPE;
+        }
+
+        // to prevent mix queries when there are exclusive filters
+        if ($params['report_type'] === self::PARTS_REPORT_TYPE) {
+            $params['major_unit_category'] = '';
+            $params['model'] = '';
+            $params['year'] = '';
+        } elseif ($params['report_type'] === self::UNITS_REPORT_TYPE) {
+            $params['part_category'] = '';
+        }
+
         $this->applyBasicsFilterForCustomReport($params);
         $this->applyFeesFiltersForCustomReport($params);
 
@@ -52,14 +68,17 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                            DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
                            p.title,
                            p.sku AS reference,
-                           IFNULL(iitem.cost,0) AS cost,
-                           IFNULL(ii.unit_price,0) AS price,
+                           IFNULL(iitem.cost,0) * ii.qty AS cost,
+                           IFNULL(ii.unit_price,0) * ii.qty AS price,
                            FLOOR(ii.qty) AS qty,
-                           IFNULL(ii.unit_price,0) - IFNULL(iitem.cost,0) AS profit,
+                           (IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) AS profit,
                            '' AS link,
                            ro.type AS ro_type,
                            'part-qb' AS source,
-                           iitem.id AS item_id
+                           iitem.id AS item_id,
+                           qi.id AS doc_id,
+                           qi.doc_num AS doc_num,
+                           IF(ro.id IS NOT NULL, 'Service', 'Deal') AS type
                     FROM dealer_sales_history sh
                     JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
@@ -77,14 +96,17 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
                         p.title,
                         p.sku AS reference,
-                        IFNULL(iitem.cost,0) AS cost,
-                        IFNULL(psp.price,0) AS price,
-                        psp.qty,
-                        IFNULL(psp.price,0) - IFNULL(iitem.cost,0) AS profit,
+                        IFNULL(iitem.cost,0)  * psp.qty AS cost,
+                        IFNULL(psp.price,0) * psp.qty AS price,
+                        FLOOR(psp.qty),
+                        (IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) AS profit,
                         '' AS link,
                         '' AS ro_type,
                         'part-pos' AS source,
-                        iitem.id AS item_id
+                        iitem.id AS item_id,
+                        ps.id AS doc_id,
+                        CONCAT('POS Sales # ',  ps.id) AS doc_num,
+                        'POS' AS type
                     FROM dealer_sales_history sh
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
@@ -103,14 +125,17 @@ SQL;
                     DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
                     i.title,
                     i.stock AS reference,
-                    IFNULL(iitem.cost,0) AS cost,
-                    IFNULL(ii.unit_price,0) AS price,
+                    IFNULL(iitem.cost,0) * ii.qty AS cost,
+                    IFNULL(ii.unit_price,0) * ii.qty AS price,
                     FLOOR(ii.qty) AS qty,
-                    IFNULL(ii.unit_price,0) - IFNULL(iitem.cost,0) AS profit,
+                    (IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) AS profit,
                     '' AS link,
                     ro.type AS ro_type,
                     'inventory-qb' AS source,
-                    iitem.id AS item_id
+                    iitem.id AS item_id,
+                    qi.id AS doc_id,
+                    qi.doc_num AS doc_num,
+                    IF(ro.id IS NOT NULL, 'Service', 'Deal') AS type
                 FROM dealer_sales_history sh
                 JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                 LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
@@ -129,14 +154,17 @@ SQL;
                         DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
                         i.title,
                         i.stock AS reference,
-                        IFNULL(iitem.cost,0) AS cost,
-                        IFNULL(psp.price,0) AS price,
-                        psp.qty,
-                        IFNULL(psp.price,0) - IFNULL(iitem.cost,0) AS profit,
+                        IFNULL(iitem.cost,0) * psp.qty AS cost,
+                        IFNULL(psp.price,0) * psp.qty AS price,
+                        FLOOR(psp.qty),
+                        (IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) AS profit,
                         '' AS link,
                         '' AS ro_type,
                         'inventory-pos' AS source,
-                        iitem.id AS item_id
+                        iitem.id AS item_id,
+                        ps.id AS doc_id,
+                        CONCAT('POS Sales # ',  ps.id) AS doc_num,
+                        'POS' AS type
                     FROM dealer_sales_history sh
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
@@ -147,9 +175,7 @@ SQL;
                           {$this->customReportHelpers['inventoryWhere']['inventory_pos']}
 SQL;
 
-        // Only make sense to mix those queries when the dealer are not
-        // filtering by any of part_category/major_unit_category/year/model
-        if ($this->hasExclusiveFilters()) {
+        if ($params['report_type'] === self::MIXED_REPORT_TYPE) {
             $boundParams = array_merge(
                 $this->customReportHelpers['partBoundParams'],
                 $this->customReportHelpers['inventoryBoundParams'],
@@ -169,7 +195,7 @@ SQL;
                 ]);
 
             $sql = "$partsSQL \nUNION\n $inventorySQL";
-        } elseif ($this->hasOnlyPartFilters()) {
+        } elseif ($params['report_type'] === self::PARTS_REPORT_TYPE) {
             $boundParams = array_merge(
                 $this->customReportHelpers['partBoundParams'],
                 [
@@ -247,8 +273,6 @@ SQL;
                 $this->customReportHelpers['inventoryBoundParams']["major_unit_category_{$suffix}"] = $params['major_unit_category'];
                 $this->customReportHelpers['inventoryWhere'][$suffix] .= " AND i.category = :major_unit_category_{$suffix}";
             }
-
-            $this->customReportHelpers['filteredByInventoryField'] = true;
         }
 
         if (!empty($params['year'])) {
@@ -256,8 +280,6 @@ SQL;
                 $this->customReportHelpers['inventoryBoundParams']["year_{$suffix}"] = $params['year'];
                 $this->customReportHelpers['inventoryWhere'][$suffix] .= " AND i.year = :year_{$suffix}";
             }
-
-            $this->customReportHelpers['filteredByInventoryField'] = true;
         }
 
         if (!empty($params['model'])) {
@@ -265,8 +287,6 @@ SQL;
                 $this->customReportHelpers['inventoryBoundParams']["model_{$suffix}"] = $params['model'];
                 $this->customReportHelpers['inventoryWhere'][$suffix] .= " AND i.model LIKE :model_{$suffix}";
             }
-
-            $this->customReportHelpers['filteredByInventoryField'] = true;
         }
     }
 
@@ -320,17 +340,5 @@ SQL;
                             JOIN qb_items sqi ON r.item_id = sqi.id
                             WHERE r.sale_id = ps.id AND (' . implode(' OR ', $feeFilter['inventory_pos']) . '))';
         }
-    }
-
-    private function hasExclusiveFilters(): bool
-    {
-        return empty($this->customReportHelpers['partBoundParams']['part_category_part_qb']) &&
-            !$this->customReportHelpers['filteredByInventoryField'];
-    }
-
-    private function hasOnlyPartFilters(): bool
-    {
-        return !empty($this->customReportHelpers['partBoundParams']['part_category_part_qb']) &&
-            !$this->customReportHelpers['filteredByInventoryField'];
     }
 }

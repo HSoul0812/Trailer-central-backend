@@ -3,6 +3,7 @@
 namespace App\Models\User;
 
 use App\Models\Inventory\Inventory;
+use App\Models\Traits\TableAware;
 use App\Models\User\NewDealerUser;
 use App\Models\User\Dealer;
 use App\Models\CRM\Text\Number;
@@ -11,6 +12,8 @@ use App\Models\User\DealerLocationSalesTax;
 
 class DealerLocation extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *

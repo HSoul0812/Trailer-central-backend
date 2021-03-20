@@ -17,6 +17,7 @@ class PostCustomSalesReportRequest extends Request
         // 'fee_type.*' => 'nullable|string|exists:dealer_location_quote_fee,fee_type', // cant be performed due there is a hardcode fee
         'year' => 'nullable|integer|min:2000',
         'model' => 'nullable|string',
-        'query' => 'nullable|string'
+        'query' => 'nullable|string',
+        'report_type' => 'in:mixed,parts,units'
     ];
 }
