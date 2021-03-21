@@ -28,6 +28,13 @@ class DealerLocation extends Model
      */
     protected $primaryKey = 'dealer_location_id';
 
+    const DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES = [
+         'standard' => 'Standard',
+         'tax_exempt' => 'Tax Exempt',
+         'out_of_state_reciprocal' => 'Out-of-state Reciprocal',
+         'out_of_state_non_reciprocal' => 'Out-of-state Non-Reciprocal'
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -50,6 +57,10 @@ class DealerLocation extends Model
         "postalcode",
         "country"
         // TODO: Add fields
+    ];
+
+    protected $casts = [
+        'sales_tax_item_column_titles' => 'array'
     ];
 
     /**
