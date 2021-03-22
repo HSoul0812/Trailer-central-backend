@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
@@ -100,6 +101,7 @@ class Kernel extends HttpKernel
         'facebook.catalog.validate' => CatalogValidate::class,
         'sales-person.validate' => SalesPersonValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
+        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
     ];
 
     /**

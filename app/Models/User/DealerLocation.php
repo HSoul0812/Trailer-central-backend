@@ -10,6 +10,12 @@ use App\Models\CRM\Text\Number;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\DealerLocationSalesTax;
 
+/**
+ * Class DealerLocation
+ * @package App\Models\User
+ *
+ * @property int $dealer_location_id
+ */
 class DealerLocation extends Model
 {
     use TableAware;
