@@ -73,13 +73,26 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                            FLOOR(ii.qty) AS qty,
                            @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
                            ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
-                           '' AS link,
+                           IF(
+                              qi.unit_sale_id IS NOT NULL,
+                              CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
+                              (
+                               SELECT GROUP_CONCAT(r.receipt_path)
+                               FROM dealer_sales_receipt r
+                               JOIN qb_payment p ON r.tb_primary_id = p.id
+                               WHERE p.invoice_id = qi.id AND r.tb_name = 'qb_payment'
+                               )
+                           ) AS links,
                            ro.type AS ro_type,
                            'part-qb' AS source,
                            iitem.id AS item_id,
                            qi.id AS doc_id,
                            qi.doc_num AS doc_num,
-                           IF(ro.id IS NOT NULL, 'Service', 'Deal') AS type
+                           CASE
+                               WHEN qi.unit_sale_id IS NOT NULL THEN 'Deal'
+                               WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
+                               ELSE 'Service'
+                           END AS type
                     FROM dealer_sales_history sh
                     JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
@@ -102,7 +115,12 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         FLOOR(psp.qty),
                         @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
                         ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
-                        '' AS link,
+                        (
+                            SELECT GROUP_CONCAT(r.receipt_path)
+                            FROM dealer_sales_receipt r
+                            JOIN crm_pos_sales p ON r.tb_primary_id = p.id
+                            WHERE r.tb_name = 'crm_pos_sales'
+                        ) AS links,
                         '' AS ro_type,
                         'part-pos' AS source,
                         iitem.id AS item_id,
@@ -132,13 +150,26 @@ SQL;
                     FLOOR(ii.qty) AS qty,
                     @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
                     ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
-                    '' AS link,
+                    IF(
+                      qi.unit_sale_id IS NOT NULL,
+                      CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
+                      (
+                       SELECT GROUP_CONCAT(r.receipt_path)
+                       FROM dealer_sales_receipt r
+                       JOIN qb_payment p ON r.tb_primary_id = p.id
+                       WHERE p.invoice_id = qi.id AND r.tb_name = 'qb_payment'
+                       )
+                    ) AS links,
                     ro.type AS ro_type,
                     'inventory-qb' AS source,
                     iitem.id AS item_id,
                     qi.id AS doc_id,
                     qi.doc_num AS doc_num,
-                    IF(ro.id IS NOT NULL, 'Service', 'Deal') AS type
+                    CASE
+                               WHEN qi.unit_sale_id IS NOT NULL THEN 'Deal'
+                               WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
+                               ELSE 'Service'
+                    END AS type
                 FROM dealer_sales_history sh
                 JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                 LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
@@ -162,7 +193,12 @@ SQL;
                         FLOOR(psp.qty),
                         @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
                         ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
-                        '' AS link,
+                        (
+                            SELECT GROUP_CONCAT(r.receipt_path)
+                            FROM dealer_sales_receipt r
+                            JOIN crm_pos_sales p ON r.tb_primary_id = p.id
+                            WHERE r.tb_name = 'crm_pos_sales'
+                        ) AS links,
                         '' AS ro_type,
                         'inventory-pos' AS source,
                         iitem.id AS item_id,

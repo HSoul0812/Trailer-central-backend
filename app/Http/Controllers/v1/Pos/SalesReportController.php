@@ -13,7 +13,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use League\Fractal\Manager;
-use League\Fractal\Resource\Item;
+use League\Fractal\Resource\Collection;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -59,10 +59,13 @@ class SalesReportController extends RestfulControllerV2
         $request = new PostCustomSalesReportRequest($request->all());
 
         if ($request->validate()) {
-            $result = $this->salesRepository->customReport($request->all());
-            $response = $this->fractal->createData(new Item($result, new CustomSalesReportTransformer(), 'data'))->toArray();
+            $data = new Collection(
+                $this->salesRepository->customReport($request->all()),
+                new CustomSalesReportTransformer(),
+                'data'
+            );
 
-            return $this->response->array($response);
+            return $this->response->array($this->fractal->createData($data)->toArray());
         }
 
         $this->response->errorBadRequest();
