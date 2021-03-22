@@ -388,6 +388,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
+        $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
 
         /*
         |--------------------------------------------------------------------------
@@ -497,7 +498,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
-            });            
+            });
         });
 
         /*
@@ -717,7 +718,7 @@ $api->version('v1', function ($route) {
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
         $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
-
+        $route->post('reports/custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@customReport');
         /*
         |--------------------------------------------------------------------------
         | Parts related
@@ -731,6 +732,8 @@ $api->version('v1', function ($route) {
          * Parts audit logs
          */
         $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
+        $route->get('parts/audit-logs/date', 'App\Http\Controllers\v1\Parts\AuditLogDateController@index');
+        $route->get('parts/audit-logs/date/csv', 'App\Http\Controllers\v1\Parts\AuditLogDateController@csv');
 
         /*
         |--------------------------------------------------------------------------

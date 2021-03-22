@@ -27,6 +27,7 @@ class Item extends Model
         'DEPOSIT_DOWN_PAYMENT' => 'deposit_down_payment',
         'INCOME_DOWN_PAYMENT' => 'income_down_payment',
         'TRADE_IN' => 'trade_in',
-        'UNDEFINED' => 'undefined'
+        'UNDEFINED' => 'undefined',
+        'TRADE_IN_PAYOFF' => 'trade_in_payoff'
     ];
 }

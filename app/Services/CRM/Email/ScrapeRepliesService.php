@@ -255,6 +255,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             } elseif($result === 0) {
                 $skipped++;
             }
+            $this->deleteAttachments($email->getAttachments());
         }
 
         // Process Skipped Message ID's
@@ -360,6 +361,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Marked as Processed
         $this->emails->createProcessed($salesperson->user_id, $email->getMessageId());
+        $this->deleteAttachments($email->getAttachments());
         return self::IMPORT_PROCESSED;
     }
 
@@ -477,14 +479,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             }
 
             // Upload File
-            $s3Image = $this->uploadAttachment($dealerId, $messageId, $file);
+            try {
+                $s3Image = $this->uploadAttachment($dealerId, $messageId, $file);
 
-            // Add Attachments to Array
-            $attachments[] = Attachment::create([
-                'message_id' => $messageId,
-                'filename' => $s3Image,
-                'original_filename' => $file->getFileName()
-            ]);
+                // Add Attachments to Array
+                $attachments[] = Attachment::create([
+                    'message_id' => $messageId,
+                    'filename' => $s3Image,
+                    'original_filename' => $file->getFileName()
+                ]);
+            } catch(\Exception $e) {
+                $this->log->error("Exception returned uploading attachment {$file->getFileName()} on Message ID #{$messageId}; {$e->getMessage()}: {$e->getTraceAsString()}");
+            }
         }
 
         // Return Collection of Attachment
@@ -521,7 +527,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Upload Image
         $key = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
         Storage::disk('s3email')->put($key, $contents, 'public');
-        return Storage::disk('s3email')->url($_ENV['MAIL_BUCKET'] . '/' . $key);
+        return Storage::disk('s3email')->url(env('MAIL_BUCKET') . '/' . $key);
     }
 
     /**

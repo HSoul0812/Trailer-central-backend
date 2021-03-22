@@ -30,6 +30,7 @@ class InvoiceTransformer extends TransformerAbstract
             'total_tax' => (float)$invoice->total_tax,
             'total' => (float)$invoice->total,
             'memo' => $invoice->memo,
+            'shipping' => $invoice->shipping,
             // 'qb_id' => $invoice->qb_id,
         ];
     }
