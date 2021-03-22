@@ -18,7 +18,7 @@ class CreateInventoryRequest extends Request
         'active' => 'boolean|nullable',
         'title' => 'required|max:255',
         'stock' => 'string|max:50|inventory_unique_stock',
-        'manufacturer' => 'inventory_inventory_mfg_valid|nullable',
+        'manufacturer' => 'inventory_mfg_name_valid|nullable',
         'brand' => 'inventory_brand_valid|nullable',
         'model' => 'string|max:255|nullable',
         'qb_item_category_id' => 'integer|nullable',
