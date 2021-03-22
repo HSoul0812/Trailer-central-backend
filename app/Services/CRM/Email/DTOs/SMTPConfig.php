@@ -3,11 +3,11 @@
 namespace App\Services\CRM\Email\DTOs;
 
 /**
- * Class ImapConfig
+ * Class SmtpConfig
  * 
  * @package App\Services\CRM\Email\DTOs
  */
-class ImapConfig
+class SmtpConfig
 {
     /**
      * @const string SSL
@@ -20,103 +20,110 @@ class ImapConfig
     const TLS = 'tls';
 
     /**
-     * @const default charset
+     * @const string Auth Gmail
      */
-    const CHARSET_DEFAULT = 'UTF-8';
+    const AUTH_GMAIL = 'GMAIL';
 
     /**
-     * @const NTLM charset
+     * @const string Auth NTLM
      */
-    const CHARSET_NTLM = 'US-ASCII';
-
-    /**
-     * @const No Certificate Suffix
-     */
-    const NO_CERT_SUFFIX = 'novalidate-cert';
-
-    /**
-     * @const No Valid Certificates
-     */
-    const NO_CERT_HOSTS = ['imap.gmail.com'];
+    const AUTH_NTLM = 'NTLM';
 
 
     /**
-     * @var string Username for IMAP
+     * @var string Username for SMTP
      */
     private $username;
 
     /**
-     * @var string Password for IMAP
+     * @var string Password for SMTP
      */
     private $password;
 
     /**
-     * @var string Host Name for IMAP
+     * @var string Host Name for SMTP
      */
     private $host;
 
     /**
-     * @var int Port for IMAP Host
+     * @var int Port for SMTP Host
      */
     private $port;
 
     /**
-     * @var string ssl || tls (Security Type for IMAP Connection)
+     * @var string ssl || tls (Security Type for SMTP Connection)
      */
     private $security;
 
     /**
-     * @var string Auth Type for IMAP Connection
+     * @var string Auth Type for SMTP Connection
      */
     private $authType;
 
     /**
-     * @var string Charset for IMAP Connection
+     * @var string Access Token
      */
-    private $charset;
+    private $accessToken;
 
     /**
-     * @var string Folder Name for IMAP Connection
+     * @var string Name of User to Send From
      */
-    private $folderName;
+    private $fromName;
 
     /**
-     * @var string Date to Start Importing From
+     * @var string Email of Person to Send To
      */
-    private $startDate;
+    private $toEmail;
+
+    /**
+     * @var string Name of Person to Send To
+     */
+    private $toName;
     
+
+    /**
+     * Get Smtp Config From Provided Params
+     * 
+     * @param array $params
+     */
+    public function __construct(array $params = []) {
+        // Variables Exist?
+        if(!empty($params)) {
+            // Check All Class Vars for Matches
+            $vars = get_class_vars(get_class($this));
+            foreach($vars as $var) {
+                if(isset($params[$var])) {
+                    $this->{$var} = $params[$var];
+                }
+            }
+        }
+    }
 
     /**
      * Get Smtp Config From Sales Person
      * 
      * @param SalesPerson $salesperson
-     * @return ImapConfig
+     * @return SmtpConfig
      */
-    public static function fillFromSalesPerson(SalesPerson $salesperson, EmailFolder $folder): ImapConfig {
+    public static function fillFromSalesPerson(SalesPerson $salesperson): SmtpConfig {
         // Initialize
-        $imapConfig = new self();
+        $smtpConfig = new self();
 
         // Set Username/Password
-        $imapConfig->setUsername($salesperson->imap_email);
-        $imapConfig->setPassword($salesperson->imap_password);
+        $smtpConfig->setUsername($salesperson->smtp_email);
+        $smtpConfig->setPassword($salesperson->smtp_password);
 
         // Set Host/Post
-        $imapConfig->setHost($salesperson->imap_server);
-        $imapConfig->setPort($salesperson->imap_port);
-        $imapConfig->setSecurity($salesperson->imap_security ?: '');
-        $imapConfig->setAuthType($salesperson->smtp_auth ?: '');
-        $imapConfig->calcCharset();
+        $smtpConfig->setHost($salesperson->smtp_server);
+        $smtpConfig->setPort($salesperson->smtp_port);
+        $smtpConfig->setSecurity($salesperson->smtp_security ?: '');
+        $smtpConfig->setAuthType($salesperson->smtp_auth ?: '');
 
-        // Set Folder Config
-        $imapConfig->setFolderName($folder->name);
-        if(!empty($folder->date_imported)) {
-            $imapConfig->setStartDate($folder->date_imported);
-        } else {
-            $imapConfig->setStartDate(Carbon::now()->sub(1, 'month'));
-        }
+        // Set From Name
+        $smtpConfig->setFromName($salesperson->full_name);
 
-        // Return IMAP Config
-        return $imapConfig;
+        // Return SMTP Config
+        return $smtpConfig;
     }
 
 
@@ -262,92 +269,89 @@ class ImapConfig
 
 
     /**
-     * Return Charset
+     * Return Access Token
      * 
-     * @return string $this->charset
+     * @return AccessToken $this->AccessToken
      */
-    public function getCharset(): string
+    public function getAccessToken(): ?AccessToken
     {
-        return $this->charset;
+        return $this->accessToken ?? null;
     }
 
     /**
-     * Set Charset
+     * Set Access Token
      * 
-     * @param string $charset
+     * @param AccessToken $accessToken
      * @return void
      */
-    public function setCharset(string $charset): void
+    public function setAccessToken(AccessToken $accessToken): void
     {
-        $this->charset = $charset;
+        $this->accessToken = $accessToken;
+    }
+
+
+    /**
+     * Return From Name
+     * 
+     * @return string $this->fromName
+     */
+    public function getFromName(): string
+    {
+        return $this->fromName;
     }
 
     /**
-     * Determine Charset From Auth Type
+     * Set From Name
      * 
+     * @param string $fromName
      * @return void
      */
-    public function calcCharset(): void
+    public function setFromName(string $fromName): void
     {
-        if($this->authType === 'NTLM') {
-            $this->setCharset(self::CHARSET_NTLM);
-        } else {
-            $this->setCharset(self::CHARSET_DEFAULT);
-        }
+        $this->fromName = $fromName;
     }
 
 
     /**
-     * Return Folder Name
+     * Return To Email
      * 
-     * @return string $this->folderName
+     * @return string $this->toEmail
      */
-    public function getFolderName(): string
+    public function getToEmail(): string
     {
-        return $this->folderName;
+        return $this->toEmail;
     }
 
     /**
-     * Set Folder Name
+     * Set To Email
      * 
-     * @param string $folderName
+     * @param string $toEmail
      * @return void
      */
-    public function setFolderName(string $folderName): void
+    public function setToEmail(string $toEmail): void
     {
-        $this->folderName = $folderName;
+        $this->toEmail = $toEmail;
     }
 
 
     /**
-     * Return Start Date
+     * Return To Name
      * 
-     * @return string $this->startDate
+     * @return string $this->toName
      */
-    public function getStartDate(): string
+    public function getToName(): string
     {
-        return $this->startDate;
+        return $this->toName;
     }
 
     /**
-     * Set Start Date
+     * Set To Name
      * 
-     * @param string $startDate
+     * @param string $toName
      * @return void
      */
-    public function setStartDate(string $startDate): void
+    public function setToName(string $toName): void
     {
-        $this->startDate = $startDate;
-    }
-
-
-    /**
-     * Current IMAP Config Appends No Certificate?
-     * 
-     * @return bool
-     */
-    public function isNoCert(): bool {
-        // Validate if Host is No Certificate
-        return (!empty($this->host) && in_array($this->host, self::NO_CERT_HOSTS));
+        $this->toName = $toName;
     }
 }

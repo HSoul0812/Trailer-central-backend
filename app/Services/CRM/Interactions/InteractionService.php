@@ -8,6 +8,7 @@ use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,7 @@ class InteractionService implements InteractionServiceInterface
     public function __construct(
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
+        NtlmEmailServiceInterface $ntlm,
         InteractionEmailServiceInterface $service,
         InteractionsRepositoryInterface $interactions,
         EmailHistoryRepositoryInterface $emailHistory,
@@ -36,6 +38,7 @@ class InteractionService implements InteractionServiceInterface
     ) {
         $this->google = $google;
         $this->gmail = $gmail;
+        $this->ntlm = $ntlm;
         $this->interactionEmail = $service;
         $this->interactions = $interactions;
         $this->emailHistory = $emailHistory;
@@ -54,43 +57,16 @@ class InteractionService implements InteractionServiceInterface
         // Find Lead/Sales Person
         $lead = Lead::findOrFail($leadId);
         $user = Auth::user();
-        $accessToken = null;
-        if(!empty($user->sales_person)) {
-            // Set From Name/Email
-            $params['from_email'] = $user->sales_person->smtp_email;
-            $params['from_name'] = $user->sales_person->full_name ?? '';
 
-            // Get Sales Person Auth
-            $accessToken = $this->tokens->getRelation([
-                'token_type' => 'google',
-                'relation_type' => 'sales_person',
-                'relation_id' => $user->sales_person->id
-            ]);
-            if(empty($accessToken->id)) {
-                // Set Sales Person Config
-                $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
-            }
-        } else {
-            $params['from_email'] = $user->email;
-            $params['from_name'] = $user->name ?? '';
-
-            // Are We a Dealer User?!
-            if(!empty($user->user) && empty($params['from_name'])) {
-                $params['from_name'] = $user->user->name ?? '';
-            }
-        }
+        // Get SMTP Config
+        $smtpConfig = $this->getSmtpConfig();
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($params['from_email'], $lead->identifier);
-        if(!empty($emailHistory->message_id)) {
-            $params['id']             = $emailHistory->email_id;
-            $params['interaction_id'] = $emailHistory->interaction_id;
-            $params['message_id']     = $emailHistory->message_id;
-        }
+        $emailHistory = $this->emailHistory->findEmailDraft($smtpConfig->getUsername(), $lead->identifier);
 
         // Set Lead Details
-        $params['to_email'] = trim($lead->email_address);
-        $params['to_name']  = $lead->full_name;
+        $smtpConfig->setToEmail(trim($lead->email_address));
+        $smtpConfig->setToName($lead->full_name);
 
         // Append Attachments
         if(!isset($params['attachments'])) {
@@ -99,20 +75,56 @@ class InteractionService implements InteractionServiceInterface
         $params['attachments'] = array_merge($params['attachments'], $attachments);
 
         // Send Email
-        if(!empty($accessToken->id)) {
-            // Validate/Refresh Token
-            $accessToken = $this->refreshToken($accessToken);
-
-            // Send Email
-            $email = $this->gmail->send($accessToken, $params);
+        if($smtpConfig->getAuthType() === SmtpConfig::AUTH_GMAIL) {
+            $email = $this->gmail->send($smtpConfig, $emailHistory, $params);
+        } elseif($smtpConfig->getAuthType() === SmtpConfig::AUTH_NTLM) {
+            $email = $this->ntlm->send($lead->dealer_id, $smtpConfig, $emailHistory, $params);
         } else {
-            $email = $this->interactionEmail->send($lead->dealer_id, $params);
+            $email = $this->interactionEmail->send($lead->dealer_id, $smtpConfig, $emailHistory, $params);
         }
 
         // Save Email
         return $this->saveEmail($leadId, $user->newDealerUser->user_id, $email);
     }
 
+
+    /**
+     * Get SMTP Config From Auth
+     * 
+     * @return SmtpConfig
+     */
+    private function getSmtpConfig(): SmtpConfig {
+        // Get User
+        $user = Auth::user();
+
+        // Check if Sales Person Exists
+        if(!empty($user->sales_person)) {
+            // Get SMTP Config
+            $smtpConfig = SmtpConfig::fillFromSalesPerson($user->sales_person);
+
+            // Get Sales Person Auth
+            $accessToken = $this->tokens->getRelation([
+                'token_type' => 'google',
+                'relation_type' => 'sales_person',
+                'relation_id' => $user->sales_person->id
+            ]);
+
+            // Set Access Token on SMTP Config
+            if(!empty($accessToken->id)) {
+                $smtpConfig->setAuthType(SmtpConfig::AUTH_GMAIL);
+                $smtpConfig->setAccessToken($this->refreshToken($accessToken));
+            }
+
+            // Return SMTP Config
+            return $smtpConfig;
+        }
+
+        // Get SMTP Config From Dealer
+        return new SmtpConfig([
+            'username' => $user->email,
+            'from_name' => !empty($user->user) ? $user->user->name : $user->name
+        ]);
+    }
 
     /**
      * Save Email From Send Email
