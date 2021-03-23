@@ -84,6 +84,8 @@ use App\Services\Common\EncrypterServiceInterface;
 use App\Services\Common\SPLEncrypterService;
 use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 use App\Services\Inventory\Floorplan\PaymentService;
+use App\Services\Inventory\InventoryService;
+use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Services\User\DealerOptionsService;
@@ -106,15 +108,19 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
+        \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
-        \Validator::extend('inventory_mfg_exists', 'App\Rules\Inventory\ManufacturerValid@passes');
+        \Validator::extend('inventory_mfg_exists', 'App\Rules\Inventory\ManufacturerExists@passes');
         \Validator::extend('inventory_mfg_valid', 'App\Rules\Inventory\ManufacturerValid@passes');
+        \Validator::extend('inventory_mfg_id_valid', 'App\Rules\Inventory\MfgIdExists@passes');
+        \Validator::extend('inventory_mfg_name_valid', 'App\Rules\Inventory\MfgNameValid@passes');
         \Validator::extend('inventory_cat_exists', 'App\Rules\Inventory\CategoryExists@passes');
         \Validator::extend('inventory_cat_valid', 'App\Rules\Inventory\CategoryValid@passes');
-        \Validator::extend('inventory_brand_exists', 'App\Rules\Inventory\BrandValid@passes');
+        \Validator::extend('inventory_brand_exists', 'App\Rules\Inventory\BrandExists@passes');
         \Validator::extend('inventory_brand_valid', 'App\Rules\Inventory\BrandValid@passes');
+        \Validator::extend('inventory_unique_stock', 'App\Rules\Inventory\UniqueStock@passes');
         \Validator::extend('lead_exists', 'App\Rules\CRM\Leads\LeadExists@passes');
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
@@ -210,6 +216,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(InventoryHistoryRepositoryInterface::class, InventoryHistoryRepository::class);
         $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
