@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Pos;
 
+use Generator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -32,6 +33,39 @@ class SalesReportRepository implements SalesReportRepositoryInterface
      * @throws InvalidArgumentException when the date range parameters were not provided
      */
     public function customReport(array $params): array
+    {
+        ['sql' => $sql, 'params' => $boundParams] = $this->sqlForCustomReport($params);
+
+        return DB::select(DB::raw($sql), $boundParams);
+    }
+
+    /**
+     * Gets the cursor for the custom sales report.
+     *
+     * Also it validates if there are the minimum required parameters
+     *
+     * @param array $params
+     * @return Generator
+     *
+     * @throws InvalidArgumentException when the parameter "dealer_id" was not provided
+     * @throws InvalidArgumentException when the date range parameters were not provided
+     */
+    public function customReportCursor(array $params): Generator
+    {
+        ['sql' => $sql, 'params' => $boundParams] = $this->sqlForCustomReport($params);
+
+        return DB::cursor(DB::raw($sql), $boundParams);
+    }
+
+    /**
+     * Builds the SQL for the custom sales report.
+     *
+     * Also it validates if there are the minimum required parameters
+     *
+     * @param array $params
+     * @return array{sql: string, params: array} sql and and params for binding
+     */
+    protected function sqlForCustomReport(array $params): array
     {
         /**
          * Given this report could have a big load, it is necessary to limit this query with dealer_id and date range
@@ -263,7 +297,7 @@ SQL;
             $sql = $inventorySQL;
         }
 
-        return DB::select(DB::raw($sql), $boundParams);
+        return ['sql' => $sql, 'params' => $boundParams];
     }
 
     /**
@@ -271,7 +305,7 @@ SQL;
      *
      * @param array $params
      */
-    private function applyBasicsFilterForCustomReport(array $params): void
+    protected function applyBasicsFilterForCustomReport(array $params): void
     {
         if (!empty($params['query'])) {
             $query = '%' . $params['query'] . '%';
@@ -333,7 +367,7 @@ SQL;
     /**
      * @param array $params
      */
-    private function applyFeesFiltersForCustomReport(array $params): void
+    protected function applyFeesFiltersForCustomReport(array $params): void
     {
         if (!empty($params['fee_type']) && is_array($params['fee_type'])) {
             /**
