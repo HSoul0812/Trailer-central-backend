@@ -31,6 +31,11 @@ class SmtpConfig
 
 
     /**
+     * @var string From Name for SMTP
+     */
+    private $fromName;
+
+    /**
      * @var string Username for SMTP
      */
     private $username;
@@ -64,21 +69,6 @@ class SmtpConfig
      * @var string Access Token
      */
     private $accessToken;
-
-    /**
-     * @var string Name of User to Send From
-     */
-    private $fromName;
-
-    /**
-     * @var string Email of Person to Send To
-     */
-    private $toEmail;
-
-    /**
-     * @var string Name of Person to Send To
-     */
-    private $toName;
     
 
     /**
@@ -93,7 +83,8 @@ class SmtpConfig
             $vars = get_class_vars(get_class($this));
             foreach($vars as $var) {
                 if(isset($params[$var])) {
-                    $this->{$var} = $params[$var];
+                    $method = 'set' . ucfirst($var);
+                    $this->{$method}($params[$var]);
                 }
             }
         }
@@ -110,6 +101,7 @@ class SmtpConfig
         $smtpConfig = new self();
 
         // Set Username/Password
+        $smtpConfig->setFromName($salesperson->full_name);
         $smtpConfig->setUsername($salesperson->smtp_email);
         $smtpConfig->setPassword($salesperson->smtp_password);
 
@@ -119,11 +111,30 @@ class SmtpConfig
         $smtpConfig->setSecurity($salesperson->smtp_security ?: '');
         $smtpConfig->setAuthType($salesperson->smtp_auth ?: '');
 
-        // Set From Name
-        $smtpConfig->setFromName($salesperson->full_name);
-
         // Return SMTP Config
         return $smtpConfig;
+    }
+
+
+    /**
+     * Return From Name
+     * 
+     * @return string $this->fromName
+     */
+    public function getFromName(): ?string
+    {
+        return $this->fromName;
+    }
+
+    /**
+     * Set From Name
+     * 
+     * @param string $fromName
+     * @return void
+     */
+    public function setFromName(string $fromName): void
+    {
+        $this->fromName = $fromName;
     }
 
 
@@ -287,71 +298,5 @@ class SmtpConfig
     public function setAccessToken(AccessToken $accessToken): void
     {
         $this->accessToken = $accessToken;
-    }
-
-
-    /**
-     * Return From Name
-     * 
-     * @return string $this->fromName
-     */
-    public function getFromName(): string
-    {
-        return $this->fromName;
-    }
-
-    /**
-     * Set From Name
-     * 
-     * @param string $fromName
-     * @return void
-     */
-    public function setFromName(string $fromName): void
-    {
-        $this->fromName = $fromName;
-    }
-
-
-    /**
-     * Return To Email
-     * 
-     * @return string $this->toEmail
-     */
-    public function getToEmail(): string
-    {
-        return $this->toEmail;
-    }
-
-    /**
-     * Set To Email
-     * 
-     * @param string $toEmail
-     * @return void
-     */
-    public function setToEmail(string $toEmail): void
-    {
-        $this->toEmail = $toEmail;
-    }
-
-
-    /**
-     * Return To Name
-     * 
-     * @return string $this->toName
-     */
-    public function getToName(): string
-    {
-        return $this->toName;
-    }
-
-    /**
-     * Set To Name
-     * 
-     * @param string $toName
-     * @return void
-     */
-    public function setToName(string $toName): void
-    {
-        $this->toName = $toName;
     }
 }

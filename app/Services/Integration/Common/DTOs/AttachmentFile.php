@@ -41,6 +41,19 @@ class AttachmentFile
 
 
     /**
+     * Initialize From Laravel Multipart Files Array
+     * 
+     * @param array $files
+     */
+    public function __construct(array $files = []) {
+        // Files Exist?!
+        if(!empty($files)) {
+            
+        }
+    }
+
+
+    /**
      * Return Temp File Name
      * 
      * @return string $this->tmpName

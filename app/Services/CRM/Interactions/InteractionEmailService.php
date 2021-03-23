@@ -37,10 +37,11 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * Send Email With Params
      * 
      * @param int $dealerId
+     * @param SmtpConfig $smtpConfig
      * @param array $params
      * @throws SendEmailFailedException
      */
-    public function send($dealerId, $params) {
+    public function send(int $dealerId, SmtpConfig $smtpConfig, array $params) {
         // Get Unique Message ID
         if(empty($params['message_id'])) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());

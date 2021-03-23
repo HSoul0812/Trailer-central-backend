@@ -86,6 +86,11 @@ class ParsedEmail
     private $leadId = 0;
 
     /**
+     * @var int Interaction ID Associated With Email
+     */
+    private $interactionId = 0;
+
+    /**
      * @var string Received || Sent (By || From Sales Person)
      */
     private $direction = 'Received';
@@ -488,11 +493,21 @@ class ParsedEmail
         $this->date = Carbon::parse($date)->setTimezone('UTC')->toDateTimeString();
     }
 
+    /**
+     * Set Date to Now
+     * 
+     * @return void
+     */
+    public function setDateNow(): void
+    {
+        $this->date = Carbon::now()->setTimezone('UTC')->toDateTimeString();
+    }
+
 
     /**
      * Return Lead ID
      * 
-     * @return int $this->lead_id
+     * @return int $this->leadId
      */
     public function getLeadId(): int
     {
@@ -508,6 +523,28 @@ class ParsedEmail
     public function setLeadId(int $leadId): void
     {
         $this->leadId = $leadId;
+    }
+
+
+    /**
+     * Return Interaction ID
+     * 
+     * @return int $this->interactionId
+     */
+    public function getInteractionId(): int
+    {
+        return $this->interactionId;
+    }
+
+    /**
+     * Set Interaction ID
+     * 
+     * @param int $interactionId Interaction ID Associated With Email
+     * @return void
+     */
+    public function setInteractionId(int $interactionId): void
+    {
+        $this->interactionId = $interactionId;
     }
 
 
