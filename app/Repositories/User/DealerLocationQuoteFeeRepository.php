@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeRepositoryInterface
 {
+    /**
+     * Retrieves all the quote fees.
+     *
+     * if there is not a provided dealer_location_id, it will group by fee_type
+     *
+     * @param array $params
+     * @return LengthAwarePaginator
+     */
     public function getAll(array $params): LengthAwarePaginator
     {
         $quoteFeeTableName = DealerLocationQuoteFee::getTableName();
@@ -45,6 +53,9 @@ class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeReposito
 
         if (isset($params['dealer_location_id'])) {
             $query->where('dealer_location_id', '=', $params['dealer_location_id']);
+        } else {
+            // if there is not a provided dealer_location_id, it will group by fee_type
+            $query->groupBy('fee_type');
         }
 
         if (isset($params['search_term'])) {
