@@ -141,7 +141,7 @@ class GmailService implements GmailServiceInterface
      * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
      * @return array of validation info
      */
-    public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail) {
+    public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Set Access Token
         $this->setAccessToken($smtpConfig->getAccessToken());
 

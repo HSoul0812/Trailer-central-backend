@@ -24,13 +24,17 @@ interface GmailServiceInterface {
     public function profile(EmailToken $emailToken): EmailToken;
 
     /**
-     * Validate Google API Access Token Exists
-     * 
-     * @param AccessToken $accessToken
-     * @param array $params
-     * @return message ID of successfully sent email
+     * Send Gmail Email
+     *
+     * @param SmtpConfig $smtpConfig
+     * @param ParsedEmail $parsedEmail
+     * @throws App\Exceptions\Integration\Google\InvalidToEmailAddressException
+     * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
+     * @throws App\Exceptions\Integration\Google\FailedInitializeGmailMessageException
+     * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
+     * @return array of validation info
      */
-    public function send(AccessToken $accessToken, array $params);
+    public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail;
 
     /**
      * Get All Messages With Label
