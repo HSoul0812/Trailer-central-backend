@@ -43,12 +43,22 @@ class AttachmentFile
     /**
      * Initialize From Laravel Multipart Files Array
      * 
-     * @param array $files
+     * @param array $attachment
      */
-    public function __construct(array $files = []) {
-        // Files Exist?!
-        if(!empty($files)) {
+    public function __construct(array $attachment = []) {
+        // Set Parts
+        if(isset($attachment['path'])) {
+            $this->setTmpName($attachment['path']);
+        }
+
+        // Set File Name
+        if(isset($attachment['as'])) {
             
+        }
+
+        // Set Mime Type
+        if(isset($attachment['mime'])) {
+            $this->setMimeType($attachment['mime']);
         }
     }
 

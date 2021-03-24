@@ -60,6 +60,9 @@ class InteractionService implements InteractionServiceInterface
         // Find Lead/Sales Person
         $lead = Lead::findOrFail($leadId);
         $user = Auth::user();
+        var_dump($params['attachments']);
+        var_dump($attachments);
+        die;
 
         // Get SMTP Config
         $smtpConfig = $this->getSmtpConfig();
