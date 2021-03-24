@@ -98,7 +98,7 @@ class AddEavAttributeTotalLengthMinWidthHeight extends Migration
         $attributeIds = [];
         foreach(self::NEW_DIMS_EAV_ATTRIBUTES as $eavAttribute) {
             $attribute = Attribute::where('code', $eavAttribute['code'])->first();
-            $attributeIds[] = $attribute->id;
+            $attributeIds[] = $attribute->attribute_id;
         }
 
         // Delete Entity Type Attributes
