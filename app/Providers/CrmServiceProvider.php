@@ -14,8 +14,6 @@ use App\Services\CRM\Leads\Import\ADFServiceInterface as ADFImportServiceInterfa
 use App\Services\CRM\Leads\Import\ADFService as ADFImportService;
 use App\Repositories\CRM\Leads\LeadRepository;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Repositories\CRM\Leads\InquiryRepository;
-use App\Repositories\CRM\Leads\InquiryRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepository;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepository;
@@ -52,7 +50,6 @@ class CrmServiceProvider extends ServiceProvider
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
-        $this->app->bind(InquiryRepositoryInterface::class, InquiryRepository::class);
         $this->app->bind(SourceRepositoryInterface::class, SourceRepository::class);
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);

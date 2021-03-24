@@ -11,7 +11,6 @@ use App\Models\CRM\Leads\LeadProduct;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
-use App\Models\User\CrmUser;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use App\Traits\CompactHelper;
@@ -79,6 +78,11 @@ class Lead extends Model
     const IS_NOT_IDS_EXPORTED = 0;
 
     const TABLE_NAME = 'website_lead';
+
+    /**
+     * @const int Number of Matches Required for Merge
+     */
+    const MERGE_MATCH_COUNT = 2;
 
 
     /**
