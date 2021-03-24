@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Pos;
 
+use Generator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -32,6 +33,39 @@ class SalesReportRepository implements SalesReportRepositoryInterface
      * @throws InvalidArgumentException when the date range parameters were not provided
      */
     public function customReport(array $params): array
+    {
+        ['sql' => $sql, 'params' => $boundParams] = $this->sqlForCustomReport($params);
+
+        return DB::select(DB::raw($sql), $boundParams);
+    }
+
+    /**
+     * Gets the cursor for the custom sales report.
+     *
+     * Also it validates if there are the minimum required parameters
+     *
+     * @param array $params
+     * @return Generator
+     *
+     * @throws InvalidArgumentException when the parameter "dealer_id" was not provided
+     * @throws InvalidArgumentException when the date range parameters were not provided
+     */
+    public function customReportCursor(array $params): Generator
+    {
+        ['sql' => $sql, 'params' => $boundParams] = $this->sqlForCustomReport($params);
+
+        return DB::cursor(DB::raw($sql), $boundParams);
+    }
+
+    /**
+     * Builds the SQL for the custom sales report.
+     *
+     * Also it validates if there are the minimum required parameters
+     *
+     * @param array $params
+     * @return array{sql: string, params: array} sql and and params for binding
+     */
+    protected function sqlForCustomReport(array $params): array
     {
         /**
          * Given this report could have a big load, it is necessary to limit this query with dealer_id and date range
@@ -71,14 +105,28 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                            IFNULL(iitem.cost,0) * ii.qty AS cost,
                            IFNULL(ii.unit_price,0) * ii.qty AS price,
                            FLOOR(ii.qty) AS qty,
-                           (IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) AS profit,
-                           '' AS link,
+                           @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
+                           ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
+                           IF(
+                              qi.unit_sale_id IS NOT NULL,
+                              CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
+                              (
+                               SELECT GROUP_CONCAT(r.receipt_path)
+                               FROM dealer_sales_receipt r
+                               JOIN qb_payment p ON r.tb_primary_id = p.id
+                               WHERE p.invoice_id = qi.id AND r.tb_name = 'qb_payment'
+                               )
+                           ) AS links,
                            ro.type AS ro_type,
                            'part-qb' AS source,
                            iitem.id AS item_id,
                            qi.id AS doc_id,
                            qi.doc_num AS doc_num,
-                           IF(ro.id IS NOT NULL, 'Service', 'Deal') AS type
+                           CASE
+                               WHEN qi.unit_sale_id IS NOT NULL THEN 'Deal'
+                               WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
+                               ELSE 'Service'
+                           END AS type
                     FROM dealer_sales_history sh
                     JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
@@ -99,8 +147,14 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         IFNULL(iitem.cost,0)  * psp.qty AS cost,
                         IFNULL(psp.price,0) * psp.qty AS price,
                         FLOOR(psp.qty),
-                        (IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) AS profit,
-                        '' AS link,
+                        @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
+                        ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
+                        (
+                            SELECT GROUP_CONCAT(r.receipt_path)
+                            FROM dealer_sales_receipt r
+                            JOIN crm_pos_sales p ON r.tb_primary_id = p.id
+                            WHERE r.tb_name = 'crm_pos_sales'
+                        ) AS links,
                         '' AS ro_type,
                         'part-pos' AS source,
                         iitem.id AS item_id,
@@ -128,14 +182,28 @@ SQL;
                     IFNULL(iitem.cost,0) * ii.qty AS cost,
                     IFNULL(ii.unit_price,0) * ii.qty AS price,
                     FLOOR(ii.qty) AS qty,
-                    (IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) AS profit,
-                    '' AS link,
+                    @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
+                    ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
+                    IF(
+                      qi.unit_sale_id IS NOT NULL,
+                      CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
+                      (
+                       SELECT GROUP_CONCAT(r.receipt_path)
+                       FROM dealer_sales_receipt r
+                       JOIN qb_payment p ON r.tb_primary_id = p.id
+                       WHERE p.invoice_id = qi.id AND r.tb_name = 'qb_payment'
+                       )
+                    ) AS links,
                     ro.type AS ro_type,
                     'inventory-qb' AS source,
                     iitem.id AS item_id,
                     qi.id AS doc_id,
                     qi.doc_num AS doc_num,
-                    IF(ro.id IS NOT NULL, 'Service', 'Deal') AS type
+                    CASE
+                               WHEN qi.unit_sale_id IS NOT NULL THEN 'Deal'
+                               WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
+                               ELSE 'Service'
+                    END AS type
                 FROM dealer_sales_history sh
                 JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                 LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
@@ -157,8 +225,14 @@ SQL;
                         IFNULL(iitem.cost,0) * psp.qty AS cost,
                         IFNULL(psp.price,0) * psp.qty AS price,
                         FLOOR(psp.qty),
-                        (IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) AS profit,
-                        '' AS link,
+                        @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
+                        ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
+                        (
+                            SELECT GROUP_CONCAT(r.receipt_path)
+                            FROM dealer_sales_receipt r
+                            JOIN crm_pos_sales p ON r.tb_primary_id = p.id
+                            WHERE r.tb_name = 'crm_pos_sales'
+                        ) AS links,
                         '' AS ro_type,
                         'inventory-pos' AS source,
                         iitem.id AS item_id,
@@ -223,7 +297,7 @@ SQL;
             $sql = $inventorySQL;
         }
 
-        return DB::select(DB::raw($sql), $boundParams);
+        return ['sql' => $sql, 'params' => $boundParams];
     }
 
     /**
@@ -231,7 +305,7 @@ SQL;
      *
      * @param array $params
      */
-    private function applyBasicsFilterForCustomReport(array $params): void
+    protected function applyBasicsFilterForCustomReport(array $params): void
     {
         if (!empty($params['query'])) {
             $query = '%' . $params['query'] . '%';
@@ -293,7 +367,7 @@ SQL;
     /**
      * @param array $params
      */
-    private function applyFeesFiltersForCustomReport(array $params): void
+    protected function applyFeesFiltersForCustomReport(array $params): void
     {
         if (!empty($params['fee_type']) && is_array($params['fee_type'])) {
             /**

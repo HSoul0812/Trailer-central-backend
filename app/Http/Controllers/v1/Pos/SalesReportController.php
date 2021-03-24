@@ -8,13 +8,17 @@ use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Pos\Sales\Reports\PostCustomSalesReportRequest;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
+use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Transformers\Pos\Sales\Reports\CustomSalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use League\Csv\CannotInsertRecord;
 use League\Fractal\Manager;
-use League\Fractal\Resource\Item;
+use League\Fractal\Resource\Collection;
 use OpenApi\Annotations as OA;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -28,14 +32,23 @@ class SalesReportController extends RestfulControllerV2
     private $salesRepository;
 
     /**
+     * @var CustomSalesReportExporterServiceInterface
+     */
+    private $salesReportService;
+
+    /**
      * @var Manager
      */
     private $fractal;
 
-    public function __construct(SalesReportRepositoryInterface $salesRepository, Manager $fractal)
+    public function __construct(
+        SalesReportRepositoryInterface $salesRepository,
+        CustomSalesReportExporterServiceInterface $salesReportService,
+        Manager $fractal)
     {
         $this->salesRepository = $salesRepository;
-        $this->middleware('setDealerIdOnRequest')->only(['customReport']);
+        $this->salesReportService = $salesReportService;
+        $this->middleware('setDealerIdOnRequest')->only(['customReport', 'exportCustomReport']);
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -59,10 +72,39 @@ class SalesReportController extends RestfulControllerV2
         $request = new PostCustomSalesReportRequest($request->all());
 
         if ($request->validate()) {
-            $result = $this->salesRepository->customReport($request->all());
-            $response = $this->fractal->createData(new Item($result, new CustomSalesReportTransformer(), 'data'))->toArray();
+            $data = new Collection(
+                $this->salesRepository->customReport($request->all()),
+                new CustomSalesReportTransformer(),
+                'data'
+            );
 
-            return $this->response->array($response);
+            return $this->response->array($this->fractal->createData($data)->toArray());
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param Request $request
+     * @return StreamedResponse|void when there is a bad request it will throw an HttpException and request life cycle ends
+     * @throws NoObjectIdValueSetException
+     * @throws HttpException when there is a bad request
+     * @throws CannotInsertRecord when cannot insert a line into the csv output file
+     */
+    public function exportCustomReport(Request $request): StreamedResponse
+    {
+        $request = new PostCustomSalesReportRequest($request->all());
+
+        if ($request->validate()) {
+            $filename = $this->salesReportService->withFileSystem(Storage::disk('tmp'))->run($request->all());
+
+            return response()->streamDownload(
+                static function () use ($filename) {
+                    fpassthru(Storage::disk('tmp')->readStream($filename));
+                },
+                $filename,
+                ['Access-Control-Expose-Headers' => 'Content-Disposition']
+            );
         }
 
         $this->response->errorBadRequest();

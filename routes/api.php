@@ -719,6 +719,7 @@ $api->version('v1', function ($route) {
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
         $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
         $route->post('reports/custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@customReport');
+        $route->post('reports/export-custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@exportCustomReport');
         /*
         |--------------------------------------------------------------------------
         | Parts related
