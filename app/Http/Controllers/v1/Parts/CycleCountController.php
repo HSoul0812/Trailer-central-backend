@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\v1\Parts;
 
+use App\Events\Parts\PartQtyUpdated;
 use App\Http\Controllers\RestfulController;
+use App\Models\Parts\BinQuantity;
+use App\Models\Parts\CycleCount;
+use App\Models\Parts\Part;
 use Dingo\Api\Http\Request;
 use App\Repositories\Parts\CycleCountRepositoryInterface;
 use App\Http\Requests\Parts\GetCycleCountsRequest;
@@ -16,9 +20,9 @@ use App\Transformers\Parts\CycleCountTransformer;
  */
 class CycleCountController extends RestfulController
 {
-    
+
     protected $cycleCounts;
-    
+
     /**
      * Create a new controller instance.
      *
@@ -29,11 +33,11 @@ class CycleCountController extends RestfulController
         $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->cycleCounts = $cycleCounts;
     }
-    
+
     /**
      * @OA\Get(
      *     path="/api/parts/cycleCounts",
-     *     description="Retrieve a list of cycleCounts",     
+     *     description="Retrieve a list of cycleCounts",
      *     tags={"Cycle Counts"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -76,7 +80,7 @@ class CycleCountController extends RestfulController
      *         description="Completed Status",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     ),  
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of cycle counts",
@@ -88,14 +92,14 @@ class CycleCountController extends RestfulController
      *     ),
      * )
      */
-    public function index(Request $request) 
+    public function index(Request $request)
     {
         $request = new GetCycleCountsRequest($request->all());
-        
+
         if ($request->validate()) {
             return $this->response->paginator($this->cycleCounts->getAll($request->all()), new CycleCountTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
@@ -159,11 +163,16 @@ class CycleCountController extends RestfulController
      */
     public function create(Request $request) {
         $request = new CreateCycleCountRequest($request->all());
-        
+
         if ( $request->validate() ) {
-            return $this->response->item($this->cycleCounts->create($request->all()), new CycleCountTransformer());
-        }  
-        
+            $params = $request->all();
+            /** @var CycleCount $cycleCount */
+            $cycleCount = $this->cycleCounts->create($params);
+            $this->addPartHistory($cycleCount, $params['parts'] ?? []);
+
+            return $this->response->item($cycleCount, new CycleCountTransformer());
+        }
+
         return $this->response->errorBadRequest();
     }
 
@@ -218,22 +227,48 @@ class CycleCountController extends RestfulController
      *     ),
      * )
      */
-    public function update(int $id, Request $request) {
+    public function update(int $id, Request $request)
+    {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateCycleCountRequest($requestData);
-        
+
         if ( $request->validate() ) {
-            return $this->response->item($this->cycleCounts->update($request->all()), new CycleCountTransformer());
-        }  
-        
+            $params = $request->all();
+            /** @var CycleCount $cycleCount */
+            $cycleCount = $this->cycleCounts->update($params);
+            $this->addPartHistory($cycleCount, $params['parts'] ?? []);
+
+            return $this->response->item($cycleCount, new CycleCountTransformer());
+        }
+
         return $this->response->errorBadRequest();
+    }
+
+    private function addPartHistory(CycleCount $cycleCount, $parts)
+    {
+        if ($cycleCount->is_completed && !empty($parts)) {
+            foreach ($parts as $part) {
+                event(new PartQtyUpdated(
+                    Part::find($part['part_id']),
+                    BinQuantity::where([
+                        'part_id' => $part['part_id'],
+                        'bin_id' => $cycleCount->bin_id,
+                    ])->get()->first(),
+                    [
+                        'quantity' => $part['count_on_hand'] - $part['starting_qty'],
+                        'description' => 'Updated via cycle count',
+                    ]
+                ));
+            }
+
+        }
     }
 
     /**
      * @OA\Delete(
      *     path="/api/parts/cycle-counts/{id}",
-     *     description="Delete a cycle count",     
+     *     description="Delete a cycle count",
      *     tags={"Cycle Counts"},
      *     @OA\Parameter(
      *         name="id",
@@ -255,12 +290,12 @@ class CycleCountController extends RestfulController
      */
     public function destroy(int $id) {
         $request = new DeleteCycleCountRequest(['id' => $id]);
-        
+
         if ( $request->validate() && $this->cycleCounts->delete(['id' => $id])) {
             return $this->response->noContent();
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
 }

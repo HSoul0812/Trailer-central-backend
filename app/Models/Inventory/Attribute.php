@@ -2,6 +2,7 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Attribute extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *
@@ -23,6 +26,8 @@ class Attribute extends Model
      * @var string
      */
     protected $primaryKey = 'attribute_id';
+
+    public $timestamps = false;
 
     public function inventory()
     {
@@ -43,5 +48,21 @@ class Attribute extends Model
     public function entityTypeAttributes()
     {
         return $this->hasMany(EntityTypeAttribute::class, 'attribute_id', 'attribute_id');
+    }
+
+    /**
+     * @return array
+     */
+    public function getValuesArray()
+    {
+        $values = explode(',', $this->values);
+
+        $array = [];
+        foreach ($values as $value) {
+            $value = explode(':', $value);
+            $array[$value[0]] = $value[1];
+        }
+
+        return $array;
     }
 }

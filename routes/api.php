@@ -34,6 +34,14 @@ $api->version('v1', function ($route) {
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
     $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
 
+    $route->put('inventory/floorplan/bulk/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create');
+
+    $route->get('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@index');
+    $route->put('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@create');
+    $route->get('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@show')->where('id', '[0-9]+');
+    $route->post('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@update')->where('id', '[0-9]+');
+    $route->delete('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')->where('id', '[0-9]+');
+
     /**
      * Part bins
      */
@@ -81,6 +89,7 @@ $api->version('v1', function ($route) {
      */
     $route->post('parts/bulk/download', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@create');
     $route->get('parts/bulk/file/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@read');
+    $route->get('parts/bulk/status/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@status');
 
     /**
      * Part Bulk
@@ -110,10 +119,20 @@ $api->version('v1', function ($route) {
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
 
     /**
+     * Part orders
+     */
+    $route->get('parts/orders', 'App\Http\Controllers\v1\Parts\PartOrdersController@index');
+    $route->put('parts/orders', 'App\Http\Controllers\v1\Parts\PartOrdersController@create');
+    $route->get('parts/orders/{id}', 'App\Http\Controllers\v1\Parts\PartOrdersController@show')->where('id', '[0-9]+');
+    $route->post('parts/orders/{id}', 'App\Http\Controllers\v1\Parts\PartOrdersController@update')->where('id', '[0-9]+');
+    $route->delete('parts/orders/{id}', 'App\Http\Controllers\v1\Parts\PartOrdersController@destroy')->where('id', '[0-9]+');
+
+    /**
      * Parts
      */
     $route->get('parts', 'App\Http\Controllers\v1\Parts\PartsController@index');
     $route->put('parts', 'App\Http\Controllers\v1\Parts\PartsController@create');
+    $route->get('parts/search', 'App\Http\Controllers\v1\Parts\PartsController@search');
     $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show')->where('id', '[0-9]+');
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
@@ -135,6 +154,19 @@ $api->version('v1', function ($route) {
      * Inventory Categories
      */
     $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
+    /**
+     * Inventory Statuses
+     */
+    $route->get('inventory/statuses', 'App\Http\Controllers\v1\Inventory\StatusController@index');
+    /**
+     * Inventory Attributes
+     */
+    $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
+
+    /**
+     * Inventory transactions history
+     */
+    $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
 
     /**
      * Inventory
@@ -156,13 +188,23 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Website
+     */
+    $route->put('website/{websiteId}/enable-proxied-domain-ssl', 'App\Http\Controllers\v1\Website\WebsiteController@enableProxiedDomainSsl');
+
+    /**
+     * Log
+     */
+    $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create');
+
+    /**
      * Website Part Filters
      */
     $route->get('website/parts/filters', 'App\Http\Controllers\v1\Website\Parts\FilterController@index');
-    $route->put('website/parts/filters', 'App\Http\Controllers\v1\Parts\FilterController@create');
-    $route->get('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@show')->where('id', '[0-9]+');
-    $route->post('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@update')->where('id', '[0-9]+');
-    $route->delete('website/parts/filters/{id}', 'App\Http\Controllers\v1\Parts\FilterController@destroy')->where('id', '[0-9]+');
+    $route->put('website/parts/filters', 'App\Http\Controllers\v1\Website\Parts\FilterController@create');
+    $route->get('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@show')->where('id', '[0-9]+');
+    $route->post('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@update')->where('id', '[0-9]+');
+    $route->delete('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@destroy')->where('id', '[0-9]+');
 
     /**
      * Website Blog Posts
@@ -192,28 +234,18 @@ $api->version('v1', function ($route) {
     $route->get('website/towing-capacity/models/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getModels')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
     $route->get('website/towing-capacity/vehicles/year/{year}/make/{makeId}', 'App\Http\Controllers\v1\Website\TowingCapacity\VehicleController@getVehicles')->where('year', '[0-9]+')->where('makeId', '[0-9]+');
 
+    /**
+     * Website mail
+     */
+    $route->put('website/mail/lead/{leadId}/auto-respond', 'App\Http\Controllers\v1\Website\Mail\MailController@autoRespond');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Dealer Sites Routes
-    |--------------------------------------------------------------------------
-    |
-    |
-    |
-    */
-    $route->group([
-        'prefix' => 'dealer-sites',
-        'middleware' => 'apikey.validate',
-    ], function ($route) {
-        $route->put('inquiry', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
-        $route->put('send-text', 'App\Http\Controllers\v1\Website\TextController@create');
-
-        /**
-         * TO DO: Duplicate of Blog!
-         * 
-         * This will require api key, while the other blog will require access token instead!
-         */
-        $route->get('blog', 'App\Http\Controllers\v1\Website\Blog\PostController@index');
+    /**
+     * Website Forms
+     */
+    $route->group(['middleware' => 'forms.field-map.validate'], function ($route) {
+        $route->get('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@index');
+        $route->put('website/forms/field-map', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@create');
+        $route->get('website/forms/field-map/types', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@types');
     });
 
 
@@ -230,6 +262,7 @@ $api->version('v1', function ($route) {
      * Interactions
      */
     $route->group(['middleware' => 'interaction.validate'], function ($route) {
+        //$route->post('leads/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
         $route->get('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@create')->where('leadId', '[0-9]+');
         $route->post('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
@@ -241,51 +274,17 @@ $api->version('v1', function ($route) {
      * Texts Logs
      */
     $route->group(['middleware' => 'text.validate'], function ($route) {
+        //$route->post('leads/texts/send', 'App\Http\Controllers\v1\CRM\Text\TextController@send');
         $route->get('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@create')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/texts/send', 'App\Http\Controllers\v1\CRM\Text\TextController@send')->where('leadId', '[0-9]+');
         $route->get('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->delete('leads/{leadId}/texts/{id}', 'App\Http\Controllers\v1\CRM\Text\TextController@destroy')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('leads/{leadId}/texts/{id}/stop', 'App\Http\Controllers\v1\CRM\Text\TextController@stop')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
     });
 
-    /**
-     * Texts Template
-     */
-    $route->group(['middleware' => 'text.template.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/template', 'App\Http\Controllers\v1\CRM\Text\TemplateController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/template/{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-    });
-
-    /**
-     * Texts Campaign
-     */
-    $route->group(['middleware' => 'text.campaign.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Text\CampaignController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/campaign', 'App\Http\Controllers\v1\CRM\Text\CampaignController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/campaign/{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/campaign/{id}/sent', 'App\Http\Controllers\v1\CRM\Text\CampaignController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->get('crm/{userId}/texts/campaign/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\CampaignController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-    });
-
-    /**
-     * Texts Blast
-     */
-    $route->group(['middleware' => 'text.blast.validate'], function ($route) {
-        $route->get('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Text\BlastController@index')->where('userId', '[0-9]+');
-        $route->put('crm/{userId}/texts/blast', 'App\Http\Controllers\v1\CRM\Text\BlastController@create')->where('userId', '[0-9]+');
-        $route->get('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@show')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@update')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('crm/{userId}/texts/blast/{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@destroy')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('crm/{userId}/texts/blast/{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-        $route->get('crm/{userId}/texts/blast/{id}/leads', 'App\Http\Controllers\v1\CRM\Text\BlastController@leads')->where('userId', '[0-9]+')->where('id', '[0-9]+');
-    });
+    // Stop Text!
+    $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
 
 
     /*
@@ -368,10 +367,10 @@ $api->version('v1', function ($route) {
         */
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
-        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show');
-        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update');
+        $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show')->where('id', '[0-9]+');
+        $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update')->where('id', '[0-9]+');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
-        $route->put('leads/inquiry', 'App\Http\Controllers\v1\CRM\Leads\LeadController@inquiry');
+        $route->put('leads/inquiry', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
 
         /*
         |--------------------------------------------------------------------------
@@ -391,17 +390,8 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/sales-people', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sales People
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
+        $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
 
         /*
         |--------------------------------------------------------------------------
@@ -412,7 +402,17 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
+        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
+        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
         $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
+        $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        /**
+         * Inventory for customers
+         */
+        $route->get('user/customers/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@index');
+        $route->get('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@getAllByCustomer')->where('customer_id', '[0-9]+');
+        $route->delete('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@bulkDestroy')->where('customer_id', '[0-9]+');
+        $route->post('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@attach')->where('customer_id', '[0-9]+');
 
         /*
         |--------------------------------------------------------------------------
@@ -424,6 +424,171 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/interactions/tasks', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@index');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Leads
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'leads'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | ADF Import
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'import'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@index');
+                $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
+                $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
+            });
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Integrations
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'integration'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Integration Auth
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'auth',
+                'middleware' => 'integration.auth.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Integration\AuthController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Integration\AuthController@create');
+                $route->post('/', 'App\Http\Controllers\v1\Integration\AuthController@valid');
+                $route->put('login', 'App\Http\Controllers\v1\Integration\AuthController@login');
+                $route->get('{id}', 'App\Http\Controllers\v1\Integration\AuthController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Integration\AuthController@update')->where('id', '[0-9]+');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Facebook
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'facebook',
+                'middleware' => 'facebook.catalog.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Integration\FacebookController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Integration\FacebookController@create');
+                $route->post('/', 'App\Http\Controllers\v1\Integration\FacebookController@payload');
+                $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
+            });
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | User
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'user'
+        ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Sales People
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'sales-people',
+                'middleware' => 'sales-person.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@index');
+                $route->put('/', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@create');
+                $route->get('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
+
+                // Sales People w/Auth
+                $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
+                $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');
+                $route->post('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@update')->where('id', '[0-9]+');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Texts
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'texts'
+            ], function ($route) {
+                // Texts Template
+                $route->group([
+                    'prefix' => 'template',
+                    'middleware' => 'text.template.validate'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Text\TemplateController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Text\TemplateController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Text\TemplateController@destroy')->where('id', '[0-9]+');
+                });
+
+                // Texts Campaign
+                $route->group([
+                    'prefix' => 'campaign',
+                    'middleware' => 'text.campaign.validate'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Text\CampaignController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Text\CampaignController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Text\CampaignController@destroy')->where('id', '[0-9]+');
+                    $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\CampaignController@sent')->where('id', '[0-9]+');
+                });
+
+                // Texts Blast
+                $route->group([
+                    'prefix' => 'blast',
+                    'middleware' => 'text.blast.validate'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Text\BlastController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Text\BlastController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Text\BlastController@destroy')->where('id', '[0-9]+');
+                    $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
+                });
+            });
+        });
     });
 
 
@@ -448,6 +613,14 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('service-orders', 'App\Http\Controllers\v1\Dms\ServiceOrderController@index');
+        $route->get('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@show');
+        $route->put('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@update');
+        $route->get('service-item-technicians/by-dealer', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byDealer');
+        $route->get('service-item-technicians/by-location/{locationId}', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byLocation');
+        $route->get('service-item-technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@index');
+
+        $route->get('service-order/technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\TechnicianController@index');
+        $route->get('service-order/types', 'App\Http\Controllers\v1\Dms\ServiceOrder\TypesController@index');
 
         /*
         |--------------------------------------------------------------------------
@@ -457,6 +630,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
+        $route->get('pos/search', 'App\Http\Controllers\v1\Pos\PosController@search');
         $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
         $route->get('pos/sales/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
 
@@ -509,6 +683,16 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Tax Calculator
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('tax-calculators', 'App\Http\Controllers\v1\Dms\TaxCalculatorController@index');
+
+        /*
+        |--------------------------------------------------------------------------
         | Quickbooks
         |--------------------------------------------------------------------------
         |
@@ -522,6 +706,11 @@ $api->version('v1', function ($route) {
         $route->get('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@index');
         $route->put('quickbooks/accounts', 'App\Http\Controllers\v1\Dms\Quickbooks\AccountController@create');
 
+        /**
+         * Quickbook Approval
+         */
+        $route->get('quickbooks/quickbook-approvals', 'App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController@index');
+
         /*
         |--------------------------------------------------------------------------
         | Various reports
@@ -531,5 +720,49 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
+        $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
+        $route->post('reports/custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@customReport');
+        $route->post('reports/export-custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@exportCustomReport');
+        /*
+        |--------------------------------------------------------------------------
+        | Parts related
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+
+        /**
+         * Parts audit logs
+         */
+        $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
+        $route->get('parts/audit-logs/date', 'App\Http\Controllers\v1\Parts\AuditLogDateController@index');
+        $route->get('parts/audit-logs/date/csv', 'App\Http\Controllers\v1\Parts\AuditLogDateController@csv');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Others
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+
+        $route->get('settings', 'App\Http\Controllers\v1\Dms\SettingsController@show');
+        $route->put('settings', 'App\Http\Controllers\v1\Dms\SettingsController@update');
+
+        $route->get('unit-sale-labor/technicians', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getTechnicians');
+        $route->get('unit-sale-labor/service-report', 'App\Http\Controllers\v1\Dms\UnitSaleLaborController@getServiceReport');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Integration
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
+    $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
 });

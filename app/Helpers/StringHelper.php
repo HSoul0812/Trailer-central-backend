@@ -58,4 +58,14 @@ class StringHelper
 
         return strtolower($string);
     }
+
+    /**
+     * @param int $length
+     * @return string
+     * @throws \Exception
+     */
+    public function getRandomHex(int $length = 20): string
+    {
+        return bin2hex(random_bytes($length));
+    }
 }

@@ -31,6 +31,11 @@ trait WithRequestQueryable
     protected $requestQueryableBuilder;
 
     /**
+     * @var Builder
+     */
+    protected $query;
+
+    /**
      * the http request object
      * @param $request
      * @return $this
@@ -52,15 +57,31 @@ trait WithRequestQueryable
     }
 
     /**
+     * can be used to force rebuild the eloquent query
+     */
+    public function buildQuery()
+    {
+        if (!$this->requestQueryableQuery && method_exists($this, 'baseQuery')) {
+            $this->requestQueryableQuery = $this->baseQuery();
+        }
+
+        $this->query = $this->queryBuilder()
+            ->withRequest($this->requestQueryableRequest)
+            ->withQuery($this->requestQueryableQuery)
+            ->build();
+    }
+
+    /**
      * Return the eloquent query
      * @return Builder|null
      */
     public function query()
     {
-        return $this->queryBuilder()
-            ->withRequest($this->requestQueryableRequest)
-            ->withQuery($this->requestQueryableQuery)
-            ->build();
+        if (!$this->query) {
+            $this->buildQuery();
+        }
+
+        return $this->query;
     }
 
     private function queryBuilder()

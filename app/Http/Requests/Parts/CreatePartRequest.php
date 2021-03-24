@@ -5,12 +5,12 @@ namespace App\Http\Requests\Parts;
 use App\Http\Requests\Request;
 
 /**
- * 
+ *
  *
  * @author Eczek
  */
 class CreatePartRequest extends Request {
-    
+
     protected $rules = [
         'dealer_id' => 'integer|required',
         'vendor_id' => 'nullable|integer',
@@ -21,12 +21,16 @@ class CreatePartRequest extends Request {
         'category_id' => 'required|integer',
         'qb_id' => 'nullable|integer',
         'subcategory' => 'nullable|string',
-        'title' => 'nullable|string',
+        'title' => 'required|string|filled',
         'alternative_part_number' => 'nullable|string',
-        'sku' => 'required|string',
+        'sku' => 'required|string|parts_sku_unique',
         'price' => 'numeric',
         'dealer_cost' => 'nullable|numeric',
         'msrp' => 'nullable|numeric',
+        'shipping_fee' => 'nullable|numeric',
+        'use_handling_fee' => 'nullable|boolean',
+        'handling_fee' => 'nullable|numeric',
+        'fulfillment_type' => 'nullable|numeric',
         'weight' => 'nullable|numeric',
         'weight_rating' => 'string|nullable',
         'description' => 'nullable',
@@ -40,7 +44,10 @@ class CreatePartRequest extends Request {
         'images' => 'array',
         'images.*.url' => 'url',
         'images.*.position' => 'integer',
-        'bins' => 'array'
+        'bins' => 'array',
+        'bins.*.bin_id' => 'integer',
+        'bins.*.quantity' => 'integer',
+        'bins.*.old_quantity' => 'integer'
     ];
-    
+
 }

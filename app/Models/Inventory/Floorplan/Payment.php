@@ -4,7 +4,7 @@ namespace App\Models\Inventory\Floorplan;
 
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\CRM\Quickbooks\Account;
+use App\Models\CRM\Dms\Quickbooks\Account;
 use App\Models\Inventory\Inventory;
 
 class Payment extends Model
@@ -13,6 +13,12 @@ class Payment extends Model
     const PAYMENT_CATEGORIES = [
         'Balance' => 'balance',
         'Interest' => 'interest',
+    ];
+
+    const PAYMENT_TYPES = [
+        'Cash' => 'cash',
+        'Check' => 'check',
+        'Ach' => 'ach'
     ];
 
     protected $table = 'inventory_floor_plan_payment';

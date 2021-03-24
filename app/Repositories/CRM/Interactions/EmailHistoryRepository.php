@@ -4,8 +4,10 @@ namespace App\Repositories\CRM\Interactions;
 
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Email\Attachment;
+use App\Models\CRM\Email\Processed;
 use Carbon\Carbon;
 
 class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
@@ -33,7 +35,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
         // Insert Attachments?
         if(!empty($fields['attachments'])) {
-            $this->createAttachments($fields['attachments']);
+            $this->updateAttachments($fields['message_id'], $fields['attachments']);
         }
 
         // Create Email History Entry
@@ -100,12 +102,12 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         // Fill Report Fields
         $fields = $this->fillReportFields($params);
 
-        // Insert Attachments?
-        if(!empty($fields['attachments'])) {
-            $this->createAttachments($fields['attachments']);
-        }
-
         DB::transaction(function() use (&$emailHistory, $fields) {
+            // Insert Attachments?
+            if(!empty($fields['attachments'])) {
+                $this->updateAttachments($fields['message_id'], $fields['attachments']);
+            }
+
             // Fill EmailHistory Details
             $emailHistory->fill($fields)->save();
         });
@@ -136,18 +138,21 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
     }
 
     /**
-     * Create Email Attachments
+     * Update Email Attachments
      * 
+     * @param string $messageId
      * @param array $attachments
      * @return Attachment
      */
-    public function createAttachments($attachments) {
-        // Initialize Attachments Array
-        $emailAttachments = array();
+    public function updateAttachments($messageId, $attachments) {
+        // Deleted Existing Attachments for Message ID!
+        Attachment::where('message_id', $messageId)->delete();
 
         // Loop Attachments
+        $emailAttachments = [];
         if(count($attachments) > 0) {
             foreach($attachments as $attachment) {
+                $attachment['message_id'] = $messageId;
                 $emailAttachments[] = Attachment::create($attachment);
             }
         }
@@ -169,6 +174,87 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
             ->whereFromEmail($fromEmail)
             ->whereNull('date_sent')
             ->first();
+    }
+
+    /**
+     * Get Message ID's for Dealer
+     * 
+     * @param int $userId
+     * @return array of Message ID's
+     */
+    public function getMessageIds($userId) {
+        // Get All Message ID's for User
+        return EmailHistory::leftJoin(Interaction::getTableName(),
+                                      Interaction::getTableName() . '.interaction_id', '=',
+                                      EmailHistory::getTableName() . '.interaction_id')
+                           ->where(Interaction::getTableName() . '.user_id', $userId)
+                           ->pluck('message_id')->toArray();
+    }
+
+    /**
+     * Find Message ID Anywhere
+     * 
+     * @param int $userId
+     * @param string $messageId
+     * @return bool
+     */
+    public function findMessageId($userId, $messageId) {
+        // Message ID Exists in Processed?
+        $processed = Processed::where('message_id', $messageId)->get();
+        if(count($processed) > 0) {
+            return true;
+        }
+
+        // Message ID Exists in Email History?
+        $emails = EmailHistory::leftJoin(Interaction::getTableName(),
+                                         Interaction::getTableName() . '.interaction_id', '=',
+                                         EmailHistory::getTableName() . '.interaction_id')
+                              ->where(Interaction::getTableName() . '.user_id', $userId)
+                              ->where(EmailHistory::getTableName() . '.message_id', $messageId)->get();
+        if(count($emails) > 0) {
+            return true;
+        }
+
+        // None Returned!
+        return false;
+    }
+
+
+    /**
+     * Get Processed Message ID's for Dealer
+     * 
+     * @param int $userId
+     * @return array of Message ID's
+     */
+    public function getProcessed($userId) {
+        // Get All Message ID's for User
+        return Processed::where('user_id', $userId)->pluck('message_id')->toArray();
+    }
+
+    /**
+     * Created Processed Emails
+     * 
+     * @param int $userId
+     * @param array $messageIds
+     * @return Collection of Processed
+     */
+    public function createProcessed($userId, $messageIds) {
+        // Initialized Processed
+        $processed = [];
+        if(!is_array($messageIds)) {
+            $messageIds = [$messageIds];
+        }
+
+        // Loop Processed
+        foreach($messageIds as $messageId) {
+            $processed[] = Processed::create([
+                'user_id' => $userId,
+                'message_id' => $messageId
+            ]);
+        }
+
+        // Return Collection
+        return collect($processed);
     }
 
 
@@ -199,7 +285,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
             // Is a Report Field?!
             if (in_array($key, EmailHistory::REPORT_FIELDS)) {
                 if ($value === 1) {
-                    $params[$key] = Carbon::now()->toDateTimeString();
+                    $params[$key] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
                 } else {
                     $params[$key] = $value;
                 }

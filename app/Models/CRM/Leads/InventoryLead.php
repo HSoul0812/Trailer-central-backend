@@ -13,6 +13,13 @@ class InventoryLead extends Model
     protected $table = 'crm_inventory_lead';
 
     /**
+     * No timestamps on table
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * The primary key associated with the table.
      *
      * @var string

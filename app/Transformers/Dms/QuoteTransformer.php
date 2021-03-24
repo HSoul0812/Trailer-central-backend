@@ -8,11 +8,11 @@ class QuoteTransformer extends TransformerAbstract
 {
 
     public function transform($quote)
-    {   
+    {
         if (isset($quote->quote)) {
             $quote = $quote->quote;
         }
-        
+
         return [
             'id' => $quote->id,
             'dealer_id' => $quote->dealer_id,
@@ -22,7 +22,9 @@ class QuoteTransformer extends TransformerAbstract
             'total_price' => $quote->total_price,
             'invoice' => $quote->invoice,
             'paid_amount' => (float) $quote->paid_amount,
+            'inventory_id' => $quote->inventory_id,
+            'inventory_vin' => $quote->inventory_vin,
             'status' => $quote->status,
         ];
     }
-} 
+}

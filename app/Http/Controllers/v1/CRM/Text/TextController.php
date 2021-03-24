@@ -235,40 +235,6 @@ class TextController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Stop(
-     *     path="/api/leads/{leadId}/texts/{id}/stop",
-     *     description="Stop sending future texts to this number",
-     *     tags={"Text"},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="Text ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Confirms text was deleted",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
-     */
-    public function stop(int $leadId, int $id) {
-        $request = new StopTextRequest(['id' => $id]);
-        
-        if ( $request->validate()) {
-            // Stop Text
-            return $this->response->item($this->texts->stop(['id' => $id]), new TextTransformer());
-        }
-        
-        return $this->response->errorBadRequest();
-    }
-
-    /**
      * @OA\Post(path="/leads/{leadId}/texts/send",
      *     tags={"interactions"},
      *     summary="Send interaction text",

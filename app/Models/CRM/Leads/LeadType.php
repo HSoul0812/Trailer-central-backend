@@ -22,6 +22,21 @@ class LeadType extends Model
     const TYPE_SERVICE = 'service';
     const TYPE_CALL = 'call';
     const TYPE_TRADE = 'trade';
+    const TYPE_NONLEAD = 'nonlead';
+
+    const TYPE_ARRAY = [
+        self::TYPE_GENERAL,
+        self::TYPE_CRAIGSLIST,
+        self::TYPE_INVENTORY,
+        self::TYPE_TEXT,
+        self::TYPE_SHOWROOM_MODEL,
+        self::TYPE_BUILD,
+        self::TYPE_RENTALS,
+        self::TYPE_FINANCING,
+        self::TYPE_SERVICE,
+        self::TYPE_CALL,
+        self::TYPE_TRADE
+    ];
     
     const TABLE_NAME = 'website_lead_types';
 

@@ -2,18 +2,20 @@
 
 namespace App\Models\Parts;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\CycleCountHistory;
 
 /**
  * @author Marcel
+ * @property Collection<CycleCountHistory> $parts
  */
 class CycleCount extends Model {
-    
+
     protected $table = 'parts_cycle_count';
 
     public $timestamps = false;
-    
+
     /**
      * The attributes that are mass assignable.
      *

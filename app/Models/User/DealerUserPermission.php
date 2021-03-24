@@ -3,7 +3,6 @@
 namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User\User;
 
 class DealerUserPermission extends Model
 {
@@ -23,11 +22,13 @@ class DealerUserPermission extends Model
      */
     protected $hidden = [];
 
+    public $timestamps = false;
+
     public function dealerUser()
     {
         return $this->hasOne(DealerUser::class, 'dealer_user_id', 'dealer_user_id');
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }

@@ -2,19 +2,22 @@
 
 namespace App\Models\Parts;
 
+use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
-use App\Models\Parts\CacheStoreTime;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use Carbon\Carbon;
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
 
 /**
  * Class Part
  *
  * @package App\Models\Parts
  * @property Collection $images
- * @property Collection $bins
+ * @property Collection<BinQuantity> $bins
+ * @property Collection<PurchaseOrderPart> $purchaseOrders
  * @property Vendor $vendor
  * @property Brand $brand
  * @property Category $category
@@ -23,7 +26,7 @@ use Carbon\Carbon;
 class Part extends Model
 {
 
-    use Searchable;
+    use Searchable, CustomSearch;
 
     protected $table = 'parts_v1';
 
@@ -48,6 +51,10 @@ class Part extends Model
         'price',
         'dealer_cost',
         'msrp',
+        'shipping_fee',
+        'use_handling_fee',
+        'handling_fee',
+        'fulfillment_type',
         'weight',
         'weight_rating',
         'description',
@@ -106,38 +113,56 @@ class Part extends Model
         ]
     ];
 
+    protected $casts = [
+        'dealer_cost' => 'float'
+    ];
+
     public static function boot() {
         parent::boot();
 
         static::created(function ($part) {
 
             $part->updateCacheStoreTimes();
-
+            $part->searchable();
         });
 
         static::updated(function ($part) {
 
             $part->updateCacheStoreTimes();
-
+            $part->searchable();
         });
     }
 
     public function searchableAs()
     {
-        return env('PARTS_ALGOLIA_INDEX', '');
+        return env('INDEX_PARTS', 'parts');
     }
 
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         $array = $this->toArray();
+
+        $array['part_id'] = (string)$this->id;
 
         $array['brand'] = (string)$this->brand;
         $array['manufacturer'] = (string)$this->manufacturer;
         $array['category'] = (string)$this->category;
         $array['type'] = (string)$this->type;
 
-        $array['images'] = $this->images->toArray();
+        // $array['images'] = $this->images->toArray();
+
         $array['vehicle_specific'] = $this->vehicleSpecifc;
+
+        //
+        $array['price'] = (string)$this->modified_cost;
+
+        // bin qty
+        $array['bins'] = $this->bins;
+        $array['bins_total_qty'] = ($this->bins instanceof Collection)?
+            $this->bins->reduce(function ($total, $item) {
+                // add only non zero quantities
+                return $total + ($item->qty > 0? $item->qty: 0);
+            }, 0): 0;
 
         return $array;
     }
@@ -194,8 +219,24 @@ class Part extends Model
     public function bins()
     {
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
-    } 
-    
+    }
+
+    public function getTotalQtyAttribute()
+    {
+        return ($this->bins instanceof Collection)?
+            $this->bins->reduce(function ($total, $item) {
+                // add only non zero quantities
+                return $total + ($item->qty > 0? $item->qty: 0);
+            }, 0): 0;
+    }
+
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderPart::class, 'part_id')
+            ->has('purchaseOrder')
+            ->groupBy('purchase_order_id');
+    }
+
     /**
      * Inspects the price CostModifier model and determines what the part
      * price should actually be
@@ -204,12 +245,25 @@ class Part extends Model
     {
         $costModifiedRepo = app(CostModifierRepositoryInterface::class);
         $costModifier = $costModifiedRepo->getByDealerId($this->dealer_id);
-        
-        if ($costModifier) {
+
+        if ($costModifier && $costModifier->modifier > 0) {
             $newCost = $this->dealer_cost + ($this->dealer_cost * ( $costModifier->modifier / 100 ));
-            return $newCost > 0 ? $newCost : $this->price;
+            return (float) $newCost > 0 ? $newCost : $this->price;
         }
-        
-        return $this->price;
+
+        return (float) $this->price;
+    }
+
+    /**
+     * Get Website Shipping
+     */
+    public function getWebsiteFeeAttribute() {
+        // Use Handling Fee?
+        if(!empty($this->use_handling_fee) && !empty($this->handling_fee)) {
+            return $this->handling_fee;
+        }
+
+        // Return Standard
+        return !empty($this->shipping_fee) ? $this->shipping_fee : '0.00';
     }
 }

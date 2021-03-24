@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Parts;
 
+use App\Events\Parts\PartQtyUpdated;
+use App\Models\Parts\Part;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\Parts\BinQuantity;
@@ -33,7 +35,7 @@ class CycleCountRepository implements CycleCountRepositoryInterface
                     $binQty->update(['qty' => $cycleCountPart['count_on_hand']]);
                 } else {
                     // Create a new bin qty
-                    BinQuantity::create([
+                    $binQty = BinQuantity::create([
                         'part_id' => $cycleCountPart['part_id'],
                         'bin_id' => $cycleCount->bin_id,
                         'qty' => $cycleCountPart['count_on_hand']
@@ -51,7 +53,7 @@ class CycleCountRepository implements CycleCountRepositoryInterface
             $cycleCount = CycleCount::create($params);
             $this->addCycleCountHistories($cycleCount, $params['parts']);
 
-             DB::commit();
+            DB::commit();
         } catch (\Exception $ex) {
             DB::rollBack();
             throw new \Exception($ex->getMessage());
@@ -91,6 +93,10 @@ class CycleCountRepository implements CycleCountRepositoryInterface
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * @param array $params
+     * @return CycleCount
+     */
     public function update($params)
     {
         $cycleCount = CycleCount::findOrFail($params['id']);

@@ -65,9 +65,11 @@ class ImportRedirects extends Command {
             if ($lineNumber == 1) {
                 return;
             }            
-            
+
             $urlFrom = $this->removeUrlRoot($csvData[0]);
             $urlTo = $this->removeUrlRoot($csvData[1]);
+            
+            $urlTo = '/search-rvs?stock='.$csvData[1];
             
             try {
                 $redirect = $this->websiteRedirectRepo->get(['from' => $urlFrom, 'to' => $urlTo, 'website_id' => $this->websiteId]);

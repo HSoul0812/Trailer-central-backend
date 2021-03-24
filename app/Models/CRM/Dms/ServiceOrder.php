@@ -2,13 +2,28 @@
 
 namespace App\Models\CRM\Dms;
 
+use App\Models\CRM\Dms\ServiceOrder\MiscPartItem;
+use App\Models\CRM\Dms\ServiceOrder\OtherItem;
+use App\Models\CRM\Dms\ServiceOrder\PartItem;
+use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
 use App\Models\CRM\User\Customer;
+use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
 
 
+/**
+ * Class ServiceOrder
+ * @package App\Models\CRM\Dms
+ * @property Collection<PartItem> $partItems
+ * @property Collection<MiscPartItem> $miscPartItems
+ * @property Collection<ServiceItem> $serviceItems
+ * @property Collection<OtherItem> $otherItems
+ * @property Invoice $invoice
+ */
 class ServiceOrder extends Model
 {
 
@@ -23,7 +38,18 @@ class ServiceOrder extends Model
         'work_available' => 'Work Available'
     ];
 
-    const SERVICE_ORDER_ESTIMATE = 'estimate';
+    public const TYPES = [
+        self::TYPE_ESTIMATE,
+        self::TYPE_INTERNAL,
+        self::TYPE_RETAIL,
+        self::TYPE_WARRANTY,
+    ];
+
+    public const TYPE_ESTIMATE = 'estimate';
+    public const TYPE_INTERNAL = 'internal';
+    public const TYPE_RETAIL = 'retail';
+    public const TYPE_WARRANTY = 'warranty';
+
     const SERVICE_ORDER_SCHEDULED = 'scheduled';
     const SERVICE_ORDER_COMPLETED = 'completed';
 
@@ -33,6 +59,10 @@ class ServiceOrder extends Model
      * @var string
      */
     protected $table = 'dms_repair_order';
+    
+    protected $fillable = [
+        'status'
+    ];
 
     const UPDATED_AT = null;
 
@@ -59,6 +89,31 @@ class ServiceOrder extends Model
     public function getPaidAmountAttribute()
     {
         return $this->hasManyThrough(Payment::class, Invoice::class, 'repair_order_id')->sum('amount');
+    }
+
+    public function partItems()
+    {
+        return $this->hasMany(PartItem::class, 'repair_order_id', 'id');
+    }
+
+    public function miscPartItems()
+    {
+        return $this->hasMany(MiscPartItem::class, 'repair_order_id', 'id');
+    }
+
+    public function serviceItems()
+    {
+        return $this->hasMany(ServiceItem::class, 'repair_order_id', 'id');
+    }
+
+    public function otherItems()
+    {
+        return $this->hasMany(OtherItem::class, 'repair_order_id', 'id');
+    }
+
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
 }

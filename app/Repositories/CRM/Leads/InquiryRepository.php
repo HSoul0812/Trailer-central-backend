@@ -6,7 +6,6 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\InquiryRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\Traits\SortTrait;
 
@@ -20,51 +19,22 @@ class InquiryRepository implements InquiryRepositoryInterface {
     const MERGE_MATCH_COUNT = 2;
 
     /**
-     * @var InquiryEmailServiceInterface
-     */
-    private $inquiry;
-
-    /**
-     * @var LeadRepositoryInterface
-     */
-    private $leads;
-
-    /**
-     * @var InteractionsRepositoryInterface
-     */
-    private $interactions;
-
-    /**
-     * InquiryRepository constructor.
-     * 
-     * @param InquiryEmailRepositoryInterface
-     * @param LeadsRepositoryInterface;
-     * @param InteractionsRepositoryInterface
-     */
-    public function __construct(InquiryEmailServiceInterface $inquiry, LeadRepositoryInterface $leads, InteractionsRepositoryInterface $interactions)
-    {
-        $this->inquiry = $inquiry;
-        $this->leads = $leads;
-        $this->interactions = $interactions;
-    }
-
-    /**
      * Create New Inquiry
      * 
      * @param type $params
      * @return type
      */
     public function create($params) {
-        // Create Lead
-        $lead = $this->mergeOrCreate($params);
+        // Find Matching Lead!
+        $lead = $this->findMatch($params);
 
-        // Valid Lead?!
+        // Merge Lead!
         if(!empty($lead->identifier)) {
-            $this->inquiry->send($lead->identifier, $params);
+            return $this->merge($lead, $params);
         }
 
-        // Return Lead
-        return $lead;
+        // Create!
+        return $this->leads->create($params);
     }
 
     public function delete($params) {
@@ -125,25 +95,6 @@ class InquiryRepository implements InquiryRepositoryInterface {
 
         // Return Lead
         return Lead::find($lead->identifier);
-    }
-
-    /**
-     * Merge or Create Lead
-     * 
-     * @param array $params
-     * @return Lead
-     */
-    public function mergeOrCreate($params) {
-        // Find Matching Lead!
-        $lead = $this->findMatch($params);
-
-        // Merge Lead!
-        if(!empty($lead->identifier)) {
-            return $this->merge($lead, $params);
-        }
-
-        // Create!
-        return $this->leads->create($params);
     }
 
     /**

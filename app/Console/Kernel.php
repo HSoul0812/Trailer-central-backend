@@ -6,10 +6,13 @@ use App\Console\Commands\Website\AddSitemaps;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
-use App\Console\Commands\RunBulkUploadCommand;
+use App\Console\Commands\Parts\Import\RunBulkUploadCommand;
 use App\Console\Commands\ReplaceYoutubeEmbeds;
-use App\Console\Commands\AdjustFeetAndInches;
+use App\Console\Commands\Inventory\AdjustFeetAndInches;
 use App\Console\Commands\User\CreateAccessToken;
+use App\Console\Commands\Parts\Import\StocksExistsCommand;
+use App\Console\Commands\CRM\Leads\AutoAssign; 
+use App\Console\Commands\Parts\IncreaseDealerCostCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -24,7 +27,10 @@ class Kernel extends ConsoleKernel
         RunBulkUploadCommand::class,
         AddSitemaps::class,
         AdjustFeetAndInches::class,
-        CreateAccessToken::class
+        CreateAccessToken::class,
+        StocksExistsCommand::class,
+        AutoAssign::class,
+        IncreaseDealerCostCommand::class
     ];
 
     /**
@@ -35,11 +41,100 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('run:bulk')->withoutOverlapping();
-        $schedule->command('add:sitemaps')->daily();
-        $schedule->command('user:create-access-token')->daily();
-        $schedule->command('leads:assign:auto')->withoutOverlapping();
+        $schedule->command('run:bulk')
+                ->withoutOverlapping()
+                ->runInBackground(); 
+        
+        $schedule->command('add:sitemaps')
+                ->daily()
+                ->runInBackground();
+        
+        $schedule->command('user:create-access-token')
+                ->daily()
+                ->runInBackground();
+        
+        $schedule->command('crm:dms:update-po-num-ref')
+                ->daily()
+                ->runInBackground();
+
+        /**
+         * Auto Assign Leads
+         */
+        $schedule->command('leads:assign:auto 0 2999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 3000 5999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 6000 6623')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 6625 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 0 0 6624')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 0 0 8770')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
+        
+        $schedule->command('leads:import:adf')
+                ->everyFiveMinutes()
+                ->runInBackground();
+
+
+        /**
+         * Campaigns/Blasts
+         */
+        $schedule->command('text:process-campaign')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('text:deliver-blast')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+
+        /**
+         * Scrape Replies
+         */
+        // 0 - 2999
+        $schedule->command('email:scrape-replies 0 2999')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+        // 3000 - 5999
+        $schedule->command('email:scrape-replies 3000 5999')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+        // 6000 - 6499
+        $schedule->command('email:scrape-replies 6000 6499')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+        // 6500 - 8999
+        $schedule->command('email:scrape-replies 6500 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+
+        // 9000+
+        $schedule->command('email:scrape-replies 9000')
+                ->withoutOverlapping()
+                ->runInBackground();
+
         // $schedule->command('inspire')
         //          ->hourly();
     }

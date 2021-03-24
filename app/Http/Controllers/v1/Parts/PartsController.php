@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\Parts;
 
 use App\Http\Controllers\RestfulController;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Http\Requests\Parts\CreatePartRequest;
@@ -11,23 +12,48 @@ use App\Transformers\Parts\PartsTransformer;
 use App\Http\Requests\Parts\ShowPartRequest;
 use App\Http\Requests\Parts\GetPartsRequest;
 use App\Http\Requests\Parts\UpdatePartRequest;
+use App\Services\Parts\PartServiceInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
 
 class PartsController extends RestfulController
 {
-    
+
     protected $parts;
-    
+
+    /**
+     * @var \App\Services\Parts\PartServiceInterface;
+     */
+    protected $partService;
+    /**
+     * @var Manager
+     */
+    private $fractal;
+    /**
+     * @var PartsTransformer
+     */
+    private $partsTransformer;
+
     /**
      * Create a new controller instance.
      *
-     * @return void
+     * @param  PartRepositoryInterface  $parts
+     * @param  PartServiceInterface  $partService
+     * @param  Manager  $fractal
      */
-    public function __construct(PartRepositoryInterface $parts)
+    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformer $partsTransformer)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
         $this->parts = $parts;
+        $this->partService = $partService;
+        $this->fractal = $fractal;
+        $this->partsTransformer = $partsTransformer;
     }
-    
+
     /**
      * @OA\Put(
      *     path="/api/parts/",
@@ -53,14 +79,14 @@ class PartsController extends RestfulController
      *         description="Vehicle Specific ID",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     ),     * 
+     *     ),     *
      *     @OA\Parameter(
      *         name="brand_id",
      *         in="query",
      *         description="Part brand",
      *         required=true,
      *         @OA\Schema(type="integer")
-     *     ),          
+     *     ),
      *    @OA\Parameter(
      *         name="manufacturer_id",
      *         in="query",
@@ -243,7 +269,7 @@ class PartsController extends RestfulController
      *            description="Bin array with bin_id and name"
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of parts",
@@ -257,18 +283,19 @@ class PartsController extends RestfulController
      */
     public function create(Request $request) {
         $request = new CreatePartRequest($request->all());
-        
+        $requestData = $request->all();
+
         if ( $request->validate() ) {
-            return $this->response->item($this->parts->create($request->all()), new PartsTransformer());
-        }  
-        
+            return $this->response->item($this->partService->create($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartsTransformer());
+        }
+
         return $this->response->errorBadRequest();
     }
 
     /**
      * @OA\Delete(
      *     path="/api/parts/{id}",
-     *     description="Delete a part",     
+     *     description="Delete a part",
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
@@ -290,20 +317,20 @@ class PartsController extends RestfulController
      */
     public function destroy(int $id) {
         $request = new DeletePartRequest(['id' => $id]);
-        
+
         if ( $request->validate() && $this->parts->delete(['id' => $id])) {
             return $this->response->noContent();
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
 
     /**
      * @OA\Get(
      *     path="/api/parts",
      *     description="Retrieve a list of parts",
-     
+
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -332,7 +359,7 @@ class PartsController extends RestfulController
      *            ),
      *            description="Type ID arra"
      *         )
-     *     ),     
+     *     ),
      *     @OA\Parameter(
      *         name="category_id",
      *         in="query",
@@ -423,18 +450,11 @@ class PartsController extends RestfulController
      */
     public function index(Request $request) {
         $request = new GetPartsRequest($request->all());
-        
-        if ( $request->validate() ) {
-            
-            if ($request->has('search_term')) {
-                $parts = $this->parts->getAllSearch($request->all());
-            } else {
-                $parts = $this->parts->getAll($request->all());
-            }
-            
-            return $this->response->paginator($parts, new PartsTransformer());
+
+        if ($request->validate()) {
+            return $this->response->paginator($this->parts->getAll($request->all()), new PartsTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
@@ -442,7 +462,7 @@ class PartsController extends RestfulController
      * @OA\Get(
      *     path="/api/parts/{id}",
      *     description="Retrieve a part",
-     
+
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
@@ -464,19 +484,19 @@ class PartsController extends RestfulController
      */
     public function show(int $id) {
         $request = new ShowPartRequest(['id' => $id]);
-        
+
         if ( $request->validate() ) {
             return $this->response->item($this->parts->get(['id' => $id]), new PartsTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     /**
      * @OA\Post(
      *     path="/api/parts/{id}",
      *     description="Update a part",
-     
+
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
@@ -498,14 +518,14 @@ class PartsController extends RestfulController
      *         description="Vehicle Specific ID",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     ),     * 
+     *     ),     *
      *     @OA\Parameter(
      *         name="brand_id",
      *         in="query",
      *         description="Part brand",
      *         required=true,
      *         @OA\Schema(type="integer")
-     *     ),          
+     *     ),
      *    @OA\Parameter(
      *         name="manufacturer_id",
      *         in="query",
@@ -674,7 +694,7 @@ class PartsController extends RestfulController
      *            description="Image URL array"
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of parts",
@@ -690,12 +710,69 @@ class PartsController extends RestfulController
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdatePartRequest($requestData);
-        
+        $requestData = $request->all();
+
         if ( $request->validate() ) {
-            return $this->response->item($this->parts->update($request->all()), new PartsTransformer());
+            return $this->response->item($this->partService->update($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartsTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
+    }
+
+    public function search(Request $request)
+    {
+        try {
+            $this->fractal->setSerializer(new NoDataArraySerializer());
+            $this->fractal->parseIncludes($request->query('with', ''));
+            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort');
+            $paginator = new \stdClass(); // this will hold the paginator produced by search
+            $dealerId = $this->getRequestDealerId($request, Auth::user());
+
+            // do the search
+            $result = $this->parts->search(
+                $query, $dealerId, [
+                    'allowAll' => true,
+                    'page' => $request->get('page'),
+                    'per_page' => $request->get('per_page', 10),
+                ], $paginator
+            );
+            $data = new Collection($result, $this->partsTransformer, 'data');
+
+            // if a paginator is requested
+            if ($request->get('page')) {
+                $data->setPaginator(new IlluminatePaginatorAdapter($paginator));
+            }
+
+            // parses the include params
+            $this->fractal->parseIncludes($request->get('include', []));
+
+            // build the api response
+            $result = (array) $this->fractal->createData($data)->toArray();
+            return $this->response->array($result);
+
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return $this->response->errorBadRequest($e->getMessage());
+        }
+    }
+
+    private function getRequestDealerId(Request $request, $user, $required = true)
+    {
+        if ($dealerId = $request->get('dealer_id', null)) {
+            return $dealerId;
+        }
+
+        if (!empty($user) && !empty($user->dealer_id)) {
+            return $user->dealer_id;
+        }
+
+        if ($required) {
+            throw new \Exception('Dealer is required');
+        }
+
+        return null;
     }
 
 }

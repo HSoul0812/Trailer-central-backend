@@ -11,7 +11,31 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Stop extends Model
 {
-    protected $table = 'crm_text_stop';
+    /**
+     * Statuses for Lead Assign
+     * 
+     * @var array
+     */
+    const REPORT_TYPES = ['unsubscribed', 'invalid', ''];
+
+    /**
+     * Statuses for Lead Assign
+     * 
+     * @var array
+     */
+    const REPORT_TYPE_DEFAULT = 'unsubscribed';
+
+    /**
+     * @var string
+     */
+    const TABLE_NAME = 'crm_text_reports';
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = self::TABLE_NAME;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +45,16 @@ class Stop extends Model
     protected $fillable = [
         'lead_id',
         'text_id',
-        'response_id',
-        'text_number'
+        'sms_number',
+        'type'
     ];
+
+    /**
+     * Get Table Name
+     * 
+     * @return string
+     */
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }

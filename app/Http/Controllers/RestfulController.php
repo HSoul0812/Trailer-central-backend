@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Dingo\Api\Http\Request;
 use App\Exceptions\NotImplementedException;
+use Dingo\Api\Http\Response;
 use Dingo\Api\Routing\Helpers;
 
 /**
@@ -71,4 +72,30 @@ class RestfulController extends Controller {
         throw new NotImplementedException();
     }
 
+    /**
+     * @return Response
+     */
+    protected function successResponse(): Response
+    {
+        return $this->response->array([
+            'response' => ['status' => 'success']
+        ]);
+    }
+
+    /**
+     * @param mixed $id
+     * @return Response
+     */
+    protected function createdResponse($id = null): Response
+    {
+        $params = [
+            'response' => ['status' => 'success']
+        ];
+
+        if ($id) {
+            $params['response']['data'] = ['id' => $id];
+        }
+
+        return $this->response->array($params);
+    }
 }

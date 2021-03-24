@@ -4,7 +4,7 @@
 namespace App\Transformers\Quickbooks;
 
 
-use App\Models\CRM\Quickbooks\Item;
+use App\Models\CRM\Dms\Quickbooks\Item;
 use League\Fractal\TransformerAbstract;
 
 class ItemTransformer extends TransformerAbstract
@@ -17,7 +17,7 @@ class ItemTransformer extends TransformerAbstract
             'name' => $item->name,
             'description' => $item->description,
             'type' => $item->type,
-            // 'item_primary_id' => $item->item_primary_id,
+            'item_primary_id' => $item->item_primary_id,
             'sku' => $item->sku,
             'item_category_id' => $item->item_category_id,
             'qty_on_hand' => $item->qty_on_hand,

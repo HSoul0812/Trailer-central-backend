@@ -15,7 +15,7 @@ class InventoryTransformer extends TransformerAbstract
     protected $availableIncludes = [
         'website'
     ];
-    
+
     protected $userTransformer;
 
     protected $dealerLocationTransformer;
@@ -37,6 +37,7 @@ class InventoryTransformer extends TransformerAbstract
              'archived_at' => $inventory->archived_at,
              'availability' => $inventory->availability,
              'bill_id' => $inventory->bill_id,
+             'brand' => $inventory->brand,
              'category' => $inventory->category,
              'condition' => $inventory->condition,
              'created_at' => $inventory->created_at,
@@ -60,11 +61,16 @@ class InventoryTransformer extends TransformerAbstract
              'non_serialized' => $inventory->non_serialized,
              'note' => $inventory->note,
              'price' => $inventory->price,
+             'sales_price' => $inventory->sales_price,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
-             'status' => $inventory->status,
+             'status' => $inventory->status_label,
              'stock' => $inventory->stock,
              'title' => $inventory->title,
              'true_cost' => $inventory->true_cost,
+             'cost_of_unit' => $inventory->cost_of_unit,
+             'cost_of_shipping' => $inventory->cost_of_shipping,
+             'cost_of_prep' => $inventory->cost_of_prep,
+             'total_of_cost' => $inventory->total_of_cost,
              'video_embed_code' => $inventory->video_embed_code,
              'vin' => $inventory->vin,
              'weight' => $inventory->weight,
@@ -72,10 +78,11 @@ class InventoryTransformer extends TransformerAbstract
              'year' => $inventory->year,
              'color' => $inventory->color,
              'floorplan_payments' => $inventory->floorplanPayments,
-             'url' => $inventory->getUrl()
+             'url' => $inventory->getUrl(),
+             'floorplan_vendor' => $inventory->floorplanVendor
          ];
     }
-    
+
     public function includeWebsite($inventory)
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
@@ -88,5 +95,5 @@ class InventoryTransformer extends TransformerAbstract
             $ret[] = $this->imageTransformer->transform($img);
         }
         return $ret;
-    } 
+    }
 }

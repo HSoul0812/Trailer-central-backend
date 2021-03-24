@@ -8,6 +8,7 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Dms\CreateFinancingCompanyRequest;
 use App\Http\Requests\Dms\DeleteFinancingCompanyRequest;
 use App\Http\Requests\Dms\UpdateFinancingCompanyRequest;
+use App\Models\CRM\Dms\FinancingCompany;
 use App\Repositories\Dms\FinancingCompanyRepositoryInterface;
 use App\Transformers\Dms\FinancingCompanyTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -55,8 +56,11 @@ class FinancingCompanyController extends RestfulControllerV2
         $this->fractal->setSerializer(new ArraySerializer());
         $this->fractal->parseIncludes($request->query('with', ''));
 
+        // todo scopes can be used to assign dealer_id to query by default
+        $baseQuery = FinancingCompany::where('dealer_id', $request->input('dealer_id'));
         $result = $this->financingCompanyRepository
             ->withRequest($request) // pass jsonapi request queries onto this queryable repo
+            ->withQuery($baseQuery) // query to base this on
             ->get([]);
 
         $data = new Collection($result, $this->financingCompanyTransformer);
@@ -111,6 +115,8 @@ class FinancingCompanyController extends RestfulControllerV2
         if ($request->validate() && $financingCompany = $this->financingCompanyRepository->create($request->all())) {
             return $this->response->item($financingCompany, $this->financingCompanyTransformer);
         }
+        
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -153,7 +159,8 @@ class FinancingCompanyController extends RestfulControllerV2
      *         @OA\Schema(type="integer")
      *     ),
      * )
-     */    public function destroy($id)
+     */    
+    public function destroy($id)
     {
         $deleteRequest = new DeleteFinancingCompanyRequest(['id' => $id]);
         if ($deleteRequest->validate() && $this->financingCompanyRepository->delete(['id' => $id])) {

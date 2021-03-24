@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Dms;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
@@ -15,9 +16,11 @@ use App\Models\CRM\User\Customer;
  * @package App\Models\CRM\Dms
  * @property Customer $customer
  * @property SalesPerson $salesPerson
+ * @property UnitSaleInventory[] $extraInventory
  */
 class UnitSale extends Model implements GenericSaleInterface
 {
+    use TableAware;
 
     const QUOTE_STATUS_OPEN = 'open';
     const QUOTE_STATUS_DEAL = 'deal';
@@ -55,6 +58,11 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id');
     }
 
+    public function extraInventory()
+    {
+        return $this->hasMany(UnitSaleInventory::class, 'quote_id', 'id');
+    }
+
     public function getPaidAmountAttribute()
     {
         return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id')->sum('amount');
@@ -63,6 +71,9 @@ class UnitSale extends Model implements GenericSaleInterface
     public function getStatusAttribute() {
         if (!empty($this->is_archived)) {
             return 'Archived';
+        }
+        if ($this->is_po === 1) {
+            return 'Completed Deal';
         }
         if (empty($this->paid_amount)) {
             return 'Open';
@@ -82,26 +93,33 @@ class UnitSale extends Model implements GenericSaleInterface
 
     public function dealerCost()
     {
-        // TODO: Implement dealerCost() method.
+        // todo implement dealer cost. i.e. sum all the dealer cost of all
+        //   included inventory, parts, etc
+        throw new \Exception('Not implemented');
     }
 
     public function subtotal()
     {
-        // TODO: Implement subtotal() method.
+        return $this->subtotal;
     }
 
     public function discount()
     {
-        // TODO: Implement discount() method.
+        return $this->inventory_discount +
+            $this->accessory_discount +
+            $this->labor_discount;
     }
 
     public function taxTotal()
     {
-        // TODO: Implement taxTotal() method.
+        // todo implement total tax; need to create a service for server-side
+        //   tax computation, otherwise you can only get taxes server-side after
+        //   an invoice is made
+        throw new \Exception('Not implemented');
     }
 
     public function createdAt()
     {
-        return $this->createdAt();
+        return $this->created_at;
     }
 }

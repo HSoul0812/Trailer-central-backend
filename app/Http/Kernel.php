@@ -2,19 +2,27 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
+use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
+use App\Http\Middleware\User\UserValidate;
 use App\Http\Middleware\Website\WebsiteValidate;
+use App\Http\Middleware\Website\FieldMapValidate;
 use App\Http\Middleware\SetDealerIdOnRequest;
 use App\Http\Middleware\SetWebsiteIdOnRequest;
+use App\Http\Middleware\SetUserIdOnRequest;
 use App\Http\Middleware\ValidAccessToken;
-use App\Http\Middleware\ValidApiKey;
 use App\Http\Middleware\CRM\Interactions\InteractionValidate;
 use App\Http\Middleware\CRM\Text\TextValidate;
 use App\Http\Middleware\CRM\Text\TemplateValidate;
 use App\Http\Middleware\CRM\Text\BlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate;
+use App\Http\Middleware\CRM\User\SalesPersonValidate;
+use App\Http\Middleware\Integration\AuthValidate;
+use App\Http\Middleware\Integration\Facebook\CatalogValidate;
+use App\Http\Middleware\Parts\PartOrderValidate;
 
 class Kernel extends HttpKernel
 {
@@ -31,7 +39,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        AccessToken::class        
+        AccessToken::class
     ];
 
     /**
@@ -76,16 +84,24 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'cors' => CorsMiddleware::class,
+        'user.validate' => UserValidate::class,
         'website.validate' => WebsiteValidate::class,
+        'forms.field-map.validate' => FieldMapValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
-        'apikey.validate' => ValidApiKey::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
+        'setDealerIdFilterOnRequest' => SetDealerIdFilterOnRequest::class,
         'setWebsiteIdOnRequest' => SetWebsiteIdOnRequest::class,
+        'setUserIdOnRequest' => SetUserIdOnRequest::class,
         'interaction.validate' => InteractionValidate::class,
         'text.validate' => TextValidate::class,
         'text.template.validate' => TemplateValidate::class,
-        'text.blast.validate' => BlastValidate::class,
         'text.campaign.validate' => CampaignValidate::class,
+        'text.blast.validate' => BlastValidate::class,
+        'integration.auth.validate' => AuthValidate::class,
+        'facebook.catalog.validate' => CatalogValidate::class,
+        'sales-person.validate' => SalesPersonValidate::class,
+        'parts.orders.validate' => PartOrderValidate::class,
+        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
     ];
 
     /**

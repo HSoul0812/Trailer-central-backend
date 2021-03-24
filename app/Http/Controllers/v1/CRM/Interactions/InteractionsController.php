@@ -11,21 +11,24 @@ use App\Http\Requests\CRM\Interactions\CreateInteractionRequest;
 use App\Http\Requests\CRM\Interactions\ShowInteractionRequest;
 use App\Http\Requests\CRM\Interactions\UpdateInteractionRequest;
 use App\Http\Requests\CRM\Interactions\SendEmailRequest;
+use App\Services\CRM\Interactions\InteractionServiceInterface;
 use Dingo\Api\Http\Request;
 
 
 class InteractionsController extends RestfulControllerV2
 {
     protected $interactions;
+    protected $service;
 
     /**
      * Create a new controller instance.
      *
      * @param Repository $interactions
      */
-    public function __construct(InteractionsRepositoryInterface $interactions)
+    public function __construct(InteractionsRepositoryInterface $interactions, InteractionServiceInterface $service)
     {
         $this->interactions = $interactions;
+        $this->service = $service;
         $this->transformer = new InteractionTransformer();
     }
 
@@ -202,10 +205,9 @@ class InteractionsController extends RestfulControllerV2
     {
         $params = $request->all();
         $request = new SendEmailRequest($params);
-        
         if ( $request->validate()) {
             // Get Results
-            $result = $this->interactions->sendEmail($leadId, $params, $request->allFiles());
+            $result = $this->service->email($leadId, $params, $request->allFiles());
 
             // Send Email Response
             return $this->response->item($result, new InteractionTransformer());

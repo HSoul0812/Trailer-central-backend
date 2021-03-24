@@ -175,6 +175,11 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\PartsServiceProvider::class,
+        App\Providers\DmsServiceProvider::class,
+        App\Providers\CrmServiceProvider::class,
+        App\Providers\IntegrationServiceProvider::class,
+        App\Providers\InteractionServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
 
         /*
@@ -184,6 +189,11 @@ return [
         \Laravel\Scout\ScoutServiceProvider::class,
         \Dingo\Api\Provider\LaravelServiceProvider::class,
         Spatie\Sitemap\SitemapServiceProvider::class,
+        ElasticClient\ServiceProvider::class,
+        ElasticScoutDriver\ServiceProvider::class,
+        ElasticScoutDriverPlus\ServiceProvider::class,
+        ElasticMigrations\ServiceProvider::class,
+        App\Providers\SpatialServiceProvider::class,
 
         /*
          * Nova stuff

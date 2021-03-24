@@ -6,14 +6,6 @@ use App\Repositories\Repository;
 
 interface InquiryRepositoryInterface extends Repository {
     /**
-     * Merge or Create Lead
-     * 
-     * @param array $params
-     * @return Lead
-     */
-    public function mergeOrCreate($params);
-
-    /**
      * Find Matching Lead
      * 
      * @return Lead

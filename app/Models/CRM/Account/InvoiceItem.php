@@ -4,7 +4,7 @@
 namespace App\Models\CRM\Account;
 
 
-use App\Models\CRM\Quickbooks\Item;
+use App\Models\CRM\Dms\Quickbooks\Item;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 class InvoiceItem extends Model
 {
     protected $table = "qb_invoice_items";
+
+    public $timestamps = false;
 
     public function invoice()
     {

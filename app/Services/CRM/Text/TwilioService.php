@@ -39,6 +39,11 @@ class TwilioService implements TextServiceInterface
     private $tried = [];
 
     /**
+     * @const array
+     */
+    const MAGIC_NUMBERS = ['+15005550000', '+15005550007', '+15005550008', '+15005550001', '+15005550006'];
+
+    /**
      * TwilioService constructor.
      */
     public function __construct(NumberRepositoryInterface $numberRepo)
@@ -63,7 +68,7 @@ class TwilioService implements TextServiceInterface
         // Look Up To Number
         $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
         if (empty($carrier['mobile_country_code'])) {
-            throw new CustomerLandlineNumberException();
+            //throw new CustomerLandlineNumberException();
         }
 
         // Send Internal Number

@@ -3,10 +3,15 @@
 namespace App\Models\CRM\User;
 
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\User\EmailFolder;
 use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
+use App\Models\Integration\Auth\AccessToken;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class SalesPerson
@@ -16,7 +21,19 @@ use Illuminate\Database\Eloquent\Model;
  */
 class SalesPerson extends Model implements Filterable
 {
+    use SoftDeletes;
+
     const TABLE_NAME = 'crm_sales_person';
+
+    /**
+     * @array auth type map from key => name
+     */
+    const AUTH_TYPES = [
+        'auto' => 'Auto Detect',
+        'PLAIN' => 'PLAIN',
+        'LOGIN' => 'LOGIN',
+        'NTLM'  => 'NTLM',
+    ];
 
     /**
      * The table associated with the model.
@@ -43,8 +60,35 @@ class SalesPerson extends Model implements Filterable
         'perms',
         'first_name',
         'last_name',
-        'email'
+        'email',
+        'is_default',
+        'is_inventory',
+        'is_financing',
+        'is_trade',
+        'signature',
+        'dealer_location_id',
+        'smtp_email',
+        'smtp_password',
+        'smtp_server',
+        'smtp_port',
+        'smtp_security',
+        'smtp_auth',
+        'smtp_failed',
+        'smtp_error',
+        'imap_email',
+        'imap_password',
+        'imap_server',
+        'imap_port',
+        'imap_security',
+        'imap_failed'
     ];
+
+    /**
+     * Disable timestamps
+     *
+     * @var bool
+     */
+    public $timestamps = false;
     
     /**
      * Define Type Arrays
@@ -76,6 +120,14 @@ class SalesPerson extends Model implements Filterable
         return $this->hasOne(CrmUser::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get new dealer user
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
+    }
+
     public function posSales()
     {
         return $this->hasMany(Sale::class, 'sales_person_id');
@@ -84,6 +136,34 @@ class SalesPerson extends Model implements Filterable
     public function unitSales()
     {
         return $this->hasMany(UnitSale::class, 'sales_person_id');
+    }
+
+    public function folders()
+    {
+        return $this->hasMany(EmailFolder::class, 'sales_person_id')->where('deleted', 0);
+    }
+
+    /**
+     * Google Access Token
+     * 
+     * @return HasOne
+     */
+    public function googleToken()
+    {
+        return $this->hasOne(AccessToken::class, 'relation_id', 'id')
+                    ->whereTokenType('google')
+                    ->whereRelationType('sales_person');
+    }
+
+    /**
+     * Get From Email History
+     * 
+     * @return HasMany
+     */
+    public function fromEmails() {
+        return $this->hasMany(EmailHistory::class, 'from_email', 'email')
+                    ->orWhere(SalesPerson::getTableName() . '.smtp_email', '=', EmailHistory::getTableName() . '.from_email');
+        
     }
 
     /**
@@ -96,6 +176,28 @@ class SalesPerson extends Model implements Filterable
     public function jsonApiFilterableColumns(): ?array
     {
         return ['*'];
+    }
+
+
+    /**
+     * Get Email Folders Including Defaults
+     * 
+     * @return Collection of EmailFolder
+     */
+    public function getEmailFoldersAttribute() {
+        // Get Email Folders Based on Existing Data
+        if(!empty($this->folders) && count($this->folders) > 0) {
+            return $this->folders;
+        }
+
+        // Google Token Exists?
+        if(!empty($this->googleToken)) {
+            // Return Only Google Defaults
+            return EmailFolder::getDefaultGmailFolders();
+        }
+
+        // Return Default Folders
+        return EmailFolder::getDefaultFolders();
     }
 
     public static function getTableName() {

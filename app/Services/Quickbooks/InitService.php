@@ -4,8 +4,7 @@
 namespace App\Services\Quickbooks;
 
 
-use App\Models\CRM\Quickbooks\Item;
-use App\Models\CRM\Quickbooks\ItemNew;
+use App\Models\CRM\Dms\Quickbooks\ItemNew;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

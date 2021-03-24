@@ -2,6 +2,7 @@
 
 namespace App\Services\Import\Parts;
 
+use App\Events\Parts\PartQtyUpdated;
 use App\Services\Import\Parts\CsvImportServiceInterface;
 use App\Repositories\Bulk\BulkUploadRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +24,9 @@ use Illuminate\Support\Facades\Log;
  */
 class CsvImportService implements CsvImportServiceInterface
 {
-
+    
+    const MAX_VALIDATION_ERROR_CHAR_COUNT = 3072;    
+    
     const VENDOR = 'Vendor';
     const BRAND = 'Brand';
     const TYPE = 'Type';
@@ -42,9 +45,13 @@ class CsvImportService implements CsvImportServiceInterface
     const STOCK_MIN = 'Stock Minimum';
     const STOCK_MAX = 'Stock Maximum';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
+    const ALTERNATE_PART_NUMBER = 'Alternate Part Number';
+    const PART_ID = 'Part ID';
 
     const BIN_ID = '/Bin\s+\d+\s+ID/i';
     const BIN_QTY = '/Bin\s+\d+\s+qty/i';
+    
+    private const S3_VALIDATION_ERRORS_PATH = 'parts/validation-errors/%s';
 
     protected $bulkUploadRepository;
     protected $partsRepository;
@@ -69,7 +76,9 @@ class CsvImportService implements CsvImportServiceInterface
         self::IMAGE => true,
         self::STOCK_MIN => true,
         self::STOCK_MAX => true,
-        self::VIDEO_EMBED_CODE => true
+        self::VIDEO_EMBED_CODE => true,
+        self::ALTERNATE_PART_NUMBER => true,
+        self::PART_ID => true
     ];
 
     protected $optionalHeaderValues = [
@@ -102,12 +111,12 @@ class CsvImportService implements CsvImportServiceInterface
         try {
            if (!$this->validate()) {
                 Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
-                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
                 return false;
             }
         } catch (\Exception $ex) {
              Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
-            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
             return false;
         }
 
@@ -138,28 +147,39 @@ class CsvImportService implements CsvImportServiceInterface
             echo 'Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
             Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
 
-            try {      
+            try {
                 // Get Part Data
                 $partData = $this->csvToPartData($csvData);
-                
-                echo "Importing ".json_encode($partData).PHP_EOL;                
+
+                echo "Importing ".json_encode($partData).PHP_EOL;
                 $part = $this->partsRepository->createOrUpdate($partData);
                 if (!$part) {
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                    Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
+                    Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString());
                     throw new \Exception("Image inaccesible");
                 }
-            } catch (\Exception $ex) {  
-                $this->validationErrors[] = $ex->getMessage();
+
+                event(new PartQtyUpdated($part, null, [
+                    'description' => 'Created/updated using bulk uploader'
+                ]));
+
+            } catch (\Exception $ex) {
+                $this->validationErrors[] = $ex->getTraceAsString();
                 $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getMessage());
-                throw new \Exception("Image inaccesible");
+                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
+                Log::info("Index to header mapping: {$this->indexToheaderMapping}");
+//                throw new \Exception("Image inaccesible");
             }
 
         });
-
-        $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
+        
+        if (empty($this->validationErrors)) {
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
+        } else {
+             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE, 'validation_errors' => json_encode($this->validationErrors)]);            
+        }
+        
     }
 
     /**
@@ -191,7 +211,11 @@ class CsvImportService implements CsvImportServiceInterface
                     }
 
                 // for lines > 1
-                } 
+                } else {
+                    if ($errorMessage = $this->isDataInvalid($this->indexToheaderMapping[$index], $value)) {
+                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, $errorMessage);
+                    }
+                }
             }
         });
 
@@ -291,8 +315,10 @@ class CsvImportService implements CsvImportServiceInterface
             $keyToIndexMapping[$value] = $index;
         }
 
-        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first();
-       
+        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])
+            ->where('dealer_id', $this->bulkUpload->dealer_id)
+            ->first();
+
         $part = [];
         $part['dealer_id'] = $this->bulkUpload->dealer_id;
         $part['vendor_id'] = !empty($vendor) ? $vendor->id : null;
@@ -309,9 +335,14 @@ class CsvImportService implements CsvImportServiceInterface
         $part['description'] = $csvData[$keyToIndexMapping[self::DESCRIPTION]];
         $part['show_on_website'] = strtolower($csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]]) === 'yes' ? true : false;
         $part['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
-        $part['stock_min'] = $csvData[$keyToIndexMapping[self::STOCK_MIN]];
-        $part['stock_max'] = $csvData[$keyToIndexMapping[self::STOCK_MAX]];
-
+        $part['stock_min'] = isset($csvData[$keyToIndexMapping[self::STOCK_MIN]]) ? $csvData[$keyToIndexMapping[self::STOCK_MIN]] : null;
+        $part['stock_max'] = isset($csvData[$keyToIndexMapping[self::STOCK_MAX]]) ? $csvData[$keyToIndexMapping[self::STOCK_MAX]] : null;
+        $part['alternative_part_number'] = isset($csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]]) ? $csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]] : null;
+        
+        if (isset($keyToIndexMapping[self::PART_ID]) && isset($csvData[$keyToIndexMapping[self::PART_ID]])) {
+            $part['id'] = $csvData[$keyToIndexMapping[self::PART_ID]];
+        }
+        
         if (isset($keyToIndexMapping[self::VIDEO_EMBED_CODE]) && isset($csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]])) {
             $part['video_embed_code'] = $csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]];
         }
@@ -341,12 +372,12 @@ class CsvImportService implements CsvImportServiceInterface
      * @param string $value
      * @return bool|string
      */
-    private function isDataValid($type, $value)
+    private function isDataInvalid($type, $value)
     {
         switch($type) {
             case self::VENDOR:
                 if (!empty($value)) {
-                    $vendor = Vendor::where('name', $value)->first();
+                    $vendor = Vendor::where('name', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
                     if (empty($vendor)) {
                         return "Vendor {$value} does not exist in the system.";
                     }
@@ -391,10 +422,15 @@ class CsvImportService implements CsvImportServiceInterface
                 if (empty($value)) {
                     return "SKU cannot be empty.";
                 }
-
-                $part = Part::where('sku', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
-                if (!empty($part)) {
-                    return "SKU {$value} already exists in the system.";
+                break;
+            case self::ALTERNATE_PART_NUMBER:
+                break;
+            case self::PART_ID:
+                if (!empty($value)) {
+                    $part = Part::where('id', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
+                    if (empty($part)) {
+                        return "Part ID {$value} does not exist in the system.";
+                    }
                 }
                 break;
             case self::SHOW_ON_WEBSITE:
@@ -441,5 +477,20 @@ class CsvImportService implements CsvImportServiceInterface
                 }
                 break;
         }
+        
+        return false;
     }
+    
+    private function outputValidationErrors()
+    {
+        $jsonEncodedValidationErrors = json_encode($this->validationErrors);
+        if (strlen($jsonEncodedValidationErrors) > self::MAX_VALIDATION_ERROR_CHAR_COUNT) {
+            $filePath = sprintf(self::S3_VALIDATION_ERRORS_PATH, uniqid().'.txt');
+            Storage::disk('s3')->put($filePath, implode(PHP_EOL, $this->validationErrors), 'public');
+            return json_encode(Storage::disk('s3')->url($filePath));
+        }
+        return $jsonEncodedValidationErrors;
+    }
+    
+    
 }

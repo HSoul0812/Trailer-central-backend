@@ -8,11 +8,13 @@ class GetInventoryRequest extends Request {
     
     protected $rules = [
         'per_page' => 'integer',
-        'sort' => 'in:title,-title,vin,-vin,manufacturer,-manufacturer,fp_balance,-fp_balance,fp_interest_paid,-fp_interest_paid,true_cost,-true_cost,fp_committed,-fp_committed',
+        'sort' => 'in:title,-title,vin,-vin,manufacturer,-manufacturer,fp_balance,-fp_balance,fp_interest_paid,-fp_interest_paid,true_cost,-true_cost,fp_committed,-fp_committed,fp_vendor,-fp_vendor,status,-status',
         'search_term' => 'string',
         'dealer_id' => 'array',
         'dealer_id.*' => 'integer',
+        'dealer_id' => 'integer',
         'only_floorplanned' => 'boolean',
+        'floorplan_vendor' => 'vendor_exists'
     ];
     
 }

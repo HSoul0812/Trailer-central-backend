@@ -3,27 +3,18 @@
 namespace App\Repositories\CRM\Interactions;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\Traits\SortTrait;
-use Carbon\Carbon;
-use Throwable;
 
 class InteractionsRepository implements InteractionsRepositoryInterface {
     
     use SortTrait;
-
-    /**
-     * @var InteractionEmailServiceInterface
-     */
-    private $interactionEmail;
 
     /**
      * @var EmailHistoryRepositoryInterface
@@ -43,10 +34,10 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     
     private $sortOrdersNames = [
         'created_at' => [
-            'name' => 'Newest Tasks to Oldest Tasks, then Future Tasks',
+            'name' => 'Newest Tasks to Oldest Tasks',
         ],
         '-created_at' => [
-            'name' => 'Oldest Tasks to Newest Tasks, then Future Tasks',
+            'name' => 'Oldest Tasks to Newest Tasks',
         ],
     ];
 
@@ -55,9 +46,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      * 
      * @param EmailHistoryRepositoryInterface
      */
-    public function __construct(InteractionEmailServiceInterface $service, EmailHistoryRepositoryInterface $emailHistory)
-    {
-        $this->interactionEmail = $service;
+    public function __construct(EmailHistoryRepositoryInterface $emailHistory) {
         $this->emailHistory = $emailHistory;
     }
     
@@ -87,14 +76,24 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      */
     public function getAll($params) {
         // Get User ID
-        $query = Interaction::where('tc_lead_id', $params['lead_id']);
+        $query = Interaction::select(
+                ['interaction_id', 
+                 'lead_product_id', 
+                 'tc_lead_id', 
+                 'user_id', 
+                 'interaction_type',
+                 'interaction_notes',
+                 'interaction_time',
+                 'sent_by',
+                 'from_email',
+                  DB::raw('"" AS to_no')])->where('tc_lead_id', $params['lead_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
 
         if(!isset($params['sort'])) {
-            $params['sort'] = '-created_at';
+            $params['sort'] = 'created_at';
         }
 
         if (!isset($params['include_texts']) || !empty($params['include_texts'])) {
@@ -140,85 +139,6 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
 
         // Create Interaction
         return $this->create($params);
-    }
-
-    /**
-     * Save Email From Send Email
-     * 
-     * @param type $leadId
-     * @param type $userId
-     * @param type $params
-     * @return type
-     */
-    public function saveEmail($leadId, $userId, $params) {
-        // Initialize Transaction
-        DB::transaction(function() use (&$params, $leadId, $userId) {
-            // Create or Update
-            $interaction = $this->createOrUpdate([
-                'id'                => $params['interaction_id'] ?? 0,
-                'lead_id'           => $leadId,
-                'user_id'           => $userId,
-                'interaction_type'  => "EMAIL",
-                'interaction_notes' => "E-Mail Sent: {$params['subject']}",
-                'interaction_time'  => Carbon::now()->toDateTimeString(),
-            ]);
-
-            // Set Interaction ID!
-            $params['interaction_id'] = $interaction->interaction_id;
-
-            // Insert Email
-            $params['date_sent'] = 1;
-            $this->emailHistory->createOrUpdate($params);
-        });
-
-        // Return Interaction
-        return $this->get([
-            'id' => $params['interaction_id']
-        ]);
-    }
-
-    /**
-     * Send Email to Lead
-     * 
-     * @param int $leadId
-     * @param array $params
-     * @return Interaction || error
-     */
-    public function sendEmail($leadId, $params) {
-        // Find Lead/Sales Person
-        $lead = Lead::findOrFail($leadId);
-        $user = Auth::user();
-        if(!empty($user->sales_person)) {
-            $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
-            $params['from_email'] = $user->sales_person->smtp_email;
-            $params['from_name'] = $user->sales_person->full_name ?? '';
-        } else {
-            $params['from_email'] = $user->email;
-            $params['from_name'] = $user->name ?? '';
-
-            // Are We a Dealer User?!
-            if(!empty($user->user) && empty($params['from_name'])) {
-                $params['from_name'] = $user->user->name ?? '';
-            }
-        }
-
-        // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($params['from_email'], $lead->identifier);
-        if(!empty($emailHistory->message_id)) {
-            $params['id']             = $emailHistory->email_id;
-            $params['interaction_id'] = $emailHistory->interaction_id;
-            $params['message_id']     = $emailHistory->message_id;
-        }
-
-        // Set Lead Details
-        $params['to_email'] = $lead->email_address;
-        $params['to_name']  = $lead->full_name;
-
-        // Send Email
-        $email = $this->interactionEmail->send($lead->dealer_id, $params);
-
-        // Save Email
-        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $email);
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
@@ -267,7 +187,10 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             DB::raw($lead->newDealerUser->user_id . ' AS user_id'),
             DB::raw('"TEXT" AS interaction_type'),
             'log_message AS interaction_notes',
-            'date_sent AS interaction_time'
+            'date_sent AS interaction_time',
+            DB::raw('from_number AS from_email'),
+            DB::raw('to_number AS to_no'),
+            DB::raw('"" AS sent_by')
         ])->where('lead_id', $params['lead_id']);
 
         // Initialize TextLog Query

@@ -1,9 +1,8 @@
 <?php
 
-
 namespace App\Models\Inventory;
 
-use App\Traits\Models\CompositePrimaryKeys;
+use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -23,8 +22,21 @@ class AttributeValue extends Model
 
     protected $primaryKey = ['attribute_id', 'inventory_id'];
 
+    public $timestamps = false;
+
+    protected $fillable = [
+        'attribute_id',
+        'inventory_id',
+        'value',
+    ];
+
     public function attribute()
     {
         return $this->belongsTo(Attribute::class, 'attribute_id', 'attribute_id');
+    }
+
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 }

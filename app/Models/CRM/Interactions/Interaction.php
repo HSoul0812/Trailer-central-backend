@@ -7,6 +7,7 @@ use App\Models\Traits\TableAware;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Models\User\NewUser;
 
 class Interaction extends Model
 {
@@ -83,6 +84,32 @@ class Interaction extends Model
     public function leadStatus()
     {
         return $this->belongsTo(LeadStatus::class, 'tc_lead_id', 'tc_lead_identifier');
+    }
+    
+    public function newUser()
+    {
+        return $this->belongsTo(NewUser::class, 'user_id', 'user_id');
+    }
+    
+    public function getRealUsernameAttribute() 
+    {
+       /**
+        *  If there's only one email history record associated to this interaction.
+        *  I.e there are no scraped replies associated to this record take the username from the from_email from the history 
+        */
+       if ($this->emailHistory->count() === 1) {
+           return $this->emailHistory->first()->from_email;
+       }
+       
+       if (!empty($this->sent_by)) {
+           return $this->sent_by;
+       }
+                      
+       if (!empty($this->from_email)) {
+           return $this->from_email;
+       }
+       
+       return $this->newUser->username;                        
     }
     
     public static function getTableName() {

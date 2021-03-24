@@ -2,12 +2,13 @@
 
 namespace App\Models\User;
 
+use App\Models\User\Interfaces\PermissionsInterface;
+use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
-use App\Models\User\DealerUser;
-use App\Models\User\AuthToken;
 use App\Models\Website\Website;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * Class User
@@ -15,10 +16,48 @@ use App\Models\Website\Website;
  * This User class is for API users
  *
  * @package App\Models\User
+ *
+ * @property int $dealer_id
+ * @property string $name
+ * @property string $email
+ *
+ * @property bool $isCrmActive
  */
-class User extends Model implements Authenticatable
+class User extends Model implements Authenticatable, PermissionsInterface
 {
+    use HasPermissionsStub;
+
     const TABLE_NAME = 'dealer';
+
+    public const TYPE_DEALER = 'dealer';
+
+    public const TYPE_MANUFACTURER = 'manufacturer';
+
+    public const TYPE_WEBSITE = 'website';
+
+    public const STATUS_SUSPENDED = 'suspended';
+
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_TRIAL = 'trial';
+
+    public const STATUS_EXTERNAL = 'external';
+
+    public const STATUS_SIGNUP = 'signup';
+
+    public const TYPES = [
+        self::TYPE_DEALER,
+        self::TYPE_MANUFACTURER,
+        self::TYPE_WEBSITE
+    ];
+
+    public const STATUSES = [
+        self::STATUS_SUSPENDED,
+        self::STATUS_ACTIVE,
+        self::STATUS_TRIAL,
+        self::STATUS_EXTERNAL,
+        self::STATUS_SIGNUP
+    ];
 
     /**
      * The table associated with the model.
@@ -44,6 +83,10 @@ class User extends Model implements Authenticatable
         'name',
         'email',
         'password'
+    ];
+
+    protected $casts = [
+        'autoresponder_enable' => 'boolean',
     ];
 
     /**
@@ -101,13 +144,13 @@ class User extends Model implements Authenticatable
      * @return string
      */
     public function getRememberTokenName() {}
-    
+
     public function getAccessTokenAttribute()
     {
         $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
         return $authToken->access_token;
     }
-    
+
     public function website()
     {
         return $this->hasOne(Website::class, 'dealer_id', 'dealer_id');
@@ -119,6 +162,17 @@ class User extends Model implements Authenticatable
     public function newDealerUser()
     {
         return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
+    }
+
+    public function crmUser(): HasOneThrough
+    {
+        return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
+    }
+
+    public function getIsCrmActiveAttribute(): bool
+    {
+        $crmUser = $this->crmUser()->first();
+        return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
     }
 
     /**
@@ -136,7 +190,7 @@ class User extends Model implements Authenticatable
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }

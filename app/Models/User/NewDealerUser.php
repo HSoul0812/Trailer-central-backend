@@ -5,8 +5,8 @@ namespace App\Models\User;
 use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Model;
 
 class NewDealerUser extends Model
@@ -63,7 +63,15 @@ class NewDealerUser extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'dealer_id', 'id');
+        return $this->belongsTo(User::class, 'id', 'dealer_id');
+    }
+
+    /**
+     * @return Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function website()
+    {
+        return $this->hasOne(Website::class, 'dealer_id', 'id');
     }
 
     /**
@@ -114,6 +122,16 @@ class NewDealerUser extends Model
      */
     public function salespeopleEmails() {
         return $this->salespeople()->whereNotNull('email')->where('email', '<>', '')->orderBy('id', 'asc');
+    }
+
+    /**
+     * Get leads
+     * 
+     * @return HasMany
+     */
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'dealer_id', 'id')->where('is_spam', 0);
     }
     
     public static function getTableName() {

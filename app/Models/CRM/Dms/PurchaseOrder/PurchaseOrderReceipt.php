@@ -7,7 +7,7 @@ namespace App\Models\CRM\Dms\PurchaseOrder;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrder;
-use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPartReceived;
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderInventory;
 
 /**
  * Class PurchaseOrderReceipt
@@ -32,6 +32,11 @@ class PurchaseOrderReceipt extends Model
     public function receivedParts()
     {
         return $this->hasMany(PurchaseOrderPartReceived::class, 'po_receipt_id');
+    }
+
+    public function receivedInventories()
+    {
+        return $this->hasMany(PurchaseOrderInventory::class, 'po_receipt_id');
     }
 
 }

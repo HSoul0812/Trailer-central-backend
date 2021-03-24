@@ -4,12 +4,13 @@ namespace App\Transformers\Parts;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Vendor;
+use App\Models\Parts\Part;
 
 class VendorTransformer extends TransformerAbstract
 {
     public function transform($vendor)
     {   
-        if (isset($vendor->vendor)) {
+        if ($vendor instanceof Part) {
             $vendor = $vendor->vendor;
         }
         
