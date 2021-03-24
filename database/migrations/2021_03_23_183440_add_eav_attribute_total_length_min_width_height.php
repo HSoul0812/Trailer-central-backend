@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Inventory\Attribute;
 use App\Models\Inventory\EntityType;
+use App\Models\Inventory\EntityTypeAttribute;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -69,7 +71,7 @@ class AddEavAttributeTotalLengthMinWidthHeight extends Migration
         $ids = [];
         foreach(self::NEW_DIMS_EAV_ATTRIBUTES as $eavAttribute) {
             $code = $eavAttribute['code'];
-            $ids[$code] = DB::table('eav_attribute')->insert($eavAttribute);
+            $ids[$code] = DB::table('eav_attribute')->insertGetId($eavAttribute);
         }
 
         // Get All Entity Types to Update
@@ -92,6 +94,17 @@ class AddEavAttributeTotalLengthMinWidthHeight extends Migration
      */
     public function down()
     {
-        //
+        // Find Attribute ID's
+        $attributeIds = [];
+        foreach(self::NEW_DIMS_EAV_ATTRIBUTES as $eavAttribute) {
+            $attribute = Attribute::where('code', $eavAttribute['code'])->first();
+            $attributeIds[] = $attribute->attribute_id;
+            $attribute->delete();
+        }
+
+        // Delete Entity Type Attributes
+        foreach($attributeIds as $id) {
+            EntityTypeAttribute::where('attribute_id', $id)->delete();
+        }
     }
 }
