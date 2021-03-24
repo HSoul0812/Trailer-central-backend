@@ -3,7 +3,9 @@
 namespace App\Services\Integration\Google;
 
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 
 interface GmailServiceInterface {
     /**
