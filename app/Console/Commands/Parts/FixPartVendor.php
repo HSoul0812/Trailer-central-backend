@@ -35,6 +35,7 @@ class FixPartVendor extends Command
     public function handle(): bool
     {
         $dealerId = $this->argument('dealer_id');
+        $count = 0;
 
         $partsQuery = Part::with('vendor')
             ->whereHas('vendor', function($query) {
@@ -44,7 +45,7 @@ class FixPartVendor extends Command
             $partsQuery = $partsQuery->where('dealer_id', '=', $dealerId);
         }
 
-        $partsQuery->chunk(500, function($parts) {
+        $partsQuery->chunk(500, function($parts) use($count){
             $part = $parts[0];
             foreach ($parts as $part) {
                 $vendor = Vendor::where([
@@ -56,13 +57,18 @@ class FixPartVendor extends Command
                     $vendor = Vendor::create([
                         'name' => $part->vendor->name,
                         'dealer_id' => $part->dealer_id,
-                        'auto_created' => 1
+                        'auto_created' => 1,
+                        'notes' => 'Prev vendor: ' . $part->vendor->id
                     ]);
                 }
 
                 $part->vendor_id = $vendor->id;
                 $part->save();
+
+                $count++;
             }
+
+            $this->info($count . ' parts have been updated.');
         });
 
         return true;
