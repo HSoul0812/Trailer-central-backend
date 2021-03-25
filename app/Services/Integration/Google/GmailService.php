@@ -420,7 +420,7 @@ class GmailService implements GmailServiceInterface
      * @param \Google_Service_Gmail_Message $message
      * @return ParsedEmail
      */
-    private function sendMessage(Google_Service_Gmail_Message $message): ParsedEmail {
+    private function sendMessage(\Google_Service_Gmail_Message $message): ParsedEmail {
         // Send Message Via Gmail
         try {
             $sent = $this->gmail->users_messages->send('me', $message);
