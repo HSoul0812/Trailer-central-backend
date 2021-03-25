@@ -166,7 +166,7 @@ class GmailService implements GmailServiceInterface
 
         // Store Attachments
         if(!empty($parsedEmail->getAttachments())) {
-            $parsedEmail->setAttachments($this->interactionEmail->storeAttachments($smtpConfig->getAccessToken()->dealerId, $parsedEmail));
+            $parsedEmail->setAttachments($this->interactionEmail->storeAttachments($smtpConfig->getAccessToken()->dealer_id, $parsedEmail));
         }
 
         // Return Updated Parsed Email
