@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Email\DTOs;
 
+
 /**
  * Class SmtpConfig
  * 
