@@ -2,6 +2,10 @@
 
 namespace App\Services\CRM\Interactions;
 
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Illuminate\Support\Collection;
+
 interface InteractionEmailServiceInterface {
     /**
      * Send Email With Params

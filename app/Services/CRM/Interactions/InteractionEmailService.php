@@ -2,8 +2,6 @@
 
 namespace App\Services\CRM\Interactions;
 
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
@@ -14,6 +12,9 @@ use App\Mail\InteractionEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Collection;
 
 /**
  * Class InteractionEmailService
