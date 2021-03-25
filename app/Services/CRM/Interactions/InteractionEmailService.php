@@ -161,7 +161,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         $messageDir = str_replace(">", "", str_replace("<", "", $parsedEmail->getMessageId()));
 
         // Valid Attachment Size?!
-        if($parsedEmail->validateAttachmentSize()) {
+        if($parsedEmail->validateAttachmentsSize()) {
             // Loop Attachments
             $attachments = new Collection();
             foreach ($parsedEmail->getAllAttachments() as $file) {
