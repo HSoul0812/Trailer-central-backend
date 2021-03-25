@@ -569,16 +569,13 @@ class ParsedEmail
 
         // Attachments Exist?
         if(!empty($this->attachments)) {
-            $attachments->merge($this->attachments);
+            $attachments = $attachments->merge($this->attachments);
         }
 
         // Existing Attachments Exist?
         if(!empty($this->existingAttachments)) {
-            $attachments->merge($this->existingAttachments);
+            $attachments = $attachments->merge($this->existingAttachments);
         }
-        var_dump($this->attachments);
-        var_dump($this->existingAttachments);
-        var_dump($attachments);
 
         // Return Collection of All Attachments
         return $attachments;
