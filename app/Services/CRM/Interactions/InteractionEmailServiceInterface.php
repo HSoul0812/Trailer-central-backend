@@ -7,10 +7,11 @@ interface InteractionEmailServiceInterface {
      * Send Email With Params
      * 
      * @param int $dealerId
-     * @param array $params
+     * @param SmtpConfig $smtpConfig
+     * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
      */
-    public function send($dealerId, $params);
+    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail);
 
     /**
      * Get Attachments
