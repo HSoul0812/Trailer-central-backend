@@ -96,12 +96,12 @@ class AttachmentFile
         }
 
         // Get Headers if Possible
-        $headers = $this->getFileHeaders($file);
+        $attachment = new self();
+        $headers = $attachment->getFileHeaders($file);
         $mime = !empty($headers['Content-Type']) ? $headers['Content-Type'] : $mime;
         $size = !empty($headers['Content-Length']) ? $headers['Content-Length'] : 0;
 
         // Create Attachment File
-        $attachment = new self();
         $attachment->setFilePath($file);
         $attachment->setFileName($filename);
         $attachment->setMimeType($mime);
