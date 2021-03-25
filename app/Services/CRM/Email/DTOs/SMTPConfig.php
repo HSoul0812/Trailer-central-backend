@@ -110,7 +110,7 @@ class SmtpConfig
 
         // Set Host/Post
         $smtpConfig->setHost($salesperson->smtp_server);
-        $smtpConfig->setPort($salesperson->smtp_port);
+        $smtpConfig->setPort((int) $salesperson->smtp_port);
         $smtpConfig->setSecurity($salesperson->smtp_security ?: '');
         $smtpConfig->setAuthType($salesperson->smtp_auth ?: '');
 
