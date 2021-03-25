@@ -186,7 +186,7 @@ class InteractionService implements InteractionServiceInterface
         DB::transaction(function() use (&$parsedEmail, $leadId, $userId) {
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
-                'id'                => $interaction->getInteractionId(),
+                'id'                => $parsedEmail->getInteractionId(),
                 'lead_id'           => $leadId,
                 'user_id'           => $userId,
                 'interaction_type'  => 'EMAIL',
@@ -194,8 +194,11 @@ class InteractionService implements InteractionServiceInterface
                 'interaction_time'  => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
             ]);
 
+            // Set Interaction ID/Date
+            $parsedEmail->setInteractionId($interaction->interaction_id);
+            $parsedEmail->setDateNow();
+
             // Insert Email
-            $params['date_sent'] = 1;
             $this->emailHistory->createOrUpdate($parsedEmail->getParams());
         });
 

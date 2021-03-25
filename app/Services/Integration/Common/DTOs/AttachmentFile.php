@@ -308,4 +308,21 @@ class AttachmentFile
         // Return Result
         return $result;
     }
+
+
+    /**
+     * Return Email Attachment Params
+     * 
+     * @param string $messageId
+     * @return array
+     */
+    public function getParams(string $messageId): array
+    {
+        // Return Params
+        return [
+            'message_id' => $messageId,
+            'filename' => $this->filePath,
+            'original_filename' => $this->fileName
+        ];
+    }
 }

@@ -629,9 +629,9 @@ class ParsedEmail
     /**
      * Return Interaction ID
      * 
-     * @return int $this->interactionId
+     * @return int $this->interactionId || null
      */
-    public function getInteractionId(): int
+    public function getInteractionId(): ?int
     {
         return $this->interactionId;
     }
@@ -667,5 +667,37 @@ class ParsedEmail
     public function setDirection(string $direction): void
     {
         $this->direction = $direction;
+    }
+
+
+    /**
+     * Return Email History Params
+     * 
+     * @return array
+     */
+    public function getParams(): array
+    {
+        // Get Attachment Params
+        $attachments = [];
+        foreach($this->attachments as $attachment) {
+            $attachments[] = $attachment->getParams($this->messageId);
+        }
+
+        // Return Params
+        return [
+            'lead_id' => $this->leadId,
+            'interaction_id' => $this->interactionId,
+            'message_id' => $this->messageId,
+            'root_message_id' => $this->rootMessageId,
+            'to_email' => $this->to,
+            'to_name' => $this->toName,
+            'from_email' => $this->from,
+            'from_name' => $this->fromName,
+            'subject' => $this->subject,
+            'body' => $this->body,
+            'use_html' => $this->isHtml,
+            'date_sent' => $this->date,
+            'attachments' => $attachments
+        ];
     }
 }
