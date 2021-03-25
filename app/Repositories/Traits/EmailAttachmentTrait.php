@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Traits;
 
+use Illuminate\Support\Collection;
+
 trait EmailAttachmentTrait {
 
     /**
