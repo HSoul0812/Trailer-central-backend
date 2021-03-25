@@ -38,27 +38,27 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * 
      * @param int $dealerId
      * @param SmtpConfig $smtpConfig
-     * @param array $params
+     * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
      */
-    public function send(int $dealerId, SmtpConfig $smtpConfig, array $params) {
+    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail) {
         // Get Unique Message ID
-        if(empty($params['message_id'])) {
+        if(empty($parsedEmail->getMessageId())) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
+            $parsedEmail->setMessageId(sprintf('<%s>', $messageId));
         } else {
-            $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
+            $messageId = str_replace('<', '', str_replace('>', '', $parsedEmail->getMessageId()));
         }
-        $params['message_id'] = sprintf('<%s>', $messageId);
 
         // Add Existing Attachments
         $attachments = array();
-        if(isset($params['files'])) {
-            $attachments = $this->cleanAttachments($params['files']);
+        if(!empty($parsedEmail->getExistingAttachments())) {
+            $attachments = $this->cleanAttachments($parsedEmail->getExistingAttachments());
         }
 
         // Get Attachments
-        if(isset($params['attachments'])) {
-            $attach = $this->getAttachments($params['attachments']);
+        if(!empty($parsedEmail->getAttachments())) {
+            $attach = $this->getAttachments($parsedEmail->getAttachments());
             $attachments = array_merge($attachments, $attach);
         }
 
@@ -66,14 +66,14 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         try {
             // Send Interaction Email
             Mail::to($this->getCleanTo([
-                'email' => $params['to_email'],
-                'name' => $params['to_name']
+                'email' => $parsedEmail->getToEmail(),
+                'name' => $parsedEmail->getToName()
             ]))->send(new InteractionEmail([
                 'date' => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
-                'replyToEmail' => $params['from_email'] ?? "",
-                'replyToName' => $params['from_name'],
-                'subject' => $params['subject'],
-                'body' => $params['body'],
+                'replyToEmail' => $smtpConfig->getUsername(),
+                'replyToName' => $smtpConfig->getFromName(),
+                'subject' => $parsedEmail->getSubject(),
+                'body' => $parsedEmail->getBody(),
                 'attach' => $attachments,
                 'id' => $messageId
             ]));
@@ -82,12 +82,12 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         }
 
         // Store Attachments
-        if(isset($params['attachments'])) {
-            $params['attachments'] = $this->storeAttachments($params['attachments'], $dealerId, $messageId);
+        if(!empty($parsedEmail->getAttachments())) {
+            $parsedEmail->setAttachments($this->storeAttachments($parsedEmail->getAttachments(), $dealerId, $messageId));
         }
 
         // Returns Params With Attachments
-        return $params;
+        return $parsedEmail;
     }
 
     /**
