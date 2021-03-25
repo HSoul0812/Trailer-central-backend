@@ -105,7 +105,7 @@ class ImapConfig
 
         // Set Host/Post
         $imapConfig->setHost($salesperson->imap_server);
-        $imapConfig->setPort($salesperson->imap_port);
+        $imapConfig->setPort((int) $salesperson->imap_port ?? 0);
         $imapConfig->setSecurity($salesperson->imap_security ?: '');
         $imapConfig->setAuthType($salesperson->smtp_auth ?: '');
         $imapConfig->calcCharset();
