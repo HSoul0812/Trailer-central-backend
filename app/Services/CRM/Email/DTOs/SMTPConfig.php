@@ -236,16 +236,8 @@ class SmtpConfig
      */
     public function getSecurity(): string
     {
-        // Set Security Default
-        $security = $this->security ?: self::SSL;
-
-        // Append No Certificate on Gmail
-        if($this->isNoCert()) {
-            $security .= '/' . self::NO_CERT_SUFFIX;
-        }
-
-        // Return Security
-        return $security;
+        // Get Security Default
+        return $this->security ?: self::SSL;
     }
 
     /**
