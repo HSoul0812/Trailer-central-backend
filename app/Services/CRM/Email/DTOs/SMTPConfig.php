@@ -148,7 +148,7 @@ class SmtpConfig
      */
     public function getUsername(): string
     {
-        return $this->username;
+        return !empty($this->username) ? trim($this->username) : '';
     }
 
     /**
@@ -170,7 +170,7 @@ class SmtpConfig
      */
     public function getPassword(): string
     {
-        return $this->password;
+        return !empty($this->password) ? trim($this->password) : '';
     }
 
     /**
@@ -192,7 +192,7 @@ class SmtpConfig
      */
     public function getHost(): string
     {
-        return $this->host;
+        return !empty($this->host) ? trim($this->host) : '';
     }
 
     /**
@@ -212,7 +212,7 @@ class SmtpConfig
      * 
      * @return int $this->port
      */
-    public function getPort(): int
+    public function getPort(): ?int
     {
         return $this->port;
     }

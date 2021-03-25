@@ -41,6 +41,9 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             $messageId = str_replace('<', '', str_replace('>', '', $parsedEmail->getMessageId()));
         }
 
+        // Fill Smtp Config
+        $this->setSmtpConfig($smtpConfig);
+
         // Try/Send Email!
         try {
             // Send Interaction Email
@@ -67,86 +70,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Returns Params With Attachments
         return $parsedEmail;
-    }
-
-    /**
-     * Clean Existing Attachments
-     * 
-     * @param type $files
-     */
-    public function cleanAttachments($files) {
-        // Clean Existing Attachments
-        $attachments = array();
-        if (!empty($files) && is_array($files)) {
-            // Loop Attachment Files
-            foreach ($files as $file) {
-                // Get File Name
-                $parts = explode("/", $file);
-                $filename = end($parts);
-                $ext = explode(".", $filename);
-                $mime = 'image/jpeg';
-                $size = 0;
-                if(!empty($ext[1])) {
-                    if(in_array($ext[1], $this->imageTypes)) {
-                        $mime = 'image/' . $ext[1];
-                    } else {
-                        $mime = 'text/' . $ext[1];
-                    }
-                }
-
-                // Get Mime Type
-                $headers = get_headers($file);
-                if(!empty($headers)) {
-                    foreach($headers as $header) {
-                        if(strpos($header, 'Content-Type') !== false) {
-                            $mime = str_replace('Content-Type: ', '', $header);
-                        }
-                        elseif(strpos($header, 'Content-Length') !== false) {
-                            $size = str_replace('Content-Length: ', '', $header);
-                        }
-                    }
-                }
-
-                // Add to Array
-                $attachments[] = [
-                    'path' => $file,
-                    'as'   => $filename,
-                    'mime' => $mime,
-                    'size' => $size
-                ];
-            }
-        }
-
-        // Return Filled Attachments Array
-        return $attachments;
-    }
-
-    /**
-     * Get Attachments
-     * 
-     * @param type $files
-     */
-    public function getAttachments($files) {
-        // Check Size of Attachments
-        $this->checkAttachmentsSize($files);
-
-        // Get Attachments
-        $attachments = array();
-        if (!empty($files) && is_array($files)) {
-            // Loop Attachment Files
-            foreach ($files as $file) {
-                // Add to Array
-                $attachments[] = [
-                    'path' => $file->getPathname(),
-                    'as'   => $file->getClientOriginalName(),
-                    'mime' => $file->getMimeType(),
-                    'size' => $file->getSize(),
-                ];
-            }
-        }
-
-        // Return Filled Attachments Array
-        return $attachments;
     }
 
     /**

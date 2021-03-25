@@ -502,6 +502,16 @@ class ParsedEmail
         return $totalSize;
     }
 
+    /**
+     * Do Attachments Exist?
+     * 
+     * @return bool
+     */
+    public function hasAttachments(): bool
+    {
+        return !empty($this->attachments) ? ($this->attachments->count() > 0) : false;
+    }
+
 
     /**
      * Return Existing Attachments
