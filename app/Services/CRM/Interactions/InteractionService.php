@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Interactions;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Interactions\Interaction;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
