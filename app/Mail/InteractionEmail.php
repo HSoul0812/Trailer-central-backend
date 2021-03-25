@@ -2,14 +2,14 @@
 
 namespace App\Mail;
 
-use App\Repositories\Traits\EmailAttachmentTrait;
+use App\Repositories\Traits\MailableAttachmentTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class InteractionEmail extends Mailable
 {
-    use Queueable, SerializesModels, EmailAttachmentTrait;
+    use Queueable, SerializesModels, MailableAttachmentTrait;
 
     /**
      * @var array
