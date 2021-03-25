@@ -52,6 +52,8 @@ class InteractionEmail extends Mailable
             ->text('emails.interactions.interaction-email-plain');
 
         // Add Attachments
+        var_dump($this->data['attach']);
+        die;
         if(!empty($this->data['attach'])) {
             $this->applyAttachments($build, $this->data['attach']);
         }
