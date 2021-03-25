@@ -2,6 +2,8 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use Illuminate\Http\UploadedFile;
+
 /**
  * Class AttachmentFile
  * 
@@ -41,25 +43,29 @@ class AttachmentFile
 
 
     /**
-     * Initialize From Laravel Multipart Files Array
+     * Initialize From Laravel UploadedFile
      * 
-     * @param array $attachment
+     * @param UploadedFile $file
+     * @return AttachmentFile
      */
-    public function __construct(array $attachment = []) {
-        // Set Parts
-        if(isset($attachment['path'])) {
-            $this->setTmpName($attachment['path']);
-        }
+    public static function getFromUploadedFile(UploadedFile $file) {
+        // Get Attachment
+        $attachment = new self();
+
+        // Set Temp Name
+        $attachment->setTmpName($file->getPathname());
 
         // Set File Name
-        if(isset($attachment['as'])) {
-            
-        }
+        $attachment->setFileName($file->getClientOriginalName());
 
         // Set Mime Type
-        if(isset($attachment['mime'])) {
-            $this->setMimeType($attachment['mime']);
-        }
+        $attachment->setMimeType($file->getMimeType());
+
+        // Set Size
+        $attachment->setFileSize($file->getSize());
+
+        // Return File Attachment
+        return $attachment;
     }
 
 

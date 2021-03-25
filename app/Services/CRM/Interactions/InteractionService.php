@@ -58,19 +58,23 @@ class InteractionService implements InteractionServiceInterface
      */
     public function email($leadId, $params, $attachments = array()) {
         // Find Lead/Sales Person
-        $lead = Lead::findOrFail($leadId);
         $user = Auth::user();
-        var_dump($params['attachments']);
-        die;
+
+        // Merge Attachments if Necessary
+        if(isset($params['attachments'])) {
+            $attachments = array_merge($attachments, $params['attachments']);
+        } else {
+            $params['attachments'] = $attachments;
+        }
 
         // Get SMTP Config
         $smtpConfig = $this->getSmtpConfig();
 
         // Create Parsed Email
-        $parsedEmail = $this->getParsedEmail($smtpConfig, $lead, $params, $attachments);
+        $parsedEmail = $this->getParsedEmail($smtpConfig, $leadId, $params);
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($smtpConfig->getUsername(), $lead->identifier);
+        $emailHistory = $this->emailHistory->findEmailDraft($smtpConfig->getUsername(), $leadId);
         if(!empty($emailHistory->id)) {
             $parsedEmail->setMessageId($emailHistory->message_id);
         }
@@ -79,9 +83,9 @@ class InteractionService implements InteractionServiceInterface
         if($smtpConfig->getAuthType() === SmtpConfig::AUTH_GMAIL) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
         } elseif($smtpConfig->getAuthType() === SmtpConfig::AUTH_NTLM) {
-            $finalEmail = $this->ntlm->send($lead->dealer_id, $smtpConfig, $parsedEmail);
+            $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
-            $finalEmail = $this->interactionEmail->send($lead->dealer_id, $smtpConfig, $parsedEmail);
+            $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
         }
 
         // Save Email
@@ -92,31 +96,39 @@ class InteractionService implements InteractionServiceInterface
     /**
      * Get Parsed Email From Params
      * 
+     * @param SmtpConfig $smtpConfig
+     * @param int $leadId
      * @param array $params
-     * @param array $attachments
      * @return ParsedEmail
      */
-    private function getParsedEmail(SmtpConfig $smtpConfig, Lead $lead, array $params, array $attachments = []): ParsedEmail {
+    private function getParsedEmail(SmtpConfig $smtpConfig, int $leadId, array $params): ParsedEmail {
         // Initialize Parsed Email
         $parsedEmail = new ParsedEmail();
 
         // Set From Details
         $parsedEmail->setFromEmail($smtpConfig->getUsername());
-        $parsedEmail->setFromName();
+        $parsedEmail->setFromName($smtpConfig->getFromName());
 
         // Set Lead Details
+        $lead = Lead::findOrFail($leadId);
+        $parsedEmail->setLeadId($lead->identifier);
         $parsedEmail->setToEmail(trim($lead->email_address));
         $parsedEmail->setToName($lead->full_name);
 
+        // Set Email Details
+        $parsedEmail->setSubject($params['subject']);
+        $parsedEmail->setBody($params['body']);
+
         // Append Attachments
-        $files = new Collection();
-        if(!empty($params['attachments'])) {
-            foreach($params['attachments'] as $attachment) {
-                $files->push(new AttachmentFile($attachment));
-            }
+        foreach($params['attachments'] as $attachment) {
+            $parsedEmail->addAttachment(AttachmentFile::getFromUploadedFile($attachment));
         }
-        foreach($attachments as $attachment) {
-            $files->push(new AttachmentFile($attachment));
+
+        // Append Existing Attachments
+        if(!empty($params['files'])) {
+            foreach($params['files'] as $file) {
+                $parsedEmail->addExistingAttachment(AttachmentFile::getFromRemoteFile($file));
+            }
         }
 
         // Return Filled Out Parsed Email

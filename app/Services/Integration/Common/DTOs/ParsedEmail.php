@@ -75,6 +75,11 @@ class ParsedEmail
     private $attachments;
 
     /**
+     * @var Collection<AttachmentFile> Attachments Already Saved to DB on Draft
+     */
+    private $existingAttachments;
+
+    /**
      * @var string Date of email sent
      */
     private $date = '';
@@ -469,6 +474,50 @@ class ParsedEmail
 
         // Append Attachment
         $this->attachments->push($attachment);
+    }
+
+
+    /**
+     * Return Existing Attachments
+     * 
+     * @return Collection<AttachmentFile> $this->existingAttachments
+     */
+    public function getExistingAttachments(): Collection
+    {
+        // Attachments Exist?
+        if(!empty($this->existingAttachments)) {
+            return $this->existingAttachments;
+        }
+
+        // Return Empty Collection
+        return new Collection();
+    }
+
+    /**
+     * Set Existing Attachments
+     * 
+     * @param Collection<AttachmentFile> $attachments
+     * @return void
+     */
+    public function setExistingAttachments(Collection $attachments): void
+    {
+        $this->existingAttachments = $attachments;
+    }
+
+    /**
+     * Add Existing Attachment
+     * 
+     * @param AttachmentFile $attachment
+     * @return void
+     */
+    public function addExistingAttachment(AttachmentFile $attachment): void
+    {
+        if(empty($this->existingAttachments)) {
+            $this->existingAttachments = new Collection();
+        }
+
+        // Append Existing Attachment
+        $this->existingAttachments->push($attachment);
     }
 
 

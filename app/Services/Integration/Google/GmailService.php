@@ -426,7 +426,7 @@ class GmailService implements GmailServiceInterface
             $files = $this->interactionEmail->cleanAttachments($parsedEmail->getExistingAttachments());
             foreach($files as $attachment) {
                 // Optionally add any attachments
-                $swift->attach((new \Swift_Attachment(file_get_contents($attachment['path']), $attachment['as'], $attachment['mime'])));
+                $swift->attach((new \Swift_Attachment(file_get_contents($attachment->getFileName()), $attachment->getFileName(), $attachment->getMimeType())));
             }
         }
 
@@ -435,7 +435,7 @@ class GmailService implements GmailServiceInterface
             $attachments = $this->interactionEmail->getAttachments($parsedEmail->getAttachments());
             foreach($attachments as $attachment) {
                 // Optionally add any attachments
-                $swift->attach(\Swift_Attachment::fromPath($attachment['path'])->setFilename($attachment['as']));
+                $swift->attach(\Swift_Attachment::fromPath($attachment->getTmpName())->setFilename($attachment->getFileName()));
             }
         }
 
