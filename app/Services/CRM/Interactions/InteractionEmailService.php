@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Models\CRM\Email\Attachment;
 use App\Mail\InteractionEmail;
