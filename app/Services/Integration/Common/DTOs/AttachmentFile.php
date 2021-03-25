@@ -246,6 +246,18 @@ class AttachmentFile
         if(!empty($this->contents)) {
             return $this->contents;
         }
+
+        // Return Temp File Contents if Exists
+        if(!empty($this->tmpName) && file_exists($this->tmpName)) {
+            return file_get_contents($this->tmpName);
+        }
+
+        // Return Remote File Contents if Exists
+        if(!empty($this->filePath) && file_exists($this->filePath)) {
+            return file_get_contents($this->filePath);
+        }
+
+        // Return Empty String
         return '';
     }
 

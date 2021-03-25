@@ -2,6 +2,9 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use App\Models\CRM\Email\Attachment;
+use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
+use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
@@ -476,6 +479,29 @@ class ParsedEmail
         $this->attachments->push($attachment);
     }
 
+    /**
+     * Validate Attachments Size
+     * 
+     * @throws ExceededSingleAttachmentSizeException
+     * @throws ExceededTotalAttachmentSizeException
+     * @return int
+     */
+    public function validateAttachmentsSize() {
+        // Loop Attachments
+        $totalSize = 0;
+        foreach($this->attachments as $attachment) {
+            if ($attachment->getFileSize() > Attachment::MAX_FILE_SIZE) {
+                throw new ExceededSingleAttachmentSizeException();
+            } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
+                throw new ExceededTotalAttachmentSizeException();
+            }
+            $totalSize += $attachment->getFileSize();
+        }
+
+        // Return Total Size
+        return $totalSize;
+    }
+
 
     /**
      * Return Existing Attachments
@@ -518,6 +544,31 @@ class ParsedEmail
 
         // Append Existing Attachment
         $this->existingAttachments->push($attachment);
+    }
+
+
+    /**
+     * Merge All Attachments
+     * 
+     * @return Collection<AttachmentFile> merge($this->attachments, $this->existingAttachments)
+     */
+    public function getAllAttachments(): Collection
+    {
+        // Initialize Collection
+        $attachments = new Collection();
+
+        // Attachments Exist?
+        if(!empty($this->attachments)) {
+            $attachments->merge($this->attachments);
+        }
+
+        // Existing Attachments Exist?
+        if(!empty($this->existingAttachments)) {
+            $attachments->merge($this->existingAttachments);
+        }
+
+        // Return Collection of All Attachments
+        return $attachments;
     }
 
 

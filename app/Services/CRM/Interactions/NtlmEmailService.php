@@ -35,18 +35,6 @@ class NtlmEmailService implements NtlmEmailServiceInterface
             $messageId = str_replace('<', '', str_replace('>', '', $parsedEmail->getMessageId()));
         }
 
-        // Add Existing Attachments
-        $attachments = array();
-        if(!empty($parsedEmail->getExistingAttachments())) {
-            $attachments = $this->cleanAttachments($parsedEmail->getExistingAttachments());
-        }
-
-        // Get Attachments
-        if(!empty($parsedEmail->getAttachments())) {
-            $attach = $this->getAttachments($parsedEmail->getAttachments());
-            $attachments = array_merge($attachments, $attach);
-        }
-
         // Try/Send Email!
         try {
             // Send Interaction Email

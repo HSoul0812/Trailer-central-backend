@@ -3,8 +3,6 @@
 namespace App\Services\CRM\Interactions;
 
 use App\Exceptions\CRM\Email\SendEmailFailedException;
-use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
-use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
@@ -43,18 +41,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             $messageId = str_replace('<', '', str_replace('>', '', $parsedEmail->getMessageId()));
         }
 
-        // Add Existing Attachments
-        $attachments = array();
-        if(!empty($parsedEmail->getExistingAttachments())) {
-            $attachments = $this->cleanAttachments($parsedEmail->getExistingAttachments());
-        }
-
-        // Get Attachments
-        if(!empty($parsedEmail->getAttachments())) {
-            $attach = $this->getAttachments($parsedEmail->getAttachments());
-            $attachments = array_merge($attachments, $attach);
-        }
-
         // Try/Send Email!
         try {
             // Send Interaction Email
@@ -67,7 +53,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 'replyToName' => $smtpConfig->getFromName(),
                 'subject' => $parsedEmail->getSubject(),
                 'body' => $parsedEmail->getBody(),
-                'attach' => $attachments,
+                'attach' => $parsedEmail->getAllAttachments(),
                 'id' => $messageId
             ]));
         } catch(\Exception $ex) {
@@ -75,8 +61,8 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         }
 
         // Store Attachments
-        if(!empty($parsedEmail->getAttachments())) {
-            $parsedEmail->setAttachments($this->storeAttachments($parsedEmail->getAttachments(), $dealerId, $messageId));
+        if($parsedEmail->hasAttachments()) {
+            $parsedEmail->setAttachments($this->storeAttachments($dealerId, $parsedEmail));
         }
 
         // Returns Params With Attachments
@@ -175,46 +161,29 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         $messageDir = str_replace(">", "", str_replace("<", "", $parsedEmail->getMessageId()));
 
         // Valid Attachment Size?!
-        if($this->checkAttachmentsSize($files)) {
+        if($parsedEmail->validateAttachmentSize()) {
             // Loop Attachments
-            foreach ($files as $file) {
+            $attachments = new Collection();
+            foreach ($parsedEmail->getAllAttachments() as $file) {
                 // Generate Path
-                $filePath = '/crm/' . $dealerId . '/' . $messageDir .
-                    '/attachments/' . $file->getClientOriginalName();
+                $filePath = '/crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $file->getFileName();
 
                 // Save File to S3
-                Storage::disk('ses')->put($filePath, $file->get());
+                Storage::disk('ses')->put($filePath, $file->getContents());
 
-                // Create Attachment
-                $attachments[] = [
-                    'message_id' => '<' . $messageId . '>',
-                    'filename' => Attachment::AWS_PREFIX . $filePath,
-                    'original_filename' => time() . $file->getClientOriginalName()
-                ];
+                // Set File Name/Path
+                $file->setFilePath(Attachment::AWS_PREFIX . $filePath);
+                $file->setFileName(time() . $file->getClientOriginalName());
+
+                // Add File
+                $attachments->push($file);
             }
+
+            // Return Attachment Objects
+            return $attachments;
         }
 
-        // Return Attachment Objects
-        return $attachments;
-    }
-
-    /**
-     * @param $files - mail attachment(-s)
-     * @return bool | string
-     */
-    private function checkAttachmentsSize($files) {
-        // Calculate Total Size
-        $totalSize = 0;
-        foreach ($files as $file) {
-            if ($file->getSize() > Attachment::MAX_FILE_SIZE) {
-                throw new ExceededSingleAttachmentSizeException();
-            } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
-                throw new ExceededTotalAttachmentSizeException();
-            }
-            $totalSize += $file->getSize();
-        }
-
-        // Return Total Size
-        return $totalSize;
+        // Return All Attachments
+        return $parsedEmail->getAllAttachments();
     }
 }

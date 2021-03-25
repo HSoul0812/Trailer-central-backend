@@ -397,7 +397,7 @@ class GmailService implements GmailServiceInterface
 
         // Add Existing Attachments
         foreach($parsedEmail->getExistingAttachments() as $attachment) {
-            $swift->attach((new \Swift_Attachment(file_get_contents($attachment->getFilePath()), $attachment->getFileName(), $attachment->getMimeType())));
+            $swift->attach((new \Swift_Attachment($attachment->getContents(), $attachment->getFileName(), $attachment->getMimeType())));
         }
 
         // Add Attachments

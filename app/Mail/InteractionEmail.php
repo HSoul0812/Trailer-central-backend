@@ -2,13 +2,14 @@
 
 namespace App\Mail;
 
+use App\Repositories\Traits\EmailAttachmentTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class InteractionEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, EmailAttachmentTrait;
 
     /**
      * @var array
@@ -50,13 +51,9 @@ class InteractionEmail extends Mailable
         $build->view('emails.interactions.interaction-email')
             ->text('emails.interactions.interaction-email-plain');
 
-        if (! empty($this->data['attach']) && is_array($this->data['attach'])) {
-            foreach ($this->data['attach'] as $attach) {
-                $build->attach($attach['path'], [
-                    'as'    => $attach['as'],
-                    'mime'  => $attach['mime']
-                ]);
-            }
+        // Add Attachments
+        if(!empty($this->data['attach'])) {
+            $this->applyAttachments($build, $this->data['attach']);
         }
 
         $build->with($this->data);
