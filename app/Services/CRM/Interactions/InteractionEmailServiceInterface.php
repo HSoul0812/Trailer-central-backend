@@ -23,10 +23,9 @@ interface InteractionEmailServiceInterface {
     /**
      * Store Uploaded Attachments
      * 
-     * @param array $files
      * @param int $dealerId
-     * @param string $messageId
-     * @return array of saved attachments
+     * @param ParsedEmail $parsedEmail
+     * @return Collection<Attachment>
      */
-    public function storeAttachments($files, $dealerId, $messageId);
+    public function storeAttachments(int $dealerId, ParsedEmail $parsedEmail): Collection;
 }

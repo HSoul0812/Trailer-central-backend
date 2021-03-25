@@ -11,6 +11,13 @@ use Illuminate\Http\UploadedFile;
  */
 class AttachmentFile
 {
+    const IMAGE_TYPES = [
+        'gif',
+        'png',
+        'jpeg',
+        'jpg'
+    ];
+
     /**
      * @var string Temporary Local Filename
      */
@@ -65,6 +72,40 @@ class AttachmentFile
         $attachment->setFileSize($file->getSize());
 
         // Return File Attachment
+        return $attachment;
+    }
+
+    /**
+     * Initialize From Existing Remote Filename
+     * 
+     * @param string $file
+     * @return AttachmentFile
+     */
+    public static function getFromRemoteFile(string $file) {
+        // Get File Name
+        $parts = explode("/", $file);
+        $filename = end($parts);
+        $ext = explode(".", $filename);
+
+        // Get Mime From Extension
+        $ext[1] = !empty($ext[1]) ? $ext[1] : 'jpeg';
+        if(in_array($ext[1], self::IMAGE_TYPES)) {
+            $mime = 'image/' . $ext[1];
+        } else {
+            $mime = 'text/' . $ext[1];
+        }
+
+        // Get Headers if Possible
+        $headers = $this->getFileHeaders($file);
+        $mime = !empty($headers['Content-Type']) ? $headers['Content-Type'] : $mime;
+        $size = !empty($headers['Content-Length']) ? $headers['Content-Length'] : 0;
+
+        // Create Attachment File
+        $attachment = new self();
+        $attachment->setFilePath($file);
+        $attachment->setFileName($filename);
+        $attachment->setMimeType($mime);
+        $attachment->setFileSize($size);
         return $attachment;
     }
 
@@ -217,5 +258,42 @@ class AttachmentFile
     public function setContents(string $contents): void
     {
         $this->contents = $contents;
+    }
+
+
+
+    /**
+     * Get Array Mapped Headers
+     * 
+     * @param string $file
+     * @return array
+     */
+    private function getFileHeaders(string $file): array {
+        // Get Headers From Filename
+        $headers = get_headers($file);
+
+        // Start Headers
+        $result = [];
+        if(!empty($headers)) {
+            // Map Headers
+            foreach($headers as $header) {
+                // Split By Colon
+                $break = explode(":", $header);
+
+                // Get Key
+                $key = trim($break[0]);
+
+                // Get Value
+                $value = !empty($break[1]) ? trim($break[1]) : '';
+
+                // Map
+                if(!empty($value)) {
+                    $result[$key] = $value;
+                }
+            }
+        }
+
+        // Return Result
+        return $result;
     }
 }

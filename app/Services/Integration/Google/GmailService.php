@@ -145,42 +145,20 @@ class GmailService implements GmailServiceInterface
         // Set Access Token
         $this->setAccessToken($smtpConfig->getAccessToken());
 
-        // Insert Gmail
+        // Prepare Gmail Message
         try {
-            // Create Message
             $message = $this->prepareMessage($smtpConfig, $parsedEmail);
         } catch (\Exception $e) {
-            // Check Error
-            $error = $e->getMessage();
-            if(strpos($error, 'Address in mailbox given') !== FALSE) {
+            if(strpos($e->getMessage(), 'Address in mailbox given') !== FALSE) {
                 throw new InvalidToEmailAddressException;
             }
-
-            throw new FailedInitializeGmailMessageException($error . ': ' . $e->getTraceAsString());
-        }
-        if(empty($message)) {
-            throw new FailedInitializeGmailMessageException();
-        }
-
-        // Send Gmail Message
-        try {
-            // Send Message
-            $sent = $this->gmail->users_messages->send('me', $message);
-        } catch (\Exception $e) {
-            // Get Message
-            $error = $e->getMessage();
-            $this->log->error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
-            if(strpos($error, "invalid authentication") !== FALSE) {
-                throw new InvalidGmailAuthMessageException();
-            } else {
-                throw new FailedSendGmailMessageException();
-            }
+            throw new FailedInitializeGmailMessageException($e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Get Message ID From Gmail
         try {
-            $full = $this->message($sent->id);
-            $parsedEmail->setMessageId($full->getMessageId());
+            $result = $this->sendMessage($message);
+            $parsedEmail->setMessageId($result->getMessageId());
         } catch (\Exception $e) {
             // Report Error, but Don't Stop Process
             $this->log->error('Exception returned getting Gmail Message ID; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
@@ -188,7 +166,7 @@ class GmailService implements GmailServiceInterface
 
         // Store Attachments
         if(!empty($parsedEmail->getAttachments())) {
-            $parsedEmail->setAttachments($this->interactionEmail->storeAttachments($parsedEmail->getAttachments(), $smtpConfig->getAccessToken()->dealerId, $parsedEmail->getMessageId()));
+            $parsedEmail->setAttachments($this->interactionEmail->storeAttachments($smtpConfig->getAccessToken()->dealerId, $parsedEmail));
         }
 
         // Return Updated Parsed Email
@@ -404,7 +382,7 @@ class GmailService implements GmailServiceInterface
         // Get From
         $from = $parsedEmail->getFromEmail();
         if(!empty($parsedEmail->getFromName())) {
-            $from = [$from => $parsedEmail->getFromEmail()];
+            $from = [$from => $parsedEmail->getFromName()];
         }
 
         // Get To
@@ -414,42 +392,51 @@ class GmailService implements GmailServiceInterface
         }
 
         // Create Swift Message
-        $swift = (new \Swift_Message($parsedEmail->getSubject()))
-            ->setFrom($from)
-            ->setTo($to)
-            ->setContentType('text/html')
-            ->setCharset('utf-8')
-            ->setBody($parsedEmail->getBody());
+        $swift = (new \Swift_Message($parsedEmail->getSubject()))->setFrom($from)->setTo($to)
+            ->setContentType('text/html')->setCharset('utf-8')->setBody($parsedEmail->getBody());
 
         // Add Existing Attachments
-        if(!empty($parsedEmail->getExistingAttachments())) {
-            $files = $this->interactionEmail->cleanAttachments($parsedEmail->getExistingAttachments());
-            foreach($files as $attachment) {
-                // Optionally add any attachments
-                $swift->attach((new \Swift_Attachment(file_get_contents($attachment->getFileName()), $attachment->getFileName(), $attachment->getMimeType())));
-            }
+        foreach($parsedEmail->getExistingAttachments() as $attachment) {
+            $swift->attach((new \Swift_Attachment(file_get_contents($attachment->getFileName()), $attachment->getFileName(), $attachment->getMimeType())));
         }
 
         // Add Attachments
-        if(!empty($parsedEmail->getAttachments())) {
-            $attachments = $this->interactionEmail->getAttachments($parsedEmail->getAttachments());
-            foreach($attachments as $attachment) {
-                // Optionally add any attachments
-                $swift->attach(\Swift_Attachment::fromPath($attachment->getTmpName())->setFilename($attachment->getFileName()));
-            }
+        foreach($parsedEmail->getAttachments() as $attachment) {
+            $swift->attach(\Swift_Attachment::fromPath($attachment->getTmpName())->setFilename($attachment->getFileName()));
         }
 
-        // Get Raw Message
-        $msg_base64 = (new \Swift_Mime_ContentEncoder_Base64ContentEncoder())
-                        ->encodeString($swift->toString());
-        $msg_base64 = preg_replace('/(\s|\r)*/', '', $msg_base64);
-
         // Set Message and Return
+        $msg_base64 = (new \Swift_Mime_ContentEncoder_Base64ContentEncoder())->encodeString($swift->toString());
         $message = new \Google_Service_Gmail_Message();
-        $message->setRaw($msg_base64);
+        $message->setRaw(preg_replace('/(\s|\r)*/', '', $msg_base64));
 
         // Return Message
         return $message;
+    }
+
+    /**
+     * Send Gmail Message
+     * 
+     * @param \Google_Service_Gmail_Message $message
+     * @return ParsedEmail
+     */
+    private function sendMessage(Google_Service_Gmail_Message $message): ParsedEmail {
+        // Send Message Via Gmail
+        try {
+            $sent = $this->gmail->users_messages->send('me', $message);
+        } catch (\Exception $e) {
+            // Get Message
+            $error = $e->getMessage();
+            $this->log->error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            if(strpos($error, "invalid authentication") !== FALSE) {
+                throw new InvalidGmailAuthMessageException();
+            } else {
+                throw new FailedSendGmailMessageException();
+            }
+        }
+
+        // Get Message ID From Gmail
+        return $this->message($sent->id);
     }
 
 

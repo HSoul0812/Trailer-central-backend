@@ -24,16 +24,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
     use CustomerHelper, MailHelper;
 
     /**
-     * @var array
-     */
-    private $imageTypes = [
-        'gif',
-        'png',
-        'jpeg',
-        'jpg'
-    ];
-
-    /**
      * Send Email With Params
      * 
      * @param int $dealerId
@@ -173,36 +163,31 @@ class InteractionEmailService implements InteractionEmailServiceInterface
     /**
      * Store Uploaded Attachments
      * 
-     * @param array $files
      * @param int $dealerId
-     * @param string $messageId
-     * @return array of saved attachments
+     * @param ParsedEmail $parsedEmail
+     * @return Collection<Attachment>
      */
-    public function storeAttachments($files, $dealerId, $messageId) {
+    public function storeAttachments(int $dealerId, ParsedEmail $parsedEmail): Collection {
         // Calculate Directory
-        $messageDir = str_replace(">", "", str_replace("<", "", $messageId));
+        $messageDir = str_replace(">", "", str_replace("<", "", $parsedEmail->getMessageId()));
 
-        // Loop Attachments
-        $attachments = array();
-        if (!empty($files) && is_array($files)) {
-            // Valid Attachment Size?!
-            if($this->checkAttachmentsSize($files)) {
-                // Loop Attachments
-                foreach ($files as $file) {
-                    // Generate Path
-                    $filePath = '/crm/' . $dealerId . '/' . $messageDir .
-                        '/attachments/' . $file->getClientOriginalName();
+        // Valid Attachment Size?!
+        if($this->checkAttachmentsSize($files)) {
+            // Loop Attachments
+            foreach ($files as $file) {
+                // Generate Path
+                $filePath = '/crm/' . $dealerId . '/' . $messageDir .
+                    '/attachments/' . $file->getClientOriginalName();
 
-                    // Save File to S3
-                    Storage::disk('ses')->put($filePath, $file->get());
+                // Save File to S3
+                Storage::disk('ses')->put($filePath, $file->get());
 
-                    // Create Attachment
-                    $attachments[] = [
-                        'message_id' => '<' . $messageId . '>',
-                        'filename' => Attachment::AWS_PREFIX . $filePath,
-                        'original_filename' => time() . $file->getClientOriginalName()
-                    ];
-                }
+                // Create Attachment
+                $attachments[] = [
+                    'message_id' => '<' . $messageId . '>',
+                    'filename' => Attachment::AWS_PREFIX . $filePath,
+                    'original_filename' => time() . $file->getClientOriginalName()
+                ];
             }
         }
 
