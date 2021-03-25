@@ -2,6 +2,8 @@
 
 namespace App\Services\CRM\Email\DTOs;
 
+use App\Models\CRM\User\SalesPerson;
+use App\Models\Integration\Auth\AccessToken;
 
 /**
  * Class SmtpConfig
