@@ -40,7 +40,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         } else {
             $messageId = str_replace('<', '', str_replace('>', '', $parsedEmail->getMessageId()));
         }
-        var_dump($this->serverHostname());
 
         // Fill Smtp Config
         $this->setSmtpConfig($smtpConfig);
@@ -90,13 +89,13 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             $attachments = new Collection();
             foreach ($parsedEmail->getAllAttachments() as $file) {
                 // Generate Path
-                $filePath = '/crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $file->getFileName();
+                $filePath = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $file->getFileName();
 
                 // Save File to S3
                 Storage::disk('ses')->put($filePath, $file->getContents());
 
                 // Set File Name/Path
-                $file->setFilePath(Attachment::AWS_PREFIX . $filePath);
+                $file->setFilePath(Attachment::AWS_PREFIX . '/' . $filePath);
                 $file->setFileName(time() . $file->getClientOriginalName());
 
                 // Add File
