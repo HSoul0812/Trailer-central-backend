@@ -40,6 +40,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         } else {
             $messageId = str_replace('<', '', str_replace('>', '', $parsedEmail->getMessageId()));
         }
+        var_dump($this->serverHostname());
 
         // Fill Smtp Config
         $this->setSmtpConfig($smtpConfig);
