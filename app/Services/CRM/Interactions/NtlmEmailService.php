@@ -6,9 +6,9 @@ use App\Exceptions\CRM\Email\SaveNtlmFailedException;
 use App\Exceptions\CRM\Email\SaveNtlmAttachmentsFailedException;
 use App\Exceptions\CRM\Email\SendNtlmFailedException;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
-use App\Services\CRM\Interactions\ParsedEmail;
 use App\Services\CRM\Interactions\DTOs\NtlmChangeKey;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 
@@ -79,7 +79,7 @@ class NtlmEmailService implements NtlmEmailServiceInterface
      * @param SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
      */
-    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail) {
+    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Get Unique Message ID
         if(empty($parsedEmail->getMessageId())) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());

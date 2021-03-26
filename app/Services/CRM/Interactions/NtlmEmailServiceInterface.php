@@ -14,5 +14,5 @@ interface NtlmEmailServiceInterface {
      * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
      */
-    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail);
+    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail;
 }
