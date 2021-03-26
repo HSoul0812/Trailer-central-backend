@@ -238,13 +238,13 @@ class NtlmEmailService implements NtlmEmailServiceInterface
         $request->Attachments = new NonEmptyArrayOfAttachmentsType();
 
         // Loop Attachments
-        foreach($parsedEmail->getAllAttachments() as $attachment) {
+        foreach($parsedEmail->getAllAttachments() as $file) {
             // Build the file attachment.
             $attachment = new FileAttachmentType();
             $attachment->IsInline = true;
-            $attachment->Content = $parsedEmail->getContents();
-            $attachment->Name = $parsedEmail->getFileName();
-            $attachment->ContentId = $parsedEmail->getFileName();
+            $attachment->Content = $file->getContents();
+            $attachment->Name = $file->getFileName();
+            $attachment->ContentId = $file->getFileName();
 
             // Add Attachment to Message
             $request->Attachments->FileAttachment[] = $attachment;
