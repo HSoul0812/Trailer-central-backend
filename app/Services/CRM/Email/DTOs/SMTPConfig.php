@@ -255,7 +255,7 @@ class SmtpConfig
     /**
      * Return Auth Type
      * 
-     * @return string $this->fileAuth
+     * @return string $this->authType
      */
     public function getAuthType(): string
     {
@@ -271,6 +271,26 @@ class SmtpConfig
     public function setAuthType(string $authType): void
     {
         $this->authType = $authType;
+    }
+
+    /**
+     * Is Auth Type Gmail?
+     * 
+     * @return bool $this->getAuthType() === self::AUTH_GMAIL
+     */
+    public function isAuthTypeGmail(): bool
+    {
+        return $this->getAuthType() === self::AUTH_GMAIL;
+    }
+
+    /**
+     * Is Auth Type NTLM?
+     * 
+     * @return bool $this->getAuthType === self::AUTH_NTLM
+     */
+    public function isAuthTypeNtlm(): bool
+    {
+        return $this->getAuthType() === self::AUTH_NTLM;
     }
 
 

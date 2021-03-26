@@ -509,7 +509,7 @@ class ParsedEmail
      */
     public function hasAttachments(): bool
     {
-        return !empty($this->attachments) ? ($this->attachments->count() > 0) : false;
+        return !empty($this->attachments) ? ($this->attachments->isNotEmpty()) : false;
     }
 
 
@@ -683,7 +683,8 @@ class ParsedEmail
     /**
      * Return Email History Params
      * 
-     * @return array
+     * @return array{App\Models\CRM\Interactions\EmailHistory::fillable,
+     *               attachments: array<AttachmentFile::getParams>}
      */
     public function getParams(): array
     {

@@ -15,7 +15,7 @@ trait MailableAttachmentTrait {
     public function applyAttachments(Mailable $build, Collection $attachments)
     {
         // Attachments Exist Before Looping
-        if ($attachments->count() > 0) {
+        if ($attachments->isNotEmpty() > 0) {
             foreach ($attachments as $attachment) {
                 // Check Temp File
                 $path = !empty($attachment->getTmpName()) ? $attachment->getTmpName() : $attachment->getFilePath();

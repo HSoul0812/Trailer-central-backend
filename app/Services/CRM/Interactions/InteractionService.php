@@ -81,9 +81,9 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Send Email
-        if($smtpConfig->getAuthType() === SmtpConfig::AUTH_GMAIL) {
+        if($smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        } elseif($smtpConfig->getAuthType() === SmtpConfig::AUTH_NTLM) {
+        } elseif($smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
             $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);

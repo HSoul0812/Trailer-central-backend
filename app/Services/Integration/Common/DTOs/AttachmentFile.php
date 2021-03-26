@@ -278,7 +278,7 @@ class AttachmentFile
      * Get Array Mapped Headers
      * 
      * @param string $file
-     * @return array
+     * @return array{string: string, etc...}
      */
     private function getFileHeaders(string $file): array {
         // Get Headers From Filename
@@ -314,7 +314,7 @@ class AttachmentFile
      * Return Email Attachment Params
      * 
      * @param string $messageId
-     * @return array
+     * @return array{App\Models\CRM\Email\Attachment::fillable}
      */
     public function getParams(string $messageId): array
     {

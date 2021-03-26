@@ -245,7 +245,7 @@ class ImapConfig
     /**
      * Return Auth Type
      * 
-     * @return string $this->fileAuth
+     * @return string $this->authType
      */
     public function getAuthType(): string
     {
