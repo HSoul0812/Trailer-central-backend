@@ -96,7 +96,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
                 // Set File Name/Path
                 $file->setFilePath(Attachment::AWS_PREFIX . '/' . $filePath);
-                $file->setFileName(time() . $file->getClientOriginalName());
+                $file->setFileName(time() . $file->getFileName());
 
                 // Add File
                 $attachments->push($file);
