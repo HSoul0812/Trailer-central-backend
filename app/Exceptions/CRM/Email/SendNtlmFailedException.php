@@ -3,7 +3,7 @@
 namespace App\Exceptions\CRM\Email;
 
 /**
- * Class SendEmailFailedException
+ * Class SendNtlmFailedException
  *
  * Use this instead of \Exception to throw any kind of send NTLM email failed exception
  *
