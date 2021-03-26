@@ -253,7 +253,7 @@ class AttachmentFile
         }
 
         // Return Remote File Contents if Exists
-        if(!empty($this->filePath) && file_exists($this->filePath)) {
+        if(!empty($this->filePath) && file_get_contents($this->filePath) !== FALSE) {
             return file_get_contents($this->filePath);
         }
 
