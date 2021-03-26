@@ -5,11 +5,12 @@ namespace App\Services\CRM\Interactions;
 use App\Exceptions\CRM\Email\SaveNtlmFailedException;
 use App\Exceptions\CRM\Email\SaveNtlmAttachmentsFailedException;
 use App\Exceptions\CRM\Email\SendNtlmFailedException;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Interactions\ParsedEmail;
-use App\Traits\CustomerHelper;
-use App\Traits\MailHelper;
 use App\Services\CRM\Interactions\DTOs\NtlmChangeKey;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Traits\CustomerHelper;
+use App\Traits\MailHelper;
 
 use \jamesiarmes\PhpEws\Client;
 use \jamesiarmes\PhpEws\Request\SendItemType;
