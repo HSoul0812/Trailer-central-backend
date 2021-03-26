@@ -30,10 +30,30 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Lead
         $lead = Lead::findOrFail($leadId);
 
-        // Get Meta Data
-        $metadata = $lead->metadata_array;
-
         // Set Params
+        $inquiry = $this->getInquiryFromLead($lead);
+
+        // Try/Send Email!
+        try {
+            // Send Interaction Email
+            Mail::to($this->getCleanTo([
+                'email' => $inquiry->getToEmail(),
+                'name' => $inquiry->getToName()
+            ]))->send(new InquiryEmail($inquiry));
+        } catch(\Exception $ex) {
+            throw new SendInquiryFailedException($ex->getMessage());
+        }
+
+        // Returns Params With Attachments
+        return $params;
+    }
+
+    /**
+     * 
+     * @param \App\Services\CRM\Leads\Lead $lead
+     */
+    private function getInquiryFromLead(Lead $lead) {
+        // Initialize Inquiry Array
         $inquiry = [
             'website' => $lead->website->domain,
             'first_name' => $lead->first_name,
@@ -46,10 +66,13 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             'is_spam' => $lead->is_spam
         ];
 
+        // Get Meta Data
+        $metadata = $lead->metadata_array;
+
         // Toggle Inventory Type
         switch($lead->lead_type) {
             case "inventory":
-                $inquiry['stock'] = !empty($params['stock']) ? $params['stock'] : $lead->stock;
+                $inquiry['stock'] = !empty($lead->inventory->stock) ? $lead->inventory->stock : $lead->stock;
                 $inquiry['inventory_url'] = $inquiry['website'] . $lead->referral;
                 $inquiry['inventory_title'] = $lead->title;
             break;
@@ -80,24 +103,5 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             $inquiryEmail = 'josh+spam-notify@trailercentral.com';
             $inquiryName  = '';
         }
-
-        // Try/Send Email!
-        try {
-            // Send Interaction Email
-            Mail::to($this->getCleanTo([
-                'email' => $inquiryEmail,
-                'name' => $inquiryName
-            ]))->send(new InquiryEmail($inquiry));
-        } catch(\Exception $ex) {
-            throw new SendInquiryFailedException($ex->getMessage());
-        }
-
-        // Store Attachments
-        if(isset($params['attachments'])) {
-            $params['attachments'] = $this->storeAttachments($params['attachments'], $dealerId, $messageId);
-        }
-
-        // Returns Params With Attachments
-        return $params;
     }
 }
