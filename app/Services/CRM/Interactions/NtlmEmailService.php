@@ -165,10 +165,8 @@ class NtlmEmailService implements NtlmEmailServiceInterface
         if(!empty($parsedEmail->getToName())) {
             $recipient->Name = $parsedEmail->getToName();
         }
-        $recipient->EmailAddress = $parsedEmail->getTo();
+        $recipient->EmailAddress = $parsedEmail->getToEmail();
         $message->ToRecipients->Mailbox[] = $recipient;
-        var_dump($recipient);
-        die;
 
         // Set the message Subject
         $message->Subject = $parsedEmail->getSubject();
