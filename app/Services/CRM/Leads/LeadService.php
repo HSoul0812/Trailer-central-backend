@@ -184,13 +184,15 @@ class LeadService implements LeadServiceInterface
         // Valid Lead?!
         if(!empty($lead->identifier)) {
             // Send Inquiry Email
-            $this->inquiry->send($lead->identifier, $params);
+            $inquiry = $this->inquiry->send($lead->identifier, $params);
 
-            // Auto Assign
-            $this->autoassign->job($lead->identifier, $params);
+            // Create Auto Assign Job
+            // TO DO: Create Auto Assign Job
+            //$this->dispatch(new AutoAssignJob($inquiry));
 
-            // Export ADF
-            $this->adf->job($lead->identifier, $params);
+            // Create ADF Export Job
+            // TO DO: Create ADF Export Job
+            //$this->dispatch(new AdfExportJob($inquiry));
         }
 
         // Return Lead

@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Services\CRM\Leads\DTOs\InquiryLead;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -36,20 +37,20 @@ class InquiryEmail extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param array $data
+     * @param InquiryLead $inquiry
      */
-    public function __construct(array $data)
+    public function __construct(InquiryLead $inquiry)
     {
         // Set Extra Vars
-        $data['year']      = date('Y');
-        $data['bgcolor']   = (($data['website'] === 'trailertrader.com') ? '#ffff00': '#ffffff');
-        $data['bgheader']  = (($data['website'] === 'trailertrader.com') ? '#00003d': 'transparent');
-        $data['subject']   = $this->getSubject($data);
+        $this->data = [
+            'year'     => date('Y'),
+            'bgcolor'  => ($inquiry->isTrailerTrader() ? '#ffff00': '#ffffff'),
+            'bgheader' => ($inquiry->isTrailerTrader() ? '#00003d': 'transparent')
+        ];
 
         // Prepare Email Data
-        $this->data        = $data;
-        $this->inquiryType = $this->getInquiryType($data);
-        $this->subject     = $data['subject'];
+        $this->inquiryType = $inquiry->inquiryType;
+        $this->subject     = $this->getSubject($inquiry);
         $this->callbacks[] = function ($message) use ($data) {
             if(isset($data['id'])) {
                 $message->getHeaders()->get('Message-ID')->setId($data['id']);
@@ -83,11 +84,11 @@ class InquiryEmail extends Mailable
     /**
      * Get Inquiry Type
      * 
-     * @param array $data
+     * @param InquiryLead $inquiry
      */
-    private function getInquiryType($data) {
+    private function getInquiryType(InquiryLead $inquiry) {
         // Get Type
-        $type = $data['inquiry_type'];
+        $type = $inquiry->inquiryType;
         if(!in_array($type, self::INQUIRY_TYPES)) {
             $type = $this->inquiryType;
         }
@@ -113,40 +114,5 @@ class InquiryEmail extends Mailable
         // Set Templates
         return $this->view('emails.leads.inquiry-' . $view)
                     ->text('emails.leads.inquiry-' . $view . '-plain');
-    }
-
-    /**
-     * Build Subject
-     * 
-     * @param array $data
-     */
-    private function getSubject($data) {
-        // Initialize
-        switch($this->inquiryType) {
-            case "call":
-                $subject = "You Just Received a Click to Call From %s";
-                return sprintf($subject, trim($data['first_name'] . ' ' . $data['last_name']));
-            case "inventory":
-                $subject = 'Inventory Information Request on %s';
-            break;
-            case "part":
-                $subject = "Inventory Part Information Request on %s";
-            break;
-            case "showroom":
-                $subject = "Showroom Model Information Request on %s";
-            break;
-            case "cta":
-                $subject = "New CTA Response on %s";
-            break;
-            case "sms":
-                $subject = "New SMS Sent on %s";
-            break;
-            default:
-                $subject = "New SMS Sent on %s";
-            break;
-        }
-
-        // Generate subject depending on type
-        return sprintf($subject, $data['website_domain']);
     }
 }

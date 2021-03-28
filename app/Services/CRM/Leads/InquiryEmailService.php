@@ -55,15 +55,15 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     private function getInquiryFromLead(Lead $lead) {
         // Initialize Inquiry Array
         $inquiry = [
-            'website' => $lead->website->domain,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'preferred_contact' => $lead->preferred_contact,
-            'lead_email' => $lead->email_address,
+            'websiteDomain' => $lead->website->domain,
+            'firstName' => $lead->first_name,
+            'lastName' => $lead->last_name,
+            'preferredContact' => $lead->preferred_contact,
+            'leadEmail' => $lead->email_address,
             'comments' => $lead->comments,
             'postal' => $lead->zip,
             'phone' => $lead->phone_number,
-            'is_spam' => $lead->is_spam
+            'isSpam' => $lead->is_spam
         ];
 
         // Get Meta Data
