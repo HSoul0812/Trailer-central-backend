@@ -40,6 +40,7 @@
         "league/csv": "^9.5",
         "league/flysystem-aws-s3-v3": "^1.0",
         "php-imap/php-imap": "~3.0",
+        "php-ews/php-ews": "~1.0",
         "predis/predis": "^1.1",
         "psr/log": "^1.0",
         "spatie/laravel-sitemap": "^5.7",
