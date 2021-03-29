@@ -683,8 +683,19 @@ class ParsedEmail
     /**
      * Return Email History Params
      * 
-     * @return array{App\Models\CRM\Interactions\EmailHistory::fillable,
-     *               attachments: array<AttachmentFile::getParams>}
+     * @return array{lead_id: int,
+     *               interaction_id: int,
+     *               message_id: string,
+     *               root_message_id: string,
+     *               to_email: string,
+     *               to_name: string,
+     *               from_email: string,
+     *               from_name: string,
+     *               subject: string,
+     *               body: string,
+     *               use_html: bool,
+     *               date_sent: string,
+     *               attachments: array
      */
     public function getParams(): array
     {

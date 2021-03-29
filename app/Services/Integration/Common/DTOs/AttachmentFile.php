@@ -314,7 +314,9 @@ class AttachmentFile
      * Return Email Attachment Params
      * 
      * @param string $messageId
-     * @return array{App\Models\CRM\Email\Attachment::fillable}
+     * @return array{message_id: string,
+     *               filename: string,
+     *               original_filename: string}
      */
     public function getParams(string $messageId): array
     {
