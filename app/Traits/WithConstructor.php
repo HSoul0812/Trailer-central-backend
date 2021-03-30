@@ -13,7 +13,7 @@ trait WithConstructor
      * @return mixed
      * @throws PropertyDoesNotExists when the desired property does not exists
      */
-    public function __construct($properties)
+    public function __construct(array $properties = [])
     {
         foreach ($properties as $property => $value) {
             if (!property_exists($this, $property)) {
@@ -22,5 +22,24 @@ trait WithConstructor
 
             $this->{$property} = $value;
         }
+    }
+
+    /**
+     * Convert to CamelCase Then Get
+     * 
+     * @param array $properties
+     */
+    public static function getViaCC(array $properties): self {
+        // New Array
+        $newProperties = [];
+        foreach ($properties as $property => $value) {
+            // Convert to CamelCase
+            $str = str_replace(' ', '', ucwords(str_replace('-', ' ', $property)));
+            $converted = strtolower($str[0]);
+            $newProperties[$converted] = $value;
+        }
+
+        // Return Array
+        return new self($newProperties);
     }
 }

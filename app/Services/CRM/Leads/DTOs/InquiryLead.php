@@ -2,10 +2,8 @@
 
 namespace App\Services\CRM\Leads\DTOs;
 
-use App\Models\CRM\Leads\LeadType;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
-use Carbon\Carbon;
 
 /**
  * Class InquiryLead
@@ -17,70 +15,248 @@ class InquiryLead
     use WithConstructor, WithGetter;
 
     /**
-     * @var string Dealer ID for Inquiry Lead
+     * @const string
+     */
+    const PREFERRED_PHONE = 'phone';
+
+    /**
+     * @const string
+     */
+    const PREFERRED_EMAIL = 'email';
+
+
+    /**
+     * @const string
+     */
+    const DEFAULT_EMAIL_BODY = '#ffffff';
+
+    /**
+     * @const string
+     */
+    const DEFAULT_EMAIL_HEADER = 'transparent';
+
+
+    /**
+     * @const string
+     */
+    const TT_DOMAIN = 'www.trailertrader.com';
+
+    /**
+     * @const string
+     */
+    const TT_EMAIL_BODY = '#ffff00';
+
+    /**
+     * @const string
+     */
+    const TT_EMAIL_HEADER = '#00003d';
+
+
+    /**
+     * @var string
+     */
+    const INQUIRY_TYPE_DEFAULT = 'general';
+
+    /**
+     * @var array
+     */
+    const INQUIRY_TYPES = array(
+        'general',
+        'cta',
+        'inventory',
+        'part',
+        'showroom',
+        'call',
+        'sms'
+    );
+
+
+
+    /**
+     * @var int Dealer ID for Lead Inquiry
      */
     private $dealerId;
 
     /**
-     * @var string Dealer Location ID for Inquiry Lead
+     * @var int Dealer Location ID for Lead Inquiry
      */
     private $locationId;
 
     /**
-     * @var string Website ID for Inquiry Lead
+     * @var int Website ID for Lead Inquiry
      */
     private $websiteId;
 
     /**
-     * @var string Date Lead Was Requested
+     * @var int Website Domain for Lead Inquiry
      */
-    private $requestDate;
+    private $websiteDomain;
 
 
     /**
-     * @var string First Name for Inquiry Lead
+     * @var string Type of Lead Inquiry
+     */
+    private $inquiryType;
+
+    /**
+     * @var array<string> Lead Types to Insert to Lead Inquiry
+     */
+    private $leadTypes;
+
+    /**
+     * @var array<string> Units of Interest for the Lead Inquiry
+     */
+    private $inventory;
+
+
+    /**
+     * @var string Title of Lead Form / Name of Inventory Item Associated with Lead Inquiry
+     */
+    private $title;
+
+    /**
+     * @var string Referral of Lead Inquiry
+     */
+    private $referral;
+
+    /**
+     * @var ?string Stock Number of Unit of Interest on Lead Inquiry
+     */
+    private $stock;
+
+
+    /**
+     * @var string First Name for Lead Inquiry
      */
     private $firstName;
 
     /**
-     * @var string Last Name for Inquiry Lead
+     * @var string Last Name for Lead Inquiry
      */
     private $lastName;
 
     /**
-     * @var string Email Address for Inquiry Lead
+     * @var string Email Address for Lead Inquiry
      */
-    private $email;
+    private $emailAddress;
 
     /**
-     * @var string Phone Number for Inquiry Lead
+     * @var string Phone Number for Lead Inquiry
      */
-    private $phone;
+    private $phoneNumber;
+
 
     /**
-     * @var string Comments for Inquiry Lead
+     * @var string Street Address for Lead Inquiry
+     */
+    private $address;
+
+    /**
+     * @var string City for Lead Inquiry
+     */
+    private $city;
+
+    /**
+     * @var string State for Lead Inquiry
+     */
+    private $state;
+
+    /**
+     * @var string Zip for Lead Inquiry
+     */
+    private $zip;
+
+
+    /**
+     * @var string Comments for Lead Inquiry
      */
     private $comments;
 
+    /**
+     * @var string Notes for Lead Inquiry
+     */
+    private $note;
 
     /**
-     * Return Lead Type
-     * 
-     * @return string $this->leadType || calculate lead type
+     * @var string Metadata for Lead Inquiry
      */
-    public function getLeadType(): string
-    {
-        // Calculate Lead Type?
-        if(empty($this->leadType)) {
-            if(!empty($this->inventoryId)) {
-                $this->leadType = LeadType::TYPE_INVENTORY;
-            } else {
-                $this->leadType = LeadType::TYPE_GENERAL;
-            }
+    private $metadata;
+
+
+    /**
+     * @var ?string Date Lead Inquiry Was Submitted
+     */
+    private $dateSubmitted;
+
+    /**
+     * @var ?string Contact Email Sent for Lead Inquiry
+     */
+    private $contactEmailSent;
+
+    /**
+     * @var ?string ADF Email Sent for Lead Inquiry
+     */
+    private $adfEmailSent;
+
+    /**
+     * @var ?bool CDK Export Sent for Lead Inquiry?
+     * 
+     * 1 = mark CDK as sent automatically
+     * 0 = wait for CDK script to send out the email on its own
+     */
+    private $cdkEmailSent;
+
+
+    /**
+     * @var bool Newsletter Requested on Lead Inquiry?
+     */
+    private $newsletter;
+
+    /**
+     * @var bool Is This Lead Inquiry Spam?
+     */
+    private $isSpam;
+
+
+    /**
+     * @var string Source of Lead Inquiry
+     */
+    private $leadSource;
+
+    /**
+     * @var string Status of Lead Inquiry
+     */
+    private $leadStatus;
+
+    /**
+     * @var string Contact Type of Lead Inquiry
+     */
+    private $contactType;
+
+    /**
+     * @var int Sales Person ID Request During Lead Inquiry
+     */
+    private $salesPersonId;
+
+
+    public static function getFromLead() {
+        
+    }
+
+
+    /**
+     * Get Inquiry Type
+     * 
+     * @return string
+     */
+    private function getInquiryType() {
+        // Get Type
+        if(!in_array($this->inquiryType, self::INQUIRY_TYPES)) {
+            $this->inquiryType = self::INQUIRY_TYPE_DEFAULT;
         }
 
-        // Return Lead Type
-        return $this->leadType;
+        // Set New Type
+        return $this->inquiryType;
     }
 
 
@@ -114,6 +290,42 @@ class InquiryLead
 
         // Return if Email Exists
         return (!empty($this->email) ? self::PREFERRED_EMAIL : self::PREFERRED_PHONE);
+    }
+
+
+    /**
+     * Is Trailer Trader?
+     * 
+     * @return bool
+     */
+    public function isTrailerTrader(): bool
+    {
+        return $this->websiteDomain === self::TT_DOMAIN;
+    }
+
+
+    /**
+     * Decode Metadata and Convert Into Array
+     * 
+     * // DEALER SITES ONLY
+     * @return array{'contact-address': array,
+     *               'adf-contact-address': null,
+     *               'subject': string,
+     *               'domain': string,
+     *               'POST_DATA': array,
+     *               'COOKIE_DATA': array,
+     *               'SERVER_DATA': array,
+     *               'SPAM_SCORE': int?,
+     *               'SPAM_FAILURES': array?,
+     *               'IS_DEV': bool?,
+     *               'REAL_TO': array,
+     *               'adf-contact-address': string}
+     * 
+     * // JOTFORM ONLY
+     * @return array{'jotformId': int, 'submissionId': int}
+     */
+    public function getMetadata() {
+        return json_decode($this->metadata);
     }
 
 
@@ -153,5 +365,23 @@ class InquiryLead
 
         // Generate subject depending on type
         return sprintf($subject, $this->websiteDomain);
+    }
+
+    /**
+     * Get Email BG Color
+     * 
+     * @return string
+     */
+    public function getBgColor() {
+        return $this->isTrailerTrader() ? self::TT_EMAIL_BODY : self::DEFAULT_EMAIL_BODY;
+    }
+
+    /**
+     * Get Email Header BG Color
+     * 
+     * @return string
+     */
+    public function getHeaderBgColor() {
+        return $this->isTrailerTrader() ? self::TT_EMAIL_HEADER : self::DEFAULT_EMAIL_HEADER;
     }
 }

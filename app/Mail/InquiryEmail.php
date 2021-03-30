@@ -17,24 +17,6 @@ class InquiryEmail extends Mailable
     private $data;
 
     /**
-     * @var string
-     */
-    private $inquiryType = 'general';
-
-    /**
-     * @var array
-     */
-    const INQUIRY_TYPES = array(
-        'general',
-        'cta',
-        'inventory',
-        'part',
-        'showroom',
-        'call',
-        'sms'
-    );
-
-    /**
      * Create a new message instance.
      *
      * @param InquiryLead $inquiry
@@ -42,20 +24,7 @@ class InquiryEmail extends Mailable
     public function __construct(InquiryLead $inquiry)
     {
         // Set Extra Vars
-        $this->data = [
-            'year'     => date('Y'),
-            'bgcolor'  => ($inquiry->isTrailerTrader() ? '#ffff00': '#ffffff'),
-            'bgheader' => ($inquiry->isTrailerTrader() ? '#00003d': 'transparent')
-        ];
-
-        // Prepare Email Data
-        $this->inquiryType = $inquiry->inquiryType;
-        $this->subject     = $this->getSubject($inquiry);
-        $this->callbacks[] = function ($message) use ($data) {
-            if(isset($data['id'])) {
-                $message->getHeaders()->get('Message-ID')->setId($data['id']);
-            }
-        };
+        $this->data = $inquiry->getEmailVars();
     }
 
     /**
@@ -70,31 +39,11 @@ class InquiryEmail extends Mailable
 
         $build = $this->from($from, $name);
 
-        if (! empty($this->data['replyToEmail'])) {
-            $build->replyTo($this->data['replyToEmail'], $this->data['replyToName']);
-        }
-
         $build->getInquiryView();
 
         $build->with($this->data);
 
         return $build;
-    }
-
-    /**
-     * Get Inquiry Type
-     * 
-     * @param InquiryLead $inquiry
-     */
-    private function getInquiryType(InquiryLead $inquiry) {
-        // Get Type
-        $type = $inquiry->inquiryType;
-        if(!in_array($type, self::INQUIRY_TYPES)) {
-            $type = $this->inquiryType;
-        }
-
-        // Set New Type
-        return $type;
     }
 
     /**
@@ -104,7 +53,7 @@ class InquiryEmail extends Mailable
      */
     private function getInquiryView() {
         // Check Type
-        $view = $this->inquiryType;
+        $view = $this->data['inquiryType'];
 
         // CTA Must be General!
         if($view === 'cta') {

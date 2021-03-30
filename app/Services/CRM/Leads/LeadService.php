@@ -183,8 +183,15 @@ class LeadService implements LeadServiceInterface
 
         // Valid Lead?!
         if(!empty($lead->identifier)) {
+            // Get Website
+            $website = Website::find($params['website_id']);
+            $params['website_domain'] = $website->domain;
+
+            // Create Inquiry
+            $inquiry = InquiryLead::getViaCC($params);
+
             // Send Inquiry Email
-            $inquiry = $this->inquiry->send($lead->identifier, $params);
+            $this->inquiry->send($inquiry);
 
             // Create Auto Assign Job
             // TO DO: Create Auto Assign Job

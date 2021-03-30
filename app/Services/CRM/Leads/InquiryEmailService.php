@@ -4,8 +4,9 @@ namespace App\Services\CRM\Leads;
 
 use Illuminate\Support\Facades\Mail;
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
-use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use App\Mail\InquiryEmail;
+use App\Models\CRM\Leads\Lead;
+use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
@@ -50,18 +51,22 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
     /**
      * 
-     * @param \App\Services\CRM\Leads\Lead $lead
+     * @param Lead $lead
      */
     private function getInquiryFromLead(Lead $lead) {
         // Initialize Inquiry Array
         $inquiry = [
+            'websiteId' => $lead->website->id,
             'websiteDomain' => $lead->website->domain,
             'firstName' => $lead->first_name,
             'lastName' => $lead->last_name,
             'preferredContact' => $lead->preferred_contact,
             'leadEmail' => $lead->email_address,
             'comments' => $lead->comments,
-            'postal' => $lead->zip,
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
             'phone' => $lead->phone_number,
             'isSpam' => $lead->is_spam
         ];
@@ -103,5 +108,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             $inquiryEmail = 'josh+spam-notify@trailercentral.com';
             $inquiryName  = '';
         }
+
+        // Return Lead Inquiry
+        return new InquiryLead($inquiry);
     }
 }
