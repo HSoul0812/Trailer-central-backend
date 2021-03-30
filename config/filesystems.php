@@ -42,10 +42,19 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
+        ],
+
+        'local_tmp' => [
+            'driver' => 'local',
+            'root' => storage_path('app/tmp'),
+        ],
+
+        'test_resources' => [
+            'driver' => 'local',
+            'root' => base_path('tests/resources'),
         ],
 
         'public' => [
@@ -97,6 +106,10 @@ return [
 //            'url' => env('AWS_URL'),
         ],
 
+        'tmp' => [
+            'driver' => 'local',
+            'root' =>  env('APP_TMP_DIR', '/tmp')
+        ],
     ],
 
 ];

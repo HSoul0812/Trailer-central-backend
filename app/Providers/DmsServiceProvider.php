@@ -6,11 +6,11 @@ namespace App\Providers;
 
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Dms\FinancingCompany;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
 use App\Models\CRM\Dms\ServiceOrder\Type;
 use App\Models\CRM\Dms\TaxCalculator;
-use App\Models\CRM\User\SalesPerson;
 use App\Models\Pos\Sale;
 use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
@@ -24,6 +24,8 @@ use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\AccountRepository;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\BillRepository;
+use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Dms\QuoteRepository;
@@ -58,6 +60,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(UnitSaleLaborRepositoryInterface::class, UnitSaleLaborRepository::class);
+        $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
 
         $this->app->bind(SaleRepositoryInterface::class, function () {
             return new SaleRepository(Sale::query());

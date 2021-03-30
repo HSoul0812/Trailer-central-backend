@@ -3,14 +3,23 @@
 namespace App\Models\User;
 
 use App\Models\Inventory\Inventory;
+use App\Models\Traits\TableAware;
 use App\Models\User\NewDealerUser;
 use App\Models\User\Dealer;
 use App\Models\CRM\Text\Number;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\DealerLocationSalesTax;
 
+/**
+ * Class DealerLocation
+ * @package App\Models\User
+ *
+ * @property int $dealer_location_id
+ */
 class DealerLocation extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *
@@ -24,6 +33,13 @@ class DealerLocation extends Model
      * @var string
      */
     protected $primaryKey = 'dealer_location_id';
+
+    const DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES = [
+         'standard' => 'Standard',
+         'tax_exempt' => 'Tax Exempt',
+         'out_of_state_reciprocal' => 'Out-of-state Reciprocal',
+         'out_of_state_non_reciprocal' => 'Out-of-state Non-Reciprocal'
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -47,6 +63,10 @@ class DealerLocation extends Model
         "postalcode",
         "country"
         // TODO: Add fields
+    ];
+
+    protected $casts = [
+        'sales_tax_item_column_titles' => 'array'
     ];
 
     /**

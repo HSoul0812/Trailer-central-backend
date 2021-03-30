@@ -4,6 +4,7 @@
 namespace App\Transformers\Dms\ServiceOrder;
 
 
+use App\Models\CRM\Dms\ServiceOrder\LaborCode;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
 use App\Transformers\Dms\ServiceOrderTransformer;
 use League\Fractal\TransformerAbstract;
@@ -33,7 +34,7 @@ class ServiceItemTransformer extends TransformerAbstract
 
     public function includeLaborCode(ServiceItem $item)
     {
-        return $this->item($item->laborCode, new LaborCodeTransformer());
+        return $this->item($item->laborCode ?: new LaborCode(), new LaborCodeTransformer());
     }
 
     public function includeTechnicians(ServiceItem $item)

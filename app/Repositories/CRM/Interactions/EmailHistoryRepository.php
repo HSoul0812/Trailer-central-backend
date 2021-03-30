@@ -285,7 +285,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
             // Is a Report Field?!
             if (in_array($key, EmailHistory::REPORT_FIELDS)) {
                 if ($value === 1) {
-                    $params[$key] = Carbon::now()->toDateTimeString();
+                    $params[$key] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
                 } else {
                     $params[$key] = $value;
                 }

@@ -88,7 +88,7 @@ class LeadService implements LeadServiceInterface
         $lead->setRelation('leadStatus', $status);
 
         // Override Fixes
-        if (isset($params['lead_source'])) {
+        if (isset($params['lead_source']) && !empty($lead->newDealerUser->user_id)) {
             // Send Lead Source
             $this->sources->createOrUpdate([
                 'user_id' => $lead->newDealerUser->user_id,
