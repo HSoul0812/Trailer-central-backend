@@ -6,6 +6,11 @@ namespace App\Http\Controllers\v1\Bulk\Parts;
 
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Bulk\Parts\CreateBulkReportRequest;
+use App\Repositories\Dms\StockRepositoryInterface;
+use App\Transformers\Bulk\Stock\StockReportTransformer;
+use Dingo\Api\Http\Response;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Manager;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Jobs\Bulk\Parts\FinancialReportExportJob;
 use App\Models\Common\MonitoredJob;
@@ -27,36 +32,94 @@ class BulkReportsController extends MonitoredJobsController
     protected $repository;
 
     /**
+     * @var StockRepositoryInterface
+     */
+    protected $stockRepository;
+
+    /**
      * @var BulkReportJobServiceInterface
      */
     protected $service;
 
     /**
-     * @param BulkReportRepositoryInterface $repository
-     * @param MonitoredJobRepositoryInterface $jobsRepository
-     * @param BulkReportJobServiceInterface $service
+     * @var Manager
      */
+    private $fractal;
+
     public function __construct(BulkReportRepositoryInterface $repository,
                                 MonitoredJobRepositoryInterface $jobsRepository,
-                                BulkReportJobServiceInterface $service)
+                                StockRepositoryInterface $stockRepository,
+                                BulkReportJobServiceInterface $service,
+                                Manager $fractal)
     {
         parent::__construct($jobsRepository);
 
         $this->middleware('setDealerIdOnRequest')->only(['financials']);
 
         $this->repository = $repository;
+        $this->stockRepository = $stockRepository;
         $this->service = $service;
+        $this->fractal = $fractal;
     }
 
     /**
      * Create a bulk pdf file download request
      *
      * @param Request $request
-     * @return JsonResponse|void
+     * @return Response|void when there is a bad request it will throw an HttpException and request life cycle ends
      * @throws Exception
      *
      * @OA\Post(
-     *     path="/api/reports/financials-parts",
+     *     path="/api/reports/financials-stock",
+     *     description="Retrieve all data for the stock report",
+     *     tags={"BulkReportParts"},
+     *     @OA\Parameter(
+     *         name="dealer_id",
+     *         description="The dealer ID.",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="search_term",
+     *         description="Search by sku/stock, title and bin_name",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="type_of_stock",
+     *         description="Type of data, ot could be inventories, parts and mixed",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     )
+     * )
+     */
+    public function financials(Request $request): Response
+    {
+        $request = new CreateBulkReportRequest($request->all());
+
+        if ($request->validate()) {
+
+            $data = new Collection(
+                $this->stockRepository->financialReport($request->all()),
+                new StockReportTransformer(),
+                'data'
+            );
+
+            return $this->response->array($this->fractal->createData($data)->toArray());
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * Create a bulk pdf file download request
+     *
+     * @param Request $request
+     * @return JsonResponse|void when there is a bad request it will throw an HttpException and request life cycle ends
+     * @throws Exception
+     *
+     * @OA\Post(
+     *     path="/api/reports/financials-stock-export",
      *     description="Create a bulk pdf file download request",
      *     tags={"BulkReportParts"},
      *     @OA\Parameter(
@@ -71,9 +134,21 @@ class BulkReportsController extends MonitoredJobsController
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
+     *     @OA\Parameter(
+     *         name="search_term",
+     *         description="Search by sku/stock, title and bin_name",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="type_of_stock",
+     *         description="Type of data, ot could be inventories, parts and mixed",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     )
      * )
      */
-    public function financials(Request $request): JsonResponse
+    public function financialsExport(Request $request): JsonResponse
     {
         $request = new CreateBulkReportRequest($request->all());
 
@@ -81,7 +156,8 @@ class BulkReportsController extends MonitoredJobsController
 
             $payload = BulkReportPayload::from([
                 'filename' => str_replace('.', '-', uniqid('financials-parts-' . date('Ymd'), true)) . '.pdf',
-                'type' => BulkReport::TYPE_FINANCIALS
+                'type' => BulkReport::TYPE_FINANCIALS,
+                'filters' => $request->all()
             ]);
 
             $model = $this->service
