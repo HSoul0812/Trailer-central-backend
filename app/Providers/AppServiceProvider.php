@@ -13,6 +13,8 @@ use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\Dms\StockRepository;
+use App\Repositories\Dms\StockRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -249,5 +251,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
 
         $this->app->bind(DomPdfExporterServiceInterface::class, DomPdfExporterService::class);
+
+        $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
     }
 }
