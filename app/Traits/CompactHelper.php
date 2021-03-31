@@ -229,4 +229,12 @@ class CompactHelper
         return $out;
 
     }
+
+    /**
+     * @return string
+     */
+    static function getRandomString(): string
+    {
+       return self::hash(time()) . base_convert(rand(1, getrandmax()), 10, 36);
+    }
 }

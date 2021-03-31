@@ -20,7 +20,7 @@ class SalesReportTransformer extends TransformerAbstract
                     'invoice_total' => (float)$row['invoice_total'],
                     'invoice_doc_num' => $row['doc_num'],
                     'sale_type' => $row['sale_type'],
-                    'sale_date' => $row['sale_date'],
+                    'sale_date' => date('Y-m-d', strtotime($row['sale_date'])),
                     'sales_person_id' => (int)$row['sales_person_id'],
                     'customer_name' => $row['customer_name'],
                     'unit_sale_amount' => (float)$row['unit_sale_amount'],

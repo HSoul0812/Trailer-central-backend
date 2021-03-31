@@ -2,11 +2,34 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Facades\Config;
 use App\Models\CRM\User\SalesPerson;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use Illuminate\Support\Facades\Config;
 
 trait MailHelper
 {
+    /**
+     * @param SmtpConfig $smtpConfig
+     */
+    public function setSmtpConfig(SmtpConfig $smtpConfig): void
+    {
+        if (!empty($smtpConfig->getHost())) {
+            $config = [
+                'driver'        => 'smtp',
+                'host'          => $smtpConfig->getHost(),
+                'port'          => $smtpConfig->getPort() ?? '2525',
+                'username'      => $smtpConfig->getUsername(),
+                'password'      => $smtpConfig->getPassword(),
+                'encryption'    => $smtpConfig->getSecurity(),
+                'from'          => [
+                    'address'   => $smtpConfig->getUsername(),
+                    'name'      => $smtpConfig->getFromName()
+                ]
+            ];
+            Config::set('mail', $config);
+        }
+    }
+
     /**
      * @param SalesPerson $salesPerson
      */

@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRepositoryInterface
 {
+    const FILTER_ALL_COMPLETED_DEALS_INTERNAL_ROS = 'completed_deals_only';
+    const FILTER_ALL_DOLLARS_EARNED = 'all_dollars_received';
+    const FILTER_ALL_COMPLETED_DEALS_ALL_ROS = 'completed_deals_all_ros';
+    
     use WithRequestQueryable;
 
     public function __construct(Builder $baseQuery)
@@ -155,12 +159,27 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $dbParams = ['dealerId1' => $params['dealer_id']];
         $dbParams['dealerId2'] = $params['dealer_id'];
         $dbParams['dealerId3'] = $params['dealer_id'];
+        $dbParams['dealerId4'] = $params['dealer_id'];
+        $dbParams['dealerId5'] = $params['dealer_id'];
+        
+        $roFilters = ' AND 1';
+        $quotesFilters = ' AND ((us.total_price - payments.paid_amount) <= 0)';
+        
+        if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_COMPLETED_DEALS_ALL_ROS) {
+            $roFilters = ' AND ((dms_unit_sale.total_price - payments.paid_amount) <= 0)';
+        } else if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_COMPLETED_DEALS_INTERNAL_ROS) {
+            $roFilters = " AND (((dms_unit_sale.total_price - payments.paid_amount) <= 0) OR dms_repair_order.type = 'internal')";
+        }
+        
+        if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_DOLLARS_EARNED) {
+            $quotesFilters = ' AND 1';
+        }
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
             $dateFromClause1 = "AND DATE(us.created_at) BETWEEN :fromDate1 AND :toDate1";
             $dateFromClause2 = "AND DATE(ps.created_at) BETWEEN :fromDate2 AND :toDate2";
-            $dbParams['fromDate1'] = $dbParams['fromDate2'] = $params['from_date'];
-            $dbParams['toDate1'] = $dbParams['toDate2'] = $params['to_date'];
+            $dbParams['fromDate1'] = $dbParams['fromDate2'] = $dbParams['fromDate3'] = $dbParams['fromDate4'] = $params['from_date'];
+            $dbParams['toDate1'] = $dbParams['toDate2'] = $dbParams['toDate3'] = $dbParams['toDate4'] = $params['to_date'];
         } else {
             $dateFromClause1 = "";
             $dateFromClause2 = "";
@@ -173,7 +192,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 /* unit sales */
                 SELECT
                     us.id sale_id, i.id invoice_id, i.doc_num as doc_num, i.total invoice_total,
-                    (CASE WHEN(i.unit_sale_id IS NOT NULL) THEN 'unit_sale'
+                    (CASE WHEN((us.total_price - payments.paid_amount) > 0) THEN 'unit_sale_partial' 
+                        WHEN((us.total_price - payments.paid_amount) <= 0) THEN 'unit_sale_completed'
                         WHEN(i.repair_order_id IS NOT NULL) THEN 'repair_order'
                         ELSE 'pos' /* todo must have a clear marker in invoice that it is a pos sale */
                         END
@@ -200,6 +220,14 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 
                 /* use this to prevent getting DP invoices */
                 /* JOIN qb_invoice_items ii ON i.id=ii.invoice_id */
+                
+                LEFT JOIN (
+                    SELECT
+                    qb_invoices.unit_sale_id,
+                    SUM(COALESCE(qb_invoices.total, 0)) paid_amount
+                    FROM qb_invoices
+                    GROUP BY qb_invoices.unit_sale_id
+                ) payments ON us.id = payments.unit_sale_id
 
                 LEFT JOIN (
                     SELECT
@@ -240,9 +268,13 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 ) sales_labor ON i.id = sales_labor.invoice_id
 
                 WHERE us.dealer_id=:dealerId1
-                {$dateFromClause1}
+                {$dateFromClause1} {$quotesFilters}
                 GROUP BY us.id
+                ";
 
+            if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_DOLLARS_EARNED) {
+                $sql .= "
+                    
                 UNION
 
                 /* POS sales via crm_pos_sales */
@@ -296,12 +328,146 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
                 WHERE po.dealer_id=:dealerId2
                   AND DATE(ps.created_at) BETWEEN :fromDate2 AND :toDate2
-                GROUP BY ps.id) sales ON sales.sales_person_id=sp.id
+                GROUP BY ps.id 
+              
+              UNION
+            
+            /* POS sales via qb_invoices */
+                SELECT qb_invoices.id sale_id, qb_invoices.id invoice_id, qb_invoices.doc_num doc_num, qb_invoices.total total ,'pos' sale_type, qb_invoices.invoice_date sale_date, qb_invoices.sales_person_id, c.display_name customer_name,
+                    SUM(sales_unit.sale_amount) as unit_sale_amount,
+                    SUM(sales_unit.cost_amount) as unit_cost_amount,
+                    SUM(sales_part.sale_amount) as part_sale_amount,
+                    SUM(sales_part.cost_amount) as part_cost_amount,
+                    SUM(sales_labor.sale_amount) as labor_sale_amount,
+                    SUM(sales_labor.cost_amount) as labor_cost_amount, 
+                    NULL as inventory_stock,
+                    NULL as inventory_make,
+                    NULL as inventory_notes
+
+                FROM qb_invoices
+                    LEFT JOIN dms_customer c ON qb_invoices.customer_id=c.id
+                    LEFT JOIN (
+                        SELECT
+                            psp.invoice_id,
+                            SUM(psp.unit_price) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM qb_invoice_items psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'part'
+                        GROUP BY psp.invoice_id
+                    ) sales_part ON qb_invoices.id = sales_part.invoice_id
+
+                    LEFT JOIN (
+                        SELECT
+                            psp.invoice_id,
+                            SUM(psp.unit_price) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM qb_invoice_items psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'trailer'
+                        GROUP BY psp.invoice_id
+                    ) sales_unit ON qb_invoices.id = sales_unit.invoice_id
+
+                    LEFT JOIN (
+                        SELECT
+                            psp.invoice_id,
+                            SUM(psp.unit_price) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM qb_invoice_items psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'labor'
+                        GROUP BY psp.invoice_id
+                    ) sales_labor ON qb_invoices.id = sales_labor.invoice_id
+                    
+                    WHERE qb_invoices.dealer_id= :dealerId4
+                  AND DATE(qb_invoices.invoice_date) BETWEEN :fromDate3 AND :toDate3 AND qb_invoices.unit_sale_id IS NULL AND qb_invoices.repair_order_id IS NULL
+                GROUP BY qb_invoices.id";
+            } else {
+                unset($dbParams['toDate2']);
+                unset($dbParams['fromDate2']);
+                unset($dbParams['fromDate3']);
+                unset($dbParams['toDate3']);
+                unset($dbParams['dealerId4']);
+                unset($dbParams['dealerId2']);
+            }
+            
+            
+            
+            $sql .= "
+                
+            UNION
+            
+            /* RO sales */
+            
+                SELECT qb_invoices.id sale_id, qb_invoices.id invoice_id, qb_invoices.doc_num doc_num, qb_invoices.total total ,'RO' sale_type, qb_invoices.invoice_date sale_date, qb_invoices.sales_person_id, c.display_name customer_name,
+                    SUM(sales_unit.sale_amount) as unit_sale_amount,
+                    SUM(sales_unit.cost_amount) as unit_cost_amount,
+                    SUM(sales_part.sale_amount) as part_sale_amount,
+                    SUM(sales_part.cost_amount) as part_cost_amount,
+                    SUM(sales_labor.sale_amount) as labor_sale_amount,
+                    SUM(sales_labor.cost_amount) as labor_cost_amount, 
+                    NULL as inventory_stock,
+                    NULL as inventory_make,
+                    NULL as inventory_notes
+
+                FROM qb_invoices
+                    LEFT JOIN dms_repair_order ON qb_invoices.repair_order_id = dms_repair_order.id
+                    LEFT JOIN dms_unit_sale ON dms_repair_order.unit_sale_id = dms_unit_sale.id
+                    LEFT JOIN qb_invoices unit_sale_invoice ON dms_unit_sale.id = unit_sale_invoice.unit_sale_id
+                    LEFT JOIN dms_customer c ON qb_invoices.customer_id=c.id
+                    LEFT JOIN (
+                        SELECT
+                            psp.invoice_id,
+                            SUM(psp.unit_price) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM qb_invoice_items psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'part'
+                        GROUP BY psp.invoice_id
+                    ) sales_part ON qb_invoices.id = sales_part.invoice_id
+                    
+                    LEFT JOIN (
+                        SELECT
+                           qb_payment.invoice_id,
+                           SUM(COALESCE(qb_payment.amount, 0)) paid_amount
+                        FROM qb_payment 
+                        GROUP BY qb_payment.invoice_id
+                    ) payments ON unit_sale_invoice.id = payments.invoice_id
+                
+                    LEFT JOIN (
+                        SELECT
+                            psp.invoice_id,
+                            SUM(psp.unit_price) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM qb_invoice_items psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'trailer'
+                        GROUP BY psp.invoice_id
+                    ) sales_unit ON qb_invoices.id = sales_unit.invoice_id
+
+                    LEFT JOIN (
+                        SELECT
+                            psp.invoice_id,
+                            SUM(psp.unit_price) sale_amount,
+                            SUM(COALESCE(qi.cost, 0)) cost_amount
+                        FROM qb_invoice_items psp
+                        LEFT JOIN qb_items qi ON qi.id=psp.item_id
+                        WHERE qi.type = 'labor'
+                        GROUP BY psp.invoice_id
+                    ) sales_labor ON qb_invoices.id = sales_labor.invoice_id
+                    
+                    WHERE qb_invoices.dealer_id= :dealerId5
+                  AND DATE(qb_invoices.invoice_date) BETWEEN :fromDate4 AND :toDate4 AND qb_invoices.unit_sale_id IS NULL AND qb_invoices.repair_order_id IS NOT NULL AND dms_repair_order.unit_sale_id IS NOT NULL $roFilters
+                GROUP BY qb_invoices.id
+                
+
+            ) sales ON sales.sales_person_id=sp.id                
 
             LEFT JOIN new_dealer_user ndu ON ndu.user_id=sp.user_id
             WHERE ndu.id=:dealerId3
-              AND sp.deleted_at IS NULL";
-
+              AND sp.deleted_at IS NULL
+            ";
+            
         $result = DB::select($sql, $dbParams);
 
         // organize by sales person

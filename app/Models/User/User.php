@@ -2,11 +2,11 @@
 
 namespace App\Models\User;
 
+use App\Models\User\Interfaces\PermissionsInterface;
+use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
-use App\Models\User\DealerUser;
-use App\Models\User\AuthToken;
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
@@ -23,8 +23,10 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * @property bool $isCrmActive
  */
-class User extends Model implements Authenticatable
+class User extends Model implements Authenticatable, PermissionsInterface
 {
+    use HasPermissionsStub;
+
     const TABLE_NAME = 'dealer';
 
     public const TYPE_DEALER = 'dealer';

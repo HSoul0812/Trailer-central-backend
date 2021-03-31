@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Http\Controllers\Dms\Customer;
+namespace Tests\Integration\Http\Controllers\Dms\Customer;
 
 use App\Http\Requests\Dms\Customer\GetInventoryRequest;
 use Dingo\Api\Exception\ResourceException;

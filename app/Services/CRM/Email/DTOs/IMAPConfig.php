@@ -2,6 +2,9 @@
 
 namespace App\Services\CRM\Email\DTOs;
 
+use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\User\EmailFolder;
+
 /**
  * Class ImapConfig
  * 
@@ -84,6 +87,40 @@ class ImapConfig
      * @var string Date to Start Importing From
      */
     private $startDate;
+    
+
+    /**
+     * Get Smtp Config From Sales Person
+     * 
+     * @param SalesPerson $salesperson
+     * @return ImapConfig
+     */
+    public static function fillFromSalesPerson(SalesPerson $salesperson, EmailFolder $folder): ImapConfig {
+        // Initialize
+        $imapConfig = new self();
+
+        // Set Username/Password
+        $imapConfig->setUsername($salesperson->imap_email);
+        $imapConfig->setPassword($salesperson->imap_password);
+
+        // Set Host/Post
+        $imapConfig->setHost($salesperson->imap_server);
+        $imapConfig->setPort((int) $salesperson->imap_port ?? 0);
+        $imapConfig->setSecurity($salesperson->imap_security ?: '');
+        $imapConfig->setAuthType($salesperson->smtp_auth ?: '');
+        $imapConfig->calcCharset();
+
+        // Set Folder Config
+        $imapConfig->setFolderName($folder->name);
+        if(!empty($folder->date_imported)) {
+            $imapConfig->setStartDate($folder->date_imported);
+        } else {
+            $imapConfig->setStartDate(Carbon::now()->sub(1, 'month'));
+        }
+
+        // Return IMAP Config
+        return $imapConfig;
+    }
 
 
     /**
@@ -208,7 +245,7 @@ class ImapConfig
     /**
      * Return Auth Type
      * 
-     * @return string $this->fileAuth
+     * @return string $this->authType
      */
     public function getAuthType(): string
     {

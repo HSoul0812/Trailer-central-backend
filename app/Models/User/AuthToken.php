@@ -4,18 +4,32 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class AuthToken
+ * @package App\Models\User
+ *
+ * @property int $id
+ * @property string $access_token
+ * @property int $user_id
+ * @property string $user_type
+ * @property \DateTimeInterface $created_at
+ * @property \DateTimeInterface $updated_at
+ */
 class AuthToken extends Model
-{ 
+{
     protected $table = 'auth_token';
+
+    const USER_TYPE_DEALER = 'dealer';
+    const USER_TYPE_DEALER_USER = 'dealer_user';
 
     /**
      * @var array
      */
     const USER_TYPES = [
-        'dealer',
-        'dealer_user'
+        self::USER_TYPE_DEALER,
+        self::USER_TYPE_DEALER_USER
     ];
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -38,7 +52,7 @@ class AuthToken extends Model
 
     /**
      * Get User By Type
-     * 
+     *
      * @return HasOne
      */
     public function user()
@@ -54,7 +68,7 @@ class AuthToken extends Model
 
     /**
      * Get Dealer
-     * 
+     *
      * @return HasOne
      */
     public function dealer() {
@@ -63,7 +77,7 @@ class AuthToken extends Model
 
     /**
      * Get Dealer User
-     * 
+     *
      * @return HasOne
      */
     public function dealerUser()
