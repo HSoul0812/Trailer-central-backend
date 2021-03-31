@@ -9,6 +9,7 @@ use App\Models\Common\MonitoredJobPayload;
 /**
  * @property-read string $type the type of report
  * @property-read string $filename location of the finished file
+ * @property-read array $filters
  */
 class BulkReportPayload extends MonitoredJobPayload
 {
@@ -22,11 +23,17 @@ class BulkReportPayload extends MonitoredJobPayload
      */
     protected $filename;
 
+    /**
+     * @var array
+     */
+    protected $filters;
+
     public function asArray(): array
     {
         return [
             'type' => $this->type,
-            'filename' => $this->filename
+            'filename' => $this->filename,
+            'filters' => $this->filters,
         ];
     }
 }
