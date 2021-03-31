@@ -4,7 +4,7 @@ namespace App\Transformers\Feed\Factory;
 
 use App\Helpers\ConvertHelper;
 use App\Models\Showroom\ShowroomFieldsMapping;
-use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
+use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use Dingo\Api\Http\Request;
 use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
@@ -17,7 +17,7 @@ use App\Models\Showroom\Showroom;
 class ShowroomTransformer extends TransformerAbstract
 {
     /**
-     * @var ShowroomFieldsMappingRepository
+     * @var ShowroomFieldsMappingRepositoryInterface
      */
     private $showroomFieldsMappingRepository;
 
@@ -38,12 +38,12 @@ class ShowroomTransformer extends TransformerAbstract
 
     /**
      * ShowroomTransformer constructor.
-     * @param ShowroomFieldsMappingRepository $showroomFieldsMappingRepository
+     * @param ShowroomFieldsMappingRepositoryInterface $showroomFieldsMappingRepository
      * @param ConvertHelper $convertHelper
      * @param Request $request
      */
     public function __construct(
-        ShowroomFieldsMappingRepository $showroomFieldsMappingRepository,
+        ShowroomFieldsMappingRepositoryInterface $showroomFieldsMappingRepository,
         ConvertHelper $convertHelper,
         Request $request
     ) {

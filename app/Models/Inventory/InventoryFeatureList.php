@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $feature_name
  * @property string $available_options
  * @property string $show_in_only
+ *
+ * @property ShowroomFeature $pivot
  */
 class InventoryFeatureList extends Model
 {

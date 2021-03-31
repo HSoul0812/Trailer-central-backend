@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class CreateShowroomFieldsMapTable2 extends Migration
+class CreateShowroomFieldsMapTable extends Migration
 {
     private const INVENTORY_FIELDS = [
         'id' => 'id',
