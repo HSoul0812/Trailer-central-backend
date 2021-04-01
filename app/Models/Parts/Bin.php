@@ -28,6 +28,8 @@ class Bin extends Model
         'bin_name'
     ];
 
+    public $timestamps = false;
+
     /**
      * The attributes excluded from the model's JSON form.
      *
