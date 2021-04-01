@@ -16,6 +16,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class LeadRepository implements LeadRepositoryInterface {
