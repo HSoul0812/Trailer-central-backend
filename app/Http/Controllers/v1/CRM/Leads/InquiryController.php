@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\v1\CRM\Leads;
 
 use App\Http\Controllers\RestfulController;
-use App\Repositories\CRM\Leads\InquiryRepositoryInterface;
+use App\Services\CRM\Leads\LeadServiceInterface;
 use Dingo\Api\Http\Request;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Http\Requests\CRM\Leads\InquiryLeadRequest;
@@ -17,11 +17,11 @@ class InquiryController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param InquiryRepositoryInterface $inquiry
+     * @param LeadServiceInterface $leads
      */
-    public function __construct(InquiryRepositoryInterface $inquiry)
+    public function __construct(LeadServiceInterface $leads)
     {
-        $this->inquiry = $inquiry;
+        $this->leads = $leads;
         $this->transformer = new LeadTransformer;
     }
 
@@ -35,7 +35,7 @@ class InquiryController extends RestfulController
         $request = new InquiryLeadRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->item($this->inquiry->create($request->all()), $this->transformer);
+            return $this->response->item($this->leads->inquiry($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();
