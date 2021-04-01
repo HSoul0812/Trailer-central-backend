@@ -26,6 +26,7 @@ class StockRepository implements StockRepositoryInterface
      *
      * @param array $params
      * @return array<array>
+     * @throws InvalidArgumentException when the dealer_id param was not provided
      */
     public function financialReport(array $params): array
     {
@@ -82,7 +83,7 @@ SQL;
         $report = [];
 
         foreach ($rows as $row) {
-            $report[$row->id][$row->bin_id]['part'] = $row;
+            $report[$row->id . '-' . $row->source][$row->bin_id]['part'] = $row;
         }
 
         return $report;
@@ -113,7 +114,6 @@ SQL;
 
             $this->financialReportHelpers['inventoryBoundParams']['title_inventories'] = $searchTerm;
             $this->financialReportHelpers['inventoryBoundParams']['stock'] = $searchTerm;
-            $this->financialReportHelpers['inventoryBoundParams']['search_term_inventories'] = $searchTerm;
 
             $this->financialReportHelpers['partsWhere'] = " AND (p.title LIKE :title_parts OR p.sku LIKE :sku OR pb.bin_name LIKE :bin)";
             $this->financialReportHelpers['inventoryWhere'] = " AND (i.title LIKE :title_inventories OR i.stock LIKE :stock)";
