@@ -735,7 +735,17 @@ $api->version('v1', function ($route) {
         $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
         $route->get('parts/audit-logs/date', 'App\Http\Controllers\v1\Parts\AuditLogDateController@index');
         $route->get('parts/audit-logs/date/csv', 'App\Http\Controllers\v1\Parts\AuditLogDateController@csv');
-
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Printer
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */        
+        $route->get('printer/instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+        
         /*
         |--------------------------------------------------------------------------
         | Others

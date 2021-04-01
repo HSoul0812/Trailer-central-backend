@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use App\Models\CRM\Dms\Printer\Settings;
 
 /**
  * Class User
@@ -189,6 +190,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
+    }
+    
+    public function printerSettings()
+    {
+        return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
 
     public static function getTableName() {
