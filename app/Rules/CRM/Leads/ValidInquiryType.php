@@ -2,8 +2,8 @@
 
 namespace App\Rules\CRM\Leads;
 
+use App\Services\CRM\Leads\DTOs\InquiryLead;
 use Illuminate\Contracts\Validation\Rule;
-use App\Mail\InquiryEmail;
 
 class ValidInquiryType implements Rule
 {
@@ -18,7 +18,7 @@ class ValidInquiryType implements Rule
     public function passes($attribute, $value)
     {
         // Inquiry Type is Valid?!
-        if(!in_array($value, InquiryEmail::INQUIRY_TYPES)) {
+        if(!in_array($value, InquiryLead::INQUIRY_TYPES)) {
             return false;
         }
 
@@ -33,6 +33,6 @@ class ValidInquiryType implements Rule
      */
     public function message()
     {
-        return 'Inquiry type needs to be: ' . implode(", ", InquiryEmail::INQUIRY_TYPES);                
+        return 'Inquiry type needs to be: ' . implode(", ", InquiryLead::INQUIRY_TYPES);                
     }
 }

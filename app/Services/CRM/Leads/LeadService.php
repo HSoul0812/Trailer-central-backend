@@ -183,12 +183,12 @@ class LeadService implements LeadServiceInterface
 
         // Valid Lead?!
         if(!empty($lead->identifier)) {
-            // Get Website
-            $website = Website::find($params['website_id']);
-            $params['website_domain'] = $website->domain;
+            // Set Inquiry Name/Email
+            $params['inquiry_email'] = $lead->inquiry_email;
+            $params['inquiry_name'] = $lead->inquiry_name;
 
-            // Create Inquiry
-            $inquiry = InquiryLead::getViaCC($params);
+            // Get Inquiry
+            $inquiry = $this->inquiry->fill($params);
 
             // Send Inquiry Email
             $this->inquiry->send($inquiry);

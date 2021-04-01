@@ -35,33 +35,14 @@ class InquiryEmail extends Mailable
     public function build()
     {
         $from = config('mail.from.address', 'noreply@trailercentral.com');
-        $name = config('mail.from.name', 'Trailer Central');
 
-        $build = $this->from($from, $name);
+        $build = $this->from($from, $this->data['fromName']);
 
-        $build->getInquiryView();
+        $build->view('emails.leads.inquiry.' . $this->data['inquiryView'])
+              ->text('emails.leads.inquiry.' . $this->data['inquiryView'] . '-plain');
 
         $build->with($this->data);
 
         return $build;
-    }
-
-    /**
-     * Get Inquiry Views
-     * 
-     * @return type
-     */
-    private function getInquiryView() {
-        // Check Type
-        $view = $this->data['inquiryType'];
-
-        // CTA Must be General!
-        if($view === 'cta') {
-            $view = 'general';
-        }
-
-        // Set Templates
-        return $this->view('emails.leads.inquiry-' . $view)
-                    ->text('emails.leads.inquiry-' . $view . '-plain');
     }
 }

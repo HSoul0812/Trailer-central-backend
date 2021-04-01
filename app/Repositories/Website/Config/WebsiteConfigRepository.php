@@ -5,6 +5,7 @@ namespace App\Repositories\Website\Config;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Models\Website\Config\WebsiteConfigDefault;
 
 class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
     
@@ -23,6 +24,10 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
     public function getAll($params) {
         $query = WebsiteConfig::select('*');
                 
+        if (isset($params['website_id'])) {
+            $query = $query->where('website_id', $params['website_id']);
+        }
+                
         if (isset($params['key'])) {
             $query = $query->where('key', $params['key']);
         }
@@ -38,4 +43,45 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         throw new NotImplementedException;
     }
 
+    /**
+     * Get Value of Key For Website or Default
+     * 
+     * @param int $websiteId
+     * @param string $key
+     * @return array{key: value} or array{json_decode(values_mapping)}
+     */
+    public function getValueOrDefault(int $websiteId, string $key): string {
+        // Get Config
+        $config = WebsiteConfig::where('website_id', $websiteId)->where('key', $key)->first();
+        $default = WebsiteConfigDefault::where('key', $key)->first();
+
+        // Return Values Mapping
+        if(!empty($config)) {
+            // Get Values Mapping Array for Config
+            $value = $config->value('value');
+            return $this->getValuesMapping($default->values_mapping, $value, $key);
+        }
+
+        // Get Values Mapping for Default
+        return $this->getValuesMapping($default->values_mapping, $default->default_value, $key);
+    }
+
+
+    /**
+     * Get Values Mapping
+     * 
+     * @param array $values
+     * @param string $value
+     * @param string $key
+     * @return array{key: value} or array{json_decode(values_mapping)}
+     */
+    private function getValuesMapping($values, $value, $key): array {
+        // Check Values Map
+        if(!empty($values[$value])) {
+            return $values[$value];
+        }
+
+        // Return Standard Map Instead
+        return [$key => $value];
+    }
 }

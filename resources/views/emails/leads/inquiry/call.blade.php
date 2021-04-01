@@ -11,11 +11,11 @@
     <tr>
         <td align="center" valign="top" style="padding:20px 0 5px;">
             <!-- begin wrapper -->
-            <table bgcolor="{{ $bgcolor }}" cellpadding="0" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
-                <tr style="background:{{ $bgheader }}">
+            <table bgcolor="{{ $bgColor }}" cellpadding="0" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
+                <tr style="background:{{ $bgHeader }}">
                     <td valign="top">
-                        <a href="https://www.trailercentral.com/">
-                            <img src="https://www.trailercentral.com/images/logo2.png" alt="Trailer Central" style="margin-bottom:10px;" border="0"/>
+                        <a href="{{ $logoUrl }}">
+                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;" border="0"/>
                         </a>
                     </td>
                 </tr>
@@ -27,9 +27,9 @@
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">You are receiving this message because a {{ $website }} user filled out the click to call form on the following listing</p>
                         
-                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Listing: <strong><a href="{{ $item_url }}">{{ $item_name }}</a></strong></p>
+                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Listing: <strong><a href="{{ $url }}">{{ $title }}</a></strong></p>
 
-                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Lead Name: <strong>{{ $first_name }} {{ $last_name }}</strong></p>
+                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Full Name: <strong>{{ $fullName }}</strong></p>
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Lead Phone: <strong>{{ $phone }}</strong></p>
 
@@ -54,22 +54,22 @@
     </tbody>
 </table>
 
-@if (!empty($is_spam))
+@if (!empty($isSpam))
     <div style='width: 650px; margin: 0 auto; background: #ffeb3b; color: #000; border: 1px solid #333; padding: 10px; font-family: monospace'>
 
-        <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE -- SCORE: {{ $all_failures_count }}</strong><br />
+        <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE -- SCORE: {{ $allFailuresCount }}</strong><br />
 
-        <strong>Remote IP:</strong> {{ $remote_ip }}
-        @if (!empty($forwarded_for)
-            / Visible Proxy: {{ $forwarded_for }}
+        <strong>Remote IP:</strong> {{ $remoteIp }}
+        @if (!empty($forwardedFor)
+            / Visible Proxy: {{ $forwardedFor }}
         @endif
         </strong><br/>
 
-        <strong>Matched Rules:</strong> {{ $all_failures }}<br/>
+        <strong>Matched Rules:</strong> {{ $allFailures }}<br/>
 
-        <strong>Original Recipients:</strong> {{ $original_contact_list }}
+        <strong>Original Recipients:</strong> {{ $originalContactList }}
 
-        <strong>Not Spam?</strong> <a href="{{ $resend_url }}">Send to original recipients anyway</a>
+        <strong>Not Spam?</strong> <a href="{{ $resendUrl }}">Send to original recipients anyway</a>
         <span style="color: #888">(expires after 7 days)</span>
 
     </div>

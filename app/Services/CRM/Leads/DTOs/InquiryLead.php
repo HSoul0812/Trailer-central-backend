@@ -17,6 +17,12 @@ class InquiryLead
     /**
      * @const string
      */
+    const SPAM_EMAIL = 'josh+spam-notify@trailercentral.com';
+
+
+    /**
+     * @const string
+     */
     const PREFERRED_PHONE = 'phone';
 
     /**
@@ -67,7 +73,8 @@ class InquiryLead
         'part',
         'showroom',
         'call',
-        'sms'
+        'sms',
+        'bestprice'
     );
 
 
@@ -80,7 +87,7 @@ class InquiryLead
     /**
      * @var int Dealer Location ID for Lead Inquiry
      */
-    private $locationId;
+    private $dealerLocationId;
 
     /**
      * @var int Website ID for Lead Inquiry
@@ -92,11 +99,43 @@ class InquiryLead
      */
     private $websiteDomain;
 
+    /**
+     * @var string Device Lead Inquiry Was Sent From
+     */
+    private $device;
+
 
     /**
      * @var string Type of Lead Inquiry
      */
     private $inquiryType;
+
+    /**
+     * @var string Email of Lead Inquiry
+     */
+    private $inquiryEmail;
+
+    /**
+     * @var string Name of Lead Inquiry
+     */
+    private $inquiryName;
+
+
+    /**
+     * @var string Logo of Lead Inquiry
+     */
+    private $logo;
+
+    /**
+     * @var string Logo URL of Lead Inquiry
+     */
+    private $logoUrl;
+
+    /**
+     * @var string From Name of Lead Inquiry
+     */
+    private $fromName;
+
 
     /**
      * @var array<string> Lead Types to Insert to Lead Inquiry
@@ -107,6 +146,11 @@ class InquiryLead
      * @var array<string> Units of Interest for the Lead Inquiry
      */
     private $inventory;
+
+    /**
+     * @var ?int Primary Item ID for Lead Inquiry
+     */
+    private $itemId;
 
 
     /**
@@ -239,17 +283,12 @@ class InquiryLead
     private $salesPersonId;
 
 
-    public static function getFromLead() {
-        
-    }
-
-
     /**
      * Get Inquiry Type
      * 
      * @return string
      */
-    private function getInquiryType() {
+    private function getInquiryType(): string {
         // Get Type
         if(!in_array($this->inquiryType, self::INQUIRY_TYPES)) {
             $this->inquiryType = self::INQUIRY_TYPE_DEFAULT;
@@ -257,6 +296,34 @@ class InquiryLead
 
         // Set New Type
         return $this->inquiryType;
+    }
+
+    /**
+     * Get Inquiry View
+     * 
+     * @return string
+     */
+    private function getInquiryView(): string {
+        return ($this->inquiryType === 'cta') ? 'general' : $this->inquiryType;
+    }
+
+
+    /**
+     * Get Inquiry Email
+     * 
+     * @return string
+     */
+    private function getInquiryEmail(): string {
+        return !empty($this->isSpam) ? self::SPAM_EMAIL : $this->inquiryEmail;
+    }
+
+    /**
+     * Get Inquiry Name
+     * 
+     * @return string
+     */
+    private function getInquiryName(): string {
+        return !empty($this->isSpam) ? '' : $this->inquiryName;
     }
 
 
@@ -324,7 +391,7 @@ class InquiryLead
      * // JOTFORM ONLY
      * @return array{'jotformId': int, 'submissionId': int}
      */
-    public function getMetadata() {
+    public function getMetadata(): array {
         return json_decode($this->metadata);
     }
 
@@ -333,8 +400,9 @@ class InquiryLead
      * Build Subject
      * 
      * @param array $data
+     * @return string
      */
-    public function getSubject($data) {
+    public function getSubject($data): string {
         // Initialize
         switch($this->inquiryType) {
             case 'call':
@@ -372,7 +440,7 @@ class InquiryLead
      * 
      * @return string
      */
-    public function getBgColor() {
+    public function getBgColor(): string {
         return $this->isTrailerTrader() ? self::TT_EMAIL_BODY : self::DEFAULT_EMAIL_BODY;
     }
 
@@ -381,7 +449,85 @@ class InquiryLead
      * 
      * @return string
      */
-    public function getHeaderBgColor() {
+    public function getHeaderBgColor(): string {
         return $this->isTrailerTrader() ? self::TT_EMAIL_HEADER : self::DEFAULT_EMAIL_HEADER;
+    }
+
+    /**
+     * Get Admin Message for Inquiry Email
+     * 
+     * @return array{allFailures: string,
+     *               remoteAddr: string,
+     *               forwardedFor: string,
+     *               originalContactList: string,
+     *               resendUrl: string}
+     */
+    public function getAdminMsg(): array {
+        // Get Meta Data
+        $metadata = $this->getMetadata();
+
+        // Define Spam Data
+        return [
+            'isSpam'              => $this->isSpam,
+            'allFailures'         => implode(", ", $metadata['SPAM_FAILURES']),
+            'remoteAddr'          => $metadata['REMOTE_ADDR'],
+            'forwardedFor'        => $metadata['FORWARDED_FOR'],
+            'originalContactList' => implode('; ', $metadata['ORIGINAL_RECIPIENTS']),
+            'resendUrl'           => $metadata['REMAIL_URL']
+        ];
+    }
+
+
+    /**
+     * Get Email Vars For Inquiry Email Templates
+     * 
+     * @return array{year: int,
+     *               bgColor: string,
+     *               bgHeader: string,
+     *               inquiryType: string,
+     *               inquiryView: string,
+     *               inquiryName: string,
+     *               inquiryEmail: string,
+     *               logo: string,
+     *               logoUrl: string,
+     *               fromName: string,
+     *               subject: string,
+     *               website: string,
+     *               title: string,
+     *               stock: string,
+     *               url: string,
+     *               fullName: string,
+     *               isSpam: bool,
+     *               allFailures: string,
+     *               remoteAddr: string,
+     *               forwardedFor: string,
+     *               originalContactList: string,
+     *               resendUrl: string}
+     */
+    public function getEmailVars(): array {
+        // Return Inquiry Email Vars
+        return array_merge([
+            'year'             => date('Y'),
+            'bgColor'          => $this->getBgColor(),
+            'bgHeader'         => $this->getHeaderBgColor(),
+            'inquiryView'      => $this->getInquiryView(),
+            'inquiryName'      => $this->inquiryName,
+            'inquiryEmail'     => $this->inquiryEmail,
+            'logo'             => $this->logo,
+            'logoUrl'          => $this->logoUrl,
+            'fromName'         => $this->fromName,
+            'subject'          => $this->getSubject(),
+            'website'          => $this->websiteDomain,
+            'device'           => $this->device,
+            'title'            => $this->title,
+            'stock'            => $this->stock,
+            'url'              => $this->website . $this->referral,
+            'fullName'         => $this->getFullName(),
+            'email'            => $this->email,
+            'phone'            => $this->phone,
+            'postal'           => $this->zip,
+            'preferred'        => $this->getPreferredContact(),
+            'comments'         => $this->comments
+        ], $this->getAdminMsg());
     }
 }

@@ -6,7 +6,11 @@ use Illuminate\Support\Facades\Mail;
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\Lead;
+use App\Models\Parts\Part;
+use App\Models\Showroom\Showroom;
+use App\Services\CRM\Leads\InquiryLead;
 use App\Services\CRM\Leads\InquiryEmailServiceInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
@@ -19,6 +23,18 @@ use Carbon\Carbon;
 class InquiryEmailService implements InquiryEmailServiceInterface
 {
     use CustomerHelper, MailHelper;
+
+    /**
+     * @var App\Repositories\Website\Config\WebsiteConfigRepositoryInterface
+     */
+    protected $websiteConfig;
+
+    /**
+     * @param WebsiteConfigRepositoryInterface $websiteConfig
+     */
+    public function __construct(WebsiteConfigRepositoryInterface $websiteConfig) {
+        $this->websiteConfig = $websiteConfig;
+    }
 
     /**
      * Send Email for Lead
@@ -50,66 +66,64 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     }
 
     /**
+     * Fill Inquiry Lead Details From Request Params
      * 
-     * @param Lead $lead
+     * @param array $params
+     * @return InquiryLead
      */
-    private function getInquiryFromLead(Lead $lead) {
-        // Initialize Inquiry Array
-        $inquiry = [
-            'websiteId' => $lead->website->id,
-            'websiteDomain' => $lead->website->domain,
-            'firstName' => $lead->first_name,
-            'lastName' => $lead->last_name,
-            'preferredContact' => $lead->preferred_contact,
-            'leadEmail' => $lead->email_address,
-            'comments' => $lead->comments,
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'phone' => $lead->phone_number,
-            'isSpam' => $lead->is_spam
-        ];
+    public function fill(array $params): InquiryLead {
+        // Get Website
+        $website = Website::find($params['website_id']);
+        $params['website_domain'] = $website->domain;
+        $params['url'] = $params['website_domain'] . $params['referral'];
 
-        // Get Meta Data
-        $metadata = $lead->metadata_array;
+        // Get Inquiry From Details For Website
+        $config = $this->websiteConfig->getValueOrDefault([
+            'website_id' => $params['website_id'],
+            'key' => 'general/item_email_from'
+        ]);
+        $params['logo'] = $config->logo;
+        $params['logo_url'] = $config->logoUrl;
+        $params['from_name'] = $config->fromName;
 
-        // Toggle Inventory Type
-        switch($lead->lead_type) {
+        // Get Data By Inquiry Type
+        $vars = $this->getInquiryTypeVars($params);
+
+        // Create Inquiry Lead
+        return InquiryLead::getViaCC($vars);
+    }
+
+
+    /**
+     * Get Inquiry Type Specific Vars
+     * 
+     * @param array $params
+     * @return array
+     */
+    private function getInquiryTypeVars(array $params): array {
+        // Toggle Inquiry Type
+        switch($params['inquiry_type']) {
             case "inventory":
-                $inquiry['stock'] = !empty($lead->inventory->stock) ? $lead->inventory->stock : $lead->stock;
-                $inquiry['inventory_url'] = $inquiry['website'] . $lead->referral;
-                $inquiry['inventory_title'] = $lead->title;
+            case "bestprice":
+                $inventory = Inventory::find($params['item_id']);
+                $params['stock'] = !empty($inventory->stock) ? $inventory->stock : $params['stock'];
+                $params['title'] = $inventory->title;
             break;
             case "part":
-                $inquiry['stock'] = $params['stock'];
-                $inquiry['part_url'] = implode(", ", $metadata['SPAM_FAILURES']);
-                $inquiry['part_title'] = $lead->title;
+                $part = Part::find($params['item_id']);
+                $params['stock'] = !empty($part->sku) ? $part->sku : $params['stock'];
+                $params['title'] = $part->title;
             break;
             case "showroomModel":
-                $inquiry['showroom_url'] = implode(", ", $metadata['SPAM_FAILURES']);
-                $inquiry['showroom_title'] = $lead->title;
+                $showroom = Showroom::find($params['item_id']);
+                $title = $showroom->year . ' '. $showroom->manufacturer;
+                $title .= (!empty($showroom->series) ? ' ' . $showroom->series : '');
+                $title .= ' ' . $showroom->model;
+                $params['title'] = $title;
             break;
         }
 
-        // Set Inquiry Name/Email
-        $inquiryEmail = $lead->inquiry_email;
-        $inquiryName  = $lead->inquiry_name;
-        if(!empty($inquiry['is_spam'])) {
-            // Set Spam Data
-            $inquiry['all_failures'] = implode(", ", $metadata['SPAM_FAILURES']);
-            $inquiry['all_failures_total'] = count($metadata['SPAM_FAILURES']);
-            $inquiry['remote_ip'] = $metadata['REMOTE_ADDR'];
-            $inquiry['forwarded_for'] = $metadata['FORWARDED_FOR'];
-            $inquiry['original_contact_list'] = implode('; ', $metadata['ORIGINAL_RECIPIENTS']);
-            $inquiry['resend_url'] = $metadata['REMAIL_URL'];
-
-            // Set Spam Email
-            $inquiryEmail = 'josh+spam-notify@trailercentral.com';
-            $inquiryName  = '';
-        }
-
-        // Return Lead Inquiry
-        return new InquiryLead($inquiry);
+        // Return Updated Params Array
+        return $params;
     }
 }
