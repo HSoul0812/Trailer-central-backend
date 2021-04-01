@@ -8,7 +8,7 @@ use Dingo\Api\Http\Request;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Http\Requests\CRM\Leads\InquiryLeadRequest;
 
-class LeadController extends RestfulController
+class InquiryController extends RestfulController
 {
     protected $inquiry;
     
@@ -17,7 +17,7 @@ class LeadController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param Repository $leads
+     * @param InquiryRepositoryInterface $inquiry
      */
     public function __construct(InquiryRepositoryInterface $inquiry)
     {
