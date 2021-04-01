@@ -4,7 +4,7 @@ namespace App\Repositories\CRM\Leads;
 
 use App\Repositories\Repository;
 
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 interface LeadRepositoryInterface extends Repository {
     /**

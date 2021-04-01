@@ -16,7 +16,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class LeadRepository implements LeadRepositoryInterface {
@@ -225,7 +225,7 @@ class LeadRepository implements LeadRepositoryInterface {
     public function findAllMatches(array $params): Collection {
         // Dealer ID Exists?!
         if(!isset($params['dealer_id'])) {
-            return collect([]);
+            return new Collection();
         }
 
         // Clean Phones
