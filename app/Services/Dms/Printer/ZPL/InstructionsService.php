@@ -37,7 +37,7 @@ class InstructionsService implements InstructionsServiceInterface
         $this->zplHelper->setBarcodeHeight($printerSettings->barcode_height);
         $this->zplHelper->setBarcodeXPosition($printerSettings->barcode_x_position);
         $this->zplHelper->setBarcodeYPosition($printerSettings->barcode_y_position);
-        $this->zplHelper->setBarcodeData($labelText);
+        $this->zplHelper->setBarcodeData($barcodeData);
         
         return $this->zplHelper->getCode();
     }
