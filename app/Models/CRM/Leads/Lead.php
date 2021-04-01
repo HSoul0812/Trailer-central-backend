@@ -12,7 +12,6 @@ use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
 use App\Models\Inventory\Inventory;
-use App\Models\User\User;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
