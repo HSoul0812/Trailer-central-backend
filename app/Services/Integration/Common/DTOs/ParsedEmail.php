@@ -489,14 +489,16 @@ class ParsedEmail
     public function validateAttachmentsSize() {
         // Loop Attachments
         $totalSize = 0;
-        foreach($this->attachments as $attachment) {
-            if ($attachment->getFileSize() > Attachment::MAX_FILE_SIZE) {
-                throw new ExceededSingleAttachmentSizeException();
-            } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
-                throw new ExceededTotalAttachmentSizeException();
+        if (!empty($this->attachments)) {
+            foreach($this->attachments as $attachment) {
+                if ($attachment->getFileSize() > Attachment::MAX_FILE_SIZE) {
+                    throw new ExceededSingleAttachmentSizeException();
+                } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
+                    throw new ExceededTotalAttachmentSizeException();
+                }
+                $totalSize += $attachment->getFileSize();
             }
-            $totalSize += $attachment->getFileSize();
-        }
+        }        
 
         // Return Total Size
         return $totalSize;
@@ -701,9 +703,12 @@ class ParsedEmail
     {
         // Get Attachment Params
         $attachments = [];
-        foreach($this->attachments as $attachment) {
-            $attachments[] = $attachment->getParams($this->messageId);
-        }
+        
+        if (!empty($this->attachments)) {
+            foreach($this->attachments as $attachment) {
+                $attachments[] = $attachment->getParams($this->messageId);
+            }
+        }        
 
         // Return Params
         return [

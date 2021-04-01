@@ -84,7 +84,8 @@ class SmtpConfig
         if(!empty($params)) {
             // Check All Class Vars for Matches
             $vars = get_class_vars(get_class($this));
-            foreach($vars as $var) {
+            
+            foreach($vars as $var => $val) {                
                 if(isset($params[$var])) {
                     $method = 'set' . ucfirst($var);
                     $this->{$method}($params[$var]);
@@ -257,7 +258,7 @@ class SmtpConfig
      * 
      * @return string $this->authType
      */
-    public function getAuthType(): string
+    public function getAuthType(): ?string
     {
         return $this->authType;
     }
