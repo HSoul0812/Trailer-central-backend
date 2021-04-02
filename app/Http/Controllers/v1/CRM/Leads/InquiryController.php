@@ -10,8 +10,14 @@ use App\Http\Requests\CRM\Leads\InquiryLeadRequest;
 
 class InquiryController extends RestfulController
 {
-    protected $inquiry;
-    
+    /**
+     * @var App\Services\CRM\Leads\LeadServiceInterface
+     */
+    protected $leads;
+
+    /**
+     * @var App\Transformers\CRM\Leads\LeadTransformer
+     */
     protected $transformer;
 
     /**

@@ -184,6 +184,8 @@ class LeadService implements LeadServiceInterface
         if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
             $params['inventory'][] = $params['item_id'];
         }
+        print_r($params);
+        die;
 
         // Create Lead
         $lead = $this->create($params);
