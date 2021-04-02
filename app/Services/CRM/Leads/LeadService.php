@@ -13,6 +13,7 @@ use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryEmailServiceInterface;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -23,6 +24,8 @@ use Illuminate\Support\Facades\DB;
  */
 class LeadService implements LeadServiceInterface
 {
+    use DispatchesJobs;
+
     /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
