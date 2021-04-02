@@ -8,6 +8,7 @@ use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Parts\Part;
 use App\Models\Showroom\Showroom;
+use App\Models\Website\Website;
 use App\Services\CRM\Leads\InquiryLead;
 use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
