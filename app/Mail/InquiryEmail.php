@@ -24,7 +24,8 @@ class InquiryEmail extends Mailable
     public function __construct(InquiryLead $inquiry)
     {
         // Set Extra Vars
-        $this->data = $inquiry->getEmailVars();
+        $this->data    = $inquiry->getEmailVars();
+        $this->subject = $inquiry->getSubject();
     }
 
     /**
