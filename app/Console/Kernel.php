@@ -13,6 +13,7 @@ use App\Console\Commands\User\CreateAccessToken;
 use App\Console\Commands\Parts\Import\StocksExistsCommand;
 use App\Console\Commands\CRM\Leads\AutoAssign; 
 use App\Console\Commands\Parts\IncreaseDealerCostCommand;
+use App\Console\Commands\Parts\FixPartVendor;
 
 class Kernel extends ConsoleKernel
 {
@@ -30,7 +31,8 @@ class Kernel extends ConsoleKernel
         CreateAccessToken::class,
         StocksExistsCommand::class,
         AutoAssign::class,
-        IncreaseDealerCostCommand::class
+        IncreaseDealerCostCommand::class,
+        FixPartVendor::class,
     ];
 
     /**
