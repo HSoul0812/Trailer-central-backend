@@ -62,7 +62,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             $email = Mail::to($this->getCleanTo($inquiry->getInquiryTo()));
 
             // Append BCC
-            if(!empty($this->getInquiryBcc())) {
+            if(!empty($inquiry->getInquiryBcc())) {
                 $email->bcc($this->getCleanTo($inquiry->getInquiryBcc()));
             }
 
