@@ -2,10 +2,8 @@
 
 namespace App\Services\CRM\Leads;
 
-use Illuminate\Support\Facades\Mail;
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
-use App\Models\CRM\Leads\Lead;
 use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use App\Models\Showroom\Showroom;
@@ -15,6 +13,8 @@ use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 /**
