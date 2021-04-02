@@ -54,6 +54,7 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         // Get Config
         $config = WebsiteConfig::where('website_id', $websiteId)->where('key', $key)->first();
         $default = WebsiteConfigDefault::where('key', $key)->first();
+        var_dump($default);
 
         // Return Values Mapping
         if(!empty($config)) {
