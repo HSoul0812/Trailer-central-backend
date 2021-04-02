@@ -185,29 +185,18 @@ class LeadService implements LeadServiceInterface
             $params['inventory'][] = $params['item_id'];
         }
 
+        // Get Inquiry
+        $inquiry = $this->inquiry->fill($params);
+
+        // Send Inquiry Email
+        $this->inquiry->send($inquiry);
+
+        // Create Auto Assign Job
+        // TO DO: Create Auto Assign Job
+        //$this->dispatch(new AutoAssignJob($inquiry));
+
         // Create Lead
-        $lead = $this->create($params);
-
-        // Valid Lead?!
-        if(!empty($lead->identifier)) {
-            // Set Inquiry Name/Email
-            $params['inquiry_email'] = $lead->inquiry_email;
-            $params['inquiry_name'] = $lead->inquiry_name;
-
-            // Get Inquiry
-            $inquiry = $this->inquiry->fill($params);
-
-            // Send Inquiry Email
-            $this->inquiry->send($inquiry);
-
-            // Create Auto Assign Job
-            // TO DO: Create Auto Assign Job
-            //$this->dispatch(new AutoAssignJob($inquiry));
-        }
-        die;
-
-        // Return Lead
-        return $lead;
+        return $this->create($params);
     }
 
 

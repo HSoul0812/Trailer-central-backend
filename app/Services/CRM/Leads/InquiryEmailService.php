@@ -89,8 +89,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['logo_url'] = $config['logoUrl'];
         $params['from_name'] = $config['fromName'];
 
+        // Get Inquiry Name/Email
+        $details = $this->getInquiryDetails($params);
+
         // Get Data By Inquiry Type
-        $vars = $this->getInquiryTypeVars($params);
+        $vars = $this->getInquiryTypeVars($details);
 
         // Create Inquiry Lead
         return InquiryLead::getViaCC($vars);
@@ -98,10 +101,46 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
 
     /**
+     * Get Inquiry Name/Email Details
+     * 
+     * @param array $params
+     * @return array_merge($params, array{'inquiry_email': string,
+     *                                    'inquiry_name': string})
+     */
+    private function getInquiryDetails(array $params): array {
+        // Get Inquiry Details From Dealer Location?
+        if(!empty($params['dealer_location_id'])) {
+            $dealerLocation = DealerLocation::find($params['dealer_location_id']);
+            if(!empty($dealerLocation->name)) {
+                $params['inquiry_name'] = $dealerLocation->name;
+                $params['inquiry_email'] = $dealerLocation->email;
+                return $params;
+            }
+        }
+
+        // Get Inquiry Details From Inventory Item?
+        if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
+            $inventory = Inventory::find($params['item_id']);
+            if(!empty($inventory->dealerLocation->name)) {
+                $params['inquiry_name'] = $inventory->dealerLocation->name;
+                $params['inquiry_email'] = $inventory->dealerLocation->email;
+                return $params;
+            }
+        }
+
+        // Get Inquiry Details From Dealer
+        $dealer = User::find($params['dealer_id']);
+        $params['inquiry_name'] = $dealer->name;
+        $params['inquiry_email'] = $dealer->email;
+        return $params;
+    }
+
+    /**
      * Get Inquiry Type Specific Vars
      * 
      * @param array $params
-     * @return array
+     * @return array_merge($params, array{'stock': string,
+     *                                    'title': string})
      */
     private function getInquiryTypeVars(array $params): array {
         // Toggle Inquiry Type
