@@ -11,7 +11,7 @@
     <tr>
         <td align="center" valign="top" style="padding:20px 0 5px;">
             <!-- begin wrapper -->
-            <table bgcolor="{{ $bgcolor }}" cellpadding="0" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
+            <table bgcolor="{{ $bgColor }}" cellpadding="0" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
                 <tr style="background:{{ $bgheader }}">
                     <td valign="top">
                         <a href="{{ $logoUrl }}">
