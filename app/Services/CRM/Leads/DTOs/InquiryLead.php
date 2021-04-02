@@ -468,11 +468,11 @@ class InquiryLead
         // Define Spam Data
         return [
             'isSpam'              => $this->isSpam,
-            'allFailures'         => implode(", ", $metadata['SPAM_FAILURES']),
-            'remoteAddr'          => $metadata['REMOTE_ADDR'],
-            'forwardedFor'        => $metadata['FORWARDED_FOR'],
-            'originalContactList' => implode('; ', $metadata['ORIGINAL_RECIPIENTS']),
-            'resendUrl'           => $metadata['REMAIL_URL']
+            'allFailures'         => !empty($metadata['SPAM_FAILURES']) ? implode(", ", $metadata['SPAM_FAILURES']) : '',
+            'remoteAddr'          => $metadata['REMOTE_ADDR'] ?? '',
+            'forwardedFor'        => $metadata['FORWARDED_FOR'] ?? '',
+            'originalContactList' => !empty($metadata['ORIGINAL_RECIPIENTS']) ? implode('; ', $metadata['ORIGINAL_RECIPIENTS']) : '',
+            'resendUrl'           => $metadata['REMAIL_URL'] ?? ''
         ];
     }
 
