@@ -77,7 +77,7 @@ class ShowroomControllerTest extends TestCase
 
         $this->assertArrayHasKey('real_model', $responseJson['data'][0]);
         $this->assertArrayHasKey('id', $responseJson['data'][0]);
-        $this->assertCount(2, array_keys($responseJson['data'][0]));
+        $this->assertCount(3, array_keys($responseJson['data'][0]));
 
         $this->assertArrayHasKey('meta', $responseJson);
         $this->assertNotEmpty($responseJson['meta']);

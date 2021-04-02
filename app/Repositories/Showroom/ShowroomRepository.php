@@ -63,11 +63,13 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
         throw new NotImplementedException;
     }
 
-    public function get($params) {
-        throw new NotImplementedException;
+    public function get($params)
+    {
+        return Showroom::findOrFail($params['id']);
     }
 
-    public function getAll($params) {
+    public function getAll($params)
+    {
         /** @var Builder $query */
         $query = Showroom::where('id', '>', 0);
 

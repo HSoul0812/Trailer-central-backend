@@ -64,6 +64,8 @@ class ShowroomTransformer extends TransformerAbstract
             $this->mapping = $this->showroomFieldsMappingRepository->getAll([]);
         }
 
+        $data['showroom_id'] = $showroom->id;
+
         $select = $this->request->get('select');
 
         /** @var ShowroomFieldsMapping $map */
@@ -104,6 +106,12 @@ class ShowroomTransformer extends TransformerAbstract
                     $data['attributes'][$map->map_to] = $value;
                     break;
 
+                case ShowroomFieldsMapping::TYPE_IMAGE:
+                    foreach ($showroom->{$map->map_from} as $image) {
+                        $data[$map->map_to][]['url'] = env('SHOWROOM_FILES_URL') . $image->src;
+                    }
+                    break;
+
                 case ShowroomFieldsMapping::TYPE_MEASURE:
                     if (empty($data[$map->map_to])) {
                         $data[$map->map_to] = number_format(0, 2);
@@ -129,7 +137,7 @@ class ShowroomTransformer extends TransformerAbstract
                     break;
 
                 default:
-                    throw new \InvalidArgumentException('Wrong showroom fields mapping type. Class - ' . self::class);
+                    throw new \InvalidArgumentException("Wrong showroom fields mapping type ({$map->type}). Class - " . self::class);
             }
         }
 

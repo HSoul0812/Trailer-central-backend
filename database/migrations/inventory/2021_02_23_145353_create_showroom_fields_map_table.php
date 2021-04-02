@@ -10,37 +10,23 @@ class CreateShowroomFieldsMapTable extends Migration
     private const INVENTORY_FIELDS = [
         'id' => 'id',
         'manufacturer' => 'manufacturer',
-        'images' => 'images',
         'category' => 'inventoryCategory',
         'model,brand' => 'model',
         'model' => 'real_model',
         'type' => 'category',
-        'axles' => 'axles',
         'description' => 'description',
         'description_txt' => 'description_txt',
         'msrp' => 'msrp',
         'gvwr' => 'gvwr',
         'GVWR' => 'gvwr',
-        'pull_type' => 'pull_type',
-        'color' => 'color',
-        'living_quarters' => 'livingquarters',
-        'ramp' => 'ramps',
-        'frame' => 'construction',
-        'stalls' => 'stalls',
-        'nose_type' => 'nose_type',
-        'configuration' => 'configuration',
-        'roof_type' => 'roof_type',
-        'colors' => 'color',
-        'engine_type' => 'fuel_type',
-        'num_passengers' => 'passengers',
-        'num_batteries' => 'number_batteries',
         'year' => 'year',
         'brand' => 'brand',
         'video_embed_code' => 'video_embed_code',
-        'dry_weight' => 'dry_weight'
     ];
 
     private const ATTRIBUTE_FIELDS = [
+        'frame' => 'construction',
+        'color' => 'color',
         'colors' => 'color',
         'horsepower' => 'horsepower',
         'fuel_capacity' => 'fuel_capacity',
@@ -78,10 +64,13 @@ class CreateShowroomFieldsMapTable extends Migration
         'axle_weight' => 'axle_weight',
         'weight' => 'weight',
         'total_weight_capacity' => 'total_weight_capacity',
-        'transom' => 'transom'
+        'transom' => 'transom',
+        'engine_type' => 'fuel_type',
+        'num_passengers' => 'passengers',
+        'num_batteries' => 'number_batteries',
     ];
 
-    const MEASURE_FIELDS = [
+    private const MEASURE_FIELDS = [
         'length' => 'length',
         'length_min_real' => 'length',
         'length_max_real' => 'length',
@@ -100,12 +89,16 @@ class CreateShowroomFieldsMapTable extends Migration
         'max_height' => 'height',
     ];
 
-    const BOOLEAN_FIELDS = [
+    private const IMAGES_FIELDS = [
+        'images' => 'images',
+    ];
+
+    private const BOOLEAN_FIELDS = [
         'livingquarters',
         'ramps',
     ];
 
-    const INTEGER_FIELDS = [
+    private const INTEGER_FIELDS = [
         'id',
         'year'
     ];
@@ -117,11 +110,9 @@ class CreateShowroomFieldsMapTable extends Migration
      */
     public function up()
     {
-        Schema::drop('showroom_fields_mapping');
-
         Schema::create('showroom_fields_mapping', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->enum('type', ['inventory', 'attribute', 'measure']);
+            $table->enum('type', ['inventory', 'attribute', 'measure', 'image']);
             $table->string('map_from');
             $table->string('map_to');
             $table->enum('field_type', ['boolean', 'string', 'integer', 'float', 'array'])->nullable();
@@ -173,7 +164,14 @@ class CreateShowroomFieldsMapTable extends Migration
             ]);
         }
 
-        exit();
+        foreach (self::IMAGES_FIELDS as $mapFrom => $mapTo) {
+            DB::table('showroom_fields_mapping')->insert([
+                'map_from' => $mapFrom,
+                'map_to' => $mapTo,
+                'type' => 'image',
+                'created_at' => $now
+            ]);
+        }
     }
 
     /**

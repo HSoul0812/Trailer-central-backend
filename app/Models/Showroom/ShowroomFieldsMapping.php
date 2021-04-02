@@ -21,6 +21,7 @@ class ShowroomFieldsMapping extends Model
     const TYPE_INVENTORY = 'inventory';
     const TYPE_ATTRIBUTE = 'attribute';
     const TYPE_MEASURE = 'measure';
+    const TYPE_IMAGE = 'image';
 
     const FIELD_TYPE_BOOLEAN = 'boolean';
     const FIELD_TYPE_INTEGER = 'integer';
