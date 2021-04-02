@@ -20,11 +20,6 @@ class AutoAssignJob extends Job
      * @var Lead
      */
     private $lead;
-    
-    /**
-     * @var App\Services\CRM\Leads\AutoAssignService
-     */
-    private $service;
 
     /**
      * @var Illuminate\Support\Facades\Log
@@ -45,6 +40,14 @@ class AutoAssignJob extends Job
         $this->log = Log::channel('autoassign');
     }
 
+    /**
+     * Handle Auto Assign Job
+     * 
+     * @param AutoAssignServiceInterface $service
+     * @throws AutoAssignJobMissingLeadException
+     * @throws AutoAssignJobSalesPersonExistsException
+     * @return boolean
+     */
     public function handle(AutoAssignServiceInterface $service)
     {
         // Job Doesn't Exist?
@@ -60,5 +63,6 @@ class AutoAssignJob extends Job
         // Process Auto Assign
         $this->log->info('Handling Auto Assign Manually on Lead #' . $this->lead->identifier);
         $service->autoAssign($this->lead);
+        return true;
     }
 }
