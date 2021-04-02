@@ -186,9 +186,7 @@ class LeadService implements LeadServiceInterface
         }
 
         // Create Lead
-        $lead = $this->create($params);
-        print_r($lead);
-        die;
+        return $this->create($params);
 
         // Valid Lead?!
         if(!empty($lead->identifier)) {

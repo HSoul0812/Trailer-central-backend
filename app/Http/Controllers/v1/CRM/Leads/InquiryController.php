@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\v1\CRM\Leads;
 
 use App\Http\Controllers\RestfulController;
-use App\Services\CRM\Leads\LeadServiceInterface;
-use Dingo\Api\Http\Request;
-use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Http\Requests\CRM\Leads\InquiryLeadRequest;
+use App\Services\CRM\Leads\LeadServiceInterface;
+use App\Transformers\CRM\Leads\LeadTransformer;
+use Dingo\Api\Http\Request;
 
 class InquiryController extends RestfulController
 {
