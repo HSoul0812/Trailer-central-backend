@@ -4,6 +4,7 @@ namespace App\Models\CRM\Dms\Printer;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class Settings
@@ -38,7 +39,7 @@ class Settings extends Model
      *
      * @return HasOne
      */
-    public function dealer() {
+    public function dealer() : HasOne {
         return $this->hasOne(User::class, 'dealer_id', 'dealer_id');
     }
 }

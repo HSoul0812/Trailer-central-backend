@@ -17,9 +17,7 @@ class InstructionController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param  PartRepositoryInterface  $parts
-     * @param  PartServiceInterface  $partService
-     * @param  Manager  $fractal
+     * @param  App\Services\Dms\Printer\InstructionsServiceInterface  $instructionsService
      */
     public function __construct(InstructionsServiceInterface $instructionsService)
     {

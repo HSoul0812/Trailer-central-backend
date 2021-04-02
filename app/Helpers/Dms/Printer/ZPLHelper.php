@@ -159,14 +159,19 @@ class ZPLHelper {
     
     private function startZplCode() : void
     {
-        $this->zplCode[] = self::ZPL_START_LABEL . '\n';
+        $this->zplCode[] = self::ZPL_START_LABEL . "\n";
     }
     
     private function endZplCode() : void
     {
-        $this->zplCode[] = self::ZPL_END_LABEL . '\n';
+        $this->zplCode[] = self::ZPL_END_LABEL . "\n";
     }
     
+
+
+    /**
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyFontSizeException
+     */
     private function setFontSizeCode() : void
     {
         if (empty($this->fontSize)) {
@@ -175,7 +180,10 @@ class ZPLHelper {
         
         $this->zplCode[] = self::ZPL_FONTSIZE_INSTRUCTION . ",{$this->fontSize}\n";
     }
-    
+        
+    /**
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyLabelOrientationException
+     */
     private function setLabelOrientationCode() : void
     {
         if (empty($this->labelOrientation)) {
@@ -183,10 +191,15 @@ class ZPLHelper {
         }
         
         if ($this->labelOrientation === self::ORIENTATION_LANDSCAPE) {
-            $this->zplCode[] = self::ZPL_ORIENTATION_INSTRUCTION . '\n';
+            $this->zplCode[] = self::ZPL_ORIENTATION_INSTRUCTION . "\n";
         }        
     }    
     
+    /**
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextException
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextXPositionException
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextYPositionException
+     */
     private function setLabelCode() : void
     {
         if (empty($this->labelTextXPosition)) {
@@ -201,9 +214,13 @@ class ZPLHelper {
             throw new EmptyLabelTextException;
         }
         
-        $this->zplCode[] = self::ZPL_LABEL_LOCATION_INSTRUCTION . $this->labelTextXPosition .', '.$this->labelTextYPosition.self::ZPL_LABEL_TEXT_INSTRUCTION . $this->labelText . self::ZPL_LABEL_TEXT_END_INSTRUCTION . '\n';
+        $this->zplCode[] = self::ZPL_LABEL_LOCATION_INSTRUCTION . $this->labelTextXPosition .', '.$this->labelTextYPosition.self::ZPL_LABEL_TEXT_INSTRUCTION . $this->labelText . self::ZPL_LABEL_TEXT_END_INSTRUCTION . "\n";
     }
-    
+        
+    /**
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeWidthException
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeHeightException
+     */
     private function setBarcodeDimensionsCode() : void
     {
         if (empty($this->barcodeWidth)) {
@@ -214,9 +231,14 @@ class ZPLHelper {
             throw new EmptyBarcodeHeightException;
         }
         
-        $this->zplCode[] = self::ZPL_BARCODE_DIMESIONS_INSTRUCTION . $this->barcodeWidth . ',3,' . $this->barcodeHeight . '\n';
+        $this->zplCode[] = self::ZPL_BARCODE_DIMESIONS_INSTRUCTION . $this->barcodeWidth . ',3,' . $this->barcodeHeight . "\n";
     }
     
+    /**
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeXPositionException
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeYPositionException
+     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeDataException
+     */
     private function setBarcodePositionCode() : void
     {
         if (empty($this->barcodeXPosition)) {
@@ -231,7 +253,7 @@ class ZPLHelper {
             throw new EmptyBarcodeDataException;
         }
         
-        $this->zplCode[] = self::ZPL_LABEL_LOCATION_INSTRUCTION . $this->barcodeXPosition . ',' . $this->barcodeYPosition . self::ZPL_BARCODE_POSITION_INSTRUCTION . self::ZPL_LABEL_TEXT_INSTRUCTION . $this->barcodeData . self::ZPL_LABEL_TEXT_END_INSTRUCTION .'\n';
+        $this->zplCode[] = self::ZPL_LABEL_LOCATION_INSTRUCTION . $this->barcodeXPosition . ',' . $this->barcodeYPosition . self::ZPL_BARCODE_POSITION_INSTRUCTION . self::ZPL_LABEL_TEXT_INSTRUCTION . $this->barcodeData . self::ZPL_LABEL_TEXT_END_INSTRUCTION ."\n";
     }
 
 }

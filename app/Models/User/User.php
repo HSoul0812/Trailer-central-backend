@@ -10,6 +10,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\CRM\Dms\Printer\Settings;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class User
@@ -192,7 +193,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
     }
     
-    public function printerSettings()
+    public function printerSettings() : HasOne
     {
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
