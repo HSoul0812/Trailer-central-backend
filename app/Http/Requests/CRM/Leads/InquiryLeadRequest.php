@@ -36,6 +36,7 @@ class InquiryLeadRequest extends Request {
         'cdk_email_sent' => 'nullable|boolean',
         'newsletter' => 'boolean',
         'is_spam' => 'boolean',
+        'is_dev' => 'boolean',
         'lead_source' => 'lead_source_valid',
         'lead_status' => 'lead_status_valid',
         'contact_type' => 'in:CONTACT,TASK',

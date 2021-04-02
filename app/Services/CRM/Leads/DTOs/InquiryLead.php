@@ -17,7 +17,27 @@ class InquiryLead
     /**
      * @const string
      */
-    const SPAM_EMAIL = 'josh+spam-notify@trailercentral.com';
+    const INQUIRY_SPAM_TO = [
+        ['email' => 'josh+spam-notify@trailercentral.com']
+    ];
+
+    /**
+     * @const array
+     */
+    const INQUIRY_CC_TO = [
+        ['email' => 'bcc@trailercentral.com'],
+        ['email' => 'alberto@trailercentral.com']
+    ];
+
+    /**
+     * @const array
+     */
+    const INQUIRY_DEV_TO = [
+        ['email' => 'ben+dev-contact-forms@trailercentral.com'],
+        ['email' => 'judson@trailercentral.com'],
+        ['email' => 'alberto@trailercentral.com'],
+        ['email' => 'david@trailercentral.com']
+    ];
 
 
     /**
@@ -266,6 +286,11 @@ class InquiryLead
      */
     private $isSpam;
 
+    /**
+     * @var bool Is This Lead Inquiry a Dev?
+     */
+    private $isDev;
+
 
     /**
      * @var string Source of Lead Inquiry
@@ -314,21 +339,31 @@ class InquiryLead
 
 
     /**
-     * Get Inquiry Email
+     * Get Inquiry To Array
      * 
-     * @return string
+     * @return array{array{name: string, email: string}, ...etc}
      */
-    private function getInquiryEmail(): string {
-        return !empty($this->isSpam) ? self::SPAM_EMAIL : $this->inquiryEmail;
-    }
+    private function getInquiryTo(): array {
+        // If Dev, Only Return Specific Entries
+        if(!empty($this->isDev)) {
+            $to = self::INQUIRY_DEV_TO;
+        }
+        // If Spam, Only Return Spam
+        elseif(!empty($this->isSpam)) {
+            $to = self::INQUIRY_SPAM_TO;
+        }
+        // Normal, Return Proper Inquiry
+        else {
+            $to = [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+        }
 
-    /**
-     * Get Inquiry Name
-     * 
-     * @return string
-     */
-    private function getInquiryName(): string {
-        return !empty($this->isSpam) ? '' : $this->inquiryName;
+        // Always Append These Entries
+        foreach(self::INQUIRY_CC_TO as $email) {
+            $to[] = ['email' => $email];
+        }
+
+        // Return Array of To Details
+        return $to;
     }
 
 
@@ -515,8 +550,6 @@ class InquiryLead
             'bgColor'          => $this->getBgColor(),
             'bgHeader'         => $this->getHeaderBgColor(),
             'inquiryView'      => $this->getInquiryView(),
-            'inquiryName'      => $this->inquiryName,
-            'inquiryEmail'     => $this->inquiryEmail,
             'logo'             => $this->logo,
             'logoUrl'          => $this->logoUrl,
             'fromName'         => $this->fromName,
