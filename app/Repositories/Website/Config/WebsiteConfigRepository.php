@@ -50,7 +50,7 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
      * @param string $key
      * @return array{key: value} or array{json_decode(values_mapping)}
      */
-    public function getValueOrDefault(int $websiteId, string $key): string {
+    public function getValueOrDefault(int $websiteId, string $key): array {
         // Get Config
         $config = WebsiteConfig::where('website_id', $websiteId)->where('key', $key)->first();
         $default = WebsiteConfigDefault::where('key', $key)->first();
