@@ -74,7 +74,7 @@
         <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE -- SCORE: {{ $allFailuresCount }}</strong><br />
 
         <strong>Remote IP:</strong> {{ $remoteIp }}
-        @if (!empty($forwardedFor)
+        @if (!empty($forwardedFor))
             / Visible Proxy: {{ $forwardedFor }}
         @endif
         </strong><br/>
