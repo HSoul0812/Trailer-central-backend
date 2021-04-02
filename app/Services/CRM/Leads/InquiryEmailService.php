@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\Lead;
+use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use App\Models\Showroom\Showroom;
 use App\Models\Website\Website;
