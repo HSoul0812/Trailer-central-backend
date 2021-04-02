@@ -343,7 +343,7 @@ class InquiryLead
      * 
      * @return array{array{name: string, email: string}, ...etc}
      */
-    private function getInquiryTo(): array {
+    public function getInquiryTo(): array {
         // If Dev, Only Return Specific Entries
         if(!empty($this->isDev)) {
             $to = self::INQUIRY_DEV_TO;
