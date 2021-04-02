@@ -354,11 +354,24 @@ class InquiryLead
         }
         // Normal, Return Proper Inquiry
         else {
-            $to = [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+            return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
         }
 
         // Return With Merged CC To
         return array_merge($to, self::INQUIRY_CC_TO);
+    }
+
+    /**
+     * Get Inquiry BCC Array
+     * 
+     * @return array{array{name: string, email: string}, ...etc}
+     */
+    public function getInquiryBcc(): array {
+        // If Dev, Only Return Specific Entries
+        if(empty($this->isDev) && empty($this->isSpam)) {
+            return self::INQUIRY_CC_TO;
+        }
+        return [];
     }
 
 

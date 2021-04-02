@@ -58,8 +58,16 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     public function send(InquiryLead $inquiry): bool {
         // Try/Send Email!
         try {
+            // Initialize Interaction Email
+            $email = Mail::to($this->getCleanTo($inquiry->getInquiryTo()));
+
+            // Append BCC
+            if(!empty($this->getInquiryBcc())) {
+                $email->bcc($this->getCleanTo($inquiry->getInquiryBcc()));
+            }
+
             // Send Interaction Email
-            Mail::to($this->getCleanTo($inquiry->getInquiryTo()))->send(new InquiryEmail($inquiry));
+            $email->send(new InquiryEmail($inquiry));
         } catch(\Exception $ex) {
             $this->log->error($ex->getMessage() . ': ' . $ex->getTraceAsString());
             throw new SendInquiryFailedException($ex->getMessage());
