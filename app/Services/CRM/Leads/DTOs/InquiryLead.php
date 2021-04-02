@@ -24,9 +24,9 @@ class InquiryLead
     /**
      * @const array
      */
-    const INQUIRY_CC_TO = [
+    const INQUIRY_BCC_TO = [
         ['email' => 'bcc@trailercentral.com'],
-        ['email' => 'alberto@trailercentral.com']
+        ['email' => 'david@trailercentral.com']
     ];
 
     /**
@@ -358,7 +358,7 @@ class InquiryLead
         }
 
         // Return With Merged CC To
-        return array_merge($to, self::INQUIRY_CC_TO);
+        return array_merge($to, self::INQUIRY_BCC_TO);
     }
 
     /**
@@ -369,7 +369,7 @@ class InquiryLead
     public function getInquiryBcc(): array {
         // If Dev, Only Return Specific Entries
         if(empty($this->isDev) && empty($this->isSpam)) {
-            return self::INQUIRY_CC_TO;
+            return self::INQUIRY_BCC_TO;
         }
         return [];
     }
