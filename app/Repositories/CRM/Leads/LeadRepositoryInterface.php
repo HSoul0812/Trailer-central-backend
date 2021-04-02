@@ -25,14 +25,6 @@ interface LeadRepositoryInterface extends Repository {
     public function getByEmails(int $dealerId, array $emails);
 
     /**
-     * Find Existing Lead That Matches Current Lead!
-     * 
-     * @param array $params
-     * @return Collection<Lead>
-     */
-    public function findAllMatches(array $params): Collection;
-
-    /**
      * Create Assign Log for Lead
      *
      * @param type $params

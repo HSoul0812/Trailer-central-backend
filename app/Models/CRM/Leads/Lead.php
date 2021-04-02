@@ -78,11 +78,6 @@ class Lead extends Model
 
     const TABLE_NAME = 'website_lead';
 
-    /**
-     * @const int Number of Matches Required for Merge
-     */
-    const MERGE_MATCH_COUNT = 2;
-
 
     /**
      * The table associated with the model.
