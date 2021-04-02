@@ -10,7 +10,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use App\Models\Showroom\Showroom;
 use App\Models\Website\Website;
-use App\Services\CRM\Leads\InquiryLead;
+use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Traits\CustomerHelper;
@@ -105,7 +105,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             case "inventory":
             case "bestprice":
                 $inventory = Inventory::find($params['item_id']);
-                $params['stock'] = !empty($inventory->stock) ? $inventory->stock : $params['stock'];
+                $params['stock'] = !empty($inventory->stock) ? $inventory->stock : '';
                 $params['title'] = $inventory->title;
             break;
             case "part":
