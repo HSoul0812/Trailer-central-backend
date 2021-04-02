@@ -399,10 +399,9 @@ class InquiryLead
     /**
      * Build Subject
      * 
-     * @param array $data
      * @return string
      */
-    public function getSubject($data): string {
+    public function getSubject(): string {
         // Initialize
         switch($this->inquiryType) {
             case 'call':
