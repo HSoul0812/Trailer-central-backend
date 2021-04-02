@@ -197,7 +197,7 @@ class LeadService implements LeadServiceInterface
             // TO DO: Create Auto Assign Job
             //$this->dispatch(new AutoAssignJob($inquiry));
         }
-        var_dump($lead);
+        dd($lead);
         die;
 
         // Return Lead
