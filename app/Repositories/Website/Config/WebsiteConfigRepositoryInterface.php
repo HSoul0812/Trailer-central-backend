@@ -10,7 +10,7 @@ interface WebsiteConfigRepositoryInterface extends Repository {
      * 
      * @param int $websiteId
      * @param string $key
-     * @return string
+     * @return array{key: value} or array{json_decode(values_mapping)}
      */
-    public function getValueOrDefault(int $websiteId, string $key): string;
+    public function getValueOrDefault(int $websiteId, string $key): array;
 }
