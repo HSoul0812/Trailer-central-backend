@@ -41,30 +41,24 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     /**
      * Send Email for Lead
      * 
-     * @param int $leadId
-     * @param array $params
+     * @param LeadInquiry $inquiry
      * @throws SendInquiryFailedException
+     * @return bool
      */
-    public function send($leadId, $params) {
-        // Get Lead
-        $lead = Lead::findOrFail($leadId);
-
-        // Set Params
-        $inquiry = $this->getInquiryFromLead($lead);
-
+    public function send(InquiryLead $inquiry): bool {
         // Try/Send Email!
         try {
             // Send Interaction Email
             Mail::to($this->getCleanTo([
-                'email' => $inquiry->getToEmail(),
-                'name' => $inquiry->getToName()
+                'email' => $inquiry->inquiry_email,
+                'name' => $inquiry->inquiry_name
             ]))->send(new InquiryEmail($inquiry));
         } catch(\Exception $ex) {
             throw new SendInquiryFailedException($ex->getMessage());
         }
 
-        // Returns Params With Attachments
-        return $params;
+        // Returns True on Success
+        return true;
     }
 
     /**
