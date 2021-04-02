@@ -202,7 +202,7 @@ class PartRepository implements PartRepositoryInterface {
         }
 
         if (isset($params['dealer_id'])) {
-             $query = $query->whereIn('dealer_id', $params['dealer_id']);
+            $query = $query->whereIn('dealer_id', $params['dealer_id']);
         }
 
         if (isset($params['type_id'])) {
@@ -385,6 +385,10 @@ class PartRepository implements PartRepositoryInterface {
                         ->orWhere('alternative_part_number', 'LIKE', '%' . $params['search_term'] . '%');
                 });
             }
+        }
+
+        if (isset($params['is_sublet_specific'])) {
+            $query = $query->where('is_sublet_specific', $params['is_sublet_specific']);
         }
 
         if (isset($params['sort'])) {
