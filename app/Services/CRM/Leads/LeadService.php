@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Leads;
 
+use App\Jobs\CRM\Leads\AutoAssignJob;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
@@ -191,12 +192,19 @@ class LeadService implements LeadServiceInterface
         // Send Inquiry Email
         $this->inquiry->send($inquiry);
 
-        // Create Auto Assign Job
-        // TO DO: Create Auto Assign Job
-        //$this->dispatch(new AutoAssignJob($inquiry));
+        // Create Lead
+        $lead = $this->create($params);
+
+        // Lead Exists?!
+        if(!empty($lead->identifier)) {
+            // Create Auto Assign Job
+            if(empty($lead->leadStatus->sales_person_id)) {
+                $this->dispatch(new AutoAssignJob($lead));
+            }
+        }
 
         // Create Lead
-        return $this->create($params);
+        return $lead;
     }
 
 
