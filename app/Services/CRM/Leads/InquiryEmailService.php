@@ -79,10 +79,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['url'] = $params['website_domain'] . $params['referral'];
 
         // Get Inquiry From Details For Website
-        $config = $this->websiteConfig->getValueOrDefault([
-            'website_id' => $params['website_id'],
-            'key' => 'general/item_email_from'
-        ]);
+        $config = $this->websiteConfig->getValueOrDefault($params['website_id'], 'general/item_email_from');
         $params['logo'] = $config->logo;
         $params['logo_url'] = $config->logoUrl;
         $params['from_name'] = $config->fromName;
