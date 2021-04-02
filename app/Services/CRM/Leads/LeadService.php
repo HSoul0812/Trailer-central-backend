@@ -196,10 +196,6 @@ class LeadService implements LeadServiceInterface
             // Create Auto Assign Job
             // TO DO: Create Auto Assign Job
             //$this->dispatch(new AutoAssignJob($inquiry));
-
-            // Create ADF Export Job
-            // TO DO: Create ADF Export Job
-            //$this->dispatch(new AdfExportJob($inquiry));
         }
 
         // Return Lead
