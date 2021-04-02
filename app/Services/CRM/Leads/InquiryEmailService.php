@@ -62,7 +62,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
                 'name' => $inquiry->inquiryName
             ]))->send(new InquiryEmail($inquiry));
         } catch(\Exception $ex) {
-            $this->log->error($ex->getMessage() . ': ' . $ex->getStackAsTrace());
+            $this->log->error($ex->getMessage() . ': ' . $ex->getTraceAsString());
             throw new SendInquiryFailedException($ex->getMessage());
         }
 
