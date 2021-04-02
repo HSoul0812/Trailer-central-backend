@@ -63,10 +63,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
             // Append BCC
             if(!empty($inquiry->getInquiryBcc())) {
-                $email->bcc($this->getCleanTo($inquiry->getInquiryBcc()));
+                $email = $email->bcc($this->getCleanTo($inquiry->getInquiryBcc()));
             }
-            print_r($inquiry->getInquiryBcc());
-            die;
 
             // Send Interaction Email
             $email->send(new InquiryEmail($inquiry));
