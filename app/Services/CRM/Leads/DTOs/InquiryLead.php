@@ -520,7 +520,7 @@ class InquiryLead
             'device'           => $this->device,
             'title'            => $this->title,
             'stock'            => $this->stock,
-            'url'              => $this->website . $this->referral,
+            'url'              => $this->websiteDomain . $this->referral,
             'fullName'         => $this->getFullName(),
             'email'            => $this->email,
             'phone'            => $this->phone,
