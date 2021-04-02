@@ -80,9 +80,9 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Get Inquiry From Details For Website
         $config = $this->websiteConfig->getValueOrDefault($params['website_id'], 'general/item_email_from');
-        $params['logo'] = $config->logo;
-        $params['logo_url'] = $config->logoUrl;
-        $params['from_name'] = $config->fromName;
+        $params['logo'] = $config['logo'];
+        $params['logo_url'] = $config['logoUrl'];
+        $params['from_name'] = $config['fromName'];
 
         // Get Data By Inquiry Type
         $vars = $this->getInquiryTypeVars($params);
