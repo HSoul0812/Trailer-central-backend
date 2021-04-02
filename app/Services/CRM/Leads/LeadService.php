@@ -202,7 +202,7 @@ class LeadService implements LeadServiceInterface
         if(!empty($lead->identifier)) {
             // Create Auto Assign Job
             if(empty($lead->leadStatus->sales_person_id)) {
-                $this->dispatch(new AutoAssignJob($lead));
+                AutoAssignJob::dispatchNow($lead);
             }
         }
 
