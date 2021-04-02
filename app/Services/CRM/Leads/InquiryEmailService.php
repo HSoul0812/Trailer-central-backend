@@ -32,10 +32,18 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     protected $websiteConfig;
 
     /**
+     * @var Illuminate\Support\Facades\Log
+     */
+    protected $log;
+
+    /**
      * @param WebsiteConfigRepositoryInterface $websiteConfig
      */
     public function __construct(WebsiteConfigRepositoryInterface $websiteConfig) {
         $this->websiteConfig = $websiteConfig;
+
+        // Initialize Logger
+        $this->log = Log::channel('leads');
     }
 
     /**
@@ -50,14 +58,17 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         try {
             // Send Interaction Email
             Mail::to($this->getCleanTo([
-                'email' => $inquiry->inquiry_email,
-                'name' => $inquiry->inquiry_name
+                'email' => $inquiry->inquiryEmail,
+                'name' => $inquiry->inquiryName
             ]))->send(new InquiryEmail($inquiry));
         } catch(\Exception $ex) {
+            $this->log->error($ex->getMessage() . ': ' . $ex->getStackAsTrace());
             throw new SendInquiryFailedException($ex->getMessage());
         }
 
         // Returns True on Success
+        $this->log->info('Inquiry Email Sent to ' . $inquiry->inquiryEmail .
+                            ' for the Lead ' . $inquiry->getFullName());
         return true;
     }
 
