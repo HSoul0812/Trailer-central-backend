@@ -34,7 +34,7 @@ trait WithConstructor
         $newProperties = [];
         foreach ($properties as $property => $value) {
             // Convert to CamelCase
-            $str = str_replace(' ', '', ucwords(str_replace('-', ' ', $property)));
+            $str = str_replace(' ', '', ucwords(str_replace('_', ' ', str_replace('-', ' ', $property))));
             $converted = lcfirst($str);
             $newProperties[$converted] = $value;
         }
