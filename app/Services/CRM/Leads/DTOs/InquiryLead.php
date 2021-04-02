@@ -357,13 +357,8 @@ class InquiryLead
             $to = [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
         }
 
-        // Always Append These Entries
-        foreach(self::INQUIRY_CC_TO as $email) {
-            $to[] = ['email' => $email];
-        }
-
-        // Return Array of To Details
-        return $to;
+        // Return With Merged CC To
+        return array_merge($to, self::INQUIRY_CC_TO);
     }
 
 
