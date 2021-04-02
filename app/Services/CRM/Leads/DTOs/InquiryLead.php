@@ -26,7 +26,7 @@ class InquiryLead
      */
     const INQUIRY_BCC_TO = [
         ['email' => 'bcc@trailercentral.com'],
-        ['email' => 'david@trailercentral.com']
+        ['email' => 'alberto@trailercentral.com']
     ];
 
     /**
