@@ -2,6 +2,8 @@
 
 namespace App\Services\CRM\Leads;
 
+use App\Services\CRM\Leads\DTOs\InquiryLead;
+
 interface InquiryEmailServiceInterface {
     /**
      * Send Email for Lead
