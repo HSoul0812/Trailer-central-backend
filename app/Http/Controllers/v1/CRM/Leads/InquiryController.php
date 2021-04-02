@@ -21,6 +21,7 @@ class InquiryController extends RestfulController
      */
     public function __construct(LeadServiceInterface $leads)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->leads = $leads;
         $this->transformer = new LeadTransformer;
     }
