@@ -418,8 +418,8 @@ class LeadService implements LeadServiceInterface
      */
     private function chooseMatch(Collection $matches, array $params): ?Lead {
         // Sort Leads Into Standard or With Status
-        $leads = collect([]);
-        $status = collect([]);
+        $leads = new Collection();
+        $status = new Collection();
         $chosen = null;
         foreach($matches as $lead) {
             // Create Filtered Lead
