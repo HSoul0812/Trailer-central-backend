@@ -59,6 +59,6 @@ class AutoAssignJob extends Job
 
         // Process Auto Assign
         $this->log->info('Handling Auto Assign Manually on Lead #' . $this->lead->identifier);
-        return $service->autoAssign($lead);
+        $service->autoAssign($this->lead);
     }
 }
