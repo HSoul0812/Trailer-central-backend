@@ -7,6 +7,7 @@ use App\Http\Requests\Request;
 class InquiryLeadRequest extends Request {
 
     protected $rules = [
+        'dealer_id' => 'required|exists:dealer,dealer_id',
         'website_id' => 'required|website_exists',
         'dealer_location_id' => 'required|dealer_location_valid',
         'inquiry_type' => 'required|inquiry_type_valid',

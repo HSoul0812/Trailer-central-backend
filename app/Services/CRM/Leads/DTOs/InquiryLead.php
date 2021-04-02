@@ -66,16 +66,21 @@ class InquiryLead
     /**
      * @var array
      */
-    const INQUIRY_TYPES = array(
+    const INQUIRY_TYPES = [
         'general',
         'cta',
         'inventory',
         'part',
-        'showroom',
+        'showroomModel',
         'call',
         'sms',
         'bestprice'
-    );
+    ];
+
+    /**
+     * @var array
+     */
+    const NON_INVENTORY_TYPES = ['part', 'showroomModel'];
 
 
 

@@ -10,6 +10,7 @@ use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -178,6 +179,12 @@ class LeadService implements LeadServiceInterface
      * @return Lead
      */
     public function inquiry($params) {
+        // Fix Units of Interest
+        $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
+        if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
+            $params['inventory'][] = $params['item_id'];
+        }
+
         // Create Lead
         $lead = $this->create($params);
 
@@ -191,14 +198,12 @@ class LeadService implements LeadServiceInterface
             $inquiry = $this->inquiry->fill($params);
 
             // Send Inquiry Email
-            //$this->inquiry->send($inquiry);
+            $this->inquiry->send($inquiry);
 
             // Create Auto Assign Job
             // TO DO: Create Auto Assign Job
             //$this->dispatch(new AutoAssignJob($inquiry));
         }
-        dd($lead);
-        die;
 
         // Return Lead
         return $lead;
