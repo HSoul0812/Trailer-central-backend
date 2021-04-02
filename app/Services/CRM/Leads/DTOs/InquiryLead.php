@@ -522,8 +522,8 @@ class InquiryLead
             'stock'            => $this->stock,
             'url'              => $this->websiteDomain . $this->referral,
             'fullName'         => $this->getFullName(),
-            'email'            => $this->email,
-            'phone'            => $this->phone,
+            'email'            => $this->emailAddress,
+            'phone'            => $this->phoneNumber,
             'postal'           => $this->zip,
             'preferred'        => $this->getPreferredContact(),
             'comments'         => $this->comments
