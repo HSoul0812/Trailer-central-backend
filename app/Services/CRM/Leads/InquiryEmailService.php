@@ -77,7 +77,6 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Website
         $website = Website::find($params['website_id']);
         $params['website_domain'] = $website->domain;
-        $params['url'] = $params['website_domain'] . $params['referral'];
 
         // Get Inquiry From Details For Website
         $config = $this->websiteConfig->getValueOrDefault($params['website_id'], 'general/item_email_from');
