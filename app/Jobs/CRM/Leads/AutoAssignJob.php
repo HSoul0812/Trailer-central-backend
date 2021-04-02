@@ -37,16 +37,15 @@ class AutoAssignJob extends Job
      * @param Lead $lead
      * @param AutoAssignServiceInterface
      */
-    public function __construct(Lead $lead, AutoAssignServiceInterface $service)
+    public function __construct(Lead $lead)
     {
         $this->lead = $lead;
-        $this->service = $service;
 
         // Initialize Logger
         $this->log = Log::channel('autoassign');
     }
 
-    public function handle()
+    public function handle(AutoAssignServiceInterface $service)
     {
         // Job Doesn't Exist?
         if (empty($this->lead)) {
@@ -60,6 +59,6 @@ class AutoAssignJob extends Job
 
         // Process Auto Assign
         $this->log->info('Handling Auto Assign Manually on Lead #' . $this->lead->identifier);
-        return $this->service->autoAssign($lead);
+        return $service->autoAssign($lead);
     }
 }
