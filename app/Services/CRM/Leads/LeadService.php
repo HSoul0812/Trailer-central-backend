@@ -186,7 +186,7 @@ class LeadService implements LeadServiceInterface
         }
 
         // Create Lead
-        return $this->create($params);
+        $lead = $this->create($params);
 
         // Valid Lead?!
         if(!empty($lead->identifier)) {
@@ -198,7 +198,7 @@ class LeadService implements LeadServiceInterface
             $inquiry = $this->inquiry->fill($params);
 
             // Send Inquiry Email
-            $this->inquiry->send($inquiry);
+            //$this->inquiry->send($inquiry);
 
             // Create Auto Assign Job
             // TO DO: Create Auto Assign Job
