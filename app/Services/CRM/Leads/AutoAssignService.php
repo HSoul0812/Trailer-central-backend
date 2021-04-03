@@ -185,7 +185,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
                     $credential = NewUser::getDealerCredential($dealer->user_id, $salesPerson->id);
                     
                     // Send Email to Sales Person
-                    Mail::to($salesEmail ?? "")->send(
+                    Mail::to($salesEmail ?? "" )->send(
                         new AutoAssignEmail([
                             'date' => Carbon::now()->toDateTimeString(),
                             'salesperson_name' => $salesPerson->getFullNameAttribute(),
@@ -199,7 +199,6 @@ class AutoAssignService implements AutoAssignServiceInterface {
                             'next_contact_date' => $nextContactText
                         ])
                     );
-                    var_dump($salesEmail);
 
                     // Success, Marked Mailed
                     $status = 'mailed';
