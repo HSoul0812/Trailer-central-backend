@@ -118,13 +118,6 @@ class InquiryEmailService implements InquiryEmailServiceInterface
      *                                    'inquiry_name': string})
      */
     private function getInquiryDetails(array $params): array {
-        // Is Dev?
-        if(!empty($params['is_dev'])) {
-            $params['inquiry_name'] = InquiryLead::INQUIRY_DEV_NAME;
-            $params['inquiry_email'] = InquiryLead::INQUIRY_DEV_EMAIL;
-            return $params;
-        }
-
         // Get Inquiry Details From Dealer Location?
         if(!empty($params['dealer_location_id'])) {
             $dealerLocation = DealerLocation::find($params['dealer_location_id']);
