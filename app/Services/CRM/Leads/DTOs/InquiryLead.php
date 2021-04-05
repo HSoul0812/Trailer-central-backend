@@ -189,6 +189,11 @@ class InquiryLead
     private $referral;
 
     /**
+     * @var ?string URL Directly to Original Lead Inquiry
+     */
+    private $url;
+
+    /**
      * @var ?string Stock Number of Unit of Interest on Lead Inquiry
      */
     private $stock;
@@ -335,6 +340,15 @@ class InquiryLead
      */
     private function getInquiryView(): string {
         return ($this->inquiryType === 'cta') ? 'general' : $this->inquiryType;
+    }
+
+    /**
+     * Get Inquiry URL
+     * 
+     * @return string
+     */
+    private function getInquiryUrl(): string {
+        return !empty($this->url) ? $this->url : $this->websiteDomain . $this->referral;
     }
 
 
@@ -566,7 +580,7 @@ class InquiryLead
             'device'           => $this->device,
             'title'            => $this->title,
             'stock'            => $this->stock,
-            'url'              => $this->websiteDomain . $this->referral,
+            'url'              => $this->getInquiryUrl(),
             'fullName'         => $this->getFullName(),
             'email'            => $this->emailAddress,
             'phone'            => $this->phoneNumber,

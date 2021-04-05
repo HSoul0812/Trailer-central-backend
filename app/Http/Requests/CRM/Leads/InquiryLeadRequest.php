@@ -17,6 +17,7 @@ class InquiryLeadRequest extends Request {
         'inventory.*' => 'inventory_valid',
         'device' => 'string',
         'title' => 'string',
+        'url' => 'string',
         'referral' => 'string',
         'first_name' => 'required|string',
         'last_name' => 'required|string',
