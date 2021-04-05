@@ -326,9 +326,11 @@ $api->version('v1', function ($route) {
     |
     |
     */
-
-    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
-
+    
+    $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
+    $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
+    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');    
+    
     /*
     |--------------------------------------------------------------------------
     | Leads
