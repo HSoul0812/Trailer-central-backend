@@ -72,7 +72,7 @@ class SaveInventoryTransformer implements TransformerInterface
     ];
 
     private const IMAGES_FIELDS = [
-        'new_images'
+        'new_images',
     ];
 
     private const IMAGE_FIELDS_MAPPING = [
@@ -241,6 +241,16 @@ class SaveInventoryTransformer implements TransformerInterface
                     }
 
                     unset($createParams[$createParamKey]);
+
+                } elseif ($createParamKey === 'features') {
+                    foreach ($createParamValue as $featureId => $featureValues) {
+                        foreach ($featureValues as $featureValue) {
+                            $features[] = [
+                                'feature_list_id' => $featureId,
+                                'value' => $featureValue,
+                            ];
+                        }
+                    }
                 }
             }
 
