@@ -74,6 +74,10 @@ use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\UserRepository;
+use App\Repositories\User\DealerPasswordResetRepositoryInterface;
+use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\User\PasswordResetServiceInterface;
+use App\Services\User\PasswordResetService;
 use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
@@ -261,6 +265,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
         $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
+        
+        $this->app->bind(DealerPasswordResetRepositoryInterface::class, DealerPasswordResetRepository::class);
+        $this->app->bind(PasswordResetServiceInterface::class, PasswordResetService::class);
     }
 
 }
