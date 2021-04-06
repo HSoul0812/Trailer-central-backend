@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Repositories\CRM\Leads\TrackingRepository;
-use App\Repositories\CRM\Leads\TrackingRepositoryInterface;
-use App\Repositories\CRM\Leads\TrackingUnitRepository;
-use App\Repositories\CRM\Leads\TrackingUnitRepositoryInterface;
+use App\Repositories\Website\Tracking\TrackingRepository;
+use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
+use App\Repositories\Website\Tracking\TrackingUnitRepository;
+use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 
 class WebsiteServiceProvider extends ServiceProvider
