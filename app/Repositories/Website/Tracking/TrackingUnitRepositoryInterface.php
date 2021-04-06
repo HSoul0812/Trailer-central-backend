@@ -3,7 +3,7 @@
 namespace App\Repositories\Website\Tracking;
 
 use App\Repositories\Repository;
-use App\Models\Website\Website\Tracking\TrackingUnit;
+use App\Models\Website\Tracking\TrackingUnit;
 
 /**
  * Interface TrackingUnitRepositoryInterface
