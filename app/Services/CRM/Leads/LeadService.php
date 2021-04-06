@@ -91,7 +91,7 @@ class LeadService implements LeadServiceInterface
         InventoryRepositoryInterface $inventory,
         InteractionsRepositoryInterface $interactions,
         TrackingRepositoryInterface $tracking,
-        TrackingUnitRepositoryInterface $trackingUnits,
+        TrackingUnitRepositoryInterface $trackingUnit,
         InquiryEmailServiceInterface $inquiry
     ) {
         // Initialize Services
