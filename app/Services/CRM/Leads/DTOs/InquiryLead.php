@@ -219,6 +219,11 @@ class InquiryLead
      */
     private $phoneNumber;
 
+    /**
+     * @var string Preferred Contact for Lead Inquiry
+     */
+    private $preferredContact;
+
 
     /**
      * @var string Street Address for Lead Inquiry
