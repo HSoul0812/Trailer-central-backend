@@ -138,7 +138,8 @@ class Lead extends Model
         'cdk_email_sent',
         'newsletter',
         'is_spam',
-        'is_archived'
+        'is_archived',
+        'is_from_classifieds'
     ];
 
     /**

@@ -301,6 +301,11 @@ class InquiryLead
      */
     private $isDev;
 
+    /**
+     * @var bool Is This Lead Inquiry From Classifieds?
+     */
+    private $isFromClassifieds;
+
 
     /**
      * @var string Source of Lead Inquiry
