@@ -302,11 +302,6 @@ class InquiryLead
     private $isSpam;
 
     /**
-     * @var bool Is This Lead Inquiry a Dev?
-     */
-    private $isDev;
-
-    /**
      * @var bool Is This Lead Inquiry From Classifieds?
      */
     private $isFromClassifieds;
@@ -387,7 +382,7 @@ class InquiryLead
      */
     public function getInquiryTo(): array {
         // If Dev, Only Return Specific Entries
-        if(!empty($this->isDev)) {
+        if(!empty($this->isDev())) {
             $to = self::INQUIRY_DEV_TO;
         }
         // If Spam, Only Return Spam
@@ -410,7 +405,7 @@ class InquiryLead
      */
     public function getInquiryBcc(): array {
         // If Dev, Only Return Specific Entries
-        if(empty($this->isDev) && empty($this->isSpam)) {
+        if(empty($this->isDev()) && empty($this->isSpam)) {
             return self::INQUIRY_BCC_TO;
         }
         return [];
@@ -458,6 +453,20 @@ class InquiryLead
     public function isTrailerTrader(): bool
     {
         return $this->websiteDomain === self::TT_DOMAIN;
+    }
+
+    /**
+     * Is Dev?
+     * 
+     * @return bool
+     */
+    public function isDev(): bool
+    {
+        // Get Metadata
+        $metadata = $this->getMetadata();
+
+        // Return
+        return !empty($metadata['IS_DEV']);
     }
 
 
