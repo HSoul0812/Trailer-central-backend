@@ -12,6 +12,8 @@ use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
+use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
