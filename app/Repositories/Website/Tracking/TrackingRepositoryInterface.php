@@ -15,7 +15,7 @@ interface TrackingRepositoryInterface extends Repository
      * @param array $params
      * @return Tracking
      */
-    public function find(array $params): Tracking;
+    public function find(array $params): ?Tracking;
 
     /**
      * Update Lead on Tracking
