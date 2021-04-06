@@ -62,6 +62,16 @@ class LeadService implements LeadServiceInterface
     protected $interactions;
 
     /**
+     * @var App\Repositories\Website\Tracking\TrackingRepositoryInterface
+     */
+    protected $tracking;
+
+    /**
+     * @var App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface
+     */
+    protected $trackingUnits;
+
+    /**
      * @var App\Services\CRM\Leads\InquiryEmailServiceInterface
      */
     protected $inquiry;
@@ -77,6 +87,8 @@ class LeadService implements LeadServiceInterface
         UnitRepositoryInterface $units,
         InventoryRepositoryInterface $inventory,
         InteractionsRepositoryInterface $interactions,
+        TrackingRepositoryInterface $tracking,
+        TrackingUnitRepositoryInterface $trackingUnits,
         InquiryEmailServiceInterface $inquiry
     ) {
         // Initialize Services
@@ -90,6 +102,8 @@ class LeadService implements LeadServiceInterface
         $this->units = $units;
         $this->inventory = $inventory;
         $this->interactions = $interactions;
+        $this->tracking = $tracking;
+        $this->trackingUnit = $trackingUnit;
     }
 
 
@@ -200,10 +214,8 @@ class LeadService implements LeadServiceInterface
 
         // Lead Exists?!
         if(!empty($lead->identifier)) {
-            // Create Auto Assign Job
-            if(empty($lead->leadStatus->sales_person_id)) {
-                AutoAssignJob::dispatchNow($lead);
-            }
+            // Queue Up Inquiry Jobs
+            $this->queueInquiryJobs($lead, $inquiry, $params);
         }
 
         // Create Lead
@@ -344,5 +356,28 @@ class LeadService implements LeadServiceInterface
 
         // Return Params
         return $params;
+    }
+
+    /**
+     * Queue Up Inquiry Jobs
+     * 
+     * @param Lead $lead
+     * @param InquiryLead $inquiry
+     * @param array $params
+     */
+    private function queueInquiryJobs(Lead $lead, InquiryLead $inquiry, array $params) {
+        // Create Auto Assign Job
+        if(empty($lead->leadStatus->sales_person_id)) {
+            AutoAssignJob::dispatchNow($lead);
+        }
+
+        // Tracking Cookie Exists?
+        if(isset($params['cookie_session_id'])) {
+            // Set Tracking to Current Lead
+            $this->tracking->updateTrackLead($params['cookie_session_id'], $lead->identifier);
+
+            // Mark Track Unit as Inquired for Unit
+            $this->trackingUnit->inquiredTrackUnit($params['cookie_session_id'], $inquiry->getUnitType(), $inquiry->itemId);
+        }
     }
 }

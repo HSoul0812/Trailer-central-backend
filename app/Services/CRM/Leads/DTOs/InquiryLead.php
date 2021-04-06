@@ -343,6 +343,19 @@ class InquiryLead
     }
 
     /**
+     * Get Unit Type
+     * 
+     * @return string
+     */
+    private function getUnitType(): string {
+        // Get Type
+        $type = $this->getInquiryType();
+
+        // Set New Type
+        return ($type === 'showroomModel' ? 'showroom' : $type);
+    }
+
+    /**
      * Get Inquiry URL
      * 
      * @return string

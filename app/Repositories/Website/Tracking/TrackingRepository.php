@@ -1,0 +1,130 @@
+<?php
+
+namespace App\Repositories\Website\Tracking;
+
+use App\Exceptions\NotImplementedException;
+use App\Models\Website\Tracking\Tracking;
+use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
+
+/**
+ * Class TrackingRepository
+ * @package App\Repositories\Website\Tracking
+ */
+class TrackingRepository implements TrackingRepositoryInterface
+{
+    use SortTrait;
+
+    private $sortOrders = [
+        'date_created' => [
+            'field' => 'date_created',
+            'direction' => 'DESC'
+        ],
+        '-date_created' => [
+            'field' => 'date_created',
+            'direction' => 'ASC'
+        ],
+        'date_inquired' => [
+            'field' => 'date_inquired',
+            'direction' => 'DESC'
+        ],
+        '-date_inquired' => [
+            'field' => 'date_inquired',
+            'direction' => 'ASC'
+        ]
+    ];
+
+    /**
+     * @param $params
+     * @throws NotImplementedException
+     */
+    public function create($params)
+    {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * @param $params
+     * @return Tracking
+     */
+    public function update($params)
+    {
+        $tracking = $this->find($params);
+
+        DB::transaction(function() use (&$tracking, $params) {
+            // Updating Tracking Details
+            $tracking->fill($params)->save();
+        });
+
+        return $tracking;
+    }
+
+    /**
+     * @param $params
+     * @throws NotImplementedException
+     */
+    public function get($params)
+    {
+        return Tracking::findOrFail($params['id']); 
+    }
+
+    /**
+     * @param $params
+     * @throws NotImplementedException
+     */
+    public function delete($params)
+    {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * @param array $params
+     * @param bool $withDefault
+     * @return Collection
+     */
+    public function getAll($params): Collection
+    {
+        $query = Tracking::select('*');
+
+        if(isset($params['lead_id'])) {
+            $query = $query->where('lead_id', $params['lead_id']);
+        }
+
+        return $query->get();
+    }
+
+
+    /**
+     * Find Tracking Data From Params
+     * 
+     * @param array $params
+     * @return ?Tracking
+     */
+    public function find(array $params): ?Tracking
+    {
+        // Find By Session ID
+        if(!empty($params['session_id'])) {
+            return Tracking::where('session_id', $params['session_id'])->first();
+        }
+
+        // Find By ID
+        return Tracking::find($params['id']);
+    }
+
+    /**
+     * Update Lead on Tracking
+     * 
+     * @param array $params
+     * @return Tracking
+     */
+    public function updateTrackLead(string $sessionId, int $leadId): Tracking
+    {
+        // Update Lead on Tracking
+        return $this->update([
+            'session_id' => $sessionId,
+            'lead_id' => $leadId,
+            'date_inquired' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
+        ]);
+    }
+}
