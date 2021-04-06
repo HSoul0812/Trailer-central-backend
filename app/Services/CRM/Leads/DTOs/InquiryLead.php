@@ -145,6 +145,11 @@ class InquiryLead
      */
     private $inquiryName;
 
+    /**
+     * @var string Cookie Session ID for Lead Inquiry
+     */
+    private $cookieSessionId;
+
 
     /**
      * @var string Logo of Lead Inquiry
