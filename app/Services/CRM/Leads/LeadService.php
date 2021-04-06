@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Leads;
 
 use App\Jobs\CRM\Leads\AutoAssignJob;
+use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
@@ -370,6 +371,10 @@ class LeadService implements LeadServiceInterface
         if(empty($lead->leadStatus->sales_person_id)) {
             AutoAssignJob::dispatchNow($lead);
         }
+
+        // Dispatch Auto Responder Job
+        $job = new AutoResponderJob($lead);
+        $this->dispatch($job->onQueue('mails'));
 
         // Tracking Cookie Exists?
         if(isset($params['cookie_session_id'])) {
