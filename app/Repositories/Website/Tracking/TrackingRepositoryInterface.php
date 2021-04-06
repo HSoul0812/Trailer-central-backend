@@ -2,8 +2,8 @@
 
 namespace App\Repositories\Website\Tracking;
 
+use App\Models\Website\Tracking\Tracking;
 use App\Repositories\Repository;
-use App\Repositories\Website\Tracking\Tracking;
 
 /**
  * Interface TrackingUnitRepositoryInterface
