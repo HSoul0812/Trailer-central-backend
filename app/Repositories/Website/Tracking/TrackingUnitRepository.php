@@ -107,9 +107,9 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
      * Get Newest Tracking Unit
      * 
      * @param $params
-     * @return TrackingUnit
+     * @return null|TrackingUnit
      */
-    public function getNewest($params): TrackingUnit
+    public function getNewest(array $params): ?TrackingUnit
     {
         // Set Sort
         $params['sort'] = '-date_viewed';
@@ -128,9 +128,9 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
      * @param string $sessionId
      * @param int $unitId
      * @param string $unitType
-     * @return TrackingUnit
+     * @return mull|TrackingUnit
      */
-    public function markUnitInquired(string $sessionId, int $unitId, string $unitType = 'inventory'): TrackingUnit
+    public function markUnitInquired(string $sessionId, int $unitId, string $unitType = 'inventory'): ?TrackingUnit
     {
         // Fix Unit Type
         if(!in_array($unitType, TrackingUnit::VALID_UNIT_TYPES)) {
@@ -143,6 +143,9 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
             'inventory_id' => $unitId,
             'type' => $unitType
         ]);
+        if(empty($uint->tracking_unit_id)) {
+            return null;
+        }
 
         // Update Unit
         return $this->update([
