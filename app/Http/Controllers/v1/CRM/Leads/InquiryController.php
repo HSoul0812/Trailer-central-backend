@@ -7,6 +7,7 @@ use App\Http\Requests\CRM\Leads\InquiryLeadRequest;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class InquiryController extends RestfulController
 {
@@ -36,9 +37,9 @@ class InquiryController extends RestfulController
      * Create Lead and Send Email Inquiry
      * 
      * @param Request $request
-     * @return type
+     * @return Response
      */
-    public function create(Request $request) {
+    public function create(Request $request): Response {
         $request = new InquiryLeadRequest($request->all());
 
         if ($request->validate()) {

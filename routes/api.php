@@ -262,6 +262,7 @@ $api->version('v1', function ($route) {
      * Interactions
      */
     $route->group(['middleware' => 'interaction.validate'], function ($route) {
+        // TO DO: Need a Send Email endpoint that doesn't Require Lead ID By Default
         //$route->post('leads/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
         $route->get('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@create')->where('leadId', '[0-9]+');
@@ -274,6 +275,7 @@ $api->version('v1', function ($route) {
      * Texts Logs
      */
     $route->group(['middleware' => 'text.validate'], function ($route) {
+        // TO DO: Need a Send Text endpoint that doesn't Require Lead ID By Default
         //$route->post('leads/texts/send', 'App\Http\Controllers\v1\CRM\Text\TextController@send');
         $route->get('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/texts', 'App\Http\Controllers\v1\CRM\Text\TextController@create')->where('leadId', '[0-9]+');
