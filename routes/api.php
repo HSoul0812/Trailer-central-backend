@@ -317,6 +317,7 @@ $api->version('v1', function ($route) {
 
     // Factory
     $route->get('feed/factory/showroom', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@index');
+    $route->get('feed/factory/showroom/{id}', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@show');
 
     /*
     |--------------------------------------------------------------------------
