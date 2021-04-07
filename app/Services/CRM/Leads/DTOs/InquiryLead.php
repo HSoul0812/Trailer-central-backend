@@ -426,7 +426,7 @@ class InquiryLead
     /**
      * Return Preferred Contact
      * 
-     * @return $this->preferredContact || string 'phone' if phone exists, 'email' otherwise
+     * @return string $this->preferredContact || 'phone' if phone exists || 'email' otherwise
      */
     public function getPreferredContact(): string
     {
