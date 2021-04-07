@@ -59,14 +59,13 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
     public function getValueOrDefault(int $websiteId, string $key): array {
         // Get Config
         $config = WebsiteConfig::where('website_id', $websiteId)->where('key', $key)->first();
-        var_dump($config);
-        die;
         $default = WebsiteConfigDefault::where('key', $key)->first();
 
         // Return Values Mapping
         if(!empty($config)) {
             // Get Values Mapping Array for Config
             $value = $config->value('value');
+            var_dump($value);
             return $this->getValuesMapping($default->values_map, $value, $key);
         }
 
