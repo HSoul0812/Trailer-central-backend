@@ -6,6 +6,7 @@ use App\Exceptions\NotImplementedException;
 use App\Models\Website\Tracking\Tracking;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 /**
