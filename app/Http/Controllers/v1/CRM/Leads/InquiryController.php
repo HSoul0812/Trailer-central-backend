@@ -39,7 +39,7 @@ class InquiryController extends RestfulController
      * @param Request $request
      * @return Response
      */
-    public function create(Request $request) {
+    public function create(Request $request): Response {
         $request = new InquiryLeadRequest($request->all());
 
         if ($request->validate()) {
