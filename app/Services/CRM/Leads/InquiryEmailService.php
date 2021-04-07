@@ -159,7 +159,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             break;
             case "part":
                 $part = Part::find($params['item_id']);
-                $params['stock'] = !empty($part->sku) ? $part->sku : $params['stock'];
+                $params['stock'] = !empty($part->sku) ? $part->sku : '';
                 $params['title'] = $part->title;
             break;
             case "showroomModel":
