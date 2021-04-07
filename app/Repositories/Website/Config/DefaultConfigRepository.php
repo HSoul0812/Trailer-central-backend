@@ -20,6 +20,12 @@ class DefaultConfigRepository implements DefaultConfigRepositoryInterface {
         throw new NotImplementedException;
     }
 
+    /**
+     * Get All Default Website Config
+     * 
+     * @param array $params
+     * @return Collection<WebsiteConfigDefault>
+     */
     public function getAll($params) {
         $query = WebsiteConfigDefault::select('*');
                 

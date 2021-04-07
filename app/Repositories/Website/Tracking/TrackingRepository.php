@@ -45,7 +45,9 @@ class TrackingRepository implements TrackingRepositoryInterface
     }
 
     /**
-     * @param $params
+     * Update Tracking
+     * 
+     * @param array $params
      * @return Tracking
      */
     public function update($params)
@@ -61,8 +63,10 @@ class TrackingRepository implements TrackingRepositoryInterface
     }
 
     /**
-     * @param $params
-     * @throws NotImplementedException
+     * Get Single Tracking
+     * 
+     * @param array $params
+     * @return Tracking
      */
     public function get($params)
     {
@@ -79,9 +83,10 @@ class TrackingRepository implements TrackingRepositoryInterface
     }
 
     /**
+     * Get All Website Tracking
+     * 
      * @param array $params
-     * @param bool $withDefault
-     * @return Collection
+     * @return Collection<Tracking>
      */
     public function getAll($params): Collection
     {
@@ -99,7 +104,7 @@ class TrackingRepository implements TrackingRepositoryInterface
      * Find Tracking Data From Params
      * 
      * @param array $params
-     * @return ?Tracking
+     * @return null|Tracking
      */
     public function find(array $params): ?Tracking
     {

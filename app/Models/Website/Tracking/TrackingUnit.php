@@ -3,6 +3,7 @@
 namespace App\Models\Website\Tracking;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Website Tracking Unit
@@ -70,17 +71,21 @@ class TrackingUnit extends Model
     const UPDATED_AT = null;
 
     /**
-     * @return HasMany
+     * Belongs To Tracking
+     * 
+     * @return BelongsTo<Tracking>
      */
-    public function unit()
+    public function unit(): BelongsTo
     {
         return $this->belongsTo(Tracking::class, 'session_id', 'session_id');
     }
 
     /**
-     * @return HasOne
+     * Belongs To Inventory
+     * 
+     * @return BelongTo<Inventory>
      */
-    public function inventory()
+    public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }

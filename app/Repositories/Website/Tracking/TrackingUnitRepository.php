@@ -36,8 +36,10 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
     }
 
     /**
+     * Update TrackingUnit 
+     * 
      * @param $params
-     * @return Tracking
+     * @return TrackingUnit
      */
     public function update($params)
     {
@@ -52,8 +54,10 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
     }
 
     /**
-     * @param $params
-     * @throws NotImplementedException
+     * Get Single TrackingUnit
+     * 
+     * @param array $params
+     * @return TrackingUnit
      */
     public function get($params)
     {
@@ -70,9 +74,10 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
     }
 
     /**
-     * @param $params
-     * @param bool $withDefault
-     * @return Collection
+     * Get All TrackingUnit
+     * 
+     * @param array $params
+     * @return Collection<TrackingUnit>
      */
     public function getAll($params): Collection
     {
@@ -98,7 +103,7 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
     }
 
     /**
-     * Get Newest 
+     * Get Newest Tracking Unit
      * 
      * @param $params
      * @return TrackingUnit

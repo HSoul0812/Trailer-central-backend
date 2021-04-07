@@ -447,9 +447,9 @@ class Lead extends Model
     /**
      * Get Inquiry Name Attribute
      * 
-     * @return Inquiry Name
+     * @return string
      */
-    public function getInquiryNameAttribute() {
+    public function getInquiryNameAttribute(): string {
         // Dealer Location Name Exists?
         if(!empty($this->dealerLocation->name)) {
             return $this->dealerLocation->name;

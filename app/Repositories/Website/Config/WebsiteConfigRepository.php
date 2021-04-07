@@ -21,6 +21,12 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         throw new NotImplementedException;
     }
 
+    /**
+     * Get All Website Config
+     * 
+     * @param array $params
+     * @return Collection<WebsiteConfig>
+     */
     public function getAll($params) {
         $query = WebsiteConfig::select('*');
                 
