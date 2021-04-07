@@ -17,7 +17,6 @@ use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 /**
  * Class InquiryEmailService

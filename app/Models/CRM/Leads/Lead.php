@@ -205,14 +205,6 @@ class Lead extends Model
     {
         return $this->hasMany(UnitSale::class, 'lead_id', 'identifier');
     }
-
-    /**
-     * Get New Dealer user.
-     */
-    public function newDealerUser()
-    {
-        return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
-    }
  
     /**
      * Get Dealer location
@@ -220,6 +212,14 @@ class Lead extends Model
     public function dealerLocation()
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * Get New Dealer user.
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
     }
 
     /**

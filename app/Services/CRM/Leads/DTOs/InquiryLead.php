@@ -333,7 +333,7 @@ class InquiryLead
      * 
      * @return string
      */
-    private function getInquiryType(): string {
+    public function getInquiryType(): string {
         // Get Type
         if(!in_array($this->inquiryType, self::INQUIRY_TYPES)) {
             $this->inquiryType = self::INQUIRY_TYPE_DEFAULT;
@@ -348,7 +348,7 @@ class InquiryLead
      * 
      * @return string
      */
-    private function getInquiryView(): string {
+    public function getInquiryView(): string {
         return ($this->inquiryType === 'cta') ? 'general' : $this->inquiryType;
     }
 
@@ -357,7 +357,7 @@ class InquiryLead
      * 
      * @return string
      */
-    private function getUnitType(): string {
+    public function getUnitType(): string {
         // Get Type
         $type = $this->getInquiryType();
 
@@ -370,7 +370,7 @@ class InquiryLead
      * 
      * @return string
      */
-    private function getInquiryUrl(): string {
+    public function getInquiryUrl(): string {
         return !empty($this->url) ? $this->url : $this->websiteDomain . $this->referral;
     }
 
@@ -380,7 +380,7 @@ class InquiryLead
      * 
      * @return array{array{name: string, email: string}, ...etc}
      */
-    public function getInquiryTo(): array {
+    public function getInquiryToArray(): array {
         // If Dev, Only Return Specific Entries
         if(!empty($this->isDev())) {
             $to = self::INQUIRY_DEV_TO;
@@ -403,7 +403,7 @@ class InquiryLead
      * 
      * @return array{array{name: string, email: string}, ...etc}
      */
-    public function getInquiryBcc(): array {
+    public function getInquiryBccArray(): array {
         // If Dev, Only Return Specific Entries
         if(empty($this->isDev()) && empty($this->isSpam)) {
             return self::INQUIRY_BCC_TO;

@@ -5,6 +5,8 @@ namespace App\Jobs\CRM\Leads;
 use App\Jobs\Job;
 use App\Models\CRM\Leads\Lead;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
+use App\Exceptions\CRM\Leads\AutoAssignJobMissingLeadException;
+use App\Exceptions\CRM\Leads\AutoAssignJobSalesPersonExistsException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\Dispatchable;
 
