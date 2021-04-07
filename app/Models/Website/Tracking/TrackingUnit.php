@@ -50,7 +50,6 @@ class TrackingUnit extends Model
         'session_id',
         'inventory_id',
         'type',
-        'date_viewed',
         'referrer',
         'path',
         'inquired'

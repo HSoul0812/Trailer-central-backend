@@ -37,7 +37,6 @@ class Tracking extends Model
         'lead_id',
         'referrer',
         'domain',
-        'date_created',
         'date_inquired'
     ];
 
