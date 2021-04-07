@@ -146,11 +146,6 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
         if(empty($unit->tracking_unit_id)) {
             return null;
         }
-        var_dump($sessionId);
-        var_dump($unitId);
-        var_dump($unitType);
-        var_dump($unit);
-        die;
 
         // Update Unit
         return $this->update([
