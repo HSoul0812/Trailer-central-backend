@@ -55,10 +55,13 @@ class ShowroomTransformer extends TransformerAbstract
     /**
      * @param Showroom $showroom
      * @return array
+     *
+     * @throws \InvalidArgumentException when it was inpossible to map some showroom fields mapping type
      */
     public function transform(Showroom $showroom): array
     {
         $data = [];
+        $showroomFilesUrl = config('app.showroom_files_url');
 
         if ($this->mapping === null) {
             $this->mapping = $this->showroomFieldsMappingRepository->getAll([]);
@@ -108,7 +111,7 @@ class ShowroomTransformer extends TransformerAbstract
 
                 case ShowroomFieldsMapping::TYPE_IMAGE:
                     foreach ($showroom->{$map->map_from} as $image) {
-                        $data[$map->map_to][]['url'] = env('SHOWROOM_FILES_URL') . $image->src;
+                        $data[$map->map_to][]['url'] = $showroomFilesUrl . $image->src;
                     }
                     break;
 
