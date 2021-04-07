@@ -50,6 +50,14 @@ class UserRepository implements UserRepositoryInterface {
     public function update($params) {
         throw new NotImplementedException;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function getByEmail(string $email) : User
+    {
+        return User::where('email', $email)->firstOrFail();
+    }
 
     /**
      * @param  string  $email

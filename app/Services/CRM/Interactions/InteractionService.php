@@ -108,7 +108,7 @@ class InteractionService implements InteractionServiceInterface
 
         // Set From Details
         $parsedEmail->setFromEmail($smtpConfig->getUsername());
-        $parsedEmail->setFromName($smtpConfig->getFromName());
+        $parsedEmail->setFromName($smtpConfig->getFromName() ?? $smtpConfig->getUsername());
 
         // Set Lead Details
         $lead = Lead::findOrFail($leadId);
