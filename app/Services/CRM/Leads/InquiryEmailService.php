@@ -58,11 +58,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Try/Send Email!
         try {
             // Initialize Interaction Email
-            $email = Mail::to($this->getCleanTo($inquiry->getInquiryTo()));
+            $email = Mail::to($this->getCleanTo($inquiry->getInquiryToArray()));
 
             // Append BCC
-            if(!empty($inquiry->getInquiryBcc())) {
-                $email = $email->bcc($this->getCleanTo($inquiry->getInquiryBcc()));
+            if(!empty($inquiry->getInquiryBccArray())) {
+                $email = $email->bcc($this->getCleanTo($inquiry->getInquiryBccArray()));
             }
 
             // Send Interaction Email
