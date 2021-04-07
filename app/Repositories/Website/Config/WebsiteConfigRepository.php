@@ -63,7 +63,7 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
         // Get Values Mapping Array for Config
         if(!empty($config)) {
-            return $this->getValuesMapping($default->values_map, $value->value, $key);
+            return $this->getValuesMapping($default->values_map, $config->value, $key);
         }
 
         // Get Values Mapping for Default
