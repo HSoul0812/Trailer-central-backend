@@ -4,8 +4,9 @@ namespace App\Repositories\Website\Tracking;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\Website\Tracking\TrackingUnit;
-use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class TrackingUnitRepository
