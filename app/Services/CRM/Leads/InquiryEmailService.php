@@ -102,7 +102,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $vars = $this->getInquiryTypeVars($details);
 
         // Create Inquiry Lead
-        return InquiryLead::getViaCC($vars);
+        return new InquiryLead($vars);
     }
 
 

@@ -467,9 +467,9 @@ class Lead extends Model
     /**
      * Get Inquiry Email Attribute
      * 
-     * @return Inquiry Email
+     * @return string
      */
-    public function getInquiryEmailAttribute() {
+    public function getInquiryEmailAttribute(): string {
         // Dealer Location Email Exists?
         if(!empty($this->dealerLocation->email)) {
             return $this->dealerLocation->email;
