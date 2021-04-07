@@ -384,7 +384,7 @@ class LeadService implements LeadServiceInterface
             $this->tracking->updateTrackLead($params['cookie_session_id'], $lead->identifier);
 
             // Mark Track Unit as Inquired for Unit
-            $this->trackingUnit->markUnitInquired($params['cookie_session_id'], $inquiry->getUnitType(), $inquiry->itemId);
+            $this->trackingUnit->markUnitInquired($params['cookie_session_id'], $inquiry->itemId, $inquiry->getUnitType());
         }
     }
 }
