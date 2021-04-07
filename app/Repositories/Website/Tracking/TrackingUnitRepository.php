@@ -143,7 +143,12 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
             'inventory_id' => $unitId,
             'type' => $unitType
         ]);
-        if(empty($uint->tracking_unit_id)) {
+        var_dump($sessionId);
+        var_dump($unitId);
+        var_dump($unitType);
+        var_dump($unit);
+        die;
+        if(empty($unit->tracking_unit_id)) {
             return null;
         }
 
