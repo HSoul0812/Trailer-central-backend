@@ -208,8 +208,6 @@ class LeadService implements LeadServiceInterface
 
         // Get Inquiry
         $inquiry = $this->inquiry->fill($params);
-        var_dump($inquiry->getEmailVars());
-        die;
 
         // Send Inquiry Email
         $this->inquiry->send($inquiry);

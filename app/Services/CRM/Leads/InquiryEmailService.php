@@ -100,8 +100,6 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Get Data By Inquiry Type
         $vars = $this->getInquiryTypeVars($details);
-        var_dump($vars);
-        die;
 
         // Create Inquiry Lead
         return new InquiryLead($vars);

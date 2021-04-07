@@ -91,7 +91,7 @@ class InquiryLead
         'cta',
         'inventory',
         'part',
-        'showroomModel',
+        'showroom',
         'call',
         'sms',
         'bestprice'
@@ -100,7 +100,7 @@ class InquiryLead
     /**
      * @var array
      */
-    const NON_INVENTORY_TYPES = ['part', 'showroomModel'];
+    const NON_INVENTORY_TYPES = ['part', 'showroom'];
 
 
 
