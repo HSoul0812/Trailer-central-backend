@@ -89,6 +89,11 @@ class ParsedEmail
 
 
     /**
+     * @var int Email History ID Associated With Email
+     */
+    private $emailHistoryId = 0;
+
+    /**
      * @var int Lead ID Associated With Email
      */
     private $leadId = 0;
@@ -712,6 +717,7 @@ class ParsedEmail
 
         // Return Params
         return [
+            'id' => $this->emailHistoryId,
             'lead_id' => $this->leadId,
             'interaction_id' => $this->interactionId,
             'message_id' => $this->messageId,

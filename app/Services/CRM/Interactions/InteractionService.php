@@ -77,6 +77,7 @@ class InteractionService implements InteractionServiceInterface
         // Get Draft if Exists
         $emailHistory = $this->emailHistory->findEmailDraft($smtpConfig->getUsername(), $leadId);
         if(!empty($emailHistory->id)) {
+            $parsedEmail->setEmailHistoryId($emailHistory->id);
             $parsedEmail->setMessageId($emailHistory->message_id);
         }
 
@@ -90,7 +91,7 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Save Email
-        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail);
+        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail, $parsedEmail->getMessageId());
     }
 
 
@@ -180,9 +181,10 @@ class InteractionService implements InteractionServiceInterface
      * @param int $leadId
      * @param int $userId
      * @param ParsedEmail $parsedEmail
+     * @param string $messageId OLD Message ID If Doesn't Match Current!
      * @return Interaction
      */
-    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail): Interaction {
+    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, string $messageId): Interaction {
         // Initialize Transaction
         DB::transaction(function() use (&$parsedEmail, $leadId, $userId) {
             // Create or Update
