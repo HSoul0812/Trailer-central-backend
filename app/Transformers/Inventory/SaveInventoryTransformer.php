@@ -17,6 +17,9 @@ class SaveInventoryTransformer implements TransformerInterface
     private const FEET_SECOND_FORMAT = '%s_second';
     private const INCHES_SECOND_FORMAT = '%s_inches_second';
 
+    private const FEATURES_KEY = 'features';
+    private const ATTRIBUTES_KEY = 'attributes';
+
     private const FEET_INCHES_FIELDS = [
         "width",
         "length",
@@ -72,7 +75,7 @@ class SaveInventoryTransformer implements TransformerInterface
     ];
 
     private const IMAGES_FIELDS = [
-        'new_images'
+        'new_images',
     ];
 
     private const IMAGE_FIELDS_MAPPING = [
@@ -241,11 +244,21 @@ class SaveInventoryTransformer implements TransformerInterface
                     }
 
                     unset($createParams[$createParamKey]);
+
+                } elseif ($createParamKey === self::FEATURES_KEY) {
+                    foreach ($createParamValue as $featureId => $featureValues) {
+                        foreach ($featureValues as $featureValue) {
+                            $features[] = [
+                                'feature_list_id' => $featureId,
+                                'value' => $featureValue,
+                            ];
+                        }
+                    }
                 }
             }
 
-            $createParams['attributes'] = $attributes;
-            $createParams['features'] = $features;
+            $createParams[self::ATTRIBUTES_KEY] = $attributes;
+            $createParams[self::FEATURES_KEY] = $features;
 
             $createParams = array_merge($createParams, $this->transformImages($createParams));
             $createParams = array_merge($createParams, $this->transformFiles($createParams));

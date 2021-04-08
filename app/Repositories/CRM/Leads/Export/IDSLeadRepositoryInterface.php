@@ -11,7 +11,8 @@ interface IDSLeadRepositoryInterface extends Repository {
      * 
      * @param int $chunkSize chunk size ot use
      * @param callable $callback callable used to process the chunked data retrieved from the DB
+     * @param string $fromDate date to start pulling from
      */
-    public function getAllNotExportedChunked($callback, int $chunkSize = 500) : void;
+    public function getAllNotExportedChunked($callback, string $fromDate, int $chunkSize = 500) : void;
     
 }

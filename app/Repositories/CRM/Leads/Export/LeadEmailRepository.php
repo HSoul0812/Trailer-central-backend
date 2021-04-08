@@ -32,7 +32,7 @@ class LeadEmailRepository implements LeadEmailRepositoryInterface
     public function getLeadEmailByLead(Lead $lead) : LeadEmail
     {
         $dealerLocationId = 0;
-        
+
         if ($lead->dealerLocation) {
             $dealerLocationId = $lead->dealerLocation->dealer_location_id;
         }
