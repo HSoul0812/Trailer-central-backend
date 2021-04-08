@@ -8,6 +8,7 @@ use App\Models\Website\Tracking\Tracking;
 use App\Repositories\Website\Tracking\TrackingRepository;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Tests\database\seeds\Website\Tracking\TrackingSeeder;
 use Tests\TestCase;
 use Tests\Unit\WithMySqlConstraintViolationsParser;
 
@@ -211,6 +212,7 @@ class TrackingRepositoryTest extends TestCase
     public function tearDown(): void
     {
         $this->seeder->cleanUp();
+        $this->seeder = null;
 
         parent::tearDown();
     }
