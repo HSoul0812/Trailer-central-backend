@@ -17,7 +17,7 @@ use Tests\database\seeds\Seeder;
  * @property-read array<Tracking> $createdTracking
  * @property-read array<Tracking> $missingLeadTracking
  */
-class WebsiteTrackingSeeder extends Seeder
+class TrackingSeeder extends Seeder
 {
     use WithGetter;
 
