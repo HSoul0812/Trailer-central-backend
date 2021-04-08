@@ -58,6 +58,10 @@ class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeReposito
             $query->groupBy('fee_type');
         }
 
+        if (isset($params['visibility'])) {
+            $query->whereIn('visibility', $params['visibility']);
+        }
+
         if (isset($params['search_term'])) {
             $query->where(function ($query) use ($params): void {
                 $query->where('fee_type', 'LIKE', '%' . $params['search_term'] . '%');
