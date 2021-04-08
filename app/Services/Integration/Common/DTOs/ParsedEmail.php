@@ -622,6 +622,28 @@ class ParsedEmail
 
 
     /**
+     * Return Email History ID
+     * 
+     * @return int $this->emailHistoryId || null
+     */
+    public function getEmailHistoryId(): ?int
+    {
+        return $this->emailHistoryId;
+    }
+
+    /**
+     * Set Email History ID
+     * 
+     * @param int $emailHistoryId ID Associated With Email History Entry
+     * @return void
+     */
+    public function setEmailHistoryId(int $emailHistoryId): void
+    {
+        $this->emailHistoryId = $emailHistoryId;
+    }
+
+
+    /**
      * Return Lead ID
      * 
      * @return int $this->leadId
@@ -690,7 +712,8 @@ class ParsedEmail
     /**
      * Return Email History Params
      * 
-     * @return array{lead_id: int,
+     * @return array{id: int,
+     *               lead_id: int,
      *               interaction_id: int,
      *               message_id: string,
      *               root_message_id: string,
