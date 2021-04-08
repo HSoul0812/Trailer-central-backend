@@ -16,7 +16,8 @@ class LeadTransformer extends TransformerAbstract {
     ];
     
     protected $availableIncludes = [
-        'leads'
+        'leads',
+        'interactions'
     ];
     
     protected $inventoryTransformer;
