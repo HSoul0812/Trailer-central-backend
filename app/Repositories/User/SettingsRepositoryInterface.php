@@ -2,7 +2,9 @@
 
 namespace App\Repositories\User;
 
+use App\Models\User\Settings;
 use App\Repositories\Repository;
+use Illuminate\Support\Collection;
 
 interface SettingsRepositoryInterface extends Repository {
     /**
