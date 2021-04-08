@@ -64,6 +64,7 @@ class Part extends Model
         'video_embed_code',
         'stock_min',
         'stock_max',
+        'is_sublet_specific'
     ];
 
     /**
@@ -117,7 +118,7 @@ class Part extends Model
         'dealer_cost' => 'float'
     ];
 
-    public static function boot() { 
+    public static function boot() {
         parent::boot();
 
         static::created(function ($part) {
@@ -220,7 +221,7 @@ class Part extends Model
     {
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
     }
-    
+
     public function getTotalQtyAttribute()
     {
         return ($this->bins instanceof Collection)?

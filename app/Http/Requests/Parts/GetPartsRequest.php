@@ -27,7 +27,8 @@ class GetPartsRequest extends Request {
         'show_on_website' => 'boolean',
         'sku' => 'min:1|sku_type',
         'id' => 'array',
-        'id.*' => 'integer'
+        'id.*' => 'integer',
+        'is_sublet_specfic' => 'integer'
     ];
 
     public function all($keys = null) {

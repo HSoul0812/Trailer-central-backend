@@ -27,7 +27,6 @@ abstract class TestCase extends BaseTestCase
         return env('TESTS_DEFAULT_ACCESS_TOKEN', '123');
     }
 
-
     // Get Test Dealer ID
     public static function getTestDealerId() {
         // Get Test Dealer ID
@@ -119,7 +118,65 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('getDateFormat')->passthru();
         $mock->shouldReceive('getRelationValue')->passthru();
         $mock->shouldReceive('relationLoaded')->passthru();
+        $mock->shouldReceive('fromFloat')->passthru();
 
         return $mock;
+    }
+
+    /**
+     * @return CallbackInterface
+     */
+    public static function getCallback(): CallbackInterface
+    {
+        return new class() implements CallbackInterface {
+            /**
+             * @var bool
+             */
+            private $isCalled = false;
+
+            /**
+             * @return \Closure
+             */
+            public function getClosure(): \Closure
+            {
+                return function ()  {
+                    $this->isCalled = true;
+                };
+            }
+
+            /**
+             * @return bool
+             */
+            public function isCalled(): bool
+            {
+                return $this->isCalled;
+            }
+        };
+    }
+
+    /**
+     * @param CallbackInterface $callback
+     * @param string $message
+     */
+    public static function assertCalled(CallbackInterface $callback, string $message = ''): void
+    {
+        if (empty($message)) {
+            $message = 'Failed asserting that not called is called';
+        }
+
+        self::assertTrue($callback->isCalled(), $message);
+    }
+
+    /**
+     * @param CallbackInterface $callback
+     * @param string $message
+     */
+    public static function assertNotCalled(CallbackInterface $callback, string $message = ''): void
+    {
+        if (empty($message)) {
+            $message = 'Failed asserting that called is not called.';
+        }
+
+        self::assertFalse($callback->isCalled(), $message);
     }
 }

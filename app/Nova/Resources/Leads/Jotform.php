@@ -49,6 +49,8 @@ class Jotform extends Resource
 
             Text::make('Website ID', 'website_id')
                 ->sortable(),
+            
+            Text::make('Jotform ID', 'jotform_id'),
 
             Text::make('Title', 'title'),
 
@@ -72,6 +74,8 @@ class Jotform extends Resource
 
             Text::make('Website ID', 'website_id')
                 ->sortable(),
+            
+            Text::make('Jotform ID', 'jotform_id'),
 
             Text::make('Title', 'title'),
 

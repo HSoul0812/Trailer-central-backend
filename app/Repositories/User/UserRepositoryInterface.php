@@ -3,9 +3,15 @@
 namespace App\Repositories\User;
 
 use App\Repositories\Repository;
+use App\Models\User\User;
 
 interface UserRepositoryInterface extends Repository {
 
+    /**
+     * @param string $email
+     * @return App\Models\User\User
+     */
+    public function getByEmail(string $email) : User;
     /**
      *
      *

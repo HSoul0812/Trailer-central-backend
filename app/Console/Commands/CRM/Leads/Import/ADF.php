@@ -49,5 +49,8 @@ class ADF extends Command
 
         // Return Result
         $this->info("Imported " . $imported . " leads from ADF import service");
+
+        // Sleep for a Second to Prevent Rate Limiting
+        sleep(1);
     }
 }
