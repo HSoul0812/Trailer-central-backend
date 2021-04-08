@@ -11,9 +11,12 @@ use App\Transformers\User\DealerLocationTransformer;
 class LeadTransformer extends TransformerAbstract {
     
     protected $defaultIncludes = [
-        'preferredLocation',
-        'interactions',
+        'preferredLocation',        
         'inventoryInterestedIn'
+    ];
+    
+    protected $availableIncludes = [
+        'leads'
     ];
     
     protected $inventoryTransformer;
@@ -71,7 +74,7 @@ class LeadTransformer extends TransformerAbstract {
     public function includeInteractions(Lead $lead)
     {
         if (empty($lead->preferred_dealer_location)) {
-            return $this->array([]);
+            return [];
         }
         
         return $this->collection($lead->interactions, new InteractionTransformer());
@@ -80,7 +83,7 @@ class LeadTransformer extends TransformerAbstract {
     public function includeInventoryInterestedIn(Lead $lead)
     {
         if (empty($lead->units)) {
-            return $this->array([]);
+            return [];
         }
         
         return $this->collection($lead->units, new InventoryTransformer());
