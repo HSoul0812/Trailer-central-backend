@@ -99,8 +99,15 @@ class TrackingSeeder extends Seeder
         $dealerId = $this->dealer->getKey();
         $websiteId = $this->dealer->getKey();
 
+        // Delete All Tracking Entries
+        foreach($this->createdTracking as $tracking) {
+            $tracking->delete();
+        }
+        foreach($this->missingLeadTracking as $tracking) {
+            $tracking->delete();
+        }
+
         // Database clean up
-        Tracking::where('website_id', $websiteId)->delete();
         Lead::where('dealer_id', $dealerId)->delete();
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::destroy($websiteId);
