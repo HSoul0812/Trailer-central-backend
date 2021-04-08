@@ -70,17 +70,10 @@ use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
-<<<<<<< HEAD
-=======
-use App\Repositories\User\UserRepositoryInterface;
-use App\Repositories\User\UserRepository;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
 use App\Services\User\PasswordResetServiceInterface;
 use App\Services\User\PasswordResetService;
-use App\Repositories\User\DealerLocationRepository;
-use App\Repositories\User\DealerLocationRepositoryInterface;
->>>>>>> develop
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 use App\Repositories\System\EmailRepository;
@@ -89,15 +82,10 @@ use App\Services\Common\EncrypterServiceInterface;
 use App\Services\Common\SPLEncrypterService;
 use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 use App\Services\Inventory\Floorplan\PaymentService;
-<<<<<<< HEAD
-=======
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
-use App\Services\User\DealerOptionsService;
-use App\Services\User\DealerOptionsServiceInterface;
->>>>>>> develop
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use Illuminate\Database\Eloquent\Builder;
