@@ -68,7 +68,7 @@ class Settings extends Model
     /**
      * Get Dealer
      * 
-     * @return HasOne
+     * @return BelongsTo
      */
     public function dealer(): BelongsTo {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
