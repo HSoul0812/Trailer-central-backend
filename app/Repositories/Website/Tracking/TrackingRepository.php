@@ -84,20 +84,12 @@ class TrackingRepository implements TrackingRepositoryInterface
     }
 
     /**
-     * Get All Website Tracking
-     * 
-     * @param array $params
-     * @return Collection<Tracking>
+     * @param $params
+     * @throws NotImplementedException
      */
     public function getAll($params): Collection
     {
-        $query = Tracking::select('*');
-
-        if(isset($params['lead_id'])) {
-            $query = $query->where('lead_id', $params['lead_id']);
-        }
-
-        return $query->get();
+        throw new NotImplementedException;
     }
 
 
