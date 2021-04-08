@@ -65,7 +65,7 @@ class InquiryService implements InquiryServiceInterface
      * @param array $params
      * @return Lead
      */
-    public function inquiry($params) {
+    public function send(array $params): Lead {
         // Fix Units of Interest
         $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
         if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
