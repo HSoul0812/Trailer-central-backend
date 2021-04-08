@@ -206,7 +206,7 @@ class TrackingRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        //$this->seeder = new TrackingSeeder();
+        $this->seeder = new TrackingSeeder();
     }
 
     public function tearDown(): void
