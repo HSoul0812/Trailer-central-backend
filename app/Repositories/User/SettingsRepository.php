@@ -46,9 +46,9 @@ class SettingsRepository implements SettingsRepositoryInterface {
      * Find Setting By Dealer ID and Setting or By ID
      * 
      * @param array $params
-     * @return Settings
+     * @return null|Settings
      */
-    public function find($params) {
+    public function find(array $params): ?Settings {
         // Dealer ID and Setting Exists?
         if(isset($params['dealer_id']) && isset($params['setting'])) {
             return Settings::where('dealer_id', $params['dealer_id'])
@@ -63,9 +63,9 @@ class SettingsRepository implements SettingsRepositoryInterface {
      * Create Or Update Multiple Settings
      * 
      * @param array $params
-     * @return Collection<DealerLocation>
+     * @return Collection<Settings>
      */
-    public function createOrUpdate($params)
+    public function createOrUpdate(array $params): Collection
     {
         // Initialize Settings
         $settings = [];
