@@ -3,8 +3,6 @@
 namespace App\Repositories\CRM\Leads;
 
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Repositories\CRM\Leads\StatusRepositoryInterface;
-use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -22,16 +20,6 @@ use Illuminate\Support\Facades\DB;
 class LeadRepository implements LeadRepositoryInterface {
 
     use SortTrait;
-
-    /**
-     * @var StatusRepositoryInterface
-     */
-    private $status;
-
-    /**
-     * @var SourceRepositoryInterface
-     */
-    private $sources;
 
     private $sortOrders = [
         'no_due_past_due_future_due' => [
@@ -80,20 +68,6 @@ class LeadRepository implements LeadRepositoryInterface {
             'name' => 'Status'
         ]
     ];
-
-    /**
-     * LeadRepository constructor.
-     * 
-     * @param StatusRepositoryInterface $status
-     * @param SourceRepositoryInterface $sources
-     */
-    public function __construct(
-        StatusRepositoryInterface $status,
-        SourceRepositoryInterface $sources
-    ) {
-        $this->status = $status;
-        $this->sources = $sources;
-    }
 
     public function create($params) {
         // Create Lead

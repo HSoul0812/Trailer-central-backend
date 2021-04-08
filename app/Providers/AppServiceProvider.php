@@ -58,8 +58,6 @@ use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 use App\Repositories\Website\PaymentCalculator\SettingsRepository;
 use App\Repositories\Website\RedirectRepository;
 use App\Repositories\Website\RedirectRepositoryInterface;
-use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
-use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
@@ -229,7 +227,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
         $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
-        $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
