@@ -8,7 +8,7 @@ use App\Models\Website\Tracking\Tracking;
 use App\Repositories\Website\Tracking\TrackingRepository;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Tests\database\seeds\Website\Tracking\TrackingSeeder;
+use Tests\database\seeds\Website\Tracking\WebsiteTrackingSeeder;
 use Tests\TestCase;
 use Tests\Unit\WithMySqlConstraintViolationsParser;
 
