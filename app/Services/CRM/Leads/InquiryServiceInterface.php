@@ -11,5 +11,5 @@ interface InquiryServiceInterface {
      * @param array $params
      * @return Lead
      */
-    public function send(array $params): Lead
+    public function send(array $params): Lead;
 }
