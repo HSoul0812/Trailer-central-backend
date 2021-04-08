@@ -11,7 +11,7 @@ use App\Models\Website\Website;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
-use App\Services\CRM\Leads\InquiryEmailServiceInterface;
+use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;

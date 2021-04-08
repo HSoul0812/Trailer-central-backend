@@ -8,7 +8,8 @@ use App\Models\CRM\Leads\Lead;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
-use App\Services\CRM\Leads\InquiryEmailServiceInterface;
+use App\Services\CRM\Leads\InquiryServiceInterface;
+use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
 /**
