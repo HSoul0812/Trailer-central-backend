@@ -17,7 +17,7 @@ use Tests\database\seeds\Seeder;
  * @property-read array<Tracking> $createdTracking
  * @property-read array<Tracking> $missingLeadTracking
  */
-class TrackingSeeder extends Seeder
+class WebsiteTrackingSeeder extends Seeder
 {
     use WithGetter;
 
@@ -80,6 +80,7 @@ class TrackingSeeder extends Seeder
 
             // Create Tracking
             $tracking = factory(Tracking::class)->create([
+                'dealer_id' => $dealerId,
                 'website_id' => $websiteId,
                 'lead_id' => !empty($seed['with_lead']) ? $lead->getKey() : null
             ]);
