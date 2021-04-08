@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\CRM\Leads;
+namespace App\Services\CRM\Email;
 
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 

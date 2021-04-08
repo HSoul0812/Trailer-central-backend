@@ -2,8 +2,6 @@
 
 namespace App\Services\CRM\Leads;
 
-use App\Jobs\CRM\Leads\AutoAssignJob;
-use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
@@ -12,10 +10,6 @@ use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
-use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
-use App\Services\CRM\Leads\DTOs\InquiryLead;
-use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -27,8 +21,6 @@ use Illuminate\Support\Facades\DB;
  */
 class LeadService implements LeadServiceInterface
 {
-    use DispatchesJobs;
-
     /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
@@ -65,21 +57,6 @@ class LeadService implements LeadServiceInterface
     protected $interactions;
 
     /**
-     * @var App\Repositories\Website\Tracking\TrackingRepositoryInterface
-     */
-    protected $tracking;
-
-    /**
-     * @var App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface
-     */
-    protected $trackingUnits;
-
-    /**
-     * @var App\Services\CRM\Leads\InquiryEmailServiceInterface
-     */
-    protected $inquiry;
-
-    /**
      * LeadService constructor.
      */
     public function __construct(
@@ -89,14 +66,8 @@ class LeadService implements LeadServiceInterface
         TypeRepositoryInterface $types,
         UnitRepositoryInterface $units,
         InventoryRepositoryInterface $inventory,
-        InteractionsRepositoryInterface $interactions,
-        TrackingRepositoryInterface $tracking,
-        TrackingUnitRepositoryInterface $trackingUnit,
-        InquiryEmailServiceInterface $inquiry
+        InteractionsRepositoryInterface $interactions
     ) {
-        // Initialize Services
-        $this->inquiry = $inquiry;
-
         // Initialize Repositories
         $this->leads = $leads;
         $this->status = $status;
@@ -105,8 +76,6 @@ class LeadService implements LeadServiceInterface
         $this->units = $units;
         $this->inventory = $inventory;
         $this->interactions = $interactions;
-        $this->tracking = $tracking;
-        $this->trackingUnit = $trackingUnit;
     }
 
 
@@ -190,38 +159,6 @@ class LeadService implements LeadServiceInterface
         });
 
         // Return Full Lead Details
-        return $lead;
-    }
-
-    /**
-     * Send Inquiry
-     * 
-     * @param array $params
-     * @return Lead
-     */
-    public function inquiry($params) {
-        // Fix Units of Interest
-        $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
-        if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
-            $params['inventory'][] = $params['item_id'];
-        }
-
-        // Get Inquiry
-        $inquiry = $this->inquiry->fill($params);
-
-        // Send Inquiry Email
-        $this->inquiry->send($inquiry);
-
-        // Create Lead
-        $lead = $this->create($params);
-
-        // Lead Exists?!
-        if(!empty($lead->identifier)) {
-            // Queue Up Inquiry Jobs
-            $this->queueInquiryJobs($lead, $inquiry, $params);
-        }
-
-        // Create Lead
         return $lead;
     }
 
@@ -359,32 +296,5 @@ class LeadService implements LeadServiceInterface
 
         // Return Params
         return $params;
-    }
-
-    /**
-     * Queue Up Inquiry Jobs
-     * 
-     * @param Lead $lead
-     * @param InquiryLead $inquiry
-     * @param array $params
-     */
-    private function queueInquiryJobs(Lead $lead, InquiryLead $inquiry, array $params) {
-        // Create Auto Assign Job
-        if(empty($lead->leadStatus->sales_person_id)) {
-            AutoAssignJob::dispatchNow($lead);
-        }
-
-        // Dispatch Auto Responder Job
-        $job = new AutoResponderJob($lead);
-        $this->dispatch($job->onQueue('mails'));
-
-        // Tracking Cookie Exists?
-        if(isset($params['cookie_session_id'])) {
-            // Set Tracking to Current Lead
-            $this->tracking->updateTrackLead($params['cookie_session_id'], $lead->identifier);
-
-            // Mark Track Unit as Inquired for Unit
-            $this->trackingUnit->markUnitInquired($params['cookie_session_id'], $inquiry->itemId, $inquiry->getUnitType());
-        }
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\CRM\Leads;
+namespace App\Http\Requests\CRM\Leads\Inquiry;
 
 use App\Http\Requests\Request;
 
-class InquiryLeadRequest extends Request {
+class SendInquiryRequest extends Request {
 
     protected $rules = [
         'dealer_id' => 'required|exists:dealer,dealer_id',

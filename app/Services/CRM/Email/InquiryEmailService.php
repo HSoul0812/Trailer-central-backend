@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\CRM\Leads;
+namespace App\Services\CRM\Email;
 
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
@@ -162,12 +162,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
                 $params['stock'] = !empty($part->sku) ? $part->sku : '';
                 $params['title'] = $part->title;
             break;
-            case "showroomModel":
+            case "showroom":
                 $showroom = Showroom::find($params['item_id']);
                 $title = $showroom->year . ' '. $showroom->manufacturer;
                 $title .= (!empty($showroom->series) ? ' ' . $showroom->series : '');
-                $title .= ' ' . $showroom->model;
-                $params['title'] = $title;
+                $params['title'] = $title . ' ' . $showroom->model;
             break;
         }
 
