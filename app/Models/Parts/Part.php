@@ -64,6 +64,7 @@ class Part extends Model
         'video_embed_code',
         'stock_min',
         'stock_max',
+        'is_sublet_specific'
     ];
 
     /**
