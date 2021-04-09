@@ -91,7 +91,7 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Save Email
-        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail, $parsedEmail->getMessageId());
+        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail);
     }
 
 
@@ -184,17 +184,23 @@ class InteractionService implements InteractionServiceInterface
      * @param string $messageId OLD Message ID If Doesn't Match Current!
      * @return Interaction
      */
-    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, string $messageId): Interaction {
+    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail): Interaction {
         // Initialize Transaction
         DB::transaction(function() use (&$parsedEmail, $leadId, $userId) {
+            // Get User
+            $user = Auth::user();
+
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
                 'lead_id'           => $leadId,
                 'user_id'           => $userId,
+                'sales_person_id'   => !empty($user->sales_person) ? $user->sales_person->id : NULL,
                 'interaction_type'  => 'EMAIL',
                 'interaction_notes' => 'E-Mail Sent: ' . $parsedEmail->getSubject(),
                 'interaction_time'  => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
+                'from_email'        => $parsedEmail->getFromEmail(),
+                'sent_by'           => !empty($user->sales_person) ? $user->sales_person->email : NULL
             ]);
 
             // Set Interaction ID/Date
