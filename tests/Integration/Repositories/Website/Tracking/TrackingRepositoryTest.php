@@ -185,7 +185,7 @@ class TrackingRepositoryTest extends TestCase
      */
     public function validFindParametersProvider(): array
     {
-        $trackingIdLambda = static function (TrackingSeeder $seeder): string {
+        $trackingIdLambda = static function (TrackingSeeder $seeder): int {
             $tracking = $seeder->createdTracking;
             return $tracking[array_rand($tracking, 1)]->getKey();
         };
