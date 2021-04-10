@@ -104,14 +104,14 @@ class TrackingUnitSeeder extends Seeder
                         'dealer_id' => $dealerId
                     ]);
                 }
-                $itemId = $this->parts[$seed['item']]->inventory_id;
+                $itemId = $this->parts[$seed['item']]->part_id;
             } else {
                 if(!isset($this->inventory[$seed['item']])) {
                     $this->inventory[] = factory(Inventory::class)->create([
                         'dealer_id' => $dealerId
                     ]);
                 }
-                $itemId = $this->inventory[$seed['item']]->part_id;
+                $itemId = $this->inventory[$seed['item']]->inventory_id;
             }
 
             // Create Tracking Unit
