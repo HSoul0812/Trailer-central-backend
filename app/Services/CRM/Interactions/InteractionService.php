@@ -181,7 +181,6 @@ class InteractionService implements InteractionServiceInterface
      * @param int $leadId
      * @param int $userId
      * @param ParsedEmail $parsedEmail
-     * @param string $messageId OLD Message ID If Doesn't Match Current!
      * @return Interaction
      */
     private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail): Interaction {
