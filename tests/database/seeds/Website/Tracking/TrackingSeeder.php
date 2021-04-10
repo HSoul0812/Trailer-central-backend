@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\database\seeds\CRM\Website\Tracking;
+namespace Tests\database\seeds\Website\Tracking;
 
 use App\Models\CRM\Leads\Lead;
 use App\Models\User\User;
