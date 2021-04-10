@@ -132,8 +132,8 @@ class TrackingUnitSeeder extends Seeder
         $sessionId = $this->tracking->session_id;
 
         // Database clean up
-        //TrackingUnit::where('session_id', $sessionId)->delete();
-        //Tracking::where('session_id', $sessionId)->delete();
+        TrackingUnit::where('session_id', $sessionId)->delete();
+        Tracking::where('session_id', $sessionId)->delete();
         Lead::where('dealer_id', $dealerId)->delete();
         Inventory::where('dealer_id', $dealerId)->delete();
         Part::where('dealer_id', $dealerId)->delete();
