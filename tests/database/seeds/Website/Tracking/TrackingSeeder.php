@@ -81,8 +81,7 @@ class TrackingSeeder extends Seeder
 
             // Create Tracking
             $tracking = factory(Tracking::class)->create([
-                'dealer_id' => $dealerId,
-                'website_id' => $websiteId,
+                'domain' => $this->website->domain,
                 'lead_id' => !empty($seed['with_lead']) ? $lead->getKey() : null
             ]);
 

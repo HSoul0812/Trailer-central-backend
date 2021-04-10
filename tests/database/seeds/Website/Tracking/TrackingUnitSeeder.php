@@ -73,8 +73,7 @@ class TrackingUnitSeeder extends Seeder
             'website_id' => $this->website->getKey()
         ]);
         $this->tracking = factory(Tracking::class)->create([
-            'dealer_id' => $this->dealer->getKey(),
-            'website_id' => $this->website->getKey(),
+            'domain' => $this->website->domain,
             'lead_id' => $this->lead->getKey()
         ]);
     }

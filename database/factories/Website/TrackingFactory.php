@@ -15,20 +15,6 @@ use Illuminate\Database\Eloquent\Factory;
 use Faker\Generator as Faker;
 
 $factory->define(Tracking::class, static function (Faker $faker, array $attributes): array {
-    // Website ID Exists?
-    if(empty($attributes['website_id'])) {
-        // Get Dealer ID
-        $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
-
-        // Get Website Domain
-        $attributes['website_id'] = factory(Website::class)->create([
-            'dealer_id' => $dealer_id
-        ])->getKey();
-    }
-
-    // Get Website ID
-    $website = Website::find($attributes['website_id']);
-
     // Get Session ID
     $sessionId = '';
     for($i = 0; $i < 28; $i++) {
@@ -40,7 +26,7 @@ $factory->define(Tracking::class, static function (Faker $faker, array $attribut
         'session_id' => 'CT' . $sessionId,
         'lead_id' => null,
         'referrer' => $faker->url,
-        'domain' => $website->domain ?? $faker->domainName,
+        'domain' => $faker->domainName,
         'date_inquired' => NULL
     ];
 });
