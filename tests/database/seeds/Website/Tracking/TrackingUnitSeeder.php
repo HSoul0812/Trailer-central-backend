@@ -62,7 +62,7 @@ class TrackingUnitSeeder extends Seeder
     private $units = [];
 
     /**
-     * InventorySeeder constructor.
+     * TrackingUnitSeeder constructor.
      */
     public function __construct()
     {

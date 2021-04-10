@@ -48,7 +48,7 @@ class TrackingSeeder extends Seeder
     private $missingLeadTracking = [];
 
     /**
-     * InventorySeeder constructor.
+     * TrackingSeeder constructor.
      */
     public function __construct()
     {
