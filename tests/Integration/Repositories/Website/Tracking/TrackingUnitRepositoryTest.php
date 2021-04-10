@@ -207,10 +207,10 @@ class TrackingUnitRepositoryTest extends TestCase
 
         return [                                // array $parameters, int $expectedTotal
             'By dummy session\'s id' => [['session_id' => $sessionIdLambda], 9],
-            'By dummy session\'s type part' => [['session_id' => $sessionIdLambda, 'type' => 'part'], 4],
-            'By dummy session\'s type inventory' => [['session_id' => $sessionIdLambda, 'type' => 'inventory'], 5],
+            'By dummy session\'s type part' => [['session_id' => $sessionIdLambda, 'type' => 'part'], 5],
+            'By dummy session\'s type inventory' => [['session_id' => $sessionIdLambda, 'type' => 'inventory'], 4],
             'By dummy session returning single inventory' => [['session_id' => $sessionIdLambda, 'type' => 'inventory', 'inventory_id' => $singleInventoryIdLambda], 1],
-            'By dummy session returning multiple parts' => [['session_id' => $sessionIdLambda, 'type' => 'inventory', 'inventory_id' => $multiPartIdLambda], 3],
+            'By dummy session returning multiple parts' => [['session_id' => $sessionIdLambda, 'type' => 'part', 'inventory_id' => $multiPartIdLambda], 3],
         ];
     }
 

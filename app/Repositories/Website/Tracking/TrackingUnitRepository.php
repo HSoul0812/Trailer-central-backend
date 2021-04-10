@@ -108,7 +108,7 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
     public function getNewest(array $params): ?TrackingUnit
     {
         // Set Sort
-        $params['sort'] = '-date_viewed';
+        $params['sort'] = 'date_viewed';
 
         // Get All in Descending Order
         $units = $this->getAll($params);
