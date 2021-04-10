@@ -13,6 +13,7 @@ use Tests\database\seeds\Seeder;
 
 /**
  * @property-read User $dealer
+ * @property-read Website $website
  * @property-read array<Lead> $leads
  * @property-read array<Tracking> $createdTracking
  * @property-read array<Tracking> $missingLeadTracking
@@ -34,7 +35,7 @@ class TrackingSeeder extends Seeder
     /**
      * @var Leads[]
      */
-    private $leads;
+    private $leads = [];
 
     /**
      * @var Tracking[]

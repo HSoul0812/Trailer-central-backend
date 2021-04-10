@@ -84,10 +84,6 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
     {
         $query = TrackingUnit::where('session_id', $params['session_id']);
 
-        if(isset($params['lead_id'])) {
-            $query = $query->where('lead_id', $params['lead_id']);
-        }
-
         if(isset($params['inventory_id'])) {
             $query = $query->where('inventory_id', $params['inventory_id']);
         }
