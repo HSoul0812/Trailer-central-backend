@@ -121,6 +121,7 @@ class TrackingUnitSeeder extends Seeder
                 'type' => $seed['type'],
                 'inventory_id' => $itemId
             ]);
+            sleep(1);
         });
     }
 
