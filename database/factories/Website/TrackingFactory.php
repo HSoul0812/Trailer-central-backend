@@ -29,9 +29,15 @@ $factory->define(Tracking::class, static function (Faker $faker, array $attribut
     // Get Website ID
     $website = Website::find($attributes['website_id']);
 
+    // Get Session ID
+    $sessionId = '';
+    for($i = 0; $i < 28; $i++) {
+        $sessionId .= $faker->randomDigit();
+    }
+
     // Return Array
     return [
-        'session_id' => 'CT' + $faker->randomNumber(28, true),
+        'session_id' => 'CT' + $sessionId,
         'lead_id' => null,
         'referrer' => $faker->url,
         'domain' => $website->domain ?? $faker->domainName,
