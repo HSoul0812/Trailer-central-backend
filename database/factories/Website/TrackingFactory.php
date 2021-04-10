@@ -69,7 +69,6 @@ $factory->define(TrackingUnit::class, static function (Faker $faker, array $attr
         'inventory_id' => $inventoryId,
         'type' => $inventoryType,
         'referrer' => $faker->url,
-        'domain' => $faker->domainName,
         'path' => $faker->slug,
         'inquired' => 0
     ];
