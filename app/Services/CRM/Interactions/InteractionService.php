@@ -207,7 +207,8 @@ class InteractionService implements InteractionServiceInterface
             $parsedEmail->setInteractionId($interaction->interaction_id);
             $parsedEmail->setDateNow();
 
-            // Insert Email
+            // Create or Update Email
+            var_dump($parsedEmail->getParams());
             $this->emailHistory->createOrUpdate($parsedEmail->getParams());
         });
 
