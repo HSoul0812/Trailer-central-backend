@@ -37,7 +37,7 @@ $factory->define(Tracking::class, static function (Faker $faker, array $attribut
 
     // Return Array
     return [
-        'session_id' => 'CT' + $sessionId,
+        'session_id' => 'CT' . $sessionId,
         'lead_id' => null,
         'referrer' => $faker->url,
         'domain' => $website->domain ?? $faker->domainName,
