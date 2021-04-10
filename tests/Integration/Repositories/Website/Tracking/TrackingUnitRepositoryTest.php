@@ -158,7 +158,7 @@ class TrackingUnitRepositoryTest extends TestCase
         $this->seeder->seed();
 
         // Get Part
-        $part = $this->seeder->parts[1];
+        $part = $this->seeder->parts[0];
 
         // Get Specific Unit That Must Be Chosen
         $unit = $this->seeder->units[7];
@@ -193,15 +193,14 @@ class TrackingUnitRepositoryTest extends TestCase
     public function validQueryParametersProvider(): array
     {
         $sessionIdLambda = static function (TrackingUnitSeeder $seeder): string {
-            $tracking = $seeder->createdTrackingUnit;
-            return $tracking[array_rand($tracking, 1)]->session_id;
+            return $seeder->tracking->session_id;
         };
 
-        $singleInventoryIdLambda = static function (TrackingUnitSeeder $seeder): string {
+        $singleInventoryIdLambda = static function (TrackingUnitSeeder $seeder): int {
             return $seeder->inventory[2]->getKey();
         };
 
-        $multiPartIdLambda = static function (TrackingUnitSeeder $seeder): string {
+        $multiPartIdLambda = static function (TrackingUnitSeeder $seeder): int {
             return $seeder->parts[0]->getKey();
         };
 
@@ -209,8 +208,8 @@ class TrackingUnitRepositoryTest extends TestCase
             'By dummy session\'s id' => [['session_id' => $sessionIdLambda], 9],
             'By dummy session\'s type part' => [['session_id' => $sessionIdLambda, 'type' => 'part'], 4],
             'By dummy session\'s type inventory' => [['session_id' => $sessionIdLambda, 'type' => 'inventory'], 5],
-            'By dummy session\'s, returning single inventory' => [['session_id' => $sessionIdLambda, 'type' => 'inventory', 'inventory_id' => $singleInventoryIdLambda], 1],
-            'By dummy session\'s, returning multiple parts' => [['session_id' => $sessionIdLambda, 'type' => 'inventory', 'inventory_id' => $multiPartIdLambda], 3],
+            'By dummy session returning single inventory' => [['session_id' => $sessionIdLambda, 'type' => 'inventory', 'inventory_id' => $singleInventoryIdLambda], 1],
+            'By dummy session returning multiple parts' => [['session_id' => $sessionIdLambda, 'type' => 'inventory', 'inventory_id' => $multiPartIdLambda], 3],
         ];
     }
 
