@@ -10,6 +10,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use App\Models\Website\Website;
 use App\Models\Website\Tracking\Tracking;
+use App\Models\Website\Tracking\TrackingUnit;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
