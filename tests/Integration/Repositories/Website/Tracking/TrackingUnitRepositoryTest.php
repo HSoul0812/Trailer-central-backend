@@ -122,7 +122,7 @@ class TrackingUnitRepositoryTest extends TestCase
         $inventory = $this->seeder->inventory[1];
 
         // Get Specific Unit That Must Be Chosen
-        $unit = $this->seeder->units[6];
+        $unit = $this->seeder->units[5];
 
         // Tracking unit already exists...
         self::assertSame(1, TrackingUnit::where(['tracking_unit_id' => $unit->tracking_unit_id])->count());
@@ -173,7 +173,7 @@ class TrackingUnitRepositoryTest extends TestCase
         /** @var TrackingUnit $unit */
         $trackingUnit = $this->getConcreteRepository()->markUnitInquired(
             $unit->session_id,
-            $part->inventory_id,
+            $part->id,
             'part'
         );
 
