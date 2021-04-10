@@ -22,7 +22,7 @@ use Tests\database\seeds\Seeder;
  * @property-read Part $parts
  * @property-read array<TrackingUnit> $units
  */
-class TrackingSeeder extends Seeder
+class TrackingUnitSeeder extends Seeder
 {
     use WithGetter;
 
