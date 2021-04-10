@@ -76,9 +76,8 @@ class InteractionService implements InteractionServiceInterface
 
         // Get Draft if Exists
         $emailHistory = $this->emailHistory->findEmailDraft($smtpConfig->getUsername(), $leadId);
-        var_dump($emailHistory);
-        if(!empty($emailHistory->id)) {
-            $parsedEmail->setEmailHistoryId($emailHistory->id);
+        if(!empty($emailHistory->email_id)) {
+            $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
         }
 
@@ -209,7 +208,6 @@ class InteractionService implements InteractionServiceInterface
             $parsedEmail->setDateNow();
 
             // Insert Email
-            var_dump($parsedEmail->getParams());
             $this->emailHistory->createOrUpdate($parsedEmail->getParams());
         });
 
