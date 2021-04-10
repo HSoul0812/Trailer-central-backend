@@ -146,4 +146,8 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
             'inquired' => 1
         ]);
     }
+
+    protected function getSortOrders() {
+        return $this->sortOrders;
+    }
 }
