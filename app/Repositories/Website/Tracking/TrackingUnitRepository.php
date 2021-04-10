@@ -111,10 +111,7 @@ class TrackingUnitRepository implements TrackingUnitRepositoryInterface
         $params['sort'] = 'date_viewed';
 
         // Get All in Descending Order
-        $units = $this->getAll($params);
-
-        // Return First
-        return $units->first();
+        return $this->getAll($params)->first();
     }
 
 
