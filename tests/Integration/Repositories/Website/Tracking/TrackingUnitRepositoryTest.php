@@ -161,7 +161,7 @@ class TrackingUnitRepositoryTest extends TestCase
         $part = $this->seeder->parts[1];
 
         // Get Specific Unit That Must Be Chosen
-        $unit = $this->seeder->units[6];
+        $unit = $this->seeder->units[7];
 
         // Tracking unit already exists...
         self::assertSame(1, TrackingUnit::where(['tracking_unit_id' => $unit->tracking_unit_id])->count());

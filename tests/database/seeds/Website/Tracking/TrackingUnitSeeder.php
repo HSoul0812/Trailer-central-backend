@@ -115,7 +115,7 @@ class TrackingUnitSeeder extends Seeder
             }
 
             // Create Tracking Unit
-            $this->units = factory(TrackingUnit::class)->create([
+            $this->units[] = factory(TrackingUnit::class)->create([
                 'session_id' => $sessionId,
                 'type' => $seed['type'],
                 'inventory_id' => $itemId
@@ -126,7 +126,7 @@ class TrackingUnitSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
-        $websiteId = $this->dealer->getKey();
+        $websiteId = $this->website->getKey();
         $sessionId = $this->tracking->session_id;
 
         // Database clean up
