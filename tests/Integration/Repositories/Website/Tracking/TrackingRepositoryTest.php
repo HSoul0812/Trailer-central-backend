@@ -65,7 +65,13 @@ class TrackingRepositoryTest extends TestCase
         self::assertInstanceOf(Tracking::class, $tracking);
 
         // Tracking session id matches param session id
-        self::assertSame($tracking->session_id, $values['session_id']);
+        if(isset($values['session_id'])) {
+            self::assertSame($tracking->session_id, $values['session_id']);
+        }
+        // Tracking id matches param id
+        else {
+            self::assertSame($tracking->tracking_id, $values['id']);
+        }
     }
 
 
