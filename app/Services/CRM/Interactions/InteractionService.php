@@ -58,8 +58,12 @@ class InteractionService implements InteractionServiceInterface
      * @return Interaction || error
      */
     public function email($leadId, $params, $attachments = array()) {
-        // Find Lead/Sales Person
-        $user = Auth::user();
+        // Get User
+        $user = User::find($params['dealer_id']);
+        $salesPerson = null;
+        if(isset($params['sales_person_id'])) {
+            $salesPerson = SalesPerson::find($params['sales_person_id']);
+        }
 
         // Merge Attachments if Necessary
         if(isset($params['attachments'])) {
@@ -91,7 +95,7 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Save Email
-        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail);
+        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail, $salesPerson);
     }
 
 
@@ -181,25 +185,23 @@ class InteractionService implements InteractionServiceInterface
      * @param int $leadId
      * @param int $userId
      * @param ParsedEmail $parsedEmail
+     * @param null|SalesPerson $salesPerson
      * @return Interaction
      */
-    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail): Interaction {
+    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null): Interaction {
         // Initialize Transaction
-        DB::transaction(function() use (&$parsedEmail, $leadId, $userId) {
-            // Get User
-            $user = Auth::user();
-
+        DB::transaction(function() use (&$parsedEmail, $leadId, $userId, $salesPerson) {
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
                 'lead_id'           => $leadId,
                 'user_id'           => $userId,
-                'sales_person_id'   => !empty($user->sales_person) ? $user->sales_person->id : NULL,
+                'sales_person_id'   => !empty($salesPerson) ? $salesPerson->id : NULL,
                 'interaction_type'  => 'EMAIL',
                 'interaction_notes' => 'E-Mail Sent: ' . $parsedEmail->getSubject(),
                 'interaction_time'  => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
                 'from_email'        => $parsedEmail->getFromEmail(),
-                'sent_by'           => !empty($user->sales_person) ? $user->sales_person->email : NULL
+                'sent_by'           => !empty($salesPerson) ? $salesPerson->email : NULL
             ]);
 
             // Set Interaction ID/Date
