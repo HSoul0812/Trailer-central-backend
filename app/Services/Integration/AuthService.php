@@ -4,8 +4,10 @@ namespace App\Services\Integration;
 
 use App\Exceptions\Integration\Auth\MissingAuthLoginTokenTypeScopesException;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
+use App\Services\Integration\Google\GmailServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use League\Fractal\Manager;
@@ -29,6 +31,11 @@ class AuthService implements AuthServiceInterface
     protected $google;
 
     /**
+     * @var GmailServiceInterface
+     */
+    protected $gmail;
+
+    /**
      * @var BusinessServiceInterface
      */
     protected $facebook;
@@ -44,11 +51,13 @@ class AuthService implements AuthServiceInterface
     public function __construct(
         TokenRepositoryInterface $tokens,
         GoogleServiceInterface $google,
+        GmailServiceInterface $gmail,
         BusinessServiceInterface $facebook,
         Manager $fractal
     ) {
         $this->tokens = $tokens;
         $this->google = $google;
+        $this->gmail = $gmail;
         $this->facebook = $facebook;
         $this->fractal = $fractal;
 
@@ -131,7 +140,7 @@ class AuthService implements AuthServiceInterface
         if($params['token_type'] === 'google') {
             // Auth Code Exists?!
             if(!empty($params['auth_code'])) {
-                $auth = $this->google->auth($params['redirect_uri'], $params['auth_code']);
+                $auth = $this->gmail->auth($params['redirect_uri'], $params['auth_code']);
             } else {
                 $login = $this->google->login($params['redirect_uri'], $params['scopes']);
                 $auth = ['url' => $login];
@@ -185,6 +194,30 @@ class AuthService implements AuthServiceInterface
             } elseif($accessToken->token_type === 'facebook') {
                 $validate = $this->facebook->validate($accessToken);
                 unset($validate['refresh_token']);
+            }
+        }
+
+        // Return Validation
+        return $validate;
+    }
+
+    /**
+     * Validate Custom Access Token
+     * 
+     * @param CommonToken $accessToken general access token filled with data from request
+     * @return array of validation
+     */
+    public function validateCustom(CommonToken $accessToken) {
+        // Initialize Access Token
+        $validate = [
+            'is_valid' => false,
+            'is_expired' => true
+        ];
+
+        // Validate Access Token
+        if(!empty($accessToken->token_type)) {
+            if($accessToken->token_type === 'google') {
+                return $this->google->validateCustom($accessToken);
             }
         }
 

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ItemNew extends Model
 {
+
+    const ITEM_INTEREST = 'Interest';
+
     protected $table = 'qb_items_new';
 
     public $timestamps = false;

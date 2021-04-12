@@ -14,7 +14,7 @@ class CustomerTransformer extends TransformerAbstract
             'dealer_id' => (int)$customer->dealer_id,
             'first_name' => $customer->first_name,
             'last_name' => $customer->last_name,
-            'display_name' => $customer->display_name,
+            'display_name' => $customer->display_name ?? "{$customer->first_name} {$customer->last_name}",
             'email' => $customer->email,
             'drivers_license' => $customer->drivers_license,
             'home_phone' => $customer->home_phone,

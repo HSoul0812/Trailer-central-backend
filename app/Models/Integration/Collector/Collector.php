@@ -22,6 +22,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property boolean $active
  * @property string $file_format
  * @property string $path_to_data
+ * @property boolean $create_items
+ * @property string $update_items
+ * @property string $archive_items
  * @property string $length_format
  * @property string $width_format
  * @property string $height_format
@@ -31,24 +34,35 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $import_description
  * @property string $images_delimiter
  * @property string $overridable_fields
+ * @property string $path_to_fields_to_description
+ * @property string $fields_to_description
  * @property bool $use_secondary_image
  * @property bool $append_floorplan_image
  * @property bool $update_images
  * @property bool $update_files
  * @property bool $import_with_showroom_category
  * @property bool $unarchive_sold_items
+ * @property string $cdk_password
+ * @property string $cdk_username
+ * @property bool $use_factory_mapping
+ * @property string $skip_categories
+ * @property string $skip_locations
  */
 class Collector extends Model  implements Filterable
-{ 
+{
     public const FILE_FORMATS = [
         self::FILE_FORMAT_XML,
         self::FILE_FORMAT_CSV,
-        self::FILE_FORMAT_CDK
+        self::FILE_FORMAT_CDK,
+        self::FILE_FORMAT_IDS,
+        self::FILE_FORMAT_XML_URL
     ];
-    
+
     public const FILE_FORMAT_CDK = 'cdk';
     public const FILE_FORMAT_XML = 'xml';
     public const FILE_FORMAT_CSV = 'csv';
+    public const FILE_FORMAT_IDS = 'ids';
+    public const FILE_FORMAT_XML_URL = 'xml_url';
 
     public const MEASURE_FORMATS = [
         'Feet' => 'feet',
@@ -80,6 +94,9 @@ class Collector extends Model  implements Filterable
         'ftp_password',
         'file_format',
         'path_to_data',
+        'create_items',
+        'update_items',
+        'archive_items',
         'length_format',
         'width_format',
         'height_format',
@@ -90,6 +107,8 @@ class Collector extends Model  implements Filterable
         'import_description',
         'images_delimiter',
         'overridable_fields',
+        'path_to_fields_to_description',
+        'fields_to_description',
         'use_secondary_image',
         'append_floorplan_image',
         'update_images',
@@ -97,7 +116,10 @@ class Collector extends Model  implements Filterable
         'import_with_showroom_category',
         'unarchive_sold_items',
         'cdk_password',
-        'cdk_username'
+        'cdk_username',
+        'use_factory_mapping',
+        'skip_categories',
+        'skip_locations'
     ];
 
     public function dealers()

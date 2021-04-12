@@ -2,11 +2,34 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Facades\Config;
 use App\Models\CRM\User\SalesPerson;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use Illuminate\Support\Facades\Config;
 
 trait MailHelper
 {
+    /**
+     * @param SmtpConfig $smtpConfig
+     */
+    public function setSmtpConfig(SmtpConfig $smtpConfig): void
+    {
+        if (!empty($smtpConfig->getHost())) {
+            $config = [
+                'driver'        => 'smtp',
+                'host'          => $smtpConfig->getHost(),
+                'port'          => $smtpConfig->getPort() ?? '2525',
+                'username'      => $smtpConfig->getUsername(),
+                'password'      => $smtpConfig->getPassword(),
+                'encryption'    => $smtpConfig->getSecurity(),
+                'from'          => [
+                    'address'   => $smtpConfig->getUsername(),
+                    'name'      => $smtpConfig->getFromName()
+                ]
+            ];
+            Config::set('mail', $config);
+        }
+    }
+
     /**
      * @param SalesPerson $salesPerson
      */
@@ -15,13 +38,13 @@ trait MailHelper
         if (!empty($salesPerson->smtp_server)) {
             $config = [
                 'driver'        => 'smtp',
-                'host'          => $salesPerson->smtp_server,
+                'host'          => trim($salesPerson->smtp_server),
                 'port'          => $salesPerson->smtp_port ?? '2525',
-                'username'      => $salesPerson->smtp_email,
-                'password'      => $salesPerson->smtp_password,
+                'username'      => trim($salesPerson->smtp_email),
+                'password'      => trim($salesPerson->smtp_password),
                 'encryption'    => $salesPerson->smtp_security ?? 'tls',
                 'from'          => [
-                    'address'   => $salesPerson->smtp_email,
+                    'address'   => trim($salesPerson->smtp_email),
                     'name'      => $salesPerson->full_name
                 ]
             ];

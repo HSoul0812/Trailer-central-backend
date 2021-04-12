@@ -2,6 +2,8 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use Illuminate\Http\UploadedFile;
+
 /**
  * Class AttachmentFile
  * 
@@ -9,6 +11,13 @@ namespace App\Services\Integration\Common\DTOs;
  */
 class AttachmentFile
 {
+    const IMAGE_TYPES = [
+        'gif',
+        'png',
+        'jpeg',
+        'jpg'
+    ];
+
     /**
      * @var string Temporary Local Filename
      */
@@ -41,13 +50,74 @@ class AttachmentFile
 
 
     /**
+     * Initialize From Laravel UploadedFile
+     * 
+     * @param UploadedFile $file
+     * @return AttachmentFile
+     */
+    public static function getFromUploadedFile(UploadedFile $file) {
+        // Get Attachment
+        $attachment = new self();
+
+        // Set Temp Name
+        $attachment->setTmpName($file->getPathname());
+
+        // Set File Name
+        $attachment->setFileName($file->getClientOriginalName());
+
+        // Set Mime Type
+        $attachment->setMimeType($file->getMimeType());
+
+        // Set Size
+        $attachment->setFileSize($file->getSize());
+
+        // Return File Attachment
+        return $attachment;
+    }
+
+    /**
+     * Initialize From Existing Remote Filename
+     * 
+     * @param string $file
+     * @return AttachmentFile
+     */
+    public static function getFromRemoteFile(string $file) {
+        // Get File Name
+        $parts = explode("/", $file);
+        $filename = end($parts);
+        $ext = explode(".", $filename);
+
+        // Get Mime From Extension
+        $ext[1] = !empty($ext[1]) ? $ext[1] : 'jpeg';
+        if(in_array($ext[1], self::IMAGE_TYPES)) {
+            $mime = 'image/' . $ext[1];
+        } else {
+            $mime = 'text/' . $ext[1];
+        }
+
+        // Get Headers if Possible
+        $attachment = new self();
+        $headers = $attachment->getFileHeaders($file);
+        $mime = !empty($headers['Content-Type']) ? $headers['Content-Type'] : $mime;
+        $size = !empty($headers['Content-Length']) ? $headers['Content-Length'] : 0;
+
+        // Create Attachment File
+        $attachment->setFilePath($file);
+        $attachment->setFileName($filename);
+        $attachment->setMimeType($mime);
+        $attachment->setFileSize($size);
+        return $attachment;
+    }
+
+
+    /**
      * Return Temp File Name
      * 
      * @return string $this->tmpName
      */
     public function getTmpName(): string
     {
-        return $this->tmpName;
+        return $this->tmpName ?? '';
     }
 
     /**
@@ -69,7 +139,7 @@ class AttachmentFile
      */
     public function getFilePath(): string
     {
-        return $this->filePath;
+        return $this->filePath ?? '';
     }
 
     /**
@@ -91,7 +161,7 @@ class AttachmentFile
      */
     public function getFileName(): string
     {
-        return $this->fileName;
+        return $this->fileName ?? '';
     }
 
     /**
@@ -113,7 +183,7 @@ class AttachmentFile
      */
     public function getFileSize(): int
     {
-        return $this->fileSize;
+        return $this->fileSize ?? 0;
     }
 
     /**
@@ -176,6 +246,18 @@ class AttachmentFile
         if(!empty($this->contents)) {
             return $this->contents;
         }
+
+        // Return Temp File Contents if Exists
+        if(!empty($this->tmpName) && file_exists($this->tmpName)) {
+            return file_get_contents($this->tmpName);
+        }
+
+        // Return Remote File Contents if Exists
+        if(!empty($this->filePath) && file_get_contents($this->filePath) !== FALSE) {
+            return file_get_contents($this->filePath);
+        }
+
+        // Return Empty String
         return '';
     }
 
@@ -188,5 +270,61 @@ class AttachmentFile
     public function setContents(string $contents): void
     {
         $this->contents = $contents;
+    }
+
+
+
+    /**
+     * Get Array Mapped Headers
+     * 
+     * @param string $file
+     * @return array{string: string, etc...}
+     */
+    private function getFileHeaders(string $file): array {
+        // Get Headers From Filename
+        $headers = get_headers($file);
+
+        // Start Headers
+        $result = [];
+        if(!empty($headers)) {
+            // Map Headers
+            foreach($headers as $header) {
+                // Split By Colon
+                $break = explode(":", $header);
+
+                // Get Key
+                $key = trim($break[0]);
+
+                // Get Value
+                $value = !empty($break[1]) ? trim($break[1]) : '';
+
+                // Map
+                if(!empty($value)) {
+                    $result[$key] = $value;
+                }
+            }
+        }
+
+        // Return Result
+        return $result;
+    }
+
+
+    /**
+     * Return Email Attachment Params
+     * 
+     * @param string $messageId
+     * @return array{message_id: string,
+     *               filename: string,
+     *               original_filename: string}
+     */
+    public function getParams(string $messageId): array
+    {
+        // Return Params
+        return [
+            'message_id' => $messageId,
+            'filename' => $this->filePath,
+            'original_filename' => $this->fileName
+        ];
     }
 }

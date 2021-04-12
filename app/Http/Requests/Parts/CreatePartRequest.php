@@ -5,12 +5,12 @@ namespace App\Http\Requests\Parts;
 use App\Http\Requests\Request;
 
 /**
- * 
+ *
  *
  * @author Eczek
  */
 class CreatePartRequest extends Request {
-    
+
     protected $rules = [
         'dealer_id' => 'integer|required',
         'vendor_id' => 'nullable|integer',
@@ -21,7 +21,7 @@ class CreatePartRequest extends Request {
         'category_id' => 'required|integer',
         'qb_id' => 'nullable|integer',
         'subcategory' => 'nullable|string',
-        'title' => 'nullable|string',
+        'title' => 'required|string|filled',
         'alternative_part_number' => 'nullable|string',
         'sku' => 'required|string|parts_sku_unique',
         'price' => 'numeric',
@@ -47,7 +47,8 @@ class CreatePartRequest extends Request {
         'bins' => 'array',
         'bins.*.bin_id' => 'integer',
         'bins.*.quantity' => 'integer',
-        'bins.*.old_quantity' => 'integer'
+        'bins.*.old_quantity' => 'integer',
+        'is_sublet_specific' => 'integer'
     ];
-    
+
 }

@@ -20,10 +20,10 @@ interface ImapServiceInterface {
     /**
      * Get Basic Overview
      * 
-     * @param int $mailId
+     * @param string $mailId
      * @return array of parsed data
      */
-    public function overview(int $mailId);
+    public function overview(string $mailId);
 
     /**
      * Full Reply Details to Clean Up Result

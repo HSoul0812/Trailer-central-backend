@@ -2,13 +2,17 @@
 
 namespace App\Models\User;
 
+use App\Models\User\Interfaces\PermissionsInterface;
+use App\Traits\Models\HasPermissions;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
-use App\Models\User\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class DealerUser extends Model implements Authenticatable
+class DealerUser extends Model implements Authenticatable, PermissionsInterface
 {
+    use HasPermissions;
+
     const TABLE_NAME = 'dealer_users';
 
     /**
@@ -24,6 +28,8 @@ class DealerUser extends Model implements Authenticatable
      * @var string
      */
     protected $primaryKey = "dealer_user_id";
+
+    public $timestamps = false;
 
     /**
      * Get the name of the unique identifier for the user.
@@ -76,7 +82,7 @@ class DealerUser extends Model implements Authenticatable
 
     /**
      * Get Access Token
-     * 
+     *
      * @return type
      */
     public function getAccessTokenAttribute()
@@ -105,10 +111,7 @@ class DealerUser extends Model implements Authenticatable
     /**
      * Get dealer user permissions
      */
-    public function perms()
-    {
-        return $this->hasMany(DealerUserPermission::class, 'dealer_user_id', 'dealer_user_id');
-    }
+
 
     /**
      * Get sales person
@@ -121,7 +124,7 @@ class DealerUser extends Model implements Authenticatable
         // Find Sales Person
         return SalesPerson::find($salesPersonId);
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }
@@ -129,7 +132,7 @@ class DealerUser extends Model implements Authenticatable
 
     /**
      * Get By Sales Person
-     * 
+     *
      * @param int $salesPersonId
      */
     public static function getBySalesPerson($salesPersonId) {
@@ -139,5 +142,13 @@ class DealerUser extends Model implements Authenticatable
             ->where(DealerUserPermission::getTableName() . '.feature', 'crm')
             ->where(DealerUserPermission::getTableName() . '.permission_level', $salesPersonId)
             ->first();
+    }
+
+    /**
+     * @return hasMany
+     */
+    public function perms(): hasMany
+    {
+        return $this->hasMany(DealerUserPermission::class, 'dealer_user_id', 'dealer_user_id');
     }
 }

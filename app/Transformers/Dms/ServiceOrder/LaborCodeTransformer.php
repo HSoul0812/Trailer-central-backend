@@ -9,8 +9,12 @@ use League\Fractal\TransformerAbstract;
 
 class LaborCodeTransformer extends TransformerAbstract
 {
-    public function transform(LaborCode $item)
+    public function transform(?LaborCode $item)
     {
+        if (empty($item)) {
+            return [];
+        }
+        
         return [
             'id' => (int)$item->id,
             'dealer_id' => (int)$item->dealer_id,

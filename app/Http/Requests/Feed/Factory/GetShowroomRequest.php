@@ -5,15 +5,12 @@ namespace App\Http\Requests\Feed\Factory;
 use App\Http\Requests\Request;
 
 /**
- * @author Marcel
+ * Class GetShowroomRequest
+ * @package App\Http\Requests\Feed\Factory
  */
-class GetShowroomRequest extends Request {
-
+class GetShowroomRequest extends Request
+{
     protected $rules = [
-        'page' => 'integer',
-        'search_term' => 'string|nullable',
-        'manufacturer' => 'string|nullable',
-        'model' => 'string|nullable',
+        'id' => 'integer|required|exists:App\Models\Showroom\Showroom,id',
     ];
-    
 }

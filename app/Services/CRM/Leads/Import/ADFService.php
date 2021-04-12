@@ -5,7 +5,6 @@ namespace App\Services\CRM\Leads\Import;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfDealerIdException;
 use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\System\EmailRepositoryInterface;
@@ -15,6 +14,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\User;
 use App\Services\CRM\Leads\DTOs\ADFLead;
+use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Carbon\CarbonImmutable;
@@ -62,7 +62,7 @@ class ADFService implements ADFServiceInterface {
      */
     protected $gmail;
     
-    public function __construct(LeadRepositoryInterface $leads,
+    public function __construct(LeadServiceInterface $leads,
                                 EmailRepositoryInterface $emails,
                                 TokenRepositoryInterface $tokens,
                                 InventoryRepositoryInterface $inventory,
@@ -113,10 +113,12 @@ class ADFService implements ADFServiceInterface {
 
                 // Validate ADF
                 $adf = $this->parseAdf($dealer, $crawler);
+                Log::info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
 
                 // Process Further
                 $result = $this->importLead($adf);
                 if(!empty($result->identifier)) {
+                    Log::info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }

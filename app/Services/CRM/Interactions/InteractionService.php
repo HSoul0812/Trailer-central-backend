@@ -3,11 +3,16 @@
 namespace App\Services\CRM\Interactions;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Interactions\Interaction;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\Integration\Common\DTOs\AttachmentFile;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +34,7 @@ class InteractionService implements InteractionServiceInterface
     public function __construct(
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
+        NtlmEmailServiceInterface $ntlm,
         InteractionEmailServiceInterface $service,
         InteractionsRepositoryInterface $interactions,
         EmailHistoryRepositoryInterface $emailHistory,
@@ -36,6 +42,7 @@ class InteractionService implements InteractionServiceInterface
     ) {
         $this->google = $google;
         $this->gmail = $gmail;
+        $this->ntlm = $ntlm;
         $this->interactionEmail = $service;
         $this->interactions = $interactions;
         $this->emailHistory = $emailHistory;
@@ -52,13 +59,96 @@ class InteractionService implements InteractionServiceInterface
      */
     public function email($leadId, $params, $attachments = array()) {
         // Find Lead/Sales Person
-        $lead = Lead::findOrFail($leadId);
         $user = Auth::user();
-        $accessToken = null;
+
+        // Merge Attachments if Necessary
+        if(isset($params['attachments'])) {
+            $attachments = array_merge($attachments, $params['attachments']);
+        } else {
+            $params['attachments'] = $attachments;
+        }
+
+        // Get SMTP Config
+        $smtpConfig = $this->getSmtpConfig();
+
+        // Create Parsed Email
+        $parsedEmail = $this->getParsedEmail($smtpConfig, $leadId, $params);
+
+        // Get Draft if Exists
+        $emailHistory = $this->emailHistory->findEmailDraft($smtpConfig->getUsername(), $leadId);
+        if(!empty($emailHistory->id)) {
+            $parsedEmail->setMessageId($emailHistory->message_id);
+        }
+
+        // Send Email
+        if($smtpConfig->isAuthTypeGmail()) {
+            $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
+        } elseif($smtpConfig->isAuthTypeNtlm()) {
+            $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
+        } else {
+            $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
+        }
+
+        // Save Email
+        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail);
+    }
+
+
+    /**
+     * Get Parsed Email From Params
+     * 
+     * @param SmtpConfig $smtpConfig
+     * @param int $leadId
+     * @param array $params
+     * @return ParsedEmail
+     */
+    private function getParsedEmail(SmtpConfig $smtpConfig, int $leadId, array $params): ParsedEmail {
+        // Initialize Parsed Email
+        $parsedEmail = new ParsedEmail();
+
+        // Set From Details
+        $parsedEmail->setFromEmail($smtpConfig->getUsername());
+        $parsedEmail->setFromName($smtpConfig->getFromName() ?? $smtpConfig->getUsername());
+
+        // Set Lead Details
+        $lead = Lead::findOrFail($leadId);
+        $parsedEmail->setLeadId($lead->identifier);
+        $parsedEmail->setToEmail(trim($lead->email_address));
+        $parsedEmail->setToName($lead->full_name);
+
+        // Set Email Details
+        $parsedEmail->setSubject($params['subject']);
+        $parsedEmail->setBody($params['body']);
+
+        // Append Attachments
+        foreach($params['attachments'] as $attachment) {
+            $parsedEmail->addAttachment(AttachmentFile::getFromUploadedFile($attachment));
+        }
+
+        // Append Existing Attachments
+        if(!empty($params['files'])) {
+            foreach($params['files'] as $file) {
+                $parsedEmail->addExistingAttachment(AttachmentFile::getFromRemoteFile($file));
+            }
+        }
+
+        // Return Filled Out Parsed Email
+        return $parsedEmail;
+    }
+
+    /**
+     * Get SMTP Config From Auth
+     * 
+     * @return SmtpConfig
+     */
+    private function getSmtpConfig(): SmtpConfig {
+        // Get User
+        $user = Auth::user();
+
+        // Check if Sales Person Exists
         if(!empty($user->sales_person)) {
-            // Set From Name/Email
-            $params['from_email'] = $user->sales_person->smtp_email;
-            $params['from_name'] = $user->sales_person->full_name ?? '';
+            // Get SMTP Config
+            $smtpConfig = SmtpConfig::fillFromSalesPerson($user->sales_person);
 
             // Get Sales Person Auth
             $accessToken = $this->tokens->getRelation([
@@ -66,86 +156,56 @@ class InteractionService implements InteractionServiceInterface
                 'relation_type' => 'sales_person',
                 'relation_id' => $user->sales_person->id
             ]);
-            if(empty($accessToken->id)) {
-                // Set Sales Person Config
-                $this->interactionEmail->setSalesPersonSmtpConfig($user->sales_person);
+
+            // Set Access Token on SMTP Config
+            if(!empty($accessToken->id)) {
+                $smtpConfig->setAuthType(SmtpConfig::AUTH_GMAIL);
+                $smtpConfig->setAccessToken($this->refreshToken($accessToken));
             }
-        } else {
-            $params['from_email'] = $user->email;
-            $params['from_name'] = $user->name ?? '';
 
-            // Are We a Dealer User?!
-            if(!empty($user->user) && empty($params['from_name'])) {
-                $params['from_name'] = $user->user->name ?? '';
-            }
+            // Return SMTP Config
+            return $smtpConfig;
         }
 
-        // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($params['from_email'], $lead->identifier);
-        if(!empty($emailHistory->message_id)) {
-            $params['id']             = $emailHistory->email_id;
-            $params['interaction_id'] = $emailHistory->interaction_id;
-            $params['message_id']     = $emailHistory->message_id;
-        }
-
-        // Set Lead Details
-        $params['to_email'] = $lead->email_address;
-        $params['to_name']  = $lead->full_name;
-
-        // Append Attachments
-        if(!isset($params['attachments'])) {
-            $params['attachments'] = array();
-        }
-        $params['attachments'] = array_merge($params['attachments'], $attachments);
-
-        // Send Email
-        if(!empty($accessToken->id)) {
-            // Validate/Refresh Token
-            $accessToken = $this->refreshToken($accessToken);
-
-            // Send Email
-            $email = $this->gmail->send($accessToken, $params);
-        } else {
-            $email = $this->interactionEmail->send($lead->dealer_id, $params);
-        }
-
-        // Save Email
-        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $email);
+        // Get SMTP Config From Dealer
+        return new SmtpConfig([
+            'username' => $user->email,
+            'name' => $user->name ?? ''
+        ]);
     }
-
 
     /**
      * Save Email From Send Email
      * 
-     * @param type $leadId
-     * @param type $userId
-     * @param type $params
-     * @return type
+     * @param int $leadId
+     * @param int $userId
+     * @param ParsedEmail $parsedEmail
+     * @return Interaction
      */
-    private function saveEmail($leadId, $userId, $params) {
+    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail): Interaction {
         // Initialize Transaction
-        DB::transaction(function() use (&$params, $leadId, $userId) {
+        DB::transaction(function() use (&$parsedEmail, $leadId, $userId) {
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
-                'id'                => $params['interaction_id'] ?? 0,
+                'id'                => $parsedEmail->getInteractionId(),
                 'lead_id'           => $leadId,
                 'user_id'           => $userId,
-                'interaction_type'  => "EMAIL",
-                'interaction_notes' => "E-Mail Sent: {$params['subject']}",
-                'interaction_time'  => Carbon::now()->toDateTimeString(),
+                'interaction_type'  => 'EMAIL',
+                'interaction_notes' => 'E-Mail Sent: ' . $parsedEmail->getSubject(),
+                'interaction_time'  => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
             ]);
 
-            // Set Interaction ID!
-            $params['interaction_id'] = $interaction->interaction_id;
+            // Set Interaction ID/Date
+            $parsedEmail->setInteractionId($interaction->interaction_id);
+            $parsedEmail->setDateNow();
 
             // Insert Email
-            $params['date_sent'] = 1;
-            $this->emailHistory->createOrUpdate($params);
+            $this->emailHistory->createOrUpdate($parsedEmail->getParams());
         });
 
         // Return Interaction
         return $this->interactions->get([
-            'id' => $params['interaction_id']
+            'id' => $parsedEmail->getInteractionId()
         ]);
     }
 

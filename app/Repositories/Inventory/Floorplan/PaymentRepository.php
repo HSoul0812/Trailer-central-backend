@@ -136,7 +136,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
     
-     /**
+    /**
      * If type is balance, decrease floorplan balance of the inventory
      * If type is interest, increase interest amount of the inventory
      */

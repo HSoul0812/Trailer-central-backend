@@ -14,7 +14,9 @@ class GetPoReceiptRequest extends Request {
         'search_term' => 'string',
         'dealer_id' => 'integer',
         'vendor_id' => 'integer',
-        'is_billed' => 'boolean'
+        'is_billed' => 'boolean',
+        'ids' => 'array',
+        'ids.*' => 'integer|required'
     ];
     
 }

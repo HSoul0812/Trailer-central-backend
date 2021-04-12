@@ -28,6 +28,9 @@ class CollectorTransformer extends TransformerAbstract
             'ftp_password' => $collector->ftp_password,
             'file_format' => $collector->file_format,
             'path_to_data' => $collector->path_to_data,
+            'create_items' => $collector->create_items,
+            'update_items' => $collector->update_items,
+            'archive_items' => $collector->archive_items,
             'length_format' => $collector->length_format,
             'width_format' => $collector->width_format,
             'height_format' => $collector->height_format,
@@ -37,6 +40,10 @@ class CollectorTransformer extends TransformerAbstract
             'import_description' => $collector->import_description,
             'images_delimiter' => $collector->images_delimiter,
             'overridable_fields' => $collector->overridable_fields,
+            'skip_categories' => $collector->skip_categories,
+            'skip_locations' => $collector->skip_locations,
+            'path_to_fields_to_description' => $collector->path_to_fields_to_description,
+            'fields_to_description' => $collector->fields_to_description,
             'use_secondary_image' => $collector->use_secondary_image,
             'append_floorplan_image' => $collector->append_floorplan_image,
             'update_images' => $collector->update_images,
@@ -45,7 +52,11 @@ class CollectorTransformer extends TransformerAbstract
             'unarchive_sold_items' => $collector->unarchive_sold_items,
             'active' => $collector->active,
             'cdk_password' => $collector->cdk_password,
-            'cdk_username' => $collector->cdk_username 
+            'cdk_username' => $collector->cdk_username,
+            'ids_token' => $collector->ids_token,
+            'ids_default_location' => $collector->ids_default_location,
+            'use_factory_mapping' => $collector->use_factory_mapping,
+            'xml_url' => $collector->xml_url
         ];
     }
 }

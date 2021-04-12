@@ -22,6 +22,14 @@ class AttributeValue extends Model
 
     protected $primaryKey = ['attribute_id', 'inventory_id'];
 
+    public $timestamps = false;
+
+    protected $fillable = [
+        'attribute_id',
+        'inventory_id',
+        'value',
+    ];
+
     public function attribute()
     {
         return $this->belongsTo(Attribute::class, 'attribute_id', 'attribute_id');

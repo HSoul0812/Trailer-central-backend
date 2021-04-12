@@ -2,6 +2,9 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use App\Models\CRM\Email\Attachment;
+use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
+use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
@@ -75,6 +78,11 @@ class ParsedEmail
     private $attachments;
 
     /**
+     * @var Collection<AttachmentFile> Attachments Already Saved to DB on Draft
+     */
+    private $existingAttachments;
+
+    /**
      * @var string Date of email sent
      */
     private $date = '';
@@ -84,6 +92,11 @@ class ParsedEmail
      * @var int Lead ID Associated With Email
      */
     private $leadId = 0;
+
+    /**
+     * @var int Interaction ID Associated With Email
+     */
+    private $interactionId = 0;
 
     /**
      * @var string Received || Sent (By || From Sales Person)
@@ -107,7 +120,7 @@ class ParsedEmail
      * @param string $id
      * @return void
      */
-    public function setId(string$id): void
+    public function setId(string $id): void
     {
         $this->id = $id;
     }
@@ -164,10 +177,29 @@ class ParsedEmail
      */
     public function getReferences(): array
     {
-        if (empty($this->references)) {
-            return [];
-        }
-        return explode(" ", $parsed['references']);
+        return !empty($this->references) ? explode(" ", $this->references) : [];
+    }
+
+    /**
+     * Return First Reference
+     * 
+     * @return string reset($this->getReferences())
+     */
+    public function getFirstReference(): string
+    {
+        $references = $this->getReferences();
+        return !empty($references) ? reset($references) : '';
+    }
+
+    /**
+     * Return Last Reference
+     * 
+     * @return string end($this->getReferences())
+     */
+    public function getLastReference(): string
+    {
+        $references = $this->getReferences();
+        return !empty($references) ? end($references) : '';
     }
 
     /**
@@ -189,13 +221,7 @@ class ParsedEmail
      */
     public function getTo(): string
     {
-        // Name Exists?
-        if(!empty($this->toName)) {
-            return $this->toName . ' <' . $this->to . '>';
-        }
-
-        // Return To Email
-        return $this->to;
+        return !empty($this->toName) ? $this->toName . ' <' . $this->to . '>' : $this->to;
     }
 
     /**
@@ -227,7 +253,7 @@ class ParsedEmail
      */
     public function getToEmail(): string
     {
-        return $this->to;
+        return $this->to ?? '';
     }
 
     /**
@@ -270,13 +296,7 @@ class ParsedEmail
      */
     public function getFrom(): string
     {
-        // Name Exists?
-        if(!empty($this->fromName)) {
-            return $this->fromName . ' <' . $this->from . '>';
-        }
-
-        // Return From Email
-        return $this->from;
+        return !empty($this->fromName) ? $this->fromName . ' <' . $this->from . '>' : $this->from;
     }
 
     /**
@@ -308,7 +328,7 @@ class ParsedEmail
      */
     public function getFromEmail(): string
     {
-        return $this->from;
+        return $this->from ?? '';
     }
 
     /**
@@ -459,6 +479,110 @@ class ParsedEmail
         $this->attachments->push($attachment);
     }
 
+    /**
+     * Validate Attachments Size
+     * 
+     * @throws ExceededSingleAttachmentSizeException
+     * @throws ExceededTotalAttachmentSizeException
+     * @return int
+     */
+    public function validateAttachmentsSize() {
+        // Loop Attachments
+        $totalSize = 0;
+        if (!empty($this->attachments)) {
+            foreach($this->attachments as $attachment) {
+                if ($attachment->getFileSize() > Attachment::MAX_FILE_SIZE) {
+                    throw new ExceededSingleAttachmentSizeException();
+                } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
+                    throw new ExceededTotalAttachmentSizeException();
+                }
+                $totalSize += $attachment->getFileSize();
+            }
+        }        
+
+        // Return Total Size
+        return $totalSize;
+    }
+
+    /**
+     * Do Attachments Exist?
+     * 
+     * @return bool
+     */
+    public function hasAttachments(): bool
+    {
+        return !empty($this->attachments) ? ($this->attachments->isNotEmpty()) : false;
+    }
+
+
+    /**
+     * Return Existing Attachments
+     * 
+     * @return Collection<AttachmentFile> $this->existingAttachments
+     */
+    public function getExistingAttachments(): Collection
+    {
+        // Attachments Exist?
+        if(!empty($this->existingAttachments)) {
+            return $this->existingAttachments;
+        }
+
+        // Return Empty Collection
+        return new Collection();
+    }
+
+    /**
+     * Set Existing Attachments
+     * 
+     * @param Collection<AttachmentFile> $attachments
+     * @return void
+     */
+    public function setExistingAttachments(Collection $attachments): void
+    {
+        $this->existingAttachments = $attachments;
+    }
+
+    /**
+     * Add Existing Attachment
+     * 
+     * @param AttachmentFile $attachment
+     * @return void
+     */
+    public function addExistingAttachment(AttachmentFile $attachment): void
+    {
+        if(empty($this->existingAttachments)) {
+            $this->existingAttachments = new Collection();
+        }
+
+        // Append Existing Attachment
+        $this->existingAttachments->push($attachment);
+    }
+
+
+    /**
+     * Merge All Attachments
+     * 
+     * @return Collection<AttachmentFile> merge($this->attachments, $this->existingAttachments)
+     */
+    public function getAllAttachments(): Collection
+    {
+        // Initialize Collection
+        $attachments = new Collection();
+
+        // Attachments Exist?
+        if(!empty($this->attachments)) {
+            $attachments = $attachments->merge($this->attachments);
+        }
+
+        // Existing Attachments Exist?
+        if(!empty($this->existingAttachments)) {
+            $attachments = $attachments->merge($this->existingAttachments);
+        }
+
+        // Return Collection of All Attachments
+        return $attachments;
+    }
+
 
     /**
      * Return Date
@@ -478,14 +602,24 @@ class ParsedEmail
      */
     public function setDate(string $date): void
     {
-        $this->date = Carbon::parse($date)->toDateTimeString();
+        $this->date = Carbon::parse($date)->setTimezone('UTC')->toDateTimeString();
+    }
+
+    /**
+     * Set Date to Now
+     * 
+     * @return void
+     */
+    public function setDateNow(): void
+    {
+        $this->date = Carbon::now()->setTimezone('UTC')->toDateTimeString();
     }
 
 
     /**
      * Return Lead ID
      * 
-     * @return int $this->lead_id
+     * @return int $this->leadId
      */
     public function getLeadId(): int
     {
@@ -501,6 +635,28 @@ class ParsedEmail
     public function setLeadId(int $leadId): void
     {
         $this->leadId = $leadId;
+    }
+
+
+    /**
+     * Return Interaction ID
+     * 
+     * @return int $this->interactionId || null
+     */
+    public function getInteractionId(): ?int
+    {
+        return $this->interactionId;
+    }
+
+    /**
+     * Set Interaction ID
+     * 
+     * @param int $interactionId Interaction ID Associated With Email
+     * @return void
+     */
+    public function setInteractionId(int $interactionId): void
+    {
+        $this->interactionId = $interactionId;
     }
 
 
@@ -523,5 +679,52 @@ class ParsedEmail
     public function setDirection(string $direction): void
     {
         $this->direction = $direction;
+    }
+
+
+    /**
+     * Return Email History Params
+     * 
+     * @return array{lead_id: int,
+     *               interaction_id: int,
+     *               message_id: string,
+     *               root_message_id: string,
+     *               to_email: string,
+     *               to_name: string,
+     *               from_email: string,
+     *               from_name: string,
+     *               subject: string,
+     *               body: string,
+     *               use_html: bool,
+     *               date_sent: string,
+     *               attachments: array
+     */
+    public function getParams(): array
+    {
+        // Get Attachment Params
+        $attachments = [];
+        
+        if (!empty($this->attachments)) {
+            foreach($this->attachments as $attachment) {
+                $attachments[] = $attachment->getParams($this->messageId);
+            }
+        }        
+
+        // Return Params
+        return [
+            'lead_id' => $this->leadId,
+            'interaction_id' => $this->interactionId,
+            'message_id' => $this->messageId,
+            'root_message_id' => $this->rootMessageId,
+            'to_email' => $this->to,
+            'to_name' => $this->toName,
+            'from_email' => $this->from,
+            'from_name' => $this->fromName,
+            'subject' => $this->subject,
+            'body' => $this->body,
+            'use_html' => $this->isHtml,
+            'date_sent' => $this->date,
+            'attachments' => $attachments
+        ];
     }
 }

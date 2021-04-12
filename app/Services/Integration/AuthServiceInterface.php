@@ -2,6 +2,8 @@
 
 namespace App\Services\Integration;
 
+use App\Services\Integration\Common\DTOs\CommonToken;
+
 interface AuthServiceInterface {
     /**
      * Show Sales Auth Response
@@ -35,6 +37,14 @@ interface AuthServiceInterface {
      * @return array of validation
      */
     public function validate($accessToken);
+
+    /**
+     * Validate Custom Access Token
+     * 
+     * @param CommonToken $accessToken general access token filled with data from request
+     * @return array of validation
+     */
+    public function validateCustom(CommonToken $accessToken);
 
     /**
      * Return Response

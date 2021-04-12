@@ -227,4 +227,19 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
+    /**
+     * @param int $tbPrimaryId
+     * @return bool
+     * @throws \Exception
+     */
+    public function deleteByTbPrimaryId(int $tbPrimaryId)
+    {
+        $quickbookApproval = QuickbookApproval::where('tb_primary_id', '=', $tbPrimaryId)->first();
+
+        if ($quickbookApproval instanceof QuickbookApproval) {
+            return $quickbookApproval->delete();
+        } else {
+            return false;
+        }
+    }
 }

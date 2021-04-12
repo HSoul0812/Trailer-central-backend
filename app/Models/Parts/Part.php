@@ -64,6 +64,7 @@ class Part extends Model
         'video_embed_code',
         'stock_min',
         'stock_max',
+        'is_sublet_specific'
     ];
 
     /**
@@ -123,13 +124,13 @@ class Part extends Model
         static::created(function ($part) {
 
             $part->updateCacheStoreTimes();
-
+            $part->searchable();
         });
 
         static::updated(function ($part) {
 
             $part->updateCacheStoreTimes();
-
+            $part->searchable();
         });
     }
 
@@ -220,7 +221,7 @@ class Part extends Model
     {
         return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
     }
-    
+
     public function getTotalQtyAttribute()
     {
         return ($this->bins instanceof Collection)?

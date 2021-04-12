@@ -317,6 +317,7 @@ $api->version('v1', function ($route) {
 
     // Factory
     $route->get('feed/factory/showroom', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@index');
+    $route->get('feed/factory/showroom/{id}', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@show');
 
     /*
     |--------------------------------------------------------------------------
@@ -326,9 +327,11 @@ $api->version('v1', function ($route) {
     |
     |
     */
-
-    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
-
+    
+    $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
+    $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
+    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');    
+    
     /*
     |--------------------------------------------------------------------------
     | Leads
@@ -388,6 +391,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
+        $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
 
         /*
         |--------------------------------------------------------------------------
@@ -497,7 +501,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
-            });            
+            });
         });
 
         /*
@@ -610,6 +614,7 @@ $api->version('v1', function ($route) {
         */
         $route->get('service-orders', 'App\Http\Controllers\v1\Dms\ServiceOrderController@index');
         $route->get('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@show');
+        $route->put('service-orders/{id}', 'App\Http\Controllers\v1\Dms\ServiceOrderController@update');
         $route->get('service-item-technicians/by-dealer', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byDealer');
         $route->get('service-item-technicians/by-location/{locationId}', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@byLocation');
         $route->get('service-item-technicians', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@index');
@@ -716,7 +721,8 @@ $api->version('v1', function ($route) {
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
         $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
-
+        $route->post('reports/custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@customReport');
+        $route->post('reports/export-custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@exportCustomReport');
         /*
         |--------------------------------------------------------------------------
         | Parts related
@@ -730,7 +736,19 @@ $api->version('v1', function ($route) {
          * Parts audit logs
          */
         $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
-
+        $route->get('parts/audit-logs/date', 'App\Http\Controllers\v1\Parts\AuditLogDateController@index');
+        $route->get('parts/audit-logs/date/csv', 'App\Http\Controllers\v1\Parts\AuditLogDateController@csv');
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Printer
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */        
+        $route->get('printer/instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+        
         /*
         |--------------------------------------------------------------------------
         | Others

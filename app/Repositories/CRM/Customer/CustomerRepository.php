@@ -138,9 +138,8 @@ class CustomerRepository implements CustomerRepositoryInterface
             $search->must('multi_match', [
                 'query' => $query['query'],
                 'fuzziness' => 'AUTO',
-                'fields' => ['display_name^2', 'first_name', 'last_name', 'email']
+                'fields' => ['display_name^2', 'first_name', 'last_name', 'email', 'company_name', 'home_phone', 'cell_phone', 'work_phone']
             ]);
-
         } else if ($options['allowAll'] ?? false) { // if no query supplied but is allowed
             $search->must('match_all', []);
 

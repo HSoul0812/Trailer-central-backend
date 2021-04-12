@@ -34,7 +34,11 @@ class AccessToken
             return $next($request);
         }
         
-        if (strpos($request->url(), 'admin') === false && strpos($request->url(), 'nova-api') === false && strpos($request->url(), 'api/user/login') === false) {
+        if (strpos($request->url(), 'admin') === false && 
+            strpos($request->url(), 'nova-api') === false && 
+            strpos($request->url(), 'api/user/login') === false &&
+            strpos($request->url(), 'api/user/password-reset/start') === false &&
+            strpos($request->url(), 'user/password-reset/finish') === false) {
             return response('Invalid access token.', 403);
         }
         
