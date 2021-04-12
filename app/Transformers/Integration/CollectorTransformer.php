@@ -40,6 +40,8 @@ class CollectorTransformer extends TransformerAbstract
             'import_description' => $collector->import_description,
             'images_delimiter' => $collector->images_delimiter,
             'overridable_fields' => $collector->overridable_fields,
+            'skip_categories' => $collector->skip_categories,
+            'skip_locations' => $collector->skip_locations,
             'path_to_fields_to_description' => $collector->path_to_fields_to_description,
             'fields_to_description' => $collector->fields_to_description,
             'use_secondary_image' => $collector->use_secondary_image,

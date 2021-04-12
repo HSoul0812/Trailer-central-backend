@@ -5,6 +5,7 @@ namespace App\Console\Commands\CRM\Leads\Export;
 use Illuminate\Console\Command;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepositoryInterface;
 use App\Services\CRM\Leads\Export\IDSServiceInterface;
+use Carbon\Carbon;
 
 /**
  * Exports leads in IDS format
@@ -56,7 +57,7 @@ class IDS extends Command
      */
     public function handle()
     {
-        $idsExportStartDate = config('ids.export_start_date');
+        $idsExportStartDate = Carbon::now()->subDays(1)->toDateTimeString();
 
         $this->info("Starting leads export...");
 
