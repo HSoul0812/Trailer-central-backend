@@ -132,10 +132,10 @@ class ShowroomTransformer extends TransformerAbstract
                         $inOnly = $helper->fromFeetAndInches($value, ConvertHelper::DISPLAY_MODE_FEET_INCHES_INCHES_ONLY, $map->map_to);
 
                         // Format Feet/Inches
-                        $return[$map->map_to] = number_format($ftDec, 2);
-                        $return[$map->map_to . '_inches'] = number_format($inDec, 2);
-                        $return[$map->map_to . '_second'] = number_format($ftOnly, 0);
-                        $return[$map->map_to . '_second_inches'] = number_format($inOnly, 0);
+                        $data[$map->map_to] = number_format($ftDec, 2);
+                        $data[$map->map_to . '_inches'] = number_format($inDec, 2);
+                        $data[$map->map_to . '_second'] = number_format($ftOnly, 0);
+                        $data[$map->map_to . '_second_inches'] = number_format($inOnly, 0);
                     }
                     break;
 
