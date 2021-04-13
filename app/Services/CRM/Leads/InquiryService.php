@@ -116,7 +116,9 @@ class InquiryService implements InquiryServiceInterface
             $this->tracking->updateTrackLead($params['cookie_session_id'], $lead->identifier);
 
             // Mark Track Unit as Inquired for Unit
-            $this->trackingUnit->markUnitInquired($params['cookie_session_id'], $inquiry->itemId, $inquiry->getUnitType());
+            if(!empty($inquiry->itemId)) {
+                $this->trackingUnit->markUnitInquired($params['cookie_session_id'], $inquiry->itemId, $inquiry->getUnitType());
+            }
         }
     }
 }

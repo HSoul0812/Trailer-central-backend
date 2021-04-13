@@ -193,8 +193,8 @@ class InquiryServiceTest extends TestCase
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
             ->shouldReceive('markUnitInquired')
-            ->once()
-            ->with($sendInquiryParams['cookie_session_id'], $inquiry->itemId, $inquiry->getUnitType());
+            ->never();
+            //->with($sendInquiryParams['cookie_session_id'], $inquiry->itemId, $inquiry->getUnitType());
 
         // Expects Auto Assign Job
         $this->expectsJobs(AutoAssignJob::class);
