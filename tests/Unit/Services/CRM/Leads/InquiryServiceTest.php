@@ -158,7 +158,7 @@ class InquiryServiceTest extends TestCase
         //$sendInquiryParams['inventory'] = [$sendRequestParams['item_id']];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = $this->prepareInquiryLead($website, $sendRequestParams);
 
 
         /** @var InquiryServiceInterface $service */
