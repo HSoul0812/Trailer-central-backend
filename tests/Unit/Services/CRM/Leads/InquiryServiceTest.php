@@ -198,11 +198,8 @@ class InquiryServiceTest extends TestCase
             ->never();
             //->with($sendInquiryParams['cookie_session_id'], $inquiry->itemId, $inquiry->getUnitType());
 
-        // Expects Auto Assign Job
-        $this->expectsJobs(AutoAssignJob::class);
-
-        // Expects Auto Responder Job
-        $this->expectsJobs(AutoResponderJob::class);
+        // Expects Auto Assign/Auto Responder Jobs
+        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
         // Fake Mail
         //Mail::fake();

@@ -103,12 +103,12 @@ class InquiryService implements InquiryServiceInterface
         // Create Auto Assign Job
         if(empty($lead->leadStatus->sales_person_id)) {
             $job = new AutoAssignJob($lead);
-            $this->dispatch($job);
+            dispatch($job->onQueue('mails'));
         }
 
         // Dispatch Auto Responder Job
         $job = new AutoResponderJob($lead);
-        $this->dispatch($job->onQueue('mails'));
+        dispatch($job->onQueue('mails'));
 
         // Tracking Cookie Exists?
         if($inquiry->cookieSessionId) {
