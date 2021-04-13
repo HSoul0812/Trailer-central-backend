@@ -186,7 +186,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('updateTrackLead')
             ->once()
             ->with($inquiry->cookieSessionId, $lead->identifier)
-            ->onReturn($tracking);
+            ->andReturn($tracking);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
@@ -313,7 +313,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('updateTrackLead')
             ->once()
             ->with($inquiry->cookieSessionId, $lead->identifier)
-            ->onReturn($tracking);
+            ->andReturn($tracking);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
@@ -448,7 +448,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('updateTrackLead')
             ->once()
             ->with($inquiry->cookieSessionId, $lead->identifier)
-            ->onReturn($tracking);
+            ->andReturn($tracking);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
