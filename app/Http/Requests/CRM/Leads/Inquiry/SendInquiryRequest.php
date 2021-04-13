@@ -15,6 +15,7 @@ class SendInquiryRequest extends Request {
         'lead_types.*' => 'lead_type_valid',
         'inventory' => 'array',
         'inventory.*' => 'inventory_valid',
+        'item_id' => 'nullable|integer',
         'device' => 'nullable|string',
         'title' => 'nullable|string',
         'url' => 'nullable|string',
@@ -41,7 +42,8 @@ class SendInquiryRequest extends Request {
         'lead_source' => 'lead_source_valid',
         'lead_status' => 'lead_status_valid',
         'contact_type' => 'in:CONTACT,TASK',
-        'sales_person_id' => 'sales_person_valid'
+        'sales_person_id' => 'sales_person_valid',
+        'cookie_session_id' => 'nullable|string'
     ];
 
 }
