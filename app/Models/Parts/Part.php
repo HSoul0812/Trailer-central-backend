@@ -219,7 +219,7 @@ class Part extends Model
 
     public function bins()
     {
-        return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
+        return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id')->orderBy('qty', 'DESC');
     }
 
     public function getTotalQtyAttribute()
