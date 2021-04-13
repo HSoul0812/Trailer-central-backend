@@ -99,7 +99,6 @@ class InquiryServiceTest extends TestCase
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
         $websiteId = self::getTestWebsiteRandom();
         $website = Website::find($websiteId);
 
@@ -458,6 +457,133 @@ class InquiryServiceTest extends TestCase
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+
+        // Fake Mail
+        Mail::fake();
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($sendRequestParams);
+
+        // Match Lead Details
+        $this->assertSame($result->identifier, $lead->identifier);
+        $this->assertSame($result->full_name, $lead->full_name);
+        $this->assertSame($result->email_address, $lead->email_address);
+        $this->assertSame($result->phone_number, $lead->phone_number);
+    }
+
+    /**
+     * @covers ::send
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendNoAutoAssign()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $websiteId = self::getTestWebsiteRandom();
+        $website = Website::find($websiteId);
+
+        // Create Dummy Inventory
+        $inventory = factory(Part::class)->create([
+            'dealer_id' => $dealerId
+        ]);
+
+        // Get Test Lead
+        $lead = factory(Lead::class)->create([
+            'dealer_id' => $dealerId,
+            'website_id' => $websiteId,
+            'inventory_id' => 0,
+            'lead_type' => LeadType::TYPE_INVENTORY
+        ]);
+        $status = factory(LeadStatus::class)->create([
+            'tc_lead_identifier' => $lead->identifier
+        ]);
+
+        // Get Tracking Details
+        $tracking = factory(Tracking::class)->create([
+            'lead_id' => $lead->identifier,
+            'domain' => $website->domain
+        ]);
+
+        // Send Request Params
+        $sendRequestParams = [
+            'dealer_id' => $lead->dealer_id,
+            'website_id' => $lead->website_id,
+            'dealer_location_id' => $lead->dealer_location_id,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
+            'lead_types' => [$lead->lead_type],
+            'item_id' => $inventory->id,
+            'device' => self::TEST_DEVICE,
+            'title' => $lead->title,
+            'url' => $lead->referral,
+            'referral' => $lead->referral,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => $lead->phone_number,
+            'preferred_contact' => '',
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
+            'comments' => $lead->comments,
+            'metadata' => $lead->metadata,
+            'is_spam' => 0,
+            'lead_source' => $status->source,
+            'lead_status' => $status->status,
+            'contact_type' => $status->task,
+            'sales_person_id' => $status->sales_person_id,
+            'cookie_session_id' => $tracking->session_id
+        ];
+
+        // Send Inquiry Params
+        $sendInquiryParams = $sendRequestParams;
+        $sendInquiryParams['inventory'] = [];
+
+        // Get Inquiry Lead
+        $inquiry = $this->prepareInquiryLead($website, $sendRequestParams);
+
+
+        /** @var InquiryServiceInterface $service */
+        $service = $this->app->make(InquiryServiceInterface::class);
+
+        // Mock Fill Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('fill')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($inquiry);
+
+        // Mock Send Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('send')
+            ->once();
+
+        // Mock Create Lead
+        $this->leadServiceMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($lead);
+
+        // Mock Sales Person Repository
+        $this->trackingRepositoryMock
+            ->shouldReceive('updateTrackLead')
+            ->once()
+            ->with($inquiry->cookieSessionId, $lead->identifier)
+            ->andReturn($tracking);
+
+        // Mock Sales Person Repository
+        $this->trackingUnitRepositoryMock
+            ->shouldReceive('markUnitInquired')
+            ->never();
+
+        // Expects Auto Responder Job ONLY
+        $this->expectsJobs([AutoResponderJob::class]);
+
+        // Does NOT Expect Auto Assign Job
+        $this->assertNotDispatched(AutoAssignJob::class);
 
         // Fake Mail
         Mail::fake();
