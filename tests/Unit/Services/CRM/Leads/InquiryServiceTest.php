@@ -117,6 +117,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Tracking Details
         $tracking = factory(Tracking::class)->create([
+            'lead_id' => $lead->identifier,
             'domain' => $website->domain
         ]);
         $trackingUnits = $this->createTrackingUnits($dealerId, $tracking->session_id);
@@ -184,7 +185,8 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, $lead->identifier);
+            ->with($inquiry->cookieSessionId, $lead->identifier)
+            ->onReturn($tracking);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
@@ -206,18 +208,6 @@ class InquiryServiceTest extends TestCase
         $this->assertSame($result->full_name, $lead->full_name);
         $this->assertSame($result->email_address, $lead->email_address);
         $this->assertSame($result->phone_number, $lead->phone_number);
-
-        // Assert tracking lead ID was set
-        $this->assertDatabaseHas('website_tracking', [
-            'session_id' => $tracking->session_id,
-            'lead_id' => $result->identifier
-        ]);
-
-        // Assert inquired status was NOT set to tracking unit
-        $this->assertDatabaseMissing('website_tracking_units', [
-            'session_id' => $tracking->session_id,
-            'inquired' => 1
-        ]);
     }
 
     /**
@@ -253,6 +243,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Tracking Details
         $tracking = factory(Tracking::class)->create([
+            'lead_id' => $lead->identifier,
             'domain' => $website->domain
         ]);
         $trackingUnits = $this->createTrackingUnits($dealerId, $tracking->session_id);
@@ -262,7 +253,7 @@ class InquiryServiceTest extends TestCase
             'dealer_id' => $lead->dealer_id,
             'website_id' => $lead->website_id,
             'dealer_location_id' => $lead->dealer_location_id,
-            'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
             'lead_types' => [$lead->lead_type],
             'item_id' => $lead->inventory_id,
             'device' => self::TEST_DEVICE,
@@ -284,7 +275,6 @@ class InquiryServiceTest extends TestCase
             'lead_source' => $status->source,
             'lead_status' => $status->status,
             'contact_type' => $status->task,
-            //'sales_person_id' => $status->sales_person_id,
             'cookie_session_id' => $tracking->session_id
         ];
 
@@ -322,13 +312,14 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, $lead->identifier);
+            ->with($inquiry->cookieSessionId, $lead->identifier)
+            ->onReturn($tracking);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
             ->shouldReceive('markUnitInquired')
             ->once()
-            ->with($inquiry->cookieSessionId, $inquiry->itemId, $inquiry->getUnitType());
+            ->with($inquiry->cookieSessionId, $inquiry->itemId, 'inventory');
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -353,18 +344,141 @@ class InquiryServiceTest extends TestCase
         $this->assertSame($result->full_name, $lead->full_name);
         $this->assertSame($result->email_address, $lead->email_address);
         $this->assertSame($result->phone_number, $lead->phone_number);
+    }
 
-        // Assert tracking lead ID was set
-        $this->assertDatabaseHas('website_tracking', [
-            'session_id' => $tracking->session_id,
-            'lead_id' => $result->identifier
+    /**
+     * @covers ::send
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendPart()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $websiteId = self::getTestWebsiteRandom();
+        $website = Website::find($websiteId);
+
+        // Create Dummy Inventory
+        $inventory = factory(Part::class)->create([
+            'dealer_id' => $dealerId
         ]);
 
-        // Assert inquired status was NOT set to tracking unit
-        $this->assertDatabaseHas('website_tracking_units', [
-            'session_id' => $tracking->session_id,
-            'inquired' => 1
+        // Get Test Lead
+        $lead = factory(Lead::class)->create([
+            'dealer_id' => $dealerId,
+            'website_id' => $websiteId,
+            'inventory_id' => 0,
+            'lead_type' => LeadType::TYPE_INVENTORY
         ]);
+        $status = factory(LeadStatus::class)->create([
+            'tc_lead_identifier' => $lead->identifier,
+            'sales_person_id' => 0
+        ]);
+
+        // Get Tracking Details
+        $tracking = factory(Tracking::class)->create([
+            'lead_id' => $lead->identifier,
+            'domain' => $website->domain
+        ]);
+        $trackingUnits = $this->createTrackingUnits($dealerId, $tracking->session_id);
+
+        // Send Request Params
+        $sendRequestParams = [
+            'dealer_id' => $lead->dealer_id,
+            'website_id' => $lead->website_id,
+            'dealer_location_id' => $lead->dealer_location_id,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
+            'lead_types' => [$lead->lead_type],
+            'item_id' => $inventory->id,
+            'device' => self::TEST_DEVICE,
+            'title' => $lead->title,
+            'url' => $lead->referral,
+            'referral' => $lead->referral,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => $lead->phone_number,
+            'preferred_contact' => '',
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
+            'comments' => $lead->comments,
+            'metadata' => $lead->metadata,
+            'is_spam' => 0,
+            'lead_source' => $status->source,
+            'lead_status' => $status->status,
+            'contact_type' => $status->task,
+            //'sales_person_id' => $status->sales_person_id,
+            'cookie_session_id' => $tracking->session_id
+        ];
+
+        // Send Inquiry Params
+        $sendInquiryParams = $sendRequestParams;
+        $sendInquiryParams['inventory'] = [];
+
+        // Get Inquiry Lead
+        $inquiry = $this->prepareInquiryLead($website, $sendRequestParams);
+
+
+        /** @var InquiryServiceInterface $service */
+        $service = $this->app->make(InquiryServiceInterface::class);
+
+        // Mock Fill Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('fill')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($inquiry);
+
+        // Mock Send Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('send')
+            ->once();
+
+        // Mock Create Lead
+        $this->leadServiceMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($lead);
+
+        // Mock Sales Person Repository
+        $this->trackingRepositoryMock
+            ->shouldReceive('updateTrackLead')
+            ->once()
+            ->with($inquiry->cookieSessionId, $lead->identifier)
+            ->onReturn($tracking);
+
+        // Mock Sales Person Repository
+        $this->trackingUnitRepositoryMock
+            ->shouldReceive('markUnitInquired')
+            ->once()
+            ->with($inquiry->cookieSessionId, $inquiry->itemId, 'part');
+
+        // Expects Auto Assign/Auto Responder Jobs
+        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+
+        // Fake Mail
+        Mail::fake();
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($sendRequestParams);
+
+        // Assert a message was sent to the dealer...
+        /*Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
+            if(empty($inquiry->inquiryEmail)) {
+                return false;
+            }                
+            return $mail->hasTo($inquiry->inquiryEmail);
+        });*/
+
+        // Match Lead Details
+        $this->assertSame($result->identifier, $lead->identifier);
+        $this->assertSame($result->full_name, $lead->full_name);
+        $this->assertSame($result->email_address, $lead->email_address);
+        $this->assertSame($result->phone_number, $lead->phone_number);
     }
 
 
