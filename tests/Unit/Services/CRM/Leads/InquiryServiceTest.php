@@ -582,9 +582,6 @@ class InquiryServiceTest extends TestCase
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
 
-        // Does NOT Expect Auto Assign Job
-        $this->assertNotDispatched(AutoAssignJob::class);
-
         // Fake Mail
         Mail::fake();
 
