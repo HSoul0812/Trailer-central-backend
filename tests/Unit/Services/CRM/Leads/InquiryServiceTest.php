@@ -120,7 +120,7 @@ class InquiryServiceTest extends TestCase
         $tracking = factory(Tracking::class)->create([
             'domain' => $website->domain
         ]);
-        $trackingUnits = $this->createTrackingUnits();
+        $trackingUnits = $this->createTrackingUnits($dealerId, $tracking->session_id);
 
         // Send Request Params
         $sendRequestParams = [
