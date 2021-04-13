@@ -83,6 +83,7 @@ class InquiryService implements InquiryServiceInterface
         $lead = $this->leads->create($params);
 
         // Lead Exists?!
+        var_dump($lead);
         if(!empty($lead->identifier)) {
             // Queue Up Inquiry Jobs
             $this->queueInquiryJobs($lead, $inquiry);
