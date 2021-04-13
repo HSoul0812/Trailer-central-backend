@@ -231,7 +231,7 @@ class InquiryServiceTest extends TestCase
         ]);*/
 
         // Assert inquired status was NOT set to tracking unit
-        $this->assertDatabaseMissing('website_tracking_unit', [
+        $this->assertDatabaseMissing('website_tracking_units', [
             'session_id' => $tracking->session_id,
             'inquired' => 1
         ]);
