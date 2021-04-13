@@ -110,7 +110,7 @@ class InquiryServiceTest extends TestCase
             'dealer_id' => $dealerId,
             'website_id' => $websiteId,
             'inventory_id' => $inventory->inventory_id,
-            LeadType::TYPE_GENERAL
+            'lead_type' => LeadType::TYPE_GENERAL
         ]);
         $status = factory(LeadStatus::class)->create([
             'tc_lead_identifier' => $lead->identifier
