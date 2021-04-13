@@ -211,11 +211,11 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Assert a message was sent to the dealer...
-        Mail::assertSent(InquiryEmail::class, function ($mail) use ($lead) {
-            if(empty($lead->inquiry_email)) {
+        Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
+            if(empty($inquiry->inquiryEmail)) {
                 return false;
             }                
-            return $mail->hasTo($lead->inquiry_email);
+            return $mail->hasTo($inquiry->inquiryEmail);
         });
 
         // Match Lead Details
