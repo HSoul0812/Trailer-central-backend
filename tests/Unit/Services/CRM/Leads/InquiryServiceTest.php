@@ -484,11 +484,6 @@ class InquiryServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
         $website = Website::find($websiteId);
 
-        // Create Dummy Inventory
-        $inventory = factory(Part::class)->create([
-            'dealer_id' => $dealerId
-        ]);
-
         // Get Test Lead
         $lead = factory(Lead::class)->create([
             'dealer_id' => $dealerId,
@@ -513,7 +508,6 @@ class InquiryServiceTest extends TestCase
             'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
             'lead_types' => [$lead->lead_type],
-            'item_id' => $inventory->id,
             'device' => self::TEST_DEVICE,
             'title' => $lead->title,
             'url' => $lead->referral,
