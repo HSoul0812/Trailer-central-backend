@@ -12,17 +12,13 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * @property int $id
  * @property int $dealer_location_id
- * @property string $fee_type possible enum values: appraisal_fee, bank_fee, doc_fee, battery_fee, title_cert,
- *                            state_inspection_fee, smog_cert, smog_fee, other_fee, filing_fee,
- *                            lein_fee, vit, license_fee, handling_fee, freight_fee, mv_warranty_fee,
- *                            vsi_fee, extended_warranty, gap_insurance, road_guard, trident,
- *                            anti_theft_system, roadside_asst, paint_sealant, rust_proofing, tire_fee,
- *                            notary_fee, messenger_fee, online_fee, plate_fee, processing_fee, county_fee,
- *                            transfer_fee, title_registration_fee, loan_fee, dmv_fee
+ * @property string $fee_type
  * @property float $amount
+ * @property string $title
  * @property int $is_state_taxed
  * @property int $is_county_taxed
  * @property int $is_local_taxed
+ * @property float $is_additional
  * @property string $visibility possible enum values:  hidden, visible, visible_locked
  * @property string $accounting_class Adt Default Fees, Taxes & Fees Group 1, Taxes & Fees Group 2, Taxes & Fees Group 3
  *
@@ -47,7 +43,9 @@ class DealerLocationQuoteFee extends Model
     protected $fillable = [
         "dealer_location_id",
         "fee_type",
+        "title",
         "amount",
+        "is_additional",
         "is_state_taxed",
         "is_county_taxed",
         "is_local_taxed",
@@ -81,10 +79,12 @@ class DealerLocationQuoteFee extends Model
     /**
      * Gets fee type from snake case to human text
      *
-     * @return string
+     * @deprecated use title property
+     *
+     * @return string|null
      */
-    public function getNameAttribute(): string
+    public function getNameAttribute(): ?string
     {
-        return ucwords(str_replace('_', ' ', $this->fee_type));
+        return $this->title;
     }
 }
