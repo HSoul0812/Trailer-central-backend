@@ -204,7 +204,7 @@ class InquiryServiceTest extends TestCase
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
         // Fake Mail
-        //Mail::fake();
+        Mail::fake();
 
 
         // Validate Send Inquiry Result
