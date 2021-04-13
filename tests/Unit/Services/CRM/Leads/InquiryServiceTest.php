@@ -155,7 +155,7 @@ class InquiryServiceTest extends TestCase
         ];
 
         // Send Inquiry Params
-        //$sendInquiryParams = $sendRequestParams;
+        $sendInquiryParams = $sendRequestParams;
         //$sendInquiryParams['inventory'] = [$sendRequestParams['item_id']];
 
         // Get Inquiry Lead
