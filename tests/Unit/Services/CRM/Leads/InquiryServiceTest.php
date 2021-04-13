@@ -186,8 +186,6 @@ class InquiryServiceTest extends TestCase
             ->andReturn($lead);
 
         // Mock Sales Person Repository
-            var_dump($inquiry->cookieSessionId);
-            var_dump($lead->identifier);
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
