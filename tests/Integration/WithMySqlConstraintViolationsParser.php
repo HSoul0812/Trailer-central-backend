@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Integration;
 
 use ErrorException;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +41,7 @@ trait WithMySqlConstraintViolationsParser
             }
 
             return 'SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: ' .
-                "a foreign key constraint fails (`$schemaName`.`$tableName`, {$matches['constraint']})";
+                "a foreign key constraint fails (`$schemaName`.`$tableName`, CONSTRAINT $constraintQuotedName";
         } catch (ErrorException $exception) {
             throw new ExpectationException($failedExpectationMessage);
         }

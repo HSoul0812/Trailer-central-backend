@@ -14,8 +14,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use PDOException;
 use Tests\database\seeds\Dms\Customer\InventorySeeder;
 use Tests\TestCase;
-use Tests\Unit\WithMySqlConstraintViolationsParser;
-
+use Tests\Integration\WithMySqlConstraintViolationsParser;
 
 class InventoryRepositoryTest extends TestCase
 {
