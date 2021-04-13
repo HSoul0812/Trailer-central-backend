@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Services\CRM\Leads;
 
+use App\Jobs\CRM\Leads\AutoAssignJob;
+use App\Jobs\Email\AutoResponderJob;
 use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
