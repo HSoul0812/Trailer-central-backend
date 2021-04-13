@@ -83,7 +83,6 @@ class InquiryService implements InquiryServiceInterface
         $lead = $this->leads->create($params);
 
         // Lead Exists?!
-        var_dump($lead);
         if(!empty($lead->identifier)) {
             // Queue Up Inquiry Jobs
             $this->queueInquiryJobs($lead, $inquiry);
@@ -111,6 +110,7 @@ class InquiryService implements InquiryServiceInterface
         $this->dispatch($job->onQueue('mails'));
 
         // Tracking Cookie Exists?
+        var_dump($inquiry);
         if(!empty($inquiry->cookieSessionId)) {
             // Set Tracking to Current Lead
             $this->tracking->updateTrackLead($inquiry->cookieSessionId, $lead->identifier);
