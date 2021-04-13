@@ -110,7 +110,7 @@ class InquiryService implements InquiryServiceInterface
         $this->dispatch($job->onQueue('mails'));
 
         // Tracking Cookie Exists?
-        if(isset($inquiry->cookieSessionId)) {
+        if(!empty($inquiry->cookieSessionId)) {
             // Set Tracking to Current Lead
             $this->tracking->updateTrackLead($inquiry->cookieSessionId, $lead->identifier);
 
