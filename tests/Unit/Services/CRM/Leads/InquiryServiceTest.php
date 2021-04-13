@@ -151,7 +151,6 @@ class InquiryServiceTest extends TestCase
             'lead_source' => $status->source,
             'lead_status' => $status->status,
             'contact_type' => $status->task,
-            'sales_person_id' => $status->sales_person_id,
             'cookie_session_id' => $tracking->session_id
         ];
 
