@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\CRM\Leads;
 
+use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
@@ -210,7 +211,7 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Assert a message was sent to the dealer...
-        Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($lead) {
+        Mail::assertSent(InquiryEmail::class, function ($mail) use ($lead) {
             if(empty($lead->inquiry_email)) {
                 return false;
             }                
