@@ -219,6 +219,7 @@ class InquiryServiceTest extends TestCase
         });*/
 
         // Match Lead Details
+        $this->assertSame($result->identifier, $lead->identifier);
         $this->assertSame($result->full_name, $lead->full_name);
         $this->assertSame($result->email_address, $lead->email_address);
         $this->assertSame($result->phone_number, $lead->phone_number);

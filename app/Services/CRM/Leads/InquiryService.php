@@ -85,7 +85,7 @@ class InquiryService implements InquiryServiceInterface
         // Lead Exists?!
         if(!empty($lead->identifier)) {
             // Queue Up Inquiry Jobs
-            $this->queueInquiryJobs($lead, $inquiry, $params);
+            $this->queueInquiryJobs($lead, $inquiry);
         }
 
         // Create Lead
@@ -98,9 +98,8 @@ class InquiryService implements InquiryServiceInterface
      * 
      * @param Lead $lead
      * @param InquiryLead $inquiry
-     * @param array $params
      */
-    private function queueInquiryJobs(Lead $lead, InquiryLead $inquiry, array $params) {
+    private function queueInquiryJobs(Lead $lead, InquiryLead $inquiry) {
         // Create Auto Assign Job
         if(empty($lead->leadStatus->sales_person_id)) {
             AutoAssignJob::dispatchNow($lead);
@@ -111,13 +110,13 @@ class InquiryService implements InquiryServiceInterface
         $this->dispatch($job->onQueue('mails'));
 
         // Tracking Cookie Exists?
-        if(isset($params['cookie_session_id'])) {
+        if(isset($inquiry->cookieSessionId)) {
             // Set Tracking to Current Lead
-            $this->tracking->updateTrackLead($params['cookie_session_id'], $lead->identifier);
+            $this->tracking->updateTrackLead($inquiry->cookieSessionId, $lead->identifier);
 
             // Mark Track Unit as Inquired for Unit
             if(!empty($inquiry->itemId)) {
-                $this->trackingUnit->markUnitInquired($params['cookie_session_id'], $inquiry->itemId, $inquiry->getUnitType());
+                $this->trackingUnit->markUnitInquired($inquiry->cookieSessionId, $inquiry->itemId, $inquiry->getUnitType());
             }
         }
     }
