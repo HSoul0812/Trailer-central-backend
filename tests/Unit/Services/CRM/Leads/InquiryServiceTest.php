@@ -115,7 +115,8 @@ class InquiryServiceTest extends TestCase
             'lead_type' => LeadType::TYPE_GENERAL
         ]);
         $status = factory(LeadStatus::class)->create([
-            'tc_lead_identifier' => $lead->identifier
+            'tc_lead_identifier' => $lead->identifier,
+            'sales_person_id' => 0
         ]);
 
         // Get Tracking Details
