@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use App\Models\Showroom\Showroom;
+use App\Models\Website\Website;
 use App\Models\Website\Tracking\Tracking;
 use App\Models\Website\Tracking\TrackingUnit;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
