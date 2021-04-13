@@ -18,8 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int $is_state_taxed
  * @property int $is_county_taxed
  * @property int $is_local_taxed
+ * @property string $visibility possible enum values:  hidden, visible, visible_locked, visible_pos, visible_locked_pos
  * @property float $is_additional
- * @property string $visibility possible enum values:  hidden, visible, visible_locked
  * @property string $accounting_class Adt Default Fees, Taxes & Fees Group 1, Taxes & Fees Group 2, Taxes & Fees Group 3
  *
  * @method static \Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
