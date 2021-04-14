@@ -98,4 +98,18 @@ class RestfulController extends Controller {
 
         return $this->response->array($params);
     }
+
+    /**
+     * @param bool $isExists
+     * @return Response
+     */
+    protected function existsResponse(bool $isExists): Response
+    {
+        return $this->response->array([
+            'response' => [
+                'status' => 'success',
+                'data' => $isExists
+            ]
+        ]);
+    }
 }
