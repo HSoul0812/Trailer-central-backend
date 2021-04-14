@@ -23,10 +23,10 @@ class ADFService implements ADFServiceInterface {
     }
 
     /**
-     * Export ADF if Possible
+     * Takes a lead and export it to ADF in XML format
      * 
-     * @param InquiryLead $inquiry
-     * @param Lead $lead
+     * @param InquiryLead $inquiry lead to export to IDS
+     * @param Lead $lead lead to export to IDS
      * @return bool
      */
     public function export(InquiryLead $inquiry, Lead $lead) : bool {
