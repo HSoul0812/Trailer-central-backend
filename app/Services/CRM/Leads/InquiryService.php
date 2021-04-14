@@ -186,7 +186,7 @@ class InquiryService implements InquiryServiceInterface
 
         // Find By Status!
         if(!empty($status) && count($status) > 0) {
-            $chosen = $this->filterMatch($status, $params);
+            $chosen = $this->filterMatch($status, $inquiry);
         }
 
         // Still Not Chosen? Find Any!
@@ -213,11 +213,13 @@ class InquiryService implements InquiryServiceInterface
             // Find All Matches Between Both
             $matched = $inquiry->findMatches($lead);
 
-            // Matched At Least Two?
-            if($matched > Lead::MERGE_MATCH_COUNT) {
+            // Matched All 3
+            if($matched > InquiryLead::MERGE_MATCH_COUNT) {
                 $chosen = $lead;
                 break;
-            } elseif($matched >= Lead::MERGE_MATCH_COUNT) {
+            }
+            // Matched At Least 2
+            elseif($matched >= InquiryLead::MERGE_MATCH_COUNT) {
                 $matches->push($lead);
             }
         }
