@@ -99,9 +99,7 @@ class DealerIncomingMapping extends Resource
             ])->dependsOn('type', FeedDealerIncomingMapping::STATUS)->onlyOnForms(),
 
             NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options(DealerLocation::select('dealer_location_id', 'name')->orderBy('name')->get()->pluck('name', 'dealer_location_id'))
-                    ->rules('required')
+                Text::make('Map To', 'map_to')
             ])->dependsOn('type', FeedDealerIncomingMapping::LOCATION)->onlyOnForms(),
 
             NovaDependencyContainer::make([Text::make('Map To', 'map_to')->sortable()->rules('required')])

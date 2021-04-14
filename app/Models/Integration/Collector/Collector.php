@@ -44,6 +44,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $unarchive_sold_items
  * @property string $cdk_password
  * @property string $cdk_username
+ * @property bool $use_factory_mapping
+ * @property string $skip_categories
+ * @property string $skip_locations
  */
 class Collector extends Model  implements Filterable
 {
@@ -114,7 +117,9 @@ class Collector extends Model  implements Filterable
         'unarchive_sold_items',
         'cdk_password',
         'cdk_username',
-        'use_factory_mapping'
+        'use_factory_mapping',
+        'skip_categories',
+        'skip_locations'
     ];
 
     public function dealers()

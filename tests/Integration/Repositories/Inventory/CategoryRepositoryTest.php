@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Repositories\Inventory;
+namespace Tests\Integration\Repositories\Inventory;
 
 use App\Models\Inventory\Category;
 use App\Repositories\Inventory\CategoryRepository;

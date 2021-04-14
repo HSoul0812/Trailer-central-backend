@@ -4,7 +4,6 @@ namespace App\Http\Controllers\v1\CRM\Interactions;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
-use App\Transformers\CRM\Interactions\InteractionTextTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use App\Http\Requests\CRM\Interactions\GetInteractionsRequest;
 use App\Http\Requests\CRM\Interactions\CreateInteractionRequest;
@@ -27,6 +26,8 @@ class InteractionsController extends RestfulControllerV2
      */
     public function __construct(InteractionsRepositoryInterface $interactions, InteractionServiceInterface $service)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['sendEmail']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['sendEmail']);
         $this->interactions = $interactions;
         $this->service = $service;
         $this->transformer = new InteractionTransformer();
