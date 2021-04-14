@@ -66,9 +66,9 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             }
 
             // Send Interaction Email
-            var_dump($inquiry);
             $email->send(new InquiryEmail($inquiry));
         } catch(\Exception $ex) {
+            var_dump($ex->getMessage());
             $this->log->error($ex->getMessage() . ': ' . $ex->getTraceAsString());
             throw new SendInquiryFailedException($ex->getMessage());
         }
