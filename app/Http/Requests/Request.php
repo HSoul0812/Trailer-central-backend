@@ -8,6 +8,8 @@ use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request as BaseRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 
 /**
  *
@@ -26,6 +28,7 @@ class Request extends BaseRequest {
      * @return bool it is true when the object belong to the current logged in dealer
      *
      * @throws ResourceException when there were some validation error
+     * @throws NoObjectIdValueSetException when validateObjectBelongsTouser is set to true but getOBjectIdValue is set to false
      */
     public function validate(): bool
     {
@@ -36,7 +39,16 @@ class Request extends BaseRequest {
         }
 
         if ($this->validateObjectBelongsToUser()) {
-            $user = Auth::user();//todo: using this facade make this method untestable, it must to be rethink
+
+            if (!$this->getObjectIdValue()) {
+                throw new NoObjectIdValueSetException;
+            }
+
+            if (!$this->getObject()) {
+                throw new NoObjectTypeSetException;
+            }
+
+            $user = Auth::user();
 
             if ($user) {
                 if ($this->getObjectIdValue()) {
@@ -52,7 +64,14 @@ class Request extends BaseRequest {
         return true;
     }
 
-    protected function getObjectIdValue(): bool
+    /**
+     * @return mixed
+     */
+    protected function getObject() {
+        return false;
+    }
+
+    protected function getObjectIdValue()
     {
         return false;
     }

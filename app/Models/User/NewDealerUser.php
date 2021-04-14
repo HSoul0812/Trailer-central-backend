@@ -5,9 +5,8 @@ namespace App\Models\User;
 use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Leads\LeadStatus;
-use App\Models\CRM\Email\Processed;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Model;
 
 class NewDealerUser extends Model
@@ -65,6 +64,14 @@ class NewDealerUser extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id', 'dealer_id');
+    }
+
+    /**
+     * @return Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function website()
+    {
+        return $this->hasOne(Website::class, 'dealer_id', 'id');
     }
 
     /**

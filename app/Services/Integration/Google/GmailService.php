@@ -2,28 +2,33 @@
 
 namespace App\Services\Integration\Google;
 
-use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
-use App\Exceptions\Integration\Google\MissingGapiClientIdException;
-use App\Exceptions\Integration\Google\InvalidGapiIdTokenException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
+use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
 use App\Exceptions\Integration\Google\MissingGmailLabelsException;
 use App\Exceptions\Integration\Google\MissingGmailLabelException;
-use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
+use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
+use App\Transformers\Integration\Auth\EmailTokenTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
+use Google_Service_Gmail;
 use Google_Service_Gmail_MessagePart;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Class GoogleService
- * 
+ *
  * @package App\Services\Integration\Google
  */
 class GmailService implements GmailServiceInterface
@@ -36,14 +41,14 @@ class GmailService implements GmailServiceInterface
     protected $interactionEmail;
 
     /**
-     * @var Google_Client
+     * @var App\Services\Integration\Google\GoogleServiceInterface
      */
-    protected $client;
+    protected $google;
 
     /**
-     * @var Google_Service_Gmail_Message
+     * @var Google_Service_Gmail
      */
-    protected $message;
+    protected $gmail;
 
     /**
      * @var array
@@ -55,94 +60,125 @@ class GmailService implements GmailServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct(InteractionEmailServiceInterface $interactionEmail) {
+    public function __construct(InteractionEmailServiceInterface $interactionEmail, GoogleServiceInterface $google, Manager $fractal) {
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
+        $this->google = $google;
 
-        // No Client ID?!
-        if(empty($_ENV['GOOGLE_OAUTH_CLIENT_ID'])) {
-            throw new MissingGapiClientIdException;
+        // Initialize Services
+        $this->fractal = $fractal;
+        $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('google');
+    }
+
+
+    /**
+     * Get Auth URL
+     *
+     * @param string $redirectUrl url to redirect auth back to again
+     * @param string $authCode auth code to get full credentials with
+     * @return array created from EmailTokenTransformer
+     */
+    public function auth($redirectUrl, $authCode): array {
+        // Set Redirect URL
+        $client = $this->google->getClient();
+        $client->setRedirectUri($redirectUrl);
+
+        // Return Auth URL for Login
+        $authToken = $client->fetchAccessTokenWithAuthCode($authCode);
+        if(empty($authToken['access_token'])) {
+            throw new InvalidGoogleAuthCodeException;
         }
 
-        // Initialize Client
-        $this->client = new \Google_Client();
-        $this->client->setApplicationName($_ENV['GOOGLE_OAUTH_APP_NAME']);
-        $this->client->setClientId($_ENV['GOOGLE_OAUTH_CLIENT_ID']);
-        if(empty($this->client)) {
-            throw new FailedConnectGapiClientException;
-        }
-        $this->client->setAccessType('offline');
+        // Return Formatted Auth Token
+        $emailToken = new EmailToken();
+        $emailToken->fillFromArray($authToken);
+
+        // Get Profile
+        $this->profile($emailToken);
+
+        // Return Transformed Data
+        $data = new Item($emailToken, new EmailTokenTransformer());
+        return $this->fractal->createData($data)->toArray();
     }
 
     /**
-     * Send Email Email
-     * 
-     * @param AccessToken $accessToken
+     * Get Gmail Profile Email
+     *
+     * @param EmailToken $emailToken
+     * @return EmailToken
+     */
+    public function profile(EmailToken $emailToken): EmailToken {
+        // Get Profile Details
+        $this->setEmailToken($emailToken);
+
+        // Insert Gmail
+        try {
+            // Get Gmail Profile
+            $profile = $this->gmail->users->getProfile('me');
+
+            // Append Profile
+            $emailToken->setEmailAddress($profile->getEmailAddress());
+        } catch (\Exception $e) {
+            // Log Error
+            $this->log->error('Exception returned on getting gmail profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+
+        // Return Google Token
+        return $emailToken;
+    }
+
+    /**
+     * Send Gmail Email
+     *
+     * @param SmtpConfig $smtpConfig
+     * @param ParsedEmail $parsedEmail
+     * @throws App\Exceptions\Integration\Google\InvalidToEmailAddressException
      * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
      * @throws App\Exceptions\Integration\Google\FailedInitializeGmailMessageException
      * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
      * @return array of validation info
      */
-    public function send(AccessToken $accessToken, array $params) {
+    public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Set Access Token
-        $this->setAccessToken($accessToken);
+        $this->setAccessToken($smtpConfig->getAccessToken());
 
-        // Create Message ID
-        if(empty($params['message_id'])) {
-            $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
-        } else {
-            $messageId = str_replace('<', '', str_replace('>', '', $params['message_id']));
-        }
-        $params['message_id'] = $messageId;
-
-
-        // Insert Gmail
+        // Prepare Gmail Message
         try {
-            // Create Message
-            $message = $this->prepareMessage($params);
+            $message = $this->prepareMessage($parsedEmail);
         } catch (\Exception $e) {
+            if(strpos($e->getMessage(), 'Address in mailbox given') !== FALSE) {
+                throw new InvalidToEmailAddressException;
+            }
             throw new FailedInitializeGmailMessageException($e->getMessage() . ': ' . $e->getTraceAsString());
         }
-        if(empty($message)) {
-            throw new FailedInitializeGmailMessageException();
-        }
 
-        // Send Gmail Message
-        try {
-            // Send Message
-            $sent = $this->gmail->users_messages->send('me', $message);
-        } catch (\Exception $e) {
-            // Get Message
-            $error = $e->getMessage();
-            Log::error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
-            if(strpos($error, "invalid authentication") !== FALSE) {
-                throw new InvalidGmailAuthMessageException();
-            } else {
-                throw new FailedSendGmailMessageException();
-            }
+        // Get Message ID From Gmail
+        $result = $this->sendMessage($message);
+        if(!empty($result) && !empty($result->getMessageId())) {
+            $parsedEmail->setMessageId($result->getMessageId());
         }
 
         // Store Attachments
-        if(isset($params['attachments'])) {
-            $params['attachments'] = $this->interactionEmail->storeAttachments($params['attachments'], $accessToken->dealerId, $params['message_id']);
+        if(!empty($parsedEmail->getAttachments())) {
+            $parsedEmail->setAttachments($this->interactionEmail->storeAttachments($smtpConfig->getAccessToken()->dealer_id, $parsedEmail));
         }
 
-        // Return Results
-        return $params;
+        // Return Updated Parsed Email
+        return $parsedEmail;
     }
 
     /**
      * Get All Messages With Label
-     * 
+     *
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
      * @param array $params
      * @return whether the email was sent successfully or not
      */
     public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []) {
-        // Configure Client
-        $this->setAccessToken($accessToken);
-
         // Get Labels
         $labels = $this->labels($accessToken, [$folder]);
 
@@ -153,7 +189,7 @@ class GmailService implements GmailServiceInterface
                 $q .= $k . ': ' . $v;
             }
         }
-        Log::info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
+        $this->log->info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
 
         // Get Messages
         $results = $this->gmail->users_messages->listUsersMessages('me', [
@@ -163,7 +199,7 @@ class GmailService implements GmailServiceInterface
         $messages = $results->getMessages();
 
         // Return Results
-        Log::info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
+        $this->log->info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
         if (count($messages) == 0) {
             return [];
         }
@@ -176,7 +212,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get and Parse Individual Message
-     * 
+     *
      * @param string $mailId
      * @return parsed message details
      */
@@ -198,7 +234,7 @@ class GmailService implements GmailServiceInterface
             $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
         }
         if(count($attachments) > 0) {
-            Log::info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
+            $this->log->info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
         }
 
         // Parse Data
@@ -207,7 +243,8 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Move Message Labels
-     * 
+     *
+     * @param AccessToken $accessToken
      * @param string $mailId mail ID to modify
      * @param array $labels labels to add by name | required
      * @param array $remove labels to remove by name | optional
@@ -234,7 +271,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get All Labels for User
-     * 
+     *
      * @param AccessToken $accessToken
      * @param string $search
      * @param bool $single
@@ -279,7 +316,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Set Access Token on Client
-     * 
+     *
      * @param type $accessToken
      * @return void
      */
@@ -290,77 +327,119 @@ class GmailService implements GmailServiceInterface
         }
 
         // Set Access Token on Client
-        $this->client->setAccessToken([
+        $client = $this->google->getClient();
+        $client->setAccessToken([
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'expires_in' => $accessToken->expires_in,
             'created' => strtotime($accessToken->issued_at) * 1000
         ]);
-        $this->client->setScopes($accessToken->scope);
+        $client->setScopes($accessToken->scope);
 
         // Setup Gmail
-        $this->gmail = new \Google_Service_Gmail($this->client);
+        $this->gmail = new Google_Service_Gmail($client);
+        return $this->gmail;
     }
 
     /**
+     * Set Google Token on Client
+     *
+     * @param EmailToken $emailToken
+     * @return void
+     */
+    private function setEmailToken(EmailToken $emailToken) {
+        // ID Token Exists?
+        if(empty($emailToken->getIdToken())) {
+            throw new MissingGapiIdTokenException;
+        }
+
+        // Set Google Token on Client
+        $client = $this->google->getClient();
+        $client->setAccessToken([
+            'access_token' => $emailToken->getAccessToken(),
+            'id_token' => $emailToken->getIdToken(),
+            'expires_in' => $emailToken->getExpiresIn(),
+            'created' => $emailToken->getIssuedUnix()
+        ]);
+        $client->setScopes($emailToken->getScope());
+
+        // Setup Gmail
+        $this->gmail = new Google_Service_Gmail($client);
+        return $this->gmail;
+    }
+
+
+    /**
      * Prepare Message to Send to Gmail
-     * 
-     * @param array $params
+     *
+     * @param ParsedEmail $parsedEmail
      * @return Google_Service_Gmail_Message
      */
-    private function prepareMessage($params) {
+    private function prepareMessage(ParsedEmail $parsedEmail) {
         // Get From
-        $from = $params['from_email'];
-        if(isset($params['from_name'])) {
-            $from = [$params['from_email'] => $params['from_name']];
+        $from = $parsedEmail->getFromEmail();
+        if(!empty($parsedEmail->getFromName())) {
+            $from = [$from => $parsedEmail->getFromName()];
+        }
+
+        // Get To
+        $to = $parsedEmail->getToEmail();
+        if(!empty($parsedEmail->getToName())) {
+            $to = [$to => $parsedEmail->getToName()];
         }
 
         // Create Swift Message
-        $message = (new \Swift_Message($params['subject']))
-            ->setFrom($from)
-            ->setTo([$params['to_email'] => $params['to_name']])
-            ->setContentType('text/html')
-            ->setCharset('utf-8')
-            ->setBody($params['body']);
-
-        // Set Message ID
-        $message->getHeaders()->get('Message-ID')->setId($params['message_id']);
+        $swift = (new \Swift_Message($parsedEmail->getSubject()))->setFrom($from)->setTo($to)
+            ->setContentType('text/html')->setCharset('utf-8')->setBody($parsedEmail->getBody());
 
         // Add Existing Attachments
-        if(isset($params['files'])) {
-            $files = $this->interactionEmail->cleanAttachments($params['files']);
-            foreach($files as $attachment) {
-                // Optionally add any attachments
-                $message->attach((new \Swift_Attachment(file_get_contents($attachment['path']), $attachment['as'], $attachment['mime'])));
-            }
+        foreach($parsedEmail->getExistingAttachments() as $attachment) {
+            $swift->attach((new \Swift_Attachment($attachment->getContents(), $attachment->getFileName(), $attachment->getMimeType())));
         }
 
         // Add Attachments
-        if(isset($params['attachments'])) {
-            $attachments = $this->interactionEmail->getAttachments($params['attachments']);
-            foreach($attachments as $attachment) {
-                // Optionally add any attachments
-                $message->attach(\Swift_Attachment::fromPath($attachment['path'])->setFilename($attachment['as']));
+        foreach($parsedEmail->getAttachments() as $attachment) {
+            $swift->attach(\Swift_Attachment::fromPath($attachment->getTmpName())->setFilename($attachment->getFileName()));
+        }
+
+        // Set Message and Return
+        $msg_base64 = (new \Swift_Mime_ContentEncoder_Base64ContentEncoder())->encodeString($swift->toString());
+        $message = new \Google_Service_Gmail_Message();
+        $message->setRaw(preg_replace('/(\s|\r)*/', '', $msg_base64));
+
+        // Return Message
+        return $message;
+    }
+
+    /**
+     * Send Gmail Message
+     * 
+     * @param \Google_Service_Gmail_Message $message
+     * @return ParsedEmail
+     */
+    private function sendMessage(\Google_Service_Gmail_Message $message): ParsedEmail {
+        // Send Message Via Gmail
+        try {
+            $sent = $this->gmail->users_messages->send('me', $message);
+        } catch (\Exception $e) {
+            // Get Message
+            $error = $e->getMessage();
+            $this->log->error('Exception returned on sending gmail email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            if(strpos($error, "invalid authentication") !== FALSE) {
+                throw new InvalidGmailAuthMessageException();
+            } else {
+                throw new FailedSendGmailMessageException();
             }
         }
 
-        // Get Raw Message
-        $msg_base64 = (new \Swift_Mime_ContentEncoder_Base64ContentEncoder())
-                        ->encodeString($message->toString());
-        $msg_base64 = preg_replace('/(\s|\r)*/', '', $msg_base64);
-
-        // Set Message and Return
-        $this->message = new \Google_Service_Gmail_Message();
-        $this->message->setRaw($msg_base64);
-
-        // Return Message
-        return $this->message;
+        // Get Message ID From Gmail
+        return $this->message($sent->id);
     }
 
 
     /**
      * Get All Label ID's for User
-     * 
+     *
      * @param array labels
      * @return array of label ID's
      */
@@ -377,7 +456,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Parse Message Headers Into More Reasonable Format
-     * 
+     *
      * @param array $headers
      * @return array
      */
@@ -400,7 +479,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Parse Message Into Body
-     * 
+     *
      * @param string $message_id
      * @param Google_Service_Gmail_MessagePart|array $payload
      * @source https://stackoverflow.com/a/32660892
@@ -438,7 +517,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Parse Message Into Attachments
-     * 
+     *
      * @param string $message_id
      * @param array $parts
      * @source https://stackoverflow.com/a/59400043
@@ -471,7 +550,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Get Parsed Message
-     * 
+     *
      * @param string $mailId
      * @param array $headers
      * @param string $body

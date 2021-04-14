@@ -56,6 +56,8 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
+    'showroom_files_url' => env('SHOWROOM_FILES_URL', 'http://dealer-cdn.com/showroom-files/'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

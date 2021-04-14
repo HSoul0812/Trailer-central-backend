@@ -24,6 +24,9 @@ class PartRepository implements PartRepositoryInterface {
 
     use SortTrait;
 
+    const PARTS_IN_STOCK = 1;
+    const PARTS_AVAILABLE = 2;
+
     private $sortOrders = [
         'title' => [
             'field' => 'title',
@@ -154,15 +157,15 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function createOrUpdate($params) {
-        
+
         if (isset($params['id'])) {
             $part = Part::where('id', $params['id'])->where('dealer_id', $params['dealer_id'])->first();
-        } 
-        
+        }
+
         if (empty($part)) {
             // Part is unique if the SKU is unique for the dealer id
             $part = Part::where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
-        }        
+        }
 
         if ($part) {
             $params['id'] = $part->id;
@@ -199,7 +202,7 @@ class PartRepository implements PartRepositoryInterface {
         }
 
         if (isset($params['dealer_id'])) {
-             $query = $query->whereIn('dealer_id', $params['dealer_id']);
+            $query = $query->whereIn('dealer_id', $params['dealer_id']);
         }
 
         if (isset($params['type_id'])) {
@@ -384,6 +387,10 @@ class PartRepository implements PartRepositoryInterface {
             }
         }
 
+        if (isset($params['is_sublet_specific'])) {
+            $query = $query->where('is_sublet_specific', $params['is_sublet_specific']);
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
@@ -540,11 +547,11 @@ class PartRepository implements PartRepositoryInterface {
 
         // if part is in stock
         if ($query['in_stock'] ?? false) {
-            if ($query['in_stock'] == 1) {
+            if ($query['in_stock'] == self::PARTS_IN_STOCK) {
                 $search->filter('range', ['bins_total_qty' => ['gt' => 0]]);
-            } else if ($query['in_stock'] == 2) {
+            } else if ($query['in_stock'] == self::PARTS_AVAILABLE) {
                 $search->filter('range', ['bins_total_qty' => ['lte' => 0]]);
-            } 
+            }
         }
 
         // filter by dealer

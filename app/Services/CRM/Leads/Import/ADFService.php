@@ -5,7 +5,6 @@ namespace App\Services\CRM\Leads\Import;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfDealerIdException;
 use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\System\EmailRepositoryInterface;
@@ -15,6 +14,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\User;
 use App\Services\CRM\Leads\DTOs\ADFLead;
+use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Carbon\CarbonImmutable;
@@ -62,7 +62,7 @@ class ADFService implements ADFServiceInterface {
      */
     protected $gmail;
     
-    public function __construct(LeadRepositoryInterface $leads,
+    public function __construct(LeadServiceInterface $leads,
                                 EmailRepositoryInterface $emails,
                                 TokenRepositoryInterface $tokens,
                                 InventoryRepositoryInterface $inventory,
@@ -113,10 +113,12 @@ class ADFService implements ADFServiceInterface {
 
                 // Validate ADF
                 $adf = $this->parseAdf($dealer, $crawler);
+                Log::info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
 
                 // Process Further
                 $result = $this->importLead($adf);
                 if(!empty($result->identifier)) {
+                    Log::info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }
@@ -172,6 +174,9 @@ class ADFService implements ADFServiceInterface {
     public function parseAdf(User $dealer, Crawler $adf): ADFLead {
         // Create ADF Lead
         $adfLead = new ADFLead();
+
+        // Set Vendor Provider
+        $adfLead->setVendorProvider($adf->filterXPath('//provider/name')->text(ADFLead::DEFAULT_PROVIDER));
 
         // Set Vendor Details
         $this->getAdfVendor($adfLead, $adf->filter('vendor'));
@@ -284,10 +289,10 @@ class ADFService implements ADFServiceInterface {
         $adfLead->setPhone($contact->filterXPath('//contact/phone')->text());
 
         // Set Address Details
-        $adfLead->setAddrStreet($contact->filterXPath('//address[@type="home"]/street')->text());
-        $adfLead->setAddrCity($contact->filterXPath('//address[@type="home"]/city')->text());
-        $adfLead->setAddrState($contact->filterXPath('//address[@type="home"]/regioncode')->text());
-        $adfLead->setAddrZip($contact->filterXPath('//address[@type="home"]/postalcode')->text());
+        $adfLead->setAddrStreet($contact->filterXPath('//address/street')->text(''));
+        $adfLead->setAddrCity($contact->filterXPath('//address/city')->text(''));
+        $adfLead->setAddrState($contact->filterXPath('//address/regioncode')->text(''));
+        $adfLead->setAddrZip($contact->filterXPath('//address/postalcode')->text(''));
 
         // Set Comments
         $adfLead->setComments($contact->filter('comments')->text());
@@ -306,11 +311,11 @@ class ADFService implements ADFServiceInterface {
      */
     private function getAdfVehicle(ADFLead $adfLead, Crawler $vehicle): ADFLead {
         // Set Vehicle Details
-        $adfLead->setVehicleYear($vehicle->filter('year')->text());
-        $adfLead->setVehicleMake($vehicle->filter('make')->text());
-        $adfLead->setVehicleModel($vehicle->filter('model')->text());
-        $adfLead->setVehicleStock($vehicle->filter('stock')->text());
-        $adfLead->setVehicleVin($vehicle->filter('vin')->text());
+        $adfLead->setVehicleYear($vehicle->filter('year')->text(''));
+        $adfLead->setVehicleMake($vehicle->filter('make')->text(''));
+        $adfLead->setVehicleModel($vehicle->filter('model')->text(''));
+        $adfLead->setVehicleStock($vehicle->filter('stock')->text(''));
+        $adfLead->setVehicleVin($vehicle->filter('vin')->text(''));
 
         // Find Inventory Items From DB That Match
         if(!empty($adfLead->getVehicleFilters())) {
@@ -346,15 +351,14 @@ class ADFService implements ADFServiceInterface {
         }
         $adfLead->setVendorIds($vendorIdMap);
 
-        // Parse Vendor/Provider Details
-        $adfLead->setVendorProvider($vendor->filterXPath('//provider/name')->text());
+        // Parse Vendor Details
         $adfLead->setVendorName($vendor->filter('vendorname')->text());
 
         // Parse Vendor Contact Details
-        $adfLead->setVendorContact($vendor->filterXPath('//contact/name')->text());
-        $adfLead->setVendorUrl($vendor->filterXPath('//contact/url')->text());
-        $adfLead->setVendorEmail($vendor->filterXPath('//contact/email')->text());
-        $adfLead->setVendorPhone($vendor->filterXPath('//contact/phone')->text());
+        $adfLead->setVendorContact($vendor->filterXPath('//contact/name')->text(''));
+        $adfLead->setVendorUrl($vendor->filterXPath('//contact/url')->text(''));
+        $adfLead->setVendorEmail($vendor->filterXPath('//contact/email')->text(''));
+        $adfLead->setVendorPhone($vendor->filterXPath('//contact/phone')->text(''));
 
         // Return ADF Lead
         return $adfLead;
@@ -369,11 +373,11 @@ class ADFService implements ADFServiceInterface {
      */
     private function getAdfVendorLocation(ADFLead $adfLead, Crawler $vendor): ADFLead {
         // Set Vendor Address Details
-        $adfLead->setVendorAddrStreet($vendor->filterXPath('//address[@type="work"]/street')->text());
-        $adfLead->setVendorAddrCity($vendor->filterXPath('//address[@type="work"]/city')->text());
-        $adfLead->setVendorAddrState($vendor->filterXPath('//address[@type="work"]/regioncode')->text());
-        $adfLead->setVendorAddrZip($vendor->filterXPath('//address[@type="work"]/postalcode')->text());
-        $adfLead->setVendorAddrCountry($vendor->filterXPath('//address[@type="work"]/country')->text());
+        $adfLead->setVendorAddrStreet($vendor->filterXPath('//address/street')->text(''));
+        $adfLead->setVendorAddrCity($vendor->filterXPath('//address/city')->text(''));
+        $adfLead->setVendorAddrState($vendor->filterXPath('//address/regioncode')->text(''));
+        $adfLead->setVendorAddrZip($vendor->filterXPath('//address/postalcode')->text(''));
+        $adfLead->setVendorAddrCountry($vendor->filterXPath('//address/country')->text(''));
 
         // Get Vendor Location
         $filters = $adfLead->getVendorAddrFilters();

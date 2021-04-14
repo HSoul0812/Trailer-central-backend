@@ -93,6 +93,7 @@ class Customer extends Model
         'shipping_country',
         'county',
         'shipping_county',
+        'qb_id'
     ];
 
     public function quotes()

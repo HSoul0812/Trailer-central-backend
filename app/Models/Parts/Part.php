@@ -64,6 +64,7 @@ class Part extends Model
         'video_embed_code',
         'stock_min',
         'stock_max',
+        'is_sublet_specific'
     ];
 
     /**
@@ -123,13 +124,13 @@ class Part extends Model
         static::created(function ($part) {
 
             $part->updateCacheStoreTimes();
-
+            $part->searchable();
         });
 
         static::updated(function ($part) {
 
             $part->updateCacheStoreTimes();
-
+            $part->searchable();
         });
     }
 
@@ -218,7 +219,7 @@ class Part extends Model
 
     public function bins()
     {
-        return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id');
+        return $this->hasMany('App\Models\Parts\BinQuantity', 'part_id')->orderBy('qty', 'DESC');
     }
 
     public function getTotalQtyAttribute()

@@ -2,12 +2,19 @@
 
 namespace App\Repositories\Inventory;
 
-use App\Exceptions\NotImplementedException;
+use App\Models\Inventory\AttributeValue;
+use App\Models\Inventory\File;
+use App\Models\Inventory\Image;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\InventoryClapp;
+use App\Models\Inventory\InventoryFeature;
+use App\Models\Inventory\InventoryFile;
+use App\Models\Inventory\InventoryImage;
+use App\Traits\Repository\Transaction;
+use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -16,7 +23,7 @@ use Illuminate\Support\Facades\DB;
  */
 class InventoryRepository implements InventoryRepositoryInterface
 {
-    use SortTrait;
+    use SortTrait, Transaction;
 
     private $sortOrders = [
         'title' => [
@@ -87,11 +94,85 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return Inventory
      */
     public function create($params)
     {
-        throw new NotImplementedException;
+        $attributes = $params['attributes'] ?? [];
+        $features = $params['features'] ?? [];
+        $newImages = $params['new_images'] ?? [];
+        $newFiles = $params['new_files'] ?? [];
+        $clapps = $params['clapps'] ?? [];
+
+        $attributeObjs = [];
+        $featureObjs = [];
+        $inventoryImageObjs = [];
+        $inventoryFilesObjs = [];
+        $clappObjs = [];
+
+        unset($params['attributes']);
+        unset($params['features']);
+        unset($params['new_images']);
+        unset($params['new_files']);
+        unset($params['clapps']);
+
+        foreach ($attributes as $attribute) {
+            $attributeObjs[] = new AttributeValue($attribute);
+        }
+
+        foreach ($features as $feature) {
+            $featureObjs[] = new InventoryFeature($feature);
+        }
+
+        foreach ($newImages as $newImage) {
+            $imageObj = new Image($newImage);
+            $imageObj->save();
+
+            $inventoryImageObj = new InventoryImage($newImage);
+            $inventoryImageObj->image_id = $imageObj->image_id;
+
+            $inventoryImageObjs[] = $inventoryImageObj;
+        }
+
+        foreach ($newFiles as $newFile) {
+            $fileObj = new File($newFile);
+            $fileObj->save();
+
+            $inventoryFileObj = new InventoryFile($newFile);
+            $inventoryFileObj->file_id = $fileObj->id;
+
+            $inventoryFilesObjs[] = $inventoryFileObj;
+        }
+
+        foreach (array_filter($clapps) as $field => $value) {
+            $clappObjs[] = new InventoryClapp(['field' => $field, 'value' => $value]);
+        }
+
+        $item = new Inventory($params);
+
+        $item->save();
+
+        if (!empty($attributeObjs)) {
+            $item->attributeValues()->saveMany($attributeObjs);
+        }
+
+        if (!empty($featureObjs)) {
+            $item->inventoryFeatures()->saveMany($featureObjs);
+        }
+
+        if (!empty($inventoryImageObjs)) {
+            $item->inventoryImages()->saveMany($inventoryImageObjs);
+        }
+
+        if (!empty($inventoryFilesObjs)) {
+            $item->inventoryFiles()->saveMany($inventoryFilesObjs);
+        }
+
+        if (!empty($clappObjs)) {
+            $item->clapps()->saveMany($clappObjs);
+        }
+
+        return $item;
     }
 
     /**
@@ -114,6 +195,25 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function get($params)
     {
         return Inventory::findOrFail($params['id']);
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function exists(array $params): bool
+    {
+        $query = Inventory::query();
+
+        if (isset($params['dealer_id'])) {
+            $query->where('dealer_id', '=', $params['dealer_id']);
+        }
+
+        if (isset($params['stock'])) {
+            $query->where('stock', '=', $params['stock']);
+        }
+
+        return $query->exists();
     }
 
     /**

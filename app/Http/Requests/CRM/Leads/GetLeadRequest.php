@@ -19,7 +19,7 @@ class GetLeadRequest extends Request {
         return $this->id;
     }
 
-    protected function validateObjectBelongsToUser() {
+    protected function validateObjectBelongsToUser(): bool {
         return true;
     }
 }

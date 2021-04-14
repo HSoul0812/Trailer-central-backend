@@ -26,6 +26,6 @@ $factory->define(Part::class, static function (Faker $faker, array $attributes):
         'updated_at' => $createdAt,
         'sku' => $attributes['sku'] ?? Str::random(17),
         'price' => $price,
-        'dealer_cost' => $price / 2,
+        'dealer_cost' => $price / 2
     ];
 });

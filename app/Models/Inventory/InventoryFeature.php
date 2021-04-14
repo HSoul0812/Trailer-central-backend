@@ -21,6 +21,14 @@ class InventoryFeature extends Model
      */
     protected $primaryKey = 'inventory_feature_id';
 
+    public $timestamps = false;
+
+    protected $fillable = [
+        'attribute_id',
+        'feature_list_id',
+        'value',
+    ];
+
     /**
      * @return BelongsTo
      */

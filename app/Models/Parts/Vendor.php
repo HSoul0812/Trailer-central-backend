@@ -32,6 +32,7 @@ class Vendor extends Model
         'notes',
         'ap_account',
         'active',
+        'auto_created',
         'created_at',
         'updated_at',
         'qb_id',

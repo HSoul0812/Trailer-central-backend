@@ -13,6 +13,7 @@ use App\Console\Commands\User\CreateAccessToken;
 use App\Console\Commands\Parts\Import\StocksExistsCommand;
 use App\Console\Commands\CRM\Leads\AutoAssign; 
 use App\Console\Commands\Parts\IncreaseDealerCostCommand;
+use App\Console\Commands\Parts\FixPartVendor;
 
 class Kernel extends ConsoleKernel
 {
@@ -30,7 +31,8 @@ class Kernel extends ConsoleKernel
         CreateAccessToken::class,
         StocksExistsCommand::class,
         AutoAssign::class,
-        IncreaseDealerCostCommand::class
+        IncreaseDealerCostCommand::class,
+        FixPartVendor::class,
     ];
 
     /**
@@ -68,11 +70,19 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
         
-        $schedule->command('leads:assign:auto 6000 8999')
+        $schedule->command('leads:assign:auto 6000 6623')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 6625 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
         
         $schedule->command('leads:assign:auto 8999')
+                ->withoutOverlapping()
+                ->runInBackground();
+        
+        $schedule->command('leads:assign:auto 0 0 6624')
                 ->withoutOverlapping()
                 ->runInBackground();
         
@@ -83,7 +93,7 @@ class Kernel extends ConsoleKernel
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
         
         $schedule->command('leads:import:adf')
-                ->withoutOverlapping()
+                ->everyFiveMinutes()
                 ->runInBackground();
 
 

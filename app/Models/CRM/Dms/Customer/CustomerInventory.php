@@ -28,6 +28,10 @@ class CustomerInventory extends Model
 
     public $timestamps = false;
 
+    protected $primaryKey = 'uuid';
+
+    public $incrementing = false;
+
     protected $fillable = [
         'customer_id',
         'inventory_id'

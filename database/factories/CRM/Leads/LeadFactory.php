@@ -37,14 +37,17 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
     $leadType = $leadTypes[$typeKey];
 
     // Get Random Inventory
-    $inventory = Inventory::where('dealer_id', $dealer_id)->inRandomOrder()->first();
+    $inventory_id = $attributes['inventory_id'] ?? factory(Inventory::class)->create([
+        'dealer_id' => $dealer_id,
+        'dealer_location_id' => $dealer_location_id
+    ])->getKey();
 
     // Return Overrides
     return [
         'website_id' => $website_id,
         'dealer_id' => $dealer_id,
         'dealer_location_id' => $dealer_location_id,
-        'inventory_id' => $inventory->inventory_id,
+        'inventory_id' => $inventory_id,
         'lead_type' => $leadType,
         'title' => $formTitles[$leadType],
         'referral' => $faker->url,
@@ -57,14 +60,6 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
         'zip' => $faker->postcode,
         'comments' => $faker->realText,
         'note' => $faker->realText,
-        'date_submitted' => $faker->dateTimeThisMonth
-    ];
-});
-
-$factory->define(LeadStatus::class, function (Faker $faker) {
-    // Return Overrides
-    return [
-        'status' => Lead::STATUS_UNCONTACTED,
-        'contact_type' => LeadStatus::TYPE_CONTACT
+        'date_submitted' => $faker->dateTimeThisMonth->format('Y-m-d H:i:s')
     ];
 });

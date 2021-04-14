@@ -2,11 +2,15 @@
 
 namespace App\Models\User;
 
+use App\Models\User\Interfaces\PermissionsInterface;
+use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use App\Models\CRM\Dms\Printer\Settings;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 
 /**
@@ -24,8 +28,10 @@ use Illuminate\Database\Query\Builder;
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
-class User extends Model implements Authenticatable
+class User extends Model implements Authenticatable, PermissionsInterface
 {
+    use HasPermissionsStub;
+
     const TABLE_NAME = 'dealer';
 
     public const TYPE_DEALER = 'dealer';
@@ -188,6 +194,11 @@ class User extends Model implements Authenticatable
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
+    }
+
+    public function printerSettings() : HasOne
+    {
+        return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
 
     public static function getTableName() {

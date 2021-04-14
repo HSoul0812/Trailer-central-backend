@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
@@ -12,6 +13,7 @@ use App\Http\Middleware\Website\FieldMapValidate;
 use App\Http\Middleware\SetDealerIdOnRequest;
 use App\Http\Middleware\SetWebsiteIdOnRequest;
 use App\Http\Middleware\SetUserIdOnRequest;
+use App\Http\Middleware\SetSalesPersonIdOnRequest;
 use App\Http\Middleware\ValidAccessToken;
 use App\Http\Middleware\CRM\Interactions\InteractionValidate;
 use App\Http\Middleware\CRM\Text\TextValidate;
@@ -91,6 +93,7 @@ class Kernel extends HttpKernel
         'setDealerIdFilterOnRequest' => SetDealerIdFilterOnRequest::class,
         'setWebsiteIdOnRequest' => SetWebsiteIdOnRequest::class,
         'setUserIdOnRequest' => SetUserIdOnRequest::class,
+        'setSalesPersonIdOnRequest' => SetSalesPersonIdOnRequest::class,
         'interaction.validate' => InteractionValidate::class,
         'text.validate' => TextValidate::class,
         'text.template.validate' => TemplateValidate::class,
@@ -100,6 +103,7 @@ class Kernel extends HttpKernel
         'facebook.catalog.validate' => CatalogValidate::class,
         'sales-person.validate' => SalesPersonValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
+        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
     ];
 
     /**

@@ -3,16 +3,40 @@
 namespace App\Services\Integration\Google;
 
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 
 interface GmailServiceInterface {
     /**
-     * Validate Google API Access Token Exists
+     * Get Auth URL
      * 
-     * @param AccessToken $accessToken
-     * @param array $params
-     * @return message ID of successfully sent email
+     * @param string $redirectUrl url to redirect auth back to again
+     * @param string $authCode auth code to get full credentials with
+     * @return array created from GoogleTokenTransformer
      */
-    public function send(AccessToken $accessToken, array $params);
+    public function auth($redirectUrl, $authCode): array;
+
+    /**
+     * Get Gmail Profile Email
+     * 
+     * @param EmailToken $emailToken
+     * @return EmailToken
+     */
+    public function profile(EmailToken $emailToken): EmailToken;
+
+    /**
+     * Send Gmail Email
+     *
+     * @param SmtpConfig $smtpConfig
+     * @param ParsedEmail $parsedEmail
+     * @throws App\Exceptions\Integration\Google\InvalidToEmailAddressException
+     * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
+     * @throws App\Exceptions\Integration\Google\FailedInitializeGmailMessageException
+     * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
+     * @return array of validation info
+     */
+    public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail;
 
     /**
      * Get All Messages With Label
@@ -35,6 +59,7 @@ interface GmailServiceInterface {
     /**
      * Move Message Labels
      * 
+     * @param AccessToken $accessToken
      * @param string $mailId mail ID to modify
      * @param array $labels labels to add by name | required
      * @param array $remove labels to remove by name | optional

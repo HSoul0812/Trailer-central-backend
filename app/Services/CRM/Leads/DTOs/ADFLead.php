@@ -18,6 +18,12 @@ class ADFLead
     const DEFAULT_SOURCE = 'ADF';
 
     /**
+     * @var string Set Default Provider to ADF
+     */
+    const DEFAULT_PROVIDER = 'ADF Import';
+
+
+    /**
      * @var string Dealer ID for ADF Lead
      */
     private $dealerId;
@@ -262,7 +268,7 @@ class ADFLead
      */
     public function setRequestDate(string $requestDate): void
     {
-        $this->requestDate = $requestDate;
+        $this->requestDate = Carbon::parse($requestDate)->toDateTimeString();
     }
 
 
@@ -340,6 +346,17 @@ class ADFLead
     public function setLastName(string $lastName): void
     {
         $this->lastName = $lastName;
+    }
+
+
+    /**
+     * Return Full Name
+     * 
+     * @return string $this->firstName $this->lastName
+     */
+    public function getFullName(): string
+    {
+        return $this->firstName . ' ' . $this->lastName;
     }
 
 

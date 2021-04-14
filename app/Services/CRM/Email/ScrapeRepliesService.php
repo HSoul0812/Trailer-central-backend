@@ -31,6 +31,13 @@ use Carbon\Carbon;
 class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 {
     /**
+     * @const int
+     */
+    const IMPORT_SUCCESS = 1;
+    const IMPORT_PROCESSED = 0;
+    const IMPORT_SKIPPED = -1;
+
+    /**
      * @var App\Services\Integration\Google\GoogleServiceInterface
      */
     protected $google;
@@ -76,6 +83,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     protected $leads;
 
     /**
+     * @var Illuminate\Support\Facades\Log
+     */
+    protected $log;
+
+    /**
      * ScrapeRepliesService constructor.
      */
     public function __construct(GoogleServiceInterface $google,
@@ -100,6 +112,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->folders = $folders;
         $this->tokens = $tokens;
         $this->leads = $leads;
+
+        // Initialize Logger
+        $this->log = Log::channel('scrapereplies');
     }
 
 
@@ -118,19 +133,19 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Loop Campaigns for Current Dealer
         $imported = 0;
-        Log::info("Dealer #{$dealer->id} Found " . count($salespeople) . " Active Salespeople with IMAP Credentials to Process");
+        $this->log->info("Dealer #{$dealer->id} Found " . count($salespeople) . " Active Salespeople with IMAP Credentials to Process");
         foreach($salespeople as $salesperson) {
             // Try Catching Error for Sales Person
             try {
                 // Import Emails
-                Log::info("Importing Emails on Sales Person #{$salesperson->id} for Dealer #{$dealer->id}");
+                $this->log->info("Importing Emails on Sales Person #{$salesperson->id} for Dealer #{$dealer->id}");
                 $imports = $this->salesperson($dealer, $salesperson);
 
                 // Adjust Total Import Counts
-                Log::info("Imported {$imports} Emails on Sales Person #{$salesperson->id}");
+                $this->log->info("Imported {$imports} Emails on Sales Person #{$salesperson->id}");
                 $imported += $imports;
             } catch(\Exception $e) {
-                Log::error("Exception returned on Sales Person #{$salesperson->id} {$e->getMessage()}: {$e->getTraceAsString()}");
+                $this->log->error("Exception returned on Sales Person #{$salesperson->id} {$e->getMessage()}: {$e->getTraceAsString()}");
             }
         }
 
@@ -157,18 +172,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Process Messages
-        Log::info('Processing Getting Emails for Sales Person #' . $salesperson->id);
+        $this->log->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
             try {
                 // Import Folder
                 $imports = $this->folder($dealer, $salesperson, $folder);
-                Log::info('Imported ' . $imports . ' Email Replies for Sales Person #' .
+                $this->log->info('Imported ' . $imports . ' Email Replies for Sales Person #' .
                             $salesperson->id . ' Folder ' . $folder->name);
                 $imported += $imports;
             } catch(\Exception $e) {
-                Log::error('Error Importing Sales Person #' .
+                $this->log->error('Error Importing Sales Person #' .
                             $salesperson->id . ' Folder ' . $folder->name . '; ' .
                             $e->getMessage() . ':' . $e->getTraceAsString());
             }
@@ -202,7 +217,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             return $total;
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
-            Log::error('Failed to Connect to Sales Person #' . $salesperson->id .
+            $this->log->error('Failed to Connect to Sales Person #' . $salesperson->id .
                         ' Folder ' . $folder->name . '; exception returned: ' .
                         $e->getMessage() . ': ' . $e->getTraceAsString());
             return 0;
@@ -215,11 +230,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
+     * @param EmailFolder $emailFolder
      * @return false || array of email results
      */
     private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
         // Get Emails From Gmail
+        $this->log->info("Connecting to Gmail with email: " . $salesperson->smtp_email);
         $messages = $this->gmail->messages($salesperson->googleToken, $emailFolder->name, [
             'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
         ]);
@@ -239,11 +255,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             } elseif($result === 0) {
                 $skipped++;
             }
+            $this->deleteAttachments($email->getAttachments());
         }
 
         // Process Skipped Message ID's
         if($skipped > 0) {
-            Log::info("Processed " . $skipped . " emails that were skipped and not imported.");
+            $this->log->info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
         // Updated Successful
@@ -261,7 +278,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
+     * @param EmailFolder $emailFolder
      * @return false || array of email results
      */
     private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
@@ -276,19 +293,22 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $mailId) {
             // Get Message Overview
             $email = $this->imap->overview($mailId);
+            if(empty($email)) {
+                continue;
+            }
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
-            if($result === 1) {
+            if($result === self::IMPORT_SUCCESS) {
                 $total++;
-            } elseif($result === 0) {
+            } elseif($result === self::IMPORT_PROCESSED) {
                 $skipped++;
             }
         }
 
         // Process Skipped Message ID's
         if($skipped > 0) {
-            Log::info("Processed " . $skipped . " Emails That were Skipped and not Imported");
+            $this->log->info("Processed " . $skipped . " Emails That were Skipped and not Imported");
         }
 
         // Updated Successful
@@ -307,14 +327,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param ParsedEmail $email
-     * @return int | -1=skipped | 0=processed | 1=imported
+     * @return int self::IMPORT_SKIPPED | self::IMPORT_PROCESSED | self::IMPORT_SUCCESS
      */
     private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
         // Check if Exists
-        if(empty($email->getSubject()) || empty($email->getMessageId()) ||
+        if(empty($email->getMessageId()) ||
            $this->emails->findMessageId($salesperson->user_id, $email->getMessageId())) {
             $this->deleteAttachments($email->getAttachments());
-            return -1;
+            return self::IMPORT_SKIPPED;
         }
 
         // Find Lead
@@ -326,18 +346,23 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             if(empty($salesperson->googleToken)) {
                 $this->imap->full($email);
             }
+            if(empty($email->getSubject()) || empty($email->getToEmail())) {
+                $this->deleteAttachments($email->getAttachments());
+                return self::IMPORT_SKIPPED;
+            }
 
             // Get Full IMAP Data
             $this->insertReply($dealerId, $salesperson->user_id, $email);
 
             // Delete Attachments
             $this->deleteAttachments($email->getAttachments());
-            return 1;
+            return self::IMPORT_SUCCESS;
         }
 
         // Marked as Processed
         $this->emails->createProcessed($salesperson->user_id, $email->getMessageId());
-        return 0;
+        $this->deleteAttachments($email->getAttachments());
+        return self::IMPORT_PROCESSED;
     }
 
     /**
@@ -454,14 +479,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             }
 
             // Upload File
-            $s3Image = $this->uploadAttachment($dealerId, $messageId, $file);
+            try {
+                $s3Image = $this->uploadAttachment($dealerId, $messageId, $file);
 
-            // Add Attachments to Array
-            $attachments[] = Attachment::create([
-                'message_id' => $messageId,
-                'filename' => $s3Image,
-                'original_filename' => $file->getFileName()
-            ]);
+                // Add Attachments to Array
+                $attachments[] = Attachment::create([
+                    'message_id' => $messageId,
+                    'filename' => $s3Image,
+                    'original_filename' => $file->getFileName()
+                ]);
+            } catch(\Exception $e) {
+                $this->log->error("Exception returned uploading attachment {$file->getFileName()} on Message ID #{$messageId}; {$e->getMessage()}: {$e->getTraceAsString()}");
+            }
         }
 
         // Return Collection of Attachment
@@ -498,7 +527,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Upload Image
         $key = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
         Storage::disk('s3email')->put($key, $contents, 'public');
-        return Storage::disk('s3email')->url($_ENV['MAIL_BUCKET'] . '/' . $key);
+        return Storage::disk('s3email')->url(env('MAIL_BUCKET') . '/' . $key);
     }
 
     /**
@@ -521,7 +550,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Deleted Some Replies?
         if($deleted > 0) {
-            Log::info('Deleted ' . $deleted . ' Total Temporary Attachment Files');
+            $this->log->info('Deleted ' . $deleted . ' Total Temporary Attachment Files');
         }
 
         // Return Total
