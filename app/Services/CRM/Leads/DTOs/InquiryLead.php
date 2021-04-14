@@ -2,7 +2,7 @@
 
 namespace App\Services\CRM\Leads\DTOs;
 
-use App\Models\CRM\Leads\LeadAssign;
+use App\Models\CRM\Leads\Lead;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use Carbon\Carbon;
