@@ -163,28 +163,6 @@ class LeadService implements LeadServiceInterface
     }
 
     /**
-     * Merge or Create Lead
-     * 
-     * @param array $params
-     * @return Lead
-     */
-    public function mergeOrCreate(array $params): Lead {
-        // Get Matches
-        $leads = $this->leads->findAllMatches($params);
-
-        // Choose Matching Lead
-        $lead = $this->chooseMatch($leads, $params);
-
-        // Merge Lead!
-        if(!empty($lead->identifier)) {
-            return $this->merge($lead, $params);
-        }
-
-        // Create!
-        return $this->leads->create($params);
-    }
-
-    /**
      * Merge Lead
      * 
      * @param Lead $lead
@@ -361,80 +339,5 @@ class LeadService implements LeadServiceInterface
 
         // Return Params
         return $params;
-    }
-
-
-    /**
-     * Choose Matching Lead
-     * 
-     * @param Collection $matches
-     * @param array $params
-     * @return null || Lead
-     */
-    private function chooseMatch(Collection $matches, array $params): ?Lead {
-        // Sort Leads Into Standard or With Status
-        $leads = new Collection();
-        $status = new Collection();
-        $chosen = null;
-        foreach($matches as $lead) {
-            // Create Filtered Lead
-            $filteredLead = new FilteredLead();
-            $filteredLead->fillFromModel($lead);
-
-            // Add to Array
-            $leads->push($filteredLead);
-            if(!empty($lead->leadStatus)) {
-                $status->push($filteredLead);
-            }
-        }
-
-        // Initialize Filtered Inquiry
-        $filteredInquiry = new FilteredLead($params);
-
-        // Find By Status!
-        if(!empty($status) && count($status) > 0) {
-            $chosen = $this->filterMatch($status, $filteredInquiry);
-        }
-
-        // Still Not Chosen? Find Any!
-        if(empty($chosen)) {
-            $chosen = $this->filterMatch($leads, $filteredInquiry);
-        }
-
-        // Return $result
-        return $chosen;
-    }
-
-    /**
-     * Filter Matching Lead
-     * 
-     * @param Collection<FilteredLead> $leads
-     * @param FilteredLead $filteredInquiry
-     * @return null | Lead
-     */
-    private function filterMatch(Collection $leads, FilteredLead $filteredInquiry): ?Lead {
-        // Loop Status
-        $chosen = null;
-        $matches = collect([]);
-        foreach($leads as $filtered) {
-            // Find All Matches Between Both
-            $matched = $filtered->findMatches($filteredInquiry);
-
-            // Matched At Least Two?
-            if($matched > Lead::MERGE_MATCH_COUNT) {
-                $chosen = $filtered;
-                break;
-            } elseif($matched >= Lead::MERGE_MATCH_COUNT) {
-                $matches->push($filtered);
-            }
-        }
-
-        // Get First Match
-        if(empty($chosen) && count($matches) > 0) {
-            $chosen = reset($matches);
-        }
-
-        // Return Array Mapping
-        return !empty($chosen) ? $chosen->getLead() : null;
     }
 }

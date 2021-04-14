@@ -5,6 +5,7 @@ namespace App\Services\CRM\Leads;
 use App\Jobs\CRM\Leads\AutoAssignJob;
 use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
@@ -20,6 +21,11 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 class InquiryService implements InquiryServiceInterface
 {
     use DispatchesJobs;
+
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     */
+    protected $leadRepo;
 
     /**
      * @var App\Repositories\Website\Tracking\TrackingRepositoryInterface
@@ -45,6 +51,7 @@ class InquiryService implements InquiryServiceInterface
      * LeadService constructor.
      */
     public function __construct(
+        LeadRepositoryInterface $leadRepo,
         TrackingRepositoryInterface $tracking,
         TrackingUnitRepositoryInterface $trackingUnit,
         LeadServiceInterface $leads,
@@ -55,6 +62,7 @@ class InquiryService implements InquiryServiceInterface
         $this->inquiryEmail = $inquiryEmail;
 
         // Initialize Repositories
+        $this->leadRepo = $leadRepo;
         $this->tracking = $tracking;
         $this->trackingUnit = $trackingUnit;
     }
@@ -80,7 +88,7 @@ class InquiryService implements InquiryServiceInterface
         $this->inquiryEmail->send($inquiry);
 
         // Create Lead
-        $lead = $this->leads->mergeOrCreate($params);
+        $lead = $this->mergeOrCreate($params);
 
         // Lead Exists?!
         if(!empty($lead->identifier)) {
@@ -90,6 +98,28 @@ class InquiryService implements InquiryServiceInterface
 
         // Create Lead
         return $lead;
+    }
+
+    /**
+     * Merge or Create Lead
+     * 
+     * @param array $params
+     * @return Lead
+     */
+    public function mergeOrCreate(array $params): Lead {
+        // Get Matches
+        $leads = $this->leadRepo->findAllMatches($params);
+
+        // Choose Matching Lead
+        $lead = $this->chooseMatch($leads, $params);
+
+        // Merge Lead!
+        if(!empty($lead->identifier)) {
+            return $this->leads->merge($lead, $params);
+        }
+
+        // Create!
+        return $this->leads->create($params);
     }
 
 
@@ -119,5 +149,73 @@ class InquiryService implements InquiryServiceInterface
                 $this->trackingUnit->markUnitInquired($inquiry->cookieSessionId, $inquiry->itemId, $inquiry->getUnitType());
             }
         }
+    }
+
+
+    /**
+     * Choose Matching Lead
+     * 
+     * @param Collection $matches
+     * @param array $params
+     * @return null || Lead
+     */
+    private function chooseMatch(Collection $matches, array $params): ?Lead {
+        // Sort Leads Into Standard or With Status
+        $status = new Collection();
+        $chosen = null;
+        foreach($matches as $lead) {
+            if(!empty($lead->leadStatus)) {
+                $status->push($lead);
+            }
+        }
+
+        // Create Inquiry Lead
+        $inquiry = new InquiryLead($params);
+
+        // Find By Status!
+        if(!empty($status) && count($status) > 0) {
+            $chosen = $this->filterMatch($status, $params);
+        }
+
+        // Still Not Chosen? Find Any!
+        if(empty($chosen)) {
+            $chosen = $this->filterMatch($matches, $inquiry);
+        }
+
+        // Return $result
+        return $chosen;
+    }
+
+    /**
+     * Filter Matching Lead
+     * 
+     * @param Collection<FilteredLead> $leads
+     * @param FilteredLead $inquiry
+     * @return null | Lead
+     */
+    private function filterMatch(Collection $leads, InquiryLead $inquiry): ?Lead {
+        // Loop Status
+        $chosen = null;
+        $matches = collect([]);
+        foreach($leads as $lead) {
+            // Find All Matches Between Both
+            $matched = $inquiry->findMatches($lead);
+
+            // Matched At Least Two?
+            if($matched > Lead::MERGE_MATCH_COUNT) {
+                $chosen = $lead;
+                break;
+            } elseif($matched >= Lead::MERGE_MATCH_COUNT) {
+                $matches->push($lead);
+            }
+        }
+
+        // Get First Match
+        if(empty($chosen) && count($matches) > 0) {
+            $chosen = reset($matches);
+        }
+
+        // Return Array Mapping
+        return !empty($chosen) ? $chosen->getLead() : null;
     }
 }
