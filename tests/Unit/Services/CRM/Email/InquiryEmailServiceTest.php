@@ -122,6 +122,7 @@ class InquiryEmailServiceTest extends TestCase
 
         // Validate Send Inquiry Result
         $result = $service->send($inquiry);
+        var_dump($result);
         var_dump($inquiry->inquiryEmail);
 
         // Assert a message was sent to the dealer...
