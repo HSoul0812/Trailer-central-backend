@@ -157,7 +157,7 @@ class GmailService implements GmailServiceInterface
 
         // Get Message ID From Gmail
         $result = $this->sendMessage($message);
-        if(empty($result) || empty($result->getMessageId())) {
+        if(!empty($result) && !empty($result->getMessageId())) {
             $parsedEmail->setMessageId($result->getMessageId());
         }
 

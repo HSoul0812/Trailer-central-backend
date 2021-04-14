@@ -89,6 +89,11 @@ class ParsedEmail
 
 
     /**
+     * @var int Email History ID Associated With Email
+     */
+    private $emailHistoryId = 0;
+
+    /**
      * @var int Lead ID Associated With Email
      */
     private $leadId = 0;
@@ -489,14 +494,16 @@ class ParsedEmail
     public function validateAttachmentsSize() {
         // Loop Attachments
         $totalSize = 0;
-        foreach($this->attachments as $attachment) {
-            if ($attachment->getFileSize() > Attachment::MAX_FILE_SIZE) {
-                throw new ExceededSingleAttachmentSizeException();
-            } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
-                throw new ExceededTotalAttachmentSizeException();
+        if (!empty($this->attachments)) {
+            foreach($this->attachments as $attachment) {
+                if ($attachment->getFileSize() > Attachment::MAX_FILE_SIZE) {
+                    throw new ExceededSingleAttachmentSizeException();
+                } else if ($totalSize > Attachment::MAX_UPLOAD_SIZE) {
+                    throw new ExceededTotalAttachmentSizeException();
+                }
+                $totalSize += $attachment->getFileSize();
             }
-            $totalSize += $attachment->getFileSize();
-        }
+        }        
 
         // Return Total Size
         return $totalSize;
@@ -615,6 +622,28 @@ class ParsedEmail
 
 
     /**
+     * Return Email History ID
+     * 
+     * @return int $this->emailHistoryId || null
+     */
+    public function getEmailHistoryId(): ?int
+    {
+        return $this->emailHistoryId;
+    }
+
+    /**
+     * Set Email History ID
+     * 
+     * @param int $emailHistoryId ID Associated With Email History Entry
+     * @return void
+     */
+    public function setEmailHistoryId(int $emailHistoryId): void
+    {
+        $this->emailHistoryId = $emailHistoryId;
+    }
+
+
+    /**
      * Return Lead ID
      * 
      * @return int $this->leadId
@@ -683,7 +712,8 @@ class ParsedEmail
     /**
      * Return Email History Params
      * 
-     * @return array{lead_id: int,
+     * @return array{id: int,
+     *               lead_id: int,
      *               interaction_id: int,
      *               message_id: string,
      *               root_message_id: string,
@@ -701,12 +731,16 @@ class ParsedEmail
     {
         // Get Attachment Params
         $attachments = [];
-        foreach($this->attachments as $attachment) {
-            $attachments[] = $attachment->getParams($this->messageId);
-        }
+        
+        if (!empty($this->attachments)) {
+            foreach($this->attachments as $attachment) {
+                $attachments[] = $attachment->getParams($this->messageId);
+            }
+        }        
 
         // Return Params
         return [
+            'id' => $this->emailHistoryId,
             'lead_id' => $this->leadId,
             'interaction_id' => $this->interactionId,
             'message_id' => $this->messageId,

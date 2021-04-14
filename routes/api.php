@@ -319,6 +319,7 @@ $api->version('v1', function ($route) {
 
     // Factory
     $route->get('feed/factory/showroom', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@index');
+    $route->get('feed/factory/showroom/{id}', 'App\Http\Controllers\v1\Feed\Factory\ShowroomController@show');
 
     /*
     |--------------------------------------------------------------------------
@@ -328,9 +329,11 @@ $api->version('v1', function ($route) {
     |
     |
     */
-
-    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
-
+    
+    $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
+    $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
+    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');    
+    
     /*
     |--------------------------------------------------------------------------
     | Leads
@@ -738,7 +741,17 @@ $api->version('v1', function ($route) {
         $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
         $route->get('parts/audit-logs/date', 'App\Http\Controllers\v1\Parts\AuditLogDateController@index');
         $route->get('parts/audit-logs/date/csv', 'App\Http\Controllers\v1\Parts\AuditLogDateController@csv');
-
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Printer
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */        
+        $route->get('printer/instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+        
         /*
         |--------------------------------------------------------------------------
         | Others

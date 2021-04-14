@@ -47,7 +47,8 @@ class CreatePartRequest extends Request {
         'bins' => 'array',
         'bins.*.bin_id' => 'integer',
         'bins.*.quantity' => 'integer',
-        'bins.*.old_quantity' => 'integer'
+        'bins.*.old_quantity' => 'integer',
+        'is_sublet_specific' => 'integer'
     ];
 
 }
