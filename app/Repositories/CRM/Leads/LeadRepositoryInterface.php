@@ -30,7 +30,7 @@ interface LeadRepositoryInterface extends Repository {
      * @param array $params
      * @return Collection<Lead>
      */
-    public function findAllMatches(array $params): Collection;
+    //public function findAllMatches(array $params): Collection;
 
     /**
      * Create Assign Log for Lead

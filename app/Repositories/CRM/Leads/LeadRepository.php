@@ -222,7 +222,7 @@ class LeadRepository implements LeadRepositoryInterface {
      * @param array $params
      * @return Collection<Lead>
      */
-    public function findAllMatches(array $params): Collection {
+    /*public function findAllMatches(array $params): Collection {
         // Dealer ID Exists?!
         if(!isset($params['dealer_id'])) {
             return new Collection();
@@ -254,7 +254,7 @@ class LeadRepository implements LeadRepositoryInterface {
                              ->where('email_address', '<>', '');
             });
         })->get();
-    }
+    }*/
 
 
     /**
