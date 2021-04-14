@@ -2,8 +2,6 @@
 
 namespace Tests\Unit\Services\CRM\Leads;
 
-use App\Jobs\CRM\Leads\AutoAssignJob;
-use App\Jobs\Email\AutoResponderJob;
 use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
@@ -12,15 +10,11 @@ use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use App\Models\Showroom\Showroom;
 use App\Models\Website\Website;
-use App\Models\Website\Tracking\Tracking;
-use App\Models\Website\Tracking\TrackingUnit;
 use App\Models\User\DealerLocation;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
-use App\Services\CRM\Leads\InquiryEmailServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Mockery;
 use Tests\TestCase;
@@ -204,62 +198,6 @@ class InquiryServiceTest extends TestCase
         $this->assertSame($result->lastName, $lead->last_name);
         $this->assertSame($result->emailAddress, $lead->email_address);
         $this->assertSame($result->phoneNumber, $lead->phone_number);
-    }
-
-
-    /**
-     * Create an Even Number of Tracking Units
-     * 
-     * @param int $dealerId
-     * @param string $sessionId
-     * @return Collection<TrackingUnit>
-     */
-    private function createTrackingUnits(int $dealerId, string $sessionId): Collection {
-        // Initialize Collection
-        $units = [];
-        $parts = [];
-        $inventory = [];
-
-        // Differentiate By Types
-        $seeds = [
-            ['type' => 'inventory', 'item' => 0],
-            ['type' => 'part', 'item' => 0],
-            ['type' => 'part', 'item' => 1],
-            ['type' => 'inventory', 'item' => 1],
-            ['type' => 'part', 'item' => 0],
-            ['type' => 'inventory', 'item' => 1]
-        ];
-
-        // Loop Seeds
-        collect($seeds)->each(function (array $seed) use(&$units, &$parts, &$inventory, $sessionId, $dealerId): void {
-            // Create Inventory/Part
-            if($seed['type'] === 'part') {
-                if(!isset($parts[$seed['item']])) {
-                    $parts[] = factory(Part::class)->create([
-                        'dealer_id' => $dealerId
-                    ]);
-                }
-                $itemId = $parts[$seed['item']]->id;
-            } else {
-                if(!isset($inventory[$seed['item']])) {
-                    $inventory[] = factory(Inventory::class)->create([
-                        'dealer_id' => $dealerId
-                    ]);
-                }
-                $itemId = $inventory[$seed['item']]->inventory_id;
-            }
-
-            // Create Tracking Unit
-            $units[] = factory(TrackingUnit::class)->create([
-                'session_id' => $sessionId,
-                'type' => $seed['type'],
-                'inventory_id' => $itemId
-            ]);
-            sleep(1);
-        });
-
-        // Return Result
-        return collect($units);
     }
 
     /**
