@@ -175,7 +175,7 @@ return [
     'price_format' => 'The format for :attribute is incorrect. Starting price needs to be lower than end price. Formats supported are: [10 TO 100], [10.05 TO 100], [10.05 TO 100.05], [10 TO 100.05], [10], [10.05]',
     'lead_type_valid' => 'Lead type status needs to be: '.
                             LeadType::TYPE_BUILD . ', ' .
-                            LeadType::TYPE_CALL . ', ' .  
+                            LeadType::TYPE_CALL . ', ' .
                             LeadType::TYPE_GENERAL . ', ' .
                             LeadType::TYPE_CRAIGSLIST . ', ' .
                             LeadType::TYPE_INVENTORY . ', ' .
@@ -188,7 +188,7 @@ return [
                             LeadType::TYPE_TRADE,
     'lead_status_valid' => 'Lead status needs to be: '.
                             Lead::STATUS_HOT . ', ' .
-                            Lead::STATUS_COLD . ',' .  
+                            Lead::STATUS_COLD . ',' .
                             Lead::STATUS_LOST . ',' .
                             Lead::STATUS_MEDIUM . ',' .
                             Lead::STATUS_NEW_INQUIRY . ',' .
@@ -199,5 +199,6 @@ return [
     'sales_person_valid' => 'Sales person ID must exist or be 0',
     'dealer_location_valid' => 'Dealer Location ID must exist or be 0',
     'website_valid' => 'Website ID must exist or be 0',
-    'inventory_valid' => 'Inventory ID must exist'
+    'inventory_valid' => 'Inventory ID must exist',
+    'stock_type_valid' => 'The selected :attribute is invalid.'
 ];

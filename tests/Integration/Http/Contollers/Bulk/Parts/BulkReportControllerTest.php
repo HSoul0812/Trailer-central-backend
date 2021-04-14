@@ -21,6 +21,7 @@ use Exception;
 
 /**
  * @covers \App\Http\Controllers\v1\Bulk\Parts\BulkReportsController
+ * @group MonitoredJobs
  */
 class BulkReportControllerTest extends AbstractMonitoredJobsTest
 {
@@ -88,7 +89,7 @@ class BulkReportControllerTest extends AbstractMonitoredJobsTest
         Bus::fake();
 
         // When I call the create action using the well formed request
-        $response = $controller->financials($request);
+        $response = $controller->financialsExport($request);
 
         // Then I should see that job wit a specific name was enqueued
         Bus::assertDispatched(FinancialReportExportJob::class);
@@ -226,9 +227,10 @@ class BulkReportControllerTest extends AbstractMonitoredJobsTest
      */
     public function invalidParametersForCreationProvider(): array
     {
-        return [         // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
-            'No dealer' => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
-            'Bad token' => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.']
+        return [              // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
+            'No dealer'      => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
+            'Bad token'      => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
+            'Bad stock type' => [['dealer_id' => 666999, 'type_of_stock' => 'sales'], ResourceException::class, 'Validation Failed', 'The selected type of stock is invalid.'],
         ];
     }
 
