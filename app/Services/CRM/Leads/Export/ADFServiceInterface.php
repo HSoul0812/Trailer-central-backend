@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Leads\Export;
 
 use App\Models\CRM\Leads\Lead;
+use App\Services\CRM\Leads\DTOs\InquiryLead;
 
 /**
  * @author David A Conway Jr.
