@@ -662,7 +662,7 @@ class InquiryLead
      * @param Lead $lead
      * @return int 0-3
      */
-    private function findMatches(Lead $lead): int {
+    public function findMatches(Lead $lead): int {
         // Initialize Matches
         $matches = 0;
 
