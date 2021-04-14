@@ -17,7 +17,7 @@ trait WithFactory
     {
         $object = new static();
 
-        foreach ($properties as $property => $value) {
+        foreach ((array) $properties as $property => $value) {
 
             if (!property_exists($object, $property)) {
                 throw new InvalidArgumentException("$property is not settable");
