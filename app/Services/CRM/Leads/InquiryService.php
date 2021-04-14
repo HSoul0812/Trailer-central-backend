@@ -12,6 +12,7 @@ use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
 /**
