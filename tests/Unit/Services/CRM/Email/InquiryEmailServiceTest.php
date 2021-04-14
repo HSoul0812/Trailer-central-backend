@@ -125,7 +125,7 @@ class InquiryEmailServiceTest extends TestCase
 
         // Assert a message was sent to the dealer...
         Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
-            var_dump($inquiry);
+            var_dump($inquiry->inquiryEmail);
             if(empty($inquiry->inquiryEmail)) {
                 return false;
             }                
