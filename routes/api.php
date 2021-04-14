@@ -176,6 +176,7 @@ $api->version('v1', function ($route) {
     $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
     $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
+    $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
 
 
     /*
@@ -327,11 +328,11 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    
+
     $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
     $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
-    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');    
-    
+    $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
+
     /*
     |--------------------------------------------------------------------------
     | Leads
@@ -738,7 +739,7 @@ $api->version('v1', function ($route) {
         $route->get('parts/audit-logs', 'App\Http\Controllers\v1\Parts\AuditLogController@index');
         $route->get('parts/audit-logs/date', 'App\Http\Controllers\v1\Parts\AuditLogDateController@index');
         $route->get('parts/audit-logs/date/csv', 'App\Http\Controllers\v1\Parts\AuditLogDateController@csv');
-        
+
         /*
         |--------------------------------------------------------------------------
         | Printer
@@ -746,9 +747,9 @@ $api->version('v1', function ($route) {
         |
         |
         |
-        */        
+        */
         $route->get('printer/instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
-        
+
         /*
         |--------------------------------------------------------------------------
         | Others

@@ -198,6 +198,25 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @param array $params
+     * @return bool
+     */
+    public function exists(array $params): bool
+    {
+        $query = Inventory::query();
+
+        if (isset($params['dealer_id'])) {
+            $query->where('dealer_id', '=', $params['dealer_id']);
+        }
+
+        if (isset($params['stock'])) {
+            $query->where('stock', '=', $params['stock']);
+        }
+
+        return $query->exists();
+    }
+
+    /**
      * @param $params
      * @return boolean
      */
