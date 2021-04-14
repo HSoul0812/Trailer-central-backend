@@ -6,9 +6,9 @@ use App\Models\CRM\Leads\Lead;
 
 /**
  *
- * @author Eczek
+ * @author David A Conway Jr.
  */
-interface IDSServiceInterface {
+interface ADFServiceInterface {
     
     /**
      * Takes a lead and export it to the IDS system in XML format

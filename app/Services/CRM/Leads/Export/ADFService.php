@@ -2,12 +2,16 @@
 
 namespace App\Services\CRM\Leads\Export;
 
-use App\Services\CRM\Leads\Export\IDSServiceInterface;
-use App\Models\CRM\Leads\Lead;
 use App\Jobs\CRM\Leads\Export\ADFJob;
+use App\Models\CRM\Leads\Lead;
+use App\Models\Inventory\Inventory;
+use App\Models\User\User;
+use App\Models\User\DealerLocation;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
+use App\Services\CRM\Leads\Export\ADFServiceInterface;
+use App\Services\CRM\Leads\DTOs\InquiryLead;
 
-class IDSService implements IDSServiceInterface {
+class ADFService implements ADFServiceInterface {
     
     /**     
      * @var App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface 
@@ -17,7 +21,14 @@ class IDSService implements IDSServiceInterface {
     public function __construct(LeadEmailRepositoryInterface $leadEmailRepository) {
         $this->leadEmailRepository = $leadEmailRepository;
     }
-    
+
+    /**
+     * Export ADF if Possible
+     * 
+     * @param InquiryLead $inquiry
+     * @param Lead $lead
+     * @return bool
+     */
     public function export(InquiryLead $inquiry, Lead $lead) : bool {
         $leadEmail = $this->leadEmailRepository->getLeadEmailByLead($lead);
         if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
@@ -25,9 +36,108 @@ class IDSService implements IDSServiceInterface {
         }
 
         $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
-        
-        ADFJob::dispatchNow($inquiry, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
+
+        $adf = $this->getAdfLead($inquiry);
+
+        ADFJob::dispatchNow($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
         
         return true;
+    }
+
+
+    /**
+     * Create ADF Lead From InquiryLead
+     * 
+     * @param InquiryLead $inquiry
+     */
+    private function getAdfLead(InquiryLead $inquiry) {
+        // Initialize ADF Lead Params
+        $params = [
+            'subject' => $inquiry->getSubject(),
+            'requestDate' => $inquiry->dateSubmitted,
+            'leadFirst' => $inquiry->firstName,
+            'leadLast' => $inquiry->lastName,
+            'leadEmail' => $inquiry->email,
+            'leadPhone' => $inquiry->phone,
+            'leadComments' => $inquiry->comments,
+            'leadAddress' => $inquiry->addrStreet,
+            'leadCity' => $inquiry->addrCity,
+            'leadState' => $inquiry->addrState,
+            'leadPostal' => $inquiry->addrZip,
+            'leadId' => $inquiry->leadId,
+            'interactionId' => $inquiry->interactionId,
+            'providerName' => $inquiry->fromName
+        ];
+
+        // Get Vehicle/Vendor Params
+        $params2 = array_merge($params, $this->getAdfVehicle($inquiry->inventory));
+        $params3 = array_merge($params2, $this->getAdfVendor($inquiry));
+
+        // Return ADF Lead
+        return new ADFLead($params3);
+    }
+
+    /**
+     * Get ADF Vehicle Params From Inventory
+     * 
+     * @param array<int> $inventory
+     * @return array{vehicleYear: int,
+     *               vehicleMake: string,
+     *               vehicleModel: string,
+     *               vehicleStock: string,
+     *               vehicleVin: string}
+     */
+    private function getAdfVehicle(array $inventory): array {
+        // Get Inventory
+        $itemId = reset($inventory);
+        $item = Inventory::find($itemId);
+
+        // Initialize ADF Lead Params
+        return [
+            'vehicleYear' => $item->year ?? 0,
+            'vehicleManufacturer' => $item->manufacturer ?? '',
+            'vehicleModel' => $item->model ?? '',
+            'vehicleStock' => $item->stock ?? '',
+            'vehicleVin' => $item->vin ?? ''
+        ];
+    }
+
+    /**
+     * Get ADF Vendor Params From Dealer/DealerLocation
+     * 
+     * @param InquiryLead $inquiry
+     * @return array{dealerId: int,
+     *               dealerLocationId: int,
+     *               vendorName: string,
+     *               vendorContact: string,
+     *               vendorWebsite: string,
+     *               vendorEmail: string,
+     *               vendorPhone: string,
+     *               vendorAddress: string,
+     *               vendorCity: string,
+     *               vendorState: string,
+     *               vendorPostal: string,
+     *               vendorCountry: string}
+     */
+    private function getAdfVendor(InquiryLead $inquiry): array {
+        // Get Dealer & Location
+        $dealer = User::find($inquiry->dealerId);
+        $location = DealerLocation::find($inquiry->dealerLocationId);
+
+        // Initialize ADF Lead Params
+        return [
+            'dealerId' => $inquiry->dealerId,
+            'dealerLocationId' => $inquiry->dealerLocationId,
+            'vendorName' => $dealer->name,
+            'vendorContact' => $location->contact,
+            'vendorWebsite' => $location->website,
+            'vendorEmail' => $location->email,
+            'vendorPhone' => $location->phone,
+            'vendorAddress' => $location->address,
+            'vendorCity' => $location->city,
+            'vendorState' => $location->region,
+            'vendorPostal' => $location->postalcode,
+            'vendorCountry' => $location->country,
+        ];
     }
 }

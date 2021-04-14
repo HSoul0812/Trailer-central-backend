@@ -10,6 +10,7 @@ use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryServiceInterface;
+use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
@@ -48,6 +49,11 @@ class InquiryService implements InquiryServiceInterface
     protected $inquiry;
 
     /**
+     * @var App\Services\CRM\Leads\Export\ADFServiceInterface
+     */
+    protected $adf;
+
+    /**
      * LeadService constructor.
      */
     public function __construct(
@@ -55,11 +61,13 @@ class InquiryService implements InquiryServiceInterface
         TrackingRepositoryInterface $tracking,
         TrackingUnitRepositoryInterface $trackingUnit,
         LeadServiceInterface $leads,
-        InquiryEmailServiceInterface $inquiryEmail
+        InquiryEmailServiceInterface $inquiryEmail,
+        ADFServiceInterface $adf
     ) {
         // Initialize Services
         $this->leads = $leads;
         $this->inquiryEmail = $inquiryEmail;
+        $this->adf = $adf;
 
         // Initialize Repositories
         $this->leadRepo = $leadRepo;
@@ -138,6 +146,9 @@ class InquiryService implements InquiryServiceInterface
         // Dispatch Auto Responder Job
         $job = new AutoResponderJob($lead);
         $this->dispatch($job->onQueue('mails'));
+
+        // Export ADF if Possible
+        $this->adf->export($inquiry, $lead);
 
         // Tracking Cookie Exists?
         if($inquiry->cookieSessionId) {

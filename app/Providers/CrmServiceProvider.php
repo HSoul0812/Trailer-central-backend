@@ -10,6 +10,8 @@ use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\CRM\Leads\LeadService;
 use App\Services\CRM\Leads\AutoAssignService;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
+use App\Services\CRM\Leads\Export\ADFServiceInterface as ADFExportServiceInterface;
+use App\Services\CRM\Leads\Export\ADFService as ADFExportService;
 use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Services\CRM\Leads\Export\IDSService;
 use App\Services\CRM\Leads\Import\ADFServiceInterface as ADFImportServiceInterface;
@@ -49,6 +51,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(InquiryEmailServiceInterface::class, InquiryEmailService::class);
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
         $this->app->bind(IDSServiceInterface::class, IDSService::class);
+        $this->app->bind(ADFExportServiceInterface::class, ADFExportService::class);
         $this->app->bind(ADFImportServiceInterface::class, ADFImportService::class);
 
         // Repositories

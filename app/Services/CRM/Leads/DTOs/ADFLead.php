@@ -59,6 +59,12 @@ class ADFLead
 
 
     /**
+     * @var string Subject of ADF Lead to Export
+     */
+    private $subject;
+
+
+    /**
      * @var string First Name for ADF Lead
      */
     private $firstName;

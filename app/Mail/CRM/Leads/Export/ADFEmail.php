@@ -2,6 +2,7 @@
 
 namespace App\Mail\CRM\Leads\Export;
 
+use App\Services\CRM\Leads\DTOs\ADFLead;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -18,13 +19,13 @@ class ADFEmail extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param InquiryLead $inquiry
+     * @param ADFLead $adf
      */
-    public function __construct(ADFLead $adf, InquiryLead $inquiry)
+    public function __construct(ADFLead $adf)
     {
         // Set Extra Vars
         $this->data    = $adf->getEmailVars();
-        $this->subject = $inquiry->getSubject();
+        $this->subject = $adf->subject;
     }
 
     /**

@@ -87,44 +87,4 @@ class ADFJob extends Job
             throw $e;
         }
     }
-
-
-    /**
-     * Create ADF Lead From InquiryLead
-     * 
-     * @param InquiryLead $inquiry
-     */
-    private function getAdfLead(InquiryLead $inquiry) {
-        // Return ADF Lead
-        return new ADFLead(['requestDate' => $this->requestDate,
-                            'vehicleYear' => $this->vehicleYear,
-                            'vehicleManufacturer' => $this->vehicleMake,
-                            'vehicleModel' => $this->vehicleModel,
-                            'vehicleVin' => $this->vehicleVin,
-                            'leadFirst' => $this->firstName,
-                            'leadLast' => $this->lastName,
-                            'leadEmail' => $this->email,
-                            'leadPhone' => $this->phone,
-                            'leadComments' => $this->comments,
-                            'leadAddress' => $this->addrStreet,
-                            'leadCity' => $this->addrCity,
-                            'leadState' => $this->addrState,
-                            'leadPostal' => $this->addrZip,
-                            'dealerId' => $this->dealerId,
-                            'dealerLocationId' => $this->dealerLocationId,
-                            'leadId' => $this->leadId,
-                            'interactionId' => $this->interactionId,
-                            'vendorName' => $this->vendorName,
-                            'vendorContact' => $this->vendorContact,
-                            'vendorWebsite' => $this->vendorUrl,
-                            'vendorEmail' => $this->vendorEmail,
-                            'vendorPhone' => $this->vendorPhone,
-                            'vendorAddress' => $this->vendorAddrStreet,
-                            'vendorCity' => $this->vendorAddrCity,
-                            'vendorState' => $this->vendorAddrState,
-                            'vendorPostal' => $this->vendorAddrZip,
-                            'vendorCountry' => $this->vendorAddrCountry,
-                            'providerName' => $this->vendorProvider
-            ]);
-    }
 }
