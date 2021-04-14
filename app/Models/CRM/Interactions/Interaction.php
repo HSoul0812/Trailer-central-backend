@@ -53,9 +53,12 @@ class Interaction extends Model
         "lead_product_id",
         "tc_lead_id",
         "user_id",
+        "sales_person_id",
         "interaction_type",
         "interaction_notes",
-        "interaction_time"
+        "interaction_time",
+        "from_email",
+        "sent_by"
     ];
 
     /**

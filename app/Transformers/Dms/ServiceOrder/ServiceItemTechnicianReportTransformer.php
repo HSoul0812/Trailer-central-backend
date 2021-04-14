@@ -3,6 +3,7 @@
 namespace App\Transformers\Dms\ServiceOrder;
 
 use League\Fractal\TransformerAbstract;
+use Carbon\Carbon;
 
 /**
  * Class ServiceItemTechnicianReportTransformer
@@ -16,6 +17,7 @@ class ServiceItemTechnicianReportTransformer extends TransformerAbstract
 
         foreach ($params as $salesPersonId => $salesPersonData) {
             foreach ($salesPersonData as $row) {
+                $completedDate = new Carbon($row['ro_completed_date']);
                 $result[$salesPersonId][] = [
                     'first_name' => $row['first_name'],
                     'last_name' => $row['last_name'],
@@ -42,7 +44,7 @@ class ServiceItemTechnicianReportTransformer extends TransformerAbstract
                     'paid_retail' => $row['paid_retail'],
                     'ro_created_at' => $row['ro_created_at'],
                     'ro_name' => $row['ro_name'],
-                    'ro_completed_date' => $row['ro_completed_date']
+                    'ro_completed_date' => $completedDate->toDateString()
                 ];
             }
         }

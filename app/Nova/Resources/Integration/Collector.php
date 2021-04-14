@@ -156,6 +156,12 @@ class Collector extends Resource
                 Text::make('Overridable Fields', 'overridable_fields')->rules('max:254')->hideFromIndex()->help(
                     'If certain fields shouldn\'t be overwritten after changing these fields in dashboard, it\'s required to specify a list of these fields separated by commas'
                 ),
+                Text::make('Skip Units By Category', 'skip_categories')->hideFromIndex()->help(
+                    'Enter the categories (as they show in the source file) you would like to skip separated by commas. Example: trailer, vehicle, car'
+                ),
+                Text::make('Skip Units By Location', 'skip_locations')->hideFromIndex()->help(
+                    'Enter the locations (as they show in the source file) you would like to skip separated by commas. Example: Grand Rapids, New York City, Miami'
+                ),
             ]),
         ];
     }

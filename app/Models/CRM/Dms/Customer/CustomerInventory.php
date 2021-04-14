@@ -28,6 +28,10 @@ class CustomerInventory extends Model
 
     public $timestamps = false;
 
+    protected $primaryKey = 'uuid';
+
+    public $incrementing = false;
+
     protected $fillable = [
         'customer_id',
         'inventory_id'
@@ -43,7 +47,7 @@ class CustomerInventory extends Model
         parent::boot();
 
         static::saving(static function (CustomerInventory $model) {
-            $model->uuid = Uuid::uuid4();
+            $model->uuid = Uuid::uuid4()->toString();
         });
     }
 }
