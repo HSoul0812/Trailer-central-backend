@@ -168,7 +168,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_COMPLETED_DEALS_ALL_ROS) {
             $roFilters = ' AND ((dms_unit_sale.total_price - payments.paid_amount) <= 0)';
         } else if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_COMPLETED_DEALS_INTERNAL_ROS) {
-            $roFilters = " AND ((dms_unit_sale.total_price - payments.paid_amount) <= 0) AND dms_repair_order.type = 'internal'";
+            $roFilters = " AND (((dms_unit_sale.total_price - payments.paid_amount) <= 0) OR dms_repair_order.type = 'internal')";
         }
         
         if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_DOLLARS_EARNED) {
@@ -192,7 +192,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 /* unit sales */
                 SELECT
                     us.id sale_id, i.id invoice_id, i.doc_num as doc_num, i.total invoice_total,
-                    (CASE WHEN(i.unit_sale_id IS NOT NULL) THEN 'unit_sale'
+                    (CASE WHEN((us.total_price - payments.paid_amount) > 0) THEN 'unit_sale_partial' 
+                        WHEN((us.total_price - payments.paid_amount) <= 0) THEN 'unit_sale_completed'
                         WHEN(i.repair_order_id IS NOT NULL) THEN 'repair_order'
                         ELSE 'pos' /* todo must have a clear marker in invoice that it is a pos sale */
                         END
@@ -222,11 +223,11 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 
                 LEFT JOIN (
                     SELECT
-                       qb_payment.invoice_id,
-                       SUM(COALESCE(qb_payment.amount, 0)) paid_amount
-                    FROM qb_payment 
-                    GROUP BY qb_payment.invoice_id
-                ) payments ON i.id = payments.invoice_id
+                    qb_invoices.unit_sale_id,
+                    SUM(COALESCE(qb_invoices.total, 0)) paid_amount
+                    FROM qb_invoices
+                    GROUP BY qb_invoices.unit_sale_id
+                ) payments ON us.id = payments.unit_sale_id
 
                 LEFT JOIN (
                     SELECT
@@ -410,9 +411,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     NULL as inventory_notes
 
                 FROM qb_invoices
-                    INNER JOIN dms_repair_order ON qb_invoices.repair_order_id = dms_repair_order.id
-                    INNER JOIN dms_unit_sale ON dms_repair_order.unit_sale_id = dms_unit_sale.id
-                    INNER JOIN qb_invoices unit_sale_invoice ON dms_unit_sale.id = unit_sale_invoice.unit_sale_id
+                    LEFT JOIN dms_repair_order ON qb_invoices.repair_order_id = dms_repair_order.id
+                    LEFT JOIN dms_unit_sale ON dms_repair_order.unit_sale_id = dms_unit_sale.id
+                    LEFT JOIN qb_invoices unit_sale_invoice ON dms_unit_sale.id = unit_sale_invoice.unit_sale_id
                     LEFT JOIN dms_customer c ON qb_invoices.customer_id=c.id
                     LEFT JOIN (
                         SELECT
@@ -466,7 +467,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             WHERE ndu.id=:dealerId3
               AND sp.deleted_at IS NULL
             ";
-
+            
         $result = DB::select($sql, $dbParams);
 
         // organize by sales person

@@ -9,37 +9,29 @@ use App\Exceptions\PropertyDoesNotExists;
 trait WithConstructor
 {
     /**
-     * @param stdClass|array $properties
+     * @param \stdClass|array $properties
      * @return mixed
      * @throws PropertyDoesNotExists when the desired property does not exists
      */
     public function __construct(array $properties = [])
     {
-        foreach ($properties as $property => $value) {
-            if (!property_exists($this, $property)) {
-                throw new InvalidArgumentException("$property is not settable");
+        foreach ($properties as $name => $value) {
+            // Convert full_name -> fullName
+            $property = str_replace('_', '', lcfirst(ucwords($name, '_')));
+            if (property_exists($this, $property)) {
+                $this->{$property} = $value;
+                continue;
             }
 
-            $this->{$property} = $value;
-        }
-    }
+            // Convert full-name -> fullName
+            $property = str_replace('-', '', lcfirst(ucwords($name, '-')));
+            if (property_exists($this, $property)) {
+                $this->{$property} = $value;
+                continue;
+            }
 
-    /**
-     * Convert to CamelCase Then Get
-     * 
-     * @param array $properties
-     */
-    public static function getViaCC(array $properties): self {
-        // New Array
-        $newProperties = [];
-        foreach ($properties as $property => $value) {
-            // Convert to CamelCase
-            $str = str_replace(' ', '', ucwords(str_replace('-', ' ', $property)));
-            $converted = strtolower($str[0]);
-            $newProperties[$converted] = $value;
+            // Property Does Not Exist!
+            throw new PropertyDoesNotExists("$property is not settable");
         }
-
-        // Return Array
-        return new self($newProperties);
     }
 }

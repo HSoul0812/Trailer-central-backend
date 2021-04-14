@@ -11,8 +11,8 @@
     <tr>
         <td align="center" valign="top" style="padding:20px 0 5px;">
             <!-- begin wrapper -->
-            <table bgcolor="{{ $bgcolor }}" cellpadding="0" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
-                <tr style="background:{{ $bgheader }}">
+            <table bgcolor="{{ $bgColor }}" cellpadding="10" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
+                <tr style="background:{{ $bgHeader }}">
                     <td valign="top">
                         <a href="{{ $logoUrl }}">
                             <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;" border="0"/>
@@ -74,7 +74,7 @@
         <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE -- SCORE: {{ $allFailuresCount }}</strong><br />
 
         <strong>Remote IP:</strong> {{ $remoteIp }}
-        @if (!empty($forwardedFor)
+        @if (!empty($forwardedFor))
             / Visible Proxy: {{ $forwardedFor }}
         @endif
         </strong><br/>

@@ -10,7 +10,7 @@ use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Services\CRM\Leads\InquiryEmailServiceInterface;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -57,11 +57,6 @@ class LeadService implements LeadServiceInterface
     protected $interactions;
 
     /**
-     * @var App\Services\CRM\Leads\InquiryEmailServiceInterface
-     */
-    protected $inquiry;
-
-    /**
      * LeadService constructor.
      */
     public function __construct(
@@ -71,12 +66,8 @@ class LeadService implements LeadServiceInterface
         TypeRepositoryInterface $types,
         UnitRepositoryInterface $units,
         InventoryRepositoryInterface $inventory,
-        InteractionsRepositoryInterface $interactions,
-        InquiryEmailServiceInterface $inquiry
+        InteractionsRepositoryInterface $interactions
     ) {
-        // Initialize Services
-        $this->inquiry = $inquiry;
-
         // Initialize Repositories
         $this->leads = $leads;
         $this->status = $status;
@@ -177,7 +168,7 @@ class LeadService implements LeadServiceInterface
      * @param array $params
      * @return Lead
      */
-    /*public function mergeOrCreate(array $params): Lead {
+    public function mergeOrCreate(array $params): Lead {
         // Get Matches
         $leads = $this->leads->findAllMatches($params);
 
@@ -191,7 +182,7 @@ class LeadService implements LeadServiceInterface
 
         // Create!
         return $this->leads->create($params);
-    }*/
+    }
 
     /**
      * Merge Lead
@@ -199,7 +190,7 @@ class LeadService implements LeadServiceInterface
      * @param Lead $lead
      * @param array $params
      */
-    /*public function merge(Lead $lead, array $params): Lead {
+    public function merge(Lead $lead, array $params): Lead {
         // Configure Notes From Provided Data
         $notes = '';
         if(!empty($params['first_name'])) {
@@ -235,43 +226,7 @@ class LeadService implements LeadServiceInterface
 
         // Return Lead
         return $this->leads->get($lead->identifier);
-    }*/
-
-    /**
-     * Send Inquiry
-     * 
-     * @param array $params
-     * @return Lead
-     */
-    /*public function inquiry($params) {
-        // Create Lead
-        $lead = $this->mergeOrCreate($params);
-
-        // Valid Lead?!
-        if(!empty($lead->identifier)) {
-            // Set Inquiry Name/Email
-            $params['inquiry_email'] = $lead->inquiry_email;
-            $params['inquiry_name'] = $lead->inquiry_name;
-
-            // Get Inquiry
-            $inquiry = $this->inquiry->fill($params);
-
-            // Send Inquiry Email
-            $this->inquiry->send($inquiry);
-
-            // Create Auto Assign Job
-            // TO DO: Create Auto Assign Job
-            //$this->dispatch(new AutoAssignJob($inquiry));
-
-            // Create ADF Export Job
-            // TO DO: Create ADF Export Job
-            //$this->dispatch(new AdfExportJob($inquiry));
-        }
-
-        // Return Lead
-        return $lead;
-    }*/
-
+    }
 
     /**
      * Delete Existing Lead Types and Insert New Ones
@@ -416,7 +371,7 @@ class LeadService implements LeadServiceInterface
      * @param array $params
      * @return null || Lead
      */
-    /*private function chooseMatch(Collection $matches, array $params): ?Lead {
+    private function chooseMatch(Collection $matches, array $params): ?Lead {
         // Sort Leads Into Standard or With Status
         $leads = new Collection();
         $status = new Collection();
@@ -448,7 +403,7 @@ class LeadService implements LeadServiceInterface
 
         // Return $result
         return $chosen;
-    }*/
+    }
 
     /**
      * Filter Matching Lead
@@ -457,7 +412,7 @@ class LeadService implements LeadServiceInterface
      * @param FilteredLead $filteredInquiry
      * @return null | Lead
      */
-    /*private function filterMatch(Collection $leads, FilteredLead $filteredInquiry): ?Lead {
+    private function filterMatch(Collection $leads, FilteredLead $filteredInquiry): ?Lead {
         // Loop Status
         $chosen = null;
         $matches = collect([]);
@@ -481,5 +436,5 @@ class LeadService implements LeadServiceInterface
 
         // Return Array Mapping
         return !empty($chosen) ? $chosen->getLead() : null;
-    }*/
+    }
 }

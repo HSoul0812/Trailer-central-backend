@@ -21,6 +21,12 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         throw new NotImplementedException;
     }
 
+    /**
+     * Get All Website Config
+     * 
+     * @param array $params
+     * @return Collection<WebsiteConfig>
+     */
     public function getAll($params) {
         $query = WebsiteConfig::select('*');
                 
@@ -50,20 +56,18 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
      * @param string $key
      * @return array{key: value} or array{json_decode(values_mapping)}
      */
-    public function getValueOrDefault(int $websiteId, string $key): string {
+    public function getValueOrDefault(int $websiteId, string $key): array {
         // Get Config
         $config = WebsiteConfig::where('website_id', $websiteId)->where('key', $key)->first();
         $default = WebsiteConfigDefault::where('key', $key)->first();
 
-        // Return Values Mapping
+        // Get Values Mapping Array for Config
         if(!empty($config)) {
-            // Get Values Mapping Array for Config
-            $value = $config->value('value');
-            return $this->getValuesMapping($default->values_mapping, $value, $key);
+            return $this->getValuesMapping($default->values_map, $config->value, $key);
         }
 
         // Get Values Mapping for Default
-        return $this->getValuesMapping($default->values_mapping, $default->default_value, $key);
+        return $this->getValuesMapping($default->values_map, $default->default_value, $key);
     }
 
 

@@ -17,7 +17,27 @@ class InquiryLead
     /**
      * @const string
      */
-    const SPAM_EMAIL = 'josh+spam-notify@trailercentral.com';
+    const INQUIRY_SPAM_TO = [
+        ['email' => 'josh+spam-notify@trailercentral.com']
+    ];
+
+    /**
+     * @const array
+     */
+    const INQUIRY_BCC_TO = [
+        ['email' => 'bcc@trailercentral.com'],
+        ['email' => 'alberto@trailercentral.com']
+    ];
+
+    /**
+     * @const array
+     */
+    const INQUIRY_DEV_TO = [
+        ['email' => 'ben+dev-contact-forms@trailercentral.com'],
+        ['email' => 'judson@trailercentral.com'],
+        ['email' => 'alberto@trailercentral.com'],
+        ['email' => 'david@trailercentral.com']
+    ];
 
 
     /**
@@ -66,7 +86,7 @@ class InquiryLead
     /**
      * @var array
      */
-    const INQUIRY_TYPES = array(
+    const INQUIRY_TYPES = [
         'general',
         'cta',
         'inventory',
@@ -75,7 +95,12 @@ class InquiryLead
         'call',
         'sms',
         'bestprice'
-    );
+    ];
+
+    /**
+     * @var array
+     */
+    const NON_INVENTORY_TYPES = ['part', 'showroom'];
 
 
 
@@ -119,6 +144,11 @@ class InquiryLead
      * @var string Name of Lead Inquiry
      */
     private $inquiryName;
+
+    /**
+     * @var string Cookie Session ID for Lead Inquiry
+     */
+    private $cookieSessionId;
 
 
     /**
@@ -164,6 +194,11 @@ class InquiryLead
     private $referral;
 
     /**
+     * @var ?string URL Directly to Original Lead Inquiry
+     */
+    private $url;
+
+    /**
      * @var ?string Stock Number of Unit of Interest on Lead Inquiry
      */
     private $stock;
@@ -188,6 +223,11 @@ class InquiryLead
      * @var string Phone Number for Lead Inquiry
      */
     private $phoneNumber;
+
+    /**
+     * @var string Preferred Contact for Lead Inquiry
+     */
+    private $preferredContact;
 
 
     /**
@@ -261,6 +301,11 @@ class InquiryLead
      */
     private $isSpam;
 
+    /**
+     * @var bool Is This Lead Inquiry From Classifieds?
+     */
+    private $isFromClassifieds;
+
 
     /**
      * @var string Source of Lead Inquiry
@@ -288,7 +333,7 @@ class InquiryLead
      * 
      * @return string
      */
-    private function getInquiryType(): string {
+    public function getInquiryType(): string {
         // Get Type
         if(!in_array($this->inquiryType, self::INQUIRY_TYPES)) {
             $this->inquiryType = self::INQUIRY_TYPE_DEFAULT;
@@ -303,27 +348,67 @@ class InquiryLead
      * 
      * @return string
      */
-    private function getInquiryView(): string {
+    public function getInquiryView(): string {
         return ($this->inquiryType === 'cta') ? 'general' : $this->inquiryType;
     }
 
-
     /**
-     * Get Inquiry Email
+     * Get Unit Type
      * 
      * @return string
      */
-    private function getInquiryEmail(): string {
-        return !empty($this->isSpam) ? self::SPAM_EMAIL : $this->inquiryEmail;
+    public function getUnitType(): string {
+        // Get Type
+        $type = $this->getInquiryType();
+
+        // Set New Type
+        return ($type === 'showroomModel' ? 'showroom' : $type);
     }
 
     /**
-     * Get Inquiry Name
+     * Get Inquiry URL
      * 
      * @return string
      */
-    private function getInquiryName(): string {
-        return !empty($this->isSpam) ? '' : $this->inquiryName;
+    public function getInquiryUrl(): string {
+        return !empty($this->url) ? $this->url : $this->websiteDomain . $this->referral;
+    }
+
+
+    /**
+     * Get Inquiry To Array
+     * 
+     * @return array{array{name: string, email: string}, ...etc}
+     */
+    public function getInquiryToArray(): array {
+        // If Dev, Only Return Specific Entries
+        if(!empty($this->isDev())) {
+            $to = self::INQUIRY_DEV_TO;
+        }
+        // If Spam, Only Return Spam
+        elseif(!empty($this->isSpam)) {
+            $to = self::INQUIRY_SPAM_TO;
+        }
+        // Normal, Return Proper Inquiry
+        else {
+            return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+        }
+
+        // Return With Merged CC To
+        return array_merge($to, self::INQUIRY_BCC_TO);
+    }
+
+    /**
+     * Get Inquiry BCC Array
+     * 
+     * @return array{array{name: string, email: string}, ...etc}
+     */
+    public function getInquiryBccArray(): array {
+        // If Dev, Only Return Specific Entries
+        if(empty($this->isDev()) && empty($this->isSpam)) {
+            return self::INQUIRY_BCC_TO;
+        }
+        return [];
     }
 
 
@@ -341,7 +426,7 @@ class InquiryLead
     /**
      * Return Preferred Contact
      * 
-     * @return $this->preferredContact || string 'phone' if phone exists, 'email' otherwise
+     * @return string $this->preferredContact || 'phone' if phone exists || 'email' otherwise
      */
     public function getPreferredContact(): string
     {
@@ -370,6 +455,20 @@ class InquiryLead
         return $this->websiteDomain === self::TT_DOMAIN;
     }
 
+    /**
+     * Is Dev?
+     * 
+     * @return bool
+     */
+    public function isDev(): bool
+    {
+        // Get Metadata
+        $metadata = $this->getMetadata();
+
+        // Return
+        return !empty($metadata['IS_DEV']);
+    }
+
 
     /**
      * Decode Metadata and Convert Into Array
@@ -392,17 +491,23 @@ class InquiryLead
      * @return array{'jotformId': int, 'submissionId': int}
      */
     public function getMetadata(): array {
-        return json_decode($this->metadata);
+        // Get JSON
+        $json = json_decode($this->metadata, true);
+
+        // Return Result
+        if(!empty($json)) {
+            return $json;
+        }
+        return [];
     }
 
 
     /**
      * Build Subject
      * 
-     * @param array $data
      * @return string
      */
-    public function getSubject($data): string {
+    public function getSubject(): string {
         // Initialize
         switch($this->inquiryType) {
             case 'call':
@@ -469,11 +574,11 @@ class InquiryLead
         // Define Spam Data
         return [
             'isSpam'              => $this->isSpam,
-            'allFailures'         => implode(", ", $metadata['SPAM_FAILURES']),
-            'remoteAddr'          => $metadata['REMOTE_ADDR'],
-            'forwardedFor'        => $metadata['FORWARDED_FOR'],
-            'originalContactList' => implode('; ', $metadata['ORIGINAL_RECIPIENTS']),
-            'resendUrl'           => $metadata['REMAIL_URL']
+            'allFailures'         => !empty($metadata['SPAM_FAILURES']) ? implode(", ", $metadata['SPAM_FAILURES']) : '',
+            'remoteAddr'          => $metadata['REMOTE_ADDR'] ?? '',
+            'forwardedFor'        => $metadata['FORWARDED_FOR'] ?? '',
+            'originalContactList' => !empty($metadata['ORIGINAL_RECIPIENTS']) ? implode('; ', $metadata['ORIGINAL_RECIPIENTS']) : '',
+            'resendUrl'           => $metadata['REMAIL_URL'] ?? ''
         ];
     }
 
@@ -511,8 +616,6 @@ class InquiryLead
             'bgColor'          => $this->getBgColor(),
             'bgHeader'         => $this->getHeaderBgColor(),
             'inquiryView'      => $this->getInquiryView(),
-            'inquiryName'      => $this->inquiryName,
-            'inquiryEmail'     => $this->inquiryEmail,
             'logo'             => $this->logo,
             'logoUrl'          => $this->logoUrl,
             'fromName'         => $this->fromName,
@@ -521,10 +624,10 @@ class InquiryLead
             'device'           => $this->device,
             'title'            => $this->title,
             'stock'            => $this->stock,
-            'url'              => $this->website . $this->referral,
+            'url'              => $this->getInquiryUrl(),
             'fullName'         => $this->getFullName(),
-            'email'            => $this->email,
-            'phone'            => $this->phone,
+            'email'            => $this->emailAddress,
+            'phone'            => $this->phoneNumber,
             'postal'           => $this->zip,
             'preferred'        => $this->getPreferredContact(),
             'comments'         => $this->comments

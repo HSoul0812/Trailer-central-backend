@@ -78,11 +78,6 @@ class Lead extends Model
 
     const TABLE_NAME = 'website_lead';
 
-    /**
-     * @const int Number of Matches Required for Merge
-     */
-    const MERGE_MATCH_COUNT = 2;
-
 
     /**
      * The table associated with the model.
@@ -143,7 +138,8 @@ class Lead extends Model
         'cdk_email_sent',
         'newsletter',
         'is_spam',
-        'is_archived'
+        'is_archived',
+        'is_from_classifieds'
     ];
 
     /**
@@ -209,14 +205,6 @@ class Lead extends Model
     {
         return $this->hasMany(UnitSale::class, 'lead_id', 'identifier');
     }
-
-    /**
-     * Get New Dealer user.
-     */
-    public function newDealerUser()
-    {
-        return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
-    }
  
     /**
      * Get Dealer location
@@ -224,6 +212,14 @@ class Lead extends Model
     public function dealerLocation()
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * Get New Dealer user.
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
     }
 
     /**
@@ -451,9 +447,9 @@ class Lead extends Model
     /**
      * Get Inquiry Name Attribute
      * 
-     * @return Inquiry Name
+     * @return string
      */
-    public function getInquiryNameAttribute() {
+    public function getInquiryNameAttribute(): string {
         // Dealer Location Name Exists?
         if(!empty($this->dealerLocation->name)) {
             return $this->dealerLocation->name;
@@ -471,9 +467,9 @@ class Lead extends Model
     /**
      * Get Inquiry Email Attribute
      * 
-     * @return Inquiry Email
+     * @return string
      */
-    public function getInquiryEmailAttribute() {
+    public function getInquiryEmailAttribute(): string {
         // Dealer Location Email Exists?
         if(!empty($this->dealerLocation->email)) {
             return $this->dealerLocation->email;

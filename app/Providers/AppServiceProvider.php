@@ -38,6 +38,8 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
+use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
+use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
@@ -58,8 +60,6 @@ use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 use App\Repositories\Website\PaymentCalculator\SettingsRepository;
 use App\Repositories\Website\RedirectRepository;
 use App\Repositories\Website\RedirectRepositoryInterface;
-use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
-use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
@@ -74,6 +74,10 @@ use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\UserRepository;
+use App\Repositories\User\DealerPasswordResetRepositoryInterface;
+use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\User\PasswordResetServiceInterface;
+use App\Services\User\PasswordResetService;
 use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
@@ -214,6 +218,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
+        $this->app->bind(ShowroomFieldsMappingRepositoryInterface::class, ShowroomFieldsMappingRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
@@ -225,7 +230,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
         $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
-        $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
@@ -261,6 +265,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
         $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
+        
+        $this->app->bind(DealerPasswordResetRepositoryInterface::class, DealerPasswordResetRepository::class);
+        $this->app->bind(PasswordResetServiceInterface::class, PasswordResetService::class);
     }
 
 }
