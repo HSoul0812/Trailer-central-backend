@@ -229,7 +229,7 @@ class InquiryService implements InquiryServiceInterface
             $chosen = reset($matches);
         }
 
-        // Return Array Mapping
-        return !empty($chosen) ? $chosen->getLead() : null;
+        // Return Chosen Lead
+        return $chosen;
     }
 }
