@@ -583,14 +583,6 @@ class InquiryServiceTest extends TestCase
         // Validate Send Inquiry Result
         $result = $service->send($sendRequestParams);
 
-        // Assert a message was sent to the dealer...
-        /*Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
-            if(empty($inquiry->inquiryEmail)) {
-                return false;
-            }                
-            return $mail->hasTo($inquiry->inquiryEmail);
-        });*/
-
         // Match Lead Details
         $this->assertSame($result->identifier, $lead->identifier);
         $this->assertSame($result->full_name, $lead->full_name);
