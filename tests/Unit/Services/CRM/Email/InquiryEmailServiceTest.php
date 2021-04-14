@@ -27,7 +27,7 @@ use Tests\TestCase;
  *
  * @coversDefaultClass \App\Services\CRM\CRM\Leads\LeadService
  */
-class InquiryServiceTest extends TestCase
+class InquiryEmailServiceTest extends TestCase
 {
     /**
      * @const string
