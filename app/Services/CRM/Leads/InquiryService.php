@@ -225,7 +225,7 @@ class InquiryService implements InquiryServiceInterface
         }
 
         // Get First Match
-        if(empty($chosen) && count($matches) > 0) {
+        if(empty($chosen) && $matches->count() > 0) {
             $chosen = reset($matches);
         }
 
