@@ -208,7 +208,7 @@ class InquiryService implements InquiryServiceInterface
     private function filterMatch(Collection $leads, InquiryLead $inquiry): ?Lead {
         // Loop Status
         $chosen = null;
-        $matches = collect([]);
+        $matches = new Collection();
         foreach($leads as $lead) {
             // Find All Matches Between Both
             $matched = $inquiry->findMatches($lead);
@@ -226,7 +226,7 @@ class InquiryService implements InquiryServiceInterface
 
         // Get First Match
         if(empty($chosen) && $matches->count() > 0) {
-            $chosen = reset($matches);
+            $chosen = $matches->first();
         }
 
         // Return Chosen Lead
