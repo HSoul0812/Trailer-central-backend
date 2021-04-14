@@ -198,6 +198,11 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return Collection<Lead>
      */
     public function findAllMatches(array $params): Collection {
+        // Dealer ID Exists?!
+        if(!isset($params['dealer_id'])) {
+            return new Collection();
+        }
+
         // Clean Phones
         $params['phone1'] = preg_replace('/[-+)( ]+/', '', $params['phone_number']);
         $params['phone2'] = '1' . $params['phone1'];
@@ -206,22 +211,24 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         // Find Leads That Match Current!
-        return Lead::where('dealer_id', $params['dealer_id'])
-                    ->where(function(Builder $query) use($params) {
-                        return $query->where(function(Builder $query) use($params) {
-                            return $query->where('first_name', $params['first_name'])
-                                         ->where('last_name', $params['last_name']);
-                    })->orWhere(function(Builder $query) use($params) {
-                        return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\') = ?', $params['phone1'])
-                                     ->where('phone_number', '<>', '');
-                    })->orWhere(function(Builder $query) use($params) {
-                        return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\') = ?', $params['phone2'])
-                                     ->where('phone_number', '<>', '');
-                    })->orWhere(function(Builder $query) use($params) {
-                        return $query->where('email_address', $params['email_address'])
-                                     ->where('email_address', '<>', '');
-                    });
-                })->get();
+        $lead = Lead::where('dealer_id', $params['dealer_id']);
+
+        // Find Name
+        return $lead->where(function(Builder $query) use($params) {
+            return $query->where(function(Builder $query) use($params) {
+                return $query->where('first_name', $params['first_name'])
+                             ->where('last_name', $params['last_name']);
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\') = ?', $params['phone1'])
+                             ->where('phone_number', '<>', '');
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\') = ?', $params['phone2'])
+                             ->where('phone_number', '<>', '');
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->where('email_address', $params['email_address'])
+                             ->where('email_address', '<>', '');
+            });
+        })->get();
     }
 
     /**
