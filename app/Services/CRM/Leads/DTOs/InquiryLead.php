@@ -491,7 +491,14 @@ class InquiryLead
      * @return array{'jotformId': int, 'submissionId': int}
      */
     public function getMetadata(): array {
-        return json_decode($this->metadata, true);
+        // Get JSON
+        $json = json_decode($this->metadata, true);
+
+        // Return Result
+        if(!empty($json)) {
+            return $json;
+        }
+        return [];
     }
 
 

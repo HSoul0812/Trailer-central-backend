@@ -186,8 +186,16 @@ class InquiryEmailServiceTest extends TestCase
         ];
 
 
+        // Mock Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOrDefault')
+            ->once()
+            ->with($websiteId, 'general/item_email_from')
+            ->andReturn(self::TEST_WEBSITE_CONFIG);
+
         /** @var InquiryEmailServiceInterface $service */
         $service = $this->app->make(InquiryEmailServiceInterface::class);
+
 
         // Validate Send Inquiry Result
         $result = $service->fill($sendRequestParams);
