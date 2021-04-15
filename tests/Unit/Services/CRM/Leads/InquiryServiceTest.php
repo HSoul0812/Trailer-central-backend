@@ -7,8 +7,6 @@ use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
-use App\Models\Inventory\Inventory;
-use App\Models\Parts\Part;
 use App\Models\Website\Tracking\Tracking;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
@@ -236,12 +234,6 @@ class InquiryServiceTest extends TestCase
             'website_id' => $websiteId,
             'inventory_id' => self::TEST_ITEM_ID,
             'lead_type' => LeadType::TYPE_INVENTORY
-        ]);
-
-        // Get Tracking Details
-        $tracking = factory(Tracking::class)->make([
-            'lead_id' => $lead->identifier,
-            'domain' => self::TEST_DOMAIN
         ]);
 
         // Send Request Params
