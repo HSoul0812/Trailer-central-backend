@@ -136,11 +136,11 @@ class ADFService implements ADFServiceInterface {
             'vendorUrl' => $location->website,
             'vendorEmail' => $location->email,
             'vendorPhone' => $location->phone,
-            'vendorAddress' => $location->address,
-            'vendorCity' => $location->city,
-            'vendorState' => $location->region,
-            'vendorPostal' => $location->postalcode,
-            'vendorCountry' => $location->country,
+            'vendorAddrStreet' => $location->address,
+            'vendorAddrCity' => $location->city,
+            'vendorAddrState' => $location->region,
+            'vendorAddrPostal' => $location->postalcode,
+            'vendorAddrCountry' => $location->country,
         ];
     }
 }
