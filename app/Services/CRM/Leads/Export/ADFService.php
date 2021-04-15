@@ -10,6 +10,7 @@ use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
+use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 
 class ADFService implements ADFServiceInterface {
