@@ -59,17 +59,17 @@ class ADFService implements ADFServiceInterface {
         $params = [
             'leadId' => $leadId,
             'subject' => $inquiry->getSubject(),
-            'requestDate' => $inquiry->dateSubmitted,
-            'leadFirst' => $inquiry->firstName,
-            'leadLast' => $inquiry->lastName,
-            'leadEmail' => $inquiry->emailAddress,
-            'leadPhone' => $inquiry->phoneNumber,
-            'leadComments' => $inquiry->comments,
-            'leadAddress' => $inquiry->address,
-            'leadCity' => $inquiry->city,
-            'leadState' => $inquiry->state,
-            'leadPostal' => $inquiry->zip,
-            'providerName' => $inquiry->fromName
+            'request_date' => $inquiry->dateSubmitted,
+            'first_name' => $inquiry->firstName,
+            'last_name' => $inquiry->lastName,
+            'email' => $inquiry->emailAddress,
+            'phone' => $inquiry->phoneNumber,
+            'comments' => $inquiry->comments,
+            'addrStreet' => $inquiry->address,
+            'addrCity' => $inquiry->city,
+            'addrState' => $inquiry->state,
+            'addrZip' => $inquiry->zip,
+            'vendorProvider' => $inquiry->fromName
         ];
 
         // Get Vehicle/Vendor Params
