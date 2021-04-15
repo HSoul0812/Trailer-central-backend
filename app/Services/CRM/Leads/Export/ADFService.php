@@ -30,7 +30,7 @@ class ADFService implements ADFServiceInterface {
      * @return bool
      */
     public function export(InquiryLead $inquiry, Lead $lead) : bool {
-        $leadEmail = $this->leadEmailRepository->find($inquiry->dealerId, $inquiry->locationId);
+        $leadEmail = $this->leadEmailRepository->find($inquiry->dealerId, $inquiry->dealerLocationId);
         if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
             return false;
         }
