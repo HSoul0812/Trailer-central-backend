@@ -28,6 +28,18 @@ class LeadEmailRepository implements LeadEmailRepositoryInterface
     public function update($params) {
         throw new NotImplementedException;
     }
+
+    /**
+     * Find a Lead Email If Exists
+     * 
+     * @param int $dealerId
+     * @param int $dealerLocationId
+     * @return null|LeadEmail
+     */
+    public function find(int $dealerId, int $dealerLocationId): ?LeadEmail
+    {
+        return LeadEmail::where('dealer_location_id', $dealerLocationId)->where('dealer_id', $dealerId)->first();
+    }
     
     public function getLeadEmailByLead(Lead $lead) : LeadEmail
     {
