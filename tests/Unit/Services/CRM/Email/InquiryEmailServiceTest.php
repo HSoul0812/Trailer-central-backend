@@ -402,15 +402,16 @@ class InquiryEmailServiceTest extends TestCase
         // Fake Mail
         Mail::fake();
 
+        // Expect Exception
+        $this->expectException(SendInquiryFailedException::class);
+
 
         // Validate Send Inquiry Result
         $result = $service->send($inquiry);
+        var_dump($result);
 
         // Assert a message was sent to the dealer...
         Mail::assertNotSent(InquiryEmail::class);
-
-        // Expect Exception
-        $this->expectException(SendInquiryFailedException::class);
     }
 
     /**
