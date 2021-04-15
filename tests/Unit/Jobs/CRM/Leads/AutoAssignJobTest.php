@@ -74,7 +74,7 @@ class AutoAssignJobTest extends TestCase
         $autoAssignJob = new AutoAssignJob($lead);
 
         // Handle Auto Assign Job
-        $result = $autoAssignJob->handle();
+        $result = $autoAssignJob->handle($this->autoAssignServiceMock);
 
         // Receive Handling Auto Assign on Leads
         Log::shouldReceive('info')->with('Handling Auto Assign Manually on Lead #' . self::TEST_ITEM_ID);
@@ -121,7 +121,7 @@ class AutoAssignJobTest extends TestCase
         $autoAssignJob = new AutoAssignJob($lead);
 
         // Handle Auto Assign Job
-        $result = $autoAssignJob->handle();
+        $result = $autoAssignJob->handle($this->autoAssignServiceMock);
 
         // Receive Handling Auto Assign on Leads
         Log::shouldReceive('error')->with('Cannot process auto assign; sales person ALREADY assigned to lead!');
