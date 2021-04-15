@@ -244,7 +244,7 @@ class InquiryEmailServiceTest extends TestCase
             }
 
             // BCC Does NOT Exist?
-            if(!(empty($mail->bcc[0]['address']))) {
+            if(empty($mail->bcc[0]['address'])) {
                 $successes++;
             }
 
