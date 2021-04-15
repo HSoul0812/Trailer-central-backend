@@ -1,10 +1,11 @@
 <?php
 
-namespace Tests\Unit\Jobs\Files;
+namespace Tests\Unit\Jobs\CRM\Leads;
 
 use App\Jobs\CRM\Leads\AutoAssignJob;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use Illuminate\Support\Facades\Log;
+use Mockery;
 use Tests\TestCase;
 
 /**
