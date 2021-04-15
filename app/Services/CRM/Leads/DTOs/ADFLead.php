@@ -1044,7 +1044,7 @@ class ADFLead
      *               vendorCountry: string,
      *               providerName: string}
      */
-    public function getEmailParams(): array
+    public function getEmailVars(): array
     {
         return ['requestDate' => $this->requestDate,
                 'vehicleYear' => $this->vehicleYear,
