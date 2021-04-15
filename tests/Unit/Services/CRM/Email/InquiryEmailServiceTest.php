@@ -244,7 +244,7 @@ class InquiryEmailServiceTest extends TestCase
             }
 
             // BCC Does NOT Exist?
-            var_dump($mail->bcc);
+            var_dump(empty($mail->bcc[0]['address']);
             die;
             if($this->assertTrue(empty($mail->bcc[0]['address']))) {
                 $successes++;
