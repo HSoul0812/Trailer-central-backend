@@ -607,7 +607,7 @@ class InquiryEmailServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    public function testSendException()
+    public function testSendWithException()
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
@@ -670,6 +670,9 @@ class InquiryEmailServiceTest extends TestCase
 
         // Assert a message was sent to the dealer...
         Mail::assertNotSent(InquiryEmail::class);
+
+        // Assert True
+        $this->assertFalse($result);
     }
 
     /**

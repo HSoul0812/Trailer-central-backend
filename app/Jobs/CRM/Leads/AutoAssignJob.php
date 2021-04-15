@@ -52,13 +52,9 @@ class AutoAssignJob extends Job
      */
     public function handle(AutoAssignServiceInterface $service)
     {
-        // Job Doesn't Exist?
-        if (empty($this->lead)) {
-            throw new AutoAssignJobMissingLeadException;
-        }
-
         // Job Already Has Sales Person?
         if (!empty($this->lead->leadStatus->sales_person_id)) {
+            $this->log->error('Cannot process auto assign; sales person ALREADY assigned to lead!');
             throw new AutoAssignJobSalesPersonExistsException;
         }
 
