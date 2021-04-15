@@ -176,6 +176,265 @@ class InquiryEmailServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
+    public function testSendInventory()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        $websiteId = self::getTestWebsiteRandom();
+
+        // Get Test Lead
+        $lead = factory(Lead::class)->create([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
+            'website_id' => $websiteId,
+            'inventory_id' => self::TEST_ITEM_ID,
+            'lead_type' => LeadType::TYPE_INVENTORY
+        ]);
+
+        // Send Request Params
+        $sendRequestParams = [
+            'dealer_id' => $lead->dealer_id,
+            'website_id' => $lead->website_id,
+            'dealer_location_id' => $lead->dealer_location_id,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
+            'lead_types' => [$lead->lead_type],
+            'device' => self::TEST_DEVICE,
+            'title' => $lead->title,
+            'url' => $lead->referral,
+            'referral' => $lead->referral,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => $lead->phone_number,
+            'preferred_contact' => '',
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
+            'comments' => $lead->comments,
+            'metadata' => $lead->metadata,
+            'is_spam' => 0,
+            'lead_source' => self::TEST_SOURCE,
+            'lead_status' => LeadStatus::STATUS_MEDIUM,
+            'contact_type' => LeadStatus::TYPE_CONTACT
+        ];
+
+        // Get Inquiry Lead
+        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+
+
+        /** @var InquiryEmailServiceInterface $service */
+        $service = $this->app->make(InquiryEmailServiceInterface::class);
+
+        // Fake Mail
+        Mail::fake();
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($inquiry);
+
+        // Assert a message was sent to the dealer...
+        Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
+            // Check Multiple Things for Successes!
+            $successes = 0;
+
+            // Inquiry Email Exists?
+            if($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail)) {
+                $successes++;
+            }
+
+            // BCC Exists?
+            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])) {
+                $successes++;
+            }
+
+            // Must Be 2!
+            return ($successes === 2);
+        });
+
+        // Result = true
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @covers ::send
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendPart()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        $websiteId = self::getTestWebsiteRandom();
+
+        // Get Test Lead
+        $lead = factory(Lead::class)->create([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
+            'website_id' => $websiteId,
+            'inventory_id' => self::TEST_ITEM_ID,
+            'lead_type' => LeadType::TYPE_PART
+        ]);
+
+        // Send Request Params
+        $sendRequestParams = [
+            'dealer_id' => $lead->dealer_id,
+            'website_id' => $lead->website_id,
+            'dealer_location_id' => $lead->dealer_location_id,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
+            'lead_types' => [$lead->lead_type],
+            'device' => self::TEST_DEVICE,
+            'title' => $lead->title,
+            'url' => $lead->referral,
+            'referral' => $lead->referral,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => $lead->phone_number,
+            'preferred_contact' => '',
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
+            'comments' => $lead->comments,
+            'metadata' => $lead->metadata,
+            'is_spam' => 0,
+            'lead_source' => self::TEST_SOURCE,
+            'lead_status' => LeadStatus::STATUS_MEDIUM,
+            'contact_type' => LeadStatus::TYPE_CONTACT
+        ];
+
+        // Get Inquiry Lead
+        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+
+
+        /** @var InquiryEmailServiceInterface $service */
+        $service = $this->app->make(InquiryEmailServiceInterface::class);
+
+        // Fake Mail
+        Mail::fake();
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($inquiry);
+
+        // Assert a message was sent to the dealer...
+        Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
+            // Check Multiple Things for Successes!
+            $successes = 0;
+
+            // Inquiry Email Exists?
+            if($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail)) {
+                $successes++;
+            }
+
+            // BCC Exists?
+            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])) {
+                $successes++;
+            }
+
+            // Must Be 2!
+            return ($successes === 2);
+        });
+
+        // Result = true
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @covers ::send
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendShowroom()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        $websiteId = self::getTestWebsiteRandom();
+
+        // Get Test Lead
+        $lead = factory(Lead::class)->create([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
+            'website_id' => $websiteId,
+            'inventory_id' => self::TEST_ITEM_ID,
+            'lead_type' => LeadType::TYPE_SHOWROOM
+        ]);
+
+        // Send Request Params
+        $sendRequestParams = [
+            'dealer_id' => $lead->dealer_id,
+            'website_id' => $lead->website_id,
+            'dealer_location_id' => $lead->dealer_location_id,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[4],
+            'lead_types' => [$lead->lead_type],
+            'device' => self::TEST_DEVICE,
+            'title' => $lead->title,
+            'url' => $lead->referral,
+            'referral' => $lead->referral,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => $lead->phone_number,
+            'preferred_contact' => '',
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
+            'comments' => $lead->comments,
+            'metadata' => $lead->metadata,
+            'is_spam' => 0,
+            'lead_source' => self::TEST_SOURCE,
+            'lead_status' => LeadStatus::STATUS_MEDIUM,
+            'contact_type' => LeadStatus::TYPE_CONTACT
+        ];
+
+        // Get Inquiry Lead
+        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+
+
+        /** @var InquiryEmailServiceInterface $service */
+        $service = $this->app->make(InquiryEmailServiceInterface::class);
+
+        // Fake Mail
+        Mail::fake();
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($inquiry);
+
+        // Assert a message was sent to the dealer...
+        Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
+            // Check Multiple Things for Successes!
+            $successes = 0;
+
+            // Inquiry Email Exists?
+            if($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail)) {
+                $successes++;
+            }
+
+            // BCC Exists?
+            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])) {
+                $successes++;
+            }
+
+            // Must Be 2!
+            return ($successes === 2);
+        });
+
+        // Result = true
+        $this->assertTrue($result);
+    }
+
+
+    /**
+     * @covers ::send
+     *
+     * @throws BindingResolutionException
+     */
     public function testSendDev()
     {
         // Get Dealer ID
@@ -408,7 +667,6 @@ class InquiryEmailServiceTest extends TestCase
 
         // Validate Send Inquiry Result
         $result = $service->send($inquiry);
-        var_dump($result);
 
         // Assert a message was sent to the dealer...
         Mail::assertNotSent(InquiryEmail::class);
