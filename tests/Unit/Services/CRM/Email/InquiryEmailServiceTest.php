@@ -275,7 +275,7 @@ class InquiryEmailServiceTest extends TestCase
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
             'inventory_id' => self::TEST_ITEM_ID,
-            'lead_type' => LeadType::TYPE_PART
+            'lead_type' => LeadType::TYPE_INVENTORY
         ]);
 
         // Send Request Params
@@ -361,7 +361,7 @@ class InquiryEmailServiceTest extends TestCase
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
             'inventory_id' => self::TEST_ITEM_ID,
-            'lead_type' => LeadType::TYPE_SHOWROOM
+            'lead_type' => LeadType::TYPE_SHOWROOM_MODEL
         ]);
 
         // Send Request Params
@@ -667,6 +667,8 @@ class InquiryEmailServiceTest extends TestCase
 
         // Validate Send Inquiry Result
         $result = $service->send($inquiry);
+        var_dump($result);
+        die;
 
         // Assert a message was sent to the dealer...
         Mail::assertNotSent(InquiryEmail::class);
