@@ -37,9 +37,9 @@ class ADFEmail extends Mailable
     {
         $from = config('mail.from.address', 'postmaster@trailercentral.com');
 
-        $build = $this->from($from, $this->data['fromName']);
+        $build = $this->from($from, $this->data['providerName']);
 
-        $build->subject(self::SUBJECT);
+        $build->subject($this->subject);
 
         $build->view('emails.leads.ids');
 
