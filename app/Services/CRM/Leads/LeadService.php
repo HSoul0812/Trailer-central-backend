@@ -203,7 +203,7 @@ class LeadService implements LeadServiceInterface
         ]);
 
         // Return Lead
-        return $this->leads->get($lead->identifier);
+        return $this->leads->get(['id' => $lead->identifier]);
     }
 
     /**
