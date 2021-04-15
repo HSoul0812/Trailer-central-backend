@@ -1061,7 +1061,7 @@ class ADFLead
                 'leadState' => $this->addrState,
                 'leadPostal' => $this->addrZip,
                 'dealerId' => $this->dealerId,
-                'dealerLocationId' => $this->dealerLocationId,
+                'dealerLocationId' => $this->locationId,
                 'leadId' => $this->leadId,
                 'vendorName' => $this->vendorName,
                 'vendorContact' => $this->vendorContact,
