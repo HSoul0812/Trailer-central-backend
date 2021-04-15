@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Jobs\CRM\Leads;
 
+use App\Exceptions\CRM\Leads\AutoAssignJobSalesPersonExistsException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\LeadStatus;
@@ -116,6 +117,9 @@ class AutoAssignJobTest extends TestCase
             ->shouldReceive('autoAssign')
             ->never();
 
+
+        // Expect Exception
+        $this->expectException(AutoAssignJobSalesPersonExistsException::class);
 
         // Initialize Auto Assign Job
         $autoAssignJob = new AutoAssignJob($lead);
