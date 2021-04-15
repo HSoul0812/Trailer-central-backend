@@ -3,6 +3,7 @@
 namespace App\Traits\Models;
 
 use Illuminate\Support\Collection;
+use App\Models\User\DealerUserPermission;
 
 /**
  * Class HasPermissionsEmpty
@@ -16,6 +17,19 @@ trait HasPermissionsStub
     public function getPermissions(): Collection
     {
         return new Collection([]);
+    }
+    
+    /**
+     * Returns permissions allowed for a given user
+     * 
+     * @return Collection
+     */
+    public function getPermissionsAllowed(): Collection
+    {
+        // Get all permissions
+        return DealerUserPermission::where('id', '>', 0)
+                                ->groupBy('feature')
+                                ->get();
     }
 
     /**

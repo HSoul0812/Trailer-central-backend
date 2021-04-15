@@ -34,14 +34,9 @@ class SignInController extends RestfulController {
         $accessToken = $request->header('access-token');
         $request = new GetDetailsRequest($request->all());
         if ($request->validate()) {
-            $authToken = AuthToken::where('access_token', $accessToken)->firstOrFail();
-            
-            if (isset($authToken->user->user)) {
-                return $this->response->item($authToken->user->user, new UserTransformer());
-            }
-            
+            $authToken = AuthToken::where('access_token', $accessToken)->firstOrFail();                        
             return $this->response->item($authToken->user, new UserTransformer());
-        }
+        } 
         return $this->response->errorBadRequest();
     }
     
