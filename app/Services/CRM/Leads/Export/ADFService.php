@@ -116,11 +116,11 @@ class ADFService implements ADFServiceInterface {
      *               vendorUrl: string,
      *               vendorEmail: string,
      *               vendorPhone: string,
-     *               vendorAddress: string,
-     *               vendorCity: string,
-     *               vendorState: string,
-     *               vendorPostal: string,
-     *               vendorCountry: string}
+     *               vendorAddrStreet: string,
+     *               vendorAddrCity: string,
+     *               vendorAddrState: string,
+     *               vendorAddrZip: string,
+     *               vendorAddrCountry: string}
      */
     private function getAdfVendor(InquiryLead $inquiry): array {
         // Get Dealer & Location
@@ -139,7 +139,7 @@ class ADFService implements ADFServiceInterface {
             'vendorAddrStreet' => $location->address,
             'vendorAddrCity' => $location->city,
             'vendorAddrState' => $location->region,
-            'vendorAddrPostal' => $location->postalcode,
+            'vendorAddrZip' => $location->postalcode,
             'vendorAddrCountry' => $location->country,
         ];
     }
