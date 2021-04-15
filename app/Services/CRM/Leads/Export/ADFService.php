@@ -98,7 +98,7 @@ class ADFService implements ADFServiceInterface {
         // Initialize ADF Lead Params
         return [
             'vehicleYear' => $item->year ?? 0,
-            'vehicleManufacturer' => $item->manufacturer ?? '',
+            'vehicleMake' => $item->manufacturer ?? '',
             'vehicleModel' => $item->model ?? '',
             'vehicleStock' => $item->stock ?? '',
             'vehicleVin' => $item->vin ?? ''
