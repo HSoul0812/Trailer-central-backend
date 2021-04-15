@@ -4,6 +4,7 @@ namespace App\Services\CRM\Leads\Export;
 
 use App\Jobs\CRM\Leads\Export\ADFJob;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\Export\LeadEmail;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
