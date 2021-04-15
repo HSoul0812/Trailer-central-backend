@@ -40,8 +40,6 @@ class ADFService implements ADFServiceInterface {
         $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
 
         $adf = $this->getAdfLead($inquiry, $lead->identifier);
-        var_dump($leadEmail);
-        die;
 
         ADFJob::dispatchNow($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
         
