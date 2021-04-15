@@ -63,7 +63,7 @@ class ADFJob extends Job
 
     public function handle()
     {
-        Log::info('Mailing ADF Lead', ['lead' => $this->inquiry->leadId]);
+        Log::info('Mailing ADF Lead', ['lead' => $this->adf->leadId]);
 
         try {
             Mail::to($this->toEmails) 
@@ -79,7 +79,7 @@ class ADFJob extends Job
                 $this->lead->save();
             }
             
-            Log::info('ADF Lead Mailed Successfully', ['lead' => $this->lead->identifier]);
+            Log::info('ADF Lead Mailed Successfully', ['lead' => $this->adf->leadId]);
             return true;
         } catch (\Exception $e) {
             Log::error('ADFLead Mail error', $e->getTrace());
