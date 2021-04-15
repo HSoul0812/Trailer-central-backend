@@ -2,6 +2,9 @@
 
 namespace Tests\Unit\Jobs\CRM\Leads;
 
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadType;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Jobs\CRM\Leads\AutoAssignJob;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use Illuminate\Support\Facades\Log;
