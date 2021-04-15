@@ -242,10 +242,11 @@ class InquiryEmailServiceTest extends TestCase
             if($mail->hasTo(InquiryLead::INQUIRY_DEV_TO[0]['email'])) {
                 $successes++;
             }
+            var_dump($mail->to);
+            var_dump(InquiryLead::INQUIRY_DEV_TO);
+            die;
 
             // BCC Does NOT Exist?
-            var_dump(empty($mail->bcc[0]['address']));
-            die;
             if($this->assertTrue(empty($mail->bcc[0]['address']))) {
                 $successes++;
             }
