@@ -10,7 +10,6 @@ use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
