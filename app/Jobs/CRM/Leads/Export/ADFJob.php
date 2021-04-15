@@ -70,7 +70,7 @@ class ADFJob extends Job
                 ->cc($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
-                    new ADFEmail($this->adf->getEmailParams())
+                    new ADFEmail($this->adf)
                 );
 
             // Set ADF Export Date
