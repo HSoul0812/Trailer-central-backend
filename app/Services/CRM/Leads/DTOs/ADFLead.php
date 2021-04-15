@@ -1047,7 +1047,7 @@ class ADFLead
      */
     public function getEmailVars(): array
     {
-        return ['requestDate' => $this->requestDate,
+        return ['requestDate' => $this->requestDate ?? Carbon::now()->setTimezone('UTC')->toDateTimeString(),
                 'vehicleYear' => $this->vehicleYear,
                 'vehicleManufacturer' => $this->vehicleMake,
                 'vehicleModel' => $this->vehicleModel,

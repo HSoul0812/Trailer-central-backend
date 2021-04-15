@@ -75,7 +75,7 @@ class ADFJob extends Job
 
             // Set ADF Export Date
             if(empty($this->lead->adf_email_sent)) {
-                $this->lead->adf_email_sent = Carbon::now()->setTimezone('UTC')->toDateTimeString();;
+                $this->lead->adf_email_sent = Carbon::now()->setTimezone('UTC')->toDateTimeString();
                 $this->lead->save();
             }
             
