@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
@@ -80,6 +81,11 @@ class InquiryServiceTest extends TestCase
      * @var LegacyMockInterface|LeadServiceInterface
      */
     private $leadServiceMock;
+
+    /**
+     * @var LegacyMockInterface|ADFServiceInterface
+     */
+    private $adfServiceMock;
 
     /**
      * @var LegacyMockInterface|InquiryEmailServiceInterface
@@ -210,6 +216,12 @@ class InquiryServiceTest extends TestCase
             ->with($sendInquiryParams)
             ->andReturn($lead);
 
+        // Mock Lead Repository
+        $this->adfServiceMock
+            ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
+
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
@@ -325,6 +337,12 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with($sendInquiryParams)
             ->andReturn($lead);
+
+        // Mock Lead Repository
+        $this->adfServiceMock
+            ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
 
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
@@ -443,6 +461,12 @@ class InquiryServiceTest extends TestCase
             ->with($sendInquiryParams)
             ->andReturn($lead);
 
+        // Mock Lead Repository
+        $this->adfServiceMock
+            ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
+
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
@@ -559,6 +583,12 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with($sendInquiryParams)
             ->andReturn($lead);
+
+        // Mock Lead Repository
+        $this->adfServiceMock
+            ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
 
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
