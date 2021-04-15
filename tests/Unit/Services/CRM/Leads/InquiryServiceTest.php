@@ -613,7 +613,7 @@ class InquiryServiceTest extends TestCase
             ->never();
 
         // Expects Auto Responder Job ONLY
-        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+        $this->expectsJobs([AutoResponderJob::class]);
 
         // Fake Mail
         Mail::fake();
