@@ -597,7 +597,7 @@ class InquiryServiceTest extends TestCase
                 $params['stock'] = 'cleaner-54321';
                 $params['title'] = 'Cleaner 54321';
             break;
-            case "showroom"
+            case "showroom":
                 $params['title'] = '2016 Winnebago Sightseer 33C';
             break;
         }
