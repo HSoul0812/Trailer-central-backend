@@ -149,10 +149,21 @@ class InquiryEmailServiceTest extends TestCase
 
         // Assert a message was sent to the dealer...
         Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
-            if($inquiry->inquiryEmail) {
-                return $mail->hasTo($inquiry->inquiryEmail);
-            }                
-            return false;
+            // Check Multiple Things for Successes!
+            $successes = 0;
+
+            // Inquiry Email Exists?
+            if($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail)) {
+                $successes++;
+            }
+
+            // BCC Exists?
+            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0])) {
+                $successes++;
+            }
+
+            // Must Be 2!
+            return ($successes === 2);
         });
 
         // Result = true

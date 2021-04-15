@@ -29,7 +29,7 @@ class InquiryService implements InquiryServiceInterface
     /**
      * @var App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface
      */
-    protected $trackingUnits;
+    protected $trackingUnit;
 
     /**
      * @var App\Services\CRM\Leads\LeadServiceInterface
@@ -39,7 +39,7 @@ class InquiryService implements InquiryServiceInterface
     /**
      * @var App\Services\CRM\Leads\InquiryEmailServiceInterface
      */
-    protected $inquiry;
+    protected $inquiryEmail;
 
     /**
      * LeadService constructor.
