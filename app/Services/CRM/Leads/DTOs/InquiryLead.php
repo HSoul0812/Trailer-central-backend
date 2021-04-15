@@ -35,7 +35,6 @@ class InquiryLead
     const INQUIRY_DEV_TO = [
         ['email' => 'ben+dev-contact-forms@trailercentral.com'],
         ['email' => 'judson@trailercentral.com'],
-        ['email' => 'alberto@trailercentral.com'],
         ['email' => 'david@trailercentral.com']
     ];
 
