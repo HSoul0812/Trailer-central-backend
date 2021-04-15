@@ -44,12 +44,10 @@ class InquiryServiceTest extends TestCase
     ];
 
     /**
-     * @const array
+     * @const string
      */
-    const TEST_INQUIRY_DETAILS = [
-        'inquiry_email' => 'admin@operatebeyond.com',
-        'inquiry_name' => 'Operate Beyond'
-    ];
+    const TEST_INQUIRY_EMAIL = 'admin@operatebeyond.com';
+    const TEST_INQUIRY_NAME = 'Operate Beyond';
 
     /**
      * @const string
@@ -567,9 +565,8 @@ class InquiryServiceTest extends TestCase
         $params['from_name'] = $config['fromName'];
 
         // Get Inquiry Name/Email
-        $inquiry = self::TEST_INQUIRY_DETAILS;
-        $params['inquiry_name'] = $inquiry['inquiry_name'];
-        $params['inquiry_email'] = $inquiry['inquiry_email'];
+        $params['inquiry_name'] = self::TEST_INQUIRY_NAME;
+        $params['inquiry_email'] = self::TEST_INQUIRY_EMAIL;
 
         // Get Data By Inquiry Type
         $vars = $this->getInquiryTypeVars($params);
