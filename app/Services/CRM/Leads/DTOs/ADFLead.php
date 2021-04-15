@@ -48,11 +48,6 @@ class ADFLead
     private $leadId;
 
     /**
-     * @var int Interaction ID for Merges on ADF Lead
-     */
-    private $interactionId;
-
-    /**
      * @var string Date Lead Was Requested
      */
     private $requestDate;
@@ -1068,7 +1063,6 @@ class ADFLead
                 'dealerId' => $this->dealerId,
                 'dealerLocationId' => $this->dealerLocationId,
                 'leadId' => $this->leadId,
-                'interactionId' => $this->interactionId,
                 'vendorName' => $this->vendorName,
                 'vendorContact' => $this->vendorContact,
                 'vendorWebsite' => $this->vendorUrl,

@@ -33,9 +33,6 @@
    @if (!empty($leadId))
       <id sequence="3" source="ID">{{ $leadId }}</id>
    @endif
-   @if (!empty($interactionId))
-      <id sequence="4" source="InteractionID">{{ $interactionId }}</id>
-   @endif
    <vendorname>{{ $vendorName }}</vendorname>
    <contact>
     <name part="full">{{ $vendorContact }}</name>

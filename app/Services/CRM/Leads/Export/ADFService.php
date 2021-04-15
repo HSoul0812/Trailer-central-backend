@@ -38,7 +38,7 @@ class ADFService implements ADFServiceInterface {
 
         $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
 
-        $adf = $this->getAdfLead($inquiry);
+        $adf = $this->getAdfLead($inquiry, $lead->identifier);
 
         ADFJob::dispatchNow($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
         
@@ -50,10 +50,13 @@ class ADFService implements ADFServiceInterface {
      * Create ADF Lead From InquiryLead
      * 
      * @param InquiryLead $inquiry
+     * @param int $leadId
+     * @return ADFLead
      */
-    private function getAdfLead(InquiryLead $inquiry) {
+    private function getAdfLead(InquiryLead $inquiry, int $leadId): ADFLead {
         // Initialize ADF Lead Params
         $params = [
+            'leadId' => $leadId,
             'subject' => $inquiry->getSubject(),
             'requestDate' => $inquiry->dateSubmitted,
             'leadFirst' => $inquiry->firstName,
@@ -61,12 +64,10 @@ class ADFService implements ADFServiceInterface {
             'leadEmail' => $inquiry->emailAddress,
             'leadPhone' => $inquiry->phoneNumber,
             'leadComments' => $inquiry->comments,
-            'leadAddress' => $inquiry->addrStreet,
-            'leadCity' => $inquiry->addrCity,
-            'leadState' => $inquiry->addrState,
-            'leadPostal' => $inquiry->addrZip,
-            'leadId' => $inquiry->leadId,
-            'interactionId' => $inquiry->interactionId,
+            'leadAddress' => $inquiry->address,
+            'leadCity' => $inquiry->city,
+            'leadState' => $inquiry->state,
+            'leadPostal' => $inquiry->zip,
             'providerName' => $inquiry->fromName
         ];
 
