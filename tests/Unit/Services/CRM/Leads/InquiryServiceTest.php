@@ -201,7 +201,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getAllMatches')
             ->once()
             ->with($sendInquiryParams)
-            ->onReturn(new Collection());
+            ->andReturn(new Collection());
 
         // Mock Create Lead
         $this->leadServiceMock
@@ -317,7 +317,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getAllMatches')
             ->once()
             ->with($sendInquiryParams)
-            ->onReturn(new Collection());
+            ->andReturn(new Collection());
 
         // Mock Create Lead
         $this->leadServiceMock
@@ -434,7 +434,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getAllMatches')
             ->once()
             ->with($sendInquiryParams)
-            ->onReturn(new Collection());
+            ->andReturn(new Collection());
 
         // Mock Create Lead
         $this->leadServiceMock
@@ -551,7 +551,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getAllMatches')
             ->once()
             ->with($sendInquiryParams)
-            ->onReturn(new Collection());
+            ->andReturn(new Collection());
 
         // Mock Create Lead
         $this->leadServiceMock
