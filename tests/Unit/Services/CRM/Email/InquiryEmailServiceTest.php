@@ -419,7 +419,7 @@ class InquiryEmailServiceTest extends TestCase
         }
 
         // Return Result
-        return $metadata;
+        return json_encode($metadata);
     }
 
     /**
