@@ -44,6 +44,14 @@ class InquiryServiceTest extends TestCase
     ];
 
     /**
+     * @const array
+     */
+    const TEST_INQUIRY_DETAILS = [
+        'inquiry_email' => 'admin@operatebeyond.com',
+        'inquiry_name' => 'Operate Beyond'
+    ];
+
+    /**
      * @const string
      */
     const TEST_DOMAIN = 'https://redbrushtrailers.com';
