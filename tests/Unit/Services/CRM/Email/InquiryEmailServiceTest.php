@@ -667,8 +667,6 @@ class InquiryEmailServiceTest extends TestCase
 
         // Validate Send Inquiry Result
         $result = $service->send($inquiry);
-        var_dump($result);
-        die;
 
         // Assert a message was sent to the dealer...
         Mail::assertNotSent(InquiryEmail::class);
