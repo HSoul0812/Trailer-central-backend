@@ -117,6 +117,9 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock = Mockery::mock(InquiryEmailServiceInterface::class);
         $this->app->instance(InquiryEmailServiceInterface::class, $this->inquiryEmailServiceMock);
 
+        $this->adfServiceMock = Mockery::mock(ADFServiceInterface::class);
+        $this->app->instance(ADFServiceInterface::class, $this->adfServiceMock);
+
         $this->leadRepositoryMock = Mockery::mock(LeadRepositoryInterface::class);
         $this->app->instance(LeadRepositoryInterface::class, $this->leadRepositoryMock);
 
