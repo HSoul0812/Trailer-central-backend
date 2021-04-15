@@ -385,7 +385,7 @@ class InquiryEmailServiceTest extends TestCase
             'state' => $lead->state,
             'zip' => $lead->zip,
             'comments' => $lead->comments,
-            'metadata' => json_decode($this->getMetadata()),
+            'metadata' => [],
             'is_spam' => 1,
             'lead_source' => self::TEST_SOURCE,
             'lead_status' => LeadStatus::STATUS_MEDIUM,
