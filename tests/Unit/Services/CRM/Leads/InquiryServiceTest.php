@@ -4,17 +4,12 @@ namespace Tests\Unit\Services\CRM\Leads;
 
 use App\Jobs\CRM\Leads\AutoAssignJob;
 use App\Jobs\Email\AutoResponderJob;
-use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
-use App\Models\Showroom\Showroom;
-use App\Models\Website\Website;
 use App\Models\Website\Tracking\Tracking;
-use App\Models\Website\Tracking\TrackingUnit;
-use App\Models\User\DealerLocation;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
@@ -22,7 +17,6 @@ use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Mockery;
 use Tests\TestCase;
@@ -50,6 +44,31 @@ class InquiryServiceTest extends TestCase
         'logoUrl' => 'https://trailercentral.com',
         'fromName' => 'Trailer Central'
     ];
+
+    /**
+     * @const string
+     */
+    const TEST_DOMAIN = 'https://redbrushtrailers.com';
+
+    /**
+     * @const string
+     */
+    const TEST_SESSION_ID = 'CT000000000000000001';
+
+    /**
+     * @const string
+     */
+    const TEST_SOURCE = 'Facebook';
+
+    /**
+     * @const int
+     */
+    const TEST_SALES_PERSON_ID = 102;
+
+    /**
+     * @const int
+     */
+    const TEST_ITEM_ID = 98179430;
 
 
     /**
@@ -99,27 +118,17 @@ class InquiryServiceTest extends TestCase
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
         $websiteId = self::getTestWebsiteRandom();
-        $website = Website::find($websiteId);
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
             'inventory_id' => 0,
             'lead_type' => LeadType::TYPE_GENERAL
         ]);
-        $status = factory(LeadStatus::class)->create([
-            'tc_lead_identifier' => $lead->identifier,
-            'sales_person_id' => 0
-        ]);
-
-        // Get Tracking Details
-        $tracking = factory(Tracking::class)->create([
-            'lead_id' => $lead->identifier,
-            'domain' => $website->domain
-        ]);
-        $trackingUnits = $this->createTrackingUnits($dealerId, $tracking->session_id);
 
         // Send Request Params
         $sendRequestParams = [
@@ -144,10 +153,10 @@ class InquiryServiceTest extends TestCase
             'comments' => $lead->comments,
             'metadata' => $lead->metadata,
             'is_spam' => 0,
-            'lead_source' => $status->source,
-            'lead_status' => $status->status,
-            'contact_type' => $status->task,
-            'cookie_session_id' => $tracking->session_id
+            'lead_source' => self::TEST_SOURCE,
+            'lead_status' => LeadStatus::STATUS_MEDIUM,
+            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
         // Send Inquiry Params
@@ -155,7 +164,7 @@ class InquiryServiceTest extends TestCase
         $sendInquiryParams['inventory'] = [];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($website, $sendRequestParams);
+        $inquiry = $this->prepareInquiryLead($sendRequestParams);
 
 
         /** @var InquiryServiceInterface $service */
@@ -203,7 +212,6 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result->identifier, $lead->identifier);
         $this->assertSame($result->full_name, $lead->full_name);
         $this->assertSame($result->email_address, $lead->email_address);
         $this->assertSame($result->phone_number, $lead->phone_number);
@@ -220,32 +228,21 @@ class InquiryServiceTest extends TestCase
         $dealerId = self::getTestDealerId();
         $dealerLocationId = self::getTestDealerLocationId();
         $websiteId = self::getTestWebsiteRandom();
-        $website = Website::find($websiteId);
-
-        // Create Dummy Inventory
-        $inventory = factory(Inventory::class)->create([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId
-        ]);
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
-            'inventory_id' => $inventory->inventory_id,
+            'inventory_id' => self::TEST_ITEM_ID,
             'lead_type' => LeadType::TYPE_INVENTORY
-        ]);
-        $status = factory(LeadStatus::class)->create([
-            'tc_lead_identifier' => $lead->identifier,
-            'sales_person_id' => 0
         ]);
 
         // Get Tracking Details
-        $tracking = factory(Tracking::class)->create([
+        $tracking = factory(Tracking::class)->make([
             'lead_id' => $lead->identifier,
-            'domain' => $website->domain
+            'domain' => self::TEST_DOMAIN
         ]);
-        $trackingUnits = $this->createTrackingUnits($dealerId, $tracking->session_id);
 
         // Send Request Params
         $sendRequestParams = [
@@ -271,10 +268,10 @@ class InquiryServiceTest extends TestCase
             'comments' => $lead->comments,
             'metadata' => $lead->metadata,
             'is_spam' => 0,
-            'lead_source' => $status->source,
-            'lead_status' => $status->status,
-            'contact_type' => $status->task,
-            'cookie_session_id' => $tracking->session_id
+            'lead_source' => self::TEST_SOURCE,
+            'lead_status' => LeadStatus::STATUS_MEDIUM,
+            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
         // Send Inquiry Params
@@ -282,7 +279,7 @@ class InquiryServiceTest extends TestCase
         $sendInquiryParams['inventory'] = [$sendRequestParams['item_id']];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($website, $sendRequestParams);
+        $inquiry = $this->prepareInquiryLead($sendRequestParams);
 
 
         /** @var InquiryServiceInterface $service */
@@ -330,16 +327,7 @@ class InquiryServiceTest extends TestCase
         // Validate Send Inquiry Result
         $result = $service->send($sendRequestParams);
 
-        // Assert a message was sent to the dealer...
-        /*Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
-            if(empty($inquiry->inquiryEmail)) {
-                return false;
-            }                
-            return $mail->hasTo($inquiry->inquiryEmail);
-        });*/
-
         // Match Lead Details
-        $this->assertSame($result->identifier, $lead->identifier);
         $this->assertSame($result->full_name, $lead->full_name);
         $this->assertSame($result->email_address, $lead->email_address);
         $this->assertSame($result->phone_number, $lead->phone_number);
@@ -354,32 +342,17 @@ class InquiryServiceTest extends TestCase
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
         $websiteId = self::getTestWebsiteRandom();
-        $website = Website::find($websiteId);
-
-        // Create Dummy Inventory
-        $inventory = factory(Part::class)->create([
-            'dealer_id' => $dealerId
-        ]);
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
             'inventory_id' => 0,
             'lead_type' => LeadType::TYPE_INVENTORY
         ]);
-        $status = factory(LeadStatus::class)->create([
-            'tc_lead_identifier' => $lead->identifier,
-            'sales_person_id' => 0
-        ]);
-
-        // Get Tracking Details
-        $tracking = factory(Tracking::class)->create([
-            'lead_id' => $lead->identifier,
-            'domain' => $website->domain
-        ]);
-        $trackingUnits = $this->createTrackingUnits($dealerId, $tracking->session_id);
 
         // Send Request Params
         $sendRequestParams = [
@@ -388,7 +361,7 @@ class InquiryServiceTest extends TestCase
             'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
             'lead_types' => [$lead->lead_type],
-            'item_id' => $inventory->id,
+            'item_id' => self::TEST_ITEM_ID,
             'device' => self::TEST_DEVICE,
             'title' => $lead->title,
             'url' => $lead->referral,
@@ -405,11 +378,10 @@ class InquiryServiceTest extends TestCase
             'comments' => $lead->comments,
             'metadata' => $lead->metadata,
             'is_spam' => 0,
-            'lead_source' => $status->source,
-            'lead_status' => $status->status,
-            'contact_type' => $status->task,
-            //'sales_person_id' => $status->sales_person_id,
-            'cookie_session_id' => $tracking->session_id
+            'lead_source' => self::TEST_SOURCE,
+            'lead_status' => LeadStatus::STATUS_MEDIUM,
+            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
         // Send Inquiry Params
@@ -417,7 +389,7 @@ class InquiryServiceTest extends TestCase
         $sendInquiryParams['inventory'] = [];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($website, $sendRequestParams);
+        $inquiry = $this->prepareInquiryLead($sendRequestParams);
 
 
         /** @var InquiryServiceInterface $service */
@@ -446,8 +418,7 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, $lead->identifier)
-            ->andReturn($tracking);
+            ->with($inquiry->cookieSessionId, $lead->identifier);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
@@ -466,7 +437,6 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result->identifier, $lead->identifier);
         $this->assertSame($result->full_name, $lead->full_name);
         $this->assertSame($result->email_address, $lead->email_address);
         $this->assertSame($result->phone_number, $lead->phone_number);
@@ -481,24 +451,16 @@ class InquiryServiceTest extends TestCase
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
         $websiteId = self::getTestWebsiteRandom();
-        $website = Website::find($websiteId);
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
             'inventory_id' => 0,
             'lead_type' => LeadType::TYPE_INVENTORY
-        ]);
-        $status = factory(LeadStatus::class)->create([
-            'tc_lead_identifier' => $lead->identifier
-        ]);
-
-        // Get Tracking Details
-        $tracking = factory(Tracking::class)->create([
-            'lead_id' => $lead->identifier,
-            'domain' => $website->domain
         ]);
 
         // Send Request Params
@@ -524,11 +486,11 @@ class InquiryServiceTest extends TestCase
             'comments' => $lead->comments,
             'metadata' => $lead->metadata,
             'is_spam' => 0,
-            'lead_source' => $status->source,
-            'lead_status' => $status->status,
-            'contact_type' => $status->task,
-            'sales_person_id' => $status->sales_person_id,
-            'cookie_session_id' => $tracking->session_id
+            'lead_source' => self::TEST_SOURCE,
+            'lead_status' => LeadStatus::STATUS_MEDIUM,
+            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'sales_person_id' => self::TEST_SALES_PERSON_ID,
+            'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
         // Send Inquiry Params
@@ -536,7 +498,7 @@ class InquiryServiceTest extends TestCase
         $sendInquiryParams['inventory'] = [];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($website, $sendRequestParams);
+        $inquiry = $this->prepareInquiryLead($sendRequestParams);
 
 
         /** @var InquiryServiceInterface $service */
@@ -565,8 +527,7 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, $lead->identifier)
-            ->andReturn($tracking);
+            ->with($inquiry->cookieSessionId, $lead->identifier);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
@@ -584,66 +545,9 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result->identifier, $lead->identifier);
         $this->assertSame($result->full_name, $lead->full_name);
         $this->assertSame($result->email_address, $lead->email_address);
         $this->assertSame($result->phone_number, $lead->phone_number);
-    }
-
-
-    /**
-     * Create an Even Number of Tracking Units
-     * 
-     * @param int $dealerId
-     * @param string $sessionId
-     * @return Collection<TrackingUnit>
-     */
-    private function createTrackingUnits(int $dealerId, string $sessionId): Collection {
-        // Initialize Collection
-        $units = [];
-        $parts = [];
-        $inventory = [];
-
-        // Differentiate By Types
-        $seeds = [
-            ['type' => 'inventory', 'item' => 0],
-            ['type' => 'part', 'item' => 0],
-            ['type' => 'part', 'item' => 1],
-            ['type' => 'inventory', 'item' => 1],
-            ['type' => 'part', 'item' => 0],
-            ['type' => 'inventory', 'item' => 1]
-        ];
-
-        // Loop Seeds
-        collect($seeds)->each(function (array $seed) use(&$units, &$parts, &$inventory, $sessionId, $dealerId): void {
-            // Create Inventory/Part
-            if($seed['type'] === 'part') {
-                if(!isset($parts[$seed['item']])) {
-                    $parts[] = factory(Part::class)->create([
-                        'dealer_id' => $dealerId
-                    ]);
-                }
-                $itemId = $parts[$seed['item']]->id;
-            } else {
-                if(!isset($inventory[$seed['item']])) {
-                    $inventory[] = factory(Inventory::class)->create([
-                        'dealer_id' => $dealerId
-                    ]);
-                }
-                $itemId = $inventory[$seed['item']]->inventory_id;
-            }
-
-            // Create Tracking Unit
-            $units[] = factory(TrackingUnit::class)->create([
-                'session_id' => $sessionId,
-                'type' => $seed['type'],
-                'inventory_id' => $itemId
-            ]);
-            sleep(1);
-        });
-
-        // Return Result
-        return collect($units);
     }
 
     /**
@@ -652,9 +556,9 @@ class InquiryServiceTest extends TestCase
      * @param array $params
      * @return InquiryLead
      */
-    private function prepareInquiryLead(Website $website, array $params) {
+    private function prepareInquiryLead(array $params) {
         // Set Website Domain
-        $params['website_domain'] = $website->domain;
+        $params['website_domain'] = self::TEST_DOMAIN;
 
         // Get Inquiry From Details For Website
         $config = self::TEST_WEBSITE_CONFIG;
@@ -663,48 +567,15 @@ class InquiryServiceTest extends TestCase
         $params['from_name'] = $config['fromName'];
 
         // Get Inquiry Name/Email
-        $details = $this->getInquiryDetails($params);
+        $inquiry = self::TEST_INQUIRY_DETAILS;
+        $params['inquiry_name'] = $inquiry['inquiry_name'];
+        $params['inquiry_email'] = $inquiry['inquiry_email'];
 
         // Get Data By Inquiry Type
-        $vars = $this->getInquiryTypeVars($details);
+        $vars = $this->getInquiryTypeVars($params);
 
         // Create Inquiry Lead
         return new InquiryLead($vars);
-    }
-
-    /**
-     * Get Inquiry Name/Email Details
-     * 
-     * @param array $params
-     * @return array_merge($params, array{'inquiry_email': string,
-     *                                    'inquiry_name': string})
-     */
-    private function getInquiryDetails(array $params): array {
-        // Get Inquiry Details From Dealer Location?
-        if(!empty($params['dealer_location_id'])) {
-            $dealerLocation = DealerLocation::find($params['dealer_location_id']);
-            if(!empty($dealerLocation->name)) {
-                $params['inquiry_name'] = $dealerLocation->name;
-                $params['inquiry_email'] = $dealerLocation->email;
-                return $params;
-            }
-        }
-
-        // Get Inquiry Details From Inventory Item?
-        if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
-            $inventory = Inventory::find($params['item_id']);
-            if(!empty($inventory->dealerLocation->name)) {
-                $params['inquiry_name'] = $inventory->dealerLocation->name;
-                $params['inquiry_email'] = $inventory->dealerLocation->email;
-                return $params;
-            }
-        }
-
-        // Get Inquiry Details From Dealer
-        $dealer = User::find($params['dealer_id']);
-        $params['inquiry_name'] = $dealer->name;
-        $params['inquiry_email'] = $dealer->email;
-        return $params;
     }
 
     /**
@@ -719,20 +590,15 @@ class InquiryServiceTest extends TestCase
         switch($params['inquiry_type']) {
             case "inventory":
             case "bestprice":
-                $inventory = Inventory::find($params['item_id']);
-                $params['stock'] = !empty($inventory->stock) ? $inventory->stock : '';
-                $params['title'] = $inventory->title;
+                $params['stock'] = 'TESTTRADEIN9995';
+                $params['title'] = '2020 4-Star Trailers Denali  Popup Camper';
             break;
             case "part":
-                $part = Part::find($params['item_id']);
-                $params['stock'] = !empty($part->sku) ? $part->sku : '';
-                $params['title'] = $part->title;
+                $params['stock'] = 'cleaner-54321';
+                $params['title'] = 'Cleaner 54321';
             break;
-            case "showroom":
-                $showroom = Showroom::find($params['item_id']);
-                $title = $showroom->year . ' '. $showroom->manufacturer;
-                $title .= (!empty($showroom->series) ? ' ' . $showroom->series : '');
-                $params['title'] = $title . ' ' . $showroom->model;
+            case "showroom"
+                $params['title'] = '2016 Winnebago Sightseer 33C';
             break;
         }
 
