@@ -158,7 +158,7 @@ class InquiryEmailServiceTest extends TestCase
             }
 
             // BCC Exists?
-            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0])) {
+            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])) {
                 $successes++;
             }
 
