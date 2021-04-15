@@ -59,9 +59,9 @@ class ADFService implements ADFServiceInterface {
         $params = [
             'leadId' => $leadId,
             'subject' => $inquiry->getSubject(),
-            'request_date' => $inquiry->dateSubmitted,
-            'first_name' => $inquiry->firstName,
-            'last_name' => $inquiry->lastName,
+            'requestDate' => $inquiry->dateSubmitted,
+            'firstName' => $inquiry->firstName,
+            'lastName' => $inquiry->lastName,
             'email' => $inquiry->emailAddress,
             'phone' => $inquiry->phoneNumber,
             'comments' => $inquiry->comments,
@@ -110,7 +110,7 @@ class ADFService implements ADFServiceInterface {
      * 
      * @param InquiryLead $inquiry
      * @return array{dealerId: int,
-     *               dealerLocationId: int,
+     *               locationId: int,
      *               vendorName: string,
      *               vendorContact: string,
      *               vendorWebsite: string,
@@ -130,7 +130,7 @@ class ADFService implements ADFServiceInterface {
         // Initialize ADF Lead Params
         return [
             'dealerId' => $inquiry->dealerId,
-            'dealerLocationId' => $inquiry->dealerLocationId,
+            'locationId' => $inquiry->dealerLocationId,
             'vendorName' => $dealer->name,
             'vendorContact' => $location->contact,
             'vendorWebsite' => $location->website,
