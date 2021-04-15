@@ -411,9 +411,6 @@ class InquiryEmailServiceTest extends TestCase
 
         // Expect Exception
         $this->expectException(SendInquiryFailedException::class);
-
-        // Result = true
-        $this->assertTrue($result);
     }
 
     /**
