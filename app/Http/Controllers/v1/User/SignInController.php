@@ -8,8 +8,11 @@ use App\Services\User\PasswordResetServiceInterface;
 use App\Http\Requests\User\FinishPasswordResetRequest;
 use App\Http\Requests\User\SignInRequest;
 use App\Http\Requests\User\StartPasswordResetRequest;
+use App\Models\User\AuthToken;
+use App\Http\Requests\User\GetDetailsRequest;
 use Dingo\Api\Http\Request;
 use App\Transformers\User\UserSignInTransformer;
+use App\Transformers\User\UserTransformer;
 
 class SignInController extends RestfulController {
     
@@ -24,6 +27,22 @@ class SignInController extends RestfulController {
         $this->users = $userRepo;
         $this->passwordResetService = $passwordResetService;
         $this->transformer = new UserSignInTransformer();
+    }
+    
+    public function details(Request $request)
+    {
+        $accessToken = $request->header('access-token');
+        $request = new GetDetailsRequest($request->all());
+        if ($request->validate()) {
+            $authToken = AuthToken::where('access_token', $accessToken)->firstOrFail();
+            
+            if (isset($authToken->user->user)) {
+                return $this->response->item($authToken->user->user, new UserTransformer());
+            }
+            
+            return $this->response->item($authToken->user, new UserTransformer());
+        }
+        return $this->response->errorBadRequest();
     }
     
     public function signIn(Request $request)
