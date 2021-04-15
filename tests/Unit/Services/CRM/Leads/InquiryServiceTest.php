@@ -133,6 +133,7 @@ class InquiryServiceTest extends TestCase
             'inventory_id' => 0,
             'lead_type' => LeadType::TYPE_GENERAL
         ]);
+        $lead->identifier = self::TEST_ITEM_ID;
 
         // Send Request Params
         $sendRequestParams = [
@@ -240,6 +241,7 @@ class InquiryServiceTest extends TestCase
             'inventory_id' => self::TEST_ITEM_ID,
             'lead_type' => LeadType::TYPE_INVENTORY
         ]);
+        $lead->identifier = self::TEST_ITEM_ID;
 
         // Send Request Params
         $sendRequestParams = [
@@ -349,6 +351,7 @@ class InquiryServiceTest extends TestCase
             'inventory_id' => 0,
             'lead_type' => LeadType::TYPE_INVENTORY
         ]);
+        $lead->identifier = self::TEST_ITEM_ID;
 
         // Send Request Params
         $sendRequestParams = [
@@ -458,6 +461,7 @@ class InquiryServiceTest extends TestCase
             'inventory_id' => 0,
             'lead_type' => LeadType::TYPE_INVENTORY
         ]);
+        $lead->identifier = self::TEST_ITEM_ID;
 
         // Send Request Params
         $sendRequestParams = [
