@@ -7,6 +7,7 @@ use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
@@ -14,6 +15,7 @@ use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Mail;
 use Mockery;
 use Tests\TestCase;
@@ -85,6 +87,11 @@ class InquiryServiceTest extends TestCase
     private $inquiryEmailServiceMock;
 
     /**
+     * @var LegacyMockInterface|LeadRepositoryInterface
+     */
+    private $leadRepositoryMock;
+
+    /**
      * @var LegacyMockInterface|TrackingRepositoryInterface
      */
     private $trackingRepositoryMock;
@@ -103,6 +110,9 @@ class InquiryServiceTest extends TestCase
 
         $this->inquiryEmailServiceMock = Mockery::mock(InquiryEmailServiceInterface::class);
         $this->app->instance(InquiryEmailServiceInterface::class, $this->inquiryEmailServiceMock);
+
+        $this->leadRepositoryMock = Mockery::mock(LeadRepositoryInterface::class);
+        $this->app->instance(LeadRepositoryInterface::class, $this->leadRepositoryMock);
 
         $this->trackingRepositoryMock = Mockery::mock(TrackingRepositoryInterface::class);
         $this->app->instance(TrackingRepositoryInterface::class, $this->trackingRepositoryMock);
@@ -185,6 +195,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock Lead Repository
+        $this->leadRepositoryMock
+            ->shouldReceive('getAllMatches')
+            ->once()
+            ->with($sendInquiryParams)
+            ->onReturn(new Collection());
 
         // Mock Create Lead
         $this->leadServiceMock
@@ -294,6 +311,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock Lead Repository
+        $this->leadRepositoryMock
+            ->shouldReceive('getAllMatches')
+            ->once()
+            ->with($sendInquiryParams)
+            ->onReturn(new Collection());
 
         // Mock Create Lead
         $this->leadServiceMock
@@ -405,6 +429,13 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('send')
             ->once();
 
+        // Mock Lead Repository
+        $this->leadRepositoryMock
+            ->shouldReceive('getAllMatches')
+            ->once()
+            ->with($sendInquiryParams)
+            ->onReturn(new Collection());
+
         // Mock Create Lead
         $this->leadServiceMock
             ->shouldReceive('create')
@@ -514,6 +545,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock Lead Repository
+        $this->leadRepositoryMock
+            ->shouldReceive('getAllMatches')
+            ->once()
+            ->with($sendInquiryParams)
+            ->onReturn(new Collection());
 
         // Mock Create Lead
         $this->leadServiceMock
