@@ -5,7 +5,6 @@ namespace App\Services\CRM\Leads\DTOs;
 use App\Models\CRM\Leads\Lead;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
-use Carbon\Carbon;
 
 /**
  * Class InquiryLead
@@ -588,19 +587,6 @@ class InquiryLead
             'originalContactList' => !empty($metadata['ORIGINAL_RECIPIENTS']) ? implode('; ', $metadata['ORIGINAL_RECIPIENTS']) : '',
             'resendUrl'           => $metadata['REMAIL_URL'] ?? ''
         ];
-    }
-
-
-    /**
-     * Get ADF Email Sent
-     * 
-     * @return string
-     */
-    public function getAdfEmailSent() {
-        if($this->adfEmailSent) {
-            return $this->adfEmailSent;
-        }
-        return Carbon::now()->setTimezone('UTC')->toDateTimeString();
     }
 
 

@@ -5,7 +5,6 @@ namespace App\Jobs\CRM\Leads\Export;
 use App\Jobs\Job;
 use App\Mail\CRM\Leads\Export\ADFEmail;
 use App\Models\CRM\Leads\Lead;
-use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -13,6 +12,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Carbon\Carbon;
 
 /**
  * Class ADFJob
@@ -23,9 +23,9 @@ class ADFJob extends Job
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var InquiryLead
+     * @var ADFLead
      */
-    private $inquiry;
+    private $adf;
 
     /**
      * @var Lead
@@ -52,11 +52,10 @@ class ADFJob extends Job
      * AutoResponder constructor.
      * @param InquiryLead $lead
      */
-    public function __construct(InquiryLead $inquiry, Lead $lead, array $toEmails, array $copiedEmails, array $hiddenCopiedEmails = [])
+    public function __construct(ADFLead $adf, Lead $lead, array $toEmails, array $copiedEmails, array $hiddenCopiedEmails = [])
     {
-        $this->inquiry = $inquiry;
+        $this->adf = $adf;
         $this->lead = $lead;
-        $this->adf = $this->getAdfLead($inquiry);
         $this->toEmails = $toEmails;
         $this->copiedEmails = $copiedEmails;
         $this->hiddenCopiedEmails = $hiddenCopiedEmails;
@@ -64,19 +63,19 @@ class ADFJob extends Job
 
     public function handle()
     {
-        Log::info('Mailing ADF Lead', ['lead' => $this->inquiry->leadId, 'interaction' => $this->inquiry->interactionId]);
+        Log::info('Mailing ADF Lead', ['lead' => $this->inquiry->leadId]);
 
         try {
             Mail::to($this->toEmails) 
                 ->cc($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
-                    new ADFEmail($this->inquiry)
+                    new ADFEmail($this->adf->getEmailParams())
                 );
 
             // Set ADF Export Date
             if(empty($this->lead->adf_email_sent)) {
-                $this->lead->adf_email_sent = $this->inquiry->getAdfSent();
+                $this->lead->adf_email_sent = Carbon::now()->setTimezone('UTC')->toDateTimeString();;
                 $this->lead->save();
             }
             
