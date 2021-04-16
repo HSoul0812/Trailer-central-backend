@@ -108,7 +108,7 @@ class ADFServiceTest extends TestCase
         
         $service = $this->app->make(ADFService::class);
 
-        $result = $service->export($lead);
+        $result = $service->export($inquiry, $lead);
 
         $this->assertTrue($result);
     }
