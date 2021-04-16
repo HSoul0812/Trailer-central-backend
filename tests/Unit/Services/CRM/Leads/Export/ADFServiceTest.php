@@ -59,16 +59,16 @@ class ADFServiceTest extends TestCase
         $this->app->instance(ADFServiceInterface::class, $this->adfService);
         
         $this->leadEmailRepository = Mockery::mock(LeadEmailRepositoryInterface::class);
-        $this->app->instance(LeadEmailRepository::class, $this->leadEmailRepository);
+        $this->app->instance(LeadEmailRepositoryInterface::class, $this->leadEmailRepository);
         
         $this->inventoryRepository = Mockery::mock(InventoryRepositoryInterface::class);
-        $this->app->instance(InventoryRepository::class, $this->inventoryRepository);
+        $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepository);
         
         $this->userRepository = Mockery::mock(UserRepositoryInterface::class);
-        $this->app->instance(UserRepository::class, $this->userRepository);
+        $this->app->instance(UserRepositoryInterface::class, $this->userRepository);
         
         $this->dealerLocationRepository = Mockery::mock(DealerLocationRepositoryInterface::class);
-        $this->app->instance(DealerLocationRepository::class, $this->dealerLocationRepository);
+        $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepository);
     }
         
     public function testExportADFLead()
