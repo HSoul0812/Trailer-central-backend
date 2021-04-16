@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\CRM\Leads;
 
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\CRM\Leads\Inquiry\CreateInquiryRequest;
 use App\Http\Requests\CRM\Leads\Inquiry\SendInquiryRequest;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Transformers\CRM\Leads\LeadTransformer;
