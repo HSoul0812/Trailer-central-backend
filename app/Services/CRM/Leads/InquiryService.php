@@ -100,7 +100,7 @@ class InquiryService implements InquiryServiceInterface
         $lead = $this->mergeOrCreate($params);
 
         // Lead Exists?!
-        if(!empty($lead->identifier)) {
+        if(!empty($lead)) {
             // Queue Up Inquiry Jobs
             $this->queueInquiryJobs($lead, $inquiry);
         }
