@@ -81,6 +81,15 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
             $this->logger->info(sprintf('%s: the job %s was finished', __CLASS__, $job->token));
         } catch (Exception $e) {
             $this->fileRepository->setFailed($job->token, ['message' => 'Got exception: ' . $e->getMessage()]);
+            $this->logger->error(
+                sprintf(
+                    '%s: the job %s has failed, exception: %s',
+                    __CLASS__,
+                    $job->token,
+                    $e->getMessage()
+                ),
+                ['payload' => $job->payload->asArray(), 'validation_errors' => $job->result->validation_errors]
+            );
 
             throw $e;
         }

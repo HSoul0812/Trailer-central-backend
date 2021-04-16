@@ -6,6 +6,7 @@ namespace App\Repositories\Integration\CVR;
 
 use App\Models\Integration\CVR\CvrFile;
 use App\Repositories\Common\MonitoredJobRepository;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Implementation for CVR file repository
@@ -14,11 +15,12 @@ class CvrFileRepository extends MonitoredJobRepository implements CvrFileReposit
 {
     /**
      * @param string $token
-     * @return CvrFile|null
+     * @return CvrFile
+     * @throws ModelNotFoundException
      */
-    public function findByToken(string $token): ?CvrFile
+    public function findByToken(string $token): CvrFile
     {
-        return CvrFile::where('token', $token)->get()->first();
+        return CvrFile::findOrFail($token);
     }
 
     /**

@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs\Integration\CVR;
 
 use App\Jobs\Job;
-use App\Models\Integration\CVR\CvrFile;
-use App\Services\Common\RunnableJobServiceInterface;
+use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Services\Integration\CVR\CvrFileServiceInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -17,36 +16,30 @@ use Illuminate\Support\Facades\Log;
 class CvrSendFileJob extends Job
 {
     /**
-     * @var CvrFile
+     * @var string
      */
-    private $jobFile;
+    private $token;
 
-    /**
-     * @var RunnableJobServiceInterface
-     */
-    private $service;
-
-    public function __construct(CvrFile $jobFile)
+    public function __construct(string $token)
     {
-        $this->jobFile = $jobFile;
+        $this->token = $token;
     }
 
     /**
+     * @param CvrFileRepositoryInterface $repository
      * @param CvrFileServiceInterface $service
      * @return bool
      * @throws Exception
      */
-    public function handle(CvrFileServiceInterface $service): bool
+    public function handle(CvrFileRepositoryInterface $repository, CvrFileServiceInterface $service): bool
     {
         try {
-            $service->run($this->jobFile);
+            $service->run($repository->findByToken($this->token));
         } catch (Exception $e) {
             // catch and log
 
-            $payload = implode(',',$this->jobFile->payload->asArray());
-
-            Log::error("Error running CVR file synchronizer job: ".
-                "token[{$this->jobFile->token}, payload={{$payload}}] exception[{$e->getMessage()}]"
+            Log::error("Error running job for sending the CVR file: ".
+                "token[{$this->token}, exception[{$e->getMessage()}]"
             );
 
             throw $e;

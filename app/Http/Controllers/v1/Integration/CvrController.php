@@ -175,7 +175,7 @@ class CvrController extends MonitoredJobsController
             $model = $this->service
                 ->setup($dealerId, $payload, $token)
                 ->withQueueableJob(static function (CvrFile $job): CvrSendFileJob {
-                    return new CvrSendFileJob($job);
+                    return new CvrSendFileJob($job->token);
                 });
 
             $this->service->dispatch($model);
