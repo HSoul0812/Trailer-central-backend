@@ -793,7 +793,7 @@ class LeadServiceTest extends TestCase
         $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Interaction
-        $this->interactionServiceMock
+        $this->interactionRepositoryMock
             ->shouldReceive('create')
             ->once()
             ->with($createInteractionParams);
