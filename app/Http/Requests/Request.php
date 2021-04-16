@@ -39,15 +39,15 @@ class Request extends BaseRequest {
         }
 
         if ($this->validateObjectBelongsToUser()) {
-            
+
             if (!$this->getObjectIdValue()) {
                 throw new NoObjectIdValueSetException;
             }
-            
+
             if (!$this->getObject()) {
                 throw new NoObjectTypeSetException;
             }
-            
+
             $user = Auth::user();
 
             if ($user) {
@@ -63,7 +63,7 @@ class Request extends BaseRequest {
 
         return true;
     }
-    
+
     /**
      * @return mixed
      */

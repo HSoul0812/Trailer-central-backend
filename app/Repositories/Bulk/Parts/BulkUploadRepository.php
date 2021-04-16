@@ -2,60 +2,81 @@
 
 namespace App\Repositories\Bulk\Parts;
 
-use App\Repositories\Bulk\BulkUploadRepositoryInterface;
-use App\Exceptions\NotImplementedException;
 use App\Models\Bulk\Parts\BulkUpload;
+use App\Repositories\Common\MonitoredJobRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use App\Jobs\ProcessBulkUpload;
 
 /**
+ * Implementation for bulk upload repository
  *
  * @author Eczek
  */
-class BulkUploadRepository implements BulkUploadRepositoryInterface {
-
-    public function create($params) {
-        $csvKey = $this->storeCsv($params['csv_file']);
-
-        $params['status'] = BulkUpload::PROCESSING;
-        $params['import_source'] = $csvKey;
-
-        $bulkUpload = BulkUpload::create($params);
-        dispatch((new ProcessBulkUpload($bulkUpload))->onQueue('parts'));
-        return $bulkUpload;
+class BulkUploadRepository extends MonitoredJobRepository implements BulkUploadRepositoryInterface
+{
+    /**
+     * @param string $token
+     * @return BulkUpload
+     */
+    public function findByToken(string $token): BulkUpload
+    {
+        return BulkUpload::where('token', $token)->get()->first();
     }
 
-    public function delete($params) {
-        throw new NotImplementedException;
+    public function create(array $params): BulkUpload
+    {
+        $csvFile = $params['payload']['csv_file'];
+        unset($params['payload']['csv_file']); // to do not store it
+
+        $params['payload']['import_source'] = $csvFile;
+
+        return BulkUpload::create($params);
     }
 
-    public function get($params) {
+    /**
+     * Gets a single record by provided params
+     *
+     * @param array $params
+     * @return BulkUpload|Builder|null
+     */
+    public function get(array $params)
+    {
         return BulkUpload::where(array_key_first($params), current($params))->first();
     }
 
-    public function getAll($params) {
-
+    /**
+     * Gets all records by provided params
+     *
+     * @param array $params
+     * @return LengthAwarePaginator
+     */
+    public function getAll(array $params): LengthAwarePaginator
+    {
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
 
-        return BulkUpload::where('dealer_id', $params['dealer_id'])->paginate($params['per_page'])->appends($params);
-    }
+        $query = BulkUpload::select('*');
 
-    public function update($params) {
-        $bulkUpload = BulkUpload::findOrFail($params['id']);
-        $bulkUpload->fill($params);
-        return $bulkUpload->save();
+        if (isset($params['dealer_id'])) {
+            $query->where('dealer_id', $params['dealer_id']);
+        }
+
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     /**
      * Stores CSV on S3 and returns its URL
      *
-     * @param InputFile $file
+     * @param UploadedFile $file
      * @return string
      */
-    private function storeCsv($file) {
-        $fileKey = Storage::disk('s3')->putFile(uniqid().'/'.$file->getClientOriginalName(), $file, 'public');
-        return $fileKey;
+    public function storeCsv($file): string
+    {
+        $path = uniqid() . '/' . $file->getClientOriginalName();
+
+        return Storage::disk('s3')->putFile($path, $file, 'public');
     }
 }

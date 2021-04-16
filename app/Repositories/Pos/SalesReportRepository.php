@@ -126,7 +126,8 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                                WHEN qi.unit_sale_id IS NOT NULL THEN 'Deal'
                                WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
                                ELSE 'Service'
-                           END AS type
+                           END AS type,
+                           '' AS model
                     FROM dealer_sales_history sh
                     JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
@@ -160,7 +161,8 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         iitem.id AS item_id,
                         ps.id AS doc_id,
                         CONCAT('POS Sales # ',  ps.id) AS doc_num,
-                        'POS' AS type
+                        'POS' AS type,
+                        '' AS model
                     FROM dealer_sales_history sh
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
@@ -203,7 +205,8 @@ SQL;
                                WHEN qi.unit_sale_id IS NOT NULL THEN 'Deal'
                                WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
                                ELSE 'Service'
-                    END AS type
+                    END AS type,
+                    i.model
                 FROM dealer_sales_history sh
                 JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                 LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
@@ -238,7 +241,8 @@ SQL;
                         iitem.id AS item_id,
                         ps.id AS doc_id,
                         CONCAT('POS Sales # ',  ps.id) AS doc_num,
-                        'POS' AS type
+                        'POS' AS type,
+                        i.model
                     FROM dealer_sales_history sh
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
@@ -358,7 +362,7 @@ SQL;
 
         if (!empty($params['model'])) {
             foreach (['inventory_qb', 'inventory_pos'] as $suffix) {
-                $this->customReportHelpers['inventoryBoundParams']["model_{$suffix}"] = $params['model'];
+                $this->customReportHelpers['inventoryBoundParams']["model_{$suffix}"] = '%' . $params['model'] . '%';
                 $this->customReportHelpers['inventoryWhere'][$suffix] .= " AND i.model LIKE :model_{$suffix}";
             }
         }

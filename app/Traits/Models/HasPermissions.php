@@ -5,6 +5,7 @@ namespace App\Traits\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
+use App\Models\User\Interfaces\PermissionsInterface;
 
 /**
  * Trait HasPermissions
@@ -27,6 +28,22 @@ trait HasPermissions
         }
 
         return $this->userPermissions;
+    }
+    
+    /**
+     * Returns permissions allowed for a given user
+     * 
+     * @return Collection
+     */
+    public function getPermissionsAllowed(): Collection
+    {
+        return $this->perms()
+                    ->where(function($query) {
+                        $query->where('permission_level', PermissionsInterface::SUPER_ADMIN_PERMISSION)
+                            ->orWhere('permission_level', PermissionsInterface::CAN_SEE_AND_CHANGE_PERMISSION)
+                            ->orWhere('permission_level', PermissionsInterface::CAN_SEE_AND_CHANGE_IMAGES_PERMISSION)
+                            ->orWhere('permission_level', PermissionsInterface::CAN_SEE_PERMISSION);
+                    })->get();
     }
 
     /**

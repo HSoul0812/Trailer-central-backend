@@ -55,7 +55,9 @@ $api->version('v1', function ($route) {
     $route->get('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@show')->where('id', '[0-9]+');
     $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
-
+    $route->post('reports/financials-stock-export', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExport');
+    $route->post('reports/financials-stock', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financials');
+    $route->get('reports/read', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@read');
 
     /**
      * Part Categories
@@ -85,20 +87,28 @@ $api->version('v1', function ($route) {
 
 
     /**
+     * Monitored jobs
+     */
+    $route->get('jobs', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@index');
+    $route->get('jobs/status/{token}', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@statusByToken');
+    $route->get('jobs/status', 'App\Http\Controllers\v1\Jobs\MonitoredJobsController@status');
+
+    /**
      * Part Bulk download
      */
     $route->post('parts/bulk/download', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@create');
-    $route->get('parts/bulk/file/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@read');
-    $route->get('parts/bulk/status/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@status');
+    $route->get('parts/bulk/file/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@readByToken');
+    $route->get('parts/bulk/file', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@read');
+    $route->get('parts/bulk/status/{token}', 'App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController@statusByToken');
 
     /**
      * Part Bulk
      */
     $route->get('parts/bulk', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@index');
     $route->post('parts/bulk', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@create');
-    $route->get('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@show')->where('id', '[0-9]+');
-    $route->put('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@update')->where('id', '[0-9]+');
-    $route->delete('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@destroy')->where('id', '[0-9]+');
+    $route->get('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@show');
+    $route->put('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@update');
+    $route->delete('parts/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Parts\BulkUploadController@destroy');
 
     /**
      * Part Types
@@ -334,6 +344,10 @@ $api->version('v1', function ($route) {
     $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
     $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
     $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
+    
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
+    });
 
     /*
     |--------------------------------------------------------------------------
