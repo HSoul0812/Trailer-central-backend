@@ -789,8 +789,8 @@ class LeadServiceTest extends TestCase
         ];
 
 
-        /** @var InquiryServiceInterface $service */
-        $service = $this->app->make(InquiryServiceInterface::class);
+        /** @var LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Interaction
         $this->interactionServiceMock
