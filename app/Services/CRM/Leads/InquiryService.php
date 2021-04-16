@@ -153,7 +153,9 @@ class InquiryService implements InquiryServiceInterface
         $this->dispatch($job->onQueue('mails'));
 
         // Export ADF if Possible
-        $this->adf->export($inquiry, $lead);
+        if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
+            $this->adf->export($inquiry, $lead);
+        }
 
         // Tracking Cookie Exists?
         if($inquiry->cookieSessionId) {
