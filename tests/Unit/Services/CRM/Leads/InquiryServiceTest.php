@@ -735,7 +735,7 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, self::TEST_ITEM_ID);
+            ->with($inquiry->cookieSessionId, $this->mergeLead->identifier);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
