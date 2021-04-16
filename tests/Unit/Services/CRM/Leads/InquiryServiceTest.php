@@ -959,12 +959,14 @@ class InquiryServiceTest extends TestCase
 
         // Replace Primary With EXACT
         if($includeExact) {
-            $primary = $seeds[1];
-            $primary['firstname'] = $lead->first_name;
-            $primary['lastname'] = $lead->last_name;
-            $primary['phone'] = $lead->phone_number;
-            $primary['email'] = $lead->email_address;
-            $seeds[1] = $primary;
+            unset($seeds[1]['primary']);
+            $seeds[] = [
+                'primary' => 1,
+                'firstname' => $lead->first_name,
+                'lastname' => $lead->last_name,
+                'phone' => $lead->phone_number,
+                'email' => $lead->email_address
+            ];
         }
 
         // Create Matching Leads
