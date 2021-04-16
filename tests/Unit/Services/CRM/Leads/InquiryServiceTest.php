@@ -995,12 +995,10 @@ class InquiryServiceTest extends TestCase
         // Validate Send Inquiry Result
         $result = $service->send($sendRequestParams);
 
-        // Match Merged Lead Details
-        $this->assertSame($result->identifier, $this->mergeLead->identifier);
-        $this->assertSame($result->first_name, $this->mergeLead->first_name);
-        $this->assertSame($result->last_name, $this->mergeLead->last_name);
-        $this->assertSame($result->phone_number, $this->mergeLead->phone_number);
-        $this->assertSame($result->email_address, $this->mergeLead->email_address);
+        // Match Lead Details
+        $this->assertSame($result->full_name, $lead->full_name);
+        $this->assertSame($result->email_address, $lead->email_address);
+        $this->assertSame($result->phone_number, $lead->phone_number);
     }
 
 
