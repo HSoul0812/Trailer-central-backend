@@ -35,6 +35,21 @@ class ADFServiceTest extends TestCase
      * @var App\Repositories\CRM\Leads\Export\LeadEmailRepository
      */
     private $leadEmailRepository;
+
+    /**
+     * @var App\Repositories\Inventory\InventoryRepository
+     */
+    private $inventoryRepository;
+
+    /**
+     * @var App\Repositories\User\UserRepository
+     */
+    private $userRepository;
+
+    /**
+     * @var App\Repositories\User\DealerLocationRepository
+     */
+    private $dealerLocationRepository;
     
     public function setUp(): void
     {
