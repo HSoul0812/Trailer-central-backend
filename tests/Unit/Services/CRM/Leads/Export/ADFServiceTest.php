@@ -119,23 +119,23 @@ class ADFServiceTest extends TestCase
                 ->once()
                 ->andReturn(self::TEST_SUBJECT_EMAIL);
 
-        $this->inventoryRepostory
+        $this->inventoryRepository
                 ->shouldReceive('get')
                 ->once()
                 ->with($inventory->inventory_id)
                 ->andReturn($inventory);
 
-        $this->userRepostory
+        $this->userRepository
                 ->shouldReceive('get')
                 ->once()
-                ->with($inventory->inventory_id)
-                ->andReturn($inventory);
+                ->with($dealer->dealer_id)
+                ->andReturn($dealer);
 
-        $this->inventoryRepostory
+        $this->dealerLocationRepository
                 ->shouldReceive('get')
                 ->once()
-                ->with($inventory->inventory_id)
-                ->andReturn($inventory);
+                ->with($dealerLocation->dealer_location_id)
+                ->andReturn($dealerLocation);
 
         $leadEmail->shouldReceive('getToEmailsAttribute')
                 ->once()
