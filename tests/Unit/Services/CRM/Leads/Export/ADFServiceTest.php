@@ -58,6 +58,7 @@ class ADFServiceTest extends TestCase
 
         $inquiry->dealerId = 1;
         $inquiry->dealerLocationId = 1;
+        $inquiry->inventory = [1];
 
         $lead->identifier = 1;
         $lead->dealer_location_id = 1;
