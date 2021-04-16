@@ -32,6 +32,7 @@ class CvrSendFileJob extends Job
     }
 
     /**
+     * @param CvrFileServiceInterface $service
      * @return bool
      * @throws Exception
      */

@@ -31,4 +31,9 @@ interface CvrFileServiceInterface extends MonitoredJobServiceInterface, Runnable
      * @param CvrFile $job
      */
     public function dispatchNow($job): void;
+
+    /**
+     * @param string $filename CVR zipped filepath
+     */
+    public function send(string $filename): void;
 }

@@ -9,12 +9,12 @@ use League\Fractal\TransformerAbstract;
 
 class CrvFileTransformer extends TransformerAbstract
 {
-    public function transform(CvrFile $bulkUpload): array
+    public function transform(CvrFile $file): array
     {
         return [
-            'id' => $bulkUpload->token,
-            'status' => $bulkUpload->status,
-            'validation_errors' => $bulkUpload->result->validation_errors ?? []
+            'id' => $file->token,
+            'status' => $file->status,
+            'validation_errors' => $file->result->validation_errors ?? []
         ];
     }
 }

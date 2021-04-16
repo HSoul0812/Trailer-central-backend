@@ -10,6 +10,7 @@ use App\Exceptions\NotImplementedException;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Integration\CVR\CvrFile;
 use App\Models\Integration\CVR\CvrFilePayload;
+use App\Models\Integration\CVR\CvrFileResult;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
@@ -76,6 +77,28 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
      * @throws Exception
      */
     public function run($job): void
+    {
+        try {
+            $this->fileRepository->updateProgress($job->token, 1); // to indicate the process has begin
+            $this->send($job->payload->document);
+            $this->fileRepository->setCompleted($job->token);
+        } catch (Exception $e) {
+            $this->fileRepository->setFailed(
+                $job->token, CvrFileResult::from(['validation_errors' => [$e->getMessage()]])
+            );
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Run the service
+     *
+     * @param string $filename CVR zipped filepath
+     * @return void
+     * @throws Exception
+     */
+    public function send(string $filename): void
     {
         // CVR synchronization logic here
         throw new NotImplementedException;

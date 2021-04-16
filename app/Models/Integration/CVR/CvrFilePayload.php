@@ -35,7 +35,7 @@ class CvrFilePayload extends MonitoredJobPayload
 
             $this->document = $this->generateFileNameFromUploadFile($file);
 
-            Storage::disk('tmp')->put($this->document, $file);
+            Storage::disk('tmp')->put($this->document, file_get_contents($file->getRealPath()));
         }
     }
 
@@ -48,8 +48,6 @@ class CvrFilePayload extends MonitoredJobPayload
         $uniqueFileName = uniqid('cvr-' . date('Ymd'), true);
         $extension = File::extension($file->getClientOriginalName());
 
-        return Storage::disk('tmp')->path(
-            sprintf('%s.%s', str_replace('.', '-', $uniqueFileName), $extension)
-        );
+        return sprintf('%s.%s', str_replace('.', '-', $uniqueFileName), $extension);
     }
 }
