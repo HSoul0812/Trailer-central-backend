@@ -249,8 +249,8 @@ class InquiryServiceTest extends TestCase
         Mail::fake();
 
 
-        // Validate Send Inquiry Result
-        $result = $service->send($sendRequestParams);
+        // Validate Create Inquiry Result
+        $result = $service->create($sendRequestParams);
 
         // Match Lead Details
         $this->assertSame($result->full_name, $lead->full_name);
