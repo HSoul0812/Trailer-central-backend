@@ -34,12 +34,12 @@ class InquiryController extends RestfulController
     }
 
     /**
-     * TO DO: Create Lead for Inquiry
+     * Create Lead for Inquiry but DON'T Send Email
      * 
      * @param Request $request
      * @return Response
      */
-    /*public function create(Request $request): Response {
+    public function create(Request $request): Response {
         $request = new CreateInquiryRequest($request->all());
 
         if ($request->validate()) {
@@ -47,7 +47,7 @@ class InquiryController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * Create Lead and Send Email Inquiry
