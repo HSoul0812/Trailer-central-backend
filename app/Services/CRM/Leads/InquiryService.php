@@ -118,7 +118,7 @@ class InquiryService implements InquiryServiceInterface
      */
     public function mergeOrCreate(array $params): Lead {
         // Lead Type is NOT Financing?
-        if(in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
+        if(!in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
             // Get Matches
             $leads = $this->leadRepo->findAllMatches($params);
 
