@@ -116,15 +116,18 @@ class InquiryService implements InquiryServiceInterface
      * @return Lead
      */
     public function mergeOrCreate(array $params): Lead {
-        // Get Matches
-        $leads = $this->leadRepo->findAllMatches($params);
+        // Lead Type is NOT Financing?
+        if($params['lead_type'] !== LeadType::TYPE_FINANCING) {
+            // Get Matches
+            $leads = $this->leadRepo->findAllMatches($params);
 
-        // Choose Matching Lead
-        $lead = $this->chooseMatch($leads, $params);
+            // Choose Matching Lead
+            $lead = $this->chooseMatch($leads, $params);
 
-        // Merge Lead!
-        if(!empty($lead->identifier)) {
-            return $this->leads->merge($lead, $params);
+            // Merge Lead!
+            if(!empty($lead->identifier)) {
+                return $this->leads->merge($lead, $params);
+            }
         }
 
         // Create!
@@ -167,7 +170,7 @@ class InquiryService implements InquiryServiceInterface
     /**
      * Choose Matching Lead
      * 
-     * @param Collection $matches
+     * @param Collection<Lead> $matches
      * @param array $params
      * @return null || Lead
      */
@@ -201,9 +204,9 @@ class InquiryService implements InquiryServiceInterface
     /**
      * Filter Matching Lead
      * 
-     * @param Collection<FilteredLead> $leads
+     * @param Collection<Lead> $leads
      * @param FilteredLead $inquiry
-     * @return null | Lead
+     * @return null || Lead
      */
     private function filterMatch(Collection $leads, InquiryLead $inquiry): ?Lead {
         // Loop Status

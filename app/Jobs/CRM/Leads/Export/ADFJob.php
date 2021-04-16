@@ -49,7 +49,7 @@ class ADFJob extends Job
     private $hiddenCopiedEmails;
     
     /**
-     * AutoResponder constructor.
+     * ADF Export constructor.
      * @param InquiryLead $lead
      */
     public function __construct(ADFLead $adf, Lead $lead, array $toEmails, array $copiedEmails, array $hiddenCopiedEmails = [])
@@ -61,6 +61,12 @@ class ADFJob extends Job
         $this->hiddenCopiedEmails = $hiddenCopiedEmails;
     }
 
+    /**
+     * Handle ADF Job
+     * 
+     * @return boolean
+     * @throws \Exception
+     */
     public function handle()
     {
         Log::info('Mailing ADF Lead', ['lead' => $this->adf->leadId]);

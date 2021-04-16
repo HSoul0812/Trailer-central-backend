@@ -166,6 +166,7 @@ class LeadService implements LeadServiceInterface
      * 
      * @param Lead $lead
      * @param array $params
+     * @return Lead
      */
     public function merge(Lead $lead, array $params): Lead {
         // Configure Notes From Provided Data
