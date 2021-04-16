@@ -7,7 +7,7 @@ namespace App\Jobs\Integration\CVR;
 use App\Jobs\Job;
 use App\Models\Integration\CVR\CvrFile;
 use App\Services\Common\RunnableJobServiceInterface;
-use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
+use App\Services\Integration\CVR\CvrFileServiceInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -28,7 +28,6 @@ class CvrSendFileJob extends Job
 
     public function __construct(CvrFile $jobFile)
     {
-        $this->service = app(BulkDownloadMonitoredJobServiceInterface::class);
         $this->jobFile = $jobFile;
     }
 
@@ -36,10 +35,10 @@ class CvrSendFileJob extends Job
      * @return bool
      * @throws Exception
      */
-    public function handle(): bool
+    public function handle(CvrFileServiceInterface $service): bool
     {
         try {
-            $this->service->run($this->jobFile);
+            $service->run($this->jobFile);
         } catch (Exception $e) {
             // catch and log
 

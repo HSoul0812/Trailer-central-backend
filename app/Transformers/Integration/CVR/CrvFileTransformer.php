@@ -14,8 +14,7 @@ class CrvFileTransformer extends TransformerAbstract
         return [
             'id' => $bulkUpload->token,
             'status' => $bulkUpload->status,
-            'document' => $bulkUpload->payload->document,
-            'validation_errors' => $bulkUpload->result->validation_errors
+            'validation_errors' => $bulkUpload->result->validation_errors ?? []
         ];
     }
 }

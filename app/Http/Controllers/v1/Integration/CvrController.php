@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\v1\Integration;
 
-use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Integration\CVR\SendFileRequest;
 use App\Jobs\Integration\CVR\CvrSendFileJob;
@@ -16,7 +15,6 @@ use App\Services\Integration\CVR\CvrFileServiceInterface;
 use App\Transformers\Integration\CVR\CrvFileTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CvrController extends MonitoredJobsController
 {
@@ -75,6 +73,88 @@ class CvrController extends MonitoredJobsController
      *                 required={"document"}
      *             )
      *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Enqueue a CVR file to be sent",
+     *         content={
+     *              @OA\MediaType(
+     *              mediaType="application/json",
+     *              @OA\Schema(
+     *                  type="object",
+     *                  @OA\Property(
+     *                      property="data",
+     *                      description="data wrapper",
+     *                      type="object"
+     *                      @OA\Property(
+     *                          property="id",
+     *                          description="uuid of the queued job",
+     *                          type="string"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="status",
+     *                          description="status of the queued job",
+     *                          type="string",
+     *                          enum={"pending", "processing", "completed", "failed"},
+     *                      ),
+     *                      @OA\Property(
+     *                          property="validation_errors",
+     *                          description="job time validation errors",
+     *                          type="array",
+     *                          @OA\Items(
+     *                              type="array",
+     *                              @OA\Items({type="string"})
+     *                          ),
+     *                      ),
+     *                  ),
+     *                  example={
+     *                      "data": {
+     *                          "id": "237b164c-b0ff-4ba2-82f9-682647599f5c",
+     *                          "status": "pending",
+     *                          "validation_errors": []
+     *                      }
+     *                  }
+     *              )
+     *         }
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation Failed",
+     *         content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="errors",
+     *                         type="array",
+     *                         description="The response errors collection",
+     *                         @OA\Items(
+     *                              type="array",
+     *                              @OA\Items({type="string"})
+     *                          ),
+     *                     ),
+     *                     @OA\Property(
+     *                         property="status_code",
+     *                         type="integer",
+     *                         description="The response status code number acording to the rfc4918"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="message",
+     *                         type="string",
+     *                         description="The response message"
+     *                     ),
+     *                     example={
+     *                          "message": "Validation Failed",
+     *                          "errors": {
+     *                              "document": [
+     *                                  "The document field is required."
+     *                              ]
+     *                          },
+     *                          "status_code": 422
+     *                      }
+     *                 )
+     *             )
+     *         }
      *     )
      * )
      *
@@ -110,12 +190,37 @@ class CvrController extends MonitoredJobsController
      *
      * @OA\Get(
      *     path="/api/integration/cvr/{token}",
-     *     description="Check status of the process",
+     *     description="Check status of the job process",
      *     tags={"CVR"},
      *     @OA\Parameter(
      *         name="token",
      *         in="path",
      *         required=true
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Status of the desired job",
+     *         content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="message",
+     *                         type="string",
+     *                         description="The response message status"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="progress",
+     *                         type="float",
+     *                         description="Progress of the enqueue job 0-100"
+     *                     ),
+     *                     example={
+     *                           "message": "It is pending",
+     *                           "progress": 0
+     *                     }
+     *                 )
+     *             )
+     *         }
      *     )
      * )
      */
