@@ -5,6 +5,7 @@ namespace App\Services\CRM\Leads;
 use App\Jobs\CRM\Leads\AutoAssignJob;
 use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadType;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
