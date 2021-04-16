@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Integration\CVR;
 
-use App\Exceptions\Common\BusyJobException;
 use App\Models\Integration\CVR\CvrFile;
 use App\Models\Integration\CVR\CvrFilePayload;
 use App\Services\Common\MonitoredJobServiceInterface;
 use App\Services\Common\RunnableJobServiceInterface;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 interface CvrFileServiceInterface extends MonitoredJobServiceInterface, RunnableJobServiceInterface
 {
@@ -17,7 +17,6 @@ interface CvrFileServiceInterface extends MonitoredJobServiceInterface, Runnable
      * @param CvrFilePayload|array $payload
      * @param string|null $token
      * @return CvrFile
-     * @throws BusyJobException when there is currently other job working
      */
     public function setup(int $dealerId, $payload, ?string $token = null): CvrFile;
 
@@ -34,6 +33,7 @@ interface CvrFileServiceInterface extends MonitoredJobServiceInterface, Runnable
 
     /**
      * @param string $filename CVR zipped filepath
+     * @throws FileNotFoundException when the file was not found
      */
     public function send(string $filename): void;
 }
