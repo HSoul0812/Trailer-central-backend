@@ -807,7 +807,7 @@ class LeadServiceTest extends TestCase
 
 
         // Validate Send Inquiry Result
-        $result = $service->send($mergeLeadParams);
+        $result = $service->merge($lead, $mergeLeadParams);
 
         // Match Merged Lead Details
         $this->assertSame($result->identifier, self::TEST_LEAD_ID);
