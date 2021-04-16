@@ -14,6 +14,7 @@ use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface; 
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
@@ -30,6 +31,12 @@ use Tests\TestCase;
  */
 class LeadServiceTest extends TestCase
 {
+    /**
+     * @const int
+     */
+    const TEST_LEAD_ID = 98179430;
+
+
     /**
      * @var LegacyMockInterface|LeadRepositoryInterface
      */
@@ -55,6 +62,11 @@ class LeadServiceTest extends TestCase
      */
     private $unitRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|InteractionsRepositoryInterface
+     */
+    private $interactionRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -72,7 +84,10 @@ class LeadServiceTest extends TestCase
         $this->app->instance(TypeRepositoryInterface::class, $this->typeRepositoryMock);
 
         $this->unitRepositoryMock = Mockery::mock(UnitRepositoryInterface::class);
-        $this->app->instance(UnitRepositoryInterface::class, $this->unitRepositoryMock);
+        $this->app->instance(UnitRepositoryInterface::class, $this->unitRepositoryMock
+
+        $this->interactionRepositoryMock = Mockery::mock(InteractionsRepositoryInterface::class);
+        $this->app->instance(InteractionsRepositoryInterface::class, $this->interactionRepositoryMock);
     }
 
 
@@ -726,6 +741,76 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertTrue(in_array($single->inventory_id, $unitsInterest));
         }
+    }
+
+
+    /**
+     * @covers ::merge
+     *
+     * @throws BindingResolutionException
+     */
+    public function testMerge()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        $websiteId = self::getTestWebsiteRandom();
+
+        // Get Test Lead
+        $lead = factory(Lead::class)->make([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
+            'website_id' => $websiteId,
+            'inventory_id' => 0,
+            'lead_type' => LeadType::TYPE_GENERAL
+        ]);
+        $lead->identifier = self::TEST_LEAD_ID;
+
+        // Send Request Params
+        $mergeLeadParams = [
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => '1234567890',
+            'comments' => 'This is a New Merge\'s Comments!'
+        ];
+
+        // Create Notes
+        $notes = $mergeLeadParams['first_name'] . ' ' . $mergeLeadParams['last_name'] . '<br /><br />' .
+                 'Phone: ' . $mergeLeadParams['phone_number'] . '<br /><br />' .
+                 'Email: ' . $mergeLeadParams['email_address'] . '<br /><br />' .
+                 $mergeLeadParams['comments'];
+
+        // Create Interaction Params
+        $createInteractionParams = [
+            'lead_id' => self::TEST_LEAD_ID,
+            'interaction_type' => 'INQUIRY',
+            'interaction_notes' => 'Original Inquiry: ' . $notes
+        ];
+
+
+        /** @var InquiryServiceInterface $service */
+        $service = $this->app->make(InquiryServiceInterface::class);
+
+        // Mock Create Interaction
+        $this->interactionServiceMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createInteractionParams);
+
+        // Mock Lead Repository
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['id' => self::TEST_LEAD_ID])
+            ->andReturn($lead);
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($mergeLeadParams);
+
+        // Match Merged Lead Details
+        $this->assertSame($result->identifier, self::TEST_LEAD_ID);
     }
 
 
