@@ -79,6 +79,35 @@ class InquiryService implements InquiryServiceInterface
 
 
     /**
+     * Create Inquiry
+     * 
+     * @param array $params
+     * @return Lead
+     */
+    public function create(array $params): Lead {
+        // Fix Units of Interest
+        $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
+        if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
+            $params['inventory'][] = $params['item_id'];
+        }
+
+        // Get Inquiry Lead
+        $inquiry = $this->inquiryEmail->fill($params);
+
+        // Create Lead
+        $lead = $this->mergeOrCreate($params);
+
+        // Lead Exists?!
+        if(!empty($lead->identifier)) {
+            // Queue Up Inquiry Jobs
+            $this->queueInquiryJobs($lead, $inquiry);
+        }
+
+        // Create Lead
+        return $lead;
+    }
+
+    /**
      * Send Inquiry
      * 
      * @param array $params

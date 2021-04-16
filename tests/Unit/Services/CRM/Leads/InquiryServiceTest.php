@@ -138,6 +138,128 @@ class InquiryServiceTest extends TestCase
 
 
     /**
+     * @covers ::create
+     *
+     * @throws BindingResolutionException
+     */
+    public function testCreate()
+    {
+        // Get Dealer ID
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        $websiteId = self::getTestWebsiteRandom();
+
+        // Get Test Lead
+        $lead = factory(Lead::class)->make([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
+            'website_id' => $websiteId,
+            'inventory_id' => 0,
+            'lead_type' => LeadType::TYPE_GENERAL
+        ]);
+        $lead->identifier = self::TEST_ITEM_ID;
+
+        // Send Request Params
+        $sendRequestParams = [
+            'dealer_id' => $lead->dealer_id,
+            'website_id' => $lead->website_id,
+            'dealer_location_id' => $lead->dealer_location_id,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
+            'lead_types' => [$lead->lead_type],
+            'device' => self::TEST_DEVICE,
+            'title' => $lead->title,
+            'url' => $lead->referral,
+            'referral' => $lead->referral,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => $lead->phone_number,
+            'preferred_contact' => '',
+            'address' => $lead->address,
+            'city' => $lead->city,
+            'state' => $lead->state,
+            'zip' => $lead->zip,
+            'comments' => $lead->comments,
+            'metadata' => $lead->metadata,
+            'is_spam' => 0,
+            'lead_source' => self::TEST_SOURCE,
+            'lead_status' => LeadStatus::STATUS_MEDIUM,
+            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'cookie_session_id' => self::TEST_SESSION_ID
+        ];
+
+        // Send Inquiry Params
+        $sendInquiryParams = $sendRequestParams;
+        $sendInquiryParams['inventory'] = [];
+
+        // Get Inquiry Lead
+        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+
+
+        /** @var InquiryServiceInterface $service */
+        $service = $this->app->make(InquiryServiceInterface::class);
+
+        // Mock Fill Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('fill')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($inquiry);
+
+        // Mock Send Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('send')
+            ->never();
+
+        // Mock Lead Repository
+        $this->leadRepositoryMock
+            ->shouldReceive('findAllMatches')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn(new Collection());
+
+        // Mock Create Lead
+        $this->leadServiceMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($lead);
+
+        // Mock ADF Export
+        $this->adfServiceMock
+            ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
+
+        // Mock Sales Person Repository
+        $this->trackingRepositoryMock
+            ->shouldReceive('updateTrackLead')
+            ->once()
+            ->with($inquiry->cookieSessionId, self::TEST_ITEM_ID);
+
+        // Mock Sales Person Repository
+        $this->trackingUnitRepositoryMock
+            ->shouldReceive('markUnitInquired')
+            ->never();
+
+        // Expects Auto Assign/Auto Responder Jobs
+        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+
+        // Fake Mail
+        Mail::fake();
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($sendRequestParams);
+
+        // Match Lead Details
+        $this->assertSame($result->full_name, $lead->full_name);
+        $this->assertSame($result->email_address, $lead->email_address);
+        $this->assertSame($result->phone_number, $lead->phone_number);
+    }
+
+
+    /**
      * @covers ::send
      *
      * @throws BindingResolutionException
