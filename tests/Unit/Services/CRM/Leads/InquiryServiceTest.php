@@ -850,8 +850,8 @@ class InquiryServiceTest extends TestCase
                 'website_id' => $lead->website_id,
                 'inventory_id' => 0,
                 'lead_type' => LeadType::TYPE_GENERAL,
-                'firstname' => $seed['firstname'] ?? null,
-                'lastname' => $seed['lastname'] ?? null,
+                'first_name' => $seed['firstname'] ?? null,
+                'last_name' => $seed['lastname'] ?? null,
                 'email_address' => $seed['email'] ?? null,
                 'phone_number' => $seed['phone'] ?? null
             ]);
