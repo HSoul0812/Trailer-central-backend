@@ -442,8 +442,7 @@ $api->version('v1', function ($route) {
         $route->group([
             'prefix' => 'inquiry'
         ], function ($route) {
-            // TO DO: Create Endpoint That ONLY Creates Inquiry, Doesn't Send
-            //$route->put('create', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
+            $route->put('create', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
             $route->put('send', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@send');
             // TO DO: Create Endpoint to Combine Send Text + Inquiry
             //$route->post('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
