@@ -161,10 +161,10 @@ class ADFServiceTest extends TestCase
     
         $this->expectsJobs(ADFJob::class);
         
-        $this->adfService
+        /*$this->adfService
             ->shouldReceive('export')
             ->with($inquiry, $lead)
-            ->andReturn(true);
+            ->andReturn(true);*/
         
         $service = $this->app->make(ADFService::class);
 
