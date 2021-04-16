@@ -64,6 +64,8 @@ class RunTest extends TestCase
             ->once()
             ->with($job->token, ['message' => "Got exception: {$exception->getMessage()}"])
             ->andReturnTrue();
+        // Then I expect that a log entry is stored
+        $dependencies->loggerService->shouldReceive('error')->once();
 
         // Also I have a "CvrFileService" properly created
         $service = Mockery::mock(CvrFileService::class, $dependencies->getOrderedArguments())
