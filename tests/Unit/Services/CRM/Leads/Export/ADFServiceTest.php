@@ -80,13 +80,17 @@ class ADFServiceTest extends TestCase
                 ->with($leadEmail->dealer_id, $leadEmail->dealer_location_id)
                 ->andReturn($leadEmail);
         
+        $inquiry->shouldReceive('getSubject')
+                ->once()
+                ->andReturn(self::TEST_SUBJECT_EMAIL);
+
         $leadEmail->shouldReceive('getToEmailsAttribute')
                 ->once()
                 ->andReturn([]);
-        
+
         $leadEmail->shouldReceive('getCopiedEmailsAttribute')
                 ->once()
-                ->andReturn([]);           
+                ->andReturn([]);
         
         $mail->shouldReceive('send')
             ->andReturnUsing(function($msg) {
@@ -107,7 +111,7 @@ class ADFServiceTest extends TestCase
         $this->adfService
             ->shouldReceive('export')
             ->with($inquiry, $lead)
-            ->andReturn(true);         
+            ->andReturn(true);
         
         $service = $this->app->make(ADFService::class);
 
