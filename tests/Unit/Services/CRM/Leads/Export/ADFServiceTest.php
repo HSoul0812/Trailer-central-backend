@@ -85,7 +85,10 @@ class ADFServiceTest extends TestCase
         $this->app['mailer']->setSwiftMailer($mail);
 
         $dealer->dealer_id = 1;
+        $dealer->name = 'Test Dealership';
+
         $dealerLocation->dealer_location_id = 1;
+
         $website->id = 1;
 
         $lead->identifier = 1;
