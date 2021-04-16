@@ -3,12 +3,16 @@
 namespace Tests\Unit\Repositories\CRM\Leads\Export;
 
 use App\Jobs\CRM\Leads\Export\ADFJob;
-use App\Repositories\CRM\Leads\Export\LeadEmailRepository;
-use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\Export\LeadEmail;
+use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
+use App\Repositories\CRM\Leads\Export\LeadEmailRepository;
+use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\Export\ADFService;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
@@ -41,24 +45,33 @@ class ADFServiceTest extends TestCase
         
         $this->leadEmailRepository = Mockery::mock(LeadEmailRepositoryInterface::class);
         $this->app->instance(LeadEmailRepository::class, $this->leadEmailRepository);
+        
+        $this->inventoryRepository = Mockery::mock(InventoryRepositoryInterface::class);
+        $this->app->instance(InventoryRepository::class, $this->inventoryRepository);
+        
+        $this->userRepository = Mockery::mock(UserRepositoryInterface::class);
+        $this->app->instance(UserRepository::class, $this->userRepository);
+        
+        $this->dealerLocationRepository = Mockery::mock(DealerLocationRepositoryInterface::class);
+        $this->app->instance(DealerLocationRepository::class, $this->dealerLocationRepository);
     }
         
     public function testExportADFLead()
     {
+        $dealer = $this->getEloquentMock(User::class);
         $dealerLocation = $this->getEloquentMock(DealerLocation::class);
 
-        $inquiry = $this->getEloquentMock(InquiryLead::class);
         $lead = $this->getEloquentMock(Lead::class);
         $leadEmail = $this->getEloquentMock(LeadEmail::class);
         $website = $this->getEloquentMock(Website::class);
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inquiry = $this->getEloquentMock(InquiryLead::class);
         $mail = Mockery::mock('Swift_Mailer');
         $this->app['mailer']->setSwiftMailer($mail);
-        
-        $website->id = 1;
 
-        $inquiry->dealerId = 1;
-        $inquiry->dealerLocationId = 1;
-        $inquiry->inventory = [1];
+        $dealer->dealer_id = 1;
+        $dealerLocation->dealer_location_id = 1;
+        $website->id = 1;
 
         $lead->identifier = 1;
         $lead->dealer_location_id = 1;
@@ -67,7 +80,13 @@ class ADFServiceTest extends TestCase
         
         $leadEmail->dealer_location_id = 1;
         $leadEmail->dealer_id = 1;
-        $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_ADF;     
+        $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_ADF;
+
+        $inventory->inventory_id = 1;
+
+        $inquiry->dealerId = 1;
+        $inquiry->dealerLocationId = 1;
+        $inquiry->inventory = [1];
         
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
@@ -84,6 +103,24 @@ class ADFServiceTest extends TestCase
         $inquiry->shouldReceive('getSubject')
                 ->once()
                 ->andReturn(self::TEST_SUBJECT_EMAIL);
+
+        $this->inventoryRepostory
+                ->shouldReceive('get')
+                ->once()
+                ->with($inventory->inventory_id)
+                ->andReturn($inventory);
+
+        $this->userRepostory
+                ->shouldReceive('get')
+                ->once()
+                ->with($inventory->inventory_id)
+                ->andReturn($inventory);
+
+        $this->inventoryRepostory
+                ->shouldReceive('get')
+                ->once()
+                ->with($inventory->inventory_id)
+                ->andReturn($inventory);
 
         $leadEmail->shouldReceive('getToEmailsAttribute')
                 ->once()

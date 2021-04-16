@@ -5,10 +5,10 @@ namespace App\Services\CRM\Leads\Export;
 use App\Jobs\CRM\Leads\Export\ADFJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\Export\LeadEmail;
-use App\Models\Inventory\Inventory;
-use App\Models\User\User;
-use App\Models\User\DealerLocation;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
@@ -20,8 +20,31 @@ class ADFService implements ADFServiceInterface {
      */
     protected $leadEmailRepository;
     
-    public function __construct(LeadEmailRepositoryInterface $leadEmailRepository) {
+    /**     
+     * @var App\Repositories\CRM\Inventory\InventoryRepositoryInterface 
+     */
+    protected $inventoryRepository;
+    
+    /**     
+     * @var App\Repositories\User\UserRepositoryInterface 
+     */
+    protected $userRepository;
+    
+    /**     
+     * @var App\Repositories\User\DealerLocationRepositoryInterface 
+     */
+    protected $dealerLocationRepository;
+    
+    public function __construct(
+        LeadEmailRepositoryInterface $leadEmailRepository,
+        InventoryRepositoryInterface $inventoryRepository,
+        UserRepositoryInterface $userRepository,
+        DealerLocationRepositoryInterface $dealerLocationRepository
+    ) {
         $this->leadEmailRepository = $leadEmailRepository;
+        $this->inventoryRepository = $inventoryRepository;
+        $this->userRepository = $userRepository;
+        $this->dealerLocationRepository = $dealerLocationRepository;
     }
 
     /**
@@ -92,8 +115,7 @@ class ADFService implements ADFServiceInterface {
      */
     private function getAdfVehicle(array $inventory): array {
         // Get Inventory
-        $itemId = reset($inventory);
-        $item = Inventory::find($itemId);
+        $item = $this->inventoryRepository->get(['id' => reset($inventory)]);
 
         // Initialize ADF Lead Params
         return [
@@ -124,8 +146,8 @@ class ADFService implements ADFServiceInterface {
      */
     private function getAdfVendor(InquiryLead $inquiry): array {
         // Get Dealer & Location
-        $dealer = User::find($inquiry->dealerId);
-        $location = DealerLocation::find($inquiry->dealerLocationId);
+        $dealer = $this->userRepository->get(['id' => $inquiry->dealerId]);
+        $location = $this->dealerLocationRepository->get(['id' => $inquiry->dealerLocationId]);
 
         // Initialize ADF Lead Params
         return [
