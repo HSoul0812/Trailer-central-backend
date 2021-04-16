@@ -54,7 +54,7 @@ class BulkReportsController extends MonitoredJobsController
     {
         parent::__construct($jobsRepository);
 
-        $this->middleware('setDealerIdOnRequest')->only(['financials']);
+        $this->middleware('setDealerIdOnRequest')->only(['financials', 'financialsExport']);
 
         $this->repository = $repository;
         $this->stockRepository = $stockRepository;
