@@ -123,7 +123,6 @@ class InquiryService implements InquiryServiceInterface
         $lead = $this->chooseMatch($leads, $params);
 
         // Merge Lead!
-        var_dump($leads);
         if(!empty($lead->identifier)) {
             return $this->leads->merge($lead, $params);
         }
