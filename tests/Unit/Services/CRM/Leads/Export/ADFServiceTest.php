@@ -6,9 +6,9 @@ use App\Jobs\CRM\Leads\Export\ADFJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\Export\LeadEmail;
 use App\Models\Inventory\Inventory;
+use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
-use App\Repositories\CRM\Leads\Export\LeadEmailRepository;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
@@ -85,7 +85,6 @@ class ADFServiceTest extends TestCase
         $this->app['mailer']->setSwiftMailer($mail);
 
         $dealer->dealer_id = 1;
-        $dealer->name = 'Test Dealership';
 
         $dealerLocation->dealer_location_id = 1;
 
