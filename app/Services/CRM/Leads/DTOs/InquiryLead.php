@@ -665,10 +665,9 @@ class InquiryLead
         if($this->emailAddress === $lead->email_address) {
             $matches++;
         }
-        var_dump($matches);
 
         // Matched Name?
-        if($this->firstName === $lead->firstname && $this->lastName === $lead->lastname) {
+        if($this->firstName === $lead->first_name && $this->lastName === $lead->last_name) {
             $matches++;
         }
 
