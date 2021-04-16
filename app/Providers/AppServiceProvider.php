@@ -2,12 +2,19 @@
 
 namespace App\Providers;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Nova\Observer\DealerIncomingMappingObserver;
+use App\Repositories\Bulk\Parts\BulkUploadRepository;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
+use App\Repositories\Common\MonitoredJobRepository;
+use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\Dms\StockRepository;
+use App\Repositories\Dms\StockRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -85,6 +92,9 @@ use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanV
 use App\Repositories\System\EmailRepository;
 use App\Repositories\System\EmailRepositoryInterface;
 use App\Services\Common\EncrypterServiceInterface;
+use App\Services\Common\LoggerService;
+use App\Services\Common\MonitoredGenericJobServiceInterface;
+use App\Services\Common\MonitoredJobService;
 use App\Services\Common\SPLEncrypterService;
 use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 use App\Services\Inventory\Floorplan\PaymentService;
@@ -92,6 +102,8 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
+use App\Services\Export\DomPdfExporterService;
+use App\Services\Export\DomPdfExporterServiceInterface;
 use App\Services\User\DealerOptionsService;
 use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
@@ -147,6 +159,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
         \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
         \Validator::extend('payment_uuid_valid', 'App\Rules\Inventory\Floorplan\PaymentUUIDValid@validate');
+        \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -215,7 +228,7 @@ class AppServiceProvider extends ServiceProvider
         //
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
-        $this->app->bind('App\Repositories\Bulk\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Parts\BulkUploadRepository');
+        $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(ShowroomFieldsMappingRepositoryInterface::class, ShowroomFieldsMappingRepository::class);
@@ -265,9 +278,17 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
         $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
-        
+
         $this->app->bind(DealerPasswordResetRepositoryInterface::class, DealerPasswordResetRepository::class);
         $this->app->bind(PasswordResetServiceInterface::class, PasswordResetService::class);
-    }
 
+        $this->app->bind(MonitoredGenericJobServiceInterface::class, MonitoredJobService::class);
+        $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);
+
+        $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
+
+        $this->app->bind(DomPdfExporterServiceInterface::class, DomPdfExporterService::class);
+
+        $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
+    }
 }

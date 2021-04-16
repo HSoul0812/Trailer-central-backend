@@ -164,11 +164,19 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         
         $roFilters = ' AND 1';
         $quotesFilters = ' AND ((us.total_price - payments.paid_amount) <= 0)';
+        $quotesJoins = "LEFT JOIN dms_repair_order ON dms_repair_order.unit_sale_id = us.id";
+        $partsPullFrom = " sales_parts ON i.id = sales_parts.invoice_id";
+        $laborPullFrom = " sales_labor ON i.id = sales_labor.invoice_id";
         
         if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_COMPLETED_DEALS_ALL_ROS) {
             $roFilters = ' AND ((dms_unit_sale.total_price - payments.paid_amount) <= 0)';
         } else if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_COMPLETED_DEALS_INTERNAL_ROS) {
-            $roFilters = " AND (((dms_unit_sale.total_price - payments.paid_amount) <= 0) OR dms_repair_order.type = 'internal')";
+            $roFilters = " AND (((dms_unit_sale.total_price - payments.paid_amount) <= 0) AND dms_repair_order.type = 'internal')";
+            $quotesJoins = "INNER JOIN dms_repair_order ON dms_repair_order.unit_sale_id = us.id";
+            $quotesJoins .= " LEFT JOIN qb_invoices repair_order_invoice ON repair_order_invoice.repair_order_id = dms_repair_order.id";
+            $quotesFilters = " AND dms_repair_order.type = 'internal'";
+            $partsPullFrom = " sales_parts ON repair_order_invoice.id = sales_parts.invoice_id";
+            $laborPullFrom = " sales_labor ON repair_order_invoice.id = sales_labor.invoice_id";
         }
         
         if (isset($params['filterMode']) && $params['filterMode'] == self::FILTER_ALL_DOLLARS_EARNED) {
@@ -215,8 +223,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 FROM dms_unit_sale us
                 LEFT JOIN dms_unit_sale_accessory usa ON usa.unit_sale_id=us.id
                 LEFT JOIN dms_customer c ON us.buyer_id=c.id
-                LEFT JOIN qb_invoices i ON i.unit_sale_id=us.id
+                LEFT JOIN qb_invoices i ON i.unit_sale_id=us.id                
                 LEFT JOIN inventory ON inventory.inventory_id = us.inventory_id
+                {$quotesJoins}                
                 
                 /* use this to prevent getting DP invoices */
                 /* JOIN qb_invoice_items ii ON i.id=ii.invoice_id */
@@ -232,7 +241,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 LEFT JOIN (
                     SELECT
                        ii.invoice_id,
-                       qb_invoices.total as sale_amount,
+                       SUM(ii.unit_price) as sale_amount,
                        SUM(COALESCE(qi.cost, inv.true_cost, 0)) cost_amount
                     FROM qb_invoice_items ii
                     LEFT JOIN qb_items qi ON qi.id=ii.item_id
@@ -254,7 +263,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     LEFT JOIN parts_v1 pa ON qi.item_primary_id=pa.id
                     WHERE qi.type = 'part'
                     GROUP BY ii.invoice_id
-                ) sales_parts ON i.id = sales_parts.invoice_id
+                ) {$partsPullFrom}
 
                 LEFT JOIN (
                     SELECT
@@ -265,7 +274,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     LEFT JOIN qb_items qi ON qi.id=ii.item_id
                     WHERE qi.type = 'labor'
                     GROUP BY ii.invoice_id
-                ) sales_labor ON i.id = sales_labor.invoice_id
+                ) {$laborPullFrom}
 
                 WHERE us.dealer_id=:dealerId1
                 {$dateFromClause1} {$quotesFilters}

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DealerUserPermission extends Model
 {
     const TABLE_NAME = 'dealer_user_permissions';
-
+    
     /**
      * The table associated with the model.
      *

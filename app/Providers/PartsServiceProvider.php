@@ -1,23 +1,25 @@
 <?php
 
-
 namespace App\Providers;
-
 
 use App\Events\Parts\PartQtyUpdated;
 use App\Listeners\Parts\PartQtyAuditLogNotification;
 use App\Listeners\Parts\PartReindexNotification;
-use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkReportRepository;
+use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
+use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Parts\AuditLogRepository;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
-use App\Services\Export\Parts\CsvExportService;
-use App\Services\Export\Parts\CsvExportServiceInterface;
+use App\Services\Export\Parts\BulkCsvDownloadJobService;
+use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
+use App\Services\Export\Parts\BulkReportJobService;
+use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Parts\PartServiceInterface;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 
 class PartsServiceProvider extends ServiceProvider
@@ -77,13 +79,10 @@ class PartsServiceProvider extends ServiceProvider
 
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
-        $this->app->bind(CsvExportServiceInterface::class, CsvExportService::class);
-        $this->app->when(CsvExportService::class)
-            ->needs(Filesystem::class)
-            ->give(function () { return Storage::disk('partsCsvExport');});
-        $this->app->when(CsvExportService::class)
-            ->needs(Filesystem::class)
-            ->give(function () { return Storage::disk('partsCsvExport');});
-
+        $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
+        $this->app->bind(BulkDownloadMonitoredJobServiceInterface::class, BulkCsvDownloadJobService::class);
+        // PDF exporter bindings
+        $this->app->bind(BulkReportRepositoryInterface::class, BulkReportRepository::class);
+        $this->app->bind(BulkReportJobServiceInterface::class, BulkReportJobService::class);
     }
 }

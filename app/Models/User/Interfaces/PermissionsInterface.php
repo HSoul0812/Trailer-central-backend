@@ -58,6 +58,13 @@ interface PermissionsInterface
      * @return Collection
      */
     public function getPermissions(): Collection;
+    
+    /**
+     * Returns permissions allowed for a given user
+     * 
+     * @return Collection
+     */
+    public function getPermissionsAllowed(): Collection;
 
     /**
      * @param string $feature

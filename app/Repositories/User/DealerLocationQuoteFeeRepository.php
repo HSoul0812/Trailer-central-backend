@@ -36,8 +36,14 @@ class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeReposito
                    NULL AS accounting_class")
         )->limit(1);
 
+        // to prevent the union fail when it has been added some column to `dealer_location_quote_fee` table
+        $columns = DB::raw(
+            "{$quoteFeeTableName}.id, {$quoteFeeTableName}.dealer_location_id, fee_type, amount," .
+            ' is_state_taxed, is_county_taxed, is_local_taxed, visibility, accounting_class'
+        );
+
         $query = DealerLocationQuoteFee::areVisible()
-            ->select($quoteFeeTableName . '.*')
+            ->select($columns)
             ->where('fee_type', '!=', '')
             ->union($queryHardcodeFees);
 

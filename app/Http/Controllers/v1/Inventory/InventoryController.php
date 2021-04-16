@@ -6,6 +6,7 @@ use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
+use App\Http\Requests\Inventory\ExistsInventoryRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
@@ -55,7 +56,7 @@ class InventoryController extends RestfulController
         InventoryHistoryRepositoryInterface $inventoryHistoryRepository
     )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'destroy']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'destroy', 'exists']);
         $this->middleware('inventory.create.permission')->only(['create']);
 
         $this->inventoryService = $inventoryService;
@@ -117,6 +118,45 @@ class InventoryController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/inventory/exists",
+     *     description="Checks whether an item exists",
+     *     tags={"Inventory"},
+     *     @OA\Parameter(
+     *         name="stock",
+     *         in="query",
+     *         description="Inventory stock",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a result",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     */
+    public function exists(Request $request): Response
+    {
+        $inventoryRequest = new ExistsInventoryRequest($request->all());
+
+        if (!$inventoryRequest->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        $isExists = $this->inventoryRepository->exists($inventoryRequest->all());
+
+        return $this->existsResponse($isExists);
     }
 
     /**

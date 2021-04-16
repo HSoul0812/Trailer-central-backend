@@ -2,6 +2,7 @@
 
 namespace App\Models\Parts;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -20,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property Part $part
  */
 class BinQuantity extends Model {
+
+    use TableAware;
 
     protected $table = 'part_bin_qty';
 
