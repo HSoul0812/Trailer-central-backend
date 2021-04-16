@@ -107,6 +107,12 @@ class InquiryServiceTest extends TestCase
      */
     private $trackingUnitRepositoryMock;
 
+
+    /**
+     * @var Lead
+     */
+    private $mergeLead;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -646,9 +652,12 @@ class InquiryServiceTest extends TestCase
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
             'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_INVENTORY
+            'lead_type' => LeadType::TYPE_GENERAL
         ]);
         $lead->identifier = self::TEST_ITEM_ID;
+
+        // Get Matches
+        $matches = $this->getMatchingLeads($lead);
 
         // Send Request Params
         $sendRequestParams = [
@@ -714,8 +723,7 @@ class InquiryServiceTest extends TestCase
         $this->leadServiceMock
             ->shouldReceive('merge')
             ->once()
-            ->with($sendInquiryParams)
-            ->andReturn($lead);
+            ->andReturn($this->mergeLead);
 
         // Mock Lead Repository
         $this->adfServiceMock
@@ -744,11 +752,10 @@ class InquiryServiceTest extends TestCase
         // Validate Send Inquiry Result
         $result = $service->send($sendRequestParams);
 
-        // Match Lead Details
-        $this->assertSame($result->full_name, $lead->full_name);
-        $this->assertSame($result->email_address, $lead->email_address);
-        $this->assertSame($result->phone_number, $lead->phone_number);
+        // Match Merged Lead Details
+        $this->assertSame($result->identifier, $this->mergeLead->identifier);
     }
+
 
     /**
      * Prepare Inquiry Lead
@@ -803,5 +810,61 @@ class InquiryServiceTest extends TestCase
 
         // Return Updated Params Array
         return $params;
+    }
+
+
+    /**
+     * Get Matching Leads
+     * 
+     * @param Lead $lead
+     * @param bool $includeExact
+     * @return Collection<Lead>
+     */
+    private function getMatchingLeads(Lead $lead, bool $includeExact = false) {
+        // Create Seeds
+        $seeds = [
+            ['firstname' => $lead->firstname, 'lastname' => $lead->lastname],
+            ['primary' => 1, 'firstname' => $lead->firstname, 'phone' => $lead->phone_number, 'email' => $lead->email_address],
+            ['phone' => $lead->phone_number],
+            ['firstname' => $lead->firstname, 'lastname' => $lead->lastname, 'email' => $lead->email_address],
+            ['lastname' => $lead->lastname],
+            ['phone' => $lead->phone_number, 'email' => $lead->email_address],
+        ];
+
+        // Replace Primary With EXACT
+        if($includeExact) {
+            $primary = $seeds[1];
+            $primary['firstname'] = $lead->firstname;
+            $primary['lastname'] = $lead->lastname;
+            $primary['phone'] = $lead->phone_number;
+            $primary['email'] = $lead->email_address;
+            $seeds[1] = $primary;
+        }
+
+        // Create Matching Leads
+        $matches = new Collection();
+        collect($seeds)->each(function (array $seed) use(&$matches, $lead): void {
+            $match = factory(Lead::class)->make([
+                'dealer_id' => $lead->dealer_id,
+                'dealer_location_id' => $lead->dealer_location_id,
+                'website_id' => $lead->website_id,
+                'inventory_id' => 0,
+                'lead_type' => LeadType::TYPE_GENERAL,
+                'firstname' => $seed['firstname'] ?? null,
+                'lastname' => $seed['lastname'] ?? null,
+                'email_address' => $seed['email'] ?? null,
+                'phone_number' => $seed['phone'] ?? null
+            ]);
+            $match->identifier = $lead->identifier + $matches->count() + 1;
+
+            // Add Matches
+            if(!empty($seed['primary'])) {
+                $this->mergeLead = $match;
+            }
+            $matches->push($match);
+        });
+
+        // Return Matches Collection
+        return $matches;
     }
 }
