@@ -84,7 +84,7 @@ class LeadServiceTest extends TestCase
         $this->app->instance(TypeRepositoryInterface::class, $this->typeRepositoryMock);
 
         $this->unitRepositoryMock = Mockery::mock(UnitRepositoryInterface::class);
-        $this->app->instance(UnitRepositoryInterface::class, $this->unitRepositoryMock
+        $this->app->instance(UnitRepositoryInterface::class, $this->unitRepositoryMock;
 
         $this->interactionRepositoryMock = Mockery::mock(InteractionsRepositoryInterface::class);
         $this->app->instance(InteractionsRepositoryInterface::class, $this->interactionRepositoryMock);
