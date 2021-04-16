@@ -122,19 +122,19 @@ class ADFServiceTest extends TestCase
         $this->inventoryRepository
                 ->shouldReceive('get')
                 ->once()
-                ->with($inventory->inventory_id)
+                ->with(['id' => $inventory->inventory_id])
                 ->andReturn($inventory);
 
         $this->userRepository
                 ->shouldReceive('get')
                 ->once()
-                ->with($dealer->dealer_id)
+                ->with(['id' => $dealer->dealer_id])
                 ->andReturn($dealer);
 
         $this->dealerLocationRepository
                 ->shouldReceive('get')
                 ->once()
-                ->with($dealerLocation->dealer_location_id)
+                ->with(['id' => $dealerLocation->dealer_location_id])
                 ->andReturn($dealerLocation);
 
         $leadEmail->shouldReceive('getToEmailsAttribute')
