@@ -823,19 +823,19 @@ class InquiryServiceTest extends TestCase
     private function getMatchingLeads(Lead $lead, bool $includeExact = false) {
         // Create Seeds
         $seeds = [
-            ['firstname' => $lead->firstname, 'lastname' => $lead->lastname],
-            ['primary' => 1, 'firstname' => $lead->firstname, 'phone' => $lead->phone_number, 'email' => $lead->email_address],
+            ['firstname' => $lead->first_name, 'lastname' => $lead->last_name],
+            ['primary' => 1, 'firstname' => $lead->first_name, 'phone' => $lead->phone_number, 'email' => $lead->email_address],
             ['phone' => $lead->phone_number],
-            ['firstname' => $lead->firstname, 'lastname' => $lead->lastname, 'email' => $lead->email_address],
-            ['lastname' => $lead->lastname],
+            ['firstname' => $lead->first_name, 'lastname' => $lead->last_name, 'email' => $lead->email_address],
+            ['lastname' => $lead->last_name],
             ['phone' => $lead->phone_number, 'email' => $lead->email_address],
         ];
 
         // Replace Primary With EXACT
         if($includeExact) {
             $primary = $seeds[1];
-            $primary['firstname'] = $lead->firstname;
-            $primary['lastname'] = $lead->lastname;
+            $primary['firstname'] = $lead->first_name;
+            $primary['lastname'] = $lead->last_name;
             $primary['phone'] = $lead->phone_number;
             $primary['email'] = $lead->email_address;
             $seeds[1] = $primary;

@@ -670,7 +670,6 @@ class InquiryLead
         if($this->firstName === $lead->first_name && $this->lastName === $lead->last_name) {
             $matches++;
         }
-        var_dump($matches);
 
         // Return
         return $matches;
