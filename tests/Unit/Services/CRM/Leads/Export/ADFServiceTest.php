@@ -46,16 +46,19 @@ class ADFServiceTest extends TestCase
     public function testExportADFLead()
     {
         $dealerLocation = $this->getEloquentMock(DealerLocation::class);
+
+        $inquiry = $this->getEloquentMock(InquiryLead::class);
         $lead = $this->getEloquentMock(Lead::class);
         $leadEmail = $this->getEloquentMock(LeadEmail::class);
         $website = $this->getEloquentMock(Website::class);
         $mail = Mockery::mock('Swift_Mailer');
         $this->app['mailer']->setSwiftMailer($mail);
-
-        $inquiry = $this->getEloquentMock(InquiryLead::class);
         
         $website->id = 1;
-        
+
+        $inquiry->dealerId = 1;
+        $inquiry->dealerLocationId = 1;
+
         $lead->identifier = 1;
         $lead->dealer_location_id = 1;
         $lead->dealer_id = 1;
