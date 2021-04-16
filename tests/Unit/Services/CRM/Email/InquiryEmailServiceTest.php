@@ -98,7 +98,7 @@ class InquiryEmailServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
@@ -184,7 +184,7 @@ class InquiryEmailServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
@@ -270,7 +270,7 @@ class InquiryEmailServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
@@ -356,7 +356,7 @@ class InquiryEmailServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
@@ -443,7 +443,7 @@ class InquiryEmailServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
@@ -529,7 +529,7 @@ class InquiryEmailServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
@@ -615,7 +615,7 @@ class InquiryEmailServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
@@ -688,7 +688,7 @@ class InquiryEmailServiceTest extends TestCase
         $websiteId = self::getTestWebsiteRandom();
 
         // Get Test Lead
-        $lead = factory(Lead::class)->create([
+        $lead = factory(Lead::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $dealerLocationId,
             'website_id' => $websiteId,
