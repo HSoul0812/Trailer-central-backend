@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Leads;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Interactions\Interaction;
 
 interface LeadServiceInterface {
     /**
