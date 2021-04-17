@@ -91,11 +91,18 @@ class LeadServiceTest extends TestCase
     {
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
+
         $status = $this->getEloquentMock(LeadStatus::class);
+        $status->source_name = self::TEST_SOURCE;
+
         $source = $this->getEloquentMock(LeadSource::class);
+        $source->source_name = self::TEST_SOURCE;
+
         $type = $this->getEloquentMock(LeadSource::class);
         $types = collect([$type]);
+
         $unit = $this->getEloquentMock(Unit::class);
+        $unit->inventory_id = 1;
         $units = collect([$unit]);
 
         // Create Base Lead Params
