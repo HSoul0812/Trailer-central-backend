@@ -250,7 +250,7 @@ class LeadServiceTest extends TestCase
         // Create Source Params
         $createSourceParams = [
             'user_id' => 1,
-            'source_name' => $updateRequestParams['lead_source']
+            'source_name' => $source->source_name
         ];
 
 
