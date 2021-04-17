@@ -254,7 +254,8 @@ class InquiryServiceTest extends TestCase
         $result = $service->create($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result['data']['full_name'], $lead->full_name);
+        $this->assertSame($result['data']['first_name'], $lead->first_name);
+        $this->assertSame($result['data']['last_name'], $lead->last_name);
         $this->assertSame($result['data']['email_address'], $lead->email_address);
         $this->assertSame($result['data']['phone_number'], $lead->phone_number);
     }
@@ -376,7 +377,8 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result['data']['full_name'], $lead->full_name);
+        $this->assertSame($result['data']['first_name'], $lead->first_name);
+        $this->assertSame($result['data']['last_name'], $lead->last_name);
         $this->assertSame($result['data']['email_address'], $lead->email_address);
         $this->assertSame($result['data']['phone_number'], $lead->phone_number);
     }
@@ -499,7 +501,8 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result['data']['full_name'], $lead->full_name);
+        $this->assertSame($result['data']['first_name'], $lead->first_name);
+        $this->assertSame($result['data']['last_name'], $lead->last_name);
         $this->assertSame($result['data']['email_address'], $lead->email_address);
         $this->assertSame($result['data']['phone_number'], $lead->phone_number);
     }
@@ -622,7 +625,8 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result['data']['full_name'], $lead->full_name);
+        $this->assertSame($result['data']['first_name'], $lead->first_name);
+        $this->assertSame($result['data']['last_name'], $lead->last_name);
         $this->assertSame($result['data']['email_address'], $lead->email_address);
         $this->assertSame($result['data']['phone_number'], $lead->phone_number);
     }
@@ -752,7 +756,8 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result['data']['full_name'], $lead->full_name);
+        $this->assertSame($result['data']['first_name'], $lead->first_name);
+        $this->assertSame($result['data']['last_name'], $lead->last_name);
         $this->assertSame($result['data']['email_address'], $lead->email_address);
         $this->assertSame($result['data']['phone_number'], $lead->phone_number);
     }
@@ -1139,7 +1144,8 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result['data']['full_name'], $lead->full_name);
+        $this->assertSame($result['data']['first_name'], $lead->first_name);
+        $this->assertSame($result['data']['last_name'], $lead->last_name);
         $this->assertSame($result['data']['email_address'], $lead->email_address);
         $this->assertSame($result['data']['phone_number'], $lead->phone_number);
         $this->assertNull($result['merge']);
