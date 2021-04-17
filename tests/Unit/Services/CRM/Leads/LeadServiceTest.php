@@ -189,7 +189,7 @@ class LeadServiceTest extends TestCase
         $this->assertSame($result->leadStatus->id, $status->id);
 
         // Assert Match
-        var_dump($result);
+        var_dump($result->leadStatus);
         var_dump($status);
         var_dump($source);
         $this->assertSame($result->leadStatus->source, $source->source_name);
