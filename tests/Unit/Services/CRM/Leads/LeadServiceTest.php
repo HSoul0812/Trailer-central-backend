@@ -110,6 +110,7 @@ class LeadServiceTest extends TestCase
 
         $type = $this->getEloquentMock(LeadSource::class);
         $type->lead_type = LeadType::TYPE_INVENTORY;
+        $leadTypes = [$type->lead_type];
         $types = collect([$type]);
 
         $unit = $this->getEloquentMock(Unit::class);
@@ -169,6 +170,11 @@ class LeadServiceTest extends TestCase
             ->once()
             ->with($createSourceParams)
             ->andReturn($source);
+
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn($leadTypes);
 
         // Mock Units of Interest
         $this->mockUnitsOfInterest($lead, $units);
