@@ -766,6 +766,16 @@ class LeadServiceTest extends TestCase
         ]);
         $lead->identifier = self::TEST_LEAD_ID;
 
+        // Get Test Interaction
+        $interaction = factory(Interaction::class)->make([
+            'user_id' => $dealerId,
+            'tc_lead_id' => self::TEST_ITEM_ID,
+            'sales_person_id' => 0,
+            'interaction_type' => 'INQUIRY'
+        ]);
+        $interaction->interaction_id = self::TEST_ITEM_ID;
+        $interaction->setRelation('lead', $lead);
+
         // Send Request Params
         $mergeLeadParams = [
             'first_name' => $lead->first_name,
@@ -796,7 +806,8 @@ class LeadServiceTest extends TestCase
         $this->interactionRepositoryMock
             ->shouldReceive('create')
             ->once()
-            ->with($createInteractionParams);
+            ->with($createInteractionParams)
+            ->andReturn($interaction);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -810,7 +821,7 @@ class LeadServiceTest extends TestCase
         $result = $service->merge($lead, $mergeLeadParams);
 
         // Match Merged Lead Details
-        $this->assertSame($result->identifier, self::TEST_LEAD_ID);
+        $this->assertSame($result->interaction_id, self::TEST_LEAD_ID);
     }
 
 
