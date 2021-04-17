@@ -177,8 +177,9 @@ class InquiryService implements InquiryServiceInterface
                 $interaction = $this->leads->merge($lead, $params);
             }
         }
+
         // Create Lead!
-        else {
+        if(empty($lead->identifier)) {
             $lead = $this->leads->create($params);
         }
 
