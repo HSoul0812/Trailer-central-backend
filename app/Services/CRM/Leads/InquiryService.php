@@ -207,9 +207,12 @@ class InquiryService implements InquiryServiceInterface
         $response = $this->fractal->createData($leadData)->toArray();
 
         // Convert Interaction to Array
-        $interactionData = new Item($interaction, $this->interactionTransformer, 'data');
-        $interactionResponse = $this->fractal->createData($interactionData)->toArray();
-        $response['merge'] = $interactionResponse['data'];
+        $response['merge'] = null;
+        if(!empty($interaction->interaction_id)) {
+            $interactionData = new Item($interaction, $this->interactionTransformer, 'data');
+            $interactionResponse = $this->fractal->createData($interactionData)->toArray();
+            $response['merge'] = $interactionResponse['data'];
+        }
 
         // Return Response
         return $response;
