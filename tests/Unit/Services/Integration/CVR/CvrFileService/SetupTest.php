@@ -56,7 +56,7 @@ class SetupTest extends TestCase
             ->with([
                 'dealer_id' => $dealerId,
                 'token' => $token,
-                'payload' => is_array($payload) ? $payload : $payload->asArray(),
+                'payload' => $payload->asArray(),
                 'queue' => CvrFile::QUEUE_NAME,
                 'concurrency_level' => CvrFile::LEVEL_DEFAULT,
                 'name' => CvrFile::QUEUE_JOB_NAME
