@@ -83,74 +83,20 @@ class LeadServiceTest extends TestCase
      */
     public function testCreateSingleType()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-        $dealer = NewDealerUser::find($dealerId);
-        $userId = $dealer->user_id;
-
-        // Create Dummy Inventory
-        $inventory = factory(Inventory::class)->create([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId
-        ]);
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->create([
-            'dealer_id' => $dealerId,
-            'website_id' => $websiteId,
-            'inventory_id' => $inventory->inventory_id
-        ]);
-        $status = factory(LeadStatus::class)->create([
-            'tc_lead_identifier' => $lead->identifier
-        ]);
-
-        // Create Source/Type/InventoryLead
-        $source = factory(LeadSource::class)->create([
-            'user_id' => $userId,
-            'source_name' => $status->source
-        ]);
-        $type = factory(LeadType::class)->create([
-            'lead_id' => $lead->identifier,
-            'lead_type' => $lead->lead_type
-        ]);
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $source = $this->getEloquentMock(LeadSource::class);
+        $type = $this->getEloquentMock(LeadSource::class);
         $types = collect([$type]);
-        $unit = factory(InventoryLead::class)->create([
-            'website_lead_id' => $lead->identifier,
-            'inventory_id' => $lead->inventory_id
-        ]);
+        $unit = $this->getEloquentMock(Unit::class);
         $units = collect([$unit]);
 
         // Create Base Lead Params
         $createRequestParams = [
-            'website_id' => $lead->website_id,
-            'dealer_id' => $lead->dealer_id,
-            'dealer_location_id' => $lead->dealer_location_id,
-            'inventory_id' => $lead->inventory_id,
-            'lead_type' => $lead->lead_type,
-            'referral' => $lead->referral,
-            'title' => $lead->title,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'date_submitted' => $lead->date_submitted->toDateTimeString(),
-            'contact_email_sent' => $lead->date_submitted->toDateTimeString(),
-            'adf_email_sent' => $lead->date_submitted->toDateTimeString(),
-            'cdk_email_sent' => 1,
-            'is_spam' => 0,
-            'lead_source' => $status->source,
-            'lead_status' => $status->status,
-            'next_contact_date' => $status->next_contact_date,
-            'contact_type' => $status->task,
-            'sales_person_id' => $status->sales_person_id
+            'inventory_id' => 1,
+            'lead_type' => LeadType::TYPE_INVENTORY,
+            'preferred_contact' => ''
         ];
 
         // Create Lead Params
@@ -161,12 +107,12 @@ class LeadServiceTest extends TestCase
 
         // Create Status Params
         $createStatusParams = $createLeadParams;
-        $createStatusParams['lead_id'] = $lead->identifier;
+        $createStatusParams['lead_id'] = 1;
 
         // Create Source Params
         $createSourceParams = [
-            'user_id' => $userId,
-            'source_name' => $createRequestParams['lead_source']
+            'user_id' => 1,
+            'source_name' => self::TEST_SOURCE
         ];
 
 
