@@ -15,8 +15,8 @@ use Exception;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 /**
- * Provide capabilities to setup and dispatch a monitored job for CVR file synchronizer, also provide the runner
- * to handle the zipped file parser and file GEN builder.
+ * Provide capabilities to setup and dispatch a monitored job for CVR file sender, also provide the runner
+ * to handle the sending process.
  *
  * This is to decouple service code from the job.
  */
