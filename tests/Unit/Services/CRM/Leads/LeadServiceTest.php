@@ -101,6 +101,7 @@ class LeadServiceTest extends TestCase
         $lead->identifier = 1;
 
         $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
         $status->name = self::TEST_SOURCE;
 
         $source = $this->getEloquentMock(LeadSource::class);
@@ -142,6 +143,8 @@ class LeadServiceTest extends TestCase
         $lead->shouldReceive('belongsTo')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
+        
+        $lead->leadStatus = $status;
 
 
         /** @var LeadServiceInterface $service */
