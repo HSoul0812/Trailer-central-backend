@@ -8,7 +8,6 @@ use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Exceptions\CRM\Leads\AutoAssignJobMissingLeadException;
 use App\Exceptions\CRM\Leads\AutoAssignJobSalesPersonExistsException;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Foundation\Bus\Dispatchable;
 
 /**
  * Class AutoAssignJob
