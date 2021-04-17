@@ -127,7 +127,8 @@ class LeadServiceTest extends TestCase
         $createRequestParams = [
             'inventory_id' => 1,
             'lead_type' => LeadType::TYPE_INVENTORY,
-            'preferred_contact' => ''
+            'preferred_contact' => '',
+            'lead_source' => self::TEST_SOURCE
         ];
 
         // Create Lead Params
