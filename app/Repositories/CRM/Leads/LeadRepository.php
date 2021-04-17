@@ -204,7 +204,7 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         // Clean Phones
-        $params['phone1'] = preg_replace('/[-+)( ]+/', '', $params['phone_number']);
+        $params['phone1'] = preg_replace('/[-+)( x]+/', '', $params['phone_number']);
         $params['phone2'] = '1' . $params['phone1'];
         if(strlen($params['phone1']) === 11) {
             $params['phone2'] = substr($params['phone1'], 1);
@@ -219,10 +219,10 @@ class LeadRepository implements LeadRepositoryInterface {
                 return $query->where('first_name', $params['first_name'])
                              ->where('last_name', $params['last_name']);
             })->orWhere(function(Builder $query) use($params) {
-                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\') = ?', $params['phone1'])
+                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\'), \'x\', \'\') = ?', $params['phone1'])
                              ->where('phone_number', '<>', '');
             })->orWhere(function(Builder $query) use($params) {
-                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\') = ?', $params['phone2'])
+                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\'), \'x\', \'\') = ?', $params['phone2'])
                              ->where('phone_number', '<>', '');
             })->orWhere(function(Builder $query) use($params) {
                 return $query->where('email_address', $params['email_address'])

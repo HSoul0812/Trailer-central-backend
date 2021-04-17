@@ -652,7 +652,7 @@ class InquiryLead
         $matches = 0;
 
         // Matched Phone?
-        $phone1 = preg_replace("/[-+)( ]+/", "", $this->phoneNumber);
+        $phone1 = preg_replace("/[-+)( x]+/", "", $this->phoneNumber);
         $phone2 = '1' . $phone1;
         if(strlen($phone1) === 11) {
             $phone2 = substr($phone1, 1);

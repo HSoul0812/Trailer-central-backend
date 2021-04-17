@@ -302,10 +302,6 @@ class InquiryService implements InquiryServiceInterface
         foreach($leads as $lead) {
             // Find All Matches Between Both
             $matched = $inquiry->findMatches($lead);
-            if($matched === 1) {
-                var_dump($lead);
-                var_dump($inquiry);
-            }
 
             // Matched All 3
             if($matched > InquiryLead::MERGE_MATCH_COUNT) {
