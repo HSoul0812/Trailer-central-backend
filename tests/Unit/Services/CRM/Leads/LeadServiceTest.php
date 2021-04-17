@@ -100,6 +100,7 @@ class LeadServiceTest extends TestCase
         $source->source_name = self::TEST_SOURCE;
 
         $type = $this->getEloquentMock(LeadSource::class);
+        $type->lead_type = LeadType::TYPE_INVENTORY;
         $types = collect([$type]);
 
         $unit = $this->getEloquentMock(Unit::class);
