@@ -103,7 +103,7 @@ class InquiryService implements InquiryServiceInterface
         // Create Auto Assign Job
         if(empty($lead->leadStatus->sales_person_id)) {
             // Dispatch Auto Assign Job
-            $job = new AutoAssignJob($lead->identifier);
+            $job = new AutoAssignJob($lead);
             $this->dispatch($job->onQueue('mails'));
         }
 

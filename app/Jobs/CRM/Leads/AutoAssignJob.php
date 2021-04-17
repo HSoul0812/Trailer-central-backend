@@ -3,11 +3,15 @@
 namespace App\Jobs\CRM\Leads;
 
 use App\Jobs\Job;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Models\CRM\Leads\Lead;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Exceptions\CRM\Leads\AutoAssignJobMissingLeadException;
 use App\Exceptions\CRM\Leads\AutoAssignJobSalesPersonExistsException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Bus\Queueable;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 /**
  * Class AutoAssignJob
@@ -15,10 +19,12 @@ use Illuminate\Support\Facades\Log;
  */
 class AutoAssignJob extends Job
 {
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     /**
-     * @var int
+     * @var Lead
      */
-    private $leadId;
+    private $lead;
 
     /**
      * @var Illuminate\Support\Facades\Log
@@ -28,12 +34,12 @@ class AutoAssignJob extends Job
     /**
      * AutoAssignJob constructor.
      * 
-     * @param int $leadId
+     * @param Lead $lead
      * @param AutoAssignServiceInterface
      */
-    public function __construct(int $leadId)
+    public function __construct(Lead $lead)
     {
-        $this->leadId = $leadId;
+        $this->lead = $lead;
 
         // Initialize Logger
         $this->log = Log::channel('autoassign');
@@ -47,20 +53,17 @@ class AutoAssignJob extends Job
      * @throws AutoAssignJobSalesPersonExistsException
      * @return boolean
      */
-    public function handle()
+    public function handle(AutoAssignServiceInterface $service)
     {
-        // Get Lead From Repository
-        $lead = $repository->get(['id' => $this->leadId]);
-
-        // Lead Already Has Sales Person?
-        if (!empty($lead->leadStatus->sales_person_id)) {
+        // Job Already Has Sales Person?
+        if (!empty($this->lead->leadStatus->sales_person_id)) {
             $this->log->error('Cannot process auto assign; sales person ALREADY assigned to lead!');
             throw new AutoAssignJobSalesPersonExistsException;
         }
 
         // Process Auto Assign
-        $this->log->info('Handling Auto Assign Manually on Lead #' . $lead->identifier);
-        $service->autoAssign($lead);
+        $this->log->info('Handling Auto Assign Manually on Lead #' . $this->lead->identifier);
+        $service->autoAssign($this->lead);
         return true;
     }
 }
