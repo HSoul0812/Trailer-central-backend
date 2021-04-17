@@ -47,7 +47,7 @@ class AutoAssignJob extends Job
      * @throws AutoAssignJobSalesPersonExistsException
      * @return boolean
      */
-    public function handle(LeadRepositoryInterface $repository, AutoAssignServiceInterface $service)
+    public function handle()
     {
         // Get Lead From Repository
         $lead = $repository->get(['id' => $this->leadId]);
