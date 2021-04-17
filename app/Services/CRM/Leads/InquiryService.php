@@ -13,8 +13,13 @@ use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Utilities\Fractal\NoDataArraySerializer;
+use App\Transformers\CRM\Leads\LeadTransformer;
+use App\Transformers\CRM\Interactions\InteractionTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Item;
 
 /**
  * Class LeadService
@@ -55,6 +60,22 @@ class InquiryService implements InquiryServiceInterface
      */
     protected $adf;
 
+
+    /**
+     * @var App\Transformers\CRM\Leads\LeadTransformer
+     */
+    private $leadTransformer;
+
+    /**
+     * @var App\Transformers\CRM\Interactions\InteractionTransformer
+     */
+    private $interactionTransformer;
+
+    /**
+     * @var Manager
+     */
+    private $fractal;
+
     /**
      * LeadService constructor.
      */
@@ -64,7 +85,10 @@ class InquiryService implements InquiryServiceInterface
         TrackingUnitRepositoryInterface $trackingUnit,
         LeadServiceInterface $leads,
         InquiryEmailServiceInterface $inquiryEmail,
-        ADFServiceInterface $adf
+        ADFServiceInterface $adf,
+        LeadTransformer $leadTransformer,
+        InteractionTransformer $interactionTransformer,
+        Manager $fractal
     ) {
         // Initialize Services
         $this->leads = $leads;
@@ -75,6 +99,12 @@ class InquiryService implements InquiryServiceInterface
         $this->leadRepo = $leadRepo;
         $this->tracking = $tracking;
         $this->trackingUnit = $trackingUnit;
+
+        // Set Up Fractal
+        $this->leadTransformer = $leadTransformer;
+        $this->interactionTransformer = $interactionTransformer;
+        $this->fractal = $fractal;
+        $this->fractal->setSerializer(new NoDataArraySerializer());
     }
 
 
@@ -82,9 +112,10 @@ class InquiryService implements InquiryServiceInterface
      * Create Inquiry
      * 
      * @param array $params
-     * @return Lead
+     * @return array{data: Lead,
+     *               merge: null|Interaction}
      */
-    public function create(array $params): Lead {
+    public function create(array $params): array {
         // Fix Units of Interest
         $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
         if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
@@ -94,26 +125,18 @@ class InquiryService implements InquiryServiceInterface
         // Get Inquiry Lead
         $inquiry = $this->inquiryEmail->fill($params);
 
-        // Create Lead
-        $lead = $this->mergeOrCreate($params);
-
-        // Lead Exists?!
-        if(!empty($lead->identifier)) {
-            // Queue Up Inquiry Jobs
-            $this->queueInquiryJobs($lead, $inquiry);
-        }
-
-        // Create Lead
-        return $lead;
+        // Create or Merge Lead
+        return $this->mergeOrCreate($inquiry, $params);
     }
 
     /**
      * Send Inquiry
      * 
      * @param array $params
-     * @return Lead
+     * @return array{data: Lead,
+     *               merge: null|Interaction}
      */
-    public function send(array $params): Lead {
+    public function send(array $params): array {
         // Fix Units of Interest
         $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
         if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
@@ -126,27 +149,21 @@ class InquiryService implements InquiryServiceInterface
         // Send Inquiry Email
         $this->inquiryEmail->send($inquiry);
 
-        // Create Lead
-        $lead = $this->mergeOrCreate($params);
-
-        // Lead Exists?!
-        if(!empty($lead->identifier)) {
-            // Queue Up Inquiry Jobs
-            $this->queueInquiryJobs($lead, $inquiry);
-        }
-
-        // Create Lead
-        return $lead;
+        // Merge or Create Lead
+        return $this->mergeOrCreate($inquiry, $params);
     }
 
     /**
      * Merge or Create Lead
      * 
+     * @param InquiryLead $inquiry
      * @param array $params
-     * @return Lead
+     * @return array{data: Lead,
+     *               merge: null|Interaction}
      */
-    public function mergeOrCreate(array $params): Lead {
+    public function mergeOrCreate(InquiryLead $inquiry, array $params): array {
         // Lead Type is NOT Financing?
+        $interaction = null;
         if(!in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
             // Get Matches
             $leads = $this->leadRepo->findAllMatches($params);
@@ -156,12 +173,45 @@ class InquiryService implements InquiryServiceInterface
 
             // Merge Lead!
             if(!empty($lead->identifier)) {
-                return $this->leads->merge($lead, $params);
+                $interaction = $this->leads->merge($lead, $params);
             }
         }
+        // Create Lead!
+        else {
+            $lead = $this->leads->create($params);
+        }
 
-        // Create!
-        return $this->leads->create($params);
+        // Lead Exists?!
+        if(!empty($lead->identifier)) {
+            // Queue Up Inquiry Jobs
+            $this->queueInquiryJobs($lead, $inquiry);
+        }
+
+        // Return Fractal Response
+        return $this->response($lead, $interaction);
+    }
+
+
+    /**
+     * Return Response
+     * 
+     * @param Lead $lead
+     * @param null|Interaction $interaction
+     * @return array{data: Lead,
+     *               merge: null|Interaction}
+     */
+    private function response(Lead $lead, ?Interaction $interaction = null) {
+        // Convert Lead to Array
+        $leadData = new Item($lead, $this->leadTransformer, 'data');
+        $response = $this->fractal->createData($leadData)->toArray();
+
+        // Convert Interaction to Array
+        $interactionData = new Item($interaction, $this->interactionTransformer, 'data');
+        $interactionResponse = $this->fractal->createData($interactionData)->toArray();
+        $response['merge'] = $interactionResponse['data'];
+
+        // Return Response
+        return $response;
     }
 
 

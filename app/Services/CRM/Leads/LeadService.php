@@ -166,9 +166,9 @@ class LeadService implements LeadServiceInterface
      * 
      * @param Lead $lead
      * @param array $params
-     * @return Lead
+     * @return Interaction
      */
-    public function merge(Lead $lead, array $params): Lead {
+    public function merge(Lead $lead, array $params): Interaction {
         // Configure Notes From Provided Data
         $notes = '';
         if(!empty($params['first_name'])) {
@@ -195,15 +195,12 @@ class LeadService implements LeadServiceInterface
             $notes .= $params['comments'];
         }
 
-        // Get Lead Data
-        $this->interactions->create([
+        // Get Interaction Data
+        return $this->interactions->create([
             'lead_id' => $lead->identifier,
             'interaction_type'   => 'INQUIRY',
             'interaction_notes'  => !empty($notes) ? 'Original Inquiry: ' . $notes : 'Not Provided'
         ]);
-
-        // Return Lead
-        return $this->leads->get(['id' => $lead->identifier]);
     }
 
     /**

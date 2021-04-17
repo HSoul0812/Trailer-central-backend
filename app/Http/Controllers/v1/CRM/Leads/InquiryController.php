@@ -18,20 +18,14 @@ class InquiryController extends RestfulController
     protected $inquiry;
 
     /**
-     * @var App\Transformers\CRM\Leads\LeadTransformer
-     */
-    protected $transformer;
-
-    /**
      * Create a new controller instance.
      *
      * @param InquiryServiceInterface $inquiry
      */
-    public function __construct(InquiryServiceInterface $inquiry, LeadTransformer $transformer)
+    public function __construct(InquiryServiceInterface $inquiry)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'send']);
         $this->inquiry = $inquiry;
-        $this->transformer = $transformer;
     }
 
     /**
@@ -44,7 +38,7 @@ class InquiryController extends RestfulController
         $request = new CreateInquiryRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->item($this->inquiry->create($request->all()), $this->transformer);
+            return $this->response->array($this->inquiry->create($request->all()));
         }
 
         return $this->response->errorBadRequest();
@@ -60,7 +54,7 @@ class InquiryController extends RestfulController
         $request = new SendInquiryRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->item($this->inquiry->send($request->all()), $this->transformer);
+            return $this->response->array($this->inquiry->send($request->all()));
         }
 
         return $this->response->errorBadRequest();
