@@ -134,6 +134,20 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
                     ->orWhere('closed_at', '>=', $params['created_at_or_closed_at_gte']);
             });
         }
+                
+        if (isset($params['date_in_or_date_out_lte'])) {
+            $query = $query->where(function($q) use($params) {
+                $q->where('date_in', '<=', $params['date_in_or_date_out_lte'] . ' 23:59:59')
+                    ->orWhere('date_out', '<=', $params['date_in_or_date_out_lte'] . ' 23:59:59');
+            });
+        }
+        
+        if (isset($params['date_in_or_date_out_gte'])) {
+            $query = $query->where(function($q) use($params) {
+                $q->where('date_in', '>=', $params['date_in_or_date_out_gte'] . ' 00:00:00')
+                    ->orWhere('date_out', '>=', $params['date_in_or_date_out_gte'] . ' 00:00:00');
+            });
+        }
 
         return $query->paginate($params['per_page'])->appends($params);
     }
