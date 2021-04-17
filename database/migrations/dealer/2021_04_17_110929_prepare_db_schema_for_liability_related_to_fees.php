@@ -36,7 +36,7 @@ class PrepareDbSchemaForLiabilityRelatedToFees extends Migration
             $table->integer('liability_acc_id')
                 ->nullable()
                 ->after('income_acc_id')
-                ->comment('Liability account where it need to be sent');
+                ->comment('Liability account where it needs to be sent');
         });
     }
 
