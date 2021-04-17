@@ -174,10 +174,6 @@ class LeadServiceTest extends TestCase
         // Mock Lead Types
         $this->mockLeadTypes($lead, $types);
 
-        // Fake DB
-        DB::fake();
-
-
         // Validate Create Catalog Result
         $result = $service->create($createRequestParams);
 
@@ -230,6 +226,9 @@ class LeadServiceTest extends TestCase
         $unit->inventory_id = 1;
         $units = collect([$unit]);
 
+        $db = $this->getEloquentMock(DB::class);
+
+
         // Create Base Lead Params
         $updateRequestParams = [
             'id' => $lead->identifier,
@@ -254,6 +253,14 @@ class LeadServiceTest extends TestCase
             'source_name' => $source->source_name
         ];
 
+
+
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        $db->shouldReceive('transaction')->passthru();
 
         /** @var LeadServiceInterface $service */
         $service = $this->app->make(LeadServiceInterface::class);
