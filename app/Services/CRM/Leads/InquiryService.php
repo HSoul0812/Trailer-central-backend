@@ -259,7 +259,7 @@ class InquiryService implements InquiryServiceInterface
      * 
      * @param Collection<Lead> $matches
      * @param array $params
-     * @return null || Lead
+     * @return null|Lead
      */
     private function chooseMatch(Collection $matches, array $params): ?Lead {
         // Sort Leads Into Standard or With Status
@@ -292,8 +292,8 @@ class InquiryService implements InquiryServiceInterface
      * Filter Matching Lead
      * 
      * @param Collection<Lead> $leads
-     * @param FilteredLead $inquiry
-     * @return null || Lead
+     * @param InquiryLead $inquiry
+     * @return null|Lead
      */
     private function filterMatch(Collection $leads, InquiryLead $inquiry): ?Lead {
         // Loop Status
