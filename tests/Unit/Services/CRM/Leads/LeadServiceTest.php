@@ -31,6 +31,12 @@ use Tests\TestCase;
 class LeadServiceTest extends TestCase
 {
     /**
+     * @const string
+     */
+    const TEST_SOURCE = 'Facebook';
+
+
+    /**
      * @var LegacyMockInterface|LeadRepositoryInterface
      */
     private $leadRepositoryMock;
