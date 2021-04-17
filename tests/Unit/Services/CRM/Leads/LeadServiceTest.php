@@ -104,6 +104,7 @@ class LeadServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $status->source_name = self::TEST_SOURCE;
+        $lead->setRelation('leadStatus', $status);
 
         $source = $this->getEloquentMock(LeadSource::class);
         $source->source_name = self::TEST_SOURCE;
