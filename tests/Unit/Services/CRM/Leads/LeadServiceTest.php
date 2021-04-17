@@ -14,6 +14,7 @@ use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface; 
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
@@ -61,6 +62,11 @@ class LeadServiceTest extends TestCase
      */
     private $unitRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|InventoryRepositoryInterface
+     */
+    private $inventoryRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -79,6 +85,9 @@ class LeadServiceTest extends TestCase
 
         $this->unitRepositoryMock = Mockery::mock(UnitRepositoryInterface::class);
         $this->app->instance(UnitRepositoryInterface::class, $this->unitRepositoryMock);
+
+        $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
+        $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepositoryMock);
     }
 
 
@@ -714,6 +723,7 @@ class LeadServiceTest extends TestCase
             ->andReturn(true);
 
         // Mock Create Unit Repository
+        $inventoryIds = [];
         foreach($units as $unit) {
             $this->unitRepositoryMock
                 ->shouldReceive('create')
@@ -723,7 +733,20 @@ class LeadServiceTest extends TestCase
                     'inventory_id' => $unit->inventory_id
                 ])
                 ->andReturn($unit);
+            $inventoryIds[] = $unit->inventory_id;
         }
+
+        // Mock Getting All Units
+        $this->inventoryRepositoryMock
+            ->shouldReceive('getAll')
+            ->once()
+            ->with([
+                'dealer_id' => $lead->dealer_id,
+                InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => [
+                    'inventory_id' => $inventoryIds
+                ]
+            ])
+            ->andReturn($units);
     }
 
     /**
