@@ -769,11 +769,11 @@ class LeadServiceTest extends TestCase
         // Get Test Interaction
         $interaction = factory(Interaction::class)->make([
             'user_id' => $dealerId,
-            'tc_lead_id' => self::TEST_ITEM_ID,
+            'tc_lead_id' => self::TEST_LEAD_ID,
             'sales_person_id' => 0,
             'interaction_type' => 'INQUIRY'
         ]);
-        $interaction->interaction_id = self::TEST_ITEM_ID;
+        $interaction->interaction_id = self::TEST_LEAD_ID;
         $interaction->setRelation('lead', $lead);
 
         // Send Request Params
