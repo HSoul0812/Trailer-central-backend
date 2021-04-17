@@ -10,9 +10,6 @@ use App\Services\Integration\CVR\CvrFileServiceInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Job wrapper for CvrSendFileService
- */
 class CvrSendFileJob extends Job
 {
     /**
@@ -38,8 +35,12 @@ class CvrSendFileJob extends Job
         } catch (Exception $e) {
             // catch and log
 
-            Log::error("Error running job for sending the CVR file: ".
-                "token[{$this->token}, exception[{$e->getMessage()}]"
+            Log::error(
+                sprintf(
+                    'Error running job for sending the CVR file: [token: %s, exception: %s]',
+                    $this->token,
+                    $e->getMessage()
+                )
             );
 
             throw $e;
