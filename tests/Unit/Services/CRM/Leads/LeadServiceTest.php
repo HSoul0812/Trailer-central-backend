@@ -810,13 +810,6 @@ class LeadServiceTest extends TestCase
             ->with($createInteractionParams)
             ->andReturn($interaction);
 
-        // Mock Lead Repository
-        $this->leadRepositoryMock
-            ->shouldReceive('get')
-            ->once()
-            ->with(['id' => self::TEST_LEAD_ID])
-            ->andReturn($lead);
-
 
         // Validate Send Inquiry Result
         $result = $service->merge($lead, $mergeLeadParams);
