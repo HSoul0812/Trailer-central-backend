@@ -20,4 +20,13 @@ interface LeadServiceInterface {
      * @return Lead
      */
     public function update(array $rawParams): Lead;
+
+    /**
+     * Merge Lead
+     * 
+     * @param Lead $lead
+     * @param array $params
+     * @return Interaction
+     */
+    public function merge(Lead $lead, array $params): Interaction;
 }
