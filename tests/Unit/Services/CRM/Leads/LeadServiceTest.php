@@ -6,6 +6,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
+use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
@@ -97,13 +98,18 @@ class LeadServiceTest extends TestCase
     public function testCreateSingleType()
     {
         // Get Model Mocks
-        $lead = $this->getEloquentMock(Lead::class);
-        $lead->identifier = 1;
-
         $status = $this->getEloquentMock(LeadStatus::class);
         $status->id = 1;
         $status->source = self::TEST_SOURCE;
+
+        $newDealerUser = $this->getEloquentMock(NewDealerUser::class);
+        $newDealerUser->id = 1;
+        $newDealerUser->user_id = 1;
+
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
         $lead->leadStatus = $status;
+        $lead->newDealerUser = $newDealerUser;
 
         $source = $this->getEloquentMock(LeadSource::class);
         $source->source_name = self::TEST_SOURCE;
