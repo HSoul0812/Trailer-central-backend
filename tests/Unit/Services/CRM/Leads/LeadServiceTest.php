@@ -143,7 +143,7 @@ class LeadServiceTest extends TestCase
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
         
-        $lead->leadStatus = $leadStatus;
+        $lead->leadStatus = $status;
 
 
         /** @var LeadServiceInterface $service */
