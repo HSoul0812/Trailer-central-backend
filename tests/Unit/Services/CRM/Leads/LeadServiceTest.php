@@ -7,6 +7,7 @@ use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\InventoryLead;
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\Inventory\Inventory;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
