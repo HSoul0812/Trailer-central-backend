@@ -180,7 +180,7 @@ class LeadServiceTest extends TestCase
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
-             ->once()
+             ->twice()
              ->andReturn($leadTypes);
 
         // Mock Units of Interest
