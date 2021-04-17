@@ -787,6 +787,7 @@ class InquiryServiceTest extends TestCase
             'interaction_type' => 'INQUIRY'
         ]);
         $interaction->interaction_id = self::TEST_ITEM_ID;
+        $interaction->setRelation('lead', $lead);
 
         // Get Matches
         $matches = $this->getMatchingLeads($lead);
@@ -919,6 +920,7 @@ class InquiryServiceTest extends TestCase
             'interaction_type' => 'INQUIRY'
         ]);
         $interaction->interaction_id = self::TEST_ITEM_ID;
+        $interaction->setRelation('lead', $lead);
 
         // Get Matches
         $matches = $this->getMatchingLeads($lead, true);
