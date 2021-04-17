@@ -653,18 +653,14 @@ class InquiryLead
 
         // Matched Phone?
         var_dump($lead->identifier);
-        $phone1 = preg_replace("/[-+)( ]+/", "", $this->phoneNumber);
+        $phone1 = preg_replace("/[-+)( x]+/", "", $this->phoneNumber);
         $phone2 = '1' . $phone1;
         if(strlen($phone1) === 11) {
             $phone2 = substr($phone1, 1);
         }
-        if($phone1 === $lead->phone_number || $phone2 === $lead->phone_number) {
+        if($phone1 === $lead->clean_phone || $phone2 === $lead->clean_phone) {
             $matches++;
         }
-        var_dump($phone1);
-        var_dump($phone2);
-        var_dump($lead->phone_number);
-        var_dump($matches);
 
         // Matched Email?
         if($this->emailAddress === $lead->email_address) {
