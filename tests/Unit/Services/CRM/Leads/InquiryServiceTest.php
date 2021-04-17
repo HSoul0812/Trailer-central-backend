@@ -7,6 +7,7 @@ use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
+use App\Models\CRM\Interactions\Interaction;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
