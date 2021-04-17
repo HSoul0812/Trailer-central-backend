@@ -365,7 +365,9 @@ class Lead extends Model
         if(empty($this->phone_number)) {
             return '';
         }
-        $phone = preg_replace("/[^0-9]/", "", $this->phone_number);
+        $phoneExt = preg_replace("/[-+)( ]+/", "", $this->phone_number);
+        $phoneNoExt = '1' . preg_replace("/x.*/", "", $phoneExt);
+        $phone = preg_replace("/[^0-9]/", "", $phoneNoExt);
         return '+' . ((strlen($phone) === 11) ? $phone : '1' . substr($phone, 0, 10));
     }
 

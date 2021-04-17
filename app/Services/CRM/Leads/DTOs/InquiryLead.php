@@ -655,6 +655,8 @@ class InquiryLead
         var_dump($lead->identifier);
         $phoneExt = preg_replace("/[-+)( ]+/", "", $this->phoneNumber);
         $phone = '1' . preg_replace("/x.*/", "", $phoneExt);
+        var_dump($phone);
+        var_dump($lead->text_phone);
         if($phone === $lead->text_phone) {
             $matches++;
         }
