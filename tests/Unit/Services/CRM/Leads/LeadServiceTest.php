@@ -6,9 +6,6 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
-use App\Models\CRM\Leads\InventoryLead;
-use App\Models\Inventory\Inventory;
-use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
@@ -18,6 +15,7 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
 
@@ -175,6 +173,9 @@ class LeadServiceTest extends TestCase
 
         // Mock Lead Types
         $this->mockLeadTypes($lead, $types);
+
+        // Fake DB
+        DB::fake();
 
 
         // Validate Create Catalog Result
