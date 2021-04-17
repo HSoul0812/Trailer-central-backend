@@ -16,8 +16,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
  */
 class AutoAssignJob extends Job
 {
-    use Dispatchable;
-
     /**
      * @var Lead
      */
