@@ -3,7 +3,7 @@
 namespace App\Jobs\CRM\Leads;
 
 use App\Jobs\Job;
-use App\Models\CRM\Leads\Lead;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Exceptions\CRM\Leads\AutoAssignJobMissingLeadException;
 use App\Exceptions\CRM\Leads\AutoAssignJobSalesPersonExistsException;
@@ -16,9 +16,9 @@ use Illuminate\Support\Facades\Log;
 class AutoAssignJob extends Job
 {
     /**
-     * @var Lead
+     * @var int
      */
-    private $lead;
+    private $leadId;
 
     /**
      * @var Illuminate\Support\Facades\Log
@@ -28,12 +28,12 @@ class AutoAssignJob extends Job
     /**
      * AutoAssignJob constructor.
      * 
-     * @param Lead $lead
+     * @param int $leadId
      * @param AutoAssignServiceInterface
      */
-    public function __construct(Lead $lead)
+    public function __construct(int $leadId)
     {
-        $this->lead = $lead;
+        $this->leadId = $leadId;
 
         // Initialize Logger
         $this->log = Log::channel('autoassign');
@@ -47,17 +47,20 @@ class AutoAssignJob extends Job
      * @throws AutoAssignJobSalesPersonExistsException
      * @return boolean
      */
-    public function handle(AutoAssignServiceInterface $service)
+    public function handle(LeadRepositoryInterface $repository, AutoAssignServiceInterface $service)
     {
-        // Job Already Has Sales Person?
-        if (!empty($this->lead->leadStatus->sales_person_id)) {
+        // Get Lead From Repository
+        $lead = $repository->get(['id' => $this->leadId]);
+
+        // Lead Already Has Sales Person?
+        if (!empty($lead->leadStatus->sales_person_id)) {
             $this->log->error('Cannot process auto assign; sales person ALREADY assigned to lead!');
             throw new AutoAssignJobSalesPersonExistsException;
         }
 
         // Process Auto Assign
-        $this->log->info('Handling Auto Assign Manually on Lead #' . $this->lead->identifier);
-        $service->autoAssign($this->lead);
+        $this->log->info('Handling Auto Assign Manually on Lead #' . $lead->identifier);
+        $service->autoAssign($lead);
         return true;
     }
 }
