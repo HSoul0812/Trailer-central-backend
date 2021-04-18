@@ -58,6 +58,10 @@ class AutoAssignJobTest extends TestCase
         $lead->phone_number = self::TEST_PHONE;
         $lead->email_address = self::TEST_EMAIL;
 
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->sales_person_id = 0;
+        $lead->leadStatus = $status;
+
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
