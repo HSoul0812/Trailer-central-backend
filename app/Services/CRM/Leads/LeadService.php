@@ -87,7 +87,9 @@ class LeadService implements LeadServiceInterface
      */
     public function create(array $rawParams): Lead {
         // Fix Params
+        var_dump($rawParams);
         $params = $this->fixCleanParams($rawParams);
+        var_dump($params);
 
         // Create Lead
         $lead = $this->leads->create($params);
