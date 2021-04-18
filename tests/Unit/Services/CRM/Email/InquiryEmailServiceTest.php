@@ -486,14 +486,14 @@ class InquiryEmailServiceTest extends TestCase
     {
         // Send Request Params
         $sendRequestParams = [
-            'website_id',
+            'website_id' => 1,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'website_domain' => self::TEST_DOMAIN,
             'first_name' => self::TEST_FIRST_NAME,
             'last_name' => self::TEST_LAST_NAME,
             'phone_number' => self::TEST_PHONE,
-            'email_address' => self::TEST_PHONE,
+            'email_address' => self::TEST_EMAIL,
             'logo' => self::TEST_WEBSITE_CONFIG['logo'],
             'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
             'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
