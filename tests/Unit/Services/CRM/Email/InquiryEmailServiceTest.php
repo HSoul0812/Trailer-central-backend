@@ -427,6 +427,7 @@ class InquiryEmailServiceTest extends TestCase
         $location = $this->getEloquentMock(DealerLocation::class);
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
 
         // Send Request Params
         $fillInquiry = [
@@ -506,6 +507,7 @@ class InquiryEmailServiceTest extends TestCase
         $location = $this->getEloquentMock(DealerLocation::class);
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
 
         // Get Inventory
         $inventory = $this->getEloquentMock(Inventory::class);
