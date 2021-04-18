@@ -58,7 +58,10 @@ class PostRepository implements PostRepositoryInterface {
             }
 
             // Add URL Path
-            $params['url_path'] = Post::makeUrlPath($params['title']);
+            
+            if (!isset($params['url_path'])) {
+                $params['url_path'] = Post::makeUrlPath($params['title']);
+            }            
 
             // Create Post
             $post = Post::create($params);
