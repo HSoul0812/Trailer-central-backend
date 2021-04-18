@@ -58,6 +58,13 @@ class AutoAssignJobTest extends TestCase
         $lead->phone_number = self::TEST_PHONE;
         $lead->email_address = self::TEST_EMAIL;
 
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+
+
         // Mock Auto Assign Lead
         $this->autoAssignServiceMock
             ->shouldReceive('autoAssign')
@@ -93,11 +100,16 @@ class AutoAssignJobTest extends TestCase
         $status->sales_person_id = 1;
         $lead->leadStatus = $status;
 
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+
         // Mock Auto Assign Lead
         $this->autoAssignServiceMock
             ->shouldReceive('autoAssign')
             ->never();
-
 
         // Expect Exception
         $this->expectException(AutoAssignJobSalesPersonExistsException::class);
