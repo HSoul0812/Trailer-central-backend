@@ -74,6 +74,8 @@ class InquiryEmailServiceTest extends TestCase
         parent::setUp();
 
         $this->websiteRepositoryMock = Mockery::mock(WebsiteRepositoryInterface::class);
+        $this->app->instance(WebsiteRepositoryInterface::class, $this->websiteRepositoryMock);
+
         $this->websiteConfigRepositoryMock = Mockery::mock(WebsiteConfigRepositoryInterface::class);
         $this->app->instance(WebsiteConfigRepositoryInterface::class, $this->websiteConfigRepositoryMock);
     }
