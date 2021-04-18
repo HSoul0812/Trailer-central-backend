@@ -6,6 +6,7 @@ use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Website\Website;
+use App\Repositories\Website\WebsiteRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
@@ -72,6 +73,7 @@ class InquiryEmailServiceTest extends TestCase
     {
         parent::setUp();
 
+        $this->websiteRepositoryMock = Mockery::mock(WebsiteRepositoryInterface::class);
         $this->websiteConfigRepositoryMock = Mockery::mock(WebsiteConfigRepositoryInterface::class);
         $this->app->instance(WebsiteConfigRepositoryInterface::class, $this->websiteConfigRepositoryMock);
     }
@@ -517,6 +519,13 @@ class InquiryEmailServiceTest extends TestCase
         // Get Inquiry Lead
         $inquiry = new InquiryLead($sendRequestParams);
 
+
+        // Mock Website Config Repository
+        $this->websiteRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['id' => $inquiry->websiteId])
+            ->andReturn($website);
 
         // Mock Website Config Repository
         $this->websiteConfigRepositoryMock

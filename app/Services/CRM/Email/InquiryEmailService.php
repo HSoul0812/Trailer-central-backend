@@ -7,11 +7,11 @@ use App\Mail\InquiryEmail;
 use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use App\Models\Showroom\Showroom;
-use App\Models\Website\Website;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Repositories\Website\WebsiteRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
@@ -28,6 +28,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     use CustomerHelper, MailHelper;
 
     /**
+     * @var App\Repositories\Website\Config\WebsiteRepositoryInterface
+     */
+    protected $website;
+
+    /**
      * @var App\Repositories\Website\Config\WebsiteConfigRepositoryInterface
      */
     protected $websiteConfig;
@@ -38,9 +43,14 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     protected $log;
 
     /**
+     * @param WebsiteRepositoryInterface $website
      * @param WebsiteConfigRepositoryInterface $websiteConfig
      */
-    public function __construct(WebsiteConfigRepositoryInterface $websiteConfig) {
+    public function __construct(
+        WebsiteRepositoryInterface $website,
+        WebsiteConfigRepositoryInterface $websiteConfig
+    ) {
+        $this->website = $website;
         $this->websiteConfig = $websiteConfig;
 
         // Initialize Logger
@@ -86,7 +96,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
      */
     public function fill(array $params): InquiryLead {
         // Get Website
-        $website = Website::find($params['website_id']);
+        $website = $this->website->get(['id' => $params['website_id']]);
         $params['website_domain'] = $website->domain;
 
         // Get Inquiry From Details For Website
