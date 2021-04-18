@@ -944,9 +944,9 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result->full_name, $lead->full_name);
-        $this->assertSame($result->email_address, $lead->email_address);
-        $this->assertSame($result->phone_number, $lead->phone_number);
+        $this->assertSame($result['data']['name'], $lead->full_name);
+        $this->assertSame($result['data']['email'], $lead->email_address);
+        $this->assertSame($result['data']['phone'], $lead->phone_number);
     }
 
 
@@ -1413,7 +1413,7 @@ class InquiryServiceTest extends TestCase
             $match->leadStatus = $status;
 
             // Get Clean Phone
-            $phone = preg_replace("/[-+)( x]+/", "", $this->phone_number);
+            $phone = preg_replace("/[-+)( x]+/", "", $match->phone_number);
             $match->shouldReceive('getCleanPhoneAttribute')
                   ->twice()
                   ->andReturn(((strlen($phone) === 11) ? $phone : '1' . $phone));
