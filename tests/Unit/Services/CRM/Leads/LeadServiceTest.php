@@ -435,6 +435,11 @@ class LeadServiceTest extends TestCase
             ->with($createSourceParams)
             ->andReturn($source);
 
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->twice()
+             ->andReturn($leadTypes);
+
         // Mock Units of Interest
         $this->mockUnitsOfInterest($lead, $units);
 
