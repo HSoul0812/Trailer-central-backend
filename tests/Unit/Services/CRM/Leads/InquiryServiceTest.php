@@ -258,7 +258,7 @@ class InquiryServiceTest extends TestCase
 
 
         // Validate Send Inquiry Result
-        $result = $service->send($sendRequestParams);
+        $result = $service->create($sendRequestParams);
 
         // Match Lead Details
         $this->assertSame($result['data']['name'], $lead->full_name);
@@ -877,6 +877,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock Lead Repository
+        $this->leadRepositoryMock
+            ->shouldReceive('findAllMatches')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($matches);
 
         // Mock Create Lead
         $this->leadServiceMock
