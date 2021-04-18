@@ -276,6 +276,9 @@ class LeadServiceTest extends TestCase
         // Turn DB Into Mock
         DB::spy();
 
+        // Pass Through Transaction
+        DB::shouldReceive('transaction')->passthru();
+
         /** @var LeadServiceInterface $service */
         $service = $this->app->make(LeadServiceInterface::class);
 
