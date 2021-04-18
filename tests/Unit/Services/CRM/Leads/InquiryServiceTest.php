@@ -883,7 +883,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('findAllMatches')
             ->once()
             ->with($sendInquiryParams)
-            ->andReturn($matches);
+            ->andReturn(new Collection());
 
         // Mock Create Lead
         $this->leadServiceMock
@@ -1402,6 +1402,9 @@ class InquiryServiceTest extends TestCase
             $match->email_address = $seed['email'] ?? null;
             $match->phone_number = $seed['phone'] ?? null;
             $match->identifier = $lead->identifier + $matches->count() + 1;
+
+            $status = $this->getEloquentMock(LeadStatus::class);
+            $match->leadStatus = $status;
 
             // Add Matches
             if(!empty($seed['primary'])) {
