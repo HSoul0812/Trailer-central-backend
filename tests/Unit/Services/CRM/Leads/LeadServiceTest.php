@@ -12,7 +12,7 @@ use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface; 
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
-use App\Repositories\CRM\Interactions\InteractionRepositoryInterface;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -76,7 +76,7 @@ class LeadServiceTest extends TestCase
     private $inventoryRepositoryMock;
 
     /**
-     * @var LegacyMockInterface|InteractionRepositoryInterface
+     * @var LegacyMockInterface|InteractionsRepositoryInterface
      */
     private $interactionRepositoryMock;
 
@@ -102,8 +102,8 @@ class LeadServiceTest extends TestCase
         $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
         $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepositoryMock);
 
-        $this->interactionRepositoryMock = Mockery::mock(InteractionRepositoryInterface::class);
-        $this->app->instance(InteractionRepositoryInterface::class, $this->interactionRepositoryMock);
+        $this->interactionRepositoryMock = Mockery::mock(InteractionsRepositoryInterface::class);
+        $this->app->instance(InteractionsRepositoryInterface::class, $this->interactionRepositoryMock);
     }
 
 
