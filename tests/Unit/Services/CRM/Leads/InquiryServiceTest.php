@@ -225,8 +225,8 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
-            'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [LeadType::TYPE_GENERAL],
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
+            'lead_types' => [LeadType::TYPE_INVENTORY],
             'device' => self::TEST_DEVICE,
             'item_id' => 1,
             'first_name' => $lead->first_name,
