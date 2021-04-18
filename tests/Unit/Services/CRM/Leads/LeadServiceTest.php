@@ -405,6 +405,12 @@ class LeadServiceTest extends TestCase
         ];
 
 
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
         // @var LeadServiceInterface $service
         $service = $this->app->make(LeadServiceInterface::class);
 
