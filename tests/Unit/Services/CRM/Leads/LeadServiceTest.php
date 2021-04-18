@@ -92,6 +92,7 @@ class LeadServiceTest extends TestCase
 
     /**
      * @covers ::create
+     * @group Lead
      *
      * @throws BindingResolutionException
      */
@@ -218,127 +219,8 @@ class LeadServiceTest extends TestCase
     }
 
     /**
-     * @covers ::update
-     *
-     * @throws BindingResolutionException
-     */
-    /*public function testUpdateSingleType()
-    {
-        // Get Model Mocks
-        $lead = $this->getEloquentMock(Lead::class);
-        $lead->identifier = 1;
-
-        $status = $this->getEloquentMock(LeadStatus::class);
-        $status->source_name = self::TEST_SOURCE;
-
-        $source = $this->getEloquentMock(LeadSource::class);
-        $source->source_name = self::TEST_SOURCE;
-
-        $type = $this->getEloquentMock(LeadType::class);
-        $type->lead_type = LeadType::TYPE_INVENTORY;
-        $types = collect([$type]);
-
-        $unit = $this->getEloquentMock(Unit::class);
-        $unit->inventory_id = 1;
-        $units = collect([$unit]);
-
-        // Create Base Lead Params
-        $updateRequestParams = [
-            'id' => $lead->identifier,
-            'inventory_id' => 1,
-            'lead_type' => LeadType::TYPE_INVENTORY,
-            'preferred_contact' => ''
-        ];
-
-        // Create Lead Params
-        $updateLeadParams = $updateRequestParams;
-        $updateLeadParams['inventory'] = [$updateRequestParams['inventory_id']];
-        $updateLeadParams['lead_types'] = [$updateRequestParams['lead_type']];
-        $updateLeadParams['preferred_contact'] = 'phone';
-
-        // Create Lead Status Params
-        $updateStatusParams = $updateLeadParams;
-        $updateStatusParams['lead_id'] = $updateStatusParams['id'];
-
-        // Create Source Params
-        $createSourceParams = [
-            'user_id' => 1,
-            'source_name' => $source->source_name
-        ];
-
-
-        // Lead Relations
-        $lead->shouldReceive('setRelation')->passthru();
-        $lead->shouldReceive('belongsTo')->passthru();
-        $lead->shouldReceive('leadStatus')->passthru();
-        $lead->shouldReceive('newDealerUser')->passthru();
-
-        // Turn DB Into Mock
-        DB::spy();
-
-        // Pass Through Transaction
-        DB::shouldReceive('transaction')->passthru();
-
-        // @var LeadServiceInterface $service
-        $service = $this->app->make(LeadServiceInterface::class);
-
-        // Mock Create Lead
-        $this->leadRepositoryMock
-            ->shouldReceive('update')
-            ->once()
-            ->with($updateLeadParams)
-            ->andReturn($lead);
-
-        // Mock Sales Person Repository
-        $this->statusRepositoryMock
-            ->shouldReceive('createOrUpdate')
-            ->once()
-            ->with($updateStatusParams)
-            ->andReturn($status);
-
-        // Mock Source Repository
-        $this->sourceRepositoryMock
-            ->shouldReceive('createOrUpdate')
-            ->once()
-            ->with($createSourceParams)
-            ->andReturn($source);
-
-        // Mock Units of Interest
-        $this->mockUnitsOfInterest($lead, $units);
-
-        // Mock Lead Types
-        $this->mockLeadTypes($lead, $types);
-
-        // Validate Update Catalog Result
-        $result = $service->update($updateRequestParams);
-
-
-        // Assert Match
-        $this->assertSame($result->identifier, (int) $lead->identifier);
-
-        // Assert Match
-        $this->assertSame($result->leadStatus->id, $status->id);
-
-        // Assert Match
-        $this->assertSame($result->leadStatus->source, $source->source_name);
-
-
-        // Match All Types
-        $this->assertSame(count($result->leadTypes), $types->count());
-        foreach($types as $k => $single) {
-            $this->assertSame($result->leadTypes[$k], $single->lead_type);
-        }
-
-        // Match All Inventory Leads
-        $this->assertSame($result->units->count(), $units->count());
-        foreach($units as $k => $single) {
-            $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
-        }
-    }*/
-
-
-    /**
      * @covers ::create
+     * @group Lead
      *
      * @throws BindingResolutionException
      */
@@ -474,8 +356,131 @@ class LeadServiceTest extends TestCase
         }
     }
 
+
+
     /**
      * @covers ::update
+     * @group Lead
+     *
+     * @throws BindingResolutionException
+     */
+    /*public function testUpdateSingleType()
+    {
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->source_name = self::TEST_SOURCE;
+
+        $source = $this->getEloquentMock(LeadSource::class);
+        $source->source_name = self::TEST_SOURCE;
+
+        $type = $this->getEloquentMock(LeadType::class);
+        $type->lead_type = LeadType::TYPE_INVENTORY;
+        $types = collect([$type]);
+
+        $unit = $this->getEloquentMock(Unit::class);
+        $unit->inventory_id = 1;
+        $units = collect([$unit]);
+
+        // Create Base Lead Params
+        $updateRequestParams = [
+            'id' => $lead->identifier,
+            'inventory_id' => 1,
+            'lead_type' => LeadType::TYPE_INVENTORY,
+            'preferred_contact' => ''
+        ];
+
+        // Create Lead Params
+        $updateLeadParams = $updateRequestParams;
+        $updateLeadParams['inventory'] = [$updateRequestParams['inventory_id']];
+        $updateLeadParams['lead_types'] = [$updateRequestParams['lead_type']];
+        $updateLeadParams['preferred_contact'] = 'phone';
+
+        // Create Lead Status Params
+        $updateStatusParams = $updateLeadParams;
+        $updateStatusParams['lead_id'] = $updateStatusParams['id'];
+
+        // Create Source Params
+        $createSourceParams = [
+            'user_id' => 1,
+            'source_name' => $source->source_name
+        ];
+
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        // Turn DB Into Mock
+        DB::spy();
+
+        // Pass Through Transaction
+        DB::shouldReceive('transaction')->passthru();
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with($updateLeadParams)
+            ->andReturn($lead);
+
+        // Mock Sales Person Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once()
+            ->with($updateStatusParams)
+            ->andReturn($status);
+
+        // Mock Source Repository
+        $this->sourceRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once()
+            ->with($createSourceParams)
+            ->andReturn($source);
+
+        // Mock Units of Interest
+        $this->mockUnitsOfInterest($lead, $units);
+
+        // Mock Lead Types
+        $this->mockLeadTypes($lead, $types);
+
+        // Validate Update Catalog Result
+        $result = $service->update($updateRequestParams);
+
+
+        // Assert Match
+        $this->assertSame($result->identifier, (int) $lead->identifier);
+
+        // Assert Match
+        $this->assertSame($result->leadStatus->id, $status->id);
+
+        // Assert Match
+        $this->assertSame($result->leadStatus->source, $source->source_name);
+
+
+        // Match All Types
+        $this->assertSame(count($result->leadTypes), $types->count());
+        foreach($types as $k => $single) {
+            $this->assertSame($result->leadTypes[$k], $single->lead_type);
+        }
+
+        // Match All Inventory Leads
+        $this->assertSame($result->units->count(), $units->count());
+        foreach($units as $k => $single) {
+            $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
+        }
+    }*/
+
+    /**
+     * @covers ::update
+     * @group Lead
      *
      * @throws BindingResolutionException
      */
