@@ -173,6 +173,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
@@ -307,6 +308,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
@@ -441,6 +443,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
@@ -576,6 +579,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
@@ -711,6 +715,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
@@ -846,6 +851,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
@@ -973,6 +979,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
@@ -1111,6 +1118,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
@@ -1247,6 +1255,7 @@ class InquiryServiceTest extends TestCase
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
