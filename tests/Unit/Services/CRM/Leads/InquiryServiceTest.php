@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
@@ -967,6 +968,7 @@ class InquiryServiceTest extends TestCase
         $lead->email_address = self::TEST_EMAIL;
 
         $status = $this->getEloquentMock(LeadStatus::class);
+        $status->salesPerson = $this->getEloquentMock(SalesPerson::class);
         $lead->leadStatus = $status;
         $lead->units = new Collection();
 
@@ -1114,6 +1116,7 @@ class InquiryServiceTest extends TestCase
         $lead->email_address = self::TEST_EMAIL;
 
         $status = $this->getEloquentMock(LeadStatus::class);
+        $status->salesPerson = $this->getEloquentMock(SalesPerson::class);
         $lead->leadStatus = $status;
         $lead->units = new Collection();
 
