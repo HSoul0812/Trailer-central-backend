@@ -392,6 +392,7 @@ class LeadServiceTest extends TestCase
         $createLeadParams = $createRequestParams;
         $createLeadParams['inventory_id'] = reset($unitsInterest);
         $createLeadParams['lead_type'] = reset($leadTypes);
+        var_dump($createLeadParams);
 
         // Create Status Params
         $createStatusParams = $createLeadParams;
