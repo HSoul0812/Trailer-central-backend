@@ -242,6 +242,11 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn($lead->phone_number);
 
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
@@ -369,6 +374,11 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
              ->once()
              ->andReturn($lead->phone_number);
+
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -499,6 +509,11 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn($lead->phone_number);
 
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
@@ -627,6 +642,11 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
              ->once()
              ->andReturn($lead->phone_number);
+
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -757,6 +777,11 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn($lead->phone_number);
 
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
@@ -871,6 +896,11 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
              ->once()
              ->andReturn($lead->phone_number);
+
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
 
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
@@ -1006,6 +1036,11 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn($lead->phone_number);
 
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
+
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
 
@@ -1131,6 +1166,11 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn($lead->phone_number);
 
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
+
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
 
@@ -1249,6 +1289,11 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
              ->once()
              ->andReturn($lead->phone_number);
+
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->once()
+             ->andReturn(null);
 
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
