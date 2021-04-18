@@ -1410,6 +1410,7 @@ class InquiryServiceTest extends TestCase
 
             $status = $this->getEloquentMock(LeadStatus::class);
             $match->leadStatus = $status;
+            $match->units = new Collection();
 
             // Get Clean Phone
             $phone = preg_replace("/[-+)( x]+/", "", $match->phone_number);
