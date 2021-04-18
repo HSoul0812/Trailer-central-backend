@@ -115,6 +115,7 @@ class InquiryServiceTest extends TestCase
     {
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -173,7 +174,7 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, self::TEST_ITEM_ID);
+            ->with($inquiry->cookieSessionId, $lead->identifier);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
