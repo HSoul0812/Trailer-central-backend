@@ -994,6 +994,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Matches
         $matches = $this->getMatchingLeads($lead);
+        $interaction->lead = $this->mergeLead;
 
 
         // Lead Relations
@@ -1134,6 +1135,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Matches
         $matches = $this->getMatchingLeads($lead, true);
+        $interaction->lead = $this->mergeLead;
 
 
         // Lead Relations
