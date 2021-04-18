@@ -149,6 +149,7 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         // Send Request Params
         $sendRequestParams = [
@@ -284,6 +285,7 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         // Send Request Params
         $sendRequestParams = [
@@ -418,6 +420,7 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         // Send Request Params
         $sendRequestParams = [
@@ -554,6 +557,7 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         // Send Request Params
         $sendRequestParams = [
@@ -690,6 +694,7 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         // Send Request Params
         $sendRequestParams = [
@@ -827,6 +832,7 @@ class InquiryServiceTest extends TestCase
         $status = $this->getEloquentMock(LeadStatus::class);
         $status->sales_person_id = 1;
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         // Send Request Params
         $sendRequestParams = [
@@ -949,6 +955,7 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         $interaction = $this->getEloquentMock(Interaction::class);
         $interaction->interaction_id = 1;
@@ -1088,6 +1095,7 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         $interaction = $this->getEloquentMock(Interaction::class);
         $interaction->interaction_id = 1;
@@ -1231,6 +1239,7 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
+        $lead->units = new Collection();
 
         // Send Request Params
         $sendRequestParams = [
