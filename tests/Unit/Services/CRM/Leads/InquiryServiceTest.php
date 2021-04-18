@@ -1052,26 +1052,26 @@ class InquiryServiceTest extends TestCase
             ->never();
 
         // Mock Lead
-        $lead->shouldReceive('getFullNameAttribute')
-            ->andReturn($lead->first_name . ' ' . $lead->last_name);
+        $this->mergeLead->shouldReceive('getFullNameAttribute')
+            ->andReturn($this->mergeLead->first_name . ' ' . $this->mergeLead->last_name);
 
         // Get Lead Types
-        $lead->shouldReceive('getLeadTypesAttribute')
+        $this->mergeLead->shouldReceive('getLeadTypesAttribute')
              ->once()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
-        $lead->shouldReceive('getFullAddressAttribute')
+        $this->mergeLead->shouldReceive('getFullAddressAttribute')
              ->once()
              ->andReturn('');
 
         // Get Pretty Phone
-        $lead->shouldReceive('getPrettyPhoneNumberAttribute')
+        $this->mergeLead->shouldReceive('getPrettyPhoneNumberAttribute')
              ->times(3)
-             ->andReturn($lead->phone_number);
+             ->andReturn($this->mergeLead->phone_number);
 
         // Get Pretty Phone
-        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+        $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
              ->once()
              ->andReturn(null);
 
@@ -1192,27 +1192,26 @@ class InquiryServiceTest extends TestCase
             ->never();
 
         // Mock Lead
-        $this->mergeLead
-            ->shouldReceive('getFullNameAttribute')
+        $this->mergeLead->shouldReceive('getFullNameAttribute')
             ->andReturn($this->mergeLead->first_name . ' ' . $this->mergeLead->last_name);
 
         // Get Lead Types
-        $lead->shouldReceive('getLeadTypesAttribute')
+        $this->mergeLead->shouldReceive('getLeadTypesAttribute')
              ->once()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
-        $lead->shouldReceive('getFullAddressAttribute')
+        $this->mergeLead->shouldReceive('getFullAddressAttribute')
              ->once()
              ->andReturn('');
 
         // Get Pretty Phone
-        $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->once()
-             ->andReturn($lead->phone_number);
+        $this->mergeLead->shouldReceive('getPrettyPhoneNumberAttribute')
+             ->times(3)
+             ->andReturn($this->mergeLead->phone_number);
 
         // Get Pretty Phone
-        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+        $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
              ->once()
              ->andReturn(null);
 
