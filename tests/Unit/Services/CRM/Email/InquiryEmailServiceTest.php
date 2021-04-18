@@ -427,7 +427,6 @@ class InquiryEmailServiceTest extends TestCase
         $location = $this->getEloquentMock(DealerLocation::class);
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
-        $location->name = 'Indianapolis';
 
         // Send Request Params
         $fillInquiry = [
@@ -503,9 +502,15 @@ class InquiryEmailServiceTest extends TestCase
         $website->dealer_id = 1;
         $website->domain = self::TEST_DOMAIN;
 
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+
         // Get Inventory
         $inventory = $this->getEloquentMock(Inventory::class);
         $inventory->inventory_id = 1;
+        $inventory->dealerLocation = $location;
 
         // Send Request Params
         $fillInquiry = [
@@ -529,6 +534,12 @@ class InquiryEmailServiceTest extends TestCase
 
         // Get Inquiry Lead
         $inquiry = new InquiryLead($fillInquiry);
+
+
+        // Lead Relations
+        $inventory->shouldReceive('setRelation')->passthru();
+        $inventory->shouldReceive('belongsTo')->passthru();
+        $inventory->shouldReceive('dealerLocation')->passthru();
 
 
         // Mock Website Repository
