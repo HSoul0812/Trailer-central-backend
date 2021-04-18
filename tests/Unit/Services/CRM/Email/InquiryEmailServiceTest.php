@@ -4,9 +4,8 @@ namespace Tests\Unit\Services\CRM\Leads;
 
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
-use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
+use App\Models\Website\Website;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
@@ -80,6 +79,7 @@ class InquiryEmailServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -137,6 +137,7 @@ class InquiryEmailServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -196,6 +197,7 @@ class InquiryEmailServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -255,6 +257,7 @@ class InquiryEmailServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -315,6 +318,7 @@ class InquiryEmailServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -374,6 +378,7 @@ class InquiryEmailServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -433,6 +438,7 @@ class InquiryEmailServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -479,11 +485,16 @@ class InquiryEmailServiceTest extends TestCase
 
     /**
      * @covers ::fill
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
     public function testFill()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+
         // Send Request Params
         $sendRequestParams = [
             'website_id' => 1,
@@ -512,6 +523,12 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock Website
+        $website->shouldReceive('find')
+            ->once()
+            ->with($website->id)
+            ->andReturn($website);
 
         // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
