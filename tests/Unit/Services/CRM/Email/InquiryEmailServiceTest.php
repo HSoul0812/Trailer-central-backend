@@ -344,6 +344,8 @@ class InquiryEmailServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->name = self::TEST_INQUIRY_NAME;
+        $dealer->email = self::TEST_INQUIRY_EMAIL;
 
         // Send Request Params
         $fillInquiry = [
@@ -422,6 +424,7 @@ class InquiryEmailServiceTest extends TestCase
         $location = $this->getEloquentMock(DealerLocation::class);
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
+        $location->name = 'Indianapolis';
 
         // Send Request Params
         $fillInquiry = [
