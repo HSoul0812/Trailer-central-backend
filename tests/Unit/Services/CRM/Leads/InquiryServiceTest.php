@@ -1066,7 +1066,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $this->mergeLead->shouldReceive('getLeadTypesAttribute')
-             ->once()
+             ->twice()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
@@ -1223,7 +1223,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $this->mergeLead->shouldReceive('getLeadTypesAttribute')
-             ->once()
+             ->twice()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
