@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Http\Contollers\Bulk\Parts;
+namespace Tests\Integration\Http\Controllers\Bulk\Parts;
 
 use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Bulk\Parts\BulkUploadController;

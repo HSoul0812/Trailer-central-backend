@@ -2,45 +2,41 @@
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Http\Contollers\Bulk\Parts;
+namespace Tests\Integration\Http\Controllers\Bulk\Parts;
 
-use App\Exceptions\Common\BusyJobException;
-use App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController;
-use App\Http\Requests\Bulk\Parts\CreateBulkDownloadRequest;
-use App\Http\Requests\Jobs\ReadMonitoredJobsRequest;
-use App\Jobs\Bulk\Parts\CsvExportJob;
-use App\Models\Bulk\Parts\BulkDownload;
-use App\Models\Common\MonitoredJob;
-use App\Repositories\Bulk\Parts\BulkDownloadRepository;
-use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
-use Dingo\Api\Exception\ResourceException;
-use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Bus;
-use Ramsey\Uuid\Uuid;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
+use App\Http\Controllers\v1\Bulk\Parts\BulkReportsController;
+use App\Http\Requests\Bulk\Parts\CreateBulkReportRequest;
+use App\Http\Requests\Bulk\Parts\GetBulkReportRequest;
+use App\Repositories\Bulk\Parts\BulkReportRepository;
+use App\Jobs\Bulk\Parts\FinancialReportExportJob;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Integration\AbstractMonitoredJobsTest;
+use Dingo\Api\Exception\ResourceException;
+use Illuminate\Http\JsonResponse;
+use App\Models\Common\MonitoredJob;
+use Illuminate\Support\Facades\Bus;
+use Ramsey\Uuid\Uuid;
+use Exception;
 
 /**
- * @covers \App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController
+ * @covers \App\Http\Controllers\v1\Bulk\Parts\BulkReportsController
  * @group MonitoredJobs
  */
-class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
+class BulkReportControllerTest extends AbstractMonitoredJobsTest
 {
     /**
      * @dataProvider invalidParametersForCreationProvider
      *
-     * @covers ::create
+     * @covers ::financials
      *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
      * @param string|null $firstExpectedErrorMessage
-     *
-     * @throws BusyJobException
+     * @throws Exception
      */
-    public function testCreateWithWrongParameters(array $params,
+    public function testCreateFinancialsReportWithWrongParameters(array $params,
                                                   string $expectedException,
                                                   string $expectedExceptionMessage,
                                                   ?string $firstExpectedErrorMessage): void
@@ -48,24 +44,13 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         // Given I have few dealers
         $this->seeder->seedDealers();
 
-        // And I'm using the controller "BulkDownloadController"
-        $controller = app(BulkDownloadController::class);
+        // And I'm using the controller "BulkReportsController"
+        $controller = app(BulkReportsController::class);
 
         $paramsExtracted = $this->seeder->extractValues($params);
 
-        if ($expectedException === BusyJobException::class) {
-            // And I have a monitored job "parts-export-new" which is currently running
-            factory(MonitoredJob::class)->create([
-                'dealer_id' => $paramsExtracted['dealer_id'],
-                'name' => BulkDownload::QUEUE_JOB_NAME,
-                'concurrency_level' => BulkDownload::LEVEL_DEFAULT,
-                'queue' => BulkDownload::QUEUE_NAME,
-                'status' => BulkDownload::STATUS_PROCESSING
-            ]);
-        }
-
-        // And I have a bad formed "CreateBulkDownloadRequest" request
-        $request = new CreateBulkDownloadRequest($paramsExtracted);
+        // And I have a bad formed "CreateBulkReportRequest" request
+        $request = new CreateBulkReportRequest($paramsExtracted);
 
         // Then I expect to see an specific exception to be thrown
         $this->expectException($expectedException);
@@ -74,7 +59,7 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
 
         try {
             // When I call the create action using the bad formed request
-            $controller->create($request);
+            $controller->financials($request);
         } catch (ResourceException $exception) {
             // Then I should see that the first error message has a specific string
             self::assertSame($firstExpectedErrorMessage, $exception->getErrors()->first());
@@ -86,61 +71,30 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
     /**
      * @dataProvider validParametersCreationProvider
      *
-     * @covers ::create
+     * @covers ::financials
      *
      * @param array $params
-     *
-     * @throws BusyJobException
+     * @throws Exception
      */
-    public function testCreateWithValidParameters(array $params): void
+    public function testCreateFinancialsReportWithValidParameters(array $params): void
     {
         // Given I have few dealers
         $this->seeder->seedDealers();
 
-        // And I'm using the controller "BulkDownloadController"
-        $controller = app(BulkDownloadController::class);
-        // And I have a well formed "CreateBulkDownloadRequest" request
-        $request = new CreateBulkDownloadRequest($this->seeder->extractValues($params));
+        // And I'm using the controller "BulkReportsController"
+        $controller = app(BulkReportsController::class);
+        // And I have a well formed "CreateBulkReportRequest" request
+        $request = new CreateBulkReportRequest($this->seeder->extractValues($params));
 
         Bus::fake();
 
         // When I call the create action using the well formed request
-        $response = $controller->create($request);
+        $response = $controller->financialsExport($request);
 
         // Then I should see that job wit a specific name was enqueued
-        Bus::assertDispatched(CsvExportJob::class);
+        Bus::assertDispatched(FinancialReportExportJob::class);
         // And I should see that response status is 202
         self::assertEquals(JsonResponse::HTTP_ACCEPTED, $response->status());
-    }
-
-    /**
-     * Test that when the user has provided the `wait` parameter, then then action controller will wait, but since
-     * there is not job working on it, it will response a 500 http status code
-     *
-     * @covers ::create
-     *
-     * @throws BusyJobException
-     */
-    public function testCreateWithWaitParameter(): void
-    {
-        // Given I have few dealers
-        $this->seeder->seedDealers();
-
-        // And I'm using the controller "BulkDownloadController"
-        $controller = app(BulkDownloadController::class);
-        // And I have a well formed "CreateBulkDownloadRequest" request with wait parameter
-        $request = new CreateBulkDownloadRequest(['dealer_id' => $this->seeder->dealers[0]->dealer_id, 'wait' => 1]);
-
-        Bus::fake();
-        // When I call the create action using the well formed request
-        $response = $controller->create($request);
-
-        // Then I should see that job wit a specific name was enqueued
-        Bus::assertDispatched(CsvExportJob::class);
-        // And I should see that response status is 200
-        self::assertEquals(JsonResponse::HTTP_OK, $response->getStatusCode());
-        // And I should see that response is a stream
-        self::assertInstanceOf(StreamedResponse::class, $response);
     }
 
     /**
@@ -152,8 +106,9 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      * @param string|null $firstExpectedErrorMessage
      *
      * @covers ::read
+     * @throws Exception
      */
-    public function testReadWithInvalidParameters(array $params,
+    public function testReadReportWithInvalidParameters(array $params,
                                                   string $expectedException,
                                                   string $expectedExceptionMessage,
                                                   ?string $firstExpectedErrorMessage): void
@@ -162,9 +117,9 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         $this->seeder->seed();
 
         // And I'm using the "BulkDownloadController" controller
-        $controller = app(BulkDownloadController::class);
-        // And I have a bad formed "GetMonitoredJobsRequest" request
-        $request = new ReadMonitoredJobsRequest($this->seeder->extractValues($params));
+        $controller = app(BulkReportsController::class);
+        // And I have a bad formed "GetBulkReportRequest" request
+        $request = new GetBulkReportRequest($this->seeder->extractValues($params));
 
         // Then I expect to see an specific exception to be thrown
         $this->expectException($expectedException);
@@ -190,15 +145,15 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      * @param int $expectedHttpCodeStatus
      * @param array $expectedPayloadResponse
      *
-     * @covers ::status
+     * @covers ::read
      */
-    public function testReadWithDifferentResponseStatuses(array $params,
+    public function testReadReportWithDifferentResponseStatuses(array $params,
                                                           string $jobStatus,
                                                           int $expectedHttpCodeStatus,
                                                           array $expectedPayloadResponse): void
     {
-        /** @var BulkDownloadRepository $repository */
-        $repository = app(BulkDownloadRepositoryInterface::class);
+        /** @var BulkReportRepository $repository */
+        $repository = app(BulkReportRepositoryInterface::class);
 
         /** @var array<string, float> $response */
 
@@ -213,10 +168,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
             ['status' => $jobStatus, 'progress' => $expectedPayloadResponse['progress'] ?? 0]
         );
 
-        // And I'm using the "MonitoredJobsController" controller
-        $controller = app(BulkDownloadController::class);
-        // And I have a well formed "GetMonitoredJobsRequest" request
-        $request = new ReadMonitoredJobsRequest($extractedParams);
+        // And I'm using the "BulkReportsController" controller
+        $controller = app(BulkReportsController::class);
+        // And I have a well formed "GetBulkReportRequest" request
+        $request = new GetBulkReportRequest($extractedParams);
 
         // When I call the status action using the provided token and request
         $response = $controller->read($request);
@@ -257,10 +212,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      */
     public function invalidParametersForReadProvider(): array
     {
-        return [                     // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
+        return [                 // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
             'No token'           => [[], ResourceException::class, 'Validation Failed', 'The token field is required.'],
-            'Bad token'          => [['token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
-            'Non-existent token' => [['token' => Uuid::uuid4()->toString()], HttpException::class, 'Job not found', null]
+            'Bad token'          => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
+            'Non-existent token' => [['dealer_id' => $this->getSeededData(0,'id'), 'token' => Uuid::uuid4()->toString()], HttpException::class, 'Job not found', null]
         ];
     }
 
@@ -272,11 +227,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      */
     public function invalidParametersForCreationProvider(): array
     {
-        return [                                            // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
-            'No dealer'                                     => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
-            'Bad token'                                     => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
-            'There is another job working'                  => [['dealer_id' => $this->getSeededData(0,'id')], BusyJobException::class, "This job can't be set up due there is currently other job working", null],
-            'There is another job working (token provided)' => [['dealer_id' => $this->getSeededData(0,'id'),'token' => Uuid::uuid4()->toString()], BusyJobException::class, "This job can't be set up due there is currently other job working", null]
+        return [              // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
+            'No dealer'      => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
+            'Bad token'      => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
+            'Bad stock type' => [['dealer_id' => 666999, 'type_of_stock' => 'sales'], ResourceException::class, 'Validation Failed', 'The selected type of stock is invalid.'],
         ];
     }
 
