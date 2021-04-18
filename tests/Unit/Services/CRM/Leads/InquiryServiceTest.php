@@ -242,7 +242,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->thrice()
+             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
@@ -378,7 +378,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->thrice()
+             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
@@ -515,7 +515,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->thrice()
+             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
@@ -652,7 +652,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->thrice()
+             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
@@ -789,7 +789,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->thrice()
+             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
@@ -912,7 +912,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->thrice()
+             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
@@ -1054,7 +1054,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->thrice()
+             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
@@ -1330,7 +1330,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->thrice()
+             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
