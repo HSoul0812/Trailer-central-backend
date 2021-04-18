@@ -340,6 +340,11 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_GENERAL]);
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
@@ -453,6 +458,11 @@ class InquiryServiceTest extends TestCase
         // Mock Lead
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
+
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_INVENTORY]);
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -568,6 +578,11 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_INVENTORY]);
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
@@ -602,14 +617,6 @@ class InquiryServiceTest extends TestCase
 
         $status = $this->getEloquentMock(LeadStatus::class);
         $lead->leadStatus = $status;
-
-        // Generate Lead Status
-        $leadStatus = factory(LeadStatus::class)->make([
-            'dealer_id' => self::getTestDealerId(),
-            'tc_lead_identifier' => $lead->identifier,
-            'sales_person_id' => self::TEST_SALES_PERSON_ID
-        ]);
-        $lead->setRelation('leadStatus', $leadStatus);
 
         // Send Request Params
         $sendRequestParams = [
@@ -689,6 +696,11 @@ class InquiryServiceTest extends TestCase
         // Mock Lead
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
+
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_SHOWROOM_MODEL]);
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -1114,6 +1126,10 @@ class InquiryServiceTest extends TestCase
         $this->trackingUnitRepositoryMock
             ->shouldReceive('markUnitInquired')
             ->never();
+
+        // Mock Lead
+        $lead->shouldReceive('getFullNameAttribute')
+            ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
