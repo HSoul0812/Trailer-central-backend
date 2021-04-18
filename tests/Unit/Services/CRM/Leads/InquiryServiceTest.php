@@ -176,6 +176,7 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
 
         // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
@@ -309,6 +310,7 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
 
         // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
@@ -442,6 +444,7 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
 
         // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
@@ -576,6 +579,7 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
 
         // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
@@ -710,6 +714,7 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
 
         // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
@@ -844,6 +849,7 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
 
         // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
@@ -970,6 +976,7 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
 
 
         // @var InquiryServiceInterface $service
@@ -1101,6 +1108,15 @@ class InquiryServiceTest extends TestCase
         $matches = $this->getMatchingLeads($lead, true);
 
 
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
+
+
         // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
 
@@ -1226,6 +1242,15 @@ class InquiryServiceTest extends TestCase
 
         // Get Inquiry Lead
         $inquiry = new InquiryLead($sendRequestParams);
+
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
 
 
         // @var InquiryServiceInterface $service
