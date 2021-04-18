@@ -227,6 +227,16 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_GENERAL]);
+
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
@@ -344,6 +354,11 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getLeadTypesAttribute')
              ->once()
              ->andReturn([LeadType::TYPE_GENERAL]);
+
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -464,6 +479,11 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn([LeadType::TYPE_INVENTORY]);
 
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
@@ -582,6 +602,11 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getLeadTypesAttribute')
              ->once()
              ->andReturn([LeadType::TYPE_INVENTORY]);
+
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -702,6 +727,11 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn([LeadType::TYPE_SHOWROOM_MODEL]);
 
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
 
@@ -801,6 +831,16 @@ class InquiryServiceTest extends TestCase
         // Mock Lead
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
+
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_GENERAL]);
+
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
 
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
@@ -917,6 +957,20 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('markUnitInquired')
             ->never();
 
+        // Mock Lead
+        $lead->shouldReceive('getFullNameAttribute')
+            ->andReturn($lead->first_name . ' ' . $lead->last_name);
+
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_GENERAL]);
+
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
+
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
 
@@ -1027,6 +1081,16 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getFullNameAttribute')
             ->andReturn($this->mergeLead->first_name . ' ' . $this->mergeLead->last_name);
 
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_GENERAL]);
+
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
+
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
 
@@ -1130,6 +1194,16 @@ class InquiryServiceTest extends TestCase
         // Mock Lead
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
+
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->once()
+             ->andReturn([LeadType::TYPE_GENERAL]);
+
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->once()
+             ->andReturn('');
 
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
