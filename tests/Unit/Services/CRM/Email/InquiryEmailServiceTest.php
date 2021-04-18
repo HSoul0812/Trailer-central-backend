@@ -586,7 +586,7 @@ class InquiryEmailServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    public function testFillInventory()
+    public function testFillPart()
     {
         // Mock Website
         $website = $this->getEloquentMock(Website::class);
