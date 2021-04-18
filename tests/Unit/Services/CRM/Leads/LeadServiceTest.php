@@ -274,9 +274,8 @@ class LeadServiceTest extends TestCase
         $lead->shouldReceive('newDealerUser')->passthru();
 
         // Transaction
-        DB::shouldReceive('transaction')
-            ->once()
-            ->passthru();
+        DB::shouldReceive('transaction')->passthru();
+        DB::shouldReceive('connection')->passthru();
 
         /** @var LeadServiceInterface $service */
         $service = $this->app->make(LeadServiceInterface::class);
