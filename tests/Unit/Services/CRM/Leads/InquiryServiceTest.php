@@ -1076,6 +1076,11 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn(null);
 
+        // Get Real Username Attribute
+        $interaction->shouldReceive('getRealUsernameAttribute')
+             ->once()
+             ->andReturn('');
+
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
 
@@ -1216,6 +1221,11 @@ class InquiryServiceTest extends TestCase
         $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
              ->once()
              ->andReturn(null);
+
+        // Get Real Username Attribute
+        $interaction->shouldReceive('getRealUsernameAttribute')
+             ->once()
+             ->andReturn('');
 
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
