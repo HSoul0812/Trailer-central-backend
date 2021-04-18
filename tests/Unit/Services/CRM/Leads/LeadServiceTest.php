@@ -460,7 +460,7 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertTrue(in_array($single->inventory_id, $unitsInterest));
         }
-    }*/
+    }
 
     /**
      * @covers ::update
