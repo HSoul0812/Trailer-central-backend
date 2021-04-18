@@ -68,17 +68,26 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     protected $log;
 
     /**
+     * @param InventoryRepositoryInterface $inventory
+     * @param PartRepositoryInterface $part
+     * @param ShowroomRepositoryInterface $showroom
      * @param WebsiteRepositoryInterface $website
      * @param WebsiteConfigRepositoryInterface $websiteConfig
+     * @param UserRepositoryInterface $user
+     * @param DealerLocationRepositoryInterface $dealerLocation
      */
     public function __construct(
         InventoryRepositoryInterface $inventory,
+        PartRepositoryInterface $part,
+        ShowroomRepositoryInterface $showroom,
         WebsiteRepositoryInterface $website,
         WebsiteConfigRepositoryInterface $websiteConfig,
         UserRepositoryInterface $user,
         DealerLocationRepositoryInterface $dealerLocation
     ) {
         $this->inventory = $inventory;
+        $this->part = $part;
+        $this->showroom = $showroom;
         $this->website = $website;
         $this->websiteConfig = $websiteConfig;
         $this->user = $user;
@@ -176,7 +185,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         }
 
         // Get Inquiry Details From Dealer
-        $dealer = $this->user->get(['id' => $params['dealer_id']]);
+        $dealer = $this->user->get(['dealer_id' => $params['dealer_id']]);
         $params['inquiry_name'] = $dealer->name;
         $params['inquiry_email'] = $dealer->email;
         return $params;

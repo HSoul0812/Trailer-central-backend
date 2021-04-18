@@ -6,8 +6,13 @@ use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Website\Website;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\Parts\PartRepositoryInterface;
+use App\Repositories\Showroom\ShowroomRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -337,7 +342,7 @@ class InquiryEmailServiceTest extends TestCase
         $website->domain = self::TEST_DOMAIN;
 
         // Send Request Params
-        $sendRequestParams = [
+        $fillInquiry = [
             'dealer_id' => 1,
             'website_id' => 1,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
@@ -377,7 +382,7 @@ class InquiryEmailServiceTest extends TestCase
         $this->userRepositoryMock
             ->shouldReceive('get')
             ->once()
-            ->with(['id' => $inquiry->dealerId])
+            ->with(['dealer_id' => $inquiry->dealerId])
             ->andReturn($website);
 
         // @var InquiryEmailServiceInterface $service
@@ -385,7 +390,7 @@ class InquiryEmailServiceTest extends TestCase
 
 
         // Validate Send Inquiry Result
-        $result = $service->fill($sendRequestParams);
+        $result = $service->fill($fillInquiry);
 
         // Result = true
         $this->assertSame($result->inquiryType, InquiryLead::INQUIRY_TYPES[0]);
