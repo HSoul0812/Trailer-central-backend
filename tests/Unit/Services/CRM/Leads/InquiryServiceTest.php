@@ -121,6 +121,9 @@ class InquiryServiceTest extends TestCase
         $lead->phone_number = self::TEST_PHONE;
         $lead->email_address = self::TEST_EMAIL;
 
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $lead->leadStatus = $status;
+
         // Send Request Params
         $sendRequestParams = [
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
