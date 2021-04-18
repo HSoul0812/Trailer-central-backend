@@ -114,7 +114,7 @@ class LeadServiceTest extends TestCase
         $source = $this->getEloquentMock(LeadSource::class);
         $source->source_name = self::TEST_SOURCE;
 
-        $type = $this->getEloquentMock(LeadSource::class);
+        $type = $this->getEloquentMock(LeadType::class);
         $type->lead_type = LeadType::TYPE_INVENTORY;
         $leadTypes = [$type->lead_type];
         $types = collect([$type]);
@@ -143,7 +143,7 @@ class LeadServiceTest extends TestCase
 
         // Create Source Params
         $createSourceParams = [
-            'user_id' => 1,
+            'user_id' => $newDealerUser->user_id,
             'source_name' => self::TEST_SOURCE
         ];
 
@@ -154,7 +154,7 @@ class LeadServiceTest extends TestCase
         $lead->shouldReceive('newDealerUser')->passthru();
 
 
-        /** @var LeadServiceInterface $service */
+        // @var LeadServiceInterface $service
         $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Lead
@@ -222,7 +222,7 @@ class LeadServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    public function testUpdateSingleType()
+    /*public function testUpdateSingleType()
     {
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -234,7 +234,7 @@ class LeadServiceTest extends TestCase
         $source = $this->getEloquentMock(LeadSource::class);
         $source->source_name = self::TEST_SOURCE;
 
-        $type = $this->getEloquentMock(LeadSource::class);
+        $type = $this->getEloquentMock(LeadType::class);
         $type->lead_type = LeadType::TYPE_INVENTORY;
         $types = collect([$type]);
 
@@ -279,7 +279,7 @@ class LeadServiceTest extends TestCase
         // Pass Through Transaction
         DB::shouldReceive('transaction')->passthru();
 
-        /** @var LeadServiceInterface $service */
+        // @var LeadServiceInterface $service
         $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Lead
@@ -334,7 +334,7 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
         }
-    }
+    }*/
 
 
     /**
@@ -342,98 +342,50 @@ class LeadServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    /*public function testCreateMultiTypes()
+    public function testCreateMultiTypes()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-        $dealer = NewDealerUser::find($dealerId);
-        $userId = $dealer->user_id;
+        // Get Model Mocks
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
+        $status->source = self::TEST_SOURCE;
 
-        // Create Dummy Inventory
-        $units = factory(Inventory::class, 5)->create([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId
-        ]);
-        $inventory = $units->first();
+        $newDealerUser = $this->getEloquentMock(NewDealerUser::class);
+        $newDealerUser->id = 1;
+        $newDealerUser->user_id = 1;
 
-        // Create Units of Interest Array
-        $unitsInterest = [];
-        foreach($units as $item) {
-            $unitsInterest[] = $item->inventory_id;
-        }
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->leadStatus = $status;
+        $lead->newDealerUser = $newDealerUser;
 
-        // Get Test Lead
-        $lead = factory(Lead::class)->create([
-            'dealer_id' => $dealerId,
-            'website_id' => $websiteId,
-            'inventory_id' => $inventory->inventory_id
-        ]);
-        $status = factory(LeadStatus::class)->create([
-            'tc_lead_identifier' => $lead->identifier
-        ]);
+        $source = $this->getEloquentMock(LeadSource::class);
+        $source->source_name = self::TEST_SOURCE;
 
-        // Create Source/Type/InventoryLead
-        $source = factory(LeadSource::class)->create([
-            'user_id' => $userId,
-            'source_name' => $status->source
-        ]);
-
-
-        // Create Dummy Lead Types
         $types = collect([]);
-        $types->push(factory(LeadType::class)->create([
-            'lead_id' => $lead->identifier,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]));
-        $types->push(factory(LeadType::class)->create([
-            'lead_id' => $lead->identifier,
-            'lead_type' => LeadType::TYPE_BUILD
-        ]));
-        $types->push(factory(LeadType::class)->create([
-            'lead_id' => $lead->identifier,
-            'lead_type' => LeadType::TYPE_FINANCING
-        ]));
-        $leadType = $types->first();
-        $lead->lead_type = $leadType->lead_type;
-
-        // Get Lead Types
-        $leadTypes = [];
-        foreach($types as $type) {
-            $leadTypes[] = $type->lead_type;
+        $leadTypes = [LeadType::TYPE_INVENTORY, LeadType::TYPE_GENERAL, LeadType::TYPE_BUILD];
+        foreach($leadTypes as $i => $v) {
+            $type = $this->getEloquentMock(LeadType::class);
+            $type->lead_type = $v;
+            $types->push($type);
         }
+
+        $units = collect([]);
+        $unitsInterest = [];
+        for($i = 1; $i <= 5; $i++) {
+            $unit = $this->getEloquentMock(Unit::class);
+            $unit->inventory_id = $i;
+            $units->push($unit);
+            $unitsInterest[] = $i;
+        }
+        $inventory = $units->first();
 
 
         // Create Base Lead Params
         $createRequestParams = [
-            'website_id' => $lead->website_id,
-            'dealer_id' => $lead->dealer_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inventory' => $unitsInterest,
             'lead_types' => $leadTypes,
-            'referral' => $lead->referral,
-            'title' => $lead->title,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => 'email',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'date_submitted' => $lead->date_submitted->toDateTimeString(),
-            'contact_email_sent' => $lead->date_submitted->toDateTimeString(),
-            'adf_email_sent' => $lead->date_submitted->toDateTimeString(),
-            'cdk_email_sent' => 1,
-            'is_spam' => 0,
-            'lead_source' => $status->source,
-            'lead_status' => $status->status,
-            'next_contact_date' => $status->next_contact_date,
-            'contact_type' => $status->task,
-            'sales_person_id' => $status->sales_person_id
+            'preferred_contact' => '',
+            'lead_source' => self::TEST_SOURCE
         ];
 
         // Create Lead Params
@@ -447,13 +399,13 @@ class LeadServiceTest extends TestCase
 
         // Create Source Params
         $createSourceParams = [
-            'user_id' => $userId,
+            'user_id' => $newDealerUser->user_id,
             'source_name' => $createRequestParams['lead_source']
         ];
 
 
-        /** @var LeadServiceInterface $service */
-        /*$service = $this->app->make(LeadServiceInterface::class);
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Lead
         $this->leadRepositoryMock
@@ -549,7 +501,7 @@ class LeadServiceTest extends TestCase
 
         // Create Source/Type/InventoryLead
         $source = factory(LeadSource::class)->create([
-            'user_id' => $userId,
+            'user_id' => $newDealerUser->user_id,
             'source_name' => $status->source
         ]);
 
@@ -620,13 +572,13 @@ class LeadServiceTest extends TestCase
 
         // Create Source Params
         $createSourceParams = [
-            'user_id' => $userId,
+            'user_id' => $newDealerUser->user_id,
             'source_name' => $updateRequestParams['lead_source']
         ];
 
 
-        /** @var LeadServiceInterface $service */
-        /*$service = $this->app->make(LeadServiceInterface::class);
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Lead
         $this->leadRepositoryMock
