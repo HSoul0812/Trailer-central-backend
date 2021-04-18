@@ -972,6 +972,7 @@ class InquiryServiceTest extends TestCase
 
         $interaction = $this->getEloquentMock(Interaction::class);
         $interaction->interaction_id = 1;
+        $interaction->leadStatus = $status;
 
         // Send Request Params
         $sendRequestParams = [
@@ -1118,6 +1119,7 @@ class InquiryServiceTest extends TestCase
 
         $interaction = $this->getEloquentMock(Interaction::class);
         $interaction->interaction_id = 1;
+        $interaction->leadStatus = $status;
 
         // Send Request Params
         $sendRequestParams = [
