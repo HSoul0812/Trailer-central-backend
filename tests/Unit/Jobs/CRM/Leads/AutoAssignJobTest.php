@@ -47,6 +47,9 @@ class AutoAssignJobTest extends TestCase
 
     /**
      * @covers ::handle
+     * @group Inquiry
+     *
+     * @throws BindingResolutionException
      */
     public function testHandle()
     {
@@ -89,6 +92,9 @@ class AutoAssignJobTest extends TestCase
 
     /**
      * @covers ::handle
+     * @group Inquiry
+     *
+     * @throws BindingResolutionException
      */
     public function testHandleWithException()
     {

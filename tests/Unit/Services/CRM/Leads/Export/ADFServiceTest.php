@@ -70,7 +70,13 @@ class ADFServiceTest extends TestCase
         $this->dealerLocationRepository = Mockery::mock(DealerLocationRepositoryInterface::class);
         $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepository);
     }
-        
+
+    /**
+     * @covers ::handle
+     * @group Inquiry
+     *
+     * @throws BindingResolutionException
+     */
     public function testExportADFLead()
     {
         $dealer = $this->getEloquentMock(User::class);
