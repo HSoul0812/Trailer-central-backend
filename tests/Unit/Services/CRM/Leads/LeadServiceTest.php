@@ -279,6 +279,7 @@ class LeadServiceTest extends TestCase
         DB::shouldReceive('parseConnectionName')->passthru();
         DB::shouldReceive('getDefaultConnection')->passthru();
         DB::shouldReceive('makeConnection')->passthru();
+        DB::shouldReceive('configuration')->passthru();
 
         /** @var LeadServiceInterface $service */
         $service = $this->app->make(LeadServiceInterface::class);
