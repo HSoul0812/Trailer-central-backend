@@ -233,22 +233,18 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
-             ->once()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
         $lead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
@@ -369,22 +365,18 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
-             ->once()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
         $lead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
@@ -506,22 +498,18 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
-             ->once()
              ->andReturn([LeadType::TYPE_INVENTORY]);
 
         // Get Full Address
         $lead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
@@ -643,22 +631,18 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
-             ->once()
              ->andReturn([LeadType::TYPE_INVENTORY]);
 
         // Get Full Address
         $lead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
@@ -780,22 +764,18 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
-             ->once()
              ->andReturn([LeadType::TYPE_SHOWROOM_MODEL]);
 
         // Get Full Address
         $lead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
@@ -916,22 +896,18 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
-             ->once()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
         $lead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Expects Auto Responder Job ONLY
@@ -1066,27 +1042,22 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $this->mergeLead->shouldReceive('getLeadTypesAttribute')
-             ->twice()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
         $this->mergeLead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $this->mergeLead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($this->mergeLead->phone_number);
 
         // Get Pretty Phone
         $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Get Real Username Attribute
         $interaction->shouldReceive('getRealUsernameAttribute')
-             ->once()
              ->andReturn('');
 
         // Mock SalesPerson
@@ -1223,27 +1194,22 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $this->mergeLead->shouldReceive('getLeadTypesAttribute')
-             ->twice()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
         $this->mergeLead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $this->mergeLead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($this->mergeLead->phone_number);
 
         // Get Pretty Phone
         $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Get Real Username Attribute
         $interaction->shouldReceive('getRealUsernameAttribute')
-             ->once()
              ->andReturn('');
 
         // Mock SalesPerson
@@ -1367,22 +1333,18 @@ class InquiryServiceTest extends TestCase
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
-             ->once()
              ->andReturn([LeadType::TYPE_GENERAL]);
 
         // Get Full Address
         $lead->shouldReceive('getFullAddressAttribute')
-             ->once()
              ->andReturn('');
 
         // Get Pretty Phone
         $lead->shouldReceive('getPrettyPhoneNumberAttribute')
-             ->times(3)
              ->andReturn($lead->phone_number);
 
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->once()
              ->andReturn(null);
 
         // Expects Auto Responder Job ONLY
