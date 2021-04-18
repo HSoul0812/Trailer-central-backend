@@ -12,7 +12,7 @@ use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface; 
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
-use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Interactions\InteractionRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -35,6 +35,14 @@ class LeadServiceTest extends TestCase
      * @const string
      */
     const TEST_SOURCE = 'Facebook';
+
+    /**
+     * @const string
+     */
+    const TEST_FIRST_NAME = 'Alegra';
+    const TEST_LAST_NAME = 'Johnson';
+    const TEST_PHONE = '555-555-5555';
+    const TEST_EMAIL = 'alegra@nowhere.com';
 
 
     /**
@@ -664,35 +672,33 @@ class LeadServiceTest extends TestCase
 
     /**
      * @covers ::merge
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
     public function testMerge()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
 
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-        $lead->identifier = self::TEST_LEAD_ID;
+        $salesPerson = $this->getEloquentMock(SalesPerson::class);
+        $salesPerson->first_name = self::TEST_FIRST_NAME;
+        $salesPerson->last_name = self::TEST_LAST_NAME;
 
-        // Get Test Interaction
-        $interaction = factory(Interaction::class)->make([
-            'user_id' => $dealerId,
-            'tc_lead_id' => self::TEST_LEAD_ID,
-            'sales_person_id' => 0,
-            'interaction_type' => 'INQUIRY'
-        ]);
-        $interaction->interaction_id = self::TEST_LEAD_ID;
-        $interaction->setRelation('lead', $lead);
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->salesPerson = $salesPerson;
+        $lead->leadStatus = $status;
+        $lead->units = new Collection();
+
+        $interaction = $this->getEloquentMock(Interaction::class);
+        $interaction->interaction_id = 1;
+        $interaction->leadStatus = $status;
+        $interaction->emailHistory = new Collection();
 
         // Send Request Params
         $mergeLeadParams = [
@@ -717,7 +723,7 @@ class LeadServiceTest extends TestCase
         ];
 
 
-        /** @var LeadServiceInterface $service */
+        // @var LeadServiceInterface $service
         $service = $this->app->make(LeadServiceInterface::class);
 
         // Mock Create Interaction
@@ -732,7 +738,7 @@ class LeadServiceTest extends TestCase
         $result = $service->merge($lead, $mergeLeadParams);
 
         // Match Merged Lead Details
-        $this->assertSame($result->interaction_id, self::TEST_LEAD_ID);
+        $this->assertSame($result->interaction_id, $interaction->interaction_id);
     }
 
 
