@@ -23,14 +23,13 @@ use Tests\TestCase;
 class AutoAssignJobTest extends TestCase
 {
     /**
-     * @const int
+     * @const string
      */
-    const TEST_SALES_PERSON_ID = 102;
+    const TEST_FIRST_NAME = 'Alegra';
+    const TEST_LAST_NAME = 'Johnson';
+    const TEST_PHONE = '555-555-5555';
+    const TEST_EMAIL = 'alegra@nowhere.com';
 
-    /**
-     * @const int
-     */
-    const TEST_ITEM_ID = 98179430;
 
     /**
      * @var LegacyMockInterface|AutoAssignServiceInterface
@@ -51,20 +50,13 @@ class AutoAssignJobTest extends TestCase
      */
     public function testHandle()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-        $lead->identifier = self::TEST_ITEM_ID;
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
 
         // Mock Auto Assign Lead
         $this->autoAssignServiceMock
@@ -78,7 +70,7 @@ class AutoAssignJobTest extends TestCase
         $result = $autoAssignJob->handle($this->autoAssignServiceMock);
 
         // Receive Handling Auto Assign on Leads
-        Log::shouldReceive('info')->with('Handling Auto Assign Manually on Lead #' . self::TEST_ITEM_ID);
+        Log::shouldReceive('info')->with('Handling Auto Assign Manually on Lead #' . $lead->identifier);
 
         // Assert True
         $this->assertTrue($result);
@@ -89,28 +81,17 @@ class AutoAssignJobTest extends TestCase
      */
     public function testHandleWithException()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
 
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-        $lead->identifier = self::TEST_ITEM_ID;
-
-        // Generate Lead Status
-        $leadStatus = factory(LeadStatus::class)->make([
-            'dealer_id' => self::getTestDealerId(),
-            'tc_lead_identifier' => $lead->identifier,
-            'sales_person_id' => self::TEST_SALES_PERSON_ID
-        ]);
-        $lead->setRelation('leadStatus', $leadStatus);
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->sales_person_id = 1;
+        $lead->leadStatus = $status;
 
         // Mock Auto Assign Lead
         $this->autoAssignServiceMock
