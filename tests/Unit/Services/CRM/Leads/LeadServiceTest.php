@@ -717,7 +717,7 @@ class LeadServiceTest extends TestCase
 
         // Create Interaction Params
         $createInteractionParams = [
-            'lead_id' => self::TEST_LEAD_ID,
+            'lead_id' => $lead->identifier,
             'interaction_type' => 'INQUIRY',
             'interaction_notes' => 'Original Inquiry: ' . $notes
         ];
