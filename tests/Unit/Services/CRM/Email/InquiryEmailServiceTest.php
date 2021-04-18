@@ -396,8 +396,8 @@ class InquiryEmailServiceTest extends TestCase
         $this->assertSame($result->inquiryType, InquiryLead::INQUIRY_TYPES[0]);
         $this->assertSame($result->firstName, $inquiry->firstName);
         $this->assertSame($result->lastName, $inquiry->lastName);
-        $this->assertSame($result->emailAddress, $inquiry->email);
-        $this->assertSame($result->phoneNumber, $inquiry->phone);
+        $this->assertSame($result->emailAddress, $inquiry->emailAddress);
+        $this->assertSame($result->phoneNumber, $inquiry->phoneNumber);
     }
 
 
