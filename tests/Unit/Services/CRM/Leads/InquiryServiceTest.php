@@ -967,8 +967,12 @@ class InquiryServiceTest extends TestCase
         $lead->phone_number = self::TEST_PHONE;
         $lead->email_address = self::TEST_EMAIL;
 
+        $salesPerson = $this->getEloquentMock(SalesPerson::class);
+        $salesPerson->first_name = self::TEST_FIRST_NAME;
+        $salesPerson->last_name = self::TEST_LAST_NAME;
+
         $status = $this->getEloquentMock(LeadStatus::class);
-        $status->salesPerson = $this->getEloquentMock(SalesPerson::class);
+        $status->salesPerson = $salesPerson;
         $lead->leadStatus = $status;
         $lead->units = new Collection();
 
@@ -1084,6 +1088,10 @@ class InquiryServiceTest extends TestCase
              ->once()
              ->andReturn('');
 
+        // Mock SalesPerson
+        $salesPerson->shouldReceive('getFullNameAttribute')
+            ->andReturn($salesPerson->first_name . ' ' . $salesPerson->last_name);
+
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
 
@@ -1115,8 +1123,12 @@ class InquiryServiceTest extends TestCase
         $lead->phone_number = self::TEST_PHONE;
         $lead->email_address = self::TEST_EMAIL;
 
+        $salesPerson = $this->getEloquentMock(SalesPerson::class);
+        $salesPerson->first_name = self::TEST_FIRST_NAME;
+        $salesPerson->last_name = self::TEST_LAST_NAME;
+
         $status = $this->getEloquentMock(LeadStatus::class);
-        $status->salesPerson = $this->getEloquentMock(SalesPerson::class);
+        $status->salesPerson = $salesPerson;
         $lead->leadStatus = $status;
         $lead->units = new Collection();
 
@@ -1231,6 +1243,10 @@ class InquiryServiceTest extends TestCase
         $interaction->shouldReceive('getRealUsernameAttribute')
              ->once()
              ->andReturn('');
+
+        // Mock SalesPerson
+        $salesPerson->shouldReceive('getFullNameAttribute')
+            ->andReturn($salesPerson->first_name . ' ' . $salesPerson->last_name);
 
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
