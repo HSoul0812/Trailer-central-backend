@@ -892,6 +892,12 @@ class InquiryServiceTest extends TestCase
             ->with($sendInquiryParams)
             ->andReturn($lead);
 
+        // Mock ADF Export
+        $this->adfServiceMock
+            ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
+
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
@@ -1405,6 +1411,12 @@ class InquiryServiceTest extends TestCase
 
             $status = $this->getEloquentMock(LeadStatus::class);
             $match->leadStatus = $status;
+
+            // Get Clean Phone
+            $phone = preg_replace("/[-+)( x]+/", "", $this->phone_number);
+            $match->shouldReceive('getCleanPhoneAttribute')
+                  ->twice()
+                  ->andReturn(((strlen($phone) === 11) ? $phone : '1' . $phone));
 
             // Add Matches
             if(!empty($seed['primary'])) {
