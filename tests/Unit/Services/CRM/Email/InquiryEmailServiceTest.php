@@ -341,6 +341,10 @@ class InquiryEmailServiceTest extends TestCase
         $website->dealer_id = 1;
         $website->domain = self::TEST_DOMAIN;
 
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Send Request Params
         $fillInquiry = [
             'dealer_id' => 1,
@@ -383,7 +387,164 @@ class InquiryEmailServiceTest extends TestCase
             ->shouldReceive('get')
             ->once()
             ->with(['dealer_id' => $inquiry->dealerId])
+            ->andReturn($dealer);
+
+        // @var InquiryEmailServiceInterface $service
+        $service = $this->app->make(InquiryEmailServiceInterface::class);
+
+
+        // Validate Send Inquiry Result
+        $result = $service->fill($fillInquiry);
+
+        // Result = true
+        $this->assertSame($result->inquiryType, InquiryLead::INQUIRY_TYPES[0]);
+        $this->assertSame($result->firstName, $inquiry->firstName);
+        $this->assertSame($result->lastName, $inquiry->lastName);
+        $this->assertSame($result->emailAddress, $inquiry->emailAddress);
+        $this->assertSame($result->phoneNumber, $inquiry->phoneNumber);
+    }
+
+    /**
+     * @covers ::fill
+     * @group Inquiry
+     *
+     * @throws BindingResolutionException
+     */
+    public function testFillLocation()
+    {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+
+        // Send Request Params
+        $fillInquiry = [
+            'dealer_id' => 1,
+            'website_id' => 1,
+            'dealer_location_id' => 1,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
+            'lead_types' => [LeadType::TYPE_GENERAL],
+            'website_domain' => self::TEST_DOMAIN,
+            'first_name' => self::TEST_FIRST_NAME,
+            'last_name' => self::TEST_LAST_NAME,
+            'phone_number' => self::TEST_PHONE,
+            'email_address' => self::TEST_EMAIL,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
+            'device' => self::TEST_DEVICE
+        ];
+
+        // Get Inquiry Lead
+        $inquiry = new InquiryLead($fillInquiry);
+
+
+        // Mock Website Repository
+        $this->websiteRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['id' => $inquiry->websiteId])
             ->andReturn($website);
+
+        // Mock Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOrDefault')
+            ->once()
+            ->with($inquiry->websiteId, 'general/item_email_from')
+            ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock Dealer Location Repository
+        $this->dealerLocationRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['id' => $inquiry->dealerLocationId])
+            ->andReturn($location);
+
+        // @var InquiryEmailServiceInterface $service
+        $service = $this->app->make(InquiryEmailServiceInterface::class);
+
+
+        // Validate Send Inquiry Result
+        $result = $service->fill($fillInquiry);
+
+        // Result = true
+        $this->assertSame($result->inquiryType, InquiryLead::INQUIRY_TYPES[0]);
+        $this->assertSame($result->firstName, $inquiry->firstName);
+        $this->assertSame($result->lastName, $inquiry->lastName);
+        $this->assertSame($result->emailAddress, $inquiry->emailAddress);
+        $this->assertSame($result->phoneNumber, $inquiry->phoneNumber);
+    }
+
+    /**
+     * @covers ::fill
+     * @group Inquiry
+     *
+     * @throws BindingResolutionException
+     */
+    public function testFillInventory()
+    {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
+        // Get Inventory
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = 1;
+
+        // Send Request Params
+        $fillInquiry = [
+            'dealer_id' => 1,
+            'website_id' => 1,
+            'item_id' => $inventory->inventory_id,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
+            'lead_types' => [LeadType::TYPE_INVENTORY],
+            'website_domain' => self::TEST_DOMAIN,
+            'first_name' => self::TEST_FIRST_NAME,
+            'last_name' => self::TEST_LAST_NAME,
+            'phone_number' => self::TEST_PHONE,
+            'email_address' => self::TEST_EMAIL,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
+            'device' => self::TEST_DEVICE
+        ];
+
+        // Get Inquiry Lead
+        $inquiry = new InquiryLead($fillInquiry);
+
+
+        // Mock Website Repository
+        $this->websiteRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['id' => $inquiry->websiteId])
+            ->andReturn($website);
+
+        // Mock Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOrDefault')
+            ->once()
+            ->with($inquiry->websiteId, 'general/item_email_from')
+            ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock Inventory Repository
+        $this->inventoryRepositoryMock
+            ->shouldReceive('get')
+            ->twice()
+            ->with(['id' => $inquiry->itemId])
+            ->andReturn($inventory);
 
         // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
