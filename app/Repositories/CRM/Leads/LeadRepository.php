@@ -198,11 +198,6 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return Collection<Lead>
      */
     public function findAllMatches(array $params): Collection {
-        // Dealer ID Exists?!
-        if(!isset($params['dealer_id'])) {
-            return new Collection();
-        }
-
         // Clean Phones
         $params['phone1'] = preg_replace('/[-+)( x]+/', '', $params['phone_number'] ?? '');
         $params['phone2'] = '1' . $params['phone1'];
