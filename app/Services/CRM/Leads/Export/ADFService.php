@@ -12,8 +12,11 @@ use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
-class ADFService implements ADFServiceInterface {
+class ADFService implements ADFServiceInterface
+{
+    use DispatchesJobs;
     
     /**     
      * @var App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface 
