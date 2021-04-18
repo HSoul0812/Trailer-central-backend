@@ -133,7 +133,6 @@ class InquiryServiceTest extends TestCase
             'last_name' => $lead->last_name,
             'phone_number' => $lead->phone_number,
             'email_address' => $lead->email_address,
-            'is_spam' => 0,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -234,7 +233,6 @@ class InquiryServiceTest extends TestCase
             'last_name' => $lead->last_name,
             'phone_number' => $lead->phone_number,
             'email_address' => $lead->email_address,
-            'is_spam' => 0,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -252,7 +250,6 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('hasOne')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
-
 
         // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
@@ -337,7 +334,6 @@ class InquiryServiceTest extends TestCase
             'last_name' => $lead->last_name,
             'phone_number' => $lead->phone_number,
             'email_address' => $lead->email_address,
-            'is_spam' => 0,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -432,14 +428,13 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[4],
-            'lead_types' => [LeadType::TYPE_INVENTORY],
+            'lead_types' => [LeadType::TYPE_SHOWROOM_MODEL],
             'device' => self::TEST_DEVICE,
             'item_id' => 1,
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
             'phone_number' => $lead->phone_number,
             'email_address' => $lead->email_address,
-            'is_spam' => 0,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -541,7 +536,6 @@ class InquiryServiceTest extends TestCase
             'last_name' => $lead->last_name,
             'phone_number' => $lead->phone_number,
             'email_address' => $lead->email_address,
-            'is_spam' => 0,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -611,61 +605,5 @@ class InquiryServiceTest extends TestCase
         $this->assertSame($result->full_name, $lead->full_name);
         $this->assertSame($result->email_address, $lead->email_address);
         $this->assertSame($result->phone_number, $lead->phone_number);
-    }
-
-
-    /**
-     * Prepare Inquiry Lead
-     * 
-     * @param array $params
-     * @return InquiryLead
-     */
-    private function prepareInquiryLead(array $params) {
-        // Set Website Domain
-        $params['website_domain'] = self::TEST_DOMAIN;
-
-        // Get Inquiry From Details For Website
-        $config = self::TEST_WEBSITE_CONFIG;
-        $params['logo'] = $config['logo'];
-        $params['logo_url'] = $config['logoUrl'];
-        $params['from_name'] = $config['fromName'];
-
-        // Get Inquiry Name/Email
-        $params['inquiry_name'] = self::TEST_INQUIRY_NAME;
-        $params['inquiry_email'] = self::TEST_INQUIRY_EMAIL;
-
-        // Get Data By Inquiry Type
-        $vars = $this->getInquiryTypeVars($params);
-
-        // Create Inquiry Lead
-        return new InquiryLead($vars);
-    }
-
-    /**
-     * Get Inquiry Type Specific Vars
-     * 
-     * @param array $params
-     * @return array_merge($params, array{'stock': string,
-     *                                    'title': string})
-     */
-    private function getInquiryTypeVars(array $params): array {
-        // Toggle Inquiry Type
-        switch($params['inquiry_type']) {
-            case "inventory":
-            case "bestprice":
-                $params['stock'] = 'TESTTRADEIN9995';
-                $params['title'] = '2020 4-Star Trailers Denali  Popup Camper';
-            break;
-            case "part":
-                $params['stock'] = 'cleaner-54321';
-                $params['title'] = 'Cleaner 54321';
-            break;
-            case "showroom":
-                $params['title'] = '2016 Winnebago Sightseer 33C';
-            break;
-        }
-
-        // Return Updated Params Array
-        return $params;
     }
 }

@@ -53,22 +53,15 @@ class InquiryEmailServiceTest extends TestCase
     /**
      * @const string
      */
-    const TEST_SESSION_ID = 'CT000000000000000001';
+    const TEST_SOURCE = 'Facebook';
 
     /**
      * @const string
      */
-    const TEST_SOURCE = 'Facebook';
-
-    /**
-     * @const int
-     */
-    const TEST_SALES_PERSON_ID = 102;
-
-    /**
-     * @const int
-     */
-    const TEST_ITEM_ID = 98179430;
+    const TEST_FIRST_NAME = 'Alegra';
+    const TEST_LAST_NAME = 'Johnson';
+    const TEST_PHONE = '555-555-5555';
+    const TEST_EMAIL = 'alegra@nowhere.com';
 
 
     /**
@@ -92,53 +85,24 @@ class InquiryEmailServiceTest extends TestCase
      */
     public function testSend()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [$lead->lead_type],
+            'lead_types' => [LeadType::TYPE_GENERAL],
+            'website_domain' => self::TEST_DOMAIN,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT
+            'is_spam' => 0
         ];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
-
-        /** @var InquiryEmailServiceInterface $service */
+        // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
 
         // Fake Mail
@@ -178,53 +142,26 @@ class InquiryEmailServiceTest extends TestCase
      */
     public function testSendInventory()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => self::TEST_ITEM_ID,
-            'lead_type' => LeadType::TYPE_INVENTORY
-        ]);
-
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
-            'lead_types' => [$lead->lead_type],
+            'lead_types' => [LeadType::TYPE_INVENTORY],
+            'item_id' => 1,
+            'website_domain' => self::TEST_DOMAIN,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT
+            'is_spam' => 0
         ];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryEmailServiceInterface $service */
+        // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
 
         // Fake Mail
@@ -264,53 +201,26 @@ class InquiryEmailServiceTest extends TestCase
      */
     public function testSendPart()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => self::TEST_ITEM_ID,
-            'lead_type' => LeadType::TYPE_INVENTORY
-        ]);
-
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
-            'lead_types' => [$lead->lead_type],
+            'lead_types' => [LeadType::TYPE_INVENTORY],
+            'item_id' => 1,
+            'website_domain' => self::TEST_DOMAIN,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT
+            'is_spam' => 0
         ];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryEmailServiceInterface $service */
+        // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
 
         // Fake Mail
@@ -350,53 +260,26 @@ class InquiryEmailServiceTest extends TestCase
      */
     public function testSendShowroom()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => self::TEST_ITEM_ID,
-            'lead_type' => LeadType::TYPE_SHOWROOM_MODEL
-        ]);
-
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[4],
-            'lead_types' => [$lead->lead_type],
+            'lead_types' => [LeadType::TYPE_SHOWROOM_MODEL],
+            'item_id' => 1,
+            'website_domain' => self::TEST_DOMAIN,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT
+            'is_spam' => 0
         ];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryEmailServiceInterface $service */
+        // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
 
         // Fake Mail
@@ -437,53 +320,26 @@ class InquiryEmailServiceTest extends TestCase
      */
     public function testSendDev()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [$lead->lead_type],
+            'lead_types' => [LeadType::TYPE_GENERAL],
+            'website_domain' => self::TEST_DOMAIN,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
             'metadata' => $this->getMetadata(true),
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT
+            'is_spam' => 0
         ];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryEmailServiceInterface $service */
+        // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
 
         // Fake Mail
@@ -523,53 +379,26 @@ class InquiryEmailServiceTest extends TestCase
      */
     public function testSendSpam()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [$lead->lead_type],
+            'lead_types' => [LeadType::TYPE_GENERAL],
+            'website_domain' => self::TEST_DOMAIN,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
             'metadata' => $this->getMetadata(),
-            'is_spam' => 1,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT
+            'is_spam' => 1
         ];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryEmailServiceInterface $service */
+        // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
 
         // Fake Mail
@@ -609,53 +438,26 @@ class InquiryEmailServiceTest extends TestCase
      */
     public function testSendWithException()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [$lead->lead_type],
+            'lead_types' => [LeadType::TYPE_GENERAL],
+            'website_domain' => self::TEST_DOMAIN,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
             'metadata' => [],
-            'is_spam' => 1,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT
+            'is_spam' => 1
         ];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryEmailServiceInterface $service */
+        // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
 
         // Fake Mail
@@ -682,57 +484,36 @@ class InquiryEmailServiceTest extends TestCase
      */
     public function testFill()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
-
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
+            'website_id',
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [$lead->lead_type],
-            'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
-            'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT
+            'lead_types' => [LeadType::TYPE_GENERAL],
+            'website_domain' => self::TEST_DOMAIN,
+            'first_name' => self::TEST_FIRST_NAME,
+            'last_name' => self::TEST_LAST_NAME,
+            'phone_number' => self::TEST_PHONE,
+            'email_address' => self::TEST_PHONE,
+            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
+            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
+            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
+            'inquiry_name' => self::TEST_INQUIRY_NAME,
+            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
+            'device' => self::TEST_DEVICE
         ];
+
+        // Get Inquiry Lead
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
         // Mock Website Config Repository
         $this->websiteConfigRepositoryMock
             ->shouldReceive('getValueOrDefault')
             ->once()
-            ->with($websiteId, 'general/item_email_from')
+            ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
 
-        /** @var InquiryEmailServiceInterface $service */
+        // @var InquiryEmailServiceInterface $service
         $service = $this->app->make(InquiryEmailServiceInterface::class);
 
 
@@ -741,10 +522,10 @@ class InquiryEmailServiceTest extends TestCase
 
         // Result = true
         $this->assertSame($result->inquiryType, InquiryLead::INQUIRY_TYPES[0]);
-        $this->assertSame($result->firstName, $lead->first_name);
-        $this->assertSame($result->lastName, $lead->last_name);
-        $this->assertSame($result->emailAddress, $lead->email_address);
-        $this->assertSame($result->phoneNumber, $lead->phone_number);
+        $this->assertSame($result->firstName, $inquiry->firstName);
+        $this->assertSame($result->lastName, $inquiry->lastName);
+        $this->assertSame($result->emailAddress, $inquiry->email);
+        $this->assertSame($result->phoneNumber, $inquiry->phone);
     }
 
 
@@ -839,60 +620,5 @@ class InquiryEmailServiceTest extends TestCase
 
         // Return Result
         return json_encode($metadata);
-    }
-
-    /**
-     * Prepare Inquiry Lead
-     * 
-     * @param array $params
-     * @return InquiryLead
-     */
-    private function prepareInquiryLead(array $params) {
-        // Set Website Domain
-        $params['website_domain'] = self::TEST_DOMAIN;
-
-        // Get Inquiry From Details For Website
-        $config = self::TEST_WEBSITE_CONFIG;
-        $params['logo'] = $config['logo'];
-        $params['logo_url'] = $config['logoUrl'];
-        $params['from_name'] = $config['fromName'];
-
-        // Get Inquiry Name/Email
-        $params['inquiry_name'] = self::TEST_INQUIRY_NAME;
-        $params['inquiry_email'] = self::TEST_INQUIRY_EMAIL;
-
-        // Get Data By Inquiry Type
-        $vars = $this->getInquiryTypeVars($params);
-
-        // Create Inquiry Lead
-        return new InquiryLead($vars);
-    }
-
-    /**
-     * Get Inquiry Type Specific Vars
-     * 
-     * @param array $params
-     * @return array_merge($params, array{'stock': string,
-     *                                    'title': string})
-     */
-    private function getInquiryTypeVars(array $params): array {
-        // Toggle Inquiry Type
-        switch($params['inquiry_type']) {
-            case "inventory":
-            case "bestprice":
-                $params['stock'] = 'TESTTRADEIN9995';
-                $params['title'] = '2020 4-Star Trailers Denali  Popup Camper';
-            break;
-            case "part":
-                $params['stock'] = 'cleaner-54321';
-                $params['title'] = 'Cleaner 54321';
-            break;
-            case "showroom":
-                $params['title'] = '2016 Winnebago Sightseer 33C';
-            break;
-        }
-
-        // Return Updated Params Array
-        return $params;
     }
 }
