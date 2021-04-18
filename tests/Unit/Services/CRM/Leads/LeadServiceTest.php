@@ -6,6 +6,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
