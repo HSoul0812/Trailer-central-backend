@@ -267,6 +267,17 @@ class LeadServiceTest extends TestCase
         ];
 
 
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        // Transaction
+        DB::shouldReceive('transaction')
+            ->once()
+            ->passthru();
+
         /** @var LeadServiceInterface $service */
         $service = $this->app->make(LeadServiceInterface::class);
 
@@ -296,9 +307,6 @@ class LeadServiceTest extends TestCase
 
         // Mock Lead Types
         $this->mockLeadTypes($lead, $types);
-
-        // Fake DB
-        DB::fake();
 
         // Validate Update Catalog Result
         $result = $service->update($updateRequestParams);
