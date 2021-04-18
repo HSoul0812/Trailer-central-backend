@@ -695,7 +695,7 @@ class InquiryEmailServiceTest extends TestCase
         $fillInquiry = [
             'dealer_id' => 1,
             'website_id' => 1,
-            'item_id' => $part->id,
+            'item_id' => $showroom->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[4],
             'lead_types' => [LeadType::TYPE_SHOWROOM_MODEL],
             'website_domain' => self::TEST_DOMAIN,
