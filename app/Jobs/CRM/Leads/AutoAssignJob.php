@@ -22,11 +22,6 @@ class AutoAssignJob extends Job
      * @var Lead
      */
     private $lead;
-
-    /**
-     * @var Illuminate\Support\Facades\Log
-     */
-    protected $log;
     
     /**
      * AutoAssignJob constructor.
@@ -37,9 +32,6 @@ class AutoAssignJob extends Job
     public function __construct(Lead $lead)
     {
         $this->lead = $lead;
-
-        // Initialize Logger
-        $this->log = Log::channel('autoassign');
     }
 
     /**
@@ -52,14 +44,17 @@ class AutoAssignJob extends Job
      */
     public function handle(AutoAssignServiceInterface $service)
     {
+        // Initialize Log
+        $log = Log::channel('autoassign');
+
         // Job Already Has Sales Person?
         if (!empty($this->lead->leadStatus->sales_person_id)) {
-            $this->log->error('Cannot process auto assign; sales person ALREADY assigned to lead!');
+            $log->error('Cannot process auto assign; sales person ALREADY assigned to lead!');
             throw new AutoAssignJobSalesPersonExistsException;
         }
 
         // Process Auto Assign
-        $this->log->info('Handling Auto Assign Manually on Lead #' . $this->lead->identifier);
+        $log->info('Handling Auto Assign Manually on Lead #' . $this->lead->identifier);
         $service->autoAssign($this->lead);
         return true;
     }

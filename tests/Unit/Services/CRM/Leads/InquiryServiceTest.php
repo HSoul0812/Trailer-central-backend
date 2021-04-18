@@ -10,6 +10,7 @@ use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Interactions\Interaction;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
@@ -65,17 +66,10 @@ class InquiryServiceTest extends TestCase
     /**
      * @const string
      */
-    const TEST_SOURCE = 'Facebook';
-
-    /**
-     * @const int
-     */
-    const TEST_SALES_PERSON_ID = 102;
-
-    /**
-     * @const int
-     */
-    const TEST_ITEM_ID = 98179430;
+    const TEST_FIRST_NAME = 'Alegra';
+    const TEST_LAST_NAME = 'Johnson';
+    const TEST_PHONE = '555-555-5555';
+    const TEST_EMAIL = 'alegra@nowhere.com';
 
 
     /**
@@ -262,52 +256,32 @@ class InquiryServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
     public function testSend()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
 
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_GENERAL
-        ]);
-        $lead->identifier = self::TEST_ITEM_ID;
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $lead->leadStatus = $status;
 
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [$lead->lead_type],
+            'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
             'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'email_address' => $lead->email_address,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -316,10 +290,17 @@ class InquiryServiceTest extends TestCase
         $sendInquiryParams['inventory'] = [];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryServiceInterface $service */
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
 
         // Mock Fill Inquiry Lead
@@ -358,12 +339,16 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, self::TEST_ITEM_ID);
+            ->with($inquiry->cookieSessionId, $lead->identifier);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
             ->shouldReceive('markUnitInquired')
             ->never();
+
+        // Mock Lead
+        $lead->shouldReceive('getFullNameAttribute')
+            ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -383,53 +368,33 @@ class InquiryServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
     public function testSendInventory()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
 
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => self::TEST_ITEM_ID,
-            'lead_type' => LeadType::TYPE_INVENTORY
-        ]);
-        $lead->identifier = self::TEST_ITEM_ID;
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $lead->leadStatus = $status;
 
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
-            'lead_types' => [$lead->lead_type],
-            'item_id' => $lead->inventory_id,
+            'lead_types' => [LeadType::TYPE_INVENTORY],
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
+            'item_id' => 1,
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
             'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'email_address' => $lead->email_address,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -438,10 +403,17 @@ class InquiryServiceTest extends TestCase
         $sendInquiryParams['inventory'] = [$sendRequestParams['item_id']];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryServiceInterface $service */
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
 
         // Mock Fill Inquiry Lead
@@ -480,13 +452,17 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, self::TEST_ITEM_ID);
+            ->with($inquiry->cookieSessionId, $lead->identifier);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
             ->shouldReceive('markUnitInquired')
             ->once()
             ->with($inquiry->cookieSessionId, $inquiry->itemId, 'inventory');
+
+        // Mock Lead
+        $lead->shouldReceive('getFullNameAttribute')
+            ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -506,53 +482,33 @@ class InquiryServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
     public function testSendPart()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
 
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_INVENTORY
-        ]);
-        $lead->identifier = self::TEST_ITEM_ID;
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $lead->leadStatus = $status;
 
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
-            'lead_types' => [$lead->lead_type],
-            'item_id' => self::TEST_ITEM_ID,
+            'lead_types' => [LeadType::TYPE_INVENTORY],
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
+            'item_id' => 1,
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
             'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT,
+            'email_address' => $lead->email_address,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -561,10 +517,17 @@ class InquiryServiceTest extends TestCase
         $sendInquiryParams['inventory'] = [];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryServiceInterface $service */
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
 
         // Mock Fill Inquiry Lead
@@ -603,13 +566,17 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, self::TEST_ITEM_ID);
+            ->with($inquiry->cookieSessionId, $lead->identifier);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
             ->shouldReceive('markUnitInquired')
             ->once()
             ->with($inquiry->cookieSessionId, $inquiry->itemId, 'part');
+
+        // Mock Lead
+        $lead->shouldReceive('getFullNameAttribute')
+            ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
@@ -629,25 +596,22 @@ class InquiryServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
-    public function testSendNoAutoAssign()
+    public function testSendShowroom()
     {
-        // Get Dealer ID
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        $websiteId = self::getTestWebsiteRandom();
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
 
-        // Get Test Lead
-        $lead = factory(Lead::class)->make([
-            'dealer_id' => $dealerId,
-            'dealer_location_id' => $dealerLocationId,
-            'website_id' => $websiteId,
-            'inventory_id' => 0,
-            'lead_type' => LeadType::TYPE_INVENTORY
-        ]);
-        $lead->identifier = self::TEST_ITEM_ID;
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $lead->leadStatus = $status;
 
         // Generate Lead Status
         $leadStatus = factory(LeadStatus::class)->make([
@@ -659,31 +623,14 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
-            'dealer_id' => $lead->dealer_id,
-            'website_id' => $lead->website_id,
-            'dealer_location_id' => $lead->dealer_location_id,
-            'inquiry_type' => InquiryLead::INQUIRY_TYPES[1],
-            'lead_types' => [$lead->lead_type],
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[4],
+            'lead_types' => [LeadType::TYPE_SHOWROOM_MODEL],
             'device' => self::TEST_DEVICE,
-            'title' => $lead->title,
-            'url' => $lead->referral,
-            'referral' => $lead->referral,
+            'item_id' => 1,
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
-            'email_address' => $lead->email_address,
             'phone_number' => $lead->phone_number,
-            'preferred_contact' => '',
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'comments' => $lead->comments,
-            'metadata' => $lead->metadata,
-            'is_spam' => 0,
-            'lead_source' => self::TEST_SOURCE,
-            'lead_status' => LeadStatus::STATUS_MEDIUM,
-            'contact_type' => LeadStatus::TYPE_CONTACT,
-            'sales_person_id' => self::TEST_SALES_PERSON_ID,
+            'email_address' => $lead->email_address,
             'cookie_session_id' => self::TEST_SESSION_ID
         ];
 
@@ -692,10 +639,17 @@ class InquiryServiceTest extends TestCase
         $sendInquiryParams['inventory'] = [];
 
         // Get Inquiry Lead
-        $inquiry = $this->prepareInquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($sendRequestParams);
 
 
-        /** @var InquiryServiceInterface $service */
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        // @var InquiryServiceInterface $service
         $service = $this->app->make(InquiryServiceInterface::class);
 
         // Mock Fill Inquiry Lead
@@ -734,12 +688,117 @@ class InquiryServiceTest extends TestCase
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
             ->once()
-            ->with($inquiry->cookieSessionId, self::TEST_ITEM_ID);
+            ->with($inquiry->cookieSessionId, $lead->identifier);
+
+        // Mock Sales Person Repository
+        $this->trackingUnitRepositoryMock
+            ->shouldReceive('markUnitInquired')
+            ->once()
+            ->with($inquiry->cookieSessionId, $inquiry->itemId, 'showroom');
+
+        // Mock Lead
+        $lead->shouldReceive('getFullNameAttribute')
+            ->andReturn($lead->first_name . ' ' . $lead->last_name);
+
+        // Expects Auto Assign/Auto Responder Jobs
+        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+
+        // Fake Mail
+        Mail::fake();
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($sendRequestParams);
+
+        // Match Lead Details
+        $this->assertSame($result['data']['name'], $lead->full_name);
+        $this->assertSame($result['data']['email'], $lead->email_address);
+        $this->assertSame($result['data']['phone'], $lead->phone_number);
+    }
+
+    /**
+     * @covers ::send
+     * @group Inquiry
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendNoAutoAssign()
+    {
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
+
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->sales_person_id = 1;
+        $lead->leadStatus = $status;
+
+        // Send Request Params
+        $sendRequestParams = [
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
+            'lead_types' => [LeadType::TYPE_GENERAL],
+            'device' => self::TEST_DEVICE,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'phone_number' => $lead->phone_number,
+            'email_address' => $lead->email_address,
+            'cookie_session_id' => self::TEST_SESSION_ID
+        ];
+
+        // Send Inquiry Params
+        $sendInquiryParams = $sendRequestParams;
+        $sendInquiryParams['inventory'] = [];
+
+        // Get Inquiry Lead
+        $inquiry = new InquiryLead($sendRequestParams);
+
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        // @var InquiryServiceInterface $service
+        $service = $this->app->make(InquiryServiceInterface::class);
+
+        // Mock Fill Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('fill')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($inquiry);
+
+        // Mock Send Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('send')
+            ->once();
+
+        // Mock Create Lead
+        $this->leadServiceMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($lead);
+
+        // Mock Sales Person Repository
+        $this->trackingRepositoryMock
+            ->shouldReceive('updateTrackLead')
+            ->once()
+            ->with($inquiry->cookieSessionId, $lead->identifier);
 
         // Mock Sales Person Repository
         $this->trackingUnitRepositoryMock
             ->shouldReceive('markUnitInquired')
             ->never();
+
+        // Mock Lead
+        $lead->shouldReceive('getFullNameAttribute')
+            ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
         // Expects Auto Responder Job ONLY
         $this->expectsJobs([AutoResponderJob::class]);
@@ -752,13 +811,15 @@ class InquiryServiceTest extends TestCase
         $result = $service->send($sendRequestParams);
 
         // Match Lead Details
-        $this->assertSame($result['data']['name'], $lead->full_name);
-        $this->assertSame($result['data']['email'], $lead->email_address);
-        $this->assertSame($result['data']['phone'], $lead->phone_number);
+        $this->assertSame($result->full_name, $lead->full_name);
+        $this->assertSame($result->email_address, $lead->email_address);
+        $this->assertSame($result->phone_number, $lead->phone_number);
     }
+
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -892,6 +953,7 @@ class InquiryServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -1028,6 +1090,7 @@ class InquiryServiceTest extends TestCase
 
     /**
      * @covers ::send
+     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -1144,62 +1207,6 @@ class InquiryServiceTest extends TestCase
         $this->assertSame($result['data']['email'], $lead->email_address);
         $this->assertSame($result['data']['phone'], $lead->phone_number);
         $this->assertNull($result['merge']);
-    }
-
-
-    /**
-     * Prepare Inquiry Lead
-     * 
-     * @param array $params
-     * @return InquiryLead
-     */
-    private function prepareInquiryLead(array $params) {
-        // Set Website Domain
-        $params['website_domain'] = self::TEST_DOMAIN;
-
-        // Get Inquiry From Details For Website
-        $config = self::TEST_WEBSITE_CONFIG;
-        $params['logo'] = $config['logo'];
-        $params['logo_url'] = $config['logoUrl'];
-        $params['from_name'] = $config['fromName'];
-
-        // Get Inquiry Name/Email
-        $params['inquiry_name'] = self::TEST_INQUIRY_NAME;
-        $params['inquiry_email'] = self::TEST_INQUIRY_EMAIL;
-
-        // Get Data By Inquiry Type
-        $vars = $this->getInquiryTypeVars($params);
-
-        // Create Inquiry Lead
-        return new InquiryLead($vars);
-    }
-
-    /**
-     * Get Inquiry Type Specific Vars
-     * 
-     * @param array $params
-     * @return array_merge($params, array{'stock': string,
-     *                                    'title': string})
-     */
-    private function getInquiryTypeVars(array $params): array {
-        // Toggle Inquiry Type
-        switch($params['inquiry_type']) {
-            case "inventory":
-            case "bestprice":
-                $params['stock'] = 'TESTTRADEIN9995';
-                $params['title'] = '2020 4-Star Trailers Denali  Popup Camper';
-            break;
-            case "part":
-                $params['stock'] = 'cleaner-54321';
-                $params['title'] = 'Cleaner 54321';
-            break;
-            case "showroom":
-                $params['title'] = '2016 Winnebago Sightseer 33C';
-            break;
-        }
-
-        // Return Updated Params Array
-        return $params;
     }
 
 
