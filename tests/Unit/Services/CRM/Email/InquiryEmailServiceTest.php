@@ -5,7 +5,12 @@ namespace Tests\Unit\Services\CRM\Leads;
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\LeadType;
+use App\Models\Inventory\Inventory;
+use App\Models\Parts\Part;
+use App\Models\Showroom\Showroom;
 use App\Models\Website\Website;
+use App\Models\CRM\User\User;
+use App\Models\User\DealerLocation;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Showroom\ShowroomRepositoryInterface;
@@ -344,8 +349,6 @@ class InquiryEmailServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
-        $dealer->name = self::TEST_INQUIRY_NAME;
-        $dealer->email = self::TEST_INQUIRY_EMAIL;
 
         // Send Request Params
         $fillInquiry = [
