@@ -498,10 +498,12 @@ class InquiryEmailServiceTest extends TestCase
         // Mock Website
         $website = $this->getEloquentMock(Website::class);
         $website->id = 1;
+        $website->dealer_id = 1;
         $website->domain = self::TEST_DOMAIN;
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => 1,
             'website_id' => 1,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
