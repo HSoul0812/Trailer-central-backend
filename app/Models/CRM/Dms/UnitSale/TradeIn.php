@@ -21,8 +21,5 @@ class TradeIn extends Model
      */
     protected $table = self::TABLE_NAME;    
 
-    public static function getTableName()
-    {
-        return self::TABLE_NAME;
-    }
+    public $timestamps = false;
 }
