@@ -361,7 +361,7 @@ class InquiryEmailServiceTest extends TestCase
         ];
 
         // Get Inquiry Lead
-        $inquiry = new InquiryLead($sendRequestParams);
+        $inquiry = new InquiryLead($fillInquiry);
 
 
         // Mock Website Repository
