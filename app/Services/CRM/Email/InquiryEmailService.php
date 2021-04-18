@@ -4,15 +4,15 @@ namespace App\Services\CRM\Email;
 
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
-use App\Models\Inventory\Inventory;
-use App\Models\Parts\Part;
-use App\Models\Showroom\Showroom;
-use App\Models\User\User;
-use App\Models\User\DealerLocation;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\Parts\PartRepositoryInterface;
+use App\Repositories\Showroom\ShowroomRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Illuminate\Support\Facades\Mail;
@@ -28,7 +28,22 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     use CustomerHelper, MailHelper;
 
     /**
-     * @var App\Repositories\Website\Config\WebsiteRepositoryInterface
+     * @var App\Repositories\Inventory\InventoryRepositoryInterface
+     */
+    protected $inventory;
+
+    /**
+     * @var App\Repositories\Parts\PartRepositoryInterface
+     */
+    protected $part;
+
+    /**
+     * @var App\Repositories\Showroom\ShowroomRepositoryInterface
+     */
+    protected $showroom;
+
+    /**
+     * @var App\Repositories\Website\WebsiteRepositoryInterface
      */
     protected $website;
 
@@ -36,6 +51,16 @@ class InquiryEmailService implements InquiryEmailServiceInterface
      * @var App\Repositories\Website\Config\WebsiteConfigRepositoryInterface
      */
     protected $websiteConfig;
+
+    /**
+     * @var App\Repositories\User\UserRepositoryInterface
+     */
+    protected $user;
+
+    /**
+     * @var App\Repositories\User\DealerLocationRepositoryInterface
+     */
+    protected $dealerLocation;
 
     /**
      * @var Illuminate\Support\Facades\Log
@@ -47,11 +72,17 @@ class InquiryEmailService implements InquiryEmailServiceInterface
      * @param WebsiteConfigRepositoryInterface $websiteConfig
      */
     public function __construct(
+        InventoryRepositoryInterface $inventory,
         WebsiteRepositoryInterface $website,
-        WebsiteConfigRepositoryInterface $websiteConfig
+        WebsiteConfigRepositoryInterface $websiteConfig,
+        UserRepositoryInterface $user,
+        DealerLocationRepositoryInterface $dealerLocation
     ) {
+        $this->inventory = $inventory;
         $this->website = $website;
         $this->websiteConfig = $websiteConfig;
+        $this->user = $user;
+        $this->dealerLocation = $dealerLocation;
 
         // Initialize Logger
         $this->log = Log::channel('leads');
@@ -126,7 +157,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     private function getInquiryDetails(array $params): array {
         // Get Inquiry Details From Dealer Location?
         if(!empty($params['dealer_location_id'])) {
-            $dealerLocation = DealerLocation::find($params['dealer_location_id']);
+            $dealerLocation = $this->dealerLocation->get(['id' => $params['dealer_location_id']]);
             if(!empty($dealerLocation->name)) {
                 $params['inquiry_name'] = $dealerLocation->name;
                 $params['inquiry_email'] = $dealerLocation->email;
@@ -136,7 +167,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Get Inquiry Details From Inventory Item?
         if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
-            $inventory = Inventory::find($params['item_id']);
+            $inventory = $this->inventory->get(['id' => $params['item_id']]);
             if(!empty($inventory->dealerLocation->name)) {
                 $params['inquiry_name'] = $inventory->dealerLocation->name;
                 $params['inquiry_email'] = $inventory->dealerLocation->email;
@@ -145,7 +176,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         }
 
         // Get Inquiry Details From Dealer
-        $dealer = User::find($params['dealer_id']);
+        $dealer = $this->user->get(['id' => $params['dealer_id']]);
         $params['inquiry_name'] = $dealer->name;
         $params['inquiry_email'] = $dealer->email;
         return $params;
@@ -163,17 +194,17 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         switch($params['inquiry_type']) {
             case "inventory":
             case "bestprice":
-                $inventory = Inventory::find($params['item_id']);
+                $inventory = $this->inventory->get(['id' => $params['item_id']]);
                 $params['stock'] = !empty($inventory->stock) ? $inventory->stock : '';
                 $params['title'] = $inventory->title;
             break;
             case "part":
-                $part = Part::find($params['item_id']);
+                $part = $this->part->get(['id' => $params['item_id']]);
                 $params['stock'] = !empty($part->sku) ? $part->sku : '';
                 $params['title'] = $part->title;
             break;
             case "showroom":
-                $showroom = Showroom::find($params['item_id']);
+                $showroom = $this->showroom->get(['id' => $params['item_id']]);
                 $title = $showroom->year . ' '. $showroom->manufacturer;
                 $title .= (!empty($showroom->series) ? ' ' . $showroom->series : '');
                 $params['title'] = $title . ' ' . $showroom->model;

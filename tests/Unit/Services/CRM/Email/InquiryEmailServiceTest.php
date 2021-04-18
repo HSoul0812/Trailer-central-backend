@@ -73,11 +73,26 @@ class InquiryEmailServiceTest extends TestCase
     {
         parent::setUp();
 
+        $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
+        $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepositoryMock);
+
+        $this->partRepositoryMock = Mockery::mock(PartRepositoryInterface::class);
+        $this->app->instance(PartRepositoryInterface::class, $this->partRepositoryMock);
+
+        $this->showroomRepositoryMock = Mockery::mock(ShowroomRepositoryInterface::class);
+        $this->app->instance(ShowroomRepositoryInterface::class, $this->showroomRepositoryMock);
+
         $this->websiteRepositoryMock = Mockery::mock(WebsiteRepositoryInterface::class);
         $this->app->instance(WebsiteRepositoryInterface::class, $this->websiteRepositoryMock);
 
         $this->websiteConfigRepositoryMock = Mockery::mock(WebsiteConfigRepositoryInterface::class);
         $this->app->instance(WebsiteConfigRepositoryInterface::class, $this->websiteConfigRepositoryMock);
+
+        $this->userRepositoryMock = Mockery::mock(UserRepositoryInterface::class);
+        $this->app->instance(UserRepositoryInterface::class, $this->userRepositoryMock);
+
+        $this->dealerLocationRepositoryMock = Mockery::mock(DealerLocationRepositoryInterface::class);
+        $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepositoryMock);
     }
 
 
@@ -138,187 +153,6 @@ class InquiryEmailServiceTest extends TestCase
         // Result = true
         $this->assertTrue($result);
     }
-
-    /**
-     * @covers ::send
-     * @group Inquiry
-     *
-     * @throws BindingResolutionException
-     */
-    public function testSendInventory()
-    {
-        // Send Request Params
-        $sendRequestParams = [
-            'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
-            'lead_types' => [LeadType::TYPE_INVENTORY],
-            'item_id' => 1,
-            'website_domain' => self::TEST_DOMAIN,
-            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
-            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
-            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
-            'inquiry_name' => self::TEST_INQUIRY_NAME,
-            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
-            'device' => self::TEST_DEVICE,
-            'is_spam' => 0
-        ];
-
-        // Get Inquiry Lead
-        $inquiry = new InquiryLead($sendRequestParams);
-
-
-        // @var InquiryEmailServiceInterface $service
-        $service = $this->app->make(InquiryEmailServiceInterface::class);
-
-        // Fake Mail
-        Mail::fake();
-
-
-        // Validate Send Inquiry Result
-        $result = $service->send($inquiry);
-
-        // Assert a message was sent to the dealer...
-        Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
-            // Check Multiple Things for Successes!
-            $successes = 0;
-
-            // Inquiry Email Exists?
-            if($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail)) {
-                $successes++;
-            }
-
-            // BCC Exists?
-            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])) {
-                $successes++;
-            }
-
-            // Must Be 2!
-            return ($successes === 2);
-        });
-
-        // Result = true
-        $this->assertTrue($result);
-    }
-
-    /**
-     * @covers ::send
-     * @group Inquiry
-     *
-     * @throws BindingResolutionException
-     */
-    public function testSendPart()
-    {
-        // Send Request Params
-        $sendRequestParams = [
-            'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
-            'lead_types' => [LeadType::TYPE_INVENTORY],
-            'item_id' => 1,
-            'website_domain' => self::TEST_DOMAIN,
-            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
-            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
-            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
-            'inquiry_name' => self::TEST_INQUIRY_NAME,
-            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
-            'device' => self::TEST_DEVICE,
-            'is_spam' => 0
-        ];
-
-        // Get Inquiry Lead
-        $inquiry = new InquiryLead($sendRequestParams);
-
-
-        // @var InquiryEmailServiceInterface $service
-        $service = $this->app->make(InquiryEmailServiceInterface::class);
-
-        // Fake Mail
-        Mail::fake();
-
-
-        // Validate Send Inquiry Result
-        $result = $service->send($inquiry);
-
-        // Assert a message was sent to the dealer...
-        Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
-            // Check Multiple Things for Successes!
-            $successes = 0;
-
-            // Inquiry Email Exists?
-            if($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail)) {
-                $successes++;
-            }
-
-            // BCC Exists?
-            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])) {
-                $successes++;
-            }
-
-            // Must Be 2!
-            return ($successes === 2);
-        });
-
-        // Result = true
-        $this->assertTrue($result);
-    }
-
-    /**
-     * @covers ::send
-     * @group Inquiry
-     *
-     * @throws BindingResolutionException
-     */
-    public function testSendShowroom()
-    {
-        // Send Request Params
-        $sendRequestParams = [
-            'inquiry_type' => InquiryLead::INQUIRY_TYPES[4],
-            'lead_types' => [LeadType::TYPE_SHOWROOM_MODEL],
-            'item_id' => 1,
-            'website_domain' => self::TEST_DOMAIN,
-            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
-            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
-            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
-            'inquiry_name' => self::TEST_INQUIRY_NAME,
-            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
-            'device' => self::TEST_DEVICE,
-            'is_spam' => 0
-        ];
-
-        // Get Inquiry Lead
-        $inquiry = new InquiryLead($sendRequestParams);
-
-
-        // @var InquiryEmailServiceInterface $service
-        $service = $this->app->make(InquiryEmailServiceInterface::class);
-
-        // Fake Mail
-        Mail::fake();
-
-
-        // Validate Send Inquiry Result
-        $result = $service->send($inquiry);
-
-        // Assert a message was sent to the dealer...
-        Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
-            // Check Multiple Things for Successes!
-            $successes = 0;
-
-            // Inquiry Email Exists?
-            if($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail)) {
-                $successes++;
-            }
-
-            // BCC Exists?
-            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])) {
-                $successes++;
-            }
-
-            // Must Be 2!
-            return ($successes === 2);
-        });
-
-        // Result = true
-        $this->assertTrue($result);
-    }
-
 
     /**
      * @covers ::send
@@ -487,6 +321,7 @@ class InquiryEmailServiceTest extends TestCase
         $this->assertFalse($result);
     }
 
+
     /**
      * @covers ::fill
      * @group Inquiry
@@ -524,7 +359,7 @@ class InquiryEmailServiceTest extends TestCase
         $inquiry = new InquiryLead($sendRequestParams);
 
 
-        // Mock Website Config Repository
+        // Mock Website Repository
         $this->websiteRepositoryMock
             ->shouldReceive('get')
             ->once()
@@ -538,10 +373,11 @@ class InquiryEmailServiceTest extends TestCase
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
 
-        // Mock Website
-        $website->shouldReceive('find')
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
             ->once()
-            ->with($website->id)
+            ->with(['id' => $inquiry->dealerId])
             ->andReturn($website);
 
         // @var InquiryEmailServiceInterface $service
