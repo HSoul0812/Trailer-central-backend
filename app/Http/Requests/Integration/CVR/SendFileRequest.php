@@ -12,8 +12,7 @@ class SendFileRequest extends Request
     {
         return [
             'dealer_id' => 'required|integer',
-            'token' => 'uuid|nullable',
-            'document' => 'file|required|mimes:zip'
+            'token' => 'uuid|nullable'
         ];
     }
 }

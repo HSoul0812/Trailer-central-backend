@@ -8,7 +8,6 @@ use App\Models\Integration\CVR\CvrFile;
 use App\Models\Integration\CVR\CvrFilePayload;
 use App\Services\Integration\CVR\CvrFileService;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\UploadedFile;
 use Mockery\LegacyMockInterface;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -37,7 +36,7 @@ class SetupTest extends TestCase
         // And I have a specific token from a cvr file monitored job
         $token = Uuid::uuid4()->toString();
         // And I have a specific payload
-        $payload = CvrFilePayload::from(['document' => UploadedFile::fake()->create('some-filename.zip', 7800)]);
+        $payload = CvrFilePayload::from([]);
 
         // Then I expect that a known "CvrFile" model is going to be returned
         $expectedCvrFile = new CvrFile([

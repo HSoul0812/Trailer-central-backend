@@ -8,7 +8,6 @@ use App\Models\Integration\CVR\CvrFile;
 use App\Models\Integration\CVR\CvrFilePayload;
 use App\Services\Common\MonitoredJobServiceInterface;
 use App\Services\Common\RunnableJobServiceInterface;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 interface CvrFileServiceInterface extends MonitoredJobServiceInterface, RunnableJobServiceInterface
 {
@@ -31,9 +30,10 @@ interface CvrFileServiceInterface extends MonitoredJobServiceInterface, Runnable
      */
     public function dispatchNow($job): void;
 
+    public function sendFile(CvrFile $job): void;
+
     /**
-     * @param string $filename CVR zipped filepath
-     * @throws FileNotFoundException when the file was not found
+     * @return string file path where is stored the assembled file ready to be sent
      */
-    public function send(string $filename): void;
+    public function buildFile(CvrFile $job): string;
 }

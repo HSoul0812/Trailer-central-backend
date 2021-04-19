@@ -59,21 +59,6 @@ class CvrController extends MonitoredJobsController
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     *    @OA\RequestBody(
-     *         required=true,
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 @OA\Property(
-     *                     description="zipped file to upload",
-     *                     property="document",
-     *                     type="string",
-     *                     format="file",
-     *                 ),
-     *                 required={"document"}
-     *             )
-     *         )
-     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Enqueue a CVR file to be sent",
@@ -98,8 +83,8 @@ class CvrController extends MonitoredJobsController
      *                          enum={"pending", "processing", "completed", "failed"},
      *                      ),
      *                      @OA\Property(
-     *                          property="validation_errors",
-     *                          description="job time validation errors",
+     *                          property="errors",
+     *                          description="job time sending errors",
      *                          type="array",
      *                          @OA\Items(
      *                              type="array",
@@ -111,7 +96,7 @@ class CvrController extends MonitoredJobsController
      *                      "data": {
      *                          "id": "237b164c-b0ff-4ba2-82f9-682647599f5c",
      *                          "status": "pending",
-     *                          "validation_errors": []
+     *                          "errors": []
      *                      }
      *                  }
      *              )
@@ -147,7 +132,7 @@ class CvrController extends MonitoredJobsController
      *                          "message": "Validation Failed",
      *                          "errors": {
      *                              "document": [
-     *                                  "The document field is required."
+     *                                  "The dealer_id field is required."
      *                              ]
      *                          },
      *                          "status_code": 422
@@ -165,15 +150,11 @@ class CvrController extends MonitoredJobsController
      */
     public function create(Request $request): Response
     {
-        $request = SendFileRequest::createFrom($request);
+        $request = new SendFileRequest($request->all());
 
         if ($request->validate()) {
-            $payload = CvrFilePayload::from(['document' => $request->file('document')]);
-            $dealerId = $request->get('dealer_id');
-            $token = $request->get('token');
-
             $model = $this->service
-                ->setup($dealerId, $payload, $token)
+                ->setup($request->get('dealer_id'), CvrFilePayload::from([]), $request->get('token'))
                 ->withQueueableJob(static function (CvrFile $job): CvrSendFileJob {
                     return new CvrSendFileJob($job->token);
                 });

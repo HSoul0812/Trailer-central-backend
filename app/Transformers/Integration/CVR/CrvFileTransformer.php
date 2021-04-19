@@ -14,7 +14,7 @@ class CrvFileTransformer extends TransformerAbstract
         return [
             'id' => $file->token,
             'status' => $file->status,
-            'validation_errors' => $file->result->validation_errors ?? []
+            'errors' => $file->result->errors ?? []
         ];
     }
 }

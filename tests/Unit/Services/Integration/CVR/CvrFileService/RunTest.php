@@ -9,7 +9,6 @@ use App\Models\Integration\CVR\CvrFilePayload;
 use App\Services\Integration\CVR\CvrFileService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\UploadedFile;
 use Mockery;
 use Mockery\LegacyMockInterface;
 use Mockery\MockInterface;
@@ -35,9 +34,8 @@ class RunTest extends TestCase
         // Given I have the four dependencies for "CvrFileServiceDependencies" creation
         $dependencies = new CvrFileServiceDependencies();
         // And I have a well formed payload
-        $payload = CvrFilePayload::from(['document' => UploadedFile::fake()->create('some-filename.zip', 7800)]);
-        // And I have a "CvrFile" but suddenly the `/tmp` path which is going to be cleaned just after
-        // the monitored job has been created, so that file is not going to be there when the method `run` be called
+        $payload = CvrFilePayload::from([]);
+        // And I have a "CvrFile" for the monitored job
         $token = Uuid::uuid4()->toString();
         $job = new CvrFile([
             'dealer_id' => $this->faker->unique()->numberBetween(100, 50000),
@@ -47,8 +45,8 @@ class RunTest extends TestCase
             'concurrency_level' => CvrFile::LEVEL_DEFAULT,
             'name' => CvrFile::QUEUE_JOB_NAME
         ]);
-        // And I know what exception will be thrown
-        $exception = new FileNotFoundException(sprintf('File does not exist at path %s', $payload->document));
+        // And I know suddenly some exception could be thrown
+        $exception = new FileNotFoundException(sprintf('File does not exist at path %s', '/tmp/gen-filename.gen'));
 
         // Then I expect that a log entry is stored
         $dependencies->loggerService->shouldReceive('info')->once();
@@ -73,7 +71,7 @@ class RunTest extends TestCase
             ->makePartial();
 
         // Then I expect that "send" is called once and will throw a known exception
-        $service->shouldReceive('send')->with($job->payload->document)->once()->andThrow($exception);
+        $service->shouldReceive('sendFile')->with($job)->once()->andThrow($exception);
         // And I expect to see an specific exception to be thrown
         $this->expectException(get_class($exception));
         // And I also expect to see an specific exception message
@@ -93,8 +91,8 @@ class RunTest extends TestCase
         // Given I have the four dependencies for "CvrFileServiceDependencies" creation
         $dependencies = new CvrFileServiceDependencies();
         // And I have a well formed payload
-        $payload = CvrFilePayload::from(['document' => UploadedFile::fake()->create('some-filename.zip', 7800)]);
-        // And I have a "CvrFile"
+        $payload = CvrFilePayload::from([]);
+        // And I have a "CvrFile" for the monitored job
         $token = Uuid::uuid4()->toString();
         $job = new CvrFile([
             'dealer_id' => $this->faker->unique()->numberBetween(100, 50000),
@@ -126,7 +124,7 @@ class RunTest extends TestCase
             ->makePartial();
 
         // Then I expect that "send" is called once and will throw a known exception
-        $service->shouldReceive('send')->with($job->payload->document)->once();
+        $service->shouldReceive('sendFile')->with($job)->once();
 
         // When I call the run method
         $service->run($job);

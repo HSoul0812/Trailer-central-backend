@@ -7,14 +7,14 @@ namespace App\Models\Integration\CVR;
 use App\Models\Common\MonitoredJobResult;
 
 /**
- * @property-read array $validation_errors
+ * @property-read array $errors
  */
 class CvrFileResult extends MonitoredJobResult
 {
     /**
      * @var array
      */
-    protected $validation_errors;
+    protected $errors;
 
     /**
      * @var array
@@ -29,7 +29,7 @@ class CvrFileResult extends MonitoredJobResult
     public function asArray(): array
     {
         return array_merge(parent::asArray(), [
-            'validation_errors' => $this->validation_errors,
+            'errors' => $this->errors,
             'status' => $this->status,
             'exception' => $this->exception
         ]);

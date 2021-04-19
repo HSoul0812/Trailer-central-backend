@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers\Integration\CVR;
 
-use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Integration\CvrController;
 use App\Http\Requests\Integration\CVR\SendFileRequest;
 use App\Jobs\Integration\CVR\CvrSendFileJob;
@@ -31,8 +30,6 @@ class CvrControllerTest extends AbstractMonitoredJobsTest
      * @param string $expectedException
      * @param string $expectedExceptionMessage
      * @param string|null $firstExpectedErrorMessage
-     *
-     * @throws BusyJobException
      */
     public function testCreateWithWrongParameters(array $params,
                                                   string $expectedException,
@@ -70,8 +67,6 @@ class CvrControllerTest extends AbstractMonitoredJobsTest
      * @covers ::create
      *
      * @param array $params
-     *
-     * @throws BusyJobException
      */
     public function testCreateWithValidParameters(array $params): void
     {
@@ -106,7 +101,6 @@ class CvrControllerTest extends AbstractMonitoredJobsTest
 
         return [              // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
             'No dealer'       => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
-            'No zipped file'  => [['dealer_id' => 666999], ResourceException::class, 'Validation Failed', 'The document field is required.'],
             'Bad token'       => [['dealer_id' => 666999, 'token' => 'this-is-a-token', 'document' => $fileUploaded,], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.']
         ];
     }

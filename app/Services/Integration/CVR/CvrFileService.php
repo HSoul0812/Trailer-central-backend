@@ -12,7 +12,6 @@ use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
 use Exception;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 /**
  * Provide capabilities to setup and dispatch a monitored job for CVR file sender, also provide the runner
@@ -75,7 +74,7 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
             $this->logger->info(sprintf('%s: the job %s has been started', __CLASS__, $job->token));
 
             $this->fileRepository->updateProgress($job->token, 1); // to indicate the process has begin
-            $this->send($job->payload->document);
+            $this->sendFile($job);
             $this->fileRepository->setCompleted($job->token);
 
             $this->logger->info(sprintf('%s: the job %s was finished', __CLASS__, $job->token));
@@ -88,24 +87,32 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
                     $job->token,
                     $e->getMessage()
                 ),
-                ['payload' => $job->payload->asArray(), 'validation_errors' => $job->result->validation_errors]
+                ['payload' => $job->payload->asArray(), 'errors' => $job->result->errors]
             );
 
             throw $e;
         }
     }
 
-    /**
-     * Send the file properly formatted to CVR endpoint
-     *
-     * @param string $filename CVR zipped filepath
-     * @return void
-     * @throws FileNotFoundException when the file was not found
-     */
-    public function send(string $filename): void
+    public function sendFile(CvrFile $job): void
     {
-        // CVR synchronization logic here
-        // Also ensure to use the `Storage` facade as following: Storage::disk('tmp')->path($payload->document)
+        // CVR build/synchronization logic here
+
+        // I suggest to use the `Storage` facade as following: Storage::disk('tmp')->path($this->buildFile())
+        // In case you want to update the progress of the job,
+        // you could do it as following $this->fileRepository->updateProgress($job-token, 50);
+        // When it has popped up some error, just throw an exception with the properly exception message, it will be
+        // attached to the job to be able to track those errors
+        throw new NotImplementedException;
+    }
+
+    /**
+     * @return string file path where is stored the assembled file ready to be sent
+     */
+    public function buildFile(CvrFile $job): string
+    {
+        // CVR build file logic here
+        // Also I suggest to use the `Storage`  facade as following: Storage::disk('tmp')->put($filename)
         throw new NotImplementedException;
     }
 }
