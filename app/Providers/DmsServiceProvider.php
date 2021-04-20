@@ -48,6 +48,8 @@ use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Dms\Printer\SettingsRepository as PrinterSettingsRepository;
 use App\Repositories\Dms\Printer\SettingsRepositoryInterface as PrinterSettingsRepositoryInterface;
+use App\Services\Dms\CVR\CVRGeneratorService;
+use App\Services\Dms\CVR\CVRGeneratorServiceInterface;
 use App\Services\Dms\Printer\InstructionsServiceInterface;
 use App\Services\Dms\Printer\ZPL\InstructionsService;
 use Illuminate\Support\ServiceProvider;
@@ -67,6 +69,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
         $this->app->bind(PrinterSettingsRepositoryInterface::class, PrinterSettingsRepository::class);
         $this->app->bind(InstructionsServiceInterface::class, InstructionsService::class);
+        $this->app->bind(CVRGeneratorServiceInterface::class, CVRGeneratorService::class);
         
         $this->app->bind(SaleRepositoryInterface::class, function () {
             return new SaleRepository(Sale::query());

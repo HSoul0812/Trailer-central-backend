@@ -9,7 +9,7 @@ use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
-
+use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
 
 /**
  * Class UnitSale
@@ -108,6 +108,17 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->inventory_discount +
             $this->accessory_discount +
             $this->labor_discount;
+    }
+    
+    public function isFinanced()
+    {
+        foreach($this->payments as $payment) {
+            if( $payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING ) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     public function taxTotal()
