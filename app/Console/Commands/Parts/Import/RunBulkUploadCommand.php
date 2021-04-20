@@ -26,13 +26,13 @@ class RunBulkUploadCommand extends Command
     public function handle(BulkUploadRepositoryInterface $bulkUploadRepo)
     {
         // @todo: What's the purpose of this double assignment? So, What's $this->s3Bucket ?
-        $bulkId = $this->s3Bucket = $this->argument('bulk-id');
+        $bulkId = $this->argument('bulk-id');
 
         if ($bulkId) {
-            $bulk = $bulkUploadRepo->get(['token' => $bulkId]);
+            $bulk = $bulkUploadRepo->get(['id' => $bulkId]);
         } else {
             $bulk = $bulkUploadRepo->get(['status' => BulkUpload::PROCESSING]);
-        }
+        } 
 
         if (empty($bulk)) {
             return;

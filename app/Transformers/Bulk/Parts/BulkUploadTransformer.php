@@ -10,10 +10,10 @@ class BulkUploadTransformer extends TransformerAbstract
     public function transform(BulkUpload $bulkUpload): array
     {
         return [
-            'id' => $bulkUpload->token,
+            'id' => $bulkUpload->id,
             'status' => $bulkUpload->status,
-            'source_file' => $bulkUpload->payload->import_source,
-            'validation_errors' => $bulkUpload->result->validation_errors
+            'source_file' => $bulkUpload->source_file,
+            'validation_errors' => $bulkUpload->validation_errors
         ];
     }
 }
