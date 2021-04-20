@@ -56,7 +56,8 @@ class CollectorTransformer extends TransformerAbstract
             'ids_token' => $collector->ids_token,
             'ids_default_location' => $collector->ids_default_location,
             'use_factory_mapping' => $collector->use_factory_mapping,
-            'xml_url' => $collector->xml_url
+            'xml_url' => $collector->xml_url,
+            'zero_msrp_on_used' => $collector->zero_msrp
         ];
     }
 }

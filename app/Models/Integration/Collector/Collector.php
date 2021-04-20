@@ -63,6 +63,9 @@ class Collector extends Model  implements Filterable
     public const FILE_FORMAT_CSV = 'csv';
     public const FILE_FORMAT_IDS = 'ids';
     public const FILE_FORMAT_XML_URL = 'xml_url';
+    
+    public const MSRP_ZEROED_OUT_ON_USED = 1;
+    public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
 
     public const MEASURE_FORMATS = [
         'Feet' => 'feet',
@@ -119,7 +122,8 @@ class Collector extends Model  implements Filterable
         'cdk_username',
         'use_factory_mapping',
         'skip_categories',
-        'skip_locations'
+        'skip_locations',
+        'zero_msrp'
     ];
 
     public function dealers()

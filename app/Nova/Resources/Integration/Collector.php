@@ -151,6 +151,7 @@ class Collector extends Resource
             ]),
 
             new Panel('Other Options', [
+                Boolean::make('Zero Out MSRP On Used Units', 'zero_msrp')->hideFromIndex(),
                 Boolean::make('Show On RV Trader', 'show_on_rvtrader')->hideFromIndex(),
                 Boolean::make('Import With Showroom Category', 'import_with_showroom_category')->hideFromIndex(),
                 Text::make('Overridable Fields', 'overridable_fields')->rules('max:254')->hideFromIndex()->help(
