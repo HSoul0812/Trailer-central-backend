@@ -67,8 +67,6 @@ use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 use App\Repositories\Website\PaymentCalculator\SettingsRepository;
 use App\Repositories\Website\RedirectRepository;
 use App\Repositories\Website\RedirectRepositoryInterface;
-use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
-use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\EntityRepository;
 use App\Repositories\Website\EntityRepositoryInterface;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
@@ -129,6 +127,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
+        \Validator::extend('website_exists', 'App\Rules\Website\WebsiteExists@passes');
         \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
         \Validator::extend('inventory_mfg_exists', 'App\Rules\Inventory\ManufacturerExists@passes');
         \Validator::extend('inventory_mfg_valid', 'App\Rules\Inventory\ManufacturerValid@passes');
@@ -143,6 +142,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
         \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');
+        \Validator::extend('inquiry_type_valid', 'App\Rules\CRM\Leads\ValidInquiryType@passes');
         \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
         \Validator::extend('interaction_type_valid', 'App\Rules\CRM\Interactions\ValidInteractionType@passes');
         \Validator::extend('campaign_action_valid', 'App\Rules\CRM\Email\CampaignActionValid@passes');
@@ -243,7 +243,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
         $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
-        $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);

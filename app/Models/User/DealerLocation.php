@@ -61,8 +61,21 @@ class DealerLocation extends Model
         "county",
         "region",
         "postalcode",
-        "country"
-        // TODO: Add fields
+        "country",
+        "geolocation",
+        "latitude",
+        "longitude",
+        "coordinates_updated",
+        "sms",
+        "sms_phone",
+        "permanent_phone",
+        "show_on_website_locations",
+        "county_issued",
+        "state_issued",
+        "dealer_license_no",
+        "federal_id",
+        "pac_amount",
+        "pac_type"
     ];
 
     protected $casts = [

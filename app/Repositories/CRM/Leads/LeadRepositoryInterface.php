@@ -4,6 +4,8 @@ namespace App\Repositories\CRM\Leads;
 
 use App\Repositories\Repository;
 
+use Illuminate\Database\Eloquent\Collection;
+
 interface LeadRepositoryInterface extends Repository {
     /**
      * Get All Unassigned Leads

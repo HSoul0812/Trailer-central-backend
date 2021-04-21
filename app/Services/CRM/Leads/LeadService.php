@@ -3,12 +3,14 @@
 namespace App\Services\CRM\Leads;
 
 use App\Models\CRM\Leads\Lead;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -50,15 +52,22 @@ class LeadService implements LeadServiceInterface
     protected $inventory;
 
     /**
+     * @var App\Repositories\CRM\Interactions\InteractionsRepositoryInterface
+     */
+    protected $interactions;
+
+    /**
      * LeadService constructor.
      */
-    public function __construct(LeadRepositoryInterface $leads,
-                                StatusRepositoryInterface $status,
-                                SourceRepositoryInterface $sources,
-                                TypeRepositoryInterface $types,
-                                UnitRepositoryInterface $units,
-                                InventoryRepositoryInterface $inventory)
-    {
+    public function __construct(
+        LeadRepositoryInterface $leads,
+        StatusRepositoryInterface $status,
+        SourceRepositoryInterface $sources,
+        TypeRepositoryInterface $types,
+        UnitRepositoryInterface $units,
+        InventoryRepositoryInterface $inventory,
+        InteractionsRepositoryInterface $interactions
+    ) {
         // Initialize Repositories
         $this->leads = $leads;
         $this->status = $status;
@@ -66,6 +75,7 @@ class LeadService implements LeadServiceInterface
         $this->types = $types;
         $this->units = $units;
         $this->inventory = $inventory;
+        $this->interactions = $interactions;
     }
 
 
@@ -151,7 +161,6 @@ class LeadService implements LeadServiceInterface
         // Return Full Lead Details
         return $lead;
     }
-
 
 
     /**

@@ -19,6 +19,7 @@ use Illuminate\Queue\SerializesModels;
 class IDSJob extends Job
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     /**
      * @var Lead
      */

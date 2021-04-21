@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\v1\CRM\Leads;
 
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\CRM\Leads\GetLeadsRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
 use App\Http\Requests\CRM\Leads\CreateLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadRequest;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use Dingo\Api\Http\Request;
