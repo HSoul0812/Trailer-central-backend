@@ -199,6 +199,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
      *                                    'title': string})
      */
     private function getInquiryTypeVars(array $params): array {
+        // Skip if no Item ID!
+        if(empty($params['item_id'])) {
+            return $params;
+        }
+
         // Toggle Inquiry Type
         switch($params['inquiry_type']) {
             case "inventory":

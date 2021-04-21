@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Leads\DTOs;
 
+use App\Models\CRM\Leads\Lead;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -78,12 +79,12 @@ class InquiryLead
 
 
     /**
-     * @var string
+     * @const string
      */
     const INQUIRY_TYPE_DEFAULT = 'general';
 
     /**
-     * @var array
+     * @const array
      */
     const INQUIRY_TYPES = [
         'general',
@@ -97,9 +98,15 @@ class InquiryLead
     ];
 
     /**
-     * @var array
+     * @const array
      */
     const NON_INVENTORY_TYPES = ['part', 'showroom'];
+
+
+    /**
+     * @const int
+     */
+    const MERGE_MATCH_COUNT = 2;
 
 
 
@@ -631,5 +638,40 @@ class InquiryLead
             'preferred'        => $this->getPreferredContact(),
             'comments'         => $this->comments
         ], $this->getAdminMsg());
+    }
+
+
+    /**
+     * Find Matches to Existing Lead
+     * 
+     * @param Lead $lead
+     * @return int 0-3
+     */
+    public function findMatches(Lead $lead): int {
+        // Initialize Matches
+        $matches = 0;
+
+        // Matched Phone?
+        $phone1 = preg_replace("/[-+)( x]+/", "", $this->phoneNumber);
+        $phone2 = '1' . $phone1;
+        if(strlen($phone1) === 11) {
+            $phone2 = substr($phone1, 1);
+        }
+        if($phone1 === $lead->clean_phone || $phone2 === $lead->clean_phone) {
+            $matches++;
+        }
+
+        // Matched Email?
+        if($this->emailAddress === $lead->email_address) {
+            $matches++;
+        }
+
+        // Matched Name?
+        if($this->firstName === $lead->first_name && $this->lastName === $lead->last_name) {
+            $matches++;
+        }
+
+        // Return
+        return $matches;
     }
 }

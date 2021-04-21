@@ -14,6 +14,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -190,6 +191,40 @@ class LeadRepository implements LeadRepositoryInterface {
         return $lead;
     }
 
+    /**
+     * Find Existing Leads That Matches Current Lead!
+     * 
+     * @param array $params
+     * @return Collection<Lead>
+     */
+    public function findAllMatches(array $params): Collection {
+        // Clean Phones
+        $params['phone1'] = preg_replace('/[-+)( x]+/', '', $params['phone_number'] ?? '');
+        $params['phone2'] = '1' . $params['phone1'];
+        if(strlen($params['phone1']) === 11) {
+            $params['phone2'] = substr($params['phone1'], 1);
+        }
+
+        // Find Leads That Match Current!
+        $lead = Lead::where('dealer_id', $params['dealer_id']);
+
+        // Find Name
+        return $lead->where(function(Builder $query) use($params) {
+            return $query->where(function(Builder $query) use($params) {
+                return $query->where('first_name', $params['first_name'])
+                             ->where('last_name', $params['last_name']);
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\'), \'x\', \'\') = ?', $params['phone1'])
+                             ->where('phone_number', '<>', '');
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\'), \'x\', \'\') = ?', $params['phone2'])
+                             ->where('phone_number', '<>', '');
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->where('email_address', $params['email_address'] ?? '')
+                             ->where('email_address', '<>', '');
+            });
+        })->get();
+    }
 
     /**
      * Create Assign Log for Lead

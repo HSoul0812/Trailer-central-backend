@@ -6,12 +6,14 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface; 
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -34,6 +36,14 @@ class LeadServiceTest extends TestCase
      * @const string
      */
     const TEST_SOURCE = 'Facebook';
+
+    /**
+     * @const string
+     */
+    const TEST_FIRST_NAME = 'Alegra';
+    const TEST_LAST_NAME = 'Johnson';
+    const TEST_PHONE = '555-555-5555';
+    const TEST_EMAIL = 'alegra@nowhere.com';
 
 
     /**
@@ -66,6 +76,11 @@ class LeadServiceTest extends TestCase
      */
     private $inventoryRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|InteractionsRepositoryInterface
+     */
+    private $interactionRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -87,6 +102,9 @@ class LeadServiceTest extends TestCase
 
         $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
         $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepositoryMock);
+
+        $this->interactionRepositoryMock = Mockery::mock(InteractionsRepositoryInterface::class);
+        $this->app->instance(InteractionsRepositoryInterface::class, $this->interactionRepositoryMock);
     }
 
 
@@ -651,6 +669,78 @@ class LeadServiceTest extends TestCase
             $this->assertTrue(in_array($single->inventory_id, $unitsInterest));
         }
     }*/
+
+
+    /**
+     * @covers ::merge
+     * @group Inquiry
+     *
+     * @throws BindingResolutionException
+     */
+    public function testMerge()
+    {
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
+
+        $salesPerson = $this->getEloquentMock(SalesPerson::class);
+        $salesPerson->first_name = self::TEST_FIRST_NAME;
+        $salesPerson->last_name = self::TEST_LAST_NAME;
+
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->salesPerson = $salesPerson;
+        $lead->leadStatus = $status;
+        $lead->units = new Collection();
+
+        $interaction = $this->getEloquentMock(Interaction::class);
+        $interaction->interaction_id = 1;
+        $interaction->leadStatus = $status;
+        $interaction->emailHistory = new Collection();
+
+        // Send Request Params
+        $mergeLeadParams = [
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'email_address' => $lead->email_address,
+            'phone_number' => '1234567890',
+            'comments' => 'This is a New Merge\'s Comments!'
+        ];
+
+        // Create Notes
+        $notes = $mergeLeadParams['first_name'] . ' ' . $mergeLeadParams['last_name'] . '<br /><br />' .
+                 'Phone: ' . $mergeLeadParams['phone_number'] . '<br /><br />' .
+                 'Email: ' . $mergeLeadParams['email_address'] . '<br /><br />' .
+                 $mergeLeadParams['comments'];
+
+        // Create Interaction Params
+        $createInteractionParams = [
+            'lead_id' => $lead->identifier,
+            'interaction_type' => 'INQUIRY',
+            'interaction_notes' => 'Original Inquiry: ' . $notes
+        ];
+
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Interaction
+        $this->interactionRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createInteractionParams)
+            ->andReturn($interaction);
+
+
+        // Validate Send Inquiry Result
+        $result = $service->merge($lead, $mergeLeadParams);
+
+        // Match Merged Lead Details
+        $this->assertSame($result->interaction_id, $interaction->interaction_id);
+    }
 
 
     /**

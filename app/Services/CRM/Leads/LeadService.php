@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Leads;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Interactions\Interaction;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
@@ -10,7 +11,6 @@ use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -162,6 +162,47 @@ class LeadService implements LeadServiceInterface
         return $lead;
     }
 
+    /**
+     * Merge Lead
+     * 
+     * @param Lead $lead
+     * @param array $params
+     * @return Interaction
+     */
+    public function merge(Lead $lead, array $params): Interaction {
+        // Configure Notes From Provided Data
+        $notes = '';
+        if(!empty($params['first_name'])) {
+            $notes .= $params['first_name'];
+        }
+        if(!empty($params['last_name'])) {
+            if(!empty($notes)) {
+                $notes .= ' ';
+            }
+            $notes .= $params['last_name'];
+        }
+        if(!empty($notes)) {
+            $notes .= '<br /><br />';
+        }
+
+        // Add Phone/Email
+        if(!empty($params['phone_number'])) {
+            $notes .= 'Phone: ' . $params['phone_number'] . '<br /><br />';
+        }
+        if(!empty($params['email_address'])) {
+            $notes .= 'Email: ' . $params['email_address'] . '<br /><br />';
+        }
+        if(!empty($params['comments'])) {
+            $notes .= $params['comments'];
+        }
+
+        // Get Interaction Data
+        return $this->interactions->create([
+            'lead_id' => $lead->identifier,
+            'interaction_type'   => 'INQUIRY',
+            'interaction_notes'  => !empty($notes) ? 'Original Inquiry: ' . $notes : 'Not Provided'
+        ]);
+    }
 
     /**
      * Delete Existing Lead Types and Insert New Ones

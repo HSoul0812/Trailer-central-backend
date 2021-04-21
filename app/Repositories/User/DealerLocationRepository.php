@@ -17,7 +17,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        return DealerLocation::findOrFail($params['id']);
     }
 
     public function getAll($params) {

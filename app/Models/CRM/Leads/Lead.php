@@ -370,6 +370,19 @@ class Lead extends Model
     }
 
     /**
+     * Get cleaned phone for matching
+     *
+     * @return string
+     */
+    public function getCleanPhoneAttribute() {
+        if(empty($this->phone_number)) {
+            return '';
+        }
+        $phone = preg_replace("/[-+)( x]+/", "", $this->phone_number);
+        return ((strlen($phone) === 11) ? $phone : '1' . $phone);
+    }
+
+    /**
      * Get lead types array.
      *
      * @return array
