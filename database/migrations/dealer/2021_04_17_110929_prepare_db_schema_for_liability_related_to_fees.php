@@ -37,15 +37,20 @@ class PrepareDbSchemaForLiabilityRelatedToFees extends Migration
         Schema::table('qb_item_category', static function (Blueprint $table) {
             $table->integer('liability_acc_id')
                 ->nullable()
-                ->after('income_acc_id')
-                ->comment('Liability account where it needs to be sent');
+                ->after('income_acc_id');
         });
 
         Schema::table('qb_items', static function (Blueprint $table) use ($charged_types) {
             $table->enum('fee_charged_type', $charged_types)
                 ->nullable()
                 ->after('vendor_id')
-                ->comment('Specific column for fees, used to determine which QBO account the amount need to be sent ');
+                ->comment('Specific column for fees, used to determine which QBO account the amount need to be sent');
+        });
+
+        Schema::table('qb_items_new', static function (Blueprint $table)  {
+            $table->integer('liability_acc_id')
+                ->nullable()
+                ->after('income_acc_id');
         });
 
         DB::table('qb_items')
@@ -71,6 +76,10 @@ class PrepareDbSchemaForLiabilityRelatedToFees extends Migration
 
         Schema::table('qb_items', static function (Blueprint $table) {
             $table->dropColumn('fee_charged_type');
+        });
+
+        Schema::table('qb_items_new', static function (Blueprint $table)  {
+            $table->dropColumn('liability_acc_id');
         });
     }
 }
