@@ -30,6 +30,7 @@ class GenerateCVRDocumentCommand extends Command
     public function handle(CVRGeneratorServiceInterface $cvrService)
     {
         $unitSale = UnitSale::findOrFail($this->argument('unit-sale-id'));
-        $cvrService->generate($unitSale);
+        $cvrFile = $cvrService->generate($unitSale);
+        die($cvrFile->getFilePath());
     }
 }

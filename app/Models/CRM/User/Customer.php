@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
 use App\Models\User\User as Dealer;
+use Carbon\Carbon;
 
 /**
  * Class Customer
@@ -134,5 +135,25 @@ class Customer extends Model
         $array['is_wholesale'] = (int)$array['is_wholesale'];
 
         return $array;
+    }
+    
+    /**
+     * Returns the customer age in years
+     * 
+     * @return int
+     */
+    public function getAgeAttribute() : int
+    {
+        return (int)Carbon::parse($this->dob)->diff(Carbon::now())->format('%y');
+    }
+    
+    /**
+     * Returns the customer birth month name
+     * 
+     * @return string
+     */
+    public function getBirthMonthAttribute() : string
+    {
+        return Carbon::parse($this->dob)->format('F');
     }
 }
