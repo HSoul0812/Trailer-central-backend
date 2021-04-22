@@ -12,6 +12,7 @@ class ExistsInventoryRequest extends Request
 {
     protected $rules = [
         'stock' => 'string',
-        'dealer_id' => 'required|exists:App\Models\User\User,dealer_id'
+        'dealer_id' => 'required|exists:App\Models\User\User,dealer_id',
+        'inventory_id' => 'nullable|exists:App\Models\Inventory\Inventory,inventory_id'
     ];
 }
