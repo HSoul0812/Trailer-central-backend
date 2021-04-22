@@ -152,7 +152,7 @@ class CreateInventoryRequest extends Request
         'craigslist.default_image.new' => 'checkbox|nullable',
         'craigslist.default_image.url' => 'string|nullable',
     ];
-
+    
     /**
      * @var TransformerInterface
      */

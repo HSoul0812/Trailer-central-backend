@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Services\CRM\Leads\DTOs\InquiryLead;
+use App\Models\CRM\Leads\Lead;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -26,6 +27,10 @@ class InquiryEmail extends Mailable
         // Set Extra Vars
         $this->data    = $inquiry->getEmailVars();
         $this->subject = $inquiry->getSubject();
+        
+        if (empty($this->data['inquiryView'])) {
+            $this->data['inquiryView'] = Lead::TYPE_GENERAL;
+        }
     }
 
     /**

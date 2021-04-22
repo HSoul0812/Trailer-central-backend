@@ -58,6 +58,8 @@ class Lead extends Model
 {
     use TableAware;
 
+    const TYPE_GENERAL = 'general';
+    
     const STATUS_WON = 'Closed';
     const STATUS_WON_CLOSED = 'Closed (Won)';
     const STATUS_LOST = 'Closed (Lost)';
@@ -279,7 +281,10 @@ class Lead extends Model
      * @return string
      */
     public function getSource() {
-        $source = $this->status()->pluck('source')->toArray();
+        if (empty($this->leadStatus)) {
+            return '';
+        }
+        $source = $this->leadStatus->pluck('source')->toArray();
         return $source['status'];
     }
 
