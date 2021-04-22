@@ -14,6 +14,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
 use Ramsey\Uuid\Uuid;
 use Tests\Integration\AbstractMonitoredJobsTest;
+use Tests\database\seeds\Dms\CVRSeeder;
 
 /**
  * @covers \App\Http\Controllers\v1\Integration\CvrController
@@ -21,6 +22,12 @@ use Tests\Integration\AbstractMonitoredJobsTest;
  */
 class CvrControllerTest extends AbstractMonitoredJobsTest
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->seeder = new CVRSeeder();
+    }
+    
     /**
      * @dataProvider invalidParametersForCreationProvider
      *
@@ -36,8 +43,7 @@ class CvrControllerTest extends AbstractMonitoredJobsTest
                                                   string $expectedExceptionMessage,
                                                   ?string $firstExpectedErrorMessage): void
     {
-        // Given I have few dealers
-        $this->seeder->seedDealers();
+        $this->seeder->seed();
 
         // And I'm using the controller "CvrController"
         $controller = app(CvrController::class);
@@ -70,13 +76,13 @@ class CvrControllerTest extends AbstractMonitoredJobsTest
      */
     public function testCreateWithValidParameters(array $params): void
     {
-        // Given I have few dealers
-        $this->seeder->seedDealers();
+        $this->seeder->seed();
+        $controllerParams = array_merge($this->seeder->extractValues($params), ['unit_sale_id' => $this->seeder->unitSale->id]);
 
         // And I'm using the controller "CvrController"
         $controller = app(CvrController::class);
         // And I have a well formed "SendFileRequest" request
-        $request = new SendFileRequest($this->seeder->extractValues($params));
+        $request = new SendFileRequest($controllerParams);
 
         Bus::fake();
 
@@ -96,7 +102,7 @@ class CvrControllerTest extends AbstractMonitoredJobsTest
      * @throws Exception when Uuid::uuid4 cannot generate a uuid
      */
     public function invalidParametersForCreationProvider(): array
-    {
+    {        
         $fileUploaded = UploadedFile::fake()->create('some-filename.zip', 7800);
 
         return [              // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
@@ -112,7 +118,7 @@ class CvrControllerTest extends AbstractMonitoredJobsTest
      * @throws Exception when Uuid::uuid4 cannot generate a uuid
      */
     public function validParametersForCreationProvider(): array
-    {
+    {        
         $fileUploaded = UploadedFile::fake()->create('some-filename.zip', 7800);
 
         return [           // array $parameters

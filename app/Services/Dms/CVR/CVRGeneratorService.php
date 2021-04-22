@@ -47,25 +47,28 @@ class CVRGeneratorService implements CVRGeneratorServiceInterface
                     /**
                      * Start Buyer related data
                      */
-                    $writer->writeElement('Buyer_Address', $unitSale->customer->address);
-                    $writer->writeElement('Buyer_Age', $unitSale->customer->age ? $unitSale->customer->age : '');
-                    $writer->writeElement('Buyer_Age', $unitSale->customer->dob ? $unitSale->customer->dob : '');
-                    $writer->writeElement('Buyer_Birth_State', '');
-                    $writer->writeElement('Buyer_Birth_Month', $unitSale->customer->dob ? $unitSale->customer->birthMonth : '');
-                    $writer->writeElement('Buyer_City', $unitSale->customer->city);
-                    $writer->writeElement('Buyer_County', $unitSale->customer->county);
-                    $writer->writeElement('Buyer_Drivers_License_Number', $unitSale->customer->drivers_license);
-                    $writer->writeElement('Buyer_First_Name_and_Middle_Initial', $unitSale->customer->first_name . ' ' . $unitSale->customer->middle_name);
-                    $writer->writeElement('Buyer_Phone', $unitSale->customer->home_phone);
-                    $writer->writeElement('Buyer_Last_Name', $unitSale->customer->last_name);
-                    $writer->writeElement('Buyer_Middle_Name', $unitSale->customer->middle_name);
-                    $writer->writeElement('Buyer_Full_Name', $unitSale->customer->display_name);                    
-                    $writer->writeElement('Buyer_Sex', $unitSale->customer->gender);
-                    $writer->writeElement('Buyer_SSAN', '');
-                    $writer->writeElement('Buyer_State', $unitSale->customer->region);
-                    $writer->writeElement('Buyer_Name_Suffix', '');                    
-                    $writer->writeElement('Buyer_Work_Phone', $unitSale->customer->work_phone);
-                    $writer->writeElement('Buyer_ZIP', $unitSale->customer->postal_code);
+                    if ($unitSale->customer) {
+                        $writer->writeElement('Buyer_Address', $unitSale->customer->address);
+                        $writer->writeElement('Buyer_Age', $unitSale->customer->age ? $unitSale->customer->age : '');
+                        $writer->writeElement('Buyer_Age', $unitSale->customer->dob ? $unitSale->customer->dob : '');
+                        $writer->writeElement('Buyer_Birth_State', '');
+                        $writer->writeElement('Buyer_Birth_Month', $unitSale->customer->dob ? $unitSale->customer->birthMonth : '');
+                        $writer->writeElement('Buyer_City', $unitSale->customer->city);
+                        $writer->writeElement('Buyer_County', $unitSale->customer->county);
+                        $writer->writeElement('Buyer_Drivers_License_Number', $unitSale->customer->drivers_license);
+                        $writer->writeElement('Buyer_First_Name_and_Middle_Initial', $unitSale->customer->first_name . ' ' . $unitSale->customer->middle_name);
+                        $writer->writeElement('Buyer_Phone', $unitSale->customer->home_phone);
+                        $writer->writeElement('Buyer_Last_Name', $unitSale->customer->last_name);
+                        $writer->writeElement('Buyer_Middle_Name', $unitSale->customer->middle_name);
+                        $writer->writeElement('Buyer_Full_Name', $unitSale->customer->display_name);                    
+                        $writer->writeElement('Buyer_Sex', $unitSale->customer->gender);
+                        $writer->writeElement('Buyer_SSAN', '');
+                        $writer->writeElement('Buyer_State', $unitSale->customer->region);
+                        $writer->writeElement('Buyer_Name_Suffix', '');                    
+                        $writer->writeElement('Buyer_Work_Phone', $unitSale->customer->work_phone);
+                        $writer->writeElement('Buyer_ZIP', $unitSale->customer->postal_code);
+                    }
+                    
                     /**
                      * End Buyer related data
                      */

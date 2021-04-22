@@ -21,6 +21,8 @@ class CvrFile extends MonitoredJob
     public const EXCEPTION_ERROR = 'exception_error';
 
     public const REPOSITORY_INTERFACE_NAME = CvrFileRepositoryInterface::class;
+    
+    public const QUEUE_NAME = 'cvr-send-file';
 
     /**
      * Payload accessor

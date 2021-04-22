@@ -11,6 +11,10 @@ use App\Models\Integration\CVR\CvrFilePayload;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
+use App\Services\Dms\CVR\DTOs\CVRFileDTO;
+use App\Models\CRM\Dms\UnitSale;
+use App\Services\Dms\CVR\CVRGeneratorServiceInterface;
+use GuzzleHttp\Client;
 use Exception;
 
 /**
@@ -21,6 +25,12 @@ use Exception;
  */
 class CvrFileService extends AbstractMonitoredJobService implements CvrFileServiceInterface
 {
+    
+    /**     
+     * @var CVRGeneratorServiceInterface 
+     */
+    private $cvrGeneratorService;
+    
     /**
      * @var CvrFileRepositoryInterface
      */
@@ -34,12 +44,14 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
     public function __construct(
         CvrFileRepositoryInterface $fileRepository,
         LoggerServiceInterface $logger,
-        MonitoredJobRepositoryInterface $monitoredJobsRepository
+        MonitoredJobRepositoryInterface $monitoredJobsRepository,
+        CVRGeneratorServiceInterface $cvrGeneratorService
     )
     {
         parent::__construct($monitoredJobsRepository);
 
         $this->fileRepository = $fileRepository;
+        $this->cvrGeneratorService = $cvrGeneratorService;
         $this->logger = $logger;
     }
 
@@ -96,23 +108,28 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
 
     public function sendFile(CvrFile $job): void
     {
-        // CVR build/synchronization logic here
+        $cvrFilePath = $this->buildFile($job)->getFilePath();    
 
-        // I suggest to use the `Storage` facade as following: Storage::disk('tmp')->path($this->buildFile())
-        // In case you want to update the progress of the job,
-        // you could do it as following $this->fileRepository->updateProgress($job-token, 50);
-        // When it has popped up some error, just throw an exception with the properly exception message, it will be
-        // attached to the job to be able to track those errors
-        throw new NotImplementedException;
+        $client = new Client();
+        $response = $client->request('POST', config('cvr.api_endpoint'), [
+            'auth' => [
+                config('cvr.username'), 
+                config('cvr.password')
+            ],
+            'body' => file_get_contents($cvrFilePath),
+            'headers' => [
+                'FileName' => config('cvr.unique_id'). uniqid()
+            ]
+        ]);
     }
 
     /**
-     * @return string file path where is stored the assembled file ready to be sent
+     * {@inheritDoc}
      */
-    public function buildFile(CvrFile $job): string
+    public function buildFile(CvrFile $job): CVRFileDTO
     {
-        // CVR build file logic here
-        // Also I suggest to use the `Storage`  facade as following: Storage::disk('tmp')->put($filename)
-        throw new NotImplementedException;
+        $payload = $job->payload->asArray();
+        $unitSale = UnitSale::findOrFail($payload['unit_sale_id']);        
+        return $this->cvrGeneratorService->generate($unitSale);
     }
 }

@@ -15,6 +15,8 @@ use App\Services\Integration\CVR\CvrFileServiceInterface;
 use App\Transformers\Integration\CVR\CrvFileTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use App\Models\CRM\Dms\UnitSale;
+
 
 class CvrController extends MonitoredJobsController
 {
@@ -42,7 +44,7 @@ class CvrController extends MonitoredJobsController
     }
 
     /**
-     * @OA\Put(
+     * @OA\Post(
      *     path="/api/integration/cvr",
      *     description="Enqueue a job to send a zipped file to the dealer CVR account",
      *     tags={"CVR"},
@@ -154,7 +156,7 @@ class CvrController extends MonitoredJobsController
 
         if ($request->validate()) {
             $model = $this->service
-                ->setup($request->get('dealer_id'), CvrFilePayload::from([]), $request->get('token'))
+                ->setup($request->get('dealer_id'), CvrFilePayload::from(['unit_sale_id' => $request->get('unit_sale_id')]), $request->get('token'))
                 ->withQueueableJob(static function (CvrFile $job): CvrSendFileJob {
                     return new CvrSendFileJob($job->token);
                 });

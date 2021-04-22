@@ -31,6 +31,6 @@ class GenerateCVRDocumentCommand extends Command
     {
         $unitSale = UnitSale::findOrFail($this->argument('unit-sale-id'));
         $cvrFile = $cvrService->generate($unitSale);
-        die($cvrFile->getFilePath());
+        $this->info($cvrFile->getFilePath());
     }
 }

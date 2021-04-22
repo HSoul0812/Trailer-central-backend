@@ -12,7 +12,8 @@ class SendFileRequest extends Request
     {
         return [
             'dealer_id' => 'required|integer',
-            'token' => 'uuid|nullable'
+            'token' => 'uuid|nullable',
+            'unit_sale_id' => 'required|unit_sale_exists'
         ];
     }
 }

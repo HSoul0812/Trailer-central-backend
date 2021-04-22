@@ -8,6 +8,7 @@ use App\Models\Integration\CVR\CvrFile;
 use App\Models\Integration\CVR\CvrFilePayload;
 use App\Services\Common\MonitoredJobServiceInterface;
 use App\Services\Common\RunnableJobServiceInterface;
+use App\Services\Dms\CVR\DTOs\CVRFileDTO;
 
 interface CvrFileServiceInterface extends MonitoredJobServiceInterface, RunnableJobServiceInterface
 {
@@ -33,7 +34,7 @@ interface CvrFileServiceInterface extends MonitoredJobServiceInterface, Runnable
     public function sendFile(CvrFile $job): void;
 
     /**
-     * @return string file path where is stored the assembled file ready to be sent
+     * @return CVRFileDTO file path where is stored the assembled file ready to be sent
      */
-    public function buildFile(CvrFile $job): string;
+    public function buildFile(CvrFile $job): CVRFileDTO;
 }
