@@ -452,7 +452,7 @@ class InventoryControllerTest extends TestCase
     /**
      * @return array[]
      */
-    private function existsProvider() {
+    public function existsProvider() {
         $seeder = new InventorySeeder();
         $seeder->seed();
 
@@ -480,7 +480,7 @@ class InventoryControllerTest extends TestCase
     /**
      * @return array[]
      */
-    private function existsFalseProvider() {
+    public function existsFalseProvider() {
         $seeder = new InventorySeeder();
         $seeder->seed();
 
@@ -508,7 +508,7 @@ class InventoryControllerTest extends TestCase
     /**
      * @return array[]
      */
-    private function existsInventoryProvider() {
+    public function existsInventoryProvider() {
         $seeder = new InventorySeeder();
         $seeder->seed();
 
@@ -542,7 +542,7 @@ class InventoryControllerTest extends TestCase
     /**
      * @return array[]
      */
-    private function existsInventoryFalseProvider() {
+    public function existsInventoryFalseProvider() {
         $seeder = new InventorySeeder();
         $seeder->seed();
 
