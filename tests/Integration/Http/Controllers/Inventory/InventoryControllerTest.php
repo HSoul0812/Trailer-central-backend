@@ -243,7 +243,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams);
+        $inventory = factory(Inventory::class)->create($inventoryParams[0]);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
 
@@ -286,14 +286,14 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams);
+        $inventory = factory(Inventory::class)->create($inventoryParams[0]);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
 
         // Get Exists Params
         $existsParams = [
             'dealer_id' => $inventoryParams['dealer_id'],
-            'stock' => $inventoryParams['stock'] + '_unused'
+            'stock' => $inventoryParams['stock'] . '_unused'
         ];
         $response = $this->json('GET', '/api/inventory/exists', $existsParams);
 
@@ -329,7 +329,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams);
+        $inventory = factory(Inventory::class)->create($inventoryParams[0]);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
         // Insert Another Into DB
@@ -378,7 +378,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams);
+        $inventory = factory(Inventory::class)->create($inventoryParams[0]);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
 
