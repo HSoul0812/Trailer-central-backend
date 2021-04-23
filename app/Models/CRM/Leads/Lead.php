@@ -60,7 +60,7 @@ class Lead extends Model
 
     const TYPE_GENERAL = 'general';
     const TYPE_INVENTORY = 'inventory';
-    const TYPE_CRAIGSTLIST = 'craigslist';
+    const TYPE_CRAIGSLIST = 'craigslist';
     const TYPE_SHOWROOM_MODEL = 'showroomModel';
     const TYPE_SHOWROOM = 'showroom';
     
@@ -469,7 +469,7 @@ class Lead extends Model
     public function getInquiryTypeAttribute() : string
     {
         switch($this->lead_type) {
-            case self::TYPE_CRAIGSTLIST:
+            case self::TYPE_CRAIGSLIST:
                 return self::TYPE_INVENTORY;
             case self::TYPE_INVENTORY:
                 return self::TYPE_INVENTORY;
