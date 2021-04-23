@@ -243,7 +243,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams[0]);
+        $inventory = factory(Inventory::class)->create($inventoryParams);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
 
@@ -284,9 +284,10 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
         $inventoryParams['brand'] = $seeder->brand->name;
         $inventoryParams['category'] = $seeder->category->legacy_category;
+        var_dump($inventoryParams);
 
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams[0]);
+        $inventory = factory(Inventory::class)->create($inventoryParams);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
 
@@ -329,7 +330,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams[0]);
+        $inventory = factory(Inventory::class)->create($inventoryParams);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
         // Insert Another Into DB
@@ -378,7 +379,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams[0]);
+        $inventory = factory(Inventory::class)->create($inventoryParams);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
 
