@@ -57,13 +57,7 @@ use App\Models\Website\Website;
 class Lead extends Model
 {
     use TableAware;
-
-    const TYPE_GENERAL = 'general';
-    const TYPE_INVENTORY = 'inventory';
-    const TYPE_CRAIGSLIST = 'craigslist';
-    const TYPE_SHOWROOM_MODEL = 'showroomModel';
-    const TYPE_SHOWROOM = 'showroom';
-    
+       
     const STATUS_WON = 'Closed';
     const STATUS_WON_CLOSED = 'Closed (Won)';
     const STATUS_LOST = 'Closed (Lost)';
@@ -469,14 +463,14 @@ class Lead extends Model
     public function getInquiryTypeAttribute() : string
     {
         switch($this->lead_type) {
-            case self::TYPE_CRAIGSLIST:
-                return self::TYPE_INVENTORY;
-            case self::TYPE_INVENTORY:
-                return self::TYPE_INVENTORY;
-            case self::TYPE_SHOWROOM_MODEL:
-                return self::TYPE_SHOWROOM;
+            case LeadType::TYPE_CRAIGSLIST:
+                return LeadType::TYPE_INVENTORY;
+            case LeadType::TYPE_INVENTORY:
+                return LeadType::TYPE_INVENTORY;
+            case LeadType::TYPE_SHOWROOM_MODEL:
+                return LeadType::TYPE_SHOWROOM;
             default:
-                return self::TYPE_GENERAL;
+                return LeadType::TYPE_GENERAL;
         }
     }
 
