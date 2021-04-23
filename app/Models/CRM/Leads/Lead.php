@@ -61,6 +61,8 @@ class Lead extends Model
     const TYPE_GENERAL = 'general';
     const TYPE_INVENTORY = 'inventory';
     const TYPE_CRAIGSTLIST = 'craigslist';
+    const TYPE_SHOWROOM_MODEL = 'showroomModel';
+    const TYPE_SHOWROOM = 'showroom';
     
     const STATUS_WON = 'Closed';
     const STATUS_WON_CLOSED = 'Closed (Won)';
@@ -471,6 +473,8 @@ class Lead extends Model
                 return self::TYPE_INVENTORY;
             case self::TYPE_INVENTORY:
                 return self::TYPE_INVENTORY;
+            case self::TYPE_SHOWROOM_MODEL:
+                return self::TYPE_SHOWROOM;
             default:
                 return self::TYPE_GENERAL;
         }
