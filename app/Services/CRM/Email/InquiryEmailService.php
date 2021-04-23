@@ -165,7 +165,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['dealer_id'] = $lead->dealer_id;
         $params['website_id'] = $lead->website_id;
         $params['dealer_location_id'] = $lead->dealer_location_id;
-        $params['inquiry_type'] = $lead->lead_type;
+        $params['inquiry_type'] = $lead->inquiryType;
         $params['lead_types'] = $lead->leadTypes;
         $params['inventory'] = $lead->inventoryIds;
         $params['item_id'] = $lead->inventory_id;

@@ -59,6 +59,8 @@ class Lead extends Model
     use TableAware;
 
     const TYPE_GENERAL = 'general';
+    const TYPE_INVENTORY = 'inventory';
+    const TYPE_CRAIGSTLIST = 'craigslist';
     
     const STATUS_WON = 'Closed';
     const STATUS_WON_CLOSED = 'Closed (Won)';
@@ -460,6 +462,18 @@ class Lead extends Model
 
         // Return Nothing
         return 0;
+    }
+    
+    public function getInquiryTypeAttribute() : string
+    {
+        switch($this->lead_type) {
+            case self::TYPE_CRAIGSTLIST:
+                return self::TYPE_INVENTORY;
+            case self::TYPE_INVENTORY:
+                return self::TYPE_INVENTORY;
+            default:
+                return self::TYPE_GENERAL;
+        }
     }
 
     /**
