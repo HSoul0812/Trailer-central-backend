@@ -284,7 +284,6 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
         $inventoryParams['brand'] = $seeder->brand->name;
         $inventoryParams['category'] = $seeder->category->legacy_category;
-        var_dump($inventoryParams);
 
         // Insert Into DB
         $inventory = factory(Inventory::class)->create($inventoryParams);
@@ -297,6 +296,7 @@ class InventoryControllerTest extends TestCase
             'stock' => $inventoryParams['stock'] . '_unused'
         ];
         $response = $this->json('GET', '/api/inventory/exists', $existsParams);
+        var_dump($response->getContent());
 
         $response->assertStatus(200);
 
