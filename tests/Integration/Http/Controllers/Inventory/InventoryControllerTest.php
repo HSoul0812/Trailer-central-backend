@@ -296,7 +296,6 @@ class InventoryControllerTest extends TestCase
             'stock' => $inventoryParams['stock'] . '_unused'
         ];
         $response = $this->json('GET', '/api/inventory/exists', $existsParams);
-        var_dump($response->getContent());
 
         $response->assertStatus(200);
 
