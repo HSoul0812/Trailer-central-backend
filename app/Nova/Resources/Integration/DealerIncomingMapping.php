@@ -85,8 +85,8 @@ class DealerIncomingMapping extends Resource
                 ->options($sortedTypes)
                 ->rules('required')
                 ->displayUsingLabels(),
-
-            BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
+            
+            Text::make('Dealer', 'dealer_id'),
 
             Text::make('Map From', 'map_from')->sortable()->rules('required'),
 
