@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use PDOException;
 use Tests\database\seeds\CRM\Leads\SourceSeeder;
 use Tests\TestCase;
-use Tests\Unit\WithMySqlConstraintViolationsParser;
+use Tests\Integration\WithMySqlConstraintViolationsParser;
 
 class SourceRepositoryTest extends TestCase
 {

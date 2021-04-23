@@ -11,7 +11,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Tests\database\seeds\CRM\Leads\StatusSeeder;
 use Tests\TestCase;
-use Tests\Unit\WithMySqlConstraintViolationsParser;
+use Tests\Integration\WithMySqlConstraintViolationsParser;
 
 class StatusRepositoryTest extends TestCase
 {
