@@ -6,6 +6,7 @@ namespace Tests\Integration\Http\Controllers\Inventory;
 
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\Interfaces\PermissionsInterface;
 use Dingo\Api\Exception\ResourceException;
