@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Http\Contollers\Jobs;
+namespace Tests\Integration\Http\Controllers\Jobs;
 
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Jobs\GetMonitoredJobsRequest;
