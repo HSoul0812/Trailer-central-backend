@@ -253,6 +253,7 @@ class InventoryControllerTest extends TestCase
             'stock' => $inventoryParams['stock']
         ];
         $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+        var_dump($response->getContent());
 
         $response->assertStatus(200);
 
