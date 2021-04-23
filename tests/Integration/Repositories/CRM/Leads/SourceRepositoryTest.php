@@ -8,7 +8,7 @@ use App\Models\CRM\Leads\LeadSource;
 use App\Repositories\CRM\Leads\SourceRepository;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use PDOException;
 use Tests\database\seeds\CRM\Leads\SourceSeeder;
 use Tests\TestCase;
