@@ -118,10 +118,11 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
             ],
             'body' => file_get_contents($cvrFilePath),
             'headers' => [
-                'FileName' => config('cvr.unique_id'). uniqid()
+                'FileName' => config('cvr.unique_id'). "_" . uniqid(),
+                'Content-Type' => 'application/xml'
             ]
-        ]);
-    }
+        ]);                
+    } 
 
     /**
      * {@inheritDoc}
