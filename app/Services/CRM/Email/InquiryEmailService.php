@@ -5,6 +5,7 @@ namespace App\Services\CRM\Email;
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Mail\InquiryEmail;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
+use App\Models\CRM\Leads\Lead;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
@@ -153,6 +154,44 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Create Inquiry Lead
         return new InquiryLead($vars);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function createFromLead(Lead $lead) : InquiryLead
+    {
+        $params = [];
+        $params['dealer_id'] = $lead->dealer_id;
+        $params['website_id'] = $lead->website_id;
+        $params['dealer_location_id'] = $lead->dealer_location_id;
+        $params['inquiry_type'] = $lead->inquiryType;
+        $params['lead_types'] = $lead->leadTypes;
+        $params['inventory'] = $lead->inventoryIds;
+        $params['item_id'] = $lead->inventory_id;
+        $params['title'] = $lead->title;
+        $params['url'] = $lead->inventory ? $lead->inventory->getUrl() : '';
+        $params['referral'] = $lead->referral;
+        $params['first_name'] = $lead->first_name;
+        $params['last_name'] = $lead->last_name;
+        $params['email_address'] = $lead->email_address;
+        $params['phone_number'] = $lead->phone_number;
+        $params['preferred_contact'] = $lead->preferred_contact;        
+        $params['address'] = $lead->address;
+        $params['city'] = $lead->city;
+        $params['state'] = $lead->state;
+        $params['zip'] = $lead->zip;
+        $params['comments'] = $lead->comments;
+        $params['note'] = $lead->note;        
+        $params['metadata'] = $lead->metadata;
+        $params['date_submitted'] = $lead->date_submitted;
+        $params['contact_email_sent'] = $lead->contact_email_sent;
+        $params['adf_email_sent'] = $lead->adf_email_sent;
+        $params['cdk_email_sent'] = $lead->cdk_email_sent;
+        $params['is_spam'] = $lead->is_spam;        
+        $params['lead_source'] = $lead->getSource();
+        $params['lead_status'] = $lead->leadStatus ? $lead->leadStatus->status : null;
+        return $this->fill($params);        
     }
 
 
