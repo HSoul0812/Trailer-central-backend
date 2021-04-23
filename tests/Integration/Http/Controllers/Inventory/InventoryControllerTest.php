@@ -253,7 +253,6 @@ class InventoryControllerTest extends TestCase
             'stock' => $inventoryParams['stock']
         ];
         $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
-        var_dump($response->getContent());
 
         $response->assertStatus(200);
 
@@ -300,7 +299,7 @@ class InventoryControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $this->assertDatabaseHas('inventory', $existsParams);
+        $this->assertDatabaseMissing('inventory', $existsParams);
 
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
@@ -393,7 +392,7 @@ class InventoryControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $this->assertDatabaseHas('inventory', $existsParams);
+        $this->assertDatabaseMissing('inventory', $existsParams);
 
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
