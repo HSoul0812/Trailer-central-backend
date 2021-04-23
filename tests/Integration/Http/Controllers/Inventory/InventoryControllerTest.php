@@ -348,7 +348,7 @@ class InventoryControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $existsParams['inventory_id'] = $inventory2->inventory_id;
+        unset($existsParams['inventory_id']);
         $this->assertDatabaseHas('inventory', $existsParams);
 
         $responseJson = json_decode($response->getContent(), true);
@@ -393,6 +393,7 @@ class InventoryControllerTest extends TestCase
 
         $response->assertStatus(200);
 
+        unset($existsParams['inventory_id']);
         $this->assertDatabaseMissing('inventory', $existsParams);
 
         $responseJson = json_decode($response->getContent(), true);
