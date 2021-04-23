@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use App\Services\CRM\Leads\DTOs\InquiryLead;
-use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
