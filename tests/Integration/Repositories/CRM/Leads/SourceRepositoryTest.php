@@ -456,12 +456,8 @@ class SourceRepositoryTest extends TestCase
             return $seeder->dealer->getKey();
         };
 
-        $defaultSourcesLambda = static function (SourceSeeder $seeder) {
-            return $seeder->defaultSources->count();
-        };
-
         return [                 // array $parameters, int $expectedTotal
-            'By dummy dealer' => [['user_id' => $dealerIdLambda], $defaultSourcesLambda + 3],
+            'By dummy dealer' => [['user_id' => $dealerIdLambda], $seeder->defaultSources->count() + 3],
         ];
     }
 
