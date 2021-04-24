@@ -4,21 +4,26 @@ namespace App\Models\User;
 
 use App\Models\Inventory\Inventory;
 use App\Models\Traits\TableAware;
-use App\Models\User\NewDealerUser;
-use App\Models\User\Dealer;
 use App\Models\CRM\Text\Number;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User\DealerLocationSalesTax;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder;
 
 /**
  * Class DealerLocation
  * @package App\Models\User
  *
  * @property int $dealer_location_id
+ * @method static Builder select($columns = ['*'])
+ * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
+ * @method static DealerLocation findOrFail($id, array $columns = ['*'])
  */
 class DealerLocation extends Model
 {
     use TableAware;
+    use SoftDeletes;
 
     /**
      * The table associated with the model.
@@ -26,6 +31,8 @@ class DealerLocation extends Model
      * @var string
      */
     protected $table = 'dealer_location';
+
+    protected $guarded = ['created_at', 'updated_at', 'deleted_at'];
 
     /**
      * The primary key associated with the table.
@@ -112,5 +119,20 @@ class DealerLocation extends Model
     public function number()
     {
         return $this->belongsTo(Number::class, 'sms_phone', 'dealer_number');
+    }
+
+    public function fees(): HasMany
+    {
+        return $this->hasMany(DealerLocationQuoteFee::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::addGlobalScope('exclude_deleted', function (\Illuminate\Database\Eloquent\Builder $builder): void {
+
+            $builder->whereNull('deleted_at');
+        });
     }
 }
