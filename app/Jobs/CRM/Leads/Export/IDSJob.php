@@ -19,7 +19,7 @@ use App\Mail\InquiryEmail;
  * @package App\Jobs\CRM\Leads\Export
  */
 class IDSJob extends Job
-{
+{ 
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
@@ -80,14 +80,20 @@ class IDSJob extends Job
                     new InquiryEmail(
                       $inquiryLead
                     )
-                );
-
+                );           
+            
             $this->lead->ids_exported = 1;
             $this->lead->save();
             
             Log::info('IDS Lead Mailed Successfully', ['lead' => $this->lead->identifier]);
             return true;
         } catch (\Exception $e) {
+            
+            // Flag it as exported anyway 
+            
+            $this->lead->ids_exported = 1;
+            $this->lead->save();
+            
             Log::error('IDSLead Mail error', $e->getTrace());
             throw $e;
         }
