@@ -95,7 +95,7 @@ class SourceSeeder extends Seeder
         // Database clean up
         LeadSource::where('user_id', $dealerId)->delete();
         DealerLocation::where('dealer_id', $dealerId)->delete();
-        Website::destroy($dealerId);
+        Website::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);
     }
 }

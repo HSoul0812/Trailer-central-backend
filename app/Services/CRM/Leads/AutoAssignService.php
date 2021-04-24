@@ -198,7 +198,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
                             'lead_comments' => $lead->comments,
                             'next_contact_date' => $nextContactText
                         ])
-                    ); 
+                    );
 
                     // Success, Marked Mailed
                     $status = 'mailed';

@@ -11,6 +11,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Mail\InquiryEmail;
 
 /**
  * Class IDSJob
@@ -19,6 +21,7 @@ use Illuminate\Queue\SerializesModels;
 class IDSJob extends Job
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     /**
      * @var Lead
      */
@@ -52,22 +55,31 @@ class IDSJob extends Job
         $this->hiddenCopiedEmails = $hiddenCopiedEmails;
     }
 
-    public function handle()
+    public function handle(InquiryEmailServiceInterface $inquiryEmailService)
     {
         if ($this->lead->ids_exported) {
             throw new \Exception('Already Exported');
         }
         
         Log::info('Mailing IDS Lead', ['lead' => $this->lead->identifier]);
-
+        
+        $inquiryLead = $inquiryEmailService->createFromLead($this->lead);
+        
         try {
             Mail::to($this->toEmails) 
-                ->cc($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
                     new IDSEmail([
                         'lead' => $this->lead,
                     ])
+                );
+            
+            Mail::to($this->copiedEmails)
+                ->bcc($this->hiddenCopiedEmails)
+                ->send(
+                    new InquiryEmail(
+                      $inquiryLead
+                    )
                 );
 
             $this->lead->ids_exported = 1;

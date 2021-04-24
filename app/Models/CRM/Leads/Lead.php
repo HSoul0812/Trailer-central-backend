@@ -8,11 +8,10 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Product\Product;
 use App\Models\CRM\Leads\LeadProduct;
+use App\Models\User\User;
 use App\Models\User\DealerLocation;
-use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\Inventory\Inventory;
-use App\Models\User\User;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\InventoryLead;
@@ -58,7 +57,7 @@ use App\Models\Website\Website;
 class Lead extends Model
 {
     use TableAware;
-
+       
     const STATUS_WON = 'Closed';
     const STATUS_WON_CLOSED = 'Closed (Won)';
     const STATUS_LOST = 'Closed (Lost)';
@@ -139,7 +138,8 @@ class Lead extends Model
         'cdk_email_sent',
         'newsletter',
         'is_spam',
-        'is_archived'
+        'is_archived',
+        'is_from_classifieds'
     ];
 
     /**
@@ -205,7 +205,7 @@ class Lead extends Model
     {
         return $this->hasMany(UnitSale::class, 'lead_id', 'identifier');
     }
-
+ 
     /**
      * Get Dealer location
      */
@@ -221,7 +221,7 @@ class Lead extends Model
     {
         return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
     }
-    
+
     /**
      * Get Website.
      *
@@ -279,7 +279,10 @@ class Lead extends Model
      * @return string
      */
     public function getSource() {
-        $source = $this->status()->pluck('source')->toArray();
+        if (empty($this->leadStatus)) {
+            return '';
+        }
+        $source = $this->leadStatus->pluck('source')->toArray();
         return $source['status'];
     }
 
@@ -370,6 +373,19 @@ class Lead extends Model
     }
 
     /**
+     * Get cleaned phone for matching
+     *
+     * @return string
+     */
+    public function getCleanPhoneAttribute() {
+        if(empty($this->phone_number)) {
+            return '';
+        }
+        $phone = preg_replace("/[-+)( x]+/", "", $this->phone_number);
+        return ((strlen($phone) === 11) ? $phone : '1' . $phone);
+    }
+
+    /**
      * Get lead types array.
      *
      * @return array
@@ -410,6 +426,11 @@ class Lead extends Model
         }
     }
 
+    /**
+     * Preferred Dealer Location Attribute
+     * 
+     * @return null|DealerLocation
+     */
     public function getPreferredDealerLocationAttribute()
     {
         if (empty($this->preferred_location)) {
@@ -438,6 +459,61 @@ class Lead extends Model
         // Return Nothing
         return 0;
     }
+    
+    public function getInquiryTypeAttribute() : string
+    {
+        switch($this->lead_type) {
+            case LeadType::TYPE_CRAIGSLIST:
+                return LeadType::TYPE_INVENTORY;
+            case LeadType::TYPE_INVENTORY:
+                return LeadType::TYPE_INVENTORY;
+            case LeadType::TYPE_SHOWROOM_MODEL:
+                return LeadType::TYPE_SHOWROOM;
+            default:
+                return LeadType::TYPE_GENERAL;
+        }
+    }
+
+    /**
+     * Get Inquiry Name Attribute
+     * 
+     * @return string
+     */
+    public function getInquiryNameAttribute(): string {
+        // Dealer Location Name Exists?
+        if(!empty($this->dealerLocation->name)) {
+            return $this->dealerLocation->name;
+        }
+
+        // Inventory Dealer Location Name Exists?
+        if(!empty($this->inventory->dealerLocation->name)) {
+            return $this->inventory->dealerLocation->name;
+        }
+
+        // Return Dealer Name
+        return $this->user->name;
+    }
+
+    /**
+     * Get Inquiry Email Attribute
+     * 
+     * @return string
+     */
+    public function getInquiryEmailAttribute(): string {
+        // Dealer Location Email Exists?
+        if(!empty($this->dealerLocation->email)) {
+            return $this->dealerLocation->email;
+        }
+
+        // Inventory Dealer Location Email Exists?
+        if(!empty($this->inventory->dealerLocation->email)) {
+            return $this->inventory->dealerLocation->email;
+        }
+
+        // Return Dealer Email
+        return $this->user->email;
+    }
+
 
     /**
      * Process the property value to comply with what the interface methods expect

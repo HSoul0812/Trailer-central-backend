@@ -3,6 +3,8 @@
 namespace App\Services\CRM\Leads\DTOs;
 
 use App\Models\CRM\Leads\LeadType;
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 use Carbon\Carbon;
 
 /**
@@ -12,6 +14,8 @@ use Carbon\Carbon;
  */
 class ADFLead
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @var string Set Default Source to ADF
      */
@@ -24,24 +28,35 @@ class ADFLead
 
 
     /**
-     * @var string Dealer ID for ADF Lead
+     * @var int Dealer ID for ADF Lead
      */
     private $dealerId;
 
     /**
-     * @var string Dealer Location ID for ADF Lead
+     * @var int Dealer Location ID for ADF Lead
      */
     private $locationId;
 
     /**
-     * @var string Website ID for ADF Lead
+     * @var int Website ID for ADF Lead
      */
     private $websiteId;
+
+    /**
+     * @var int Website ID for ADF Lead
+     */
+    private $leadId;
 
     /**
      * @var string Date Lead Was Requested
      */
     private $requestDate;
+
+
+    /**
+     * @var string Subject of ADF Lead to Export
+     */
+    private $subject;
 
 
     /**
@@ -994,5 +1009,73 @@ class ADFLead
 
         // Return Filters
         return $filters;
+    }
+
+
+    /**
+     * Get Email Params for ADF
+     * 
+     * @return array{requestDate: string,
+     *               vehicleYear: int,
+     *               vehicleManufacturer: string,
+     *               vehicleModel: string,
+     *               vehicleStock: string,
+     *               vehicleVin: string,
+     *               leadFirst: string,
+     *               leadLast: string,
+     *               leadEmail: string,
+     *               leadPhone: string,
+     *               leadComments: string,
+     *               leadAddress: string,
+     *               leadCity: string,
+     *               leadState: string,
+     *               leadPostal: string,
+     *               dealerId: int,
+     *               dealerLocationId: int,
+     *               leadId: int,
+     *               vendorName: string,
+     *               vendorContact: string,
+     *               vendorWebsite: string,
+     *               vendorEmail: string,
+     *               vendorPhone: string,
+     *               vendorAddress: string,
+     *               vendorCity: string,
+     *               vendorState: string,
+     *               vendorPostal: string,
+     *               vendorCountry: string,
+     *               providerName: string}
+     */
+    public function getEmailVars(): array
+    {
+        return ['requestDate' => $this->requestDate ?? Carbon::now()->setTimezone('UTC')->toDateTimeString(),
+                'vehicleYear' => $this->vehicleYear,
+                'vehicleManufacturer' => $this->vehicleMake,
+                'vehicleModel' => $this->vehicleModel,
+                'vehicleStock' => $this->vehicleStock,
+                'vehicleVin' => $this->vehicleVin,
+                'leadFirst' => $this->firstName,
+                'leadLast' => $this->lastName,
+                'leadEmail' => $this->email,
+                'leadPhone' => $this->phone,
+                'leadComments' => $this->comments,
+                'leadAddress' => $this->addrStreet,
+                'leadCity' => $this->addrCity,
+                'leadState' => $this->addrState,
+                'leadPostal' => $this->addrZip,
+                'dealerId' => $this->dealerId,
+                'dealerLocationId' => $this->locationId,
+                'leadId' => $this->leadId,
+                'vendorName' => $this->vendorName,
+                'vendorContact' => $this->vendorContact,
+                'vendorWebsite' => $this->vendorUrl,
+                'vendorEmail' => $this->vendorEmail,
+                'vendorPhone' => $this->vendorPhone,
+                'vendorAddress' => $this->vendorAddrStreet,
+                'vendorCity' => $this->vendorAddrCity,
+                'vendorState' => $this->vendorAddrState,
+                'vendorPostal' => $this->vendorAddrZip,
+                'vendorCountry' => $this->vendorAddrCountry,
+                'providerName' => $this->vendorProvider
+            ];
     }
 }

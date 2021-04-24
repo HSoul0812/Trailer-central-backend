@@ -17,7 +17,7 @@ class CreateInventoryRequest extends Request
         'dealer_location_id' => 'required_without_all:dealer_location_identifier|integer|exists:App\Models\User\DealerLocation,dealer_location_id',
         'active' => 'boolean|nullable',
         'title' => 'required|max:255',
-        'stock' => 'string|max:50|inventory_unique_stock',
+        'stock' => 'string|max:50',
         'manufacturer' => 'inventory_mfg_name_valid|nullable',
         'brand' => 'inventory_brand_valid|nullable',
         'model' => 'string|max:255|nullable',
@@ -152,7 +152,7 @@ class CreateInventoryRequest extends Request
         'craigslist.default_image.new' => 'checkbox|nullable',
         'craigslist.default_image.url' => 'string|nullable',
     ];
-
+    
     /**
      * @var TransformerInterface
      */

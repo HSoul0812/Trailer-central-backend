@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 use Dingo\Api\Routing\Router;
 
@@ -273,6 +273,8 @@ $api->version('v1', function ($route) {
      * Interactions
      */
     $route->group(['middleware' => 'interaction.validate'], function ($route) {
+        // TO DO: Need a Send Email endpoint that doesn't Require Lead ID By Default
+        //$route->post('leads/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
         $route->get('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@create')->where('leadId', '[0-9]+');
         $route->post('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
@@ -428,6 +430,23 @@ $api->version('v1', function ($route) {
         $route->get('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@getAllByCustomer')->where('customer_id', '[0-9]+');
         $route->delete('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@bulkDestroy')->where('customer_id', '[0-9]+');
         $route->post('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@attach')->where('customer_id', '[0-9]+');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Inquiry
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'inquiry'
+        ], function ($route) {
+            $route->put('create', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
+            $route->put('send', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@send');
+            // TO DO: Create Endpoint to Combine Send Text + Inquiry
+            //$route->post('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
+        });
 
         /*
         |--------------------------------------------------------------------------

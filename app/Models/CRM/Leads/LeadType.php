@@ -23,6 +23,7 @@ class LeadType extends Model
     const TYPE_CALL = 'call';
     const TYPE_TRADE = 'trade';
     const TYPE_NONLEAD = 'nonlead';
+    const TYPE_SHOWROOM = 'showroom';
 
     const TYPE_ARRAY = [
         self::TYPE_GENERAL,

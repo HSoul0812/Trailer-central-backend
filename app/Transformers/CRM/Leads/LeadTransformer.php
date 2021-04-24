@@ -74,7 +74,7 @@ class LeadTransformer extends TransformerAbstract {
     
     public function includeInteractions(Lead $lead)
     {
-        if (empty($lead->preferred_dealer_location)) {
+        if (empty($lead->interactions)) {
             return [];
         }
         

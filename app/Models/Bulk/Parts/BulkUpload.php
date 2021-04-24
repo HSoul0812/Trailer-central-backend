@@ -2,49 +2,43 @@
 
 namespace App\Models\Bulk\Parts;
 
-use App\Contracts\Support\DTO;
-use App\Models\Common\MonitoredJob;
-use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
+use Illuminate\Database\Eloquent\Model;
 
-/**
- * @property BulkUploadPayload $payload
- * @property BulkUploadResult $result
- */
-class BulkUpload extends MonitoredJob
-{
-    public const QUEUE_NAME = 'parts';
-
-    public const QUEUE_JOB_NAME = 'parts-bulk-upload';
-
-    public const VALIDATION_ERROR = 'validation_error';
-
-    public const EXCEPTION_ERROR = 'exception_error';
-
-    public const PROCESSING = parent::STATUS_PROCESSING; // for backward compatibility
-
-    public const COMPLETE = parent::STATUS_COMPLETED; // for backward compatibility
-
-    public const REPOSITORY_INTERFACE_NAME = BulkUploadRepositoryInterface::class;
+class BulkUpload extends Model { 
+    
+    const VALIDATION_ERROR = 'validation_error';
+    const PROCESSING = 'processing';
+    const COMPLETE = 'complete';
+    
+    protected $table = 'parts_bulk_upload';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'dealer_id',
+        'status',
+        'import_source',
+        'validation_errors'
+    ];
 
     /**
-     * Payload accessor
+     * The attributes excluded from the model's JSON form.
      *
-     * @param string|null $value
-     * @return BulkUploadPayload
+     * @var array
      */
-    public function getPayloadAttribute(?string $value)
-    {
-        return BulkUploadPayload::from(json_decode($value ?? '', true));
-    }
+    protected $hidden = [
 
-    /**
-     * Result accessor
-     *
-     * @param string|null $value
-     * @return BulkUploadResult
-     */
-    public function getResultAttribute(?string $value): DTO
+    ];
+
+    public function getValidationErrors()
     {
-        return BulkUploadResult::from(json_decode($value ?? '', true));
+        if (empty($this->validation_errors)) {
+            return null;
+        }
+        
+        return json_decode($this->validation_errors);
     }
 }
