@@ -50,7 +50,7 @@ class SourceRepositoryTest extends TestCase
      *
      * @covers SourceRepository::getAll
      */
-    public function testGetAll(array $params, closure $expectedTotal): void
+    public function testGetAll(array $params, \Closure $expectedTotal): void
     {
         // Given I have a collection of inventories
         $this->seeder->seed();
