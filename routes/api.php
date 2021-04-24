@@ -344,7 +344,7 @@ $api->version('v1', function ($route) {
     $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
     $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
     $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
-    
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
     });
@@ -408,6 +408,10 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
+        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
+        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->put('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
+        $route->post('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
 
         /*
