@@ -15,8 +15,6 @@ use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
-use App\Repositories\Integration\CVR\CvrFileRepository;
-use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -87,8 +85,6 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
-use App\Services\Integration\CVR\CvrFileService;
-use App\Services\Integration\CVR\CvrFileServiceInterface;
 use App\Services\User\PasswordResetServiceInterface;
 use App\Services\User\PasswordResetService;
 use App\Repositories\User\DealerLocationRepository;
@@ -289,9 +285,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PasswordResetServiceInterface::class, PasswordResetService::class);
 
         $this->app->bind(MonitoredGenericJobServiceInterface::class, MonitoredJobService::class);
-        $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);
-        $this->app->bind(CvrFileRepositoryInterface::class, CvrFileRepository::class);
-        $this->app->bind(CvrFileServiceInterface::class, CvrFileService::class);
+        $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);        
 
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
 

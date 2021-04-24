@@ -66,7 +66,8 @@ class SetupTest extends TestCase
         $service = new CvrFileService(
             $dependencies->fileRepository,
             $dependencies->loggerService,
-            $dependencies->jobsRepository
+            $dependencies->jobsRepository,
+            $dependencies->cvrGeneratorService
         );
 
         // When I call the run method

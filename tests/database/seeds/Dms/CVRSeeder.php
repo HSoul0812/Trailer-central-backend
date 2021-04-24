@@ -35,7 +35,7 @@ class CVRSeeder extends MonitoredJobSeeder
 
     public function cleanUp(): void
     {
-        parent::cleanUp();
         $this->unitSale->delete();
+        parent::cleanUp();        
     }
 }

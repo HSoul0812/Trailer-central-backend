@@ -53,7 +53,7 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->belongsTo(Customer::class, 'buyer_id', 'id');
     }
     
-    public function coCustomer()
+    public function coCustomer() : BelongsTo
     {
         return $this->belongsTo(Customer::class, 'cobuyer_id', 'id');
     }
@@ -166,9 +166,9 @@ class UnitSale extends Model implements GenericSaleInterface
         }
         
         return false;
-    }
+    } 
 
-    public function taxTotal()
+    public function taxTotal() : float
     {
         $taxAmount = 0;
         if ( $this->invoice ) {
