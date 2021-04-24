@@ -14,7 +14,7 @@ $factory->define(Website::class, static function (Faker $faker, array $attribute
     $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
 
     // Get Domain
-    $domain = $attributes['domain'] ?? $faker->domainName;
+    $domain = $attributes['domain'] ?? $faker->uuid . '.' . $faker->tld;
     $template = $attributes['template'] ?? preg_replace('/[.].+$/', '', $domain);
 
     // Created At
