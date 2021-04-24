@@ -50,13 +50,13 @@ class SourceRepositoryTest extends TestCase
      *
      * @covers SourceRepository::getAll
      */
-    public function testGetAll(array $params, \Closure $expectedTotalLambda): void
+    public function testGetAll(array $params, array $expectedTotals): void
     {
         // Given I have a collection of inventories
         $this->seeder->seed();
 
         // Get Expected Total
-        $expectedTotal = $this->seeder->extractValues($expectedTotalLambda);
+        $extractedTotal = $this->seeder->extractValues($expectedTotals);
 
         // When I call getAll
         // Then I got a list of source types
@@ -67,7 +67,7 @@ class SourceRepositoryTest extends TestCase
         self::assertInstanceOf(Collection::class, $sources);
 
         // And the total of records should be the expected
-        self::assertSame($expectedTotal, $sources->count());
+        self::assertSame($extractedTotal['expected_total'], $sources->count());
     }
 
     /**
@@ -464,7 +464,7 @@ class SourceRepositoryTest extends TestCase
         };
 
         return [                 // array $parameters, int $expectedTotal
-            'By dummy dealer' => [['user_id' => $dealerIdLambda], $defaultSourcesLambda],
+            'By dummy dealer' => [['user_id' => $dealerIdLambda], ['expected_total' => $defaultSourcesLambda]],
         ];
     }
 
