@@ -460,7 +460,7 @@ class SourceRepositoryTest extends TestCase
         };
 
         $defaultSourcesLambda = static function (SourceSeeder $seeder) {
-            return $seeder->defaultSources->count() + 3;
+            return $seeder->defaultSources->count() + 2;
         };
 
         return [                 // array $parameters, int $expectedTotal
