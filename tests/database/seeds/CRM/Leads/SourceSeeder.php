@@ -47,6 +47,7 @@ class SourceSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
+        $this->defaultSources = LeadSource::where('user_id', 0)->get();
     }
 
     public function seed(): void

@@ -50,10 +50,13 @@ class SourceRepositoryTest extends TestCase
      *
      * @covers SourceRepository::getAll
      */
-    public function testGetAll(array $params, int $expectedTotal): void
+    public function testGetAll(array $params, \Closure $expectedTotalLambda): void
     {
         // Given I have a collection of inventories
         $this->seeder->seed();
+
+        // Get Expected Total
+        $expectedTotal = $this->seeder->extractValues($expectedTotalLambda);
 
         // When I call getAll
         // Then I got a list of source types
@@ -456,10 +459,12 @@ class SourceRepositoryTest extends TestCase
             return $seeder->dealer->getKey();
         };
 
-        $defaultSources = LeadSource::where('user_id', 0)->count();
+        $defaultSourcesLambda = static function (SourceSeeder $seeder) {
+            return $seeder->defaultSources->count() + 3;
+        };
 
         return [                 // array $parameters, int $expectedTotal
-            'By dummy dealer' => [['user_id' => $dealerIdLambda], $defaultSources + 3],
+            'By dummy dealer' => [['user_id' => $dealerIdLambda], $defaultSourcesLambda],
         ];
     }
 
