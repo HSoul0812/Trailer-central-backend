@@ -200,5 +200,6 @@ return [
     'dealer_location_valid' => 'Dealer Location ID must exist or be 0',
     'website_valid' => 'Website ID must exist or be 0',
     'inventory_valid' => 'Inventory ID must exist',
-    'stock_type_valid' => 'The selected :attribute is invalid.'
+    'stock_type_valid' => 'The selected :attribute is invalid.',
+    'inventory_unique_stock' => 'The selected :attribute already exists on another inventory item.'
 ];
