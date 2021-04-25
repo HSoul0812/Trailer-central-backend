@@ -116,7 +116,7 @@ class DealerLocationController extends RestfulControllerV2 {
     public function create(Request $request): Response
     {
         $request = new SaveDealerLocationRequest($request->all());
-//dd($request->all());
+
         if ($request->validate()) {
             $location = $this->dealerLocation->create($request->all());
 

@@ -16,9 +16,11 @@ class UpdateDealerLocationRequest extends SaveDealerLocationRequest
         $rules = [
             'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
             'id' => 'nullable|integer|exists:dealer_location,dealer_location_id',
+            'sales_tax_items.*.id' => 'required_with:sales_tax_items|integer',
+            'fees.*.id' => 'required_with:fees|integer',
         ];
 
-        return array_merge($rules, parent::getRules());
+        return array_merge(parent::getRules(), $rules);
     }
 
     protected function getObject(): DealerLocation

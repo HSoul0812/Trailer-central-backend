@@ -4,7 +4,11 @@ namespace App\Models\User;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 
+/**
+ * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ */
 class DealerLocationSalesTaxItem extends Model
 {
     use TableAware;

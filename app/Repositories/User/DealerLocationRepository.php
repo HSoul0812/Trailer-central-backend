@@ -6,7 +6,6 @@ use App\Models\User\DealerLocationQuoteFee;
 use App\Models\User\DealerLocationSalesTax;
 use App\Models\User\DealerLocationSalesTaxItem;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Exceptions\NotImplementedException;
 use App\Models\User\DealerLocation;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,8 +13,12 @@ use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use DB;
 
-class DealerLocationRepository implements DealerLocationRepositoryInterface {
-
+class DealerLocationRepository implements DealerLocationRepositoryInterface
+{
+    /**
+     * @param array $params
+     * @throws InvalidArgumentException when `dealer_id` has not been provided
+     */
     public function create($params): DealerLocation
     {
         if (!isset($params['dealer_id'])) {
@@ -106,11 +109,54 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
         return $query->with('salesTax')->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * @param array $params
+     * @throws InvalidArgumentException when `dealer_id` has not been provided
+     * @throws InvalidArgumentException when `dealer_location_id` has not been provided
+     * @throws ModelNotFoundException
+     */
     public function update($params): bool
     {
-        throw new NotImplementedException;
-    }
+        if (!isset($params['dealer_id'])) {
+            throw new InvalidArgumentException('"dealer_id" is required');
+        }
 
+        return DB::transaction(function () use ($params): bool {
+
+            if (!empty($params['is_default_for_invoice'])) {
+                // remove any default location for invoice if exists
+                DealerLocation::where('dealer_id', $params['dealer_id'])->update(['is_default_for_invoice' => 0]);
+            }
+
+            $id = $this->getDealerLocationIdFromParams($params);
+            $locationRelDefinition = ['dealer_location_id' => $id];
+
+            $location = DealerLocation::findOrFail($id);
+            $location->fill($params)->save();
+
+            DealerLocationSalesTax::updateOrCreate($params);
+
+            if (!empty($params['sales_tax_items'])) {
+                DealerLocationSalesTaxItem::where('dealer_location_id', $id)->delete();
+
+                foreach ($params['sales_tax_items'] as $item) {
+                    $taxItem = new DealerLocationSalesTaxItem();
+                    $taxItem->fill($item + $locationRelDefinition)->save();
+                }
+            }
+
+            if (!empty($params['fees'])) {
+                DealerLocationQuoteFee::where('dealer_location_id', $id)->delete();
+
+                foreach ($params['fees'] as $item) {
+                    $fee = new DealerLocationQuoteFee();
+                    $fee->fill($item + $locationRelDefinition)->save();
+                }
+            }
+
+            return true;
+        });
+    }
 
     /**
      * Find Dealer Location By Various Options

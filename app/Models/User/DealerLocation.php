@@ -34,7 +34,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string $sms_phone
  * @property int $permanent_phone
  * @property int $show_on_website_locations
- * @property string $sales_tax_item_column_titles
+ * @property array $sales_tax_item_column_titles
  * @property string $county_issued
  * @property string $state_issued
  * @property string $dealer_license_no
@@ -45,9 +45,11 @@ use Illuminate\Database\Eloquent\Builder;
  * @property float $latitude
  * @property float $longitude
  *
- * @method static Illuminate\Database\Query\Builder select($columns = ['*'])
- * @method static Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
- * @method static Illuminate\Database\Query\Builder whereIn($column, $values, $boolean = 'and', $not = false)
+ * @property-read DealerLocationSalesTax salesTax
+ *
+ * @method static \Illuminate\Database\Query\Builder select($columns = ['*'])
+ * @method static \Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \Illuminate\Database\Query\Builder whereIn($column, $values, $boolean = 'and', $not = false)
  * @method static DealerLocation findOrFail($id, array $columns = ['*'])
  */
 class DealerLocation extends Model

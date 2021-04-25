@@ -8,16 +8,13 @@ use App\Models\User\DealerLocation;
 
 class DealerLocationTransformer extends TransformerAbstract
 {
-    protected $defaultIncludes = [
-    ];
-
     protected $availableIncludes = [
         'fees'
     ];
 
     public function transform(DealerLocation $dealerLocation): array
     {
-	return [
+        return [
             'id' => $dealerLocation->dealer_location_id,
             'name' => $dealerLocation->name,
             'contact' => $dealerLocation->contact,
