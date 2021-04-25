@@ -81,7 +81,7 @@ class IDSJob extends Job
                       $inquiryLead
                     )
                 );           
-            
+
             $this->lead->ids_exported = 1;
             $this->lead->save();
             

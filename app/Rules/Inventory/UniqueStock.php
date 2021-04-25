@@ -28,6 +28,11 @@ class UniqueStock implements Rule
             ['dealer_id', '=', $dealerId]
         ];
 
+        $inventoryId = app('request')->get('inventory_id');
+        if(!empty($inventoryId)) {
+            $params[] = ['inventory_id', '<>', $inventoryId];
+        }
+
         return Inventory::where($params)->count() === 0;
     }
 
