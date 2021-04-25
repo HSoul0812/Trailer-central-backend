@@ -2,12 +2,16 @@
 
 namespace App\Models\User;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 class DealerLocationSalesTaxItem extends Model
 {
+    use TableAware;
 
     protected $table = 'dealer_location_sales_tax_item_v2';
+
+    public $timestamps = false;
 
     const TYPE_STATE = 'state';
     const TYPE_COUNTY = 'county';

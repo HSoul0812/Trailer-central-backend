@@ -2,31 +2,103 @@
 
 namespace App\Repositories\User;
 
-use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Models\User\DealerLocationQuoteFee;
+use App\Models\User\DealerLocationSalesTax;
+use App\Models\User\DealerLocationSalesTaxItem;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Exceptions\NotImplementedException;
 use App\Models\User\DealerLocation;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
+use DB;
 
 class DealerLocationRepository implements DealerLocationRepositoryInterface {
-    
-    public function create($params) {
-        throw new NotImplementedException;
+
+    public function create($params): DealerLocation
+    {
+        if (!isset($params['dealer_id'])) {
+            throw new InvalidArgumentException('"dealer_id" is required');
+        }
+
+        return DB::transaction(function () use ($params): DealerLocation {
+
+            if (!empty($params['is_default_for_invoice'])) {
+                // remove any default location for invoice if exists
+                DealerLocation::where('dealer_id', $params['dealer_id'])->update(['is_default_for_invoice' => 0]);
+            }
+
+            $location = new DealerLocation();
+            $location->fill($params)->save();
+
+            $locationRelDefinition = ['dealer_location_id' => $location->dealer_location_id];
+
+            $taxSettings = new DealerLocationSalesTax();
+            $taxSettings->fill($params + $locationRelDefinition)->save();
+
+            if (!empty($params['sales_tax_items'])) {
+                foreach ($params['sales_tax_items'] as $item) {
+                    $taxItem = new DealerLocationSalesTaxItem();
+                    $taxItem->fill($item + $locationRelDefinition)->save();
+                }
+            }
+
+            if (!empty($params['fees'])) {
+                foreach ($params['fees'] as $item) {
+                    $fee = new DealerLocationQuoteFee();
+                    $fee->fill($item + $locationRelDefinition)->save();
+                }
+            }
+
+            return $location;
+        });
     }
 
-    public function delete($params) {
-        throw new NotImplementedException;
+    /**
+     * @param array $params
+     * @throws InvalidArgumentException when `dealer_location_id` has not been provided
+     */
+    public function delete($params): int
+    {
+        return DealerLocation::where('dealer_location_id', $this->getDealerLocationIdFromParams($params))->delete();
     }
 
-    public function get($params) {
-        return DealerLocation::findOrFail($params['id']);
+    /**
+     * @param array $params
+     * @throws ModelNotFoundException
+     * @throws InvalidArgumentException when `dealer_location_id` has not been provided
+     */
+    public function get($params): DealerLocation
+    {
+        return DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
     }
 
-    public function getAll($params) {
+    /**
+     * @param array $params
+     */
+    public function getAll($params): LengthAwarePaginator
+    {
         $query = DealerLocation::select('*');
-        
+
         if (isset($params['dealer_id'])) {
             $query = $query->where('dealer_id', $params['dealer_id']);
         }
-        
+
+        if (isset($params['search_term'])) {
+            $search_term = '%' . $params['search_term'] . '%';
+            $query = $query->where(function (Builder $subQuery) use ($search_term): void {
+                $subQuery->where('name', 'LIKE', $search_term)
+                    ->orWhere('contact', 'LIKE', $search_term)
+                    ->orWhere('phone', 'LIKE', $search_term)
+                    ->orWhere('website', 'LIKE', $search_term)
+                    ->orWhere('email', 'LIKE', $search_term)
+                    ->orWhere('city', 'LIKE', $search_term)
+                    ->orWhere('county', 'LIKE', $search_term)
+                    ->orWhere('region', 'LIKE', $search_term);
+            });
+        }
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
@@ -34,14 +106,15 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
         return $query->with('salesTax')->paginate($params['per_page'])->appends($params);
     }
 
-    public function update($params) {
+    public function update($params): bool
+    {
         throw new NotImplementedException;
     }
 
 
     /**
      * Find Dealer Location By Various Options
-     * 
+     *
      * @param array $params
      * @return Collection<DealerLocation>
      */
@@ -77,7 +150,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
 
         // Match Zip
         if(isset($params['zip'])) {
-            $query->where('postalcode', $params['zip']);
+            $query->where('zip', $params['zip']);
         }
 
         // Return Locations Found
@@ -87,7 +160,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
 
     /**
      * Get First Dealer SMS Number
-     * 
+     *
      * @param int $dealerId
      * @return type
      */
@@ -102,7 +175,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
 
     /**
      * Get All Dealer SMS Numbers
-     * 
+     *
      * @param int $dealerId
      * @return type
      */
@@ -116,7 +189,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
 
     /**
      * Get Dealer Number for Location or Default
-     * 
+     *
      * @param int $dealerId
      * @param int $locationId
      * @return type
@@ -151,4 +224,14 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface {
         return $phoneNumber;
     }
 
+    private function getDealerLocationIdFromParams(array $params): int
+    {
+        $id = $params['dealer_location_id'] ?? $params['id'] ?? null;
+
+        if (empty($id)) {
+            throw new InvalidArgumentException('"dealer_location_id" is required');
+        }
+
+        return $id;
+    }
 }

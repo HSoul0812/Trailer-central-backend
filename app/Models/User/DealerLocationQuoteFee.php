@@ -35,6 +35,8 @@ class DealerLocationQuoteFee extends Model
      */
     protected $table = 'dealer_location_quote_fee';
 
+    public $timestamps = false;
+
     /**
      * The attributes that are mass assignable.
      *

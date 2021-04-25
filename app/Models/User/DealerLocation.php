@@ -7,17 +7,47 @@ use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Class DealerLocation
  * @package App\Models\User
  *
  * @property int $dealer_location_id
- * @method static Builder select($columns = ['*'])
- * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
- * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
+ * @property int $dealer_id
+ * @property string $name
+ * @property string $contact
+ * @property string $website
+ * @property string $email
+ * @property string $address
+ * @property string $city
+ * @property string $county
+ * @property string $region
+ * @property string $country
+ * @property string $postalcode
+ * @property string $fax
+ * @property string $phone
+ * @property int $is_default
+ * @property int $sms
+ * @property string $sms_phone
+ * @property int $permanent_phone
+ * @property int $show_on_website_locations
+ * @property string $sales_tax_item_column_titles
+ * @property string $county_issued
+ * @property string $state_issued
+ * @property string $dealer_license_no
+ * @property string $federal_id
+ * @property float $pac_amount
+ * @property string $pac_type
+ * @property int $coordinates_updated
+ * @property float $latitude
+ * @property float $longitude
+ *
+ * @method static Illuminate\Database\Query\Builder select($columns = ['*'])
+ * @method static Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static Illuminate\Database\Query\Builder whereIn($column, $values, $boolean = 'and', $not = false)
  * @method static DealerLocation findOrFail($id, array $columns = ['*'])
  */
 class DealerLocation extends Model
@@ -105,12 +135,14 @@ class DealerLocation extends Model
         return $this->hasOne(Inventory::class, 'dealer_location_id', 'dealer_location_id');
     }
 
-    /**
-     * @return type
-     */
-    public function salesTax()
+    public function salesTax():HasOne
     {
         return $this->hasOne(DealerLocationSalesTax::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    public function salesTaxItems(): HasMany
+    {
+        return $this->HasMany(DealerLocationSalesTaxItem::class, 'dealer_location_id', 'dealer_location_id');
     }
 
     /**
@@ -130,7 +162,7 @@ class DealerLocation extends Model
     {
         parent::boot();
 
-        static::addGlobalScope('exclude_deleted', function (\Illuminate\Database\Eloquent\Builder $builder): void {
+        static::addGlobalScope('exclude_deleted', function (Builder $builder): void {
 
             $builder->whereNull('deleted_at');
         });
