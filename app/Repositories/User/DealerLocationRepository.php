@@ -305,7 +305,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
     }
 
     /**
-     * Forces a value to be an array, if it is a json it will be encoded sa array
+     * Forces a value to be an array, if it is a json it will be encoded as array
      *
      * @param $titles
      * @return array|string
