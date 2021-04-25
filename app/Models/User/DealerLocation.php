@@ -114,7 +114,8 @@ class DealerLocation extends Model
         "dealer_license_no",
         "federal_id",
         "pac_amount",
-        "pac_type"
+        "pac_type",
+        'sales_tax_item_column_titles'
     ];
 
     protected $casts = [

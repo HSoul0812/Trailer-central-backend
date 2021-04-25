@@ -35,7 +35,6 @@ class SaveDealerLocationRequest extends Request
             'sms_phone' => 'nullable|string|max:20|regex:/^[01]?[- .]?\(?[2-9]\d{2}\)?[- .]?\d{3}[- .]?\d{4}$/',
             'permanent_phone' => 'checkbox|in:0,1',
             'show_on_website_locations' => 'checkbox|in:0,1',
-            'sales_tax_item_column_titles' => 'nullable|json',
             'county_issued' => 'nullable|min:0,max:50',
             'state_issued' => 'nullable|min:0,max:50',
             'dealer_license_no' => 'nullable|min:0,max:20',
@@ -76,6 +75,12 @@ class SaveDealerLocationRequest extends Request
             'sales_tax_items.*.standard' => 'checkbox|in:0,1',
             'sales_tax_items.*.out_of_state_reciprocal' => 'checkbox|in:0,1',
             'sales_tax_items.*.out_of_state_non_reciprocal' => 'checkbox|in:0,1',
+            // sales_tax_item_column_titles
+            'sales_tax_item_column_titles' => 'nullable|array',
+            'sales_tax_item_column_titles.*.standard' => 'nullable|min:0,max:50',
+            'sales_tax_item_column_titles.*.tax_exempt' => 'nullable|min:0,max:50',
+            'sales_tax_item_column_titles.*.out_of_state_reciprocal' => 'nullable|min:0,max:50',
+            'sales_tax_item_column_titles.*.out_of_state_non_reciprocal' => 'nullable|min:0,max:50',
             // fees
             'fees' => 'nullable|array',
             'fees.*.title' => 'required_with:fees|min:1,max:50',
