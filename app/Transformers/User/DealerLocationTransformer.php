@@ -2,12 +2,20 @@
 
 namespace App\Transformers\User;
 
+use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 use App\Models\User\DealerLocation;
 
 class DealerLocationTransformer extends TransformerAbstract
 {
-    public function transform(DealerLocation $dealerLocation)
+    protected $defaultIncludes = [
+    ];
+
+    protected $availableIncludes = [
+        'fees'
+    ];
+
+    public function transform(DealerLocation $dealerLocation): array
     {
 	return [
             'id' => $dealerLocation->dealer_location_id,
@@ -29,5 +37,14 @@ class DealerLocationTransformer extends TransformerAbstract
             'dealer_location_id' => $dealerLocation->location_id,
             'sales_tax_item_column_titles' => $dealerLocation->sales_tax_item_column_titles ?? [$dealerLocation::DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES]
         ];
+    }
+
+    public function includeFees(DealerLocation $location): Primitive
+    {
+        if (empty($location->fees)) {
+            return new Primitive([]);
+        }
+
+        return $this->primitive($location->fees);
     }
 }
