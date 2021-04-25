@@ -100,7 +100,7 @@ class DealerLocationController extends RestfulControllerV2 {
         $request = new CommonDealerLocationRequest(array_merge(['id' => $id, 'dealer_id'], $request->all()));
 
         if ($request->validate()) {
-            return $this->sendResponseForSingleLocationResponse($id, $request->include);
+            return $this->sendResponseForSingleLocation($id, $request->include);
         }
 
         $this->response->errorBadRequest();
@@ -120,7 +120,7 @@ class DealerLocationController extends RestfulControllerV2 {
         if ($request->validate()) {
             $location = $this->dealerLocation->create($request->all());
 
-            return $this->sendResponseForSingleLocationResponse($location->dealer_location_id, $request->include);
+            return $this->sendResponseForSingleLocation($location->dealer_location_id, $request->include);
         }
 
         $this->response->errorBadRequest();
@@ -138,7 +138,7 @@ class DealerLocationController extends RestfulControllerV2 {
         $request = new UpdateDealerLocationRequest($request->all());
 
         if ($request->validate() && $this->dealerLocation->update($request->all())) {
-            return $this->sendResponseForSingleLocationResponse($request->id, $request->include);
+            return $this->sendResponseForSingleLocation($request->id, $request->include);
         }
 
         $this->response->errorBadRequest();
@@ -160,7 +160,7 @@ class DealerLocationController extends RestfulControllerV2 {
         $this->response->errorBadRequest();
     }
 
-    private function sendResponseForSingleLocationResponse(int $id, string $include): Response
+    private function sendResponseForSingleLocation(int $id, string $include): Response
     {
         $this->fractal->parseIncludes($include);
 
