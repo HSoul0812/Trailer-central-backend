@@ -49,30 +49,20 @@ class Request extends BaseRequest {
                 throw new NoObjectTypeSetException;
             }
 
-            $dealer_id = $this->getAuthenticatedDealerId();
+            $user = Auth::user();
 
-            if ($dealer_id && $this->getObjectIdValue()) {
-                $obj = $this->getObject()->findOrFail($this->getObjectIdValue());
+            if ($user) {
+                if ($this->getObjectIdValue()) {
+                    $obj = $this->getObject()->findOrFail($this->getObjectIdValue());
+                    if ($user->dealer_id != $obj->dealer_id) {
+                        return false;
+                    }
+                }
 
-                // false in case the object does not belongs to the dealer who has made the request
-                return $dealer_id === $obj->dealer_id;
             }
         }
 
         return true;
-    }
-
-    /**
-     * This function is to be able to test any request using the guard `validateObjectBelongsToUser` cuz `Auth::user()` is not testable
-     *
-     * @return int
-     */
-    private function getAuthenticatedDealerId(): int
-    {
-        // looking for a client provided parameters seems fool, but remember that `setDealerIdOnRequest` middleware is in charge of this
-        $dealer_id = $this->input('dealer_id');
-
-        return $dealer_id ?? Auth::user()->dealer_id;
     }
 
     /**
