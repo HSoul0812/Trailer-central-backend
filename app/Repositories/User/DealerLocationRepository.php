@@ -33,7 +33,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
                 // remove any default location for invoice if exists
                 DealerLocation::where('dealer_id', $params['dealer_id'])->update(['is_default_for_invoice' => 0]);
             }
-            $salesTaxItemColumnTitles = $this->parseTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
+            $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
 
             $location = new DealerLocation();
             $location->fill($params + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles])->save();
@@ -144,7 +144,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
             $id = $this->getDealerLocationIdFromParams($params);
             $locationRelDefinition = ['dealer_location_id' => $id];
 
-            $salesTaxItemColumnTitles = $this->parseTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
+            $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
 
             $location = DealerLocation::findOrFail($id);
             $location->fill($params + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles])->save();
@@ -304,7 +304,13 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         return $id;
     }
 
-    private function parseTaxColumnTitles($titles): array
+    /**
+     * Forces a value to be an array, if it is a json it will be encoded sa array
+     *
+     * @param $titles
+     * @return array|string
+     */
+    private function encodeTaxColumnTitles($titles): array
     {
         $salesTaxItemColumnTitles = [];
 
