@@ -43,6 +43,6 @@ class CvrFileServiceDependencies
 
     public function getOrderedArguments(): array
     {
-        return [$this->fileRepository, $this->loggerService, $this->jobsRepository];
+        return [$this->fileRepository, $this->loggerService, $this->jobsRepository, $this->cvrGeneratorService];
     }
 }
