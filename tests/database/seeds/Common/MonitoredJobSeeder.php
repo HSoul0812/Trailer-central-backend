@@ -21,12 +21,12 @@ class MonitoredJobSeeder extends Seeder
     /**
      * @var array<User>
      */
-    private $dealers = [];
+    protected $dealers = [];
 
     /**
      * @var array<string, Collection<MonitoredJob>>
      */
-    private $jobs = [];
+    protected $jobs = [];
 
     public function seed(): void
     {

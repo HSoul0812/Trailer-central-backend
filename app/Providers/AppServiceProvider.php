@@ -159,7 +159,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
         \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
         \Validator::extend('payment_uuid_valid', 'App\Rules\Inventory\Floorplan\PaymentUUIDValid@validate');
-        \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');
+        \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');        
+        \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -283,7 +284,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PasswordResetServiceInterface::class, PasswordResetService::class);
 
         $this->app->bind(MonitoredGenericJobServiceInterface::class, MonitoredJobService::class);
-        $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);
+        $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);        
 
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
 

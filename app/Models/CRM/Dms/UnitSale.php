@@ -9,7 +9,12 @@ use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
-
+use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
+use App\Models\CRM\Dms\Quickbooks\Item;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User\User;
+use App\Models\CRM\Dms\UnitSale\TradeIn;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class UnitSale
@@ -37,10 +42,20 @@ class UnitSale extends Model implements GenericSaleInterface
     protected $appends = ['paid_amount'];
 
     const UPDATED_AT = null;
+    
+    public function dealer() : BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
 
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'buyer_id', 'id');
+    }
+    
+    public function coCustomer() : BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'cobuyer_id', 'id');
     }
 
     public function lead()
@@ -56,6 +71,11 @@ class UnitSale extends Model implements GenericSaleInterface
     public function payments()
     {
         return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id');
+    }
+    
+    public function tradeIn() : HasMany
+    {
+        return $this->hasMany(TradeIn::class, 'unit_sale_id');
     }
 
     public function extraInventory()
@@ -109,13 +129,59 @@ class UnitSale extends Model implements GenericSaleInterface
             $this->accessory_discount +
             $this->labor_discount;
     }
-
-    public function taxTotal()
+    
+    public function getCostOfPrimaryVehicleAttribute() : float
     {
-        // todo implement total tax; need to create a service for server-side
-        //   tax computation, otherwise you can only get taxes server-side after
-        //   an invoice is made
-        throw new \Exception('Not implemented');
+        $costOfVehicle = 0;
+        if ( $this->invoice ) {
+            foreach($this->invoice as $invoice) {
+                foreach($invoice->items as $item) {
+                    if ( $item->item->type === Item::ITEM_TYPES['TRAILER'] ) {
+                        $costOfVehicle += $item->cost;
+                    }
+                }
+            }
+        }
+        return $costOfVehicle;
+    }
+    
+    public function amountFinanced() : float
+    {
+        $amountFinanced = 0;
+        foreach($this->payments as $payment) {
+            if( $payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING ) {
+                $amountFinanced += $payment->amount;
+            }
+        }
+        
+        return $amountFinanced;
+    }
+    
+    public function isFinanced() : bool
+    {
+        foreach($this->payments as $payment) {
+            if( $payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING ) {
+                return true;
+            }
+        }
+        
+        return false;
+    } 
+
+    public function taxTotal() : float
+    {
+        $taxAmount = 0;
+        if ( $this->invoice ) {
+            foreach($this->invoice as $invoice) {
+                foreach($invoice->items as $item) {
+                    if ( $item->item->type === Item::ITEM_TYPES['TAX'] ) {
+                        $taxAmount += $item->itemPrice;
+                    }
+                }
+            }            
+        }
+        
+        return $taxAmount;
     }
 
     public function createdAt()
