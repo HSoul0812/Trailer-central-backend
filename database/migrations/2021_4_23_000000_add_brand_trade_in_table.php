@@ -14,11 +14,10 @@ class AddBrandTradeInTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasColumn('dms_unit_sale_trade_in_v1', 'temp_inv_brand')) {
-            Schema::table('dms_unit_sale_trade_in_v1', function (Blueprint $table) {
-                $table->string('temp_inv_brand', 100)->nullable()->default(null)->after('temp_inv_category');
-            });
-        }
+        Schema::table('dms_unit_sale_trade_in_v1', function (Blueprint $table) {
+            $table->string('temp_inv_brand', 100)->nullable()->default(null)->after('temp_inv_category');
+        });
+
     }
 
     /**
@@ -28,10 +27,8 @@ class AddBrandTradeInTable extends Migration
      */
     public function down()
     {
-        if (Schema::hasColumn('dms_unit_sale_trade_in_v1', 'temp_inv_brand')) {
-            Schema::table('dms_unit_sale_trade_in_v1', function (Blueprint $table) {
-                $table->dropColumn('temp_inv_brand');
-            });
-        }
+        Schema::table('dms_unit_sale_trade_in_v1', function (Blueprint $table) {
+            $table->dropColumn('temp_inv_brand');
+        });
     }
 }
