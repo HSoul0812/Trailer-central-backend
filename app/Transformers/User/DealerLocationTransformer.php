@@ -2,6 +2,7 @@
 
 namespace App\Transformers\User;
 
+use App\Traits\CompactHelper;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 use App\Models\User\DealerLocation;
@@ -16,6 +17,7 @@ class DealerLocationTransformer extends TransformerAbstract
     {
         return [
             'id' => $dealerLocation->dealer_location_id,
+            'identifier' => CompactHelper::shorten($dealerLocation->dealer_location_id), // for backward compatibility
             'name' => $dealerLocation->name,
             'contact' => $dealerLocation->contact,
             'website' => $dealerLocation->website,
