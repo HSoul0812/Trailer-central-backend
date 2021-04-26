@@ -52,7 +52,11 @@ class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
      */
     public function export(): void
     {
-        $this->engine->loadHTML($this->view->render());
-        Storage::disk('tmp')->put($this->filename, $this->engine->output());
+        $content = $this->view->render();
+        ($this->afterRenderHandler)();
+        $this->engine->loadHTML($content);
+        $output = $this->engine->output();
+        ($this->afterLoadHtmlHandler)();
+        Storage::disk('tmp')->put($this->filename, $output);
     }
 }

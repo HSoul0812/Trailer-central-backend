@@ -33,7 +33,7 @@ class BulkReportPayload extends MonitoredJobPayload
         return [
             'type' => $this->type,
             'filename' => $this->filename,
-            'filters' => $this->filters,
+            'filters' => (array)$this->filters,
         ];
     }
 }

@@ -1,4 +1,6 @@
 <?php
+
+use App\Repositories\Dms\StockRepositoryInterface;
 use Brick\Money\Money;
 
 /** @var array $data */
@@ -43,7 +45,7 @@ $allPartTotalPrice = 0;
 <div class="row">
     <table id="partsReportTable">
         <tr>
-            <th>Sku</th>
+            <th>Sku/Stock</th>
             <th>Title</th>
             <th>Cost</th>
             <th>Price</th>
@@ -53,20 +55,23 @@ $allPartTotalPrice = 0;
 
         foreach($data as $partId => $reportPart) {
         $firstPart = reset($reportPart);
+        $isPartType = $firstPart['part']->source === StockRepositoryInterface::STOCK_TYPE_PARTS;
 
         $partTotalQty = 0;
         $partTotalCost = 0;
         $partTotalPrice = 0;
         ?>
         <tr>
-            <td><?= $firstPart['part']['sku'] ?></td>
-            <td><?= $firstPart['part']['title'] ?></td>
-            <td><?= $firstPart['part']['dealer_cost'] ?></td>
-            <td><?= $firstPart['part']['price'] ?></td>
+            <td><?= $firstPart['part']->reference ?></td>
+            <td><?= $firstPart['part']->title ?></td>
+            <td><?= $firstPart['part']->dealer_cost ?></td>
+            <td><?= $firstPart['part']->price ?></td>
             <td>
                 <table style="width: 100%;">
                     <tr>
-                        <th>Bin Name</th>
+                        <?php if ($isPartType) : ?>
+                        <th>Bin name</th>
+                        <?php endif; ?>
                         <th>Qty</th>
                         <th>Total Cost</th>
                         <th>Total Price</th>
@@ -75,16 +80,18 @@ $allPartTotalPrice = 0;
                     foreach($reportPart as $reportBinQty) {
                     $part = $reportBinQty['part'];
 
-                    $partTotalQty += $part['qty'];
-                    $partTotalCost += $part['dealer_cost'] * $part['qty'];
-                    $partTotalPrice += $part['price'] * $part['qty'];
+                    $partTotalQty += $part->qty;
+                    $partTotalCost += $part->dealer_cost * $part->qty;
+                    $partTotalPrice += $part->price * $part->qty;
                     ?>
-                    <tr>
-                        <td><?= $part['bin_name'] ?></td>
-                        <td><?= $part['qty'] ?></td>
-                        <td><?= $part['dealer_cost'] * $part['qty'] ?></td>
-                        <td><?= $part['price'] * $part['qty'] ?></td>
-                    </tr>
+                    <?php if ($isPartType) : ?>
+                        <tr>
+                            <td><?= $part->bin_name ?></td>
+                            <td><?= $part->qty ?></td>
+                            <td><?= $part->dealer_cost * $part->qty ?></td>
+                            <td><?= $part->price * $part->qty ?></td>
+                        </tr>
+                    <?php endif; ?>
                     <?php
                     }
 
@@ -92,8 +99,10 @@ $allPartTotalPrice = 0;
                     $allPartTotalCost += $partTotalCost;
                     $allPartTotalPrice += $partTotalPrice;
                     ?>
-                    <tr class="totals-row">
-                        <td></td>
+                    <tr class="<?= $isPartType ? 'totals-row' : '' ?>">
+                        <?php if ($isPartType) : ?>
+                            <td></td>
+                        <?php endif; ?>
                         <td class="text-right font-weight-bold">
                             <?= $partTotalQty ?>
                         </td>
