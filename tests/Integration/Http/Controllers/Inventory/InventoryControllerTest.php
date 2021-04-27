@@ -6,6 +6,7 @@ namespace Tests\Integration\Http\Controllers\Inventory;
 
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\Interfaces\PermissionsInterface;
 use Dingo\Api\Exception\ResourceException;
@@ -222,6 +223,189 @@ class InventoryControllerTest extends TestCase
             ->assertStatus(403)
             ->assertSee('Invalid access token.');
     }
+
+
+    /**
+     * @covers ::exists
+     * @dataProvider inventoryDataProvider
+     * 
+     * @param array $inventoryParams
+     */
+    public function testExists(array $inventoryParams)
+    {
+        $seeder = new InventorySeeder();
+        $seeder->seed();
+
+        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
+        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
+        $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
+        $inventoryParams['brand'] = $seeder->brand->name;
+        $inventoryParams['category'] = $seeder->category->legacy_category;
+
+        // Insert Into DB
+        $inventory = factory(Inventory::class)->create($inventoryParams);
+        $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
+
+
+        // Get Exists Params
+        $existsParams = [
+            'dealer_id' => $inventoryParams['dealer_id'],
+            'stock' => $inventoryParams['stock']
+        ];
+        $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('inventory', $existsParams);
+
+        $responseJson = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('response', $responseJson);
+        $this->assertArrayHasKey('status', $responseJson['response']);
+        $this->assertArrayHasKey('data', $responseJson['response']);
+        $this->assertSame('success', $responseJson['response']['status']);
+        $this->assertTrue($responseJson['response']['data']);
+
+        $seeder->cleanUp();
+    }
+
+    /**
+     * @covers ::exists
+     * @dataProvider inventoryDataProvider
+     * 
+     * @param array $inventoryParams
+     */
+    public function testExistsFalse(array $inventoryParams)
+    {
+        $seeder = new InventorySeeder();
+        $seeder->seed();
+
+        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
+        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
+        $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
+        $inventoryParams['brand'] = $seeder->brand->name;
+        $inventoryParams['category'] = $seeder->category->legacy_category;
+
+        // Insert Into DB
+        $inventory = factory(Inventory::class)->create($inventoryParams);
+        $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
+
+
+        // Get Exists Params
+        $existsParams = [
+            'dealer_id' => $inventoryParams['dealer_id'],
+            'stock' => $inventoryParams['stock'] . '_unused'
+        ];
+        $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseMissing('inventory', $existsParams);
+
+        $responseJson = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('response', $responseJson);
+        $this->assertArrayHasKey('status', $responseJson['response']);
+        $this->assertArrayHasKey('data', $responseJson['response']);
+        $this->assertSame('success', $responseJson['response']['status']);
+        $this->assertFalse($responseJson['response']['data']);
+
+        $seeder->cleanUp();
+    }
+
+    /**
+     * @covers ::exists
+     * @dataProvider inventoryDataProvider
+     * 
+     * @param array $inventoryParams
+     */
+    public function testExistsWithInventory(array $inventoryParams)
+    {
+        $seeder = new InventorySeeder();
+        $seeder->seed();
+
+        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
+        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
+        $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
+        $inventoryParams['brand'] = $seeder->brand->name;
+        $inventoryParams['category'] = $seeder->category->legacy_category;
+
+        // Insert Into DB
+        $inventory = factory(Inventory::class)->create($inventoryParams);
+        $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
+
+        // Insert Another Into DB
+        $inventoryParams['stock'] .= '2';
+        $inventory2 = factory(Inventory::class)->create($inventoryParams);
+        $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory2->inventory_id]);
+
+
+        // Get Exists Params
+        $existsParams = [
+            'dealer_id' => $inventoryParams['dealer_id'],
+            'inventory_id' => $inventory->inventory_id,
+            'stock' => $inventoryParams['stock']
+        ];
+        $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+
+        $response->assertStatus(200);
+
+        unset($existsParams['inventory_id']);
+        $this->assertDatabaseHas('inventory', $existsParams);
+
+        $responseJson = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('response', $responseJson);
+        $this->assertArrayHasKey('status', $responseJson['response']);
+        $this->assertArrayHasKey('data', $responseJson['response']);
+        $this->assertSame('success', $responseJson['response']['status']);
+        $this->assertTrue($responseJson['response']['data']);
+
+        $seeder->cleanUp();
+    }
+
+    /**
+     * @covers ::exists
+     * @dataProvider inventoryDataProvider
+     * 
+     * @param array $inventoryParams
+     */
+    public function testExistsWithInventoryFalse(array $inventoryParams)
+    {
+        $seeder = new InventorySeeder();
+        $seeder->seed();
+
+        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
+        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
+        $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
+        $inventoryParams['brand'] = $seeder->brand->name;
+        $inventoryParams['category'] = $seeder->category->legacy_category;
+
+        // Insert Into DB
+        $inventory = factory(Inventory::class)->create($inventoryParams);
+        $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
+
+
+        // Get Exists Params
+        $existsParams = [
+            'dealer_id' => $inventoryParams['dealer_id'],
+            'inventory_id' => $inventory->inventory_id,
+            'stock' => $inventoryParams['stock'] . '_unused'
+        ];
+        $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+
+        $response->assertStatus(200);
+
+        unset($existsParams['inventory_id']);
+        $this->assertDatabaseMissing('inventory', $existsParams);
+
+        $responseJson = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('response', $responseJson);
+        $this->assertArrayHasKey('status', $responseJson['response']);
+        $this->assertArrayHasKey('data', $responseJson['response']);
+        $this->assertSame('success', $responseJson['response']['status']);
+        $this->assertFalse($responseJson['response']['data']);
+
+        $seeder->cleanUp();
+    }
+
 
     /**
      * Examples of invalid query parameters with their respective expected exception class name and its messages

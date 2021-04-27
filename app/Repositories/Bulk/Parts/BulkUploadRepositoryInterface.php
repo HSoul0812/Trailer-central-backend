@@ -3,7 +3,6 @@
 namespace App\Repositories\Bulk\Parts;
 
 use App\Models\Bulk\Parts\BulkUpload;
-use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\UploadedFile;
 
@@ -12,7 +11,7 @@ use Illuminate\Http\UploadedFile;
  *
  * @author Eczek
  */
-interface BulkUploadRepositoryInterface extends MonitoredJobRepositoryInterface
+interface BulkUploadRepositoryInterface 
 {
     /**
      * Gets a single record by provided params
@@ -30,27 +29,4 @@ interface BulkUploadRepositoryInterface extends MonitoredJobRepositoryInterface
      */
     public function getAll(array $params);
 
-    /**
-     * Find a upload job by token
-     *
-     * @param string $token
-     * @return BulkUpload
-     */
-    public function findByToken(string $token): BulkUpload;
-
-    /**
-     * Create a upload job by token
-     *
-     * @param array $params Array of values for the new row
-     * @return BulkUpload
-     */
-    public function create(array $params): BulkUpload;
-
-    /**
-     * Stores CSV on S3 and returns its URL
-     *
-     * @param UploadedFile $file
-     * @return string
-     */
-    public function storeCsv($file): string;
 }

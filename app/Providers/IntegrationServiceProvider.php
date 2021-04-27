@@ -28,6 +28,10 @@ use App\Services\Integration\Facebook\CatalogService;
 use App\Services\Integration\Facebook\CatalogServiceInterface;
 use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
+use App\Repositories\Integration\CVR\CvrFileRepository;
+use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
+use App\Services\Integration\CVR\CvrFileService;
+use App\Services\Integration\CVR\CvrFileServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class IntegrationServiceProvider extends ServiceProvider
@@ -52,7 +56,10 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
         $this->app->bind(FeedRepositoryInterface::class, FeedRepository::class);
         $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
-
+        
+        $this->app->bind(CvrFileRepositoryInterface::class, CvrFileRepository::class);
+        $this->app->bind(CvrFileServiceInterface::class, CvrFileService::class);
+                
         // Collector Repositories
         $this->app->bind(CollectorRepositoryInterface::class, function() {
             return new CollectorRepository(Collector::query());

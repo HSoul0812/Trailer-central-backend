@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\CRM\Dms\Printer\Settings;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
+use App\Models\User\DealerLocation;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class User
@@ -186,6 +188,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function dealerUsers()
     {
         return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
+    }
+    
+    public function locations() : HasMany
+    {
+        return $this->hasMany(DealerLocation::class, 'dealer_id', 'dealer_id');
     }
 
     /**

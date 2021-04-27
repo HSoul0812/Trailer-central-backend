@@ -29,5 +29,16 @@ return [
             'unmapped' => env('ADF_IMPORT_UNMAPPED', 'Unmapped'),
             'processed' => env('ADF_IMPORT_PROCESSED', 'Processed')
         ]
+    ],
+    /*
+    |--------------------------------------------------------------------------
+    | ADF Export
+    |--------------------------------------------------------------------------
+    |
+    | Here are the ADF Export details.
+    |
+    */
+    'exports' => [
+        'copied_emails' => env('COPIED_EMAILS', 'alberto@trailercentrail.com')
     ]
 ];

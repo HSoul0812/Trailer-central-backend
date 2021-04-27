@@ -183,6 +183,7 @@ return [
         App\Providers\IntegrationServiceProvider::class,
         App\Providers\InteractionServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
+        App\Providers\WebsiteServiceProvider::class,
         App\Providers\JobServiceProvider::class,
         /*
          * 3rd party stuff

@@ -29,4 +29,9 @@ class InvoiceItem extends Model
     {
         return $this->hasOne(Item::class, 'id', 'item_id');
     }
+    
+    public function getItemPriceAttribute() : float
+    {
+        return (int)$this->qty * (float)$this->unit_price;
+    }
 }

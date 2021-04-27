@@ -3,6 +3,8 @@
 namespace App\Services\CRM\Leads;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Interactions\Interaction;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
@@ -50,15 +52,22 @@ class LeadService implements LeadServiceInterface
     protected $inventory;
 
     /**
+     * @var App\Repositories\CRM\Interactions\InteractionsRepositoryInterface
+     */
+    protected $interactions;
+
+    /**
      * LeadService constructor.
      */
-    public function __construct(LeadRepositoryInterface $leads,
-                                StatusRepositoryInterface $status,
-                                SourceRepositoryInterface $sources,
-                                TypeRepositoryInterface $types,
-                                UnitRepositoryInterface $units,
-                                InventoryRepositoryInterface $inventory)
-    {
+    public function __construct(
+        LeadRepositoryInterface $leads,
+        StatusRepositoryInterface $status,
+        SourceRepositoryInterface $sources,
+        TypeRepositoryInterface $types,
+        UnitRepositoryInterface $units,
+        InventoryRepositoryInterface $inventory,
+        InteractionsRepositoryInterface $interactions
+    ) {
         // Initialize Repositories
         $this->leads = $leads;
         $this->status = $status;
@@ -66,6 +75,7 @@ class LeadService implements LeadServiceInterface
         $this->types = $types;
         $this->units = $units;
         $this->inventory = $inventory;
+        $this->interactions = $interactions;
     }
 
 
@@ -152,7 +162,47 @@ class LeadService implements LeadServiceInterface
         return $lead;
     }
 
+    /**
+     * Merge Lead
+     * 
+     * @param Lead $lead
+     * @param array $params
+     * @return Interaction
+     */
+    public function merge(Lead $lead, array $params): Interaction {
+        // Configure Notes From Provided Data
+        $notes = '';
+        if(!empty($params['first_name'])) {
+            $notes .= $params['first_name'];
+        }
+        if(!empty($params['last_name'])) {
+            if(!empty($notes)) {
+                $notes .= ' ';
+            }
+            $notes .= $params['last_name'];
+        }
+        if(!empty($notes)) {
+            $notes .= '<br /><br />';
+        }
 
+        // Add Phone/Email
+        if(!empty($params['phone_number'])) {
+            $notes .= 'Phone: ' . $params['phone_number'] . '<br /><br />';
+        }
+        if(!empty($params['email_address'])) {
+            $notes .= 'Email: ' . $params['email_address'] . '<br /><br />';
+        }
+        if(!empty($params['comments'])) {
+            $notes .= $params['comments'];
+        }
+
+        // Get Interaction Data
+        return $this->interactions->create([
+            'lead_id' => $lead->identifier,
+            'interaction_type'   => 'INQUIRY',
+            'interaction_notes'  => !empty($notes) ? 'Original Inquiry: ' . $notes : 'Not Provided'
+        ]);
+    }
 
     /**
      * Delete Existing Lead Types and Insert New Ones
