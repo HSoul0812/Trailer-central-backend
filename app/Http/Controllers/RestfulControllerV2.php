@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Dingo\Api\Http\Response;
 use Dingo\Api\Routing\Helpers;
 
 /**
@@ -23,5 +24,22 @@ class RestfulControllerV2 extends Controller
         return $this->response->array([
             'response' => ['status' => 'success']
         ]);
+    }
+
+    /**
+     * @param mixed $id
+     * @return Response
+     */
+    protected function updatedResponse($id = null): Response
+    {
+        $params = [
+            'response' => ['status' => 'success']
+        ];
+
+        if ($id) {
+            $params['response']['data'] = ['id' => $id];
+        }
+
+        return $this->response->array($params);
     }
 }
