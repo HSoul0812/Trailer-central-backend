@@ -4,11 +4,9 @@
 namespace App\Services\Dms;
 
 
-use App\Exceptions\Dms\CustomerAlreadyExistsException;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\CRM\Customer\CustomerRepository;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
-use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 class CustomerCreateBatchService
@@ -17,15 +15,10 @@ class CustomerCreateBatchService
      * @var CustomerRepository
      */
     private $customerRepository;
-    /**
-     * @var QuickbookApprovalRepositoryInterface
-     */
-    private $quickbookApprovalRepository;
 
-    public function __construct(CustomerRepositoryInterface $customerRepository, QuickbookApprovalRepositoryInterface $quickbookApprovalRepository)
+    public function __construct(CustomerRepositoryInterface $customerRepository)
     {
         $this->customerRepository = $customerRepository;
-        $this->quickbookApprovalRepository = $quickbookApprovalRepository;
     }
 
     public function run(array $data)
@@ -50,9 +43,6 @@ class CustomerCreateBatchService
                 Log::info("[{$customer->dealer_id}] Created/used existing customer [{$customer->id}] [{$customer->last_name}, {$customer->first_name}]");
                 $lead->customer_id = $customer->id;
                 $lead->save();
-
-                // create approval obj
-                $this->quickbookApprovalRepository->createForCustomer($customer);
 
             } catch (\Exception $e) {
                 Log::warning($e->getMessage());
