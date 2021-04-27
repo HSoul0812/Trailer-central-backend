@@ -50,7 +50,7 @@ class DealerLocationTransformer extends TransformerAbstract
             return new Primitive([]);
         }
 
-        return $this->primitive($location->fees);
+        return $this->primitive($location->fees->keyBy('fee_type'));
     }
 
     public function includeSalesTaxItems(DealerLocation $location): Primitive
