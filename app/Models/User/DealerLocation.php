@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
@@ -138,6 +139,26 @@ class DealerLocation extends Model
         return $this->hasOne(Inventory::class, 'dealer_location_id', 'dealer_location_id');
     }
 
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    public function inventoryCount(): int
+    {
+        return $this->dealer_location_id ?
+            Inventory::where('dealer_location_id', $this->dealer_location_id)->count() : 0;
+    }
+
+    public function referenceCount(): int
+    {
+        return $this->dealer_location_id ?
+            ApiEntityReference::where([
+                'entity_id' => $this->dealer_location_id,
+                'entity_type' => ApiEntityReference::TYPE_LOCATION
+            ])->count() : 0;
+    }
+
     public function salesTax():HasOne
     {
         return $this->hasOne(DealerLocationSalesTax::class, 'dealer_location_id', 'dealer_location_id');
@@ -159,6 +180,17 @@ class DealerLocation extends Model
     public function fees(): HasMany
     {
         return $this->hasMany(DealerLocationQuoteFee::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    public function hasRelatedRecords(): bool
+    {
+        $numberOfInventories = Inventory::where('dealer_location_id', $this->dealer_location_id)->count();
+        $numberOfReferences = ApiEntityReference::where([
+            'entity_id' => $this->dealer_location_id,
+            'entity_type' => ApiEntityReference::TYPE_LOCATION
+        ])->count();
+
+        return $numberOfInventories || $numberOfReferences;
     }
 
     protected static function boot(): void

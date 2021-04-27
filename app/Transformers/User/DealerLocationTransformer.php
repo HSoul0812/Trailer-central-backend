@@ -34,7 +34,11 @@ class DealerLocationTransformer extends TransformerAbstract
             'sales_tax' => $dealerLocation->salesTax,
             'dealer_location_no' => $dealerLocation->dealer_license_no,
             'dealer_location_id' => $dealerLocation->dealer_location_id,
-            'sales_tax_item_column_titles' => $dealerLocation->sales_tax_item_column_titles ?? [$dealerLocation::DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES]
+            'sales_tax_item_column_titles' => $dealerLocation->sales_tax_item_column_titles ?? [$dealerLocation::DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES],
+            'meta' => [
+                'number_of_inventories' => $dealerLocation->inventoryCount(),
+                'number_of_references' => $dealerLocation->referenceCount()
+            ]
         ];
     }
 

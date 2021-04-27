@@ -2,6 +2,8 @@
 
 namespace App\Repositories\User;
 
+use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
+use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocationQuoteFee;
 use App\Models\User\DealerLocationSalesTax;
 use App\Models\User\DealerLocationSalesTaxItem;
@@ -11,6 +13,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
+use DomainException;
 use DB;
 
 class DealerLocationRepository implements DealerLocationRepositoryInterface
@@ -75,7 +78,57 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
      */
     public function delete($params): int
     {
-        return DealerLocation::where('dealer_location_id', $this->getDealerLocationIdFromParams($params))->delete();
+        if (!isset($params['dealer_id'])) {
+            throw new InvalidArgumentException('"dealer_id" is required');
+        }
+
+        $dealerId = $params['dealer_id'];
+        $id = $this->getDealerLocationIdFromParams($params);
+        $moveTo = $params['move_references_to_location_id'] ?? null;
+
+        $location = DealerLocation::findOrFail($id);
+
+        return DB::transaction(function () use ($location, $dealerId, $moveTo): int {
+            if ($location->hasRelatedRecords()) {
+                if(!$moveTo){
+                    /** @var DealerLocation $default */
+                    $default = DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1])
+                        ->where('dealer_location_id', '!=', $location->dealer_location_id)
+                        ->first();
+
+                    // if there is not a provided `move_references_to_location_id`, then it'll assign the default dealer location,
+                    // otherwise the first location
+                    if ($default) {
+                        $moveTo = $default->dealer_location_id;
+                    } else {
+                        /** @var DealerLocation $first */
+                        $first = DealerLocation::where(['dealer_id' => $dealerId])
+                            ->where('dealer_location_id', '!=', $location->dealer_location_id)
+                            ->first();
+
+                        if ($first) {
+                            $moveTo = $first->dealer_location_id;
+                        } else {
+                            throw new DomainException("There isn't a possible location to move those related ".
+                                "records of DealerLocation{dealer_location_id={$location->dealer_location_id}}");
+                        }
+                    }
+                }
+
+                Inventory::where('dealer_location_id', $location->dealer_location_id)->update([
+                    'dealer_location_id' => $moveTo
+                ]);
+
+                ApiEntityReference::where([
+                    'entity_id' => $location->dealer_location_id,
+                    'entity_type' => ApiEntityReference::TYPE_LOCATION
+                ])->update([
+                    'entity_id' => $moveTo
+                ]);
+            }
+
+            return (int)$location->delete();
+        });
     }
 
     /**
@@ -323,5 +376,14 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         }
 
         return $salesTaxItemColumnTitles;
+    }
+
+    private function locationsHasRelatedRecords()
+    {
+        $numberOfInventories = Inventory::where('dealer_location_id', $id)->count();
+        $numberOfReferences = ApiEntityReference::where([
+            'entity_id' => $id,
+            'entity_type' => ApiEntityReference::TYPE_LOCATION
+        ])->count();
     }
 }

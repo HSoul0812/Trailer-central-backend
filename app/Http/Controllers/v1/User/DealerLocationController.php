@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\User;
 
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\User\DeleteDealerLocationRequest;
 use App\Http\Requests\User\GetDealerLocationQuoteFeeRequest;
 use App\Http\Requests\User\GetDealerLocationRequest;
 use App\Http\Requests\User\SaveDealerLocationRequest;
@@ -75,10 +76,10 @@ class DealerLocationController extends RestfulControllerV2 {
      */
     public function destroy(int $id, Request $request): Response
     {
-        $request = new CommonDealerLocationRequest(['id' => $id, 'dealer_id' => $request->get('dealer_id')]);
+        $request = new DeleteDealerLocationRequest(['id' => $id] + $request->all());
 
         if ($request->validate()) {
-            if ($this->dealerLocation->delete(['dealer_location_id' => $id])) {
+            if ($this->dealerLocation->delete($request->all())) {
                 return $this->response->noContent();
             }
 
