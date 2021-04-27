@@ -8,9 +8,6 @@ use App\Models\User\DealerLocation;
 
 class UpdateDealerLocationRequest extends SaveDealerLocationRequest
 {
-    /** @var int */
-    public $id;
-
     protected function getRules(): array
     {
         $rules = [

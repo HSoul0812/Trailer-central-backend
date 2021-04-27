@@ -9,18 +9,12 @@ use App\Models\User\DealerLocation;
 
 class CommonDealerLocationRequest extends Request
 {
-    /** @var int */
-    public $dealer_id;
-
-    /** @var int */
-    public $id;
-
-    /** @var string */
-    public $include = '';
+    use DealerLocationRequestTrait;
 
     protected $rules = [
         'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
-        'id' => 'nullable|integer|exists:dealer_location,dealer_location_id'
+        'id' => 'nullable|integer|exists:dealer_location,dealer_location_id',
+        'include' => 'nullable',
     ];
 
     protected function getObject(): DealerLocation

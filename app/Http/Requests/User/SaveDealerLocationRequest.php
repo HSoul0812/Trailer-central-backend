@@ -8,11 +8,7 @@ use App\Http\Requests\Request;
 
 class SaveDealerLocationRequest extends Request
 {
-    /** @var int */
-    public $dealer_id;
-
-    /** @var string */
-    public $include = '';
+    use DealerLocationRequestTrait;
 
     protected function getRules(): array
     {
@@ -61,7 +57,7 @@ class SaveDealerLocationRequest extends Request
             'is_shop_supplies_taxed' => 'checkbox|in:0,1',
             'is_parts_on_service_taxed' => 'checkbox|in:0,1',
             'is_labor_on_service_taxed' => 'checkbox|in:0,1',
-            'tax_calculator_id' => 'required|exists:dms_tax_calculators,id,dealer_id,' . $this->input('dealer_id'),
+            'tax_calculator_id' => 'required|exists:dms_tax_calculators,id,dealer_id,' . $this->getDealerId(),
             'is_shipping_taxed' => 'checkbox|in:0,1',
             'use_local_tax' => 'checkbox|in:0,1',
             'is_env_fee_taxed' => 'checkbox|in:0,1',
