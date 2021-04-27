@@ -13,7 +13,6 @@ class GetDealerLocationRequest extends Request
     public $include = '';
 
     protected $rules = [
-        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
-        'include' => 'in:fees'
+        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id'
     ];
 }

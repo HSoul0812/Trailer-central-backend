@@ -10,7 +10,9 @@ use App\Models\User\DealerLocation;
 class DealerLocationTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'fees'
+        'fees',
+        'salesTaxItems',
+        'salesTaxItemsV1'
     ];
 
     public function transform(DealerLocation $dealerLocation): array
@@ -49,5 +51,23 @@ class DealerLocationTransformer extends TransformerAbstract
         }
 
         return $this->primitive($location->fees);
+    }
+
+    public function includeSalesTaxItems(DealerLocation $location): Primitive
+    {
+        if (empty($location->salesTaxItems)) {
+            return new Primitive([]);
+        }
+
+        return $this->primitive($location->salesTaxItems);
+    }
+
+    public function includeSalesTaxItemsV1(DealerLocation $location): Primitive
+    {
+        if (empty($location->salesTaxItemsV1)) {
+            return new Primitive([]);
+        }
+
+        return $this->primitive($location->salesTaxItemsV1);
     }
 }

@@ -20,8 +20,7 @@ class CommonDealerLocationRequest extends Request
 
     protected $rules = [
         'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
-        'id' => 'nullable|integer|exists:dealer_location,dealer_location_id',
-        'include' => 'in:fees'
+        'id' => 'nullable|integer|exists:dealer_location,dealer_location_id'
     ];
 
     protected function getObject(): DealerLocation

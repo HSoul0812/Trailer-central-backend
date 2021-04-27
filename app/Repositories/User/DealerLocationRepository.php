@@ -7,6 +7,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocationQuoteFee;
 use App\Models\User\DealerLocationSalesTax;
 use App\Models\User\DealerLocationSalesTaxItem;
+use App\Models\User\DealerLocationSalesTaxItemV1;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerLocation;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -54,6 +55,10 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
                 foreach ($params['sales_tax_items'] as $item) {
                     $taxItem = new DealerLocationSalesTaxItem();
                     $taxItem->fill($item + $locationRelDefinition)->save();
+
+                    // for backward compatibility
+                    $taxItem = new DealerLocationSalesTaxItemV1();
+                    $taxItem->fill($item + $locationRelDefinition)->save();
                 }
             }
 
@@ -96,8 +101,8 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
                         ->where('dealer_location_id', '!=', $location->dealer_location_id)
                         ->first();
 
-                    // if there is not a provided `move_references_to_location_id`, then it'll assign the default dealer location,
-                    // otherwise the first location
+                    // if there is not a provided `move_references_to_location_id`,
+                    // then it'll assign the default dealer location, otherwise the first location
                     if ($default) {
                         $moveTo = $default->dealer_location_id;
                     } else {
@@ -210,9 +215,14 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
                 }
 
                 DealerLocationSalesTaxItem::where('dealer_location_id', $id)->delete();
+                DealerLocationSalesTaxItemV1::where('dealer_location_id', $id)->delete();
 
                 foreach ($params['sales_tax_items'] as $item) {
                     $taxItem = new DealerLocationSalesTaxItem();
+                    $taxItem->fill($item + $locationRelDefinition)->save();
+
+                    // for backward compatibility
+                    $taxItem = new DealerLocationSalesTaxItemV1();
                     $taxItem->fill($item + $locationRelDefinition)->save();
                 }
             }
@@ -376,14 +386,5 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         }
 
         return $salesTaxItemColumnTitles;
-    }
-
-    private function locationsHasRelatedRecords()
-    {
-        $numberOfInventories = Inventory::where('dealer_location_id', $id)->count();
-        $numberOfReferences = ApiEntityReference::where([
-            'entity_id' => $id,
-            'entity_type' => ApiEntityReference::TYPE_LOCATION
-        ])->count();
     }
 }

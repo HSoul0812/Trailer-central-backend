@@ -169,6 +169,11 @@ class DealerLocation extends Model
         return $this->HasMany(DealerLocationSalesTaxItem::class, 'dealer_location_id', 'dealer_location_id');
     }
 
+    public function salesTaxItemsV1(): HasMany
+    {
+        return $this->HasMany(DealerLocationSalesTaxItemV1::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
     /**
      * @return type
      */
