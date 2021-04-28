@@ -344,7 +344,7 @@ $api->version('v1', function ($route) {
     $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
     $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
     $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
-    
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
     });
@@ -797,6 +797,18 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('printer/instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Docupilot
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('docupilot/document-templates', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@index');
+        $route->get('docupilot/document-templates/{id}', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@show');
+        $route->post('docupilot/document-templates/{id}', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@update');
 
         /*
         |--------------------------------------------------------------------------

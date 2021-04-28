@@ -18,6 +18,8 @@ use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepository;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Repositories\Dms\Docupilot\DocumentTemplatesRepository;
+use App\Repositories\Dms\Docupilot\DocumentTemplatesRepositoryInterface;
 use App\Repositories\Dms\FinancingCompanyRepository;
 use App\Repositories\Dms\FinancingCompanyRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
@@ -70,7 +72,9 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(PrinterSettingsRepositoryInterface::class, PrinterSettingsRepository::class);
         $this->app->bind(InstructionsServiceInterface::class, InstructionsService::class);
         $this->app->bind(CVRGeneratorServiceInterface::class, CVRGeneratorService::class);
-        
+
+        $this->app->bind(DocumentTemplatesRepositoryInterface::class, DocumentTemplatesRepository::class);
+
         $this->app->bind(SaleRepositoryInterface::class, function () {
             return new SaleRepository(Sale::query());
         });
@@ -102,5 +106,10 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(TypeRepositoryInterface::class, function () {
             return new TypeRepository(Type::query());
         });
+    }
+
+    public function boot()
+    {
+        \Validator::extend('document_template_exists', 'App\Rules\Dms\Docupilot\DocumentTemplateExists@passes');
     }
 }

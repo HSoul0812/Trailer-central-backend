@@ -100,6 +100,23 @@ class RestfulController extends Controller {
     }
 
     /**
+     * @param mixed $id
+     * @return Response
+     */
+    protected function updatedResponse($id = null): Response
+    {
+        $params = [
+            'response' => ['status' => 'success']
+        ];
+
+        if ($id) {
+            $params['response']['data'] = ['id' => $id];
+        }
+
+        return $this->response->array($params);
+    }
+
+    /**
      * @param bool $isExists
      * @return Response
      */
