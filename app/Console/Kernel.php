@@ -14,6 +14,7 @@ use App\Console\Commands\Parts\Import\StocksExistsCommand;
 use App\Console\Commands\CRM\Leads\AutoAssign; 
 use App\Console\Commands\Parts\IncreaseDealerCostCommand;
 use App\Console\Commands\Parts\FixPartVendor;
+use App\Console\Commands\CRM\Dms\GenerateCVRDocumentCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -33,6 +34,7 @@ class Kernel extends ConsoleKernel
         AutoAssign::class,
         IncreaseDealerCostCommand::class,
         FixPartVendor::class,
+        GenerateCVRDocumentCommand::class
     ];
 
     /**

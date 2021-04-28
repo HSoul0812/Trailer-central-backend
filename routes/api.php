@@ -540,6 +540,21 @@ $api->version('v1', function ($route) {
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
             });
+
+            /*
+            |--------------------------------------------------------------------------
+            | CVR
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'cvr'
+            ], function ($route) {
+                $route->post('/', 'App\Http\Controllers\v1\Integration\CvrController@create');
+                $route->get('{token}', 'App\Http\Controllers\v1\Integration\CvrController@statusByToken');
+            });
         });
 
         /*
@@ -786,6 +801,18 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('printer/instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Docupilot
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('docupilot/document-templates', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@index');
+        $route->get('docupilot/document-templates/{id}', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@show');
+        $route->post('docupilot/document-templates/{id}', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@update');
 
         /*
         |--------------------------------------------------------------------------

@@ -43,10 +43,10 @@ class FinancialReportExportJob extends Job
             $service->run($model);
         } catch (Throwable $exception) {
 
-            $payload = implode(',', $model->payload->asArray());
+            $payload = json_encode($model->payload->asArray());
 
             Log::error("Error running export parts financial report export job: " .
-                "token[{$model->token}, payload={{$payload}}] exception[{$exception->getMessage()}]"
+                "token[{$model->token}, payload={$payload}, exception={$exception->getMessage()}]"
             );
 
             throw $exception;

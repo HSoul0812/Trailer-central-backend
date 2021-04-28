@@ -19,11 +19,17 @@ trait WithFactory
 
         foreach ((array) $properties as $property => $value) {
 
-            if (!property_exists($object, $property)) {
-                throw new InvalidArgumentException("$property is not settable");
-            }
+            $methodName = 'set' . str_replace('_', '', ucwords($property, '_'));
 
-            $object->$property = $value;
+            if (method_exists($object, $methodName)) {
+                $object->$methodName($value);
+            } else {
+                if (!property_exists($object, $property)) {
+                    throw new InvalidArgumentException("$property is not settable");
+                }
+
+                $object->$property = $value;
+            }
         }
 
         return $object;

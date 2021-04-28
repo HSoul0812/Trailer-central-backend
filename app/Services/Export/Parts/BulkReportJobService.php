@@ -10,7 +10,7 @@ use App\Models\Bulk\Parts\BulkReport;
 use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
-use App\Repositories\Parts\BinRepositoryInterface;
+use App\Repositories\Dms\StockRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
 use App\Services\Export\FilesystemPdfExporter;
 use App\Services\Export\HasExporterInterface;
@@ -33,9 +33,9 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
     private $bulkRepository;
 
     /**
-     * @var BinRepositoryInterface
+     * @var StockRepositoryInterface
      */
-    private $binRepository;
+    private $stockRepository;
 
     /**
      * @var LoggerServiceInterface
@@ -44,7 +44,7 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
 
     public function __construct(
         BulkReportRepositoryInterface $bulkRepository,
-        BinRepositoryInterface $binRepository,
+        StockRepositoryInterface $stockRepository,
         LoggerServiceInterface $logger,
         MonitoredJobRepositoryInterface $monitoredJobsRepository
     )
@@ -52,7 +52,7 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
         parent::__construct($monitoredJobsRepository);
 
         $this->bulkRepository = $bulkRepository;
-        $this->binRepository = $binRepository;
+        $this->stockRepository = $stockRepository;
         $this->logger = $logger;
     }
 
@@ -84,6 +84,7 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
     public function run($job)
     {
         try {
+            // @todo: the progress calculation should be accurate using a better way
             $this->logger->info(sprintf("[%s:] starting to export the pdf file for the monitored job '%s'", __CLASS__, $job->token));
 
             $this->bulkRepository->updateProgress($job->token, 0);
@@ -96,6 +97,12 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
             $this->getExporter($job)
                 ->withView($this->resolveView($job))
                 ->withData($data)
+                ->afterRender(function () use ($job) {
+                    $this->bulkRepository->updateProgress($job->token, 15);
+                })
+                ->afterLoadHtml(function () use ($job) {
+                    $this->bulkRepository->updateProgress($job->token, 95);
+                })
                 ->export();
 
             $this->bulkRepository->setCompleted($job->token);
@@ -103,7 +110,7 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
             $this->logger->info(sprintf("[%s:] process to export the pdf file for the monitored job '%s' was completed", __CLASS__, $job->token));
         } catch (Throwable $exception) {
             $this->bulkRepository->setFailed($job->token, ['message' => "Got exception: {$exception->getMessage()}"]);
-            $this->logger->error(sprintf('[%s:] got exception: %s', __CLASS__, $exception->getMessage()));
+            $this->logger->error(sprintf('[%s:] got exception: %s', __CLASS__, $exception->getMessage()), $exception->getTrace());
 
             throw $exception;
         }
@@ -136,7 +143,9 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
         // When there are more report types, they must be resolve in the following switch
         switch ($job->payload->type) {
             case BulkReport::TYPE_FINANCIALS:
-                return $this->binRepository->financialReportByDealer($job->dealer_id);
+                $filters = ['dealer_id' => $job->dealer_id] + array_filter($job->payload->filters);
+
+                return  $this->stockRepository->financialReport($filters);
             // more types here
         }
 

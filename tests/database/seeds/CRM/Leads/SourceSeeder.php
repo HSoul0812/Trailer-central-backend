@@ -36,11 +36,18 @@ class SourceSeeder extends Seeder
     private $createdSources = [];
 
     /**
+     * @var LeadSource[]
+     */
+    private $defaultSources = [];
+
+
+    /**
      * InventorySeeder constructor.
      */
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
+        $this->defaultSources = LeadSource::where('user_id', 0)->get();
     }
 
     public function seed(): void

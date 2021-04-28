@@ -201,5 +201,6 @@ return [
     'website_valid' => 'Website ID must exist or be 0',
     'inventory_valid' => 'Inventory ID must exist',
     'stock_type_valid' => 'The selected :attribute is invalid.',
+    'inventory_unique_stock' => 'The selected :attribute already exists on another inventory item.',
     'tax_calculator_valid' => 'The selected tax calculator id is invalid'
 ];

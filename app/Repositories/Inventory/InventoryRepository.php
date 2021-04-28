@@ -220,6 +220,11 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->where('stock', '=', $params['stock']);
         }
 
+        // When Checking Stock on an EXISTING Item, Let's EXCLUDE the current item
+        if (isset($params['inventory_id'])) {
+            $query->where('inventory_id', '<>', $params['inventory_id']);
+        }
+
         return $query->exists();
     }
 

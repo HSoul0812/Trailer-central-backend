@@ -17,11 +17,22 @@ abstract class PdfExporter
     protected $view;
 
     /**
-     * @param View|null $view
+     * @var callable
      */
-    public function __construct(?View $view = null)
+    protected $afterRenderHandler;
+
+    /**
+     * @var callable
+     */
+    protected $afterLoadHtmlHandler;
+
+    public function __construct(?View $view = null, ?callable $afterRenderFn = null,  ?callable $afterLoadHtmlFn = null)
     {
         $this->view = $view;
+        $this->afterRenderHandler = $afterRenderFn ?? static function (): void {
+        };
+        $this->afterLoadHtmlHandler = $afterLoadHtmlFn ?? static function (): void {
+        };
     }
 
     /**
@@ -33,6 +44,30 @@ abstract class PdfExporter
     public function withView(View $view): self
     {
         $this->view = $view;
+        return $this;
+    }
+
+    /**
+     * Fluent set the after render handler
+     *
+     * @param callable $fn
+     * @return PdfExporter
+     */
+    public function afterRender(callable $fn): self
+    {
+        $this->afterRenderHandler = $fn;
+        return $this;
+    }
+
+    /**
+     * Fluent set the after load html handler
+     *
+     * @param callable $fn
+     * @return PdfExporter
+     */
+    public function afterLoadHtml(callable $fn): self
+    {
+        $this->afterLoadHtmlHandler = $fn;
         return $this;
     }
 
