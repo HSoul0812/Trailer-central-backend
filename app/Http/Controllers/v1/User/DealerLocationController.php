@@ -134,9 +134,9 @@ class DealerLocationController extends RestfulControllerV2 {
      * @throws ResourceException when there was a failed validation
      * @throws HttpException when the provided resource id does not belongs to dealer who has made the request
      */
-    public function update(Request $request): Response
+    public function update(int $id, Request $request): Response
     {
-        $request = new UpdateDealerLocationRequest($request->all());
+        $request = new UpdateDealerLocationRequest(['id' => $id] + $request->all());
 
         if ($request->validate() && $this->dealerLocation->update($request->all())) {
             return $this->sendResponseForSingleLocation($request->getId(), $request->getInclude());

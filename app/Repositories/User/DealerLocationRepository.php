@@ -207,7 +207,8 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
             $location = DealerLocation::findOrFail($id);
             $location->fill($params + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles])->save();
 
-            DealerLocationSalesTax::updateOrCreate($params);
+            $taxSettings = DealerLocationSalesTax::where('dealer_location_id', $id)->first()  ??  new DealerLocationSalesTax();
+            $taxSettings->fill($params)->save();
 
             if (!empty($params['sales_tax_items'])) {
                 if (!is_array($params['sales_tax_items'])) {

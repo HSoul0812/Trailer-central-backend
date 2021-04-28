@@ -39,4 +39,21 @@ class DealerLocationSalesTaxItem extends Model
         self::TYPE_REGISTRATION => 'Registration',
     ];
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        "dealer_location_id",
+        "entity_type_id",
+        "item_type",
+        "tax_pct",
+        "tax_cap",
+        "standard",
+        "tax_exempt",
+        "out_of_state_reciprocal",
+        "out_of_state_non_reciprocal",
+        "settngs"
+    ];
 }
