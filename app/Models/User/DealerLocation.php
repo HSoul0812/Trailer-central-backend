@@ -43,8 +43,10 @@ use Illuminate\Database\Eloquent\Builder;
  * @property float $pac_amount
  * @property string $pac_type
  * @property int $coordinates_updated
+ * @property int $is_default_for_invoice
  * @property float $latitude
  * @property float $longitude
+ * @property string $location_id
  *
  * @property-read DealerLocationSalesTax salesTax
  *

@@ -30,13 +30,30 @@ class DealerLocationTransformer extends TransformerAbstract
             'city' => $dealerLocation->city,
             'county' => $dealerLocation->county,
             'region' => $dealerLocation->region,
-            'postal' => $dealerLocation->postalcode,
+            'postal' => $dealerLocation->postalcode, // for backward compatibility
+            'postalcode' => $dealerLocation->postalcode,
             'country' => $dealerLocation->country,
             'federal_id' => $dealerLocation->federal_id,
             'sales_tax' => $dealerLocation->salesTax,
             'dealer_location_no' => $dealerLocation->dealer_license_no,
+            'location_id' => $dealerLocation->location_id,
             'dealer_location_id' => $dealerLocation->dealer_location_id,
             'sales_tax_item_column_titles' => $dealerLocation->sales_tax_item_column_titles ?? [$dealerLocation::DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES],
+            'dealer_id' => $dealerLocation->dealer_id,
+            'is_default' => $dealerLocation->is_default,
+            'is_default_for_invoice' => $dealerLocation->is_default_for_invoice,
+            'latitude' => $dealerLocation->latitude,
+            'longitude' => $dealerLocation->longitude,
+            'coordinates_updated' => $dealerLocation->coordinates_updated,
+            'sms' => $dealerLocation->sms_phone,
+            'sms_phone' => $dealerLocation->sms_phone,
+            'permanent_phone' => $dealerLocation->permanent_phone,
+            'show_on_website_locations' => $dealerLocation->show_on_website_locations,
+            'county_issued' => $dealerLocation->county_issued,
+            'state_issued' => $dealerLocation->state_issued,
+            'dealer_license_no' => $dealerLocation->dealer_license_no,
+            'pac_type' => $dealerLocation->pac_type,
+            'pac_amount' => $dealerLocation->pac_amount,
             'meta' => [
                 'number_of_inventories' => $dealerLocation->inventoryCount(),
                 'number_of_references' => $dealerLocation->referenceCount()
@@ -62,6 +79,12 @@ class DealerLocationTransformer extends TransformerAbstract
         return $this->primitive($location->salesTaxItems);
     }
 
+    /**
+     * This is for backward compatibility
+     *
+     * @param DealerLocation $location
+     * @return Primitive
+     */
     public function includeSalesTaxItemsV1(DealerLocation $location): Primitive
     {
         if (empty($location->salesTaxItemsV1)) {
