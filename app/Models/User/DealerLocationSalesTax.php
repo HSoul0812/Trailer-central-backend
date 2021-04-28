@@ -32,7 +32,6 @@ class DealerLocationSalesTax extends Model
      */
     protected $fillable = [
         'dealer_location_id',
-        'is_default_for_invoice',
         'sales_tax_id',
         'labor_tax_type',
         'tax_before_trade',

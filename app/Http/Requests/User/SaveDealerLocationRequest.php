@@ -24,7 +24,7 @@ class SaveDealerLocationRequest extends Request
             'region' => 'required|string|min:2,max:255',
             'country' => 'required|string|min:2,max:255|in:US,CA,CL',
             'postalcode' => 'required|string|regex:/^\d{5}(?:[-\s]?\d{4})?$/',
-            'fax' => 'required|string|min:1,max:20|regex:/^[01]?[- .]?\(?[2-9]\d{2}\)?[- .]?\d{3}[- .]?\d{4}$/',
+            'fax' => 'nullable|string|min:1,max:20|regex:/^[01]?[- .]?\(?[2-9]\d{2}\)?[- .]?\d{3}[- .]?\d{4}$/',
             'phone' => 'required|string|max:20|regex:/^[01]?[- .]?\(?[2-9]\d{2}\)?[- .]?\d{3}[- .]?\d{4}$/',
             'is_default' => 'checkbox|in:0,1',
             'sms' => 'checkbox|in:0,1',
@@ -57,7 +57,7 @@ class SaveDealerLocationRequest extends Request
             'is_shop_supplies_taxed' => 'checkbox|in:0,1',
             'is_parts_on_service_taxed' => 'checkbox|in:0,1',
             'is_labor_on_service_taxed' => 'checkbox|in:0,1',
-            'tax_calculator_id' => 'required|exists:dms_tax_calculators,id,dealer_id,' . $this->getDealerId(),
+            'tax_calculator_id' => 'required|tax_calculator_valid:' . $this->getDealerId(),
             'is_shipping_taxed' => 'checkbox|in:0,1',
             'use_local_tax' => 'checkbox|in:0,1',
             'is_env_fee_taxed' => 'checkbox|in:0,1',
@@ -81,14 +81,14 @@ class SaveDealerLocationRequest extends Request
             'fees.*.title' => 'required_with:fees|min:1,max:50',
             'fees.*.fee_type' => 'required_with:fees|min:1,max:50',
             'fees.*.amount' => 'required_with:fees|numeric|min:0',
-            'fees.*.cost_amount' => 'nullable|numeric|min:0',
+            'fees.*.cost_amount' => 'required_if:fees.*.fee_charged_type,combined|numeric|min:0',
             'fees.*.is_additional' => 'checkbox|in:0,1',
             'fees.*.is_state_taxed' => 'checkbox|in:0,1',
             'fees.*.is_county_taxed' => 'checkbox|in:0,1',
             'fees.*.is_local_taxed' => 'checkbox|in:0,1',
             'fees.*.visibility' => 'required_with:fees|in:hidden,visible,visible_locked,visible_pos,visible_locked_pos',
             'fees.*.accounting_class' => 'required_with:fees|in:Adt Default Fees,Taxes & Fees Group 1,Taxes & Fees Group 2,Taxes & Fees Group 3',
-            'fees.*.fee_charged_type' => 'required_with:fees|in:income,liability,combined'
+            'fees.*.fee_charged_type' => 'nullable|in:income,liability,combined'
         ];
     }
 }
