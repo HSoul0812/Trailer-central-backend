@@ -125,7 +125,7 @@ class DealerLocationController extends RestfulControllerV2 {
         $request = new SaveDealerLocationRequest($request->all());
 
         if ($request->validate()) {
-            $location = $this->dealerLocation->create($request->all());
+            $location = $this->service->create($request->getDealerId(), $request->all());
 
             return $this->sendResponseForSingleLocation($location->dealer_location_id, $request->getInclude());
         }
@@ -144,7 +144,7 @@ class DealerLocationController extends RestfulControllerV2 {
     {
         $request = new UpdateDealerLocationRequest(['id' => $id] + $request->all());
 
-        if ($request->validate() && $this->dealerLocation->update($request->all())) {
+        if ($request->validate() && $this->service->update($request->getId(), $request->getDealerId(), $request->all())) {
             return $this->sendResponseForSingleLocation($request->getId(), $request->getInclude());
         }
 
