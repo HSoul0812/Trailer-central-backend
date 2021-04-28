@@ -53,6 +53,10 @@ use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
 use App\Repositories\User\DealerLocationQuoteFeeRepositoryInterface;
+use App\Repositories\User\DealerLocationSalesTaxItemRepository;
+use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
+use App\Repositories\User\DealerLocationSalesTaxRepository;
+use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepository;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\User\NewUserRepository;
@@ -298,6 +302,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(ApiEntityReferenceRepositoryInterface::class, ApiEntityReferenceRepository::class);
         $this->app->bind(DealerLocationServiceInterface::class, DealerLocationService::class);
-
+        $this->app->bind(DealerLocationSalesTaxItemRepositoryInterface::class, DealerLocationSalesTaxItemRepository::class);
+        $this->app->bind(DealerLocationSalesTaxRepositoryInterface::class, DealerLocationSalesTaxRepository::class);
     }
 }
