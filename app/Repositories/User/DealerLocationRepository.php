@@ -2,23 +2,23 @@
 
 namespace App\Repositories\User;
 
-use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
-use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocationQuoteFee;
 use App\Models\User\DealerLocationSalesTax;
 use App\Models\User\DealerLocationSalesTaxItem;
 use App\Models\User\DealerLocationSalesTaxItemV1;
+use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerLocation;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
-use DomainException;
 use DB;
 
 class DealerLocationRepository implements DealerLocationRepositoryInterface
 {
+    use Transaction;
+
     /**
      * @param array $params
      * @throws InvalidArgumentException when `dealer_id` has not been provided
@@ -83,57 +83,13 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
      */
     public function delete($params): int
     {
-        if (!isset($params['dealer_id'])) {
-            throw new InvalidArgumentException('"dealer_id" is required');
+        $location = DealerLocation::find($this->getDealerLocationIdFromParams($params));
+
+        if ($location) {
+            return (int)$location->delete();
         }
 
-        $dealerId = $params['dealer_id'];
-        $id = $this->getDealerLocationIdFromParams($params);
-        $moveTo = $params['move_references_to_location_id'] ?? null;
-
-        $location = DealerLocation::findOrFail($id);
-
-        return DB::transaction(function () use ($location, $dealerId, $moveTo): int {
-            if ($location->hasRelatedRecords()) {
-                if(!$moveTo){
-                    /** @var DealerLocation $default */
-                    $default = DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1])
-                        ->where('dealer_location_id', '!=', $location->dealer_location_id)
-                        ->first();
-
-                    // if there is not a provided `move_references_to_location_id`,
-                    // then it'll assign the default dealer location, otherwise the first location
-                    if ($default) {
-                        $moveTo = $default->dealer_location_id;
-                    } else {
-                        /** @var DealerLocation $first */
-                        $first = DealerLocation::where(['dealer_id' => $dealerId])
-                            ->where('dealer_location_id', '!=', $location->dealer_location_id)
-                            ->first();
-
-                        if ($first) {
-                            $moveTo = $first->dealer_location_id;
-                        } else {
-                            throw new DomainException("There isn't a possible location to move those related ".
-                                "records of DealerLocation{dealer_location_id={$location->dealer_location_id}}");
-                        }
-                    }
-                }
-
-                Inventory::where('dealer_location_id', $location->dealer_location_id)->update([
-                    'dealer_location_id' => $moveTo
-                ]);
-
-                ApiEntityReference::where([
-                    'entity_id' => $location->dealer_location_id,
-                    'entity_type' => ApiEntityReference::TYPE_LOCATION
-                ])->update([
-                    'entity_id' => $moveTo
-                ]);
-            }
-
-            return (int)$location->delete();
-        });
+        return 0;
     }
 
     /**
@@ -146,36 +102,32 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         return DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
     }
 
+    public function getDefaultByDealerId(int $dealerId): ?DealerLocation
+    {
+        return DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1])->first();
+    }
+
     /**
      * @param array $params
      */
     public function getAll($params): LengthAwarePaginator
     {
-        $query = DealerLocation::select('*');
-
-        if (isset($params['dealer_id'])) {
-            $query = $query->where('dealer_id', $params['dealer_id']);
-        }
-
-        if (isset($params['search_term'])) {
-            $search_term = '%' . $params['search_term'] . '%';
-            $query = $query->where(function (Builder $subQuery) use ($search_term): void {
-                $subQuery->where('name', 'LIKE', $search_term)
-                    ->orWhere('contact', 'LIKE', $search_term)
-                    ->orWhere('phone', 'LIKE', $search_term)
-                    ->orWhere('website', 'LIKE', $search_term)
-                    ->orWhere('email', 'LIKE', $search_term)
-                    ->orWhere('city', 'LIKE', $search_term)
-                    ->orWhere('county', 'LIKE', $search_term)
-                    ->orWhere('region', 'LIKE', $search_term);
-            });
-        }
+        $query = $this->getQueryBuilderForAll($params);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         return $query->with('salesTax')->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * @param array $params
+     * @return \Illuminate\Database\Eloquent\Collection<DealerLocation>
+     */
+    public function findAll(array $params): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->getQueryBuilderForAll($params)->with('salesTax')->get();
     }
 
     /**
@@ -387,5 +339,40 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         }
 
         return $salesTaxItemColumnTitles;
+    }
+
+    private function getQueryBuilderForAll(array $params): Builder
+    {
+        $query = DealerLocation::select('*');
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where('dealer_id', $params['dealer_id']);
+        }
+
+        if (isset($params['search_term'])) {
+            $search_term = '%' . $params['search_term'] . '%';
+            $query = $query->where(function (Builder $subQuery) use ($search_term): void {
+                $subQuery->where('name', 'LIKE', $search_term)
+                    ->orWhere('contact', 'LIKE', $search_term)
+                    ->orWhere('phone', 'LIKE', $search_term)
+                    ->orWhere('website', 'LIKE', $search_term)
+                    ->orWhere('email', 'LIKE', $search_term)
+                    ->orWhere('city', 'LIKE', $search_term)
+                    ->orWhere('county', 'LIKE', $search_term)
+                    ->orWhere('region', 'LIKE', $search_term);
+            });
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query = $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE_IN]) && is_array($params[self::CONDITION_AND_WHERE_IN])) {
+            foreach ($params[self::CONDITION_AND_WHERE_IN] as $field => $values) {
+                $query = $query->whereIn($field, $values);
+            }
+        }
+
+        return $query;
     }
 }

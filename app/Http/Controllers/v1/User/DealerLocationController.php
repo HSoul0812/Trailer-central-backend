@@ -10,6 +10,7 @@ use App\Http\Requests\User\SaveDealerLocationRequest;
 use App\Http\Requests\User\UpdateDealerLocationRequest;
 use App\Repositories\User\DealerLocationQuoteFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Services\User\DealerLocationServiceInterface;
 use App\Transformers\User\DealerLocationQuoteFeeTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use App\Http\Requests\User\CommonDealerLocationRequest;
@@ -31,6 +32,9 @@ class DealerLocationController extends RestfulControllerV2 {
     /** @var DealerLocationRepositoryInterface */
     protected $dealerLocation;
 
+    /** @var DealerLocationServiceInterface */
+    protected $service;
+
     /** @var DealerLocationTransformer */
     protected $transformer;
 
@@ -38,6 +42,7 @@ class DealerLocationController extends RestfulControllerV2 {
     private $fractal;
 
     public function __construct(
+        DealerLocationServiceInterface $service,
         DealerLocationRepositoryInterface $dealerLocationRepo,
         DealerLocationQuoteFeeRepositoryInterface $dealerLocationRepoFee,
         Manager $fractal
@@ -48,6 +53,7 @@ class DealerLocationController extends RestfulControllerV2 {
         ]);
         $this->dealerLocation = $dealerLocationRepo;
         $this->dealerLocationQuoteFee = $dealerLocationRepoFee;
+        $this->service = $service;
         $this->transformer = new DealerLocationTransformer();
         $this->fractal = $fractal;
     }
@@ -79,7 +85,7 @@ class DealerLocationController extends RestfulControllerV2 {
         $request = new DeleteDealerLocationRequest(['id' => $id] + $request->all());
 
         if ($request->validate()) {
-            if ($this->dealerLocation->delete($request->all())) {
+            if ($this->service->moveAndDelete($request->getId(), $request->getMoveReferencesToLocationId())) {
                 return $this->response->noContent();
             }
 

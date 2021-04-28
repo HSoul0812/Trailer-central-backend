@@ -15,6 +15,8 @@ use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
+use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
+use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -83,6 +85,8 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\User\DealerLocationService;
+use App\Services\User\DealerLocationServiceInterface;
 use App\Services\User\PasswordResetServiceInterface;
 use App\Services\User\PasswordResetService;
 use App\Repositories\User\DealerLocationRepository;
@@ -291,5 +295,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DomPdfExporterServiceInterface::class, DomPdfExporterService::class);
 
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
+
+        $this->app->bind(ApiEntityReferenceRepositoryInterface::class, ApiEntityReferenceRepository::class);
+        $this->app->bind(DealerLocationServiceInterface::class, DealerLocationService::class);
+
     }
 }

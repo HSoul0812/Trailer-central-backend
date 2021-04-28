@@ -13,8 +13,8 @@ class DeleteDealerLocationRequest extends CommonDealerLocationRequest
         ], parent::getRules());
     }
 
-    public function getMoveReferencesToLocationId(): int
+    public function getMoveReferencesToLocationId(): ?int
     {
-        return (int)$this->input('move_references_to_location_id');
+        return $this->input('move_references_to_location_id');
     }
 }

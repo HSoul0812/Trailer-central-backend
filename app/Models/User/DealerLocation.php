@@ -6,6 +6,7 @@ use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -54,6 +55,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
  * @method static \Illuminate\Database\Query\Builder whereIn($column, $values, $boolean = 'and', $not = false)
  * @method static DealerLocation findOrFail($id, array $columns = ['*'])
+ * @method static DealerLocation|Collection|static[]|static|null find($id, $columns = ['*'])
  */
 class DealerLocation extends Model
 {
@@ -191,6 +193,10 @@ class DealerLocation extends Model
 
     public function hasRelatedRecords(): bool
     {
+        if (empty($this->dealer_location_id)) {
+            return false;
+        }
+
         $numberOfInventories = Inventory::where('dealer_location_id', $this->dealer_location_id)->count();
         $numberOfReferences = ApiEntityReference::where([
             'entity_id' => $this->dealer_location_id,

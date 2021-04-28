@@ -9,7 +9,13 @@ use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-interface DealerLocationRepositoryInterface extends Repository {
+interface DealerLocationRepositoryInterface extends Repository
+{
+    public const DEFAULT_GET_PARAMS = [
+        self::CONDITION_AND_WHERE => [
+        ]
+    ];
+
     /**
      * Find Dealer Location By Various Options
      *
@@ -57,11 +63,22 @@ interface DealerLocationRepositoryInterface extends Repository {
 
     /**
      * @param array $params
+     * @return \Illuminate\Database\Eloquent\Collection<DealerLocation>
+     */
+    public function findAll(array $params): \Illuminate\Database\Eloquent\Collection;
+
+    /**
+     * @param array $params
      * @return DealerLocation
      * @throws ModelNotFoundException
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
      */
     public function get($params): DealerLocation;
+
+    /**
+     * @param int $dealerId
+     */
+    public function getDefaultByDealerId(int $dealerId): ?DealerLocation;
 
     /**
      * @param array $params
@@ -75,4 +92,10 @@ interface DealerLocationRepositoryInterface extends Repository {
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
      */
     public function update($params): bool;
+
+    public function beginTransaction(): void;
+
+    public function commitTransaction(): void;
+
+    public function rollbackTransaction(): void;
 }
