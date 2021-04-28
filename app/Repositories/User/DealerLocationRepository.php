@@ -2,10 +2,6 @@
 
 namespace App\Repositories\User;
 
-use App\Models\User\DealerLocationQuoteFee;
-use App\Models\User\DealerLocationSalesTax;
-use App\Models\User\DealerLocationSalesTaxItem;
-use App\Models\User\DealerLocationSalesTaxItemV1;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerLocation;
@@ -13,7 +9,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
-use DB;
 
 class DealerLocationRepository implements DealerLocationRepositoryInterface
 {
@@ -22,8 +17,6 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
     /**
      * @param array $params
      * @throws InvalidArgumentException when `dealer_id` has not been provided
-     * @throws InvalidArgumentException when `sales_tax_items` is not an array
-     * @throws InvalidArgumentException when `fees` is not an array
      */
     public function create($params): DealerLocation
     {
@@ -31,50 +24,10 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
             throw new InvalidArgumentException('"dealer_id" is required');
         }
 
-        return DB::transaction(function () use ($params): DealerLocation {
+        $location = new DealerLocation();
+        $location->fill($params)->save();
 
-            if (!empty($params['is_default_for_invoice'])) {
-                // remove any default location for invoice if exists
-                DealerLocation::where('dealer_id', $params['dealer_id'])->update(['is_default_for_invoice' => 0]);
-            }
-            $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
-
-            $location = new DealerLocation();
-            $location->fill($params + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles])->save();
-
-            $locationRelDefinition = ['dealer_location_id' => $location->dealer_location_id];
-
-            $taxSettings = new DealerLocationSalesTax();
-            $taxSettings->fill($params + $locationRelDefinition)->save();
-
-            if (!empty($params['sales_tax_items'])) {
-                if (!is_array($params['sales_tax_items'])) {
-                    throw new InvalidArgumentException('"sales_tax_items" must be an array');
-                }
-
-                foreach ($params['sales_tax_items'] as $item) {
-                    $taxItem = new DealerLocationSalesTaxItem();
-                    $taxItem->fill($item + $locationRelDefinition)->save();
-
-                    // for backward compatibility
-                    $taxItem = new DealerLocationSalesTaxItemV1();
-                    $taxItem->fill($item + $locationRelDefinition)->save();
-                }
-            }
-
-            if (!empty($params['fees'])) {
-                if (!is_array($params['fees'])) {
-                    throw new InvalidArgumentException('"fees" must be an array');
-                }
-
-                foreach ($params['fees'] as $item) {
-                    $fee = new DealerLocationQuoteFee();
-                    $fee->fill($item + $locationRelDefinition)->save();
-                }
-            }
-
-            return $location;
-        });
+        return $location;
     }
 
     /**
@@ -112,7 +65,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
      */
     public function getAll($params): LengthAwarePaginator
     {
-        $query = $this->getQueryBuilderForAll($params);
+        $query = $this->getQueryBuilder($params);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
@@ -127,74 +80,23 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
      */
     public function findAll(array $params): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->getQueryBuilderForAll($params)->with('salesTax')->get();
+        return $this->getQueryBuilder($params)->with('salesTax')->get();
     }
 
     /**
-     * @param array $params
-     * @throws InvalidArgumentException when `dealer_id` has not been provided
-     * @throws InvalidArgumentException when `dealer_location_id` has not been provided
-     * @throws InvalidArgumentException when `sales_tax_items` is not an array
-     * @throws InvalidArgumentException when `fees` is not an array
      * @throws ModelNotFoundException
+     * @throws InvalidArgumentException when `dealer_location_id` has not been provided
      */
     public function update($params): bool
     {
-        if (!isset($params['dealer_id'])) {
-            throw new InvalidArgumentException('"dealer_id" is required');
-        }
+        $location = DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
 
-        return DB::transaction(function () use ($params): bool {
+        return $location->fill($params)->save();
+    }
 
-            if (!empty($params['is_default_for_invoice'])) {
-                // remove any default location for invoice if exists
-                DealerLocation::where('dealer_id', $params['dealer_id'])->update(['is_default_for_invoice' => 0]);
-            }
-
-            $id = $this->getDealerLocationIdFromParams($params);
-            $locationRelDefinition = ['dealer_location_id' => $id];
-
-            $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
-
-            $location = DealerLocation::findOrFail($id);
-            $location->fill($params + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles])->save();
-
-            $taxSettings = DealerLocationSalesTax::where('dealer_location_id', $id)->first()  ??  new DealerLocationSalesTax();
-            $taxSettings->fill($params)->save();
-
-            if (!empty($params['sales_tax_items'])) {
-                if (!is_array($params['sales_tax_items'])) {
-                    throw new InvalidArgumentException('"sales_tax_items" must be an array');
-                }
-
-                DealerLocationSalesTaxItem::where('dealer_location_id', $id)->delete();
-                DealerLocationSalesTaxItemV1::where('dealer_location_id', $id)->delete();
-
-                foreach ($params['sales_tax_items'] as $item) {
-                    $taxItem = new DealerLocationSalesTaxItem();
-                    $taxItem->fill($item + $locationRelDefinition)->save();
-
-                    // for backward compatibility
-                    $taxItem = new DealerLocationSalesTaxItemV1();
-                    $taxItem->fill($item + $locationRelDefinition)->save();
-                }
-            }
-
-            if (!empty($params['fees'])) {
-                if (!is_array($params['fees'])) {
-                    throw new InvalidArgumentException('"fees" must be an array');
-                }
-
-                DealerLocationQuoteFee::where('dealer_location_id', $id)->delete();
-
-                foreach ($params['fees'] as $item) {
-                    $fee = new DealerLocationQuoteFee();
-                    $fee->fill($item + $locationRelDefinition)->save();
-                }
-            }
-
-            return true;
-        });
+    public function turnOffDefaultLocationForInvoiceByDealerId(int $dealerId): bool
+    {
+        return DealerLocation::where('dealer_id', $dealerId)->update(['is_default_for_invoice' => 0]);
     }
 
     /**
@@ -309,6 +211,9 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         return $phoneNumber;
     }
 
+    /**
+     * @throws InvalidArgumentException when `dealer_location_id` has not been provided
+     */
     private function getDealerLocationIdFromParams(array $params): int
     {
         $id = $params['dealer_location_id'] ?? $params['id'] ?? null;
@@ -320,28 +225,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         return $id;
     }
 
-    /**
-     * Forces a value to be an array, if it is a json it will be encoded as array
-     *
-     * @param array|string $titles
-     * @return array
-     */
-    private function encodeTaxColumnTitles($titles): array
-    {
-        $salesTaxItemColumnTitles = [];
-
-        if (!empty($titles)) {
-            $salesTaxItemColumnTitles = $titles;
-
-            if (is_string($titles)) {
-                $salesTaxItemColumnTitles = json_decode($titles, true);
-            }
-        }
-
-        return $salesTaxItemColumnTitles;
-    }
-
-    private function getQueryBuilderForAll(array $params): Builder
+    private function getQueryBuilder(array $params): Builder
     {
         $query = DealerLocation::select('*');
 

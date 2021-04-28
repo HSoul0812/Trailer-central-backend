@@ -18,21 +18,11 @@ class ValidTaxCalculator
      *
      * @return bool
      */
-    public function passes(string $attribute, $value, $dealer_id = null): bool
+    public function passes(string $attribute, $value, array $parameters = []): bool
     {
 
         $calculator = TaxCalculator::find($value);
 
-        return $calculator && ($calculator->dealer_id === null || $calculator->dealer_id === $dealer_id);
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message(): string
-    {
-        return 'The selected tax calculator id is invalid.';
+        return $calculator && ($calculator->dealer_id === null || $calculator->dealer_id === (int)$parameters[0]);
     }
 }

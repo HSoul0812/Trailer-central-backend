@@ -12,7 +12,7 @@ use Illuminate\Database\Query\Builder;
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
- * @method static DealerLocation findOrFail($id, array $columns = ['*'])
+ * @method static DealerLocationSalesTax findOrFail($id, array $columns = ['*'])
  * @method static Model|Collection|static[]|static|null find($id, $columns = ['*'])
  * @method static Model|static updateOrCreate(array $attributes, array $values = [])
  *

@@ -80,6 +80,8 @@ interface DealerLocationRepositoryInterface extends Repository
      */
     public function getDefaultByDealerId(int $dealerId): ?DealerLocation;
 
+    public function turnOffDefaultLocationForInvoiceByDealerId(int $dealerId): bool;
+
     /**
      * @param array $params
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
