@@ -9,6 +9,7 @@ use App\Repositories\Dms\SettingsRepositoryInterface;
 use App\Transformers\Dms\SettingsTransformer;
 use App\Http\Requests\Dms\Settings\UpdateSettingsRequest;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class SettingsController extends RestfulControllerV2
 {
