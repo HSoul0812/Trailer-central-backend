@@ -39,7 +39,7 @@ class CreateInventoryRequest extends Request
         'website_price' => 'numeric|nullable',
         'dealer_price' => 'numeric|nullable',
         'monthly_payment' => 'numeric|nullable',
-        'year' => 'integer|min:1900|max:2050',
+        'year' => 'integer',
         'condition' => 'in:new,used,remfg|nullable',
         'length' => 'numeric|nullable',
         'width' => 'numeric|nullable',

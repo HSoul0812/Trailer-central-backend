@@ -204,7 +204,9 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function exists(array $params): bool
     {
         $query = Inventory::query();
-
+        
+        $query->where('status', '!=', Inventory::STATUS_QUOTE);
+        
         if (isset($params['dealer_id'])) {
             $query->where('dealer_id', '=', $params['dealer_id']);
         }

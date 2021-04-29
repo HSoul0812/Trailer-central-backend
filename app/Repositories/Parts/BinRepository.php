@@ -17,7 +17,7 @@ class BinRepository implements BinRepositoryInterface
 
     public function create($params)
     {
-        throw new NotImplementedException;
+        return Bin::create($params);
     }
 
     public function delete($params)
@@ -69,7 +69,10 @@ class BinRepository implements BinRepositoryInterface
 
     public function update($params)
     {
-        throw new NotImplementedException;
+        $bin = $this->get($params);
+        $bin->fill($params);
+        $bin->save();
+        return $bin;
     }
 
     public function getOrCreate($params)
