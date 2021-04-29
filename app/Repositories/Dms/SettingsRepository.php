@@ -14,7 +14,7 @@ class SettingsRepository extends RepositoryAbstract implements SettingsRepositor
      * @param array $params
      * @return EmailHistory
      */
-    public function create(array $params): Settings {
+    public function create($params) {
         // Initialize Settings
         $settings = new Settings();
 
@@ -28,7 +28,7 @@ class SettingsRepository extends RepositoryAbstract implements SettingsRepositor
      * @param array $params
      * @throws NotImplementedException
      */
-    public function delete(array $params) {
+    public function delete($params) {
         throw new NotImplementedException;
     }
 
@@ -38,7 +38,7 @@ class SettingsRepository extends RepositoryAbstract implements SettingsRepositor
      * @param array $params
      * @throws NotImplementedException
      */
-    public function get(array $params) {
+    public function get($params) {
         throw new NotImplementedException;
     }
 
@@ -48,7 +48,7 @@ class SettingsRepository extends RepositoryAbstract implements SettingsRepositor
      * @param array $params
      * @return Settings
      */
-    public function update(array $params): Settings {
+    public function update($params) {
         $settings = Settings::findOrFail($params['id']);
 
         DB::transaction(function() use (&$settings, $params) {
