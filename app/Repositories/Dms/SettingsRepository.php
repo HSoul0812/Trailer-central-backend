@@ -23,7 +23,10 @@ class SettingsRepository extends RepositoryAbstract implements SettingsRepositor
         $settings->fillWithMeta($params);
 
         // Save Settings After Filling With Meta
-        return $settings->save();
+        $settings->save();
+
+        // Return Settings
+        return $settings;
     }
 
     /**
