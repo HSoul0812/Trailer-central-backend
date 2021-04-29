@@ -15,6 +15,7 @@ class SettingsController extends RestfulControllerV2
      * @var SettingsRepositoryInterface
      */
     private $settingsRepository;
+
     /**
      * @var SettingsTransformer
      */
@@ -38,11 +39,13 @@ class SettingsController extends RestfulControllerV2
         return $this->response->item($settings, $this->transformer);
     }
 
-    public function update(Request $request)
+    
+    public function update(Request $request): Response
     {
-        $settings = $this->settingsRepository->getByDealerId($request->input('dealer_id'));
-        $settings->fillWithMeta($request->all());
-        $settings->save();
+        $request = new UpdateLeadRequest($request->all());
+        if ($request->validate()) {
+            $this->service->update($request->all());
+        }
 
         return $this->response->accepted();
     }
