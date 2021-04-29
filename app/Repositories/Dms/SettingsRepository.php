@@ -5,6 +5,7 @@ namespace App\Repositories\Dms;
 use App\Models\CRM\Dms\Settings;
 use App\Repositories\RepositoryAbstract;
 use App\Exceptions\NotImplementedException;
+use Illuminate\Support\Facades\DB;
 
 class SettingsRepository extends RepositoryAbstract implements SettingsRepositoryInterface
 {
