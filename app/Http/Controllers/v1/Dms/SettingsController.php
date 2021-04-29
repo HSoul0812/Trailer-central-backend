@@ -7,6 +7,7 @@ namespace App\Http\Controllers\v1\Dms;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Dms\SettingsRepositoryInterface;
 use App\Transformers\Dms\SettingsTransformer;
+use App\Http\Requests\Dms\Settings\UpdateSettingsRequest;
 use Dingo\Api\Http\Request;
 
 class SettingsController extends RestfulControllerV2
@@ -42,7 +43,7 @@ class SettingsController extends RestfulControllerV2
     
     public function update(Request $request): Response
     {
-        $request = new UpdateLeadRequest($request->all());
+        $request = new UpdateSettingsRequest($request->all());
         if ($request->validate()) {
             $this->service->update($request->all());
         }
