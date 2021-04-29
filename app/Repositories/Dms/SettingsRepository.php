@@ -20,7 +20,10 @@ class SettingsRepository extends RepositoryAbstract implements SettingsRepositor
         $settings = new Settings();
 
         // Fill Settings
-        return $settings->fillWithMeta($params)->save();
+        $settings->fillWithMeta($params);
+
+        // Save Settings After Filling With Meta
+        return $settings->save();
     }
 
     /**
@@ -54,7 +57,10 @@ class SettingsRepository extends RepositoryAbstract implements SettingsRepositor
 
         DB::transaction(function() use (&$settings, $params) {
             // Fill Settings Details
-            $settings->fillWithMeta($params)->save();
+            $settings->fillWithMeta($params);
+
+            // Save Settings After Filling With Meta
+            $settings->save();
         });
 
         return $settings;
