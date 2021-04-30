@@ -288,7 +288,7 @@ class DealerLocationService implements DealerLocationServiceInterface
             DealerLocationRepositoryInterface::CONDITION_AND_WHERE => $whereFirst
         ])->first();
 
-        return $first->dealer_location_id ?: null;
+        return $first->dealer_location_id ?? null;
     }
 
     /**
