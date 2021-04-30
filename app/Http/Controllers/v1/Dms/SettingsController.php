@@ -47,8 +47,9 @@ class SettingsController extends RestfulControllerV2
         $request = new UpdateSettingsRequest($request->all());
         if ($request->validate()) {
             $this->settingsRepository->createOrUpdate($request->all());
+            return $this->response->accepted();
         }
 
-        return $this->response->accepted();
+        return $this->response->errorBadRequest();
     }
 }
