@@ -100,8 +100,8 @@ class DealerLocationService implements DealerLocationServiceInterface
                     throw new InvalidArgumentException('"fees" must be an array');
                 }
 
-                foreach ($params['fees'] as $item) {
-                    $this->quoteFeeRepo->create($item + $locationRelDefinition);
+                foreach ($params['fees'] as $fee) {
+                    $this->quoteFeeRepo->create($fee + $locationRelDefinition);
                 }
             }
 

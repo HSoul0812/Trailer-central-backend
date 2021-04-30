@@ -52,6 +52,8 @@ interface DealerLocationRepositoryInterface extends Repository
     /**
      * @param array $params
      * @return DealerLocation
+     * @throws InvalidArgumentException when provided "sales_tax_items" isn't an array
+     * @throws InvalidArgumentException when provided "fees" isn't an array
      */
     public function create($params): DealerLocation;
 
