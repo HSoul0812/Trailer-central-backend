@@ -592,6 +592,57 @@ $api->version('v1', function ($route) {
 
             /*
             |--------------------------------------------------------------------------
+            | Email Builder
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'emailbuilder'
+            ], function ($route) {
+                // Email Builder Template
+                $route->group([
+                    'prefix' => 'template',
+                    'middleware' => 'emailbuilder.template.validate'
+                ], function ($route) {
+                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@destroy')->where('id', '[0-9]+');*/
+                    $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\TemplateController@send')->where('id', '[0-9]+');
+                });
+
+                // Email Builder Campaign
+                $route->group([
+                    'prefix' => 'campaign',
+                    'middleware' => 'emailbuilder.campaign.validate'
+                ], function ($route) {
+                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@destroy')->where('id', '[0-9]+');*/
+                    $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\CampaignController@send')->where('id', '[0-9]+');
+                });
+
+                // Email Builder Blast
+                $route->group([
+                    'prefix' => 'blast',
+                    'middleware' => 'emailbuilder.blast.validate'
+                ], function ($route) {
+                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
+                    $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
+                    $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
+                    $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\BlastController@send')->where('id', '[0-9]+');
+                });
+            });
+
+            /*
+            |--------------------------------------------------------------------------
             | Texts
             |--------------------------------------------------------------------------
             |
