@@ -235,8 +235,14 @@ class DealerLocationService implements DealerLocationServiceInterface
         try {
             $this->locationRepo->beginTransaction();
 
-            $moveToLocationId = $moveToLocationId ??
-                $this->getAnotherAvailableLocationIdToMove($location->dealer_location_id, $location->dealer_id);
+            if ($moveToLocationId) {
+                if (!$this->locationRepo->dealerHasLocationWithId($location->dealer_id, $moveToLocationId)) {
+                    throw new DomainException("The provided target DealerLocation{dealer_location_id=$moveToLocationId} " .
+                        "doesn't belong the Dealer{dealer_id=$location->dealer_id}");
+                }
+            } else {
+                $moveToLocationId = $this->getAnotherAvailableLocationIdToMove($location->dealer_location_id, $location->dealer_id);
+            }
 
             if ($moveToLocationId === null) {
                 throw new DomainException("There isn't a possible location to move those related " .

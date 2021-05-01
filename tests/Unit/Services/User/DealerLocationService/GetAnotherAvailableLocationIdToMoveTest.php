@@ -53,14 +53,14 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
             'is_default' => 1
         ]);
 
-        // And I expect that "DealerLocationRepositoryInterface::getDefaultByDealerId" method is called once
+        // Then I expect that "DealerLocationRepositoryInterface::getDefaultByDealerId" method is called once
         // with a known parameter, returning a know location instance
         $dependencies->locationRepo->shouldReceive('getDefaultByDealerId')
             ->with($dealerId)
             ->once()
             ->andReturn($defaultLocation);
 
-        // When I call the "DealerLocationService::getAnotherAvailableLocationIdToMove" method
+        // When I call the "DealerLocationService::getAnotherAvailableLocationIdToMove" method with known parameters
         $locationId = $service->getAnotherAvailableLocationIdToMove($locationId, $dealerId);
 
         // Then I expect that "DealerLocationService::getAnotherAvailableLocationIdToMove" returns a known dealer location id
@@ -103,7 +103,7 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
         // And I know  the first dealer location
         $firstLocation = $locations->first();
 
-        // And I expect that "DealerLocationRepositoryInterface::getDefaultByDealerId" method is called once
+        // Then I expect that "DealerLocationRepositoryInterface::getDefaultByDealerId" method is called once
         // with a known parameter, returning none
         $dependencies->locationRepo->shouldReceive('getDefaultByDealerId')
             ->with($dealerId)
@@ -120,7 +120,7 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
             ->once()
             ->andReturn($locations);
 
-        // When I call the "DealerLocationService::getAnotherAvailableLocationIdToMove" method
+        // When I call the "DealerLocationService::getAnotherAvailableLocationIdToMove" method with known parameters
         $locationId = $service->getAnotherAvailableLocationIdToMove($locationId, $dealerId);
 
         // Then I expect that "DealerLocationService::getAnotherAvailableLocationIdToMove" returns a known dealer location id
@@ -150,7 +150,7 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
         // And I have a dealer location id
         $locationId = $this->faker->numberBetween(1, 100000);
 
-        // And I expect that "DealerLocationRepositoryInterface::getDefaultByDealerId" method is called once
+        // Then I expect that "DealerLocationRepositoryInterface::getDefaultByDealerId" method is called once
         // with a known parameter, returning none
         $dependencies->locationRepo->shouldReceive('getDefaultByDealerId')
             ->with($dealerId)
@@ -167,7 +167,7 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
             ->once()
             ->andReturn(Collection::make());
 
-        // When I call the "DealerLocationService::getAnotherAvailableLocationIdToMove" method
+        // When I call the "DealerLocationService::getAnotherAvailableLocationIdToMove" method with known parameters
         $locationId = $service->getAnotherAvailableLocationIdToMove($locationId, $dealerId);
 
         // Then I expect that "DealerLocationService::getAnotherAvailableLocationIdToMove" returns null

@@ -132,7 +132,7 @@ class CreateTest extends TestCase
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
 
-        // When I call the "DealerLocationService::create" method
+        // When I call the "DealerLocationService::create" method with known parameters
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance
@@ -204,7 +204,7 @@ class CreateTest extends TestCase
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
 
-        // When I call the "DealerLocationService::create" method
+        // When I call the "DealerLocationService::create" method with known parameters
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance
@@ -272,7 +272,7 @@ class CreateTest extends TestCase
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method  is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
 
-        // When I call the "DealerLocationService::create" method
+        // When I call the "DealerLocationService::create" method with known parameters
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance

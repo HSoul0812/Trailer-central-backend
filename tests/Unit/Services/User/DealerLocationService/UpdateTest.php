@@ -45,13 +45,13 @@ class UpdateTest extends TestCase
         // And I have a dealer id
         $dealerId = $this->faker->numberBetween(1, 100000);
 
-        // Then I have well known dealer location
+        // And I have well known dealer location
         $location = factory(DealerLocation::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $this->faker->numberBetween(1, 50000)
         ]);
 
-        // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method  is called once
+        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method  is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
         // And I expect that "DealerLocationRepositoryInterface::update" method is called once, with known parameters
@@ -67,7 +67,7 @@ class UpdateTest extends TestCase
             ->with($location->dealer_location_id, $params)
             ->once();
 
-        // Then I expect to see a specific exception being thrown
+        // And I expect to see a specific exception being thrown
         $this->expectException(InvalidArgumentException::class);
 
         // And I also expect to see an specific exception message
@@ -79,7 +79,7 @@ class UpdateTest extends TestCase
         // And I expect that "DealerLocationRepositoryInterface::rollbackTransaction" method  is called once
         $dependencies->locationRepo->shouldReceive('rollbackTransaction')->once();
 
-        // When I call the "DealerLocationService::update" method
+        // When I call the "DealerLocationService::update" method with known parameters
         $service->update($location->dealer_location_id, $dealerId, $params);
     }
 
@@ -111,13 +111,13 @@ class UpdateTest extends TestCase
             ['entity_type_id' => 5, 'item_type' => 'county']
         ]];
 
-        // Then I have well known dealer location
+        // And I have well known dealer location
         $location = factory(DealerLocation::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $this->faker->numberBetween(1, 50000)
         ]);
 
-        // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
+        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
         // And I expect that "DealerLocationRepositoryInterface::update" method is called once, with known parameters
@@ -133,12 +133,14 @@ class UpdateTest extends TestCase
             ->with($location->dealer_location_id, $params)
             ->once();
 
-        // And I expect that "DealerLocationSalesTaxItemRepositoryInterface::deleteByDealerLocationId" method is called once, with known parameters
+        // And I expect that "DealerLocationSalesTaxItemRepositoryInterface::deleteByDealerLocationId"
+        // method is called once, with known parameters
         $dependencies->salesTaxItemRepo
             ->shouldReceive('deleteByDealerLocationId')
             ->with($location->dealer_location_id)
             ->once();
-        // And I expect that "DealerLocationSalesTaxItemRepositoryInterface::deleteByDealerLocationIdV1" method is called once, with known parameters
+        // And I expect that "DealerLocationSalesTaxItemRepositoryInterface::deleteByDealerLocationIdV1"
+        // method is called once, with known parameters
         $dependencies->salesTaxItemRepo
             ->shouldReceive('deleteByDealerLocationIdV1')
             ->with($location->dealer_location_id)
@@ -161,7 +163,7 @@ class UpdateTest extends TestCase
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method  is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
 
-        // When I call the "DealerLocationService::update" method
+        // When I call the "DealerLocationService::update" method with known parameters
         $result = $service->update($location->dealer_location_id, $dealerId, $params);
 
         // Then I expect that "DealerLocationService::update" returns true
@@ -198,13 +200,13 @@ class UpdateTest extends TestCase
             ['title' => 'Shop supply fee', 'fee_type' => 'shop_supply_fee']
         ]];
 
-        // Then I have well known dealer location
+        // And I have well known dealer location
         $location = factory(DealerLocation::class)->make([
             'dealer_id' => $dealerId,
             'dealer_location_id' => $this->faker->numberBetween(1, 50000)
         ]);
 
-        // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
+        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
         // And I expect that "DealerLocationRepositoryInterface::update" method is called once, with known parameters
@@ -237,7 +239,7 @@ class UpdateTest extends TestCase
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method  is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
 
-        // When I call the "DealerLocationService::update" method
+        // When I call the "DealerLocationService::update" method with known parameters
         $result = $service->update($location->dealer_location_id, $dealerId, $params);
 
         // Then I expect that "DealerLocationService::update" returns true

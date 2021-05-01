@@ -83,6 +83,11 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         return $this->getQueryBuilder($params)->with('salesTax')->get();
     }
 
+    public function dealerHasLocationWithId(int $dealerId, int $locationId): bool
+    {
+        return DealerLocation::where(['dealer_id' => $dealerId, 'dealer_location_id' => $locationId])->exists();
+    }
+
     /**
      * @throws ModelNotFoundException
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
