@@ -26,7 +26,7 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
     /**
      * Test that SUT will returns default location id
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillReturnsDefaultOne(): void
     {
@@ -71,7 +71,7 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
     /**
      * Test that SUT will returns default location id
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillReturnsFirstOne(): void
     {
@@ -131,7 +131,7 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
     /**
      * Test that SUT will returns null
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillReturnsNull(): void
     {

@@ -87,7 +87,7 @@ class UpdateTest extends TestCase
     /**
      * Test that SUT will update certainly number of tax items
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillUpdateTaxItems(): void
     {
@@ -174,7 +174,7 @@ class UpdateTest extends TestCase
     /**
      * Test that SUT will update certainly number of quote fees
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillUpdateQuoteFees(): void
     {
@@ -247,6 +247,9 @@ class UpdateTest extends TestCase
         self::assertTrue($result);
     }
 
+    /**
+     * @return array<string, array>
+     */
     public function wrongParamsProvider(): array
     {
         return [                                // array $params, string $expectedExceptionMessage

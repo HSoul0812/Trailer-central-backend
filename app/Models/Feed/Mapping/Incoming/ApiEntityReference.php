@@ -2,6 +2,7 @@
 
 namespace App\Models\Feed\Mapping\Incoming;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 
@@ -9,6 +10,8 @@ use Illuminate\Database\Query\Builder;
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
  */
 class ApiEntityReference extends Model {
+
+    use TableAware;
 
     protected $table = 'api_entity_reference';
 

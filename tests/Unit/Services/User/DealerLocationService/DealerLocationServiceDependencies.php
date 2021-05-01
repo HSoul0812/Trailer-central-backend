@@ -42,7 +42,6 @@ class DealerLocationServiceDependencies
     /** @var LoggerServiceInterface */
     public $loggerService;
 
-
     public function __construct()
     {
         $this->locationRepo = Mockery::mock(DealerLocationRepository::class);

@@ -88,7 +88,7 @@ class CreateTest extends TestCase
     /**
      * Test that SUT will try updating to zero the "is_default" column of any dealer location
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillTryTurningOffAnyDefaultLocation(): void
     {
@@ -149,7 +149,7 @@ class CreateTest extends TestCase
     /**
      * Test that SUT will create certainly number of tax items
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillCreateTaxItems(): void
     {
@@ -224,7 +224,7 @@ class CreateTest extends TestCase
     /**
      * Test that SUT will create certainly number of quote fees
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillCreateQuoteFees(): void
     {
@@ -292,6 +292,9 @@ class CreateTest extends TestCase
         self::assertSame($expectedLocation, $location);
     }
 
+    /**
+     * @return array<string, array>
+     */
     public function wrongParamsProvider(): array
     {
         return [                                // array $params, string $expectedExceptionMessage

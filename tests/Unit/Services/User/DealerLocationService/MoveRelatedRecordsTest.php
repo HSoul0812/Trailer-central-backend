@@ -103,7 +103,7 @@ class MoveRelatedRecordsTest extends TestCase
     /**
      * Test that SUT will move those related records from a location to another location
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillMoveToAnotherLocation(): void
     {
@@ -167,6 +167,9 @@ class MoveRelatedRecordsTest extends TestCase
         $service->moveRelatedRecords($location);
     }
 
+    /**
+     * @return array<string, array>
+     */
     public function dealerLocationIdsToMoveProvider(): array
     {
         return [                            // int $dealerLocationIdToMove, string $expectedExceptionMessage

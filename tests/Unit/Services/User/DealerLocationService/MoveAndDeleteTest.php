@@ -74,7 +74,7 @@ class MoveAndDeleteTest extends TestCase
      * Test that SUT will not move any related record, because it has not any related record, but it will delete one
      * dealer location
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillNotMoveAnyRelatedRecordButWillDelete(): void
     {
@@ -126,7 +126,7 @@ class MoveAndDeleteTest extends TestCase
     /**
      * Test that SUT will move all related records and it will delete one dealer location
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillMoveAllRelatedRecordAndWillDelete(): void
     {
