@@ -17,6 +17,7 @@ use Tests\TestCase;
 
 /**
  * @covers \App\Services\User\DealerLocationService::moveRelatedRecords
+ * @group DealerLocations
  */
 class MoveRelatedRecordsTest extends TestCase
 {
@@ -51,7 +52,7 @@ class MoveRelatedRecordsTest extends TestCase
             'dealer_location_id' => $this->faker->numberBetween(1, 50000)
         ]);
 
-        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method  is called once
+        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
         if ($locationIdToMove !== null) {
@@ -89,10 +90,10 @@ class MoveRelatedRecordsTest extends TestCase
         );
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        // And I expect that "LoggerServiceInterface::error" method  is called once
+        // And I expect that "LoggerServiceInterface::error" method is called once
         $dependencies->loggerService->shouldReceive('error')->once();
 
-        // And I expect that "DealerLocationRepositoryInterface::rollbackTransaction" method  is called once
+        // And I expect that "DealerLocationRepositoryInterface::rollbackTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('rollbackTransaction')->once();
 
         // When I call the "DealerLocationService::moveRelatedRecords" method with known parameters
@@ -132,7 +133,7 @@ class MoveRelatedRecordsTest extends TestCase
             'dealer_location_id' => $this->faker->numberBetween(1, 50000)
         ]);
 
-        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method  is called once
+        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
         // And I expect that "DealerLocationService::getAnotherAvailableLocationIdToMove" method is called once,

@@ -200,10 +200,10 @@ class DealerLocationService implements DealerLocationServiceInterface
      */
     public function moveAndDelete(int $id, ?int $moveToLocationId = null): bool
     {
-        $location = $this->locationRepo->get(['dealer_location_id' => $id]);
-
         try {
             $this->locationRepo->beginTransaction();
+
+            $location = $this->locationRepo->get(['dealer_location_id' => $id]);
 
             if ($location->hasRelatedRecords()) {
                 $this->moveRelatedRecords($location, $moveToLocationId);

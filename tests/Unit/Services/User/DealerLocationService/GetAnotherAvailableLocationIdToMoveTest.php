@@ -17,6 +17,7 @@ use Tests\TestCase;
 
 /**
  * @covers \App\Services\User\DealerLocationService::getAnotherAvailableLocationIdToMove
+ * @group DealerLocations
  */
 class GetAnotherAvailableLocationIdToMoveTest extends TestCase
 {

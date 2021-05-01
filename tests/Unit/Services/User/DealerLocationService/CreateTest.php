@@ -16,6 +16,7 @@ use Tests\TestCase;
 
 /**
  * @covers \App\Services\User\DealerLocationService::create
+ * @group DealerLocations
  */
 class CreateTest extends TestCase
 {
@@ -46,9 +47,12 @@ class CreateTest extends TestCase
         $dealerId = $this->faker->numberBetween(1, 100000);
 
         // Then I know that I will receive an expected location
-        $location = self::getEloquentMock(DealerLocation::class);
+        $location = factory(DealerLocation::class)->make([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $this->faker->numberBetween(1, 50000)
+        ]);
 
-        // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method  is called once
+        // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
         // And I expect that "DealerLocationRepositoryInterface::create" method is called once, with known parameters
@@ -71,10 +75,10 @@ class CreateTest extends TestCase
         // And I also expect to see an specific exception message
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        // And I expect that "LoggerServiceInterface::error" method  is called once
+        // And I expect that "LoggerServiceInterface::error" method is called once
         $dependencies->loggerService->shouldReceive('error')->once();
 
-        // And I expect that "DealerLocationRepositoryInterface::rollbackTransaction" method  is called once
+        // And I expect that "DealerLocationRepositoryInterface::rollbackTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('rollbackTransaction')->once();
 
         // When I call the "DealerLocationService::create" method
@@ -106,7 +110,10 @@ class CreateTest extends TestCase
         $params = ['is_default_for_invoice' => 1];
 
         // Then I know that I will receive an expected location
-        $expectedLocation = self::getEloquentMock(DealerLocation::class);
+        $expectedLocation = factory(DealerLocation::class)->make([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $this->faker->numberBetween(1, 50000)
+        ]);
 
         // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
@@ -168,7 +175,10 @@ class CreateTest extends TestCase
         ]];
 
         // Then I know that I will receive an expected location
-        $expectedLocation = self::getEloquentMock(DealerLocation::class);
+        $expectedLocation = factory(DealerLocation::class)->make([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $this->faker->numberBetween(1, 50000)
+        ]);
 
         // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
@@ -242,7 +252,10 @@ class CreateTest extends TestCase
         ]];
 
         // Then I know that I will receive an expected location
-        $expectedLocation = self::getEloquentMock(DealerLocation::class);
+        $expectedLocation = factory(DealerLocation::class)->make([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $this->faker->numberBetween(1, 50000)
+        ]);
 
         // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
@@ -269,7 +282,7 @@ class CreateTest extends TestCase
                 ->once();
         }
 
-        // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method  is called once
+        // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
 
         // When I call the "DealerLocationService::create" method with known parameters

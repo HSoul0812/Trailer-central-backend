@@ -16,6 +16,7 @@ use Exception;
 
 /**
  * @covers \App\Services\User\DealerLocationService::update
+ * @group DealerLocations
  */
 class UpdateTest extends TestCase
 {
@@ -51,7 +52,7 @@ class UpdateTest extends TestCase
             'dealer_location_id' => $this->faker->numberBetween(1, 50000)
         ]);
 
-        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method  is called once
+        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
         // And I expect that "DealerLocationRepositoryInterface::update" method is called once, with known parameters
@@ -73,10 +74,10 @@ class UpdateTest extends TestCase
         // And I also expect to see an specific exception message
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        // And I expect that "LoggerServiceInterface::error" method  is called once
+        // And I expect that "LoggerServiceInterface::error" method is called once
         $dependencies->loggerService->shouldReceive('error')->once();
 
-        // And I expect that "DealerLocationRepositoryInterface::rollbackTransaction" method  is called once
+        // And I expect that "DealerLocationRepositoryInterface::rollbackTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('rollbackTransaction')->once();
 
         // When I call the "DealerLocationService::update" method with known parameters
@@ -160,7 +161,7 @@ class UpdateTest extends TestCase
                 ->once();
         }
 
-        // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method  is called once
+        // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
 
         // When I call the "DealerLocationService::update" method with known parameters
@@ -236,7 +237,7 @@ class UpdateTest extends TestCase
                 ->once();
         }
 
-        // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method  is called once
+        // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
 
         // When I call the "DealerLocationService::update" method with known parameters
