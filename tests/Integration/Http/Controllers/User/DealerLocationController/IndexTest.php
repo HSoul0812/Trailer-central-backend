@@ -29,7 +29,7 @@ class IndexTest extends AbstractDealerLocationController
      *
      * @throws Exception when an unexpected exception has been thrown instead of the desired exception
      */
-    public function testWithInvalidParameter(array $params,
+    public function testWithInvalidParameters(array $params,
                                              string $expectedException,
                                              string $expectedExceptionMessage,
                                              ?string $firstExpectedErrorMessage): void
@@ -64,9 +64,9 @@ class IndexTest extends AbstractDealerLocationController
      *
      * @param callable|string $expectedName
      *
-     * @throws Exception when an unexpected exception has been thrown instead of the desired exception
+     * @throws Exception when an unexpected exception has not been handled
      */
-    public function testWithValidParameter(array $params, int $expectedTotal, int $expectedLastPage, $expectedName): void
+    public function testWithValidParameters(array $params, int $expectedTotal, int $expectedLastPage, $expectedName): void
     {
         /** @var LengthAwarePaginator $paginator */
         /** @var DealerLocation $firstLocation */

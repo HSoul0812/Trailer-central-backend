@@ -17,20 +17,20 @@ use App\Traits\WithGetter;
 use DB;
 
 /**
- * @property-read Collection<User> $dealers
- * @property-read array<int, Collection<DealerLocation>> $locations
+ * @property-read Collection<User>|array<User> $dealers
+ * @property-read array<int, Collection<DealerLocation>|array<DealerLocation>> $locations
  */
 class DealerLocationSeeder extends Seeder
 {
     use WithGetter;
 
     /**
-     * @var Collection<User>
+     * @var Collection<User>|array<User>
      */
     private $dealers;
 
     /**
-     * @var array<Collection<DealerLocation>>
+     * @var array<int, Collection<DealerLocation>|array<DealerLocation>>
      */
     private $locations;
 

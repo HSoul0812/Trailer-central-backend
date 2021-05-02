@@ -66,6 +66,8 @@ class AbstractDealerLocationController extends TestCase
                     return $seeder->locations[$dealerId]->random();
                 case 'firstLocation':
                     return $seeder->locations[$dealerId]->first();
+                case 'firstLocationId':
+                    return $seeder->locations[$dealerId]->first()->dealer_location_id;
             }
 
             return null;
