@@ -62,6 +62,19 @@ class DealerLocationSeeder extends Seeder
             'name' => 'Springfield XXX',
             'is_default' => 1
         ]));
+
+        $firstInventoryId = $this->locations[$dealer1Id]->first()->dealer_location_id;
+        // 5 new inventories
+        factory(Inventory::class, 5)->create([
+            'dealer_id' => $dealer1Id,
+            'dealer_location_id' => $firstInventoryId
+        ]);
+        // 5 new entity references
+        factory(ApiEntityReference::class, 3)->create([
+            'entity_type' => ApiEntityReference::TYPE_LOCATION,
+            'entity_id' => $firstInventoryId
+        ]);
+
         // 5 new dealer locations  for the third dealer
         $this->locations[$dealer2Id] = factory(DealerLocation::class, 4)->create([
             'dealer_id' => $dealer2Id

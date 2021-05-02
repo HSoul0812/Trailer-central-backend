@@ -127,9 +127,7 @@ class UpdateTest extends AbstractDealerLocationController
         ];
         $request = new UpdateDealerLocationRequest($params);
 
-        // When I call the "create" action using the valid request
-
-
+        // When I call the "update" action using the valid request
         $response = $controller->update($locationId, $request);
         $data = $response->original;
 
@@ -158,7 +156,7 @@ class UpdateTest extends AbstractDealerLocationController
             'env_fee_pct' => 3
         ]);
 
-        // And I should see that persisted record has other related records
+        // And I should see the persisted record has other related records
         self::assertCount(1, DealerLocationSalesTax::where(['dealer_location_id' => $locationId])->get());
         self::assertCount(2, DealerLocationSalesTaxItem::where(['dealer_location_id' => $locationId])->get());
         self::assertCount(2, DealerLocationSalesTaxItemV1::where(['dealer_location_id' => $locationId])->get());

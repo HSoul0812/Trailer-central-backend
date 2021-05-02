@@ -11,11 +11,13 @@ class CommonDealerLocationRequest extends Request
 {
     use DealerLocationRequestTrait;
 
-    protected $rules = [
-        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
-        'id' => 'nullable|integer|exists:dealer_location,dealer_location_id',
-        'include' => 'nullable',
-    ];
+    protected function getRules(): array
+    {
+        return [
+            'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
+            'id' => 'required|exists:dealer_location,dealer_location_id,dealer_id,' . $this->getDealerId()
+        ];
+    }
 
     protected function getObject(): DealerLocation
     {
