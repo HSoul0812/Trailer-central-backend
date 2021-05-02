@@ -26,6 +26,6 @@ class DealerLocationSalesTaxRepository implements DealerLocationSalesTaxReposito
         $taxSettings = DealerLocationSalesTax::where('dealer_location_id', $dealerLocationId)->first() ??
             new DealerLocationSalesTax();
 
-        return $taxSettings->fill($params)->save();
+        return $taxSettings->fill(['dealer_location_id' => $dealerLocationId] + $params)->save();
     }
 }

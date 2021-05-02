@@ -60,6 +60,7 @@ class DealerLocationSeeder extends Seeder
         $this->locations[$dealer1Id]->add(factory(DealerLocation::class)->create([
             'dealer_id' => $dealer1Id,
             'name' => 'Springfield XXX',
+            'is_default' => 1
         ]));
         // 5 new dealer locations  for the third dealer
         $this->locations[$dealer2Id] = factory(DealerLocation::class, 4)->create([
@@ -68,7 +69,8 @@ class DealerLocationSeeder extends Seeder
         $this->locations[$dealer2Id]->add(factory(DealerLocation::class)->create([
             'dealer_id' => $dealer2Id,
             'name' => 'Shelbyville YYY',
-            'city' => 'Shelbyville XXX'
+            'city' => 'Shelbyville XXX',
+            'is_default' => 1
         ]));
         // 6 new dealer locations for the third dealer
         $this->locations[$dealer3Id] = factory(DealerLocation::class, 6)->create([
