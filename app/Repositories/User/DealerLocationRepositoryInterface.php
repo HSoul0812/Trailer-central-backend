@@ -84,7 +84,9 @@ interface DealerLocationRepositoryInterface extends Repository
      */
     public function getDefaultByDealerId(int $dealerId): ?DealerLocation;
 
-    public function turnOffDefaultLocationForInvoiceByDealerId(int $dealerId): bool;
+    public function turnOffDefaultLocationByDealerId(int $dealerId): bool;
+
+    public function turnOffDefaultLocationForInvoicingByDealerId(int $dealerId): bool;
 
     /**
      * @param array $params

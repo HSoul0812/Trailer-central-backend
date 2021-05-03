@@ -69,9 +69,14 @@ class DealerLocationService implements DealerLocationServiceInterface
         try {
             $this->locationRepo->beginTransaction();
 
+            if (!empty($params['is_default'])) {
+                // remove any default location if exists
+                $this->locationRepo->turnOffDefaultLocationByDealerId($dealerId);
+            }
+
             if (!empty($params['is_default_for_invoice'])) {
                 // remove any default location for invoice if exists
-                $this->locationRepo->turnOffDefaultLocationForInvoiceByDealerId($dealerId);
+                $this->locationRepo->turnOffDefaultLocationForInvoicingByDealerId($dealerId);
             }
 
             $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
@@ -138,9 +143,14 @@ class DealerLocationService implements DealerLocationServiceInterface
         try {
             $this->locationRepo->beginTransaction();
 
+            if (!empty($params['is_default'])) {
+                // remove any default location if exists
+                $this->locationRepo->turnOffDefaultLocationByDealerId($dealerId);
+            }
+
             if (!empty($params['is_default_for_invoice'])) {
                 // remove any default location for invoice if exists
-                $this->locationRepo->turnOffDefaultLocationForInvoiceByDealerId($dealerId);
+                $this->locationRepo->turnOffDefaultLocationForInvoicingByDealerId($dealerId);
             }
 
             $locationRelDefinition = ['dealer_location_id' => $locationId];

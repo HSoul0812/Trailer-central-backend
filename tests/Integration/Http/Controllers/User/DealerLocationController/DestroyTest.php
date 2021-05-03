@@ -148,7 +148,7 @@ class DestroyTest extends AbstractDealerLocationController
     /**
      * @return array<string, callable>
      */
-    public function errorsAssertions(): array
+    private function errorsAssertions(): array
     {
         return [
             'wrong dealer location' => function (MessageBag $bag) {

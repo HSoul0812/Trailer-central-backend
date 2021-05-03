@@ -106,6 +106,8 @@ class CreateTest extends AbstractDealerLocationController
             'postalcode' => '87104',
             'phone' => '8126295574',
             'tax_calculator_id' => 1,
+            'is_default' => 1,
+            'is_default_for_invoice' => 1,
             'sales_tax_items' => [
                 ['entity_type_id' => 5, 'item_type' => 'state'],
                 ['entity_type_id' => 5, 'item_type' => 'city'],
@@ -137,6 +139,16 @@ class CreateTest extends AbstractDealerLocationController
             'name' => $params['name'],
         ]);
 
+        // And I should see that I have only one dealer location as default location and that location is the expected location
+        $defaultLocations = DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1])->get();
+        self::assertCount(1, $defaultLocations);
+        self::assertSame($locationId, $defaultLocations->first()->dealer_location_id);
+
+        // And I should see that I have only one dealer location as default location for invoicing and that location is the expected location
+        $defaultLocationsForInvoicing = DealerLocation::where(['dealer_id' => $dealerId, 'is_default_for_invoice' => 1])->get();
+        self::assertCount(1, $defaultLocationsForInvoicing);
+        self::assertSame($locationId, $defaultLocationsForInvoicing->first()->dealer_location_id);
+
         // And I should see the persisted record has other related records
         self::assertCount(1, DealerLocationSalesTax::where(['dealer_location_id' => $locationId])->get());
         self::assertCount(2, DealerLocationSalesTaxItem::where(['dealer_location_id' => $locationId])->get());
@@ -165,7 +177,7 @@ class CreateTest extends AbstractDealerLocationController
     /**
      * @return array<string, callable>
      */
-    public function errorsAssertions(): array
+    private function errorsAssertions(): array
     {
         return [
             '"sales_tax_items" and "fees" errors have a specific message' => function (MessageBag $bag) {

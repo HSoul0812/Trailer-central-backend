@@ -99,7 +99,12 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         return $location->fill($params)->save();
     }
 
-    public function turnOffDefaultLocationForInvoiceByDealerId(int $dealerId): bool
+    public function turnOffDefaultLocationByDealerId(int $dealerId): bool
+    {
+        return DealerLocation::where('dealer_id', $dealerId)->update(['is_default' => 0]);
+    }
+
+    public function turnOffDefaultLocationForInvoicingByDealerId(int $dealerId): bool
     {
         return DealerLocation::where('dealer_id', $dealerId)->update(['is_default_for_invoice' => 0]);
     }

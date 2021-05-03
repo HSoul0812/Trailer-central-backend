@@ -85,6 +85,71 @@ class UpdateTest extends TestCase
     }
 
     /**
+     * Test that SUT will create a new dealer location setting it up as default location and turning off others
+     * locations belonging to that dealer
+     *
+     * @throws Exception when an unexpected exception has not been handled
+     */
+    public function testWillTryTurningOffAnyDefaultLocation(): void
+    {
+        /** @var  MockInterface|LegacyMockInterface|DealerLocationService $service */
+        /** @var  MockInterface|LegacyMockInterface|DealerLocation $location */
+
+        // Given I have the seven dependencies for "DealerLocationService"
+        $dependencies = new DealerLocationServiceDependencies();
+
+        // And I have a well constructed "DealerLocationService"
+        $service = Mockery::mock(DealerLocationService::class, $dependencies->getOrderedArguments())
+            ->shouldAllowMockingProtectedMethods()
+            ->makePartial();
+
+        // And I have a dealer id
+        $dealerId = $this->faker->numberBetween(1, 100000);
+
+        // And I have the parameter "is_default_for_invoice" and "is_default" checked
+        $params = ['is_default_for_invoice' => 1, 'is_default' => 1];
+
+        // And I have well known dealer location
+        $location = factory(DealerLocation::class)->make([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $this->faker->numberBetween(1, 50000)
+        ]);
+
+        // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
+        $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
+
+        // And I expect that "DealerLocationRepositoryInterface::turnOffDefaultLocationByDealerId" method
+        // is called once with a known parameter
+        $dependencies->locationRepo->shouldReceive('turnOffDefaultLocationByDealerId')->with($dealerId)->once();
+
+        // And I expect that "DealerLocationRepositoryInterface::turnOffDefaultLocationForInvoicingByDealerId" method
+        // is called once with a known parameter
+        $dependencies->locationRepo->shouldReceive('turnOffDefaultLocationForInvoicingByDealerId')->with($dealerId)->once();
+
+        // And I expect that "DealerLocationRepositoryInterface::update" method is called once, with known parameters
+        $dependencies->locationRepo
+            ->shouldReceive('update')
+            ->with($params + ['dealer_location_id' => $location->dealer_location_id, 'sales_tax_item_column_titles' => []])
+            ->once();
+
+        // And I expect that "DealerLocationSalesTaxRepositoryInterface::updateOrCreateByDealerLocationId" method
+        // is called once, with known parameters
+        $dependencies->salesTaxRepo
+            ->shouldReceive('updateOrCreateByDealerLocationId')
+            ->with($location->dealer_location_id, $params)
+            ->once();
+
+        // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
+        $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
+
+        // When I call the "DealerLocationService::update" method with known parameters
+        $result = $service->update($location->dealer_location_id, $dealerId, $params);
+
+        // Then I expect that "DealerLocationService::update" returns true
+        self::assertTrue($result);
+    }
+
+    /**
      * Test that SUT will update certainly number of tax items
      *
      * @throws Exception when an unexpected exception has not been handled

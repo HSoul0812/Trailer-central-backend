@@ -115,6 +115,7 @@ class UpdateTest extends AbstractDealerLocationController
             'env_fee_basis' => 'parts_and_labor',
             'env_fee_pct' => 3,
             'is_default' => 1,
+            'is_default_for_invoice' => 1,
             'sales_tax_items' => [
                 ['entity_type_id' => 5, 'item_type' => 'state'],
                 ['entity_type_id' => 5, 'item_type' => 'city'],
@@ -140,8 +141,15 @@ class UpdateTest extends AbstractDealerLocationController
         // And I should see the data retrieved has a key-value "id" which is the identifier of the recently updated dealer location
         $locationId = $data['data']['id'];
 
-        // And I should see that I have only one dealer location as default location
-        self::assertCount(1, DealerLocation::where(['dealer_location_id' => $locationId, 'is_default' => 1])->get());
+        // And I should see that I have only one dealer location as default location and that location is the expected location
+        $defaultLocations = DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1])->get();
+        self::assertCount(1, $defaultLocations);
+        self::assertSame($locationId, $defaultLocations->first()->dealer_location_id);
+
+        // And I should see that I have only one dealer location as default location for invoicing and that location is the expected location
+        $defaultLocationsForInvoicing = DealerLocation::where(['dealer_id' => $dealerId, 'is_default_for_invoice' => 1])->get();
+        self::assertCount(1, $defaultLocationsForInvoicing);
+        self::assertSame($locationId, $defaultLocationsForInvoicing->first()->dealer_location_id);
 
         // And I should see that a record has been persisted with certain values
         $this->assertDatabaseHas(DealerLocation::getTableName(), [
@@ -187,7 +195,7 @@ class UpdateTest extends AbstractDealerLocationController
     /**
      * @return array<string, callable>
      */
-    public function errorsAssertions(): array
+    private function errorsAssertions(): array
     {
         return [
             'wrong dealer location' => function (MessageBag $bag) {

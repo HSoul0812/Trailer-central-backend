@@ -86,7 +86,7 @@ class CreateTest extends TestCase
     }
 
     /**
-     * Test that SUT will try updating to zero the "is_default" column of any dealer location
+     * Test that SUT will try updating to zero the "is_default" and "is_default_for_invoice" column of any dealer location
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -106,8 +106,8 @@ class CreateTest extends TestCase
         // And I have a dealer id
         $dealerId = $this->faker->numberBetween(1, 100000);
 
-        // And I have the parameter "is_default_for_invoice"
-        $params = ['is_default_for_invoice' => 1];
+        // And I have the parameter "is_default_for_invoice" and "is_default" checked
+        $params = ['is_default_for_invoice' => 1, 'is_default' => 1];
 
         // Then I know that I will receive an expected location
         $expectedLocation = factory(DealerLocation::class)->make([
@@ -118,9 +118,13 @@ class CreateTest extends TestCase
         // And I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
-        // And I expect that "DealerLocationRepositoryInterface::turnOffDefaultLocationForInvoiceByDealerId" method
+        // And I expect that "DealerLocationRepositoryInterface::turnOffDefaultLocationByDealerId" method
         // is called once with a known parameter
-        $dependencies->locationRepo->shouldReceive('turnOffDefaultLocationForInvoiceByDealerId')->with($dealerId)->once();
+        $dependencies->locationRepo->shouldReceive('turnOffDefaultLocationByDealerId')->with($dealerId)->once();
+
+        // And I expect that "DealerLocationRepositoryInterface::turnOffDefaultLocationForInvoicingByDealerId" method
+        // is called once with a known parameter
+        $dependencies->locationRepo->shouldReceive('turnOffDefaultLocationForInvoicingByDealerId')->with($dealerId)->once();
 
         // And I expect that "DealerLocationRepositoryInterface::create" method is called once, with known parameters
         // returning a known "DealerLocation" instance
