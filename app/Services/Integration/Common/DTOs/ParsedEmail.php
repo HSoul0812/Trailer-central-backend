@@ -5,6 +5,8 @@ namespace App\Services\Integration\Common\DTOs;
 use App\Models\CRM\Email\Attachment;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
@@ -15,6 +17,8 @@ use Carbon\Carbon;
  */
 class ParsedEmail
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @var string ID of Email from Source
      */

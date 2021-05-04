@@ -4,6 +4,8 @@ namespace App\Services\CRM\Email\DTOs;
 
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Integration\Auth\AccessToken;
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 
 /**
  * Class SmtpConfig
@@ -12,6 +14,8 @@ use App\Models\Integration\Auth\AccessToken;
  */
 class SmtpConfig
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @const string SSL
      */
@@ -72,27 +76,7 @@ class SmtpConfig
      * @var string Access Token
      */
     private $accessToken;
-    
 
-    /**
-     * Get Smtp Config From Provided Params
-     * 
-     * @param array $params
-     */
-    public function __construct(array $params = []) {
-        // Variables Exist?
-        if(!empty($params)) {
-            // Check All Class Vars for Matches
-            $vars = get_class_vars(get_class($this));
-            
-            foreach($vars as $var => $val) {                
-                if(isset($params[$var])) {
-                    $method = 'set' . ucfirst($var);
-                    $this->{$method}($params[$var]);
-                }
-            }
-        }
-    }
 
     /**
      * Get Smtp Config From Sales Person
@@ -101,22 +85,16 @@ class SmtpConfig
      * @return SmtpConfig
      */
     public static function fillFromSalesPerson(SalesPerson $salesperson): SmtpConfig {
-        // Initialize
-        $smtpConfig = new self();
-
-        // Set Username/Password
-        $smtpConfig->setFromName($salesperson->full_name);
-        $smtpConfig->setUsername($salesperson->smtp_email);
-        $smtpConfig->setPassword($salesperson->smtp_password);
-
-        // Set Host/Post
-        $smtpConfig->setHost($salesperson->smtp_server);
-        $smtpConfig->setPort((int) $salesperson->smtp_port ?? 0);
-        $smtpConfig->setSecurity($salesperson->smtp_security ?: '');
-        $smtpConfig->setAuthType($salesperson->smtp_auth ?: '');
-
-        // Return SMTP Config
-        return $smtpConfig;
+        // Return SmtpConfig
+        return new self([
+            'from_name' => $salesperson->full_name,
+            'username' => $salesperson->smtp_email,
+            'password' => $salesperson->smtp_password,
+            'host' => $salesperson->smtp_service,
+            'port' => $salesperson->smtp_port,
+            'security' => $salesperson->smtp_security,
+            'auth_type' => $salesperson->smtp_auth
+        ]);
     }
 
 

@@ -2,21 +2,12 @@
 
 namespace App\Services\CRM\Interactions;
 
-use App\Exceptions\CRM\Leads\SendInquiryFailedException;
-use App\Mail\InquiryEmail;
-use App\Services\CRM\Leads\DTOs\InquiryLead;
-use App\Models\CRM\Leads\Lead;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\Website\WebsiteRepositoryInterface;
-use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
-use App\Repositories\Parts\PartRepositoryInterface;
-use App\Repositories\Showroom\ShowroomRepositoryInterface;
-use App\Repositories\User\UserRepositoryInterface;
-use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Services\CRM\Interactions\DTOs\EmailBuilderConfig;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -29,39 +20,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     use CustomerHelper, MailHelper;
 
     /**
-     * @var App\Repositories\Inventory\InventoryRepositoryInterface
+     * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
      */
-    protected $inventory;
-
-    /**
-     * @var App\Repositories\Parts\PartRepositoryInterface
-     */
-    protected $part;
-
-    /**
-     * @var App\Repositories\Showroom\ShowroomRepositoryInterface
-     */
-    protected $showroom;
-
-    /**
-     * @var App\Repositories\Website\WebsiteRepositoryInterface
-     */
-    protected $website;
-
-    /**
-     * @var App\Repositories\Website\Config\WebsiteConfigRepositoryInterface
-     */
-    protected $websiteConfig;
-
-    /**
-     * @var App\Repositories\User\UserRepositoryInterface
-     */
-    protected $user;
-
-    /**
-     * @var App\Repositories\User\DealerLocationRepositoryInterface
-     */
-    protected $dealerLocation;
+    protected $salespeople;
 
     /**
      * @var Illuminate\Support\Facades\Log
@@ -69,30 +30,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $log;
 
     /**
-     * @param InventoryRepositoryInterface $inventory
-     * @param PartRepositoryInterface $part
-     * @param ShowroomRepositoryInterface $showroom
-     * @param WebsiteRepositoryInterface $website
-     * @param WebsiteConfigRepositoryInterface $websiteConfig
-     * @param UserRepositoryInterface $user
-     * @param DealerLocationRepositoryInterface $dealerLocation
+     * @param SalesPersonRepositoryInterface $salespeople
      */
     public function __construct(
-        InventoryRepositoryInterface $inventory,
-        PartRepositoryInterface $part,
-        ShowroomRepositoryInterface $showroom,
-        WebsiteRepositoryInterface $website,
-        WebsiteConfigRepositoryInterface $websiteConfig,
-        UserRepositoryInterface $user,
-        DealerLocationRepositoryInterface $dealerLocation
+        SalesPersonRepositoryInterface $salespeople
     ) {
-        $this->inventory = $inventory;
-        $this->part = $part;
-        $this->showroom = $showroom;
-        $this->website = $website;
-        $this->websiteConfig = $websiteConfig;
-        $this->user = $user;
-        $this->dealerLocation = $dealerLocation;
+        $this->salespeople = $salespeople;
 
         // Initialize Logger
         $this->log = Log::channel('emailbuilder');
@@ -109,29 +52,58 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Get Blast Details
         $blast = $this->blasts->get(['id' => $params['id']]);
 
+        // Get Sales Person
+        $salesPerson = $this->salespeople->getBySmtpEmail($blast->from_email_address);
+
         // Create Email Builder Email!
         $builder = new EmailBuilderConfig([
+            'id' => $blast->email_blasts_id,
+            'type' => 'blast',
             'subject' => $blast->campaign_subject,
             'template' => $blast->template->html,
-            'from_email' => $blast->from_email_address
+            'template_id' => $blast->template->template_id,
+            'from_email' => $blast->from_email_address,
+            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
 
-        // Try/Send Email!
-        try {
-            // Loop Leads
-            foreach($params['leads'] as $leadId) {
-                $this->send($builder, $leadId);
+        // Loop Leads
+        $successfullySent = [];
+        foreach($params['leads'] as $leadId) {
+            // Try/Send Email!
+            try {
+                // Send Email
+                $this->send($this->addLeadToBuilder($builder, $leadId));
 
                 // Send Notice
+                $successfullySent[] = $leadId;
                 $this->log->info('Sent Email Blast #' . $blast->id . ' to Lead with ID: ' . $leadId);
+            } catch(\Exception $ex) {
+                $this->log->error($ex->getMessage(), $ex->getTrace());
             }
-        } catch(\Exception $ex) {
-            $this->log->error($ex->getMessage() . ': ' . $ex->getTraceAsString());
-            throw new SendBlastEmailsFailedException($ex->getMessage());
         }
 
         // Returns True on Success
-        $this->log->info('Sent ' . count($params['leads']) . ' Email Blasts for Dealer ' . $params['dealer_id']);
+        $this->log->info('Sent ' . count($successfullySent) . ' Email Blasts for Dealer ' . $params['dealer_id']);
         return true;
+    }
+
+
+    /**
+     * Add Lead Details to Builder Config
+     * 
+     * @param EmailBuilderConfig $config
+     * @param int $leadId
+     * @return EmailBuilderConfig
+     */
+    private function addLeadToBuilder(EmailBuilderConfig $config, int $leadId): EmailBuilderConfig
+    {
+        // Get Lead
+        $lead = $this->leads->get(['id' => $leadId]);
+
+        // Insert Lead Details
+        $config->addLeadConfig($leadId, $lead->email_address, $lead->full_name);
+
+        // Return Updated Config
+        return $config;
     }
 }

@@ -6,6 +6,14 @@ use App\Repositories\Repository;
 use App\Utilities\JsonApi\RequestQueryable;
 
 interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
+    /**
+     * Find SMTP By Email
+     *
+     * @param int $userId
+     * @param string $email
+     * @return SalesPerson
+     */
+    public function findSmtpByEmail(int $userId, string $email): SalesPerson;
 
     /**
      * Generate a salesperson sales report;

@@ -41,6 +41,12 @@ class EmailBuilderConfig
     private $fromEmail;
 
     /**
+     * @var SmtpConfig SMTP Config to Send Email From
+     */
+    private $smtpConfig;
+
+
+    /**
      * @var string To Email to Use to Send Email Builder To
      */
     private $toEmail;
@@ -49,4 +55,25 @@ class EmailBuilderConfig
      * @var string To Name to Use to Send Email Builder To
      */
     private $toName;
+
+    /**
+     * @var int Lead ID To Email/Name Comes From
+     */
+    private $leadId;
+
+
+    /**
+     * Get Log Params
+     * 
+     * @return array{lead: int,
+     *               type: string,
+     *               $this->type: int}
+     */
+    public function getLogParams(): array {
+        return [
+            'lead' => $this->leadId,
+            'type' => $this->type,
+            $this->type => $this->id
+        ];
+    }
 }
