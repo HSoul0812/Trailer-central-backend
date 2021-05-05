@@ -68,16 +68,17 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Send Lead Emails for Blast
      * 
-     * @param array $params
+     * @param int $id ID of Blast to Send Emails For
+     * @param array<int> ID's of Leads to Send Emails For Blast
      * @throws SendBlastEmailsFailedException
      * @return bool
      */
-    public function sendBlast(array $params): bool {
+    public function sendBlast(int $id, array $leads): bool {
         // Get Blast Details
-        $blast = $this->blasts->get(['id' => $params['id']]);
+        $blast = $this->blasts->get(['id' => $id]);
 
         // Get Sales Person
-        $salesPerson = $this->salespeople->getBySmtpEmail($blast->from_email_address);
+        $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
@@ -86,7 +87,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'subject' => $blast->campaign_subject,
             'template' => $blast->template->html,
             'template_id' => $blast->template->template_id,
-            'user_id' => $params['user_id'],
+            'user_id' => $blast->user_id,
             'sales_person_id' => $salesPerson->id,
             'from_email' => $blast->from_email_address,
             'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
@@ -94,7 +95,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Loop Leads
         $successfullySent = [];
-        foreach($params['leads'] as $leadId) {
+        foreach($leads as $leadId) {
             // Try/Send Email!
             try {
                 // Get Lead
@@ -112,7 +113,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Returns True on Success
-        $this->log->info('Sent ' . count($successfullySent) . ' Email Blasts for Dealer ' . $params['dealer_id']);
+        $this->log->info('Sent ' . count($successfullySent) . ' Email Blasts for Dealer ' . $blast->user_id);
         return true;
     }
 }
