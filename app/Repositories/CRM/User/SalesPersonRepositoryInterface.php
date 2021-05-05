@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\User;
 
+use App\Models\CRM\User\SalesPerson;
 use App\Repositories\Repository;
 use App\Utilities\JsonApi\RequestQueryable;
 
