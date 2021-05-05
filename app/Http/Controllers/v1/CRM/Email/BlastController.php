@@ -4,13 +4,13 @@ namespace App\Http\Controllers\v1\CRM\Email;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
-use App\Services\CRM\Interactions\EmailBuilderServiceInterface;
 /*use App\Http\Requests\CRM\Email\GetBlastsRequest;
 use App\Http\Requests\CRM\Email\CreateBlastRequest;
 use App\Http\Requests\CRM\Email\ShowBlastRequest;
 use App\Http\Requests\CRM\Email\UpdateBlastRequest;
 use App\Http\Requests\CRM\Email\DeleteBlastRequest;*/
 use App\Http\Requests\CRM\Email\SendBlastRequest;
+use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Transformers\CRM\Email\BlastTransformer;
 use Dingo\Api\Http\Request;
 

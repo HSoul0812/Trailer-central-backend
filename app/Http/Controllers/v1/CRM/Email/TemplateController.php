@@ -4,14 +4,15 @@ namespace App\Http\Controllers\v1\CRM\Email;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
-use Dingo\Api\Http\Request;
 /*use App\Http\Requests\CRM\Email\GetTemplatesRequest;
 use App\Http\Requests\CRM\Email\CreateTemplateRequest;
 use App\Http\Requests\CRM\Email\ShowTemplateRequest;
 use App\Http\Requests\CRM\Email\UpdateTemplateRequest;
 use App\Http\Requests\CRM\Email\DeleteTemplateRequest;*/
 use App\Http\Requests\CRM\Email\SendTemplateRequest;
+use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Transformers\CRM\Email\TemplateTransformer;
+use Dingo\Api\Http\Request;
 
 class TemplateController extends RestfulControllerV2
 {

@@ -4,14 +4,15 @@ namespace App\Http\Controllers\v1\CRM\Email;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
-use Dingo\Api\Http\Request;
 /*use App\Http\Requests\CRM\Email\GetCampaignsRequest;
 use App\Http\Requests\CRM\Email\CreateCampaignRequest;
 use App\Http\Requests\CRM\Email\ShowCampaignRequest;
 use App\Http\Requests\CRM\Email\UpdateCampaignRequest;
 use App\Http\Requests\CRM\Email\DeleteCampaignRequest;*/
 use App\Http\Requests\CRM\Email\SendCampaignRequest;
+use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Transformers\CRM\Email\CampaignTransformer;
+use Dingo\Api\Http\Request;
 
 class CampaignController extends RestfulControllerV2
 {
