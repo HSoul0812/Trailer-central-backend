@@ -2,10 +2,10 @@
 
 namespace App\Repositories\CRM\Email;
 
-use Illuminate\Support\Facades\DB;
-use App\Repositories\CRM\Email\CampaignRepositoryInterface;
-use App\Models\CRM\Email\CampaignSent;
 use App\Exceptions\NotImplementedException;
+use App\Models\CRM\Email\CampaignSent;
+use App\Repositories\CRM\Email\CampaignRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class CampaignRepository implements CampaignRepositoryInterface {
 

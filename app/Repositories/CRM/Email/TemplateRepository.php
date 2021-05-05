@@ -2,9 +2,9 @@
 
 namespace App\Repositories\CRM\Email;
 
-use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Email\Template;
+use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 
 class TemplateRepository implements TemplateRepositoryInterface {
 

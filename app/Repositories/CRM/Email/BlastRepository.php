@@ -2,9 +2,10 @@
 
 namespace App\Repositories\CRM\Email;
 
-use Illuminate\Support\Facades\DB;
-use App\Repositories\CRM\Email\BlastRepositoryInterface;
+use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Email\BlastSent;
+use App\Repositories\CRM\Email\BlastRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class BlastRepository implements BlastRepositoryInterface {
 
