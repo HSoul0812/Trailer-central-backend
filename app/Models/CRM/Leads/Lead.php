@@ -309,7 +309,7 @@ class Lead extends Model
      */
     public function getInventoryIdsAttribute() {
         // Initialize Inventory ID's Array
-        $inventoryIds = $this->units()->pluck('inventory_id')->toArray();
+        $inventoryIds = $this->units()->pluck('inventory.inventory_id')->toArray();
 
         // Append Current Inventory ID
         array_unshift($inventoryIds, $this->inventory_id);

@@ -9,6 +9,7 @@ use App\Http\Requests\Parts\GetBinsRequest;
 use App\Transformers\Parts\BinTransformer;
 use App\Http\Requests\Parts\CreateBinRequest;
 use App\Http\Requests\Parts\UpdateBinRequest;
+use App\Http\Requests\Parts\DeleteBinRequest;
 
 class BinController extends RestfulController
 {
@@ -97,6 +98,14 @@ class BinController extends RestfulController
         $request = new UpdateBinRequest($request->all());
         if ($request->validate()) {
             return $this->response->item($this->bins->update(array_merge(['bin_id' => $id, $request->all()])), new BinTransformer);
+        }
+        return $this->response->errorBadRequest();
+    }
+    
+    public function destroy(int $id) {
+        $request = new DeleteBinRequest(['bin_id' => $id]);
+        if ($request->validate() && $this->bins->delete($request->all())) {
+            return $this->response->created();
         }
         return $this->response->errorBadRequest();
     }

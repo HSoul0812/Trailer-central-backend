@@ -47,7 +47,7 @@ class CreateInventoryRequest extends Request
         'weight' => 'numeric|nullable',
         'gvwr' => 'numeric|nullable',
         'axle_capacity' => 'numeric|nullable',
-        'cost_of_unit' => 'string|max:255|nullable',
+        'cost_of_unit' => 'numeric|nullable',
         'true_cost' => 'numeric|nullable',
         'cost_of_shipping' => 'string|max:255|nullable',
         'cost_of_prep' => 'string|max:255|nullable',

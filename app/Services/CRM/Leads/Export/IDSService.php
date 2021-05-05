@@ -8,6 +8,7 @@ use App\Jobs\CRM\Leads\Export\IDSJob;
 use Illuminate\Support\Facades\Log;
 use App\Models\CRM\Leads\Export\LeadEmail;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class IDSService implements IDSServiceInterface {
     
@@ -21,7 +22,14 @@ class IDSService implements IDSServiceInterface {
     }
     
     public function export(Lead $lead) : bool {
-        $leadEmail = $this->leadEmailRepository->getLeadEmailByLead($lead);
+        try {
+            $leadEmail = $this->leadEmailRepository->getLeadEmailByLead($lead);
+        } catch (ModelNotFoundException $ex) {
+            $lead->ids_exported = 1;
+            $lead->save();
+            return false;
+        }
+        
         
         if ($leadEmail->export_format !== LeadEMail::EXPORT_FORMAT_IDS) {
             return false;

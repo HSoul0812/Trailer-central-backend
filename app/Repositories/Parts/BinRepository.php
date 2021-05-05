@@ -22,7 +22,8 @@ class BinRepository implements BinRepositoryInterface
 
     public function delete($params)
     {
-        throw new NotImplementedException;
+        $bin = Bin::findOrFail($params['bin_id']);
+        return $bin->delete();
     }
 
     public function get($params)
@@ -43,7 +44,7 @@ class BinRepository implements BinRepositoryInterface
         if (isset($params['location'])) {
             $query = $query->where('location', $params['location']);
         }
-
+       
         // Return First Value
         return $query->first();
     }
@@ -62,6 +63,11 @@ class BinRepository implements BinRepositoryInterface
 
         if (isset($params['bin_name'])) {
             $query = $query->where('bin_name', 'like', '%' . $params['bin_name'] . '%');
+        }
+        
+        // Added for consistency
+        if (isset($params['search_term'])) {
+            $query = $query->where('bin_name', 'LIKE', "%{$params['search_term']}%");
         }
 
         return $query->paginate($params['per_page'])->appends($params);
