@@ -16,6 +16,8 @@ use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
+use App\Repositories\CRM\User\EmailFolderRepository;
+use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepository;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Dms\Docupilot\DocumentTemplatesRepository;
@@ -86,6 +88,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(SalesPersonRepositoryInterface::class, function() {
             return new SalesPersonRepository(SalesPerson::query());
         });
+        $this->app->bind(EmailFolderRepositoryInterface::class, EmailFolderRepository::class);
 
         $this->app->bind(FinancingCompanyRepositoryInterface::class, function() {
             return new FinancingCompanyRepository(FinancingCompany::query());
