@@ -73,8 +73,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         foreach($params['leads'] as $leadId) {
             // Try/Send Email!
             try {
+                // Get Lead
+                $lead = $this->leads->get(['id' => $leadId]);
+
                 // Send Email
-                $this->send($this->addLeadToBuilder($builder, $leadId));
+                $this->send($this->addLeadToBuilder($builder, $lead));
 
                 // Send Notice
                 $successfullySent[] = $leadId;
@@ -87,25 +90,5 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Returns True on Success
         $this->log->info('Sent ' . count($successfullySent) . ' Email Blasts for Dealer ' . $params['dealer_id']);
         return true;
-    }
-
-
-    /**
-     * Add Lead Details to Builder Config
-     * 
-     * @param BuilderEmail $config
-     * @param int $leadId
-     * @return BuilderEmail
-     */
-    private function addLeadToBuilder(BuilderEmail $config, int $leadId): BuilderEmail
-    {
-        // Get Lead
-        $lead = $this->leads->get(['id' => $leadId]);
-
-        // Insert Lead Details
-        $config->addLeadConfig($leadId, $lead->email_address, $lead->full_name);
-
-        // Return Updated Config
-        return $config;
     }
 }

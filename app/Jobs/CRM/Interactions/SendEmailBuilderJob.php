@@ -89,9 +89,6 @@ class SendEmailBuilderJob extends Job
      * @return EmailHistory
      */
     private function saveToDb(EmailHistoryRepositoryInterface $emailHistoryRepo): EmailHistory {
-        // Get Parsed Email
-        $parsedEmail = $this->config->getParsedEmail();
-
         // Create or Update
         if(!empty($this->config->leadId)) {
             $interaction = $this->interactions->create([
@@ -107,17 +104,9 @@ class SendEmailBuilderJob extends Job
         }
 
         // Create Email History Entry
-        return $emailHistoryRepo->create([
-            'lead_id' => !empty($this->config->leadId) ? $this->config->leadId : 0,
-            'interaction_id' => !empty($interaction->interaction_id) ? $interaction->interaction_id : 0,
-            'message_id' => $parsedEmail->messageId,
-            'to_email' => $this->config->toEmail,
-            'to_name' => $this->config->toName,
-            'from_email' => $this->config->fromEmail,
-            'subject' => $this->config->subject,
-            'body' => $this->getFilledTemplate(),
-            'use_html' => 1
-        ]);
+        return $emailHistoryRepo->create(
+            $this->config->getEmailHistoryParams($interaction->interaction_id)
+        );
     }
 
     /**
@@ -178,6 +167,7 @@ class SendEmailBuilderJob extends Job
             $emailHistoryRepo->update([
                 'id' => $finalEmail->emailHistoryId,
                 'message_id' => $finalEmail->messageId,
+                'body' => $finalEmail->body,
                 'date_sent' => 1
             ]);
         }

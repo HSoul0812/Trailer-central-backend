@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Interactions\DTOs;
 
+use App\Models\CRM\Leads\Lead;
 use App\Traits\MailHelper;
 
 /**
@@ -53,6 +54,11 @@ class BuilderEmail
      */
     private $templateId;
 
+    /**
+     * @var string Message-ID Generated to Send With Email
+     */
+    private $messageId;
+
 
     /**
      * @var int ID of User
@@ -99,16 +105,35 @@ class BuilderEmail
     /**
      * Add Lead Details
      * 
-     * @param int $leadId
-     * @param string $email
-     * @param string $name
+     * @param Lead $lead
      * @return void
      */
-    public function addLeadConfig(int $leadId, string $email, string $name): void
+    public function addLeadConfig(Lead $lead): void
     {
-        $this->leadId = $leadId;
-        $this->email = $email;
-        $this->name = $name;
+        // Insert Lead Details
+        $this->leadId = $lead->identifier;
+        $this->toEmail = $lead->email_address;
+        $this->toName = $lead->full_name;
+
+        // Get Title of Unit of Interest
+        $this->titleUnitInterest = $lead->inventory_title;
+    }
+
+
+    /**
+     * Return Message ID or Generate New One
+     * 
+     * @return string
+     */
+    public function getMessageId() {
+        // No Message ID Exists?
+        if(empty($this->messageId)) {
+            // Get Unique Message ID
+            $this->messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
+        }
+
+        // Return Message ID
+        return $this->messageId;
     }
 
     /**
@@ -138,6 +163,36 @@ class BuilderEmail
 
 
     /**
+     * Get Email History Params Fill Array
+     * 
+     * @param int $interactionId
+     * @return array{lead_id: null|int,
+     *               interaction_id: null|int
+     *               message_id: string,
+     *               to_email: string,
+     *               to_name: string,
+     *               from_email: string,
+     *               subject: string,
+     *               body: string,
+     *               use_html: bool}
+     */
+    public function getEmailHistoryParams(?int $interactionId = 0): array
+    {
+        // Return Email History Fill Params
+        return [
+            'lead_id' => !empty($this->config->leadId) ? $this->config->leadId : 0,
+            'interaction_id' => !empty($interactionId) ? $interactionId : 0,
+            'message_id' => $this->getMessageId(),
+            'to_email' => $this->toEmail,
+            'to_name' => $this->toName,
+            'from_email' => $this->fromEmail,
+            'subject' => $this->subject,
+            'body' => $this->getFilledTemplate(),
+            'use_html' => true
+        ];
+    }
+
+    /**
      * Get Log Params
      * 
      * @return array{lead: int,
@@ -161,13 +216,10 @@ class BuilderEmail
      */
     public function getParsedEmail(int $emailId = 0): ParsedEmail
     {
-        // Get Unique Message ID
-        $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
-
         // Return ParsedEmail
         return new ParsedEmail([
             'email_history_id' => $emailId,
-            'message_id' => sprintf('<%s>', $messageId),
+            'message_id' => sprintf('<%s>', $this->getMessageId()),
             'lead_id' => $this->leadId,
             'to' => $this->toEmail,
             'to_name' => $this->toName,
