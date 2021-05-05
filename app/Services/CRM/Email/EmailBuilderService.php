@@ -2,6 +2,9 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Repositories\CRM\Email\BlastRepositoryInterface;
+use App\Repositories\CRM\Email\CampaignRepositoryInterface;
+use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
@@ -20,6 +23,21 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     use CustomerHelper, MailHelper;
 
     /**
+     * @var App\Repositories\CRM\Email\BlastRepositoryInterface
+     */
+    protected $blasts;
+
+    /**
+     * @var App\Repositories\CRM\Email\CampaignRepositoryInterface
+     */
+    protected $campaigns;
+
+    /**
+     * @var App\Repositories\CRM\Email\TemplateRepositoryInterface
+     */
+    protected $templates;
+
+    /**
      * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
      */
     protected $salespeople;
@@ -33,8 +51,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param SalesPersonRepositoryInterface $salespeople
      */
     public function __construct(
+        BlastRepositoryInterface $blasts,
+        CampaignRepositoryInterface $campaigns,
+        TemplateRepositoryInterface $templates,
         SalesPersonRepositoryInterface $salespeople
     ) {
+        $this->blasts = $blasts;
+        $this->campaigns = $campaigns;
+        $this->templates = $templates;
         $this->salespeople = $salespeople;
 
         // Initialize Logger
