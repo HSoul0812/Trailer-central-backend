@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
@@ -12,6 +13,7 @@ use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 /**
  * Class EmailBuilderService
@@ -20,7 +22,7 @@ use Illuminate\Support\Facades\Log;
  */
 class EmailBuilderService implements EmailBuilderServiceInterface
 {
-    use CustomerHelper, MailHelper;
+    use DispatchesJobs, CustomerHelper, MailHelper;
 
     /**
      * @var App\Repositories\CRM\Email\BlastRepositoryInterface
@@ -93,27 +95,49 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
 
+        // Send Emails
+        $emails = $this->sendEmails($builder, $leads);
+
+        // Returns True on Success
+        $this->log->info('Sent ' . $emails->count() . ' Email Blasts for Dealer ' . $blast->user_id);
+        return true;
+    }
+
+
+    /**
+     * Send Emails for Builder Config
+     * 
+     * @param BuilderEmail $builder
+     * @param array $leads
+     * @return Collection<int> Collection of Lead ID's That Started Sending
+     */
+    private function sendEmails(BuilderEmail $builder, array $leads) {
+        // Initialize Sent Emails Collection
+        $sentEmails = new Collection();
+
         // Loop Leads
-        $successfullySent = [];
         foreach($leads as $leadId) {
             // Try/Send Email!
             try {
                 // Get Lead
                 $lead = $this->leads->get(['id' => $leadId]);
 
-                // Send Email
-                $this->send($this->addLeadToBuilder($builder, $lead));
+                // Add Lead Config to Builder Email
+                $builder->addLeadConfig($lead);
+
+                // Dispatch Send EmailBuilder Job
+                $job = new SendEmailBuilderJob($builder);
+                $this->dispatch($job->onQueue('mails'));
 
                 // Send Notice
-                $successfullySent[] = $leadId;
-                $this->log->info('Sent Email Blast #' . $blast->id . ' to Lead with ID: ' . $leadId);
+                $sentEmails->push($leadId);
+                $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
             } catch(\Exception $ex) {
                 $this->log->error($ex->getMessage(), $ex->getTrace());
             }
         }
 
-        // Returns True on Success
-        $this->log->info('Sent ' . count($successfullySent) . ' Email Blasts for Dealer ' . $blast->user_id);
-        return true;
+        // Return Sent Emails Collection
+        return $sentEmails;
     }
 }
