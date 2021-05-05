@@ -5,7 +5,7 @@ namespace App\Services\CRM\Interactions;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
-use App\Services\CRM\Interactions\DTOs\EmailBuilderConfig;
+use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Illuminate\Support\Facades\Log;
@@ -56,12 +56,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $salesPerson = $this->salespeople->getBySmtpEmail($blast->from_email_address);
 
         // Create Email Builder Email!
-        $builder = new EmailBuilderConfig([
+        $builder = new BuilderEmail([
             'id' => $blast->email_blasts_id,
             'type' => 'blast',
             'subject' => $blast->campaign_subject,
             'template' => $blast->template->html,
             'template_id' => $blast->template->template_id,
+            'user_id' => $params['user_id'],
+            'sales_person_id' => $salesPerson->id,
             'from_email' => $blast->from_email_address,
             'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
@@ -91,11 +93,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Add Lead Details to Builder Config
      * 
-     * @param EmailBuilderConfig $config
+     * @param BuilderEmail $config
      * @param int $leadId
-     * @return EmailBuilderConfig
+     * @return BuilderEmail
      */
-    private function addLeadToBuilder(EmailBuilderConfig $config, int $leadId): EmailBuilderConfig
+    private function addLeadToBuilder(BuilderEmail $config, int $leadId): BuilderEmail
     {
         // Get Lead
         $lead = $this->leads->get(['id' => $leadId]);

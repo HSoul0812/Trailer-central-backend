@@ -25,7 +25,6 @@ class BlastController extends RestfulControllerV2
     public function __construct(BlastRepositoryInterface $blasts)
     {
         $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'send']);
-        $this->middleware('setSalesPersonIdOnRequest')->only(['send']);
         $this->blasts = $blasts;
     }
 
