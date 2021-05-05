@@ -4,7 +4,7 @@ namespace App\Http\Controllers\v1\CRM\Email;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
-use Dingo\Api\Http\Request;
+use App\Services\CRM\Interactions\EmailBuilderServiceInterface;
 /*use App\Http\Requests\CRM\Email\GetBlastsRequest;
 use App\Http\Requests\CRM\Email\CreateBlastRequest;
 use App\Http\Requests\CRM\Email\ShowBlastRequest;
@@ -12,20 +12,34 @@ use App\Http\Requests\CRM\Email\UpdateBlastRequest;
 use App\Http\Requests\CRM\Email\DeleteBlastRequest;*/
 use App\Http\Requests\CRM\Email\SendBlastRequest;
 use App\Transformers\CRM\Email\BlastTransformer;
+use Dingo\Api\Http\Request;
 
 class BlastController extends RestfulControllerV2
 {
+    /**
+     * @var BlastRepositoryInterface
+     */
     protected $blasts;
+
+    /**
+     * @var EmailBuilderServiceInterface
+     */
+    protected $emailbuilder;
 
     /**
      * Create a new controller instance.
      *
-     * @param Repository $blasts
+     * @param BlastRepositoryInterface $blasts
+     * @param EmailBuilderServiceInterface $emailbuilder
      */
-    public function __construct(BlastRepositoryInterface $blasts)
+    public function __construct(
+        BlastRepositoryInterface $blasts,
+        EmailBuilderServiceInterface $emailbuilder
+    )
     {
         $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'send']);
         $this->blasts = $blasts;
+        $this->emailbuilder = $emailbuilder;
     }
 
 
@@ -279,7 +293,7 @@ class BlastController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Create Email
-            return $this->response->item($this->service->sendBlast($request->all()), new BlastTransformer());
+            return $this->response->item($this->emailbuilder->sendBlast($request->all()), new BlastTransformer());
         }
         
         return $this->response->errorBadRequest();
