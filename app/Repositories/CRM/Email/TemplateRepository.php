@@ -17,7 +17,7 @@ class TemplateRepository implements TemplateRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        return Template::findOrFail($params['id']);
     }
 
     public function getAll($params) {

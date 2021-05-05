@@ -2,7 +2,8 @@
 
 namespace App\Repositories\CRM\Email;
 
-use App\Exceptions\NotImplementedException;
+use App\Exceptions\NotImplementedException
+use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\BlastSent;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        return Blast::findOrFail($params['id']);
     }
 
     public function getAll($params) {
