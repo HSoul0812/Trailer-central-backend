@@ -7,6 +7,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
+
 /**
  * Class SmtpConfig
  * 
