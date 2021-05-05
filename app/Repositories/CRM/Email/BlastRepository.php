@@ -2,7 +2,7 @@
 
 namespace App\Repositories\CRM\Email;
 
-use App\Exceptions\NotImplementedException
+use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\BlastSent;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
