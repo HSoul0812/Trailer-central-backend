@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\CRM\Interactions;
+namespace App\Services\CRM\Email;
 
 interface EmailBuilderServiceInterface {
     /**

@@ -35,8 +35,7 @@ class BlastController extends RestfulControllerV2
     public function __construct(
         BlastRepositoryInterface $blasts,
         EmailBuilderServiceInterface $emailbuilder
-    )
-    {
+    ) {
         $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'send']);
         $this->blasts = $blasts;
         $this->emailbuilder = $emailbuilder;

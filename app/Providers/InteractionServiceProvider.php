@@ -33,6 +33,8 @@ use App\Services\CRM\Text\BlastService as TextBlastService;
 use App\Services\CRM\Text\BlastServiceInterface as TextBlastServiceInterface;
 use App\Services\CRM\Text\CampaignService as TextCampaignService;
 use App\Services\CRM\Text\CampaignServiceInterface as TextCampaignServiceInterface;
+use App\Services\CRM\Interactions\EmailBuilderService;
+use App\Services\CRM\Interactions\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\InteractionService;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailService;

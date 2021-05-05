@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\CRM\Interactions;
+namespace App\Services\CRM\Email;
 
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
