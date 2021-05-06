@@ -57,9 +57,8 @@ class CampaignSent extends Model
      * @var array
      */
     protected $fillable = [
-        'email_campaign_id',
+        'drip_campaigns_id',
         'lead_id',
-        'email_id',
-        'status'
+        'message_id'
     ];
 }

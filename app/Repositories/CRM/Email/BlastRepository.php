@@ -41,7 +41,7 @@ class BlastRepository implements BlastRepositoryInterface {
 
         try {
             // Create Blast Sent
-            $stop = BlastSent::create($params);
+            $sent = BlastSent::create($params);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -49,6 +49,6 @@ class BlastRepository implements BlastRepositoryInterface {
             throw new \Exception($ex->getMessage());
         }
         
-        return $stop;
+        return $sent;
     }
 }

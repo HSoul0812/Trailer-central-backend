@@ -57,9 +57,8 @@ class BlastSent extends Model
      * @var array
      */
     protected $fillable = [
-        'email_blast_id',
+        'email_blasts_id',
         'lead_id',
-        'email_id',
-        'status'
+        'message_id'
     ];
 }
