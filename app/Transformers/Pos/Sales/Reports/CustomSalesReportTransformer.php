@@ -14,7 +14,11 @@ class CustomSalesReportTransformer extends TransformerAbstract
         return array_merge(
             get_object_vars($transaction),
             [
-                'links' => explode(',', (string)$transaction->links)
+                'links' => explode(',', (string)$transaction->links),
+                'taxes_amount' => (float)$transaction->taxes_amount,
+                'price' => (float)$transaction->price,
+                'profit' => (float)$transaction->profit,
+                'refund' => (float)$transaction->refund
             ]
         );
     }
