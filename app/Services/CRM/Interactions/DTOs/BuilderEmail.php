@@ -141,10 +141,10 @@ class BuilderEmail
     /**
      * Get Filled Template
      * 
-     * @param int $emailId
+     * @param null|int $emailId
      * @return string
      */
-    public function getFilledTemplate(int $emailId): string
+    public function getFilledTemplate(?int $emailId = null): string
     {
         // Get Template
         $filled = $this->template;
@@ -155,7 +155,7 @@ class BuilderEmail
         }
 
         // Check for Verlafix
-        if(strpos($filled, "[unsubscribe_link]") !== FALSE) {
+        if(strpos($filled, "[unsubscribe_link]") !== FALSE && $emailId !== null) {
             $filled = str_replace(self::UNSUBSCRIBE_LINK_VAR, self::UNSUBSCRIBE_LINK . $emailId, $filled);
         }
 
