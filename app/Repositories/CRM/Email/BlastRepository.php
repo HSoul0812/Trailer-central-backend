@@ -34,6 +34,7 @@ class BlastRepository implements BlastRepositoryInterface {
      * Mark Blast as Sent
      * 
      * @param array $params
+     * @throws \Exception
      * @return BlastSent
      */
     public function sent(array $params): BlastSent {

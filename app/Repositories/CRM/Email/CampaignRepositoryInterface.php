@@ -10,6 +10,7 @@ interface CampaignRepositoryInterface extends Repository {
      * Mark Campaign as Sent
      * 
      * @param array $params
+     * @throws \Exception
      * @return CampaignSent
      */
     public function sent(array $params): CampaignSent;

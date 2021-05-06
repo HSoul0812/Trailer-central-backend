@@ -34,14 +34,15 @@ class CampaignRepository implements CampaignRepositoryInterface {
      * Mark Campaign as Sent
      * 
      * @param array $params
+     * @throws \Exception
      * @return CampaignSent
      */
-    public function sent($params) {
+    public function sent(array $params): CampaignSent {
         DB::beginTransaction();
 
         try {
             // Create Campaign Sent
-            $stop = CampaignSent::create($params);
+            $sent = CampaignSent::create($params);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -49,7 +50,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
             throw new \Exception($ex->getMessage());
         }
         
-        return $stop;
+        return $sent;
     }
 
     /**
