@@ -19,6 +19,22 @@ class BuilderEmail
 
 
     /**
+     * @var string
+     */
+    const TYPE_BLAST = 'blast';
+
+    /**
+     * @var string
+     */
+    const TYPE_CAMPAIGN = 'campaign';
+
+    /**
+     * @var string
+     */
+    const TYPE_TEMPLATE = 'template';
+
+
+    /**
      * @var array List of Template Replacement Variables
      */
     const BUILDER_TEMPLATE_VARIABLES = [

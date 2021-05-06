@@ -34,9 +34,9 @@ class BlastRepository implements BlastRepositoryInterface {
      * Mark Blast as Sent
      * 
      * @param array $params
-     * return BlastSent
+     * @return BlastSent
      */
-    public function sent($params) {
+    public function sent(array $params): BlastSent {
         DB::beginTransaction();
 
         try {
@@ -50,5 +50,20 @@ class BlastRepository implements BlastRepositoryInterface {
         }
         
         return $sent;
+    }
+
+    /**
+     * Was Blast Already Sent?
+     * 
+     * @param int $blastId
+     * @param int $leadId
+     * @return bool
+     */
+    public function wasSent(int $blastId, int $leadId): bool {
+        // Get Blast Sent Entry
+        $sent = BlastSent::where('email_blasts_id', $blastId)->where('lead_id', $leadId)->first();
+
+        // Was Blast Sent?
+        return !empty($sent->email_blasts_id);
     }
 }

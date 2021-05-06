@@ -34,7 +34,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
      * Mark Campaign as Sent
      * 
      * @param array $params
-     * return CampaignSent
+     * @return CampaignSent
      */
     public function sent($params) {
         DB::beginTransaction();
@@ -50,5 +50,20 @@ class CampaignRepository implements CampaignRepositoryInterface {
         }
         
         return $stop;
+    }
+
+    /**
+     * Was Campaign Already Sent?
+     * 
+     * @param int $campaignId
+     * @param int $leadId
+     * @return bool
+     */
+    public function wasSent(int $campaignId, int $leadId): bool {
+        // Get Campaign Sent Entry
+        $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
+
+        // Was Blast Sent?
+        return !empty($sent->email_blasts_id);
     }
 }
