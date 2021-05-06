@@ -144,7 +144,8 @@ class SendEmailBuilderJob extends Job
             $this->setSmtpConfig($this->config->smtpConfig);
 
             // Send Email
-            Mail::to($this->config->getToEmail())->send(new EmailBuilderEmail($parsedEmail));
+            Mail::to($this->getCleanTo($this->config->getToEmail()))
+                ->send(new EmailBuilderEmail($parsedEmail));
             $finalEmail = $parsedEmail;
         }
 

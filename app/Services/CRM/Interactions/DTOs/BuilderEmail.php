@@ -124,6 +124,18 @@ class BuilderEmail
 
 
     /**
+     * Get To Email Details
+     * 
+     * @return array{email: string, name: string}
+     */
+    public function getToEmail() {
+        return [
+            'email' => $this->toEmail,
+            'name' => $this->toName
+        ];
+    }
+
+    /**
      * Return Message ID or Generate New One
      * 
      * @return string
