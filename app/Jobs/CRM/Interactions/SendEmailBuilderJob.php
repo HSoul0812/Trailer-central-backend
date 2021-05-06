@@ -3,7 +3,7 @@
 namespace App\Jobs\CRM\Interactions;
 
 use App\Jobs\Job;
-use App\Mail\Interactions\EmailBuilderEmail;
+use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
