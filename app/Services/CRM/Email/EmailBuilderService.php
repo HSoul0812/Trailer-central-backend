@@ -18,6 +18,9 @@ use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Traits\CustomerHelper;
 use App\Transformers\CRM\Email\BuilderEmailTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -69,13 +72,18 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         CampaignRepositoryInterface $campaigns,
         TemplateRepositoryInterface $templates,
         LeadRepositoryInterface $leads,
-        SalesPersonRepositoryInterface $salespeople
+        SalesPersonRepositoryInterface $salespeople,
+        Manager $fractal
     ) {
         $this->blasts = $blasts;
         $this->campaigns = $campaigns;
         $this->templates = $templates;
         $this->leads = $leads;
         $this->salespeople = $salespeople;
+
+        // Set Fractal
+        $this->fractal = $fractal;
+        $this->fractal->setSerializer(new NoDataArraySerializer());
 
         // Initialize Logger
         $this->log = Log::channel('emailbuilder');
