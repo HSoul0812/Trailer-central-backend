@@ -38,6 +38,20 @@ class CampaignSent extends Model
     const STATUS_LOGGED = 'logged';
 
     /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'date_added';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = NULL;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
