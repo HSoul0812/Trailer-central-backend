@@ -82,4 +82,12 @@ class Campaign extends Model
     {
         return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
     }
+
+    /**
+     * Get Template
+     */
+    public function template()
+    {
+        return $this->belongsTo(Template::class, 'email_template_id', 'id');
+    }
 }
