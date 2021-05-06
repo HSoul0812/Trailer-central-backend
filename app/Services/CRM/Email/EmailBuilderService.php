@@ -2,11 +2,16 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Exceptions\CRM\Email\Builder\SendBuilderEmailsFailedException;
+use App\Exceptions\CRM\Email\Builder\SendBlastEmailsFailedException;
+use App\Exceptions\CRM\Email\Builder\SendCampaignEmailsFailedException;
+use App\Exceptions\CRM\Email\Builder\SendTemplateEmailFailedException;
 use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
@@ -42,6 +47,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $templates;
 
     /**
+     * @var App\Repositories\CRM\Leads\LeadsRepositoryInterface
+     */
+    protected $leads;
+
+    /**
      * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
      */
     protected $salespeople;
@@ -58,11 +68,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         BlastRepositoryInterface $blasts,
         CampaignRepositoryInterface $campaigns,
         TemplateRepositoryInterface $templates,
+        LeadRepositoryInterface $leads,
         SalesPersonRepositoryInterface $salespeople
     ) {
         $this->blasts = $blasts;
         $this->campaigns = $campaigns;
         $this->templates = $templates;
+        $this->leads = $leads;
         $this->salespeople = $salespeople;
 
         // Initialize Logger
@@ -77,7 +89,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @throws SendBlastEmailsFailedException
      * @return bool
      */
-    public function sendBlast(int $id, array $leads): bool {
+    public function sendBlast(int $id, array $leads): Response {
         // Get Blast Details
         $blast = $this->blasts->get(['id' => $id]);
 
@@ -100,12 +112,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
 
-        // Send Emails
-        $emails = $this->sendEmails($builder, $leads);
-
-        // Returns True on Success
-        $this->log->info('Sent ' . $emails->count() . ' Email Blasts for Dealer ' . $blast->user_id);
-        return true;
+        // Send Emails and Return Response
+        try {
+            return $this->sendEmails($builder, $leads);
+        } catch(\Exception $ex) {
+            throw new SendBlastEmailsFailedException;
+        }
     }
 
 
@@ -119,6 +131,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     private function sendEmails(BuilderEmail $builder, array $leads) {
         // Initialize Sent Emails Collection
         $sentEmails = new Collection();
+        $errorEmails = new Collection();
 
         // Loop Leads
         foreach($leads as $leadId) {
@@ -139,10 +152,36 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
             } catch(\Exception $ex) {
                 $this->log->error($ex->getMessage(), $ex->getTrace());
+                $errorEmails->push($leadId);
             }
         }
 
+        // Errors Occurred and No Emails Sent?
+        if($sentEmails->count() < 1 && $errorEmails->count() > 0) {
+            throw new SendBuilderEmailsFailedException;
+        }
+
         // Return Sent Emails Collection
-        return $sentEmails;
+        return $this->response($builder, $sentEmails, $errorEmails);
+    }
+
+    /**
+     * Return Send Emails Response
+     * 
+     * @param BuilderEmail $builder
+     * @param Collection<int> $sent Lead ID's Successfully Queued to Send
+     * @param Collection<int> $errors Lead ID's That Failed to Queue
+     * @return Response
+     */
+    private function response(BuilderEmail $builder, Collection $sent, Collection $errors): Response {
+        // Handle Logging
+        $this->log->info('Queued ' . $sent->count() . ' Email ' . $builder->type .
+                '(s) for Dealer #' . $builder->userId);
+        if($errors->count() > 0) {
+            $this->log->info('Errors Occurring Trying to Queue ' . $errors->count() . ' Email ' . $builder->type .
+                    '(s) for Dealer #' . $builder->userId);
+        }
+
+        // Generate Response Fractal
     }
 }
