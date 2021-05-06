@@ -14,6 +14,7 @@ use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Traits\MailHelper;
+use App\Traits\Tokens\GoogleHelper;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Bus\Queueable;
