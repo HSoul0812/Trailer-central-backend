@@ -2,7 +2,7 @@
 
 namespace App\Repositories\CRM\Email;
 
-use App\Models\CRM\Text\CampaignSent;
+use App\Models\CRM\Email\CampaignSent;
 use App\Repositories\Repository;
 
 interface CampaignRepositoryInterface extends Repository {
