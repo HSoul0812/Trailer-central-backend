@@ -18,15 +18,15 @@ class EmailBuilderEmail extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param array $data
+     * @param ParsedEmail $email
      */
-    public function __construct(array $data)
+    public function __construct(ParsedEmail $email)
     {
-        $this->data     = $data;
-        $this->subject  = $data['subject'];
-        $this->callbacks[] = function ($message) use ($data) {
-            if(isset($data['id'])) {
-                $message->getHeaders()->get('Message-ID')->setId($data['id']);
+        $this->data     = ['body' => $email->body];
+        $this->subject  = $email->subject;
+        $this->callbacks[] = function ($message) use ($email) {
+            if(isset($email->messageId)) {
+                $message->getHeaders()->get('Message-ID')->setId($email->messageId);
             }
         };
     }
@@ -42,10 +42,6 @@ class EmailBuilderEmail extends Mailable
         $name = config('mail.from.name', 'Trailer Central');
 
         $build = $this->from($from, $name);
-
-        if (! empty($this->data['replyToEmail'])) {
-            $build->replyTo($this->data['replyToEmail'], $this->data['replyToName']);
-        }
 
         $build->view('emails.interactions.emailbuilder-email');
 

@@ -31,6 +31,11 @@ class BuilderEmail
      */
     const UNSUBSCRIBE_LINK = 'https://crm.trailercentral.com/emailtracker/unsubscribe/';
 
+    /**
+     * @var string Text of the Unsubscribe Link
+     */
+    const UNSUBSCRIBE_TEXT = 'To unsubscribe from this mailing list click here.';
+
 
     /**
      * @var int ID of Type
@@ -167,13 +172,34 @@ class BuilderEmail
             $filled = str_replace('{' . $var . '}', $this->{$replace}, $filled);
         }
 
-        // Check for Verlafix
-        if(strpos($filled, "[unsubscribe_link]") !== FALSE && $emailId !== null) {
-            $filled = str_replace(self::UNSUBSCRIBE_LINK_VAR, self::UNSUBSCRIBE_LINK . $emailId, $filled);
+        // Append Unsubscribe?
+        if($emailId !== null) {
+            // Check for Verlafix
+            if(strpos($filled, "[unsubscribe_link]") !== FALSE) {
+                $filled = str_replace(self::UNSUBSCRIBE_LINK_VAR, self::UNSUBSCRIBE_LINK . $emailId, $filled);
+            } else {
+                $filled .= $this->getUnsubscribeHtml($emailId);
+            }
         }
 
         // Return Updated Template
         return $filled;
+    }
+
+    /**
+     * Get Unsubscribe HTML + Text
+     * 
+     * @param int $emailId
+     * @return string
+     */
+    public function getUnsubscribeHtml(int $emailId): string
+    {
+        return '<br /><br />
+                <p>
+                    <a href="' . self::UNSUBSCRIBE_LINK . $emailId . '">' .
+                        self::UNSUBSCRIBE_TEXT . '
+                    </a>
+                </p>';
     }
 
 
