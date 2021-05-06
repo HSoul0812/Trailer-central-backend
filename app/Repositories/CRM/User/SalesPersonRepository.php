@@ -153,9 +153,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      *
      * @param int $userId
      * @param string $email
-     * @return SalesPerson
+     * @return null|SalesPerson
      */
-    public function getBySmtpEmail(int $userId, string $email): SalesPerson {
+    public function getBySmtpEmail(int $userId, string $email): ?SalesPerson {
         // Get SMTP By Dealer ID and SMTP Email
         return SalesPerson::where('user_id', $userId)->where('smtp_email', $email)->first();
     }
