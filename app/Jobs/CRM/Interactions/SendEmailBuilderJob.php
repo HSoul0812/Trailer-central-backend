@@ -126,13 +126,16 @@ class SendEmailBuilderJob extends Job
 
         // Get SMTP Config
         if(!empty($this->config->smtpConfig->isAuthTypeGmail())) {
+            // Get Access Token
+            $accessToken = $this->refreshAccessToken($this->config->getAccessToken());
+
             // Send Gmail Email
-            $parsedEmail = $gmailService->send($this->config->getAccessToken(), $parsedEmail);
+            $parsedEmail = $gmailService->send($accessToken, $parsedEmail);
         }
         // Get NTLM Config
         elseif(!empty($this->config->smtpConfig->isAuthTypeGmail())) {
             // Send NTLM Email
-            $parsedEmail = $ntlmService->send($this->config->getAccessToken(), $parsedEmail);
+            $parsedEmail = $ntlmService->send($this->config->smtpConfig, $parsedEmail);
         }
         // Get SMTP Config
         else {
@@ -183,7 +186,7 @@ class SendEmailBuilderJob extends Job
             break;
             case "blast":
                 $sent = $blastRepo->sent([
-                    'drip_campaign_id' => $this->config->id,
+                    'email_blasts_id' => $this->config->id,
                     'lead_id' => $this->config->leadId,
                     'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
                 ]);
