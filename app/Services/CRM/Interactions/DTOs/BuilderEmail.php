@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Interactions\DTOs;
 
 use App\Models\CRM\Leads\Lead;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Traits\MailHelper;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
