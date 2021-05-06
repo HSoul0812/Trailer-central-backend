@@ -176,14 +176,14 @@ class SendEmailBuilderJob extends Job
         switch($this->config->type) {
             case "campaign":
                 $sent = $campaignRepo->sent([
-                    'drip_campaign_id' => $this->config->typeId,
+                    'drip_campaign_id' => $this->config->id,
                     'lead_id' => $this->config->leadId,
                     'message_id' => $this->email->message_id
                 ]);
             break;
             case "blast":
                 $sent = $blastRepo->sent([
-                    'drip_campaign_id' => $this->config->typeId,
+                    'drip_campaign_id' => $this->config->id,
                     'lead_id' => $this->config->leadId,
                     'message_id' => $this->email->message_id
                 ]);
