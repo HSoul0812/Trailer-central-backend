@@ -70,12 +70,12 @@ class SendEmailBuilderJob extends Job
             $finalEmail = $this->sendEmail($email->email_id, $gmailService, $ntlmService);
 
             // Mark as Sent
-            $this->markSent($finalEmail, $campaignRepo, $blastRepo, $finalEmail);
+            $this->markSent($emailHistoryRepo, $campaignRepo, $blastRepo, $finalEmail);
             $log->info('Email Builder Mailed Successfully', $this->config->getLogParams());
             return true;
         } catch (\Exception $e) {
             // Flag it as sent anyway
-            $this->markSent($templateRepo, $campaignRepo, $blastRepo);
+            $this->markSent($emailHistoryRepo, $campaignRepo, $blastRepo);
             $log->error('Email Builder Mail error', $e->getTrace());
             throw new SendEmailBuilderFailedException($e);
         }

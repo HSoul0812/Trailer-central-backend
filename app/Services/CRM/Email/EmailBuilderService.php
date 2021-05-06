@@ -117,7 +117,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         try {
             return $this->sendEmails($builder, $leads);
         } catch(\Exception $ex) {
-            throw new SendBlastEmailsFailedException('Exception Occurred Sending Blast Emails: ' . $ex->getMessage());
+            throw new SendBlastEmailsFailedException;
         }
     }
 
