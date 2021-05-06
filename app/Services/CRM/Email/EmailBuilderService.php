@@ -17,7 +17,6 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Traits\CustomerHelper;
-use App\Traits\MailHelper;
 use App\Transformers\CRM\Email\BuilderEmailTransformer;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -30,7 +29,7 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
  */
 class EmailBuilderService implements EmailBuilderServiceInterface
 {
-    use DispatchesJobs, CustomerHelper, MailHelper;
+    use DispatchesJobs, CustomerHelper;
 
     /**
      * @var App\Repositories\CRM\Email\BlastRepositoryInterface

@@ -13,6 +13,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Traits\MailHelper;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Bus\Queueable;
@@ -26,7 +27,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class SendEmailBuilderJob extends Job
 { 
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, MailHelper;
 
     /**
      * @var BuilderEmail
