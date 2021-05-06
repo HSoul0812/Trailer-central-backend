@@ -80,7 +80,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $blast = $this->blasts->get(['id' => $id]);
 
         // Get Sales Person
-        $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
+        try {
+            $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
+        } catch(\Exception $e) {
+            throw new FromEmailMissingSmtpConfigException;
+        }
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
