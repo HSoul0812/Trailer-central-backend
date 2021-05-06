@@ -105,7 +105,7 @@ class SendEmailBuilderJob extends Job
 
         // Create Email History Entry
         return $emailHistoryRepo->create(
-            $this->config->getEmailHistoryParams($interaction->interaction_id)
+            $this->config->getEmailHistoryParams($interaction->interaction_id ?? 0)
         );
     }
 
