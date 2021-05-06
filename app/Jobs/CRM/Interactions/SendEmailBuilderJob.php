@@ -118,7 +118,7 @@ class SendEmailBuilderJob extends Job
      */
     private function sendEmail(
         int $emailId,
-        GmailServiceInterace $gmailService,
+        GmailServiceInterface $gmailService,
         NtlmEmailServiceInterface $ntlmService
     ): ParsedEmail {
         // Get Parsed Email
