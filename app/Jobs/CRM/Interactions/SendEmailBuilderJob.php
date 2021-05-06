@@ -178,14 +178,14 @@ class SendEmailBuilderJob extends Job
                 $sent = $campaignRepo->sent([
                     'drip_campaign_id' => $this->config->id,
                     'lead_id' => $this->config->leadId,
-                    'message_id' => $this->email->message_id
+                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
                 ]);
             break;
             case "blast":
                 $sent = $blastRepo->sent([
                     'drip_campaign_id' => $this->config->id,
                     'lead_id' => $this->config->leadId,
-                    'message_id' => $this->email->message_id
+                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
                 ]);
             break;
         }
