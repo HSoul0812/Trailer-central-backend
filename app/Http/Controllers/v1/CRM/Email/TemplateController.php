@@ -21,13 +21,16 @@ class TemplateController extends RestfulControllerV2
     /**
      * Create a new controller instance.
      *
-     * @param Repository $templates
+     * @param TemplateRepositoryInterface $templates
+     * @param EmailBuilderServiceInterface $emailbuilder
      */
-    public function __construct(TemplateRepositoryInterface $templates)
-    {
+    public function __construct(
+        TemplateRepositoryInterface $templates,
+        EmailBuilderServiceInterface $emailbuilder
+    ) {
         $this->middleware('setUserIdOnRequest')->only(['index', 'create']);
-        $this->middleware('setSalesPersonIdOnRequest')->only(['send']);
         $this->templates = $templates;
+        $this->emailbuilder = $emailbuilder;
     }
 
 
@@ -267,7 +270,9 @@ class TemplateController extends RestfulControllerV2
         $request = new SendTemplateRequest($requestData);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->service->sendTemplate($request->all()), new TemplateTransformer());
+            return $this->response->array(
+                $this->emailbuilder->sendTemplate($requestData['id'], $requestData['to_email'])
+            );
         }
         
         return $this->response->errorBadRequest();

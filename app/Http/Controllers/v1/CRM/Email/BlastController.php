@@ -292,9 +292,8 @@ class BlastController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Send Emails for Blast
-            return $this->response->item(
-                $this->emailbuilder->sendBlast($requestData['id'], $requestData['leads']),
-                new BlastTransformer()
+            return $this->response->array(
+                $this->emailbuilder->sendBlast($requestData['id'], $requestData['leads'])
             );
         }
         

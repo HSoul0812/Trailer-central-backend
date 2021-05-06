@@ -17,16 +17,21 @@ use Dingo\Api\Http\Request;
 class CampaignController extends RestfulControllerV2
 {
     protected $campaigns;
+    protected $emailbuilder;
 
     /**
      * Create a new controller instance.
      *
-     * @param Repository $campaigns
+     * @param CampaignRepositoryInterface $campaignss
+     * @param EmailBuilderServiceInterface $emailbuilder
      */
-    public function __construct(CampaignRepositoryInterface $campaigns)
-    {
+    public function __construct(
+        CampaignRepositoryInterface $campaigns,
+        EmailBuilderServiceInterface $emailbuilder
+    ) {
         $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'send']);
         $this->campaigns = $campaigns;
+        $this->emailbuilder = $emailbuilder;
     }
 
 
@@ -279,8 +284,10 @@ class CampaignController extends RestfulControllerV2
         $request = new SendCampaignRequest(['id' => $id]);
         
         if ( $request->validate()) {
-            // Create Email
-            return $this->response->item($this->service->sendCampaign($requestData), new CampaignTransformer());
+            // Send Emails for Campaign
+            return $this->response->array(
+                $this->emailbuilder->sendCampaign($requestData['id'], $requestData['leads'])
+            );
         }
         
         return $this->response->errorBadRequest();

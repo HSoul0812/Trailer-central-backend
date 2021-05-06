@@ -11,7 +11,7 @@ interface EmailBuilderServiceInterface {
      * @throws SendBlastEmailsFailedException
      * @return bool
      */
-    public function sendBlast(int $id, array $leads): bool;
+    public function sendBlast(int $id, array $leads): array;
 
     /**
      * Send Lead Emails for Campaign
@@ -21,7 +21,7 @@ interface EmailBuilderServiceInterface {
      * @throws SendCampaignEmailsFailedException
      * @return bool
      */
-    //public function sendCampaign(int $id, array $leads): bool;
+    //public function sendCampaign(int $id, array $leads): array;
 
     /**
      * Send Lead Emails for Template
@@ -31,5 +31,5 @@ interface EmailBuilderServiceInterface {
      * @throws SendTemplateEmailFailedException
      * @return bool
      */
-    //public function sendTemplate(int $id, string $email): bool;
+    //public function sendTemplate(int $id, string $email): array;
 }

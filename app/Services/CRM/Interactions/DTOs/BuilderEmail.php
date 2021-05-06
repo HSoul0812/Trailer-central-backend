@@ -103,12 +103,12 @@ class BuilderEmail
 
 
     /**
-     * Add Lead Details
+     * Set Lead Details
      * 
      * @param Lead $lead
      * @return void
      */
-    public function addLeadConfig(Lead $lead): void
+    public function setLeadConfig(Lead $lead): void
     {
         // Insert Lead Details
         $this->leadId = $lead->identifier;

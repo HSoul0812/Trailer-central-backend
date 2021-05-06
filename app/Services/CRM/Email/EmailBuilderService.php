@@ -18,6 +18,7 @@ use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
+use App\Transformers\CRM\Email\BuilderEmailTransformer;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -89,7 +90,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @throws SendBlastEmailsFailedException
      * @return bool
      */
-    public function sendBlast(int $id, array $leads): Response {
+    public function sendBlast(int $id, array $leads): array {
         // Get Blast Details
         $blast = $this->blasts->get(['id' => $id]);
 
@@ -141,7 +142,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $lead = $this->leads->get(['id' => $leadId]);
 
                 // Add Lead Config to Builder Email
-                $builder->addLeadConfig($lead);
+                $builder->setLeadConfig($lead);
 
                 // Dispatch Send EmailBuilder Job
                 $job = new SendEmailBuilderJob($builder);
@@ -173,7 +174,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param Collection<int> $errors Lead ID's That Failed to Queue
      * @return Response
      */
-    private function response(BuilderEmail $builder, Collection $sent, Collection $errors): Response {
+    private function response(BuilderEmail $builder, Collection $sent, Collection $errors): array {
         // Handle Logging
         $this->log->info('Queued ' . $sent->count() . ' Email ' . $builder->type .
                 '(s) for Dealer #' . $builder->userId);
@@ -182,6 +183,15 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                     '(s) for Dealer #' . $builder->userId);
         }
 
-        // Generate Response Fractal
+        // Convert Builder Email to Fractal
+        $data = new Item($builder, new BuilderEmailTransformer(), 'data');
+        $response = $this->fractal->createData($data)->toArray();
+
+        // Set Succesfull Emails and Errors
+        $response['sent'] = $sent->toArray();
+        $response['errors'] = $errors->toArray();
+
+        // Return Response
+        return $response;
     }
 }
