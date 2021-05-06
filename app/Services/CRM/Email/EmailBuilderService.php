@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
