@@ -12,9 +12,9 @@ interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
      *
      * @param int $userId
      * @param string $email
-     * @return null|SalesPerson
+     * @return SalesPerson
      */
-    public function getBySmtpEmail(int $userId, string $email): ?SalesPerson;
+    public function getBySmtpEmail(int $userId, string $email): SalesPerson;
 
     /**
      * Generate a salesperson sales report;
