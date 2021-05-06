@@ -182,7 +182,7 @@ class BuilderEmail
     {
         // Return Email History Fill Params
         return [
-            'lead_id' => !empty($this->config->leadId) ? $this->config->leadId : 0,
+            'lead_id' => !empty($this->leadId) ? $this->leadId : 0,
             'interaction_id' => !empty($interactionId) ? $interactionId : 0,
             'message_id' => $this->getMessageId(),
             'to_email' => $this->toEmail,
