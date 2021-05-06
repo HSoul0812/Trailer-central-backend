@@ -21,7 +21,7 @@ class BuilderEmailTransformer extends TransformerAbstract {
             'subject' => $email->subject,
             'template' => $email->template,
             'template_id' => $email->templateId,
-            'user_id' => $email->user_id,
+            'user_id' => $email->userId,
             'sales_person_id' => $email->salesPersonId,
             'from_email' => $email->fromEmail
         ];
