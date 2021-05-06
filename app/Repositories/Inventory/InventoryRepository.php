@@ -11,7 +11,6 @@ use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryFile;
 use App\Models\Inventory\InventoryImage;
 use App\Traits\Repository\Transaction;
-use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
