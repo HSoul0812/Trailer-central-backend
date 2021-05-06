@@ -2,6 +2,7 @@
 
 namespace App\Mail\CRM\Interactions;
 
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
