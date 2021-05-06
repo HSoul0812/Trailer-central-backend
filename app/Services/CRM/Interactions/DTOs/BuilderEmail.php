@@ -226,7 +226,7 @@ class BuilderEmail
             'lead_id' => $this->leadId,
             'to' => $this->toEmail,
             'to_name' => $this->toName,
-            'from_email' => $this->fromEmail,
+            'from' => $this->fromEmail,
             'subject' => $this->subject,
             'body' => $this->getFilledTemplate($emailId),
             'is_html' => true
