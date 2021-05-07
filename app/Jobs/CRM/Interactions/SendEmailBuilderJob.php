@@ -9,9 +9,11 @@ use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Traits\MailHelper;
 use App\Traits\Tokens\GoogleHelper;
@@ -45,7 +47,9 @@ class SendEmailBuilderJob extends Job
     }
 
     /**
-     * @param GmailServiceInterface $gmail
+     * @param GoogleServiceInterface $googleService
+     * @param GmailServiceInterface $gmailService
+     * @param TokenRepositoryInterface $tokenRepo
      * @param EmailHistoryRepositoryInterface $emailHistoryRepo
      * @param TemplateRepositoryInterface $templateRepo
      * @param CampaignRepositoryInterface $campaignRepo
@@ -54,7 +58,9 @@ class SendEmailBuilderJob extends Job
      * @return boolean
      */
     public function handle(
+        GoogleServiceInterface $googleService,
         GmailServiceInterface $gmailService,
+        TokenRepositoryInterface $tokenRepo,
         NtlmEmailServiceInterface $ntlmService,
         EmailHistoryRepositoryInterface $emailHistoryRepo,
         TemplateRepositoryInterface $templateRepo,
@@ -70,7 +76,7 @@ class SendEmailBuilderJob extends Job
             $email = $this->saveToDb($emailHistoryRepo);
 
             // Send Email Via SMTP, Gmail, or NTLM
-            $finalEmail = $this->sendEmail($email->email_id, $gmailService, $ntlmService);
+            $finalEmail = $this->sendEmail($email->email_id, $googleService, $gmailService, $tokenRepo, $ntlmService);
 
             // Mark as Sent
             $this->markSent($emailHistoryRepo, $campaignRepo, $blastRepo, $finalEmail);
@@ -121,7 +127,9 @@ class SendEmailBuilderJob extends Job
      */
     private function sendEmail(
         int $emailId,
+        GoogleServiceInterface $googleService,
         GmailServiceInterface $gmailService,
+        TokenRepositoryInterface $tokenRepo,
         NtlmEmailServiceInterface $ntlmService
     ): ParsedEmail {
         // Get Parsed Email
@@ -130,7 +138,7 @@ class SendEmailBuilderJob extends Job
         // Get SMTP Config
         if(!empty($this->config->smtpConfig->isAuthTypeGmail())) {
             // Get Access Token
-            $accessToken = $this->refreshAccessToken($this->config->smtpConfig->accessToken);
+            $accessToken = $this->refreshAccessToken($this->config->smtpConfig->accessToken, $googleService, $tokenRepo);
 
             // Send Gmail Email
             $parsedEmail = $gmailService->send($accessToken, $parsedEmail);
@@ -152,6 +160,29 @@ class SendEmailBuilderJob extends Job
 
         // Return Final Email
         return $finalEmail;
+    }
+
+    /**
+     * Refresh Gmail Access Token
+     * 
+     * @param AccessToken $accessToken
+     * @param GoogleServiceInterface $googleService
+     * @param TokenRepositoryInterface $tokenRepo
+     * @return AccessToken
+     */
+    private function refreshAccessToken(
+        AccessToken $accessToken,
+        GoogleServiceInterface $googleService,
+        TokenRepositoryInterface $tokenRepo
+    ): AccessToken {
+        // Refresh Token
+        $validate = $googleService->validate($accessToken);
+        if(!empty($validate['new_token'])) {
+            $accessToken = $tokenRepo->refresh($accessToken->id, $validate['new_token']);
+        }
+
+        // Return New Token
+        return $accessToken;
     }
 
     /**
