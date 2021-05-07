@@ -16,7 +16,6 @@ use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Traits\MailHelper;
-use App\Traits\Tokens\GoogleHelper;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Bus\Queueable;
@@ -30,7 +29,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class SendEmailBuilderJob extends Job
 { 
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, MailHelper, GoogleHelper;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, MailHelper;
 
     /**
      * @var BuilderEmail
