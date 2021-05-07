@@ -28,7 +28,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class SendEmailBuilderJob extends Job
 { 
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, MailHelper;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, MailHelper, GoogleHelper;
 
     /**
      * @var BuilderEmail
