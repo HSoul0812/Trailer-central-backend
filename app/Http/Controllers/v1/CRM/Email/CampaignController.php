@@ -281,7 +281,7 @@ class CampaignController extends RestfulControllerV2
     public function send(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
-        $request = new SendCampaignRequest(['id' => $id]);
+        $request = new SendCampaignRequest($requestData);
         
         if ( $request->validate()) {
             // Send Emails for Campaign
