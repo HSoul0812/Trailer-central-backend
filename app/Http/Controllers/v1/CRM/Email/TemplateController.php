@@ -276,8 +276,8 @@ class TemplateController extends RestfulControllerV2
                     $requestData['id'],
                     $requestData['subject'],
                     $requestData['to_email'],
-                    $requestData['sales_person_id'],
-                    $requestData['from_email']
+                    $requestData['sales_person_id'] ?? 0,
+                    $requestData['from_email'] ?? ''
                 )
             );
         }
