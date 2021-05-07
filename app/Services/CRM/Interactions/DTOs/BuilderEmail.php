@@ -143,6 +143,18 @@ class BuilderEmail
         $this->titleUnitInterest = $lead->inventory_title;
     }
 
+    /**
+     * Set To Email
+     * 
+     * @param string $toEmail
+     * @return void
+     */
+    public function setToEmail(string $toEmail): void
+    {
+        // Set To Email
+        $this->toEmail = $toEmail;
+    }
+
 
     /**
      * Get To Email Details
