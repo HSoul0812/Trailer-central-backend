@@ -119,7 +119,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'from_email' => $blast->from_email_address,
             'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
-        var_dump($builder->smtpConfig);
 
         // Send Emails and Return Response
         try {
