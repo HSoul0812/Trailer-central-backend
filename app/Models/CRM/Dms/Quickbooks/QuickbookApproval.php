@@ -77,10 +77,10 @@ class QuickbookApproval extends Model
         return null;
     }
 
-    public function getAccountAttribute()
+    public function getAccountAttribute(): ?string
     {
-        $qbObj = json_decode($this->qb_obj, true);
         if ($this->tb_name === 'qb_accounts' && isset($qbObj['Name'])) {
+            $qbObj = json_decode($this->qb_obj, true);
             return $qbObj['Name'];
         }
         return null;
