@@ -94,7 +94,7 @@ class SmtpConfig
             'host' => $salesperson->smtp_service,
             'port' => $salesperson->smtp_port,
             'security' => $salesperson->smtp_security,
-            'auth_type' => !empty($salesperson->googleToken) ? 'google' : $salesperson->smtp_auth,
+            'auth_type' => !empty($salesperson->googleToken) ? self::AUTH_GMAIL : $salesperson->smtp_auth,
             'access_token' => $salesperson->googleToken
         ]);
     }
