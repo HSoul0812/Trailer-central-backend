@@ -126,7 +126,7 @@ class SendEmailBuilderJob extends Job
     ): ParsedEmail {
         // Get Parsed Email
         $parsedEmail = $this->config->getParsedEmail($emailId);
-        var_dump($this->config->smtpConfig->isAuthTypeGmail());
+        var_dump($this->config->smtpConfig);
         die;
 
         // Get SMTP Config
