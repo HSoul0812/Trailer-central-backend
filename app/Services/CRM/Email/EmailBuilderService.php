@@ -186,32 +186,34 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         string $fromEmail = ''
     ): array {
         // Get Campaign Details
-        $campaign = $this->campaigns->get(['id' => $id]);
+        $template = $this->templates->get(['id' => $id]);
 
         // Get Sales Person
-        $salesPerson = $this->salespeople->getBySmtpEmail($campaign->user_id, $campaign->from_email_address);
+        if(!empty($fromEmail)) {
+            $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+        }
         if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
+            $salesPerson = $this->salespeople->get(['id' => $salesPersonId]);
         }
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
-            'id' => $campaign->drip_campaigns_id,
-            'type' => BuilderEmail::TYPE_CAMPAIGN,
-            'subject' => $campaign->campaign_subject,
-            'template' => $campaign->template->html,
-            'template_id' => $campaign->template->template_id,
-            'user_id' => $campaign->user_id,
+            'id' => $salesPerson->template_id,
+            'type' => BuilderEmail::TYPE_TEMPLATE,
+            'subject' => $subject,
+            'template' => $template->html,
+            'template_id' => $template->template_id,
+            'user_id' => $template->user_id,
             'sales_person_id' => $salesPerson->id,
-            'from_email' => $campaign->from_email_address,
+            'from_email' => $fromEmail,
             'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
 
-        // Send Emails and Return Response
+        // Send Email and Return Response
         try {
-            return $this->sendEmails($builder, $leads);
+            return $this->sendManual($builder, $toEmail);
         } catch(\Exception $ex) {
-            throw new SendCampaignEmailsFailedException($ex);
+            throw new SendTemplateEmailFailedException($ex);
         }
     }
 
@@ -267,14 +269,42 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     }
 
     /**
+     * Send Email Manually for Builder Config
+     * 
+     * @param BuilderEmail $builder
+     * @param string $toEmail
+     * @return bool
+     */
+    private function sendManual(BuilderEmail $builder, string $toEmail) {
+        // Try/Send Email!
+        try {
+            // Add To Email to Builder Email
+            $builder->setToEmail($toEmail);
+
+            // Dispatch Send EmailBuilder Job
+            $job = new SendEmailBuilderJob($builder);
+            $this->dispatch($job->onQueue('mails'));
+
+            // Send Notice
+            $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
+
+            // Return Response Array
+            return $this->response($builder);
+        } catch(\Exception $ex) {
+            $this->log->error($ex->getMessage(), $ex->getTrace());
+            throw new SendBuilderEmailsFailedException;
+        }
+    }
+
+    /**
      * Return Send Emails Response
      * 
      * @param BuilderEmail $builder
-     * @param Collection<int> $sent Lead ID's Successfully Queued to Send
-     * @param Collection<int> $errors Lead ID's That Failed to Queue
+     * @param null|Collection<int> $sent Lead ID's Successfully Queued to Send
+     * @param null|Collection<int> $errors Lead ID's That Failed to Queue
      * @return Response
      */
-    private function response(BuilderEmail $builder, Collection $sent, Collection $errors): array {
+    private function response(BuilderEmail $builder, ?Collection $sent = null, ?Collection $errors = null): array {
         // Handle Logging
         $this->log->info('Queued ' . $sent->count() . ' Email ' . $builder->type .
                 '(s) for Dealer #' . $builder->userId);
@@ -288,8 +318,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $response = $this->fractal->createData($data)->toArray();
 
         // Set Succesfull Emails and Errors
-        $response['sent'] = $sent->toArray();
-        $response['errors'] = $errors->toArray();
+        if($sent !== null) {
+            $response['sent'] = $sent->toArray();
+        }
+        if($errors !== null) {
+            $response['errors'] = $errors->toArray();
+        }
 
         // Return Response
         return $response;

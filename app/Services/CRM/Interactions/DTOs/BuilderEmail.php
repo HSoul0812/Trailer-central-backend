@@ -150,10 +150,16 @@ class BuilderEmail
      * @return array{email: string, name: string}
      */
     public function getToEmail() {
-        return [
-            'email' => $this->toEmail,
-            'name' => $this->toName
-        ];
+        // Initialize To Array
+        $to = ['email' => $this->toEmail];
+
+        // Append Name
+        if($this->toName) {
+            $to['name'] = $this->toName;
+        }
+
+        // Return To
+        return $to;
     }
 
     /**
@@ -279,7 +285,7 @@ class BuilderEmail
             'message_id' => sprintf('<%s>', $this->getMessageId()),
             'lead_id' => $this->leadId,
             'to' => $this->toEmail,
-            'to_name' => $this->toName,
+            'to_name' => $this->toName ?? '',
             'from' => $this->fromEmail,
             'subject' => $this->subject,
             'body' => $this->getFilledTemplate($emailId),
