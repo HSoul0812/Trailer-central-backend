@@ -295,7 +295,7 @@ class BuilderEmail
         return new ParsedEmail([
             'email_history_id' => $emailId,
             'message_id' => sprintf('<%s>', $this->getMessageId()),
-            'lead_id' => $this->leadId,
+            'lead_id' => $this->leadId ?? 0,
             'to' => $this->toEmail,
             'to_name' => $this->toName ?? '',
             'from' => $this->fromEmail,
