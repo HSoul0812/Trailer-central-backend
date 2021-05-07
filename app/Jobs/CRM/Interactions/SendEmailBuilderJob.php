@@ -152,6 +152,7 @@ class SendEmailBuilderJob extends Job
         // Get SMTP Config
         else {
             $this->setSmtpConfig($this->config->smtpConfig);
+            var_dump($this->config->smtpConfig);
 
             // Send Email
             Mail::to($this->getCleanTo($this->config->getToEmail()))
