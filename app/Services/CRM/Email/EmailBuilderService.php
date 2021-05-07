@@ -198,11 +198,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
-            'id' => $salesPerson->template_id,
+            'id' => $id,
             'type' => BuilderEmail::TYPE_TEMPLATE,
             'subject' => $subject,
             'template' => $template->html,
-            'template_id' => $template->template_id,
+            'template_id' => $id,
             'user_id' => $template->user_id,
             'sales_person_id' => $salesPerson->id,
             'from_email' => $fromEmail,
