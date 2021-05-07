@@ -286,7 +286,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->dispatch($job->onQueue('mails'));
 
             // Send Notice
-            $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
+            $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email: ' . $toEmail);
 
             // Return Response Array
             return $this->response($builder);
