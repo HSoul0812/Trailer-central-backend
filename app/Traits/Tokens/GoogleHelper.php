@@ -20,7 +20,7 @@ trait GoogleHelper
      * @param TokenServiceInterface $tokenService
      * @return AccessToken
      */
-    private function refreshAccessToken(
+    public function refreshAccessToken(
         AccessToken $accessToken,
         GoogleServiceInterface $googleService,
         TokenRepositoryInterface $tokenService
