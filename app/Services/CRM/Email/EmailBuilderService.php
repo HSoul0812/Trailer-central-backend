@@ -128,6 +128,45 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
     }
 
+    /**
+     * Send Lead Emails for Campaign
+     * 
+     * @param int $id ID of Campaign to Send Emails For
+     * @param array<int> ID's of Leads to Send Emails For Campaign
+     * @throws SendCampaignEmailsFailedException
+     * @return bool
+     */
+    public function sendCampaign(int $id, array $leads): array {
+        // Get Campaign Details
+        $campaign = $this->campaigns->get(['id' => $id]);
+
+        // Get Sales Person
+        $salesPerson = $this->salespeople->getBySmtpEmail($campaign->user_id, $campaign->from_email_address);
+        if(empty($salesPerson->id)) {
+            throw new FromEmailMissingSmtpConfigException;
+        }
+
+        // Create Email Builder Email!
+        $builder = new BuilderEmail([
+            'id' => $campaign->email_blasts_id,
+            'type' => BuilderEmail::TYPE_CAMPAIGN,
+            'subject' => $campaign->campaign_subject,
+            'template' => $campaign->template->html,
+            'template_id' => $campaign->template->template_id,
+            'user_id' => $campaign->user_id,
+            'sales_person_id' => $salesPerson->id,
+            'from_email' => $campaign->from_email_address,
+            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
+        ]);
+
+        // Send Emails and Return Response
+        try {
+            return $this->sendEmails($builder, $leads);
+        } catch(\Exception $ex) {
+            throw new SendCampaignEmailsFailedException($ex);
+        }
+    }
+
 
     /**
      * Send Emails for Builder Config
