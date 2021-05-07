@@ -130,7 +130,7 @@ class SendEmailBuilderJob extends Job
         // Get SMTP Config
         if(!empty($this->config->smtpConfig->isAuthTypeGmail())) {
             // Get Access Token
-            $accessToken = $this->refreshAccessToken($this->config->getAccessToken());
+            $accessToken = $this->refreshAccessToken($this->config->smtpConfig->accessToken);
 
             // Send Gmail Email
             $parsedEmail = $gmailService->send($accessToken, $parsedEmail);
