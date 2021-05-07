@@ -142,12 +142,12 @@ class SendEmailBuilderJob extends Job
             $this->config->smtpConfig->setAccessToken($accessToken);
 
             // Send Gmail Email
-            $parsedEmail = $gmailService->send($this->config->smtpConfig, $parsedEmail);
+            $finalEmail = $gmailService->send($this->config->smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
         elseif(!empty($this->config->smtpConfig->isAuthTypeGmail())) {
             // Send NTLM Email
-            $parsedEmail = $ntlmService->send($this->config->smtpConfig, $parsedEmail);
+            $finalEmail = $ntlmService->send($this->config->smtpConfig, $parsedEmail);
         }
         // Get SMTP Config
         else {
