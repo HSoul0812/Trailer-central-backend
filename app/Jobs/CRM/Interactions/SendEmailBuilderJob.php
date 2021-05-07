@@ -139,9 +139,10 @@ class SendEmailBuilderJob extends Job
         if(!empty($this->config->smtpConfig->isAuthTypeGmail())) {
             // Get Access Token
             $accessToken = $this->refreshAccessToken($this->config->smtpConfig->accessToken, $googleService, $tokenRepo);
+            $this->config->smtpConfig->setAccessToken($accessToken);
 
             // Send Gmail Email
-            $parsedEmail = $gmailService->send($accessToken, $parsedEmail);
+            $parsedEmail = $gmailService->send($this->config->smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
         elseif(!empty($this->config->smtpConfig->isAuthTypeGmail())) {
