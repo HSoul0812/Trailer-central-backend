@@ -306,9 +306,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     private function response(BuilderEmail $builder, ?Collection $sent = null, ?Collection $errors = null): array {
         // Handle Logging
-        $this->log->info('Queued ' . $sent->count() . ' Email ' . $builder->type .
-                '(s) for Dealer #' . $builder->userId);
-        if($errors->count() > 0) {
+        if($sent !== null) {
+            $this->log->info('Queued ' . $sent->count() . ' Email ' . $builder->type .
+                    '(s) for Dealer #' . $builder->userId);
+        }
+        if($errors !== null && $errors->count() > 0) {
             $this->log->info('Errors Occurring Trying to Queue ' . $errors->count() . ' Email ' . $builder->type .
                     '(s) for Dealer #' . $builder->userId);
         }
