@@ -13,9 +13,9 @@ class SendTemplateRequest extends Request {
 
     protected $rules = [
         'user_id' => 'required|integer',
-        'sales_person_id' => 'integer|sales_person_valid',
-        'from_email' => 'email',
-        'to_email' => 'email',
-        'lead_id' => 'integer|exists:website_lead,identifier'
+        'subject' => 'required|string',
+        'to_email' => 'required|email',
+        'sales_person_id' => 'required_without_all:from_email|integer|sales_person_valid',
+        'from_email' => 'required_without_all:sales_person_id|email|valid_smtp_email'
     ];
 }

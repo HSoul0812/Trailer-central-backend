@@ -28,7 +28,8 @@ class TemplateController extends RestfulControllerV2
         TemplateRepositoryInterface $templates,
         EmailBuilderServiceInterface $emailbuilder
     ) {
-        $this->middleware('setUserIdOnRequest')->only(['index', 'create']);
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'send']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['send']);
         $this->templates = $templates;
         $this->emailbuilder = $emailbuilder;
     }
@@ -271,7 +272,13 @@ class TemplateController extends RestfulControllerV2
         
         if ( $request->validate() ) {
             return $this->response->array(
-                $this->emailbuilder->sendTemplate($requestData['id'], $requestData['to_email'])
+                $this->emailbuilder->sendTemplate(
+                    $requestData['id'],
+                    $requestData['subject'],
+                    $requestData['to_email'],
+                    $requestData['sales_person_id'],
+                    $requestData['from_email']
+                )
             );
         }
         

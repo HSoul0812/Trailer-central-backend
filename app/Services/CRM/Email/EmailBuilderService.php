@@ -95,7 +95,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param int $id ID of Blast to Send Emails For
      * @param array<int> ID's of Leads to Send Emails For Blast
      * @throws SendBlastEmailsFailedException
-     * @return bool
+     * @return array response
      */
     public function sendBlast(int $id, array $leads): array {
         // Get Blast Details
@@ -134,9 +134,57 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param int $id ID of Campaign to Send Emails For
      * @param array<int> ID's of Leads to Send Emails For Campaign
      * @throws SendCampaignEmailsFailedException
-     * @return bool
+     * @return array response
      */
     public function sendCampaign(int $id, array $leads): array {
+        // Get Campaign Details
+        $campaign = $this->campaigns->get(['id' => $id]);
+
+        // Get Sales Person
+        $salesPerson = $this->salespeople->getBySmtpEmail($campaign->user_id, $campaign->from_email_address);
+        if(empty($salesPerson->id)) {
+            throw new FromEmailMissingSmtpConfigException;
+        }
+
+        // Create Email Builder Email!
+        $builder = new BuilderEmail([
+            'id' => $campaign->drip_campaigns_id,
+            'type' => BuilderEmail::TYPE_CAMPAIGN,
+            'subject' => $campaign->campaign_subject,
+            'template' => $campaign->template->html,
+            'template_id' => $campaign->template->template_id,
+            'user_id' => $campaign->user_id,
+            'sales_person_id' => $salesPerson->id,
+            'from_email' => $campaign->from_email_address,
+            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
+        ]);
+
+        // Send Emails and Return Response
+        try {
+            return $this->sendEmails($builder, $leads);
+        } catch(\Exception $ex) {
+            throw new SendCampaignEmailsFailedException($ex);
+        }
+    }
+
+    /**
+     * Send Email for Template
+     * 
+     * @param int $id ID of Template to Send Email For
+     * @param string $subject Subject of Email to Send
+     * @param string $toEmail Email Address to Send To
+     * @param int $salesPersonId ID of Sales Person to Send From
+     * @param string $fromEmail Email to Send From
+     * @throws SendTemplateEmailFailedException
+     * @return array response
+     */
+    public function sendTemplate(
+        int $id,
+        string $subject,
+        string $toEmail,
+        int $salesPersonId = 0,
+        string $fromEmail = ''
+    ): array {
         // Get Campaign Details
         $campaign = $this->campaigns->get(['id' => $id]);
 
