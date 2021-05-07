@@ -148,7 +148,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
-            'id' => $campaign->email_blasts_id,
+            'id' => $campaign->drip_campaigns_id,
             'type' => BuilderEmail::TYPE_CAMPAIGN,
             'subject' => $campaign->campaign_subject,
             'template' => $campaign->template->html,
