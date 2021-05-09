@@ -149,8 +149,6 @@ class GmailService implements GmailServiceInterface
         try {
             $message = $this->prepareMessage($parsedEmail);
         } catch (\Exception $e) {
-            var_dump($e->getMessage());
-            die;
             if(strpos($e->getMessage(), 'Address in mailbox given') !== FALSE) {
                 throw new InvalidToEmailAddressException;
             }
@@ -389,6 +387,8 @@ class GmailService implements GmailServiceInterface
         if(!empty($parsedEmail->getToName())) {
             $to = [$to => $parsedEmail->getToName()];
         }
+        var_dump($from);
+        var_dump($to);
 
         // Create Swift Message
         $swift = (new \Swift_Message($parsedEmail->getSubject()))->setFrom($from)->setTo($to)
