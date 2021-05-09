@@ -569,6 +569,21 @@ $api->version('v1', function ($route) {
         ], function ($route) {
             /*
             |--------------------------------------------------------------------------
+            | Admin Settings
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'settings'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\User\SettingsController@index');
+                $route->post('/', 'App\Http\Controllers\v1\User\SettingsController@update');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
             | Sales People
             |--------------------------------------------------------------------------
             |

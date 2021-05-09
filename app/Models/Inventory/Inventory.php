@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 use Laravel\Scout\Searchable;
+use App\Models\Inventory\Category;
 
 /**
  * Class Inventory
@@ -386,6 +387,17 @@ class Inventory extends Model
     public function customerInventories(): HasMany
     {
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
+    }
+    
+    public function getCategoryLabelAttribute()
+    {
+        $category = Category::where('legacy_category', $this->category)->first();
+        
+        if (empty($category)) {
+            return null;
+        }
+        
+        return $category->label;
     }
 
     public function getColorAttribute()
