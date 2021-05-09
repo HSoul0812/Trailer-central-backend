@@ -83,6 +83,11 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         return $this->getQueryBuilder($params)->with('salesTax')->get();
     }
 
+    public function dealerHasLocationWithId(int $dealerId, int $locationId): bool
+    {
+        return DealerLocation::where(['dealer_id' => $dealerId, 'dealer_location_id' => $locationId])->exists();
+    }
+
     /**
      * @throws ModelNotFoundException
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
@@ -94,7 +99,12 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         return $location->fill($params)->save();
     }
 
-    public function turnOffDefaultLocationForInvoiceByDealerId(int $dealerId): bool
+    public function turnOffDefaultLocationByDealerId(int $dealerId): bool
+    {
+        return DealerLocation::where('dealer_id', $dealerId)->update(['is_default' => 0]);
+    }
+
+    public function turnOffDefaultLocationForInvoicingByDealerId(int $dealerId): bool
     {
         return DealerLocation::where('dealer_id', $dealerId)->update(['is_default_for_invoice' => 0]);
     }

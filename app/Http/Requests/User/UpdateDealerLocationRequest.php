@@ -11,7 +11,7 @@ class UpdateDealerLocationRequest extends SaveDealerLocationRequest
     protected function getRules(): array
     {
         $rules = [
-            'id' => 'nullable|integer|exists:dealer_location,dealer_location_id'
+            'id' => 'required|exists:dealer_location,dealer_location_id,dealer_id,' . $this->getDealerId()
         ];
 
         return array_merge(parent::getRules(), $rules);
