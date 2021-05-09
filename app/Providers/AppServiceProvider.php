@@ -15,6 +15,8 @@ use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
+use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
+use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -51,6 +53,10 @@ use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
 use App\Repositories\User\DealerLocationQuoteFeeRepositoryInterface;
+use App\Repositories\User\DealerLocationSalesTaxItemRepository;
+use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
+use App\Repositories\User\DealerLocationSalesTaxRepository;
+use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepository;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\User\NewUserRepository;
@@ -83,6 +89,8 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\User\DealerLocationService;
+use App\Services\User\DealerLocationServiceInterface;
 use App\Services\User\PasswordResetServiceInterface;
 use App\Services\User\PasswordResetService;
 use App\Repositories\User\DealerLocationRepository;
@@ -126,6 +134,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
         \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
+        \Validator::extend('tax_calculator_valid', 'App\Rules\User\ValidTaxCalculator@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('website_exists', 'App\Rules\Website\WebsiteExists@passes');
         \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
@@ -291,5 +300,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DomPdfExporterServiceInterface::class, DomPdfExporterService::class);
 
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
+
+        $this->app->bind(ApiEntityReferenceRepositoryInterface::class, ApiEntityReferenceRepository::class);
+        $this->app->bind(DealerLocationServiceInterface::class, DealerLocationService::class);
+        $this->app->bind(DealerLocationSalesTaxItemRepositoryInterface::class, DealerLocationSalesTaxItemRepository::class);
+        $this->app->bind(DealerLocationSalesTaxRepositoryInterface::class, DealerLocationSalesTaxRepository::class);
     }
 }
