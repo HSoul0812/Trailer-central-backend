@@ -2,6 +2,7 @@
 
 namespace App\Jobs\CRM\Interactions;
 
+use App\Exceptions\CRM\Email\Builder\SendEmailBuilderJobFailedException;
 use App\Jobs\Job;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Interactions\EmailHistory;
@@ -85,8 +86,8 @@ class SendEmailBuilderJob extends Job
         } catch (\Exception $e) {
             // Flag it as sent anyway
             $this->markSent($emailHistoryRepo, $campaignRepo, $blastRepo);
-            $log->error('Email Builder Mail error', $e->getTrace());
-            throw new SendEmailBuilderFailedException($e);
+            $log->error('Email Builder Mail error: ' . $e->getMessage(), $e->getTrace());
+            throw new SendEmailBuilderJobFailedException($e);
         }
     }
 
