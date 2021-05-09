@@ -141,7 +141,6 @@ class SendEmailBuilderJob extends Job
             // Get Access Token
             $accessToken = $this->refreshAccessToken($this->config->smtpConfig->accessToken, $googleService, $tokenRepo);
             $this->config->smtpConfig->setAccessToken($accessToken);
-            var_dump($parsedEmail);
 
             // Send Gmail Email
             $finalEmail = $gmailService->send($this->config->smtpConfig, $parsedEmail);
