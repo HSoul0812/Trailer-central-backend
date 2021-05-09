@@ -387,8 +387,6 @@ class GmailService implements GmailServiceInterface
         if(!empty($parsedEmail->getToName())) {
             $to = [$to => $parsedEmail->getToName()];
         }
-        var_dump($from);
-        var_dump($to);
 
         // Create Swift Message
         $swift = (new \Swift_Message($parsedEmail->getSubject()))->setFrom($from)->setTo($to)
