@@ -32,10 +32,6 @@ class Image extends Model
      */
     protected $primaryKey = 'image_id';
     
-    protected $fillable = [
-        'filename'
-    ];
-
     public $timestamps = true;
 
     protected $fillable = [

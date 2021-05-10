@@ -12,11 +12,12 @@ use App\Models\Inventory\InventoryFile;
 use App\Models\Inventory\InventoryImage;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
 
 /**
  * Class InventoryRepository
@@ -371,7 +372,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * 
      * @return Builder
      */
-    private function buildInventoryQuery(array $params, bool $withDefault = true) : Builder
+    private function buildInventoryQuery(array $params, bool $withDefault = true) : GrimzyBuilder
     {
         /** @var Builder $query */
         $query = Inventory::where('inventory.inventory_id', '>', 0);
@@ -457,7 +458,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
     
-    private function getResultsCountFromQuery(Builder $query) : int
+    private function getResultsCountFromQuery(GrimzyBuilder $query) : int
     {
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
