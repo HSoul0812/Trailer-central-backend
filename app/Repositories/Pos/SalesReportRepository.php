@@ -105,6 +105,7 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                            IFNULL(iitem.cost,0) * ii.qty AS cost,
                            IFNULL(ii.unit_price,0) * ii.qty AS price,
                            FLOOR(ii.qty) AS qty,
+                           ii.taxes_amount AS taxes_amount,
                            @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
                            ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
                            IF(
@@ -148,6 +149,7 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         IFNULL(iitem.cost,0)  * psp.qty AS cost,
                         IFNULL(psp.price,0) * psp.qty AS price,
                         FLOOR(psp.qty),
+                        NULL AS taxes_amount,
                         @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
                         ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
                         (
@@ -184,6 +186,7 @@ SQL;
                     IFNULL(iitem.cost,0) * ii.qty AS cost,
                     IFNULL(ii.unit_price,0) * ii.qty AS price,
                     FLOOR(ii.qty) AS qty,
+                    ii.taxes_amount AS taxes_amount,
                     @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
                     ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
                     IF(
@@ -228,6 +231,7 @@ SQL;
                         IFNULL(iitem.cost,0) * psp.qty AS cost,
                         IFNULL(psp.price,0) * psp.qty AS price,
                         FLOOR(psp.qty),
+                        NULL AS taxes_amount,
                         @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
                         ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
                         (

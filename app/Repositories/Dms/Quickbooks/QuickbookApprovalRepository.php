@@ -180,10 +180,18 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
             $query = $query->whereNotIn('tb_name', ['qb_items', 'qb_item_category']);
         }
         if (isset($params['search_term'])) {
-            $query = $query->where(function($q) use($params) {
-                $q->where('action_type', 'LIKE', '%' . $params['search_term'] . '%')
-                    ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
-                    ->orWhere(function($query) use($params) {
+            $search_term = $params['search_term'];
+            $query = $query->where(function ($q) use ($params, $search_term) {
+                $q->where('action_type', 'LIKE', "%$search_term%")
+                    ->orWhere('created_at', 'LIKE', "%$search_term%")
+                    ->orWhere('qb_obj', 'LIKE', "%TotalAmt%$search_term%Line%") // ticket total
+                    ->orWhere('qb_obj', 'LIKE', "%CustomerRef%\"name\"%$search_term%TxnDate%") // customer name
+                    ->orWhere('qb_obj', 'LIKE', "%DisplayName%$search_term%PrimaryEmailAddr%") // customer name
+                    ->orWhere('qb_obj', 'LIKE', "\{\"Name\"\:\"%$search_term%\"\,\"AccountType%") // customer name
+                    ->orWhere('qb_obj', 'LIKE', "%PaymentMethodRef%name%$search_term%") // payment method
+                    ->orWhere('qb_obj', 'LIKE', "%PaymentRefNum%$search_term%TotalAmt%") // sales ticket
+                    ->orWhere('qb_obj', 'LIKE', "%DocNumber%$search_term%PrivateNote%") // sales ticket
+                    ->orWhere(function ($query) use ($params) {
                         $query->filterByTableName($params['search_term']);
                     });
 
