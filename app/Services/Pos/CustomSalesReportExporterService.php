@@ -116,10 +116,10 @@ class CustomSalesReportExporterService implements CustomSalesReportExporterServi
                 $line->type,
                 $line->qty,
                 $line->cost,
-                $line->cost,
                 $line->price,
                 $line->taxes_amount,
                 $line->taxes_amount + $line->price,
+                $line->refund,
                 $line->profit
             ]);
         }
