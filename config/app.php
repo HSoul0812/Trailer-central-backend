@@ -185,6 +185,7 @@ return [
         App\Providers\CatchAllOptionsRequestsProvider::class,
         App\Providers\WebsiteServiceProvider::class,
         App\Providers\JobServiceProvider::class,
+        App\Providers\UserServiceProvider::class,
         /*
          * 3rd party stuff
          */

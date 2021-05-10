@@ -100,6 +100,8 @@ class CustomSalesReportExporterService implements CustomSalesReportExporterServi
             'Qty',
             'Cost',
             'Price',
+            'Tax amount',
+            'Total amount',
             'Refund',
             'Profit'
         ]);
@@ -114,8 +116,10 @@ class CustomSalesReportExporterService implements CustomSalesReportExporterServi
                 $line->type,
                 $line->qty,
                 $line->cost,
-                $line->cost,
                 $line->price,
+                $line->taxes_amount,
+                $line->taxes_amount + $line->price,
+                $line->refund,
                 $line->profit
             ]);
         }

@@ -60,6 +60,15 @@ class QuickbookApproval extends Model
 
     public $timestamps = false;
 
+    protected $listAccountAttrName = [
+        'IncomeAccountRef',
+        'ExpenseAccountRef',
+        'AssetAccountRef',
+        'CreditCardAccountRef',
+        'BankAccountRef',
+        'DepositToAccountRef',
+    ];
+
     public function getTbLabelAttribute()
     {
         return self::TABLE_NAME_MAPPER[$this->tb_name];
@@ -75,6 +84,86 @@ class QuickbookApproval extends Model
             return $qbObj['CustomerRef']['name'];
         }
         return null;
+    }
+
+    public function getAccountAttribute(): ?string
+    {
+        $names = [];
+        $tbName = $this->tb_name;
+        $qbObj = json_decode($this->qb_obj,true);
+        switch($tbName) {
+            case 'qb_accounts':
+                if(!empty($qbObj['Name'])) {
+                    $names[] = $qbObj['Name'];
+                }
+                break;
+            case 'qb_bill_payment':
+                if(!empty($qbObj['CreditCardPayment']['CCAccountRef']['name'])) {
+                    $names[] = $qbObj['CreditCardPayment']['CCAccountRef']['name'];
+                }
+                break;
+            case 'qb_vendors':
+                if(!empty($qbObj['DisplayName'])) {
+                    $names[] = $qbObj['DisplayName'];
+                }
+                break;
+            case 'qb_items':
+            case 'qb_items_new':
+            case 'inventory_floor_plan_payment':
+            case 'qb_payment':
+                $names = $this->parseNameByItem();
+                break;
+            case 'qb_bills':
+            case 'qb_expenses':
+                $names = $this->parseNameInLine('AccountBasedExpenseLineDetail', 'AccountRef');
+                if(!empty($qbObj['AccountRef']['name'])) {
+                    $names[] = $qbObj['AccountRef']['name'];
+                }
+                break;
+            case 'qb_invoices':
+            case 'crm_pos_sales':
+            case 'dealer_refunds':
+                $names = $this->parseNameInLine('SalesItemLineDetail', 'ItemRef');
+                if(!empty($qbObj['DepositToAccountRef']['name'])) {
+                    $names[] = $qbObj['DepositToAccountRef']['name'];
+                }
+                break;
+            case 'qb_journal_entry':
+                $names = $this->parseNameInLine('JournalEntryLineDetail', 'AccountRef');
+                break;
+            default:
+                break;
+        }
+        $name = implode('<br/>', $names);
+        return $name;
+    }
+
+    protected function parseNameByItem():array
+    {
+        $names = [];
+        $qbObj = json_decode($this->qb_obj,true);
+        foreach($this->listAccountAttrName as $attr) {
+            if(!empty($qbObj[$attr]['name'])) {
+                $names[] = $qbObj[$attr]['name'];
+            }
+        }
+        return $names;
+    }
+
+    protected function parseNameInLine(string $key, string $subKey):array
+    {
+        $names = [];
+        $qbObj = json_decode($this->qb_obj,true);
+        if(!empty($qbObj['Line']) && is_array($qbObj['Line'])) {
+            foreach($qbObj['Line'] as $k => $line) {
+                if(!empty($line[$key][$subKey]['name'])) {
+                    $names[] = $line[$key][$subKey]['name'];
+                }
+            }
+        }
+
+        return $names;
+
     }
 
     public function getPaymentMethodAttribute()

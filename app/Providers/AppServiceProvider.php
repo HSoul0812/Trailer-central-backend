@@ -57,10 +57,6 @@ use App\Repositories\User\DealerLocationSalesTaxItemRepository;
 use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxRepository;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
-use App\Repositories\User\NewDealerUserRepository;
-use App\Repositories\User\NewDealerUserRepositoryInterface;
-use App\Repositories\User\NewUserRepository;
-use App\Repositories\User\NewUserRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
@@ -85,16 +81,12 @@ use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
-use App\Repositories\User\UserRepositoryInterface;
-use App\Repositories\User\UserRepository;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
 use App\Services\User\DealerLocationService;
 use App\Services\User\DealerLocationServiceInterface;
 use App\Services\User\PasswordResetServiceInterface;
 use App\Services\User\PasswordResetService;
-use App\Repositories\User\DealerLocationRepository;
-use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 use App\Repositories\System\EmailRepository;
@@ -112,8 +104,6 @@ use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Services\Export\DomPdfExporterService;
 use App\Services\Export\DomPdfExporterServiceInterface;
-use App\Services\User\DealerOptionsService;
-use App\Services\User\DealerOptionsServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use Illuminate\Database\Eloquent\Builder;
@@ -168,7 +158,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
         \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
         \Validator::extend('payment_uuid_valid', 'App\Rules\Inventory\Floorplan\PaymentUUIDValid@validate');
-        \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');        
+        \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
@@ -214,6 +204,9 @@ class AppServiceProvider extends ServiceProvider
 
             // configuration tables
             __DIR__ . '/../../database/migrations/config',
+
+            // invoicing
+            __DIR__ . '/../../database/migrations/invoicing',
         ]);
 
         // log all queries
@@ -255,13 +248,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
-        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
         $this->app->bind(CrmUserRoleRepositoryInterface::class, CrmUserRoleRepository::class);
-        $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
         $this->app->bind(DealerLocationQuoteFeeRepositoryInterface::class, DealerLocationQuoteFeeRepository::class);
-        $this->app->bind(NewUserRepositoryInterface::class, NewUserRepository::class);
-        $this->app->bind(NewDealerUserRepositoryInterface::class, NewDealerUserRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(SalesReportRepositoryInterface::class, SalesReportRepository::class);
@@ -284,8 +273,6 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
 
-        $this->app->bind(DealerOptionsServiceInterface::class, DealerOptionsService::class);
-
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
         $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
 
@@ -293,7 +280,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PasswordResetServiceInterface::class, PasswordResetService::class);
 
         $this->app->bind(MonitoredGenericJobServiceInterface::class, MonitoredJobService::class);
-        $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);        
+        $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);
 
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
 

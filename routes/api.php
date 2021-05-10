@@ -46,7 +46,10 @@ $api->version('v1', function ($route) {
      * Part bins
      */
     $route->get('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@index');
-
+    $route->put('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@create');
+    $route->post('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@create')->where('id', '[0-9]+');
+    $route->delete('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@destroy')->where('id', '[0-9]+');
+    
     /**
      * Part brands
      */
@@ -344,7 +347,7 @@ $api->version('v1', function ($route) {
     $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
     $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
     $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
-
+    
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
     });
@@ -568,6 +571,21 @@ $api->version('v1', function ($route) {
         $route->group([
             'prefix' => 'user'
         ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Admin Settings
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'settings'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\User\SettingsController@index');
+                $route->post('/', 'App\Http\Controllers\v1\User\SettingsController@update');
+            });
+
             /*
             |--------------------------------------------------------------------------
             | Sales People

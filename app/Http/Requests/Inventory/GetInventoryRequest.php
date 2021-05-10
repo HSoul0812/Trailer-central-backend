@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
+use App\Models\Inventory\Inventory;
 
 class GetInventoryRequest extends Request {
     
@@ -14,7 +15,15 @@ class GetInventoryRequest extends Request {
         'dealer_id.*' => 'integer',
         'dealer_id' => 'integer',
         'only_floorplanned' => 'boolean',
-        'floorplan_vendor' => 'vendor_exists'
+        'floorplan_vendor' => 'vendor_exists',
+        'images_greater_than' => 'integer',
+        'images_less_than' => 'integer',
+        'units_with_true_Cost' => 'boolean',
+        'dealer_location_id' => 'dealer_location_valid'
     ];
     
+    public function __construct(array $query = [], array $request = [], array $attributes = [], array $cookies = [], array $files = [], array $server = [], $content = null) {
+        parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
+        $this->rules['condition'] = 'in:'.implode(',', array_keys(Inventory::CONDITION_MAPPING));
+    }
 }

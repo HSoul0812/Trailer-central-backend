@@ -296,7 +296,7 @@ class InventoryService implements InventoryServiceInterface
         $images = $params[$imagesKey];
 
         $isOverlayEnabled = isset($params['overlay_enabled']) && in_array($params['overlay_enabled'], Inventory::OVERLAY_CODES);
-        $overlayEnabledParams = ['overlayText' => $params['stock']];
+        $overlayEnabledParams = ['overlayText' => $params['stock'], 'skipNotExisting' => true];
 
         $withOverlay = [];
         $withoutOverlay = [];
@@ -318,17 +318,23 @@ class InventoryService implements InventoryServiceInterface
         }
 
         foreach ($withoutOverlay as &$image) {
-            $fileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
-
+            $fileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, ['skipNotExisting' => true]);
+            if (empty($fileDto)) {
+                continue;
+            }
+            
             $image['filename'] = $fileDto->getPath();
             $image['filename_noverlay'] = '';
             $image['hash'] = $fileDto->getHash();
         }
 
         foreach ($withOverlay as &$image) {
-            $noOverlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id']);
+            $noOverlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, ['skipNotExisting' => true]);
             $overlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
-
+            if (empty($noOverlayFileDto) || empty($overlayFileDto)) {
+                continue;
+            }
+            
             $image['filename'] = $overlayFileDto->getPath();
             $image['filename_noverlay'] = $noOverlayFileDto->getPath();
             $image['hash'] = $overlayFileDto->getHash();

@@ -37,4 +37,5 @@ class InventoryImage extends Model {
         'was_manually_added',
         'is_stock',
     ];
+    
 }
