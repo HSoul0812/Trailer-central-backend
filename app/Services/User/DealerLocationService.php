@@ -69,9 +69,14 @@ class DealerLocationService implements DealerLocationServiceInterface
         try {
             $this->locationRepo->beginTransaction();
 
+            if (!empty($params['is_default'])) {
+                // remove any default location if exists
+                $this->locationRepo->turnOffDefaultLocationByDealerId($dealerId);
+            }
+
             if (!empty($params['is_default_for_invoice'])) {
                 // remove any default location for invoice if exists
-                $this->locationRepo->turnOffDefaultLocationForInvoiceByDealerId($dealerId);
+                $this->locationRepo->turnOffDefaultLocationForInvoicingByDealerId($dealerId);
             }
 
             $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
@@ -100,8 +105,8 @@ class DealerLocationService implements DealerLocationServiceInterface
                     throw new InvalidArgumentException('"fees" must be an array');
                 }
 
-                foreach ($params['fees'] as $item) {
-                    $this->quoteFeeRepo->create($item + $locationRelDefinition);
+                foreach ($params['fees'] as $fee) {
+                    $this->quoteFeeRepo->create($fee + $locationRelDefinition);
                 }
             }
 
@@ -138,9 +143,14 @@ class DealerLocationService implements DealerLocationServiceInterface
         try {
             $this->locationRepo->beginTransaction();
 
+            if (!empty($params['is_default'])) {
+                // remove any default location if exists
+                $this->locationRepo->turnOffDefaultLocationByDealerId($dealerId);
+            }
+
             if (!empty($params['is_default_for_invoice'])) {
                 // remove any default location for invoice if exists
-                $this->locationRepo->turnOffDefaultLocationForInvoiceByDealerId($dealerId);
+                $this->locationRepo->turnOffDefaultLocationForInvoicingByDealerId($dealerId);
             }
 
             $locationRelDefinition = ['dealer_location_id' => $locationId];
@@ -200,10 +210,10 @@ class DealerLocationService implements DealerLocationServiceInterface
      */
     public function moveAndDelete(int $id, ?int $moveToLocationId = null): bool
     {
-        $location = $this->locationRepo->get(['dealer_location_id' => $id]);
-
         try {
             $this->locationRepo->beginTransaction();
+
+            $location = $this->locationRepo->get(['dealer_location_id' => $id]);
 
             if ($location->hasRelatedRecords()) {
                 $this->moveRelatedRecords($location, $moveToLocationId);
@@ -235,8 +245,14 @@ class DealerLocationService implements DealerLocationServiceInterface
         try {
             $this->locationRepo->beginTransaction();
 
-            $moveToLocationId = $moveToLocationId ??
-                $this->getAnotherAvailableLocationIdToMove($location->dealer_location_id, $location->dealer_id);
+            if ($moveToLocationId) {
+                if (!$this->locationRepo->dealerHasLocationWithId($location->dealer_id, $moveToLocationId)) {
+                    throw new DomainException("The provided target DealerLocation{dealer_location_id=$moveToLocationId} " .
+                        "doesn't belong the Dealer{dealer_id=$location->dealer_id}");
+                }
+            } else {
+                $moveToLocationId = $this->getAnotherAvailableLocationIdToMove($location->dealer_location_id, $location->dealer_id);
+            }
 
             if ($moveToLocationId === null) {
                 throw new DomainException("There isn't a possible location to move those related " .
@@ -288,7 +304,7 @@ class DealerLocationService implements DealerLocationServiceInterface
             DealerLocationRepositoryInterface::CONDITION_AND_WHERE => $whereFirst
         ])->first();
 
-        return $first->dealer_location_id ?: null;
+        return $first->dealer_location_id ?? null;
     }
 
     /**

@@ -52,6 +52,8 @@ interface DealerLocationRepositoryInterface extends Repository
     /**
      * @param array $params
      * @return DealerLocation
+     * @throws InvalidArgumentException when provided "sales_tax_items" isn't an array
+     * @throws InvalidArgumentException when provided "fees" isn't an array
      */
     public function create($params): DealerLocation;
 
@@ -67,6 +69,8 @@ interface DealerLocationRepositoryInterface extends Repository
      */
     public function findAll(array $params): \Illuminate\Database\Eloquent\Collection;
 
+    public function dealerHasLocationWithId(int $dealerId, int $locationId): bool;
+
     /**
      * @param array $params
      * @return DealerLocation
@@ -80,7 +84,9 @@ interface DealerLocationRepositoryInterface extends Repository
      */
     public function getDefaultByDealerId(int $dealerId): ?DealerLocation;
 
-    public function turnOffDefaultLocationForInvoiceByDealerId(int $dealerId): bool;
+    public function turnOffDefaultLocationByDealerId(int $dealerId): bool;
+
+    public function turnOffDefaultLocationForInvoicingByDealerId(int $dealerId): bool;
 
     /**
      * @param array $params

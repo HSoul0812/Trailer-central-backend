@@ -205,14 +205,4 @@ class DealerLocation extends Model
 
         return $numberOfInventories || $numberOfReferences;
     }
-
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::addGlobalScope('exclude_deleted', function (Builder $builder): void {
-
-            $builder->whereNull('deleted_at');
-        });
-    }
 }
