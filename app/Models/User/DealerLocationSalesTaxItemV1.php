@@ -13,6 +13,8 @@ class DealerLocationSalesTaxItemV1 extends DealerLocationSalesTaxItem
 {
     protected $table = 'dealer_location_sales_tax_item';
 
+    public $timestamps = false;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -26,7 +28,6 @@ class DealerLocationSalesTaxItemV1 extends DealerLocationSalesTaxItem
         "standard",
         "tax_exempt",
         "out_of_state_reciprocal",
-        "out_of_state_non_reciprocal",
-        "settngs"
+        "out_of_state_non_reciprocal"
     ];
 }

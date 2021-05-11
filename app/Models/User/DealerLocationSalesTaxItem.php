@@ -15,8 +15,6 @@ class DealerLocationSalesTaxItem extends Model
 
     protected $table = 'dealer_location_sales_tax_item_v2';
 
-    public $timestamps = false;
-
     const TYPE_STATE = 'state';
     const TYPE_COUNTY = 'county';
     const TYPE_CITY = 'city';
@@ -53,7 +51,6 @@ class DealerLocationSalesTaxItem extends Model
         "standard",
         "tax_exempt",
         "out_of_state_reciprocal",
-        "out_of_state_non_reciprocal",
-        "settngs"
+        "out_of_state_non_reciprocal"
     ];
 }
