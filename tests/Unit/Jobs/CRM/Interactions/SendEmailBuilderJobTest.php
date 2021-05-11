@@ -70,21 +70,21 @@ class SendEmailBuilderJobTest extends TestCase
         // Mock Email Builder Save to DB
         $this->emailBuilderServiceMock
             ->shouldReceive('saveToDb')
-            ->with($builder)
+            ->withArgs([$builder])
             ->once()
             ->andReturn($email);
 
         // Mock Email Builder Send Email
         $this->emailBuilderServiceMock
             ->shouldReceive('sendEmail')
-            ->with($builder, $email->id)
+            ->withArgs([$builder, $email->id])
             ->once()
             ->andReturn($parsedEmail);
 
         // Mock Email Builder Send Email
         $this->emailBuilderServiceMock
             ->shouldReceive('markSent')
-            ->with($builder, $parsedEmail)
+            ->withArgs([$builder, $parsedEmail])
             ->once();
 
 
@@ -113,14 +113,15 @@ class SendEmailBuilderJobTest extends TestCase
      */
     public function testHandleWithException()
     {
+        // Mock EmailHistory
+        $email = $this->getEloquentMock(EmailHistory::class);
+        $email->email_id = 1;
+
         // Mock BuilderEmail
         $builder = $this->getEloquentMock(BuilderEmail::class);
         $builder->id = 1;
         $builder->type = 'campaign';
         $builder->leadId = 1;
-
-        // Mock ParsedEmail
-        $parsedEmail = $this->getEloquentMock(ParsedEmail::class);
 
 
         // Mock Email Builder
@@ -135,19 +136,19 @@ class SendEmailBuilderJobTest extends TestCase
         // Mock Email Builder Save to DB
         $this->emailBuilderServiceMock
             ->shouldReceive('saveToDb')
-            ->with($builder)
+            ->withArgs([$builder])
             ->once()
-            ->andReturn(null);
+            ->andReturn($email);
 
         // Mock Email Builder Send Email Failed
         $this->emailBuilderServiceMock
             ->shouldReceive('sendEmail')
-            ->never();
+            ->once();
 
         // Mock Email Builder Send Email
         $this->emailBuilderServiceMock
             ->shouldReceive('markSent')
-            ->with($builder)
+            ->withArgs([$builder])
             ->once();
 
         // Expect Exception
