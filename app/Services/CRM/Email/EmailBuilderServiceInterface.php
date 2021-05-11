@@ -2,6 +2,10 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Models\CRM\Interactions\EmailHistory;
+use App\Services\CRM\Interactions\DTOs\BuilderEmail;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
+
 interface EmailBuilderServiceInterface {
     /**
      * Send Lead Emails for Blast
