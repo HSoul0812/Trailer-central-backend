@@ -227,7 +227,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     private function sendEmails(BuilderEmail $builder, array $leads) {
         // Initialize Sent Emails Collection
-        $sentEmails = new Collection();
+        $sentEmails = [];
         $sentLeads = new Collection();
         $errorLeads = new Collection();
 
@@ -243,7 +243,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             try {
                 // Get Lead
                 $lead = $this->leads->get(['id' => $leadId]);
-                if($sentEmails->filter(function($index, $value) use($lead) { return $value === $lead->email_address; })->count() > 0) {
+                if(in_array($lead->email_address, $sentEmails)) {
                     continue;
                 }
 
@@ -255,8 +255,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->dispatch($job->onQueue('mails'));
 
                 // Send Notice
+                $sentEmails[] = $lead->email_address;
                 $sentLeads->push($leadId);
-                $sentEmails->push($lead->email_address);
                 $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
             } catch(\Exception $ex) {
                 $this->log->error($ex->getMessage(), $ex->getTrace());
