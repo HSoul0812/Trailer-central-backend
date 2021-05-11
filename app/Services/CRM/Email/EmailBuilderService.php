@@ -10,6 +10,7 @@ use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
