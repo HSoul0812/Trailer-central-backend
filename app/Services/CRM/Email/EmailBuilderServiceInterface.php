@@ -38,4 +38,31 @@ interface EmailBuilderServiceInterface {
      * @return array response
      */
     public function sendTemplate(int $id, string $subject, string $toEmail, int $salesPersonId = 0, string $fromEmail = ''): array;
+
+    
+    /**
+     * Save Email Information to Database
+     * 
+     * @param BuilderEmail $config
+     * @return EmailHistory
+     */
+    public function saveToDb(BuilderEmail $config): EmailHistory;
+
+    /**
+     * Send Email Via SMTP|Gmail|NTLM
+     * 
+     * @param BuilderEmail $config
+     * @param int $emailId
+     * @return ParsedEmail
+     */
+    public function sendEmail(BuilderEmail $config, int $emailId): ParsedEmail;
+
+    /**
+     * Mark Email as Sent
+     * 
+     * @param BuilderEmail $config
+     * @param null|ParsedEmail $finalEmail
+     * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
+     */
+    public function markSent(BuilderEmail $config, ?ParsedEmail $finalEmail = null): bool;
 }

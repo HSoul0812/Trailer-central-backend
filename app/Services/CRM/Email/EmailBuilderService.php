@@ -11,11 +11,17 @@ use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
+use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\Integration\Google\GoogleServiceInterface;
+use App\Services\Integration\Google\GmailServiceInterface;
 use App\Traits\CustomerHelper;
 use App\Transformers\CRM\Email\BuilderEmailTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -60,6 +66,36 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $salespeople;
 
     /**
+     * @var App\Repositories\CRM\Interactions\InteractionsRepositoryInterface
+     */
+    protected $interactions;
+
+    /**
+     * @var App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface
+     */
+    protected $emailhistory;
+
+    /**
+     * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
+     */
+    protected $tokens;
+
+    /**
+     * @var App\Services\CRM\Interactions\NtlmEmailServiceInterface
+     */
+    protected $ntlm;
+
+    /**
+     * @var App\Services\Integration\Google\GoogleServiceInterface
+     */
+    protected $google;
+
+    /**
+     * @var App\Services\Integration\Google\GmailServiceInterface
+     */
+    protected $gmail;
+
+    /**
      * @var Illuminate\Support\Facades\Log
      */
     protected $log;
@@ -71,6 +107,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param TemplateRepositoryInterface $templates
      * @param LeadRepositoryInterface $leads
      * @param SalesPersonRepositoryInterface $salespeople
+     * @param EmailHistoryRepositoryInterface $emailhistory
+     * @param TokenRepositoryInterface $tokens
+     * @param GoogleServiceInterface $google
+     * @param GmailServiceInterface $gmail
      * @param Manager $fractal
      */
     public function __construct(
@@ -79,6 +119,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         TemplateRepositoryInterface $templates,
         LeadRepositoryInterface $leads,
         SalesPersonRepositoryInterface $salespeople,
+        InteractionsRepositoryInterface $interactions,
+        EmailHistoryRepositoryInterface $emailhistory,
+        TokenRepositoryInterface $tokens,
+        NtlmEmailServiceInterface $ntlm,
+        GoogleServiceInterface $google,
+        GmailServiceInterface $gmail,
         Manager $fractal
     ) {
         $this->blasts = $blasts;
@@ -86,6 +132,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $this->templates = $templates;
         $this->leads = $leads;
         $this->salespeople = $salespeople;
+        $this->interactions = $interactions;
+        $this->emailhistory = $emailhistory;
+        $this->tokens = $tokens;
+
+        $this->ntlm = $ntlm;
+        $this->google = $google;
+        $this->gmail = $gmail;
 
         // Set Fractal
         $this->fractal = $fractal;
@@ -231,6 +284,111 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
 
     /**
+     * Save Email Information to Database
+     * 
+     * @param BuilderEmail $config
+     * @return EmailHistory
+     */
+    public function saveToDb(BuilderEmail $config): EmailHistory {
+        // Create Interaction
+        if(!empty($config->leadId)) {
+            $interaction = $this->interactions->create([
+                'lead_id'           => $config->leadId,
+                'user_id'           => $config->userId,
+                'sales_person_id'   => $config->salesPersonId,
+                'interaction_type'  => 'EMAIL',
+                'interaction_notes' => 'E-Mail Sent: ' . $config->subject,
+                'interaction_time'  => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
+                'from_email'        => $config->fromEmail,
+                'sent_by'           => $config->fromEmail
+            ]);
+        }
+
+        // Create Email History Entry
+        return $this->emailhistory->create($config->getEmailHistoryParams($interaction->interaction_id ?? 0));
+    }
+
+    /**
+     * Send Email Via SMTP|Gmail|NTLM
+     * 
+     * @param BuilderEmail $config
+     * @param int $emailId
+     * @return ParsedEmail
+     */
+    public function sendEmail(BuilderEmail $config, int $emailId): ParsedEmail {
+        // Get Parsed Email
+        $parsedEmail = $config->getParsedEmail($emailId);
+
+        // Get SMTP Config
+        if(!empty($config->smtpConfig->isAuthTypeGmail())) {
+            // Get Access Token
+            $accessToken = $this->refreshAccessToken($config->smtpConfig->accessToken);
+            $config->smtpConfig->setAccessToken($accessToken);
+
+            // Send Gmail Email
+            $finalEmail = $this->gmail->send($config->smtpConfig, $parsedEmail);
+        }
+        // Get NTLM Config
+        elseif(!empty($config->smtpConfig->isAuthTypeGmail())) {
+            // Send NTLM Email
+            $finalEmail = $this->ntlm->send($config->smtpConfig, $parsedEmail);
+        }
+        // Get SMTP Config
+        else {
+            $this->setSmtpConfig($config->smtpConfig);
+
+            // Send Email
+            Mail::to($this->getCleanTo($config->getToEmail()))
+                ->send(new EmailBuilderEmail($parsedEmail));
+            $finalEmail = $parsedEmail;
+        }
+
+        // Return Final Email
+        return $finalEmail;
+    }
+
+    /**
+     * Mark Email as Sent
+     * 
+     * @param BuilderEmail $config
+     * @param null|ParsedEmail $finalEmail
+     * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
+     */
+    public function markSent(BuilderEmail $config, ?ParsedEmail $finalEmail = null): bool {
+        // Set Date Sent
+        if($finalEmail !== null) {
+            $this->emailhistory->update([
+                'id' => $finalEmail->emailHistoryId,
+                'message_id' => $finalEmail->messageId,
+                'body' => $finalEmail->body,
+                'date_sent' => 1
+            ]);
+        }
+
+        // Handle Based on Type
+        switch($config->type) {
+            case "campaign":
+                $sent = $this->campaigns->sent([
+                    'drip_campaigns_id' => $config->id,
+                    'lead_id' => $config->leadId,
+                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
+                ]);
+            break;
+            case "blast":
+                $sent = $this->blasts->sent([
+                    'email_blasts_id' => $config->id,
+                    'lead_id' => $config->leadId,
+                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
+                ]);
+            break;
+        }
+
+        // Return False if Nothing Saved
+        return !empty($sent->lead_id);
+    }
+
+
+    /**
      * Send Emails for Builder Config
      * 
      * @param BuilderEmail $builder
@@ -348,5 +506,22 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Return Response
         return $response;
+    }
+
+    /**
+     * Refresh Gmail Access Token
+     * 
+     * @param AccessToken $accessToken
+     * @return AccessToken
+     */
+    private function refreshAccessToken(AccessToken $accessToken): AccessToken {
+        // Refresh Token
+        $validate = $this->google->validate($accessToken);
+        if(!empty($validate['new_token'])) {
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
+        }
+
+        // Return New Token
+        return $accessToken;
     }
 }
