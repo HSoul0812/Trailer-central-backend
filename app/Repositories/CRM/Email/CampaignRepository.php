@@ -65,6 +65,6 @@ class CampaignRepository implements CampaignRepositoryInterface {
         $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
 
         // Was Blast Sent?
-        return !empty($sent->email_blasts_id);
+        return !empty($sent->drip_campaigns_id);
     }
 }
