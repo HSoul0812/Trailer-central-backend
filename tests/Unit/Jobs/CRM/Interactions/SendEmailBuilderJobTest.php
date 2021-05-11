@@ -58,6 +58,15 @@ class SendEmailBuilderJobTest extends TestCase
         $parsedEmail = $this->getEloquentMock(ParsedEmail::class);
 
 
+        // Mock Email Builder
+        $builder->shouldReceive('getLogParams')
+            ->twice()
+            ->andReturn([
+                'lead' => $builder->leadId,
+                'type' => $builder->type,
+                $builder->type => $builder->id
+            ]);
+
         // Mock Email Builder Save to DB
         $this->emailBuilderServiceMock
             ->shouldReceive('saveToDb')
@@ -114,6 +123,15 @@ class SendEmailBuilderJobTest extends TestCase
         $parsedEmail = $this->getEloquentMock(ParsedEmail::class);
 
 
+        // Mock Email Builder
+        $builder->shouldReceive('getLogParams')
+            ->once()
+            ->andReturn([
+                'lead' => $builder->leadId,
+                'type' => $builder->type,
+                $builder->type => $builder->id
+            ]);
+
         // Mock Email Builder Save to DB
         $this->emailBuilderServiceMock
             ->shouldReceive('saveToDb')
@@ -140,7 +158,7 @@ class SendEmailBuilderJobTest extends TestCase
         $sendEmailBuilderJob = new SendEmailBuilderJob($builder);
 
         // Handle Send Email Builder Job
-        $result = $sendEmailBuilderJob->handle($this->autoAssignServiceMock);
+        $result = $sendEmailBuilderJob->handle($this->sendEmailBuilderServiceMock);
 
         // Receive Handling Error on Send Email Builder Job
         Log::shouldReceive('error');
