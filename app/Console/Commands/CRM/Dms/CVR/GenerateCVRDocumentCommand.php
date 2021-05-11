@@ -6,6 +6,9 @@ use Illuminate\Console\Command;
 use App\Models\CRM\Dms\UnitSale;
 use App\Services\Dms\CVR\CVRGeneratorServiceInterface;
 
+/**
+ * Used to test CVR 
+ */
 class GenerateCVRDocumentCommand extends Command
 {
     /**
