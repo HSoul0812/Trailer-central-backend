@@ -86,8 +86,10 @@ class Blast extends Model
 
     /**
      * Get Template
+     * 
+     * @return BelongsTo
      */
-    public function template()
+    public function template(): BelongsTo
     {
         return $this->belongsTo(Template::class, 'email_template_id', 'id');
     }

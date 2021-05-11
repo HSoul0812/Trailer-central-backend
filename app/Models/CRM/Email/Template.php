@@ -49,33 +49,41 @@ class Template extends Model
 
     /**
      * Get CRM User
+     * 
+     * @return BelongsTo
      */
-    public function crmUser()
+    public function crmUser(): BelongsTo
     {
         return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
     }
 
     /**
      * Get Dealer User
+     * 
+     * @return BelongsTo
      */
-    public function newDealerUser()
+    public function newDealerUser(): BelongsTo
     {
         return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
     }
 
     /**
-     * @return type
+     * Get Campaigns Using Template
+     * 
+     * @return HasMany
      */
-    public function campaigns()
+    public function campaigns(): HasMany
     {
-        return $this->hasMany(Campaign::class);
+        return $this->hasMany(Campaign::class, 'email_template_id', 'id');
     }
 
     /**
-     * @return type
+     * Get Blasts Using Template
+     * 
+     * @return HasMany
      */
-    public function blasts()
+    public function blasts(): HasMany
     {
-        return $this->hasMany(Blast::class);
+        return $this->hasMany(Blast::class, 'email_template_id', 'id');
     }
 }
