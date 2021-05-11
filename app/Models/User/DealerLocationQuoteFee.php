@@ -30,10 +30,17 @@ class DealerLocationQuoteFee extends Model
 {
     use TableAware;
 
+    public const CHARGED_TYPE_INCOME = 'income';
+    public const CHARGED_TYPE_LIABILITY = 'liability';
+    public const CHARGED_TYPE_COMBINED = 'combined';
+    public const CHARGED_TYPE_DEFAULT = self::CHARGED_TYPE_INCOME;
+
     /**
      * @var string
      */
     protected $table = 'dealer_location_quote_fee';
+
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -50,7 +57,9 @@ class DealerLocationQuoteFee extends Model
         "is_county_taxed",
         "is_local_taxed",
         "visibility",
-        "accounting_class"
+        "accounting_class",
+        'fee_charged_type',
+        'cost_amount'
     ];
 
     protected $appends = [

@@ -28,7 +28,8 @@ class Request extends BaseRequest {
      * @return bool it is true when the object belong to the current logged in dealer
      *
      * @throws ResourceException when there were some validation error
-     * @throws NoObjectIdValueSetException when validateObjectBelongsTouser is set to true but getOBjectIdValue is set to false
+     * @throws NoObjectIdValueSetException when validateObjectBelongsToUser is set to true but getObjectIdValue is set to false
+     * @throws NoObjectTypeSetException when validateObjectBelongsToUser is set to true but getObject is set to false
      */
     public function validate(): bool
     {
