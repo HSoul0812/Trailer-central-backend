@@ -11,10 +11,10 @@ use App\Console\Commands\ReplaceYoutubeEmbeds;
 use App\Console\Commands\Inventory\AdjustFeetAndInches;
 use App\Console\Commands\User\CreateAccessToken;
 use App\Console\Commands\Parts\Import\StocksExistsCommand;
-use App\Console\Commands\CRM\Leads\AutoAssign; 
+use App\Console\Commands\CRM\Leads\AutoAssign;
 use App\Console\Commands\Parts\IncreaseDealerCostCommand;
 use App\Console\Commands\Parts\FixPartVendor;
-use App\Console\Commands\CRM\Dms\GenerateCVRDocumentCommand;
+use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -47,16 +47,16 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('run:bulk')
                 ->withoutOverlapping()
-                ->runInBackground(); 
-        
+                ->runInBackground();
+
         $schedule->command('add:sitemaps')
                 ->daily()
                 ->runInBackground();
-        
+
         $schedule->command('user:create-access-token')
                 ->daily()
                 ->runInBackground();
-        
+
         $schedule->command('crm:dms:update-po-num-ref')
                 ->daily()
                 ->runInBackground();
@@ -67,33 +67,33 @@ class Kernel extends ConsoleKernel
         $schedule->command('leads:assign:auto 0 2999')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
         $schedule->command('leads:assign:auto 3000 5999')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
         $schedule->command('leads:assign:auto 6000 6623')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
         $schedule->command('leads:assign:auto 6625 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
         $schedule->command('leads:assign:auto 8999')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
         $schedule->command('leads:assign:auto 0 0 6624')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
         $schedule->command('leads:assign:auto 0 0 8770')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
-        
+
         $schedule->command('leads:import:adf')
                 ->everyFiveMinutes()
                 ->runInBackground();
@@ -105,7 +105,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('text:process-campaign')
                 ->withoutOverlapping()
                 ->runInBackground();
-        
+
         $schedule->command('text:deliver-blast')
                 ->withoutOverlapping()
                 ->runInBackground();
