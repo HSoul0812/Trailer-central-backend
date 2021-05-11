@@ -50,7 +50,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $templates;
 
     /**
-     * @var App\Repositories\CRM\Leads\LeadsRepositoryInterface
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
     protected $leads;
 
@@ -64,8 +64,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     protected $log;
 
+
     /**
+     * @param BlastRepositoryInterface $blasts
+     * @param CampaignRepositoryInterface $campaigns
+     * @param TemplateRepositoryInterface $templates
+     * @param LeadRepositoryInterface $leads
      * @param SalesPersonRepositoryInterface $salespeople
+     * @param Manager $fractal
      */
     public function __construct(
         BlastRepositoryInterface $blasts,
@@ -94,6 +100,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * 
      * @param int $id ID of Blast to Send Emails For
      * @param array<int> ID's of Leads to Send Emails For Blast
+     * @throws FromEmailMissingSmtpConfigException
      * @throws SendBlastEmailsFailedException
      * @return array response
      */
@@ -133,6 +140,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * 
      * @param int $id ID of Campaign to Send Emails For
      * @param array<int> ID's of Leads to Send Emails For Campaign
+     * @throws FromEmailMissingSmtpConfigException
      * @throws SendCampaignEmailsFailedException
      * @return array response
      */
@@ -175,6 +183,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param string $toEmail Email Address to Send To
      * @param int $salesPersonId ID of Sales Person to Send From
      * @param string $fromEmail Email to Send From
+     * @throws FromEmailMissingSmtpConfigException
      * @throws SendTemplateEmailFailedException
      * @return array response
      */
@@ -194,6 +203,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
         if(empty($salesPerson->id)) {
             $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+        }
+        if(empty($salesPerson->id)) {
+            throw new FromEmailMissingSmtpConfigException;
         }
 
         // Create Email Builder Email!
@@ -223,9 +235,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * 
      * @param BuilderEmail $builder
      * @param array $leads
-     * @return Collection<int> Collection of Lead ID's That Started Sending
+     * @throws SendBuilderEmailsFailedException
+     * @return array response
      */
-    private function sendEmails(BuilderEmail $builder, array $leads) {
+    private function sendEmails(BuilderEmail $builder, array $leads): array {
         // Initialize Sent Emails Collection
         $sentEmails = [];
         $sentLeads = new Collection();
@@ -278,9 +291,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * 
      * @param BuilderEmail $builder
      * @param string $toEmail
-     * @return bool
+     * @throws SendBuilderEmailsFailedException
+     * @return array response
      */
-    private function sendManual(BuilderEmail $builder, string $toEmail) {
+    private function sendManual(BuilderEmail $builder, string $toEmail): array {
         // Try/Send Email!
         try {
             // Add To Email to Builder Email
@@ -307,7 +321,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param BuilderEmail $builder
      * @param null|Collection<int> $sent Lead ID's Successfully Queued to Send
      * @param null|Collection<int> $errors Lead ID's That Failed to Queue
-     * @return Response
+     * @return array response
      */
     private function response(BuilderEmail $builder, ?Collection $sent = null, ?Collection $errors = null): array {
         // Handle Logging

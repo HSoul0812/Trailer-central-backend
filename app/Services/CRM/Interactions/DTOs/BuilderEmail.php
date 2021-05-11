@@ -19,17 +19,17 @@ class BuilderEmail
 
 
     /**
-     * @var string
+     * @const string
      */
     const TYPE_BLAST = 'blast';
 
     /**
-     * @var string
+     * @const string
      */
     const TYPE_CAMPAIGN = 'campaign';
 
     /**
-     * @var string
+     * @const string
      */
     const TYPE_TEMPLATE = 'template';
 
@@ -159,7 +159,7 @@ class BuilderEmail
     /**
      * Get To Email Details
      * 
-     * @return array{email: string, name: string}
+     * @return array{email: string, ?name: string}
      */
     public function getToEmail() {
         // Initialize To Array
@@ -240,7 +240,7 @@ class BuilderEmail
     /**
      * Get Email History Params Fill Array
      * 
-     * @param int $interactionId
+     * @param null|int $interactionId
      * @return array{lead_id: null|int,
      *               interaction_id: null|int
      *               message_id: string,

@@ -10,7 +10,7 @@ interface TemplateRepositoryInterface extends Repository {
      * 
      * @param string $template
      * @param array $replaces
-     * @return type
+     * @return string
      */
-    public function fillTemplate($template, $replaces);
+    public function fillTemplate(string $template, array $replaces): string;
 }
