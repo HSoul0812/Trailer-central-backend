@@ -25,6 +25,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Traits\CustomerHelper;
+use App\Traits\MailHelper;
 use App\Transformers\CRM\Email\BuilderEmailTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
@@ -40,7 +41,7 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
  */
 class EmailBuilderService implements EmailBuilderServiceInterface
 {
-    use DispatchesJobs, CustomerHelper;
+    use DispatchesJobs, CustomerHelper, MailHelper;
 
     /**
      * @var App\Repositories\CRM\Email\BlastRepositoryInterface

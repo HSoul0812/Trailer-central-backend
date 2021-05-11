@@ -6,7 +6,6 @@ use App\Exceptions\CRM\Email\Builder\SendEmailBuilderJobFailedException;
 use App\Jobs\Job;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
-use App\Traits\MailHelper;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class SendEmailBuilderJob extends Job
 { 
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, MailHelper;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * @var BuilderEmail
