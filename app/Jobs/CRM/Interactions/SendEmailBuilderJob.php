@@ -40,7 +40,7 @@ class SendEmailBuilderJob extends Job
      * @throws SendEmailBuilderJobFailedException
      * @return boolean
      */
-    public function handle(EmailBuilderService $service) {
+    public function handle(EmailBuilderServiceInterface $service) {
         // Initialize Logger
         $log = Log::channel('emailbuilder');
         $log->info('Mailing Email Builder Email', $this->config->getLogParams());
