@@ -46,7 +46,7 @@ class SendEmailBuilderJobTest extends TestCase
     {
         // Mock EmailHistory
         $email = $this->getEloquentMock(EmailHistory::class);
-        $email->id = 1;
+        $email->email_id = 1;
 
         // Mock BuilderEmail
         $builder = $this->getEloquentMock(BuilderEmail::class);
@@ -158,7 +158,7 @@ class SendEmailBuilderJobTest extends TestCase
         $sendEmailBuilderJob = new SendEmailBuilderJob($builder);
 
         // Handle Send Email Builder Job
-        $result = $sendEmailBuilderJob->handle($this->sendEmailBuilderServiceMock);
+        $result = $sendEmailBuilderJob->handle($this->emailBuilderServiceMock);
 
         // Receive Handling Error on Send Email Builder Job
         Log::shouldReceive('error');
