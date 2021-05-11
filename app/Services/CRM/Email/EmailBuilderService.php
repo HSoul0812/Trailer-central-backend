@@ -243,7 +243,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             try {
                 // Get Lead
                 $lead = $this->leads->get(['id' => $leadId]);
-                if($sentEmails->where($lead->email_address)->count() > 0) {
+                if($sentEmails->filter(function($index, $value) use($lead) { return $value === $lead->email_address; })->count() > 0) {
                     continue;
                 }
 
