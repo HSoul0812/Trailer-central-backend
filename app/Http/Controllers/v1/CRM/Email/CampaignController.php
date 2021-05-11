@@ -16,13 +16,20 @@ use Dingo\Api\Http\Request;
 
 class CampaignController extends RestfulControllerV2
 {
+    /**
+     * @var CampaignRepositoryInterface
+     */
     protected $campaigns;
+
+    /**
+     * @var EmailBuilderServiceInterface
+     */
     protected $emailbuilder;
 
     /**
      * Create a new controller instance.
      *
-     * @param CampaignRepositoryInterface $campaignss
+     * @param CampaignRepositoryInterface $campaigns
      * @param EmailBuilderServiceInterface $emailbuilder
      */
     public function __construct(

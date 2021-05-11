@@ -16,7 +16,15 @@ use Dingo\Api\Http\Request;
 
 class TemplateController extends RestfulControllerV2
 {
+    /**
+     * @var EmailBuilderServiceInterface
+     */
     protected $templates;
+
+    /**
+     * @var EmailBuilderServiceInterface
+     */
+    protected $emailbuilder;
 
     /**
      * Create a new controller instance.
