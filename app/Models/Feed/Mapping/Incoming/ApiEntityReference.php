@@ -2,12 +2,19 @@
 
 namespace App\Models\Feed\Mapping\Incoming;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 
+/**
+ * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ */
 class ApiEntityReference extends Model {
 
+    use TableAware;
+
     protected $table = 'api_entity_reference';
-    
+
     /**
      * The primary key associated with the table.
      *
@@ -16,14 +23,16 @@ class ApiEntityReference extends Model {
     protected $primaryKey = 'api_entity_reference_id';
 
     public $timestamps = false;
-    
+
     const LOADTRAIL_API_KEY = 'lt';
     const PJ_API_KEY = 'pj';
     const UTC_API_KEY = 'utc';
     const LGS_API_KEY = 'lgs';
     const NOVAE_API_KEY = 'novae';
     const LAMAR_API_KEY = 'lamar';
-    const NORSTAR_API_KEY = 'norstar';    
+    const NORSTAR_API_KEY = 'norstar';
+
+    public const TYPE_LOCATION = 'dealer_location';
 
     protected $fillable = [
         'entity_id',

@@ -31,6 +31,8 @@ class InventorySeeder extends Seeder
 {
     use WithGetter;
 
+    private $fixedUser;
+
     /**
      * @var User
      */
@@ -140,4 +142,5 @@ class InventorySeeder extends Seeder
 
         User::destroy($this->dealer->dealer_id);
     }
+
 }

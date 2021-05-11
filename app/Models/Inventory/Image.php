@@ -31,7 +31,7 @@ class Image extends Model
      * @var string
      */
     protected $primaryKey = 'image_id';
-
+    
     public $timestamps = true;
 
     protected $fillable = [

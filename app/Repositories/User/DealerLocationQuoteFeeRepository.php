@@ -28,6 +28,7 @@ class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeReposito
             DB::raw("NULL AS id,
                    NULL AS dealer_location_id,
                    'environmental_fee' AS fee_type,
+                   'Environmental Fee' AS title,
                    NULL AS amount,
                    NULL AS is_state_taxed,
                    NULL AS is_county_taxed,
@@ -38,7 +39,7 @@ class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeReposito
 
         // to prevent the union fail when it has been added some column to `dealer_location_quote_fee` table
         $columns = DB::raw(
-            "{$quoteFeeTableName}.id, {$quoteFeeTableName}.dealer_location_id, fee_type, amount," .
+            "{$quoteFeeTableName}.id, {$quoteFeeTableName}.dealer_location_id, fee_type, title, amount," .
             ' is_state_taxed, is_county_taxed, is_local_taxed, visibility, accounting_class'
         );
 
@@ -71,6 +72,7 @@ class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeReposito
         if (isset($params['search_term'])) {
             $query->where(function ($query) use ($params): void {
                 $query->where('fee_type', 'LIKE', '%' . $params['search_term'] . '%');
+                $query->where('title', 'LIKE', '%' . $params['search_term'] . '%');
             });
         }
 
@@ -89,5 +91,18 @@ class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeReposito
     public function getByDealerLocationId(int $id, array $extraParams = []): LengthAwarePaginator
     {
         return $this->getAll(array_merge($extraParams, ['dealer_location_id' => $id]));
+    }
+
+    public function create(array $params): DealerLocationQuoteFee
+    {
+        $item = new DealerLocationQuoteFee();
+        $item->fill($params)->save();
+
+        return $item;
+    }
+
+    public function deleteByDealerLocationId(int $dealerLocationId): int
+    {
+        return DealerLocationQuoteFee::where(['dealer_location_id' => $dealerLocationId])->delete();
     }
 }

@@ -26,4 +26,9 @@ interface InventoryRepositoryInterface extends Repository
     public function commitTransaction(): void;
 
     public function rollbackTransaction(): void;
+
+    /**
+     * @return int number of touched records
+     */
+    public function moveLocationId(int $from, int $to): int;
 }

@@ -39,8 +39,8 @@ class InventoryTransformer extends TransformerAbstract
              'bill_id' => $inventory->bill_id,
              'brand' => $inventory->brand,
              'category' => $inventory->category,
-             'condition' => $inventory->condition,
-             'created_at' => $inventory->created_at,
+             'category_label' => $inventory->category_label,
+             'condition' => $inventory->condition,             
              'dealer' => $this->userTransformer->transform($inventory->user),
              'dealer_location_id' => $inventory->dealer_location_id,
              'dealer_location' => $inventory->dealerLocation ? $this->dealerLocationTransformer->transform($inventory->dealerLocation) : null,
@@ -52,6 +52,7 @@ class InventoryTransformer extends TransformerAbstract
              'gvwr' => $inventory->gvwr,
              'height' => $inventory->height,
              'images' => $this->transformImages($inventory->images),
+             'primary_image' => $inventory->images->count() > 0 ? $this->imageTransformer->transform($inventory->images->first()) : null,
              'is_archived' => $inventory->is_archived,
              'is_floorplan_bill' => $inventory->is_floorplan_bill,
              'length' => $inventory->length,
@@ -60,8 +61,8 @@ class InventoryTransformer extends TransformerAbstract
              'msrp' => $inventory->msrp,
              'non_serialized' => $inventory->non_serialized,
              'note' => $inventory->note,
-             'price' => $inventory->price,
-             'sales_price' => $inventory->sales_price,
+             'price' => $inventory->price ?? 0,
+             'sales_price' => $inventory->sales_price ?? 0,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
              'status' => $inventory->status_label,
              'stock' => $inventory->stock,
@@ -79,7 +80,9 @@ class InventoryTransformer extends TransformerAbstract
              'color' => $inventory->color,
              'floorplan_payments' => $inventory->floorplanPayments,
              'url' => $inventory->getUrl(),
-             'floorplan_vendor' => $inventory->floorplanVendor
+             'floorplan_vendor' => $inventory->floorplanVendor,
+             'created_at' => $inventory->created_at,
+             'updated_at' => $inventory->updated_at
          ];
     }
 

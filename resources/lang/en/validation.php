@@ -202,5 +202,6 @@ return [
     'inventory_valid' => 'Inventory ID must exist',
     'stock_type_valid' => 'The selected :attribute is invalid.',
     'inventory_unique_stock' => 'The selected :attribute already exists on another inventory item.',
-    'valid_smtp_email' => 'The selected :attribute doesn\'t have any smtp configuration!'
+    'valid_smtp_email' => 'The selected :attribute doesn\'t have any smtp configuration!',
+    'tax_calculator_valid' => 'The selected tax calculator id is invalid'
 ];

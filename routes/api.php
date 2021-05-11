@@ -411,6 +411,10 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
+        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
+        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
+        $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
 
         /*
@@ -567,6 +571,21 @@ $api->version('v1', function ($route) {
         $route->group([
             'prefix' => 'user'
         ], function ($route) {
+            /*
+            |--------------------------------------------------------------------------
+            | Admin Settings
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'settings'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\User\SettingsController@index');
+                $route->post('/', 'App\Http\Controllers\v1\User\SettingsController@update');
+            });
+
             /*
             |--------------------------------------------------------------------------
             | Sales People
