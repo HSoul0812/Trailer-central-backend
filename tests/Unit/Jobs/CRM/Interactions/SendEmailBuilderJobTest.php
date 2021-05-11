@@ -84,7 +84,9 @@ class SendEmailBuilderJobTest extends TestCase
         // Mock Email Builder Send Email
         $this->emailBuilderServiceMock
             ->shouldReceive('markSent')
-            ->withArgs([$builder, $parsedEmail])
+            ->with(Mockery::on(function($config, $parsed) use($builder, $parsedEmail) {
+                return($config === $builder && !empty($parsed));
+            }))
             ->once();
 
 
