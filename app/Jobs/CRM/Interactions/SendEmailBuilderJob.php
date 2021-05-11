@@ -50,9 +50,9 @@ class SendEmailBuilderJob extends Job
     /**
      * @param GoogleServiceInterface $googleService
      * @param GmailServiceInterface $gmailService
+     * @param NtlmEmailServiceInterface $ntlmService
      * @param TokenRepositoryInterface $tokenRepo
      * @param EmailHistoryRepositoryInterface $emailHistoryRepo
-     * @param TemplateRepositoryInterface $templateRepo
      * @param CampaignRepositoryInterface $campaignRepo
      * @param BlastRepositoryInterface $blastRepo
      * @throws SendEmailBuilderFailedException
@@ -61,10 +61,9 @@ class SendEmailBuilderJob extends Job
     public function handle(
         GoogleServiceInterface $googleService,
         GmailServiceInterface $gmailService,
-        TokenRepositoryInterface $tokenRepo,
         NtlmEmailServiceInterface $ntlmService,
+        TokenRepositoryInterface $tokenRepo,
         EmailHistoryRepositoryInterface $emailHistoryRepo,
-        TemplateRepositoryInterface $templateRepo,
         CampaignRepositoryInterface $campaignRepo,
         BlastRepositoryInterface $blastRepo
     ) {
