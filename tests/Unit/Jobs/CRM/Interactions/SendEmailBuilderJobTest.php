@@ -77,14 +77,14 @@ class SendEmailBuilderJobTest extends TestCase
         // Mock Email Builder Send Email
         $this->emailBuilderServiceMock
             ->shouldReceive('sendEmail')
-            ->withArgs([$builder, $email->id])
+            ->withArgs([$builder, $email->email_id])
             ->once()
             ->andReturn($parsedEmail);
 
         // Mock Email Builder Send Email
         $this->emailBuilderServiceMock
             ->shouldReceive('markSent')
-            //->withArgs([$builder, $parsedEmail])
+            ->withArgs([$builder, $parsedEmail])
             ->once();
 
 
@@ -143,6 +143,7 @@ class SendEmailBuilderJobTest extends TestCase
         // Mock Email Builder Send Email Failed
         $this->emailBuilderServiceMock
             ->shouldReceive('sendEmail')
+            ->withArgs([$builder, $email->email_id])
             ->once();
 
         // Mock Email Builder Send Email
