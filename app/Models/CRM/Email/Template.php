@@ -7,6 +7,8 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\Blast;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Email Template

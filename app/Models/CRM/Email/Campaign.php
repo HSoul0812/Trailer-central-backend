@@ -5,6 +5,7 @@ namespace App\Models\CRM\Email;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Email Campaign
