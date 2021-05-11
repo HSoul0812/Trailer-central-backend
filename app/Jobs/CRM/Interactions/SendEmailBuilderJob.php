@@ -39,7 +39,7 @@ class SendEmailBuilderJob extends Job
     private $config;
 
     /**
-     * SendEmailBuilder constructor.
+     * SendEmailBuilderJob constructor.
      * @param BuilderEmail $config
      */
     public function __construct(BuilderEmail $config)
@@ -55,7 +55,7 @@ class SendEmailBuilderJob extends Job
      * @param EmailHistoryRepositoryInterface $emailHistoryRepo
      * @param CampaignRepositoryInterface $campaignRepo
      * @param BlastRepositoryInterface $blastRepo
-     * @throws SendEmailBuilderFailedException
+     * @throws SendEmailBuilderJobFailedException
      * @return boolean
      */
     public function handle(
@@ -121,7 +121,10 @@ class SendEmailBuilderJob extends Job
     /**
      * Send Email Via SMTP|Gmail|NTLM
      * 
+     * @param int $emailId
+     * @param GoogleServiceInterface $googleService
      * @param GmailServiceInterface $gmailService
+     * @param TokenRepositoryInterface $tokenRepo
      * @param NtlmEmailServiceInterface $ntlmService
      * @return ParsedEmail
      */
