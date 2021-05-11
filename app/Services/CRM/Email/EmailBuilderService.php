@@ -246,6 +246,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 if(in_array($lead->email_address, $sentEmails)) {
                     continue;
                 }
+                $sentEmails[] = $lead->email_address;
 
                 // Add Lead Config to Builder Email
                 $builder->setLeadConfig($lead);
@@ -255,7 +256,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->dispatch($job->onQueue('mails'));
 
                 // Send Notice
-                $sentEmails[] = $lead->email_address;
                 $sentLeads->push($leadId);
                 $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
             } catch(\Exception $ex) {
