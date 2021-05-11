@@ -33,13 +33,11 @@ class TemplateRepository implements TemplateRepositoryInterface {
      * 
      * @param string $template
      * @param array $replaces
-     * @return type
+     * @return string
      */
-    public function fillTemplate($template, $replaces) {
-        // Add Footer
-        $body = $template . Template::REPLY_STOP;
-
+    public function fillTemplate(string $template, array $replaces): string {
         // Loop Replacements!
+        $body = $template;
         foreach($replaces as $field => $value) {
             // Replace Field
             $body = str_replace('{' . $field . '}', $value, $body);
