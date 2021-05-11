@@ -53,14 +53,10 @@ use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
 use App\Repositories\User\DealerLocationQuoteFeeRepositoryInterface;
-use App\Repositories\User\DealerLocationRepository;
-use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxItemRepository;
 use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxRepository;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
-use App\Repositories\User\UserRepository;
-use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
@@ -296,8 +292,5 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationServiceInterface::class, DealerLocationService::class);
         $this->app->bind(DealerLocationSalesTaxItemRepositoryInterface::class, DealerLocationSalesTaxItemRepository::class);
         $this->app->bind(DealerLocationSalesTaxRepositoryInterface::class, DealerLocationSalesTaxRepository::class);
-        $this->app->bind(DealerLocationRepositoryInterface::class, DealerLocationRepository::class);
-
-        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
     }
 }
