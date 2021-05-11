@@ -228,7 +228,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     private function sendEmails(BuilderEmail $builder, array $leads) {
         // Initialize Sent Emails Collection
         $sentEmails = new Collection();
-        $errorEmails = new Collection();
+        $sentLeads = new Collection();
+        $errorLeads = new Collection();
 
         // Loop Leads
         foreach($leads as $leadId) {
@@ -242,6 +243,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             try {
                 // Get Lead
                 $lead = $this->leads->get(['id' => $leadId]);
+                if($sendEmails->where($lead->email_address)->count() > 0) {
+                    continue;
+                }
 
                 // Add Lead Config to Builder Email
                 $builder->setLeadConfig($lead);
@@ -251,21 +255,22 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->dispatch($job->onQueue('mails'));
 
                 // Send Notice
-                $sentEmails->push($leadId);
+                $sentLeads->push($leadId);
+                $sentEmails->push($lead->email_address);
                 $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
             } catch(\Exception $ex) {
                 $this->log->error($ex->getMessage(), $ex->getTrace());
-                $errorEmails->push($leadId);
+                $errorLeads->push($leadId);
             }
         }
 
         // Errors Occurred and No Emails Sent?
-        if($sentEmails->count() < 1 && $errorEmails->count() > 0) {
+        if($sentLeads->count() < 1 && $errorLeads->count() > 0) {
             throw new SendBuilderEmailsFailedException;
         }
 
         // Return Sent Emails Collection
-        return $this->response($builder, $sentEmails, $errorEmails);
+        return $this->response($builder, $sentLeads, $errorLeads);
     }
 
     /**
