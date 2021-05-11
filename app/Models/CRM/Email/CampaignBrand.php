@@ -13,6 +13,8 @@ class CampaignBrand extends Model
 {
     protected $table = 'crm_email_campaign_unit_brands';
 
+    public $timestamps = false;
+
     /**
      * The attributes that are mass assignable.
      *

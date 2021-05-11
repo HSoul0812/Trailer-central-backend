@@ -286,12 +286,11 @@ class BlastController extends RestfulControllerV2
      * )
      */
     public function send(int $id, Request $request) {
-        $requestData = $request->all();
-        $requestData['id'] = $id;
-        $request = new SendBlastRequest($requestData);
+        $request = new SendBlastRequest($request->all() + ['id' => $id]);
         
         if ( $request->validate()) {
             // Send Emails for Blast
+            $requestData = $request->all();
             return $this->response->array(
                 $this->emailbuilder->sendBlast($requestData['id'], $requestData['leads'])
             );

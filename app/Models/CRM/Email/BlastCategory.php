@@ -13,6 +13,8 @@ class BlastCategory extends Model
 {
     protected $table = 'crm_email_blast_unit_categories';
 
+    public $timestamps = false;
+
     /**
      * The attributes that are mass assignable.
      *

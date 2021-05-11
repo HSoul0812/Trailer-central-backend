@@ -13,6 +13,8 @@ class CampaignCategory extends Model
 {
     protected $table = 'crm_email_campaign_unit_categories';
 
+    public $timestamps = false;
+
     /**
      * The attributes that are mass assignable.
      *

@@ -274,11 +274,10 @@ class TemplateController extends RestfulControllerV2
      * )
      */
     public function send(int $id, Request $request) {
-        $requestData = $request->all();
-        $requestData['id'] = $id;
-        $request = new SendTemplateRequest($requestData);
+        $request = new SendTemplateRequest($request->all() + ['id' => $id]);
         
         if ( $request->validate() ) {
+            $requestData = $request->all();
             return $this->response->array(
                 $this->emailbuilder->sendTemplate(
                     $requestData['id'],

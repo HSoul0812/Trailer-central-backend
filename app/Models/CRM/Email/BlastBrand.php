@@ -13,6 +13,8 @@ class BlastBrand extends Model
 {
     protected $table = 'crm_email_blast_unit_brands';
 
+    public $timestamps = false;
+
     /**
      * The attributes that are mass assignable.
      *
