@@ -32,6 +32,7 @@ use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
 /**
