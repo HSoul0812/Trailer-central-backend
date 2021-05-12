@@ -165,7 +165,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Template
         $template = $this->getEloquentMock(Template::class);
         $template->template_id = 1;
-        $template->html = $this->getTemplate('blast');
+        $template->html = $this->getTemplate();
 
         // Mock Blast
         $blast = $this->getEloquentMock(Blast::class);
@@ -229,6 +229,23 @@ class EmailBuilderServiceTest extends TestCase
         $this->assertSame($result['sent'], 3);
     }
 
+
+    /**
+     * Get Template for Type
+     * 
+     * @return string
+     */
+    private function getTemplate() {
+        return '
+<html>
+<body>
+<p>This is a test Email!</p>
+<p><strong>Full Name:</strong> {lead_name}</p>
+<p><strong>Unit Interested In:</strong> {title_of_unit_of_interest}</p>
+</body>
+</html>
+        ';
+    }
 
     /**
      * Get Lead Mocks
