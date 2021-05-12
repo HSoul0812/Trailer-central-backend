@@ -2,10 +2,9 @@
 
 namespace Tests\Unit\Services\CRM\Leads;
 
-use App\Mail\InquiryEmail;
-use App\Models\CRM\Leads\LeadType;
-use App\Services\CRM\Email\InquiryEmailServiceInterface;
-use App\Services\CRM\Leads\DTOs\InquiryLead;
+use App\Models\CRM\Email\Blast;
+use App\Models\CRM\Email\Campaign;
+use App\Models\CRM\Email\Template;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
@@ -14,11 +13,13 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\CRM\Interactions\DTOs\BuilderEmail;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Support\Facades\Mail;
 use Mockery;
 use Tests\TestCase;
 
@@ -30,7 +31,7 @@ use Tests\TestCase;
  *
  * @coversDefaultClass \App\Services\CRM\Email\EmailBuilderService
  */
-class InquiryEmailServiceTest extends TestCase
+class EmailBuilderServiceTest extends TestCase
 {
     /**
      * @const array<array{email: string, name: string, inventory: string}> Dummy Lead Details
@@ -186,8 +187,8 @@ class InquiryEmailServiceTest extends TestCase
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->shouldReceive('fillFromSalesPerson')->passthru();
 
-        // @var InquiryEmailServiceInterface $service
-        $service = $this->app->make(InquiryEmailServiceInterface::class);
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
 
         // Lead Relations
         $blast->shouldReceive('setRelation')->passthru();
@@ -210,15 +211,6 @@ class InquiryEmailServiceTest extends TestCase
                  ->with(['id' => $lead->identifier])
                  ->once()
                  ->andReturn($lead);
-
-            // ONLY Process if Not a Duplicate!
-            if($i !== self::DUMMY_LEAD_DUP) {
-                // Update Builder
-                $builder->leadId = $lead->identifier;
-                $builder->toEmail = $lead->email_address;
-                $builder->toName = $lead->full_name;
-                $builder->titleUnitInterest = $lead->inventory_title;
-            }
         }
 
         // Expect Jobs
