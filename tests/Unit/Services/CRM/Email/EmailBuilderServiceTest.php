@@ -191,7 +191,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Mock Access Token
         $accessToken = $this->getEloquentMock(AccessToken::class);
-        $salesperson->setRelation('googleToken', $accessToken);
+        $salesperson->googleToken = $accessToken;
 
         // Mock SMTP Config
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
