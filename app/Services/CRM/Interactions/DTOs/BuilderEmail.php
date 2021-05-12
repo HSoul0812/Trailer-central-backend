@@ -85,6 +85,11 @@ class BuilderEmail
 
 
     /**
+     * @var int ID of Dealer
+     */
+    private $dealerId;
+
+    /**
      * @var int ID of User
      */
     private $userId;

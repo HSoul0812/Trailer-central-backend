@@ -181,6 +181,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'subject' => $blast->campaign_subject,
             'template' => $blast->template->html,
             'template_id' => $blast->template->template_id,
+            'dealer_id' => $blast->newDealerUser->id,
             'user_id' => $blast->user_id,
             'sales_person_id' => $salesPerson->id,
             'from_email' => $blast->from_email_address,
@@ -221,6 +222,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'subject' => $campaign->campaign_subject,
             'template' => $campaign->template->html,
             'template_id' => $campaign->template->template_id,
+            'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
             'sales_person_id' => $salesPerson->id,
             'from_email' => $campaign->from_email_address,
@@ -275,6 +277,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'subject' => $subject,
             'template' => $template->html,
             'template_id' => $id,
+            'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
             'sales_person_id' => $salesPerson->id,
             'from_email' => !empty($fromEmail) ? $fromEmail : $salesPerson->smtp_email,
@@ -338,7 +341,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Get NTLM Config
         elseif(!empty($config->smtpConfig->isAuthTypeNtlm())) {
             // Send NTLM Email
-            $finalEmail = $this->ntlm->send($config->smtpConfig, $parsedEmail);
+            $finalEmail = $this->ntlm->send($config->dealerId, $config->smtpConfig, $parsedEmail);
         }
         // Get SMTP Config
         else {

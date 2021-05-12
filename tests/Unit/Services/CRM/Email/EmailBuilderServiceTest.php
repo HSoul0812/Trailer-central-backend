@@ -1082,7 +1082,6 @@ class EmailBuilderServiceTest extends TestCase
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->authType = SmtpConfig::AUTH_AUTO;
-        $smtpConfig->shouldReceive('getAuthType')->twice()->andReturn(SmtpConfig::AUTH_AUTO);
         $smtpConfig->shouldReceive('isAuthTypeGmail')->once()->andReturn(false);
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->once()->andReturn(false);
         $config->smtpConfig = $smtpConfig;
@@ -1133,6 +1132,7 @@ class EmailBuilderServiceTest extends TestCase
     {
         // Mock Builder Email
         $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->dealerId = 1;
         $config->leadId = 1;
         $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
         $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
@@ -1142,15 +1142,9 @@ class EmailBuilderServiceTest extends TestCase
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->authType = SmtpConfig::AUTH_NTLM;
-        $smtpConfig->shouldReceive('getAuthType')->twice()->andReturn(SmtpConfig::AUTH_NTLM);
         $smtpConfig->shouldReceive('isAuthTypeGmail')->once()->andReturn(false);
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->once()->andReturn(true);
         $config->smtpConfig = $smtpConfig;
-
-        // Mock Additional Fields
-        $config->shouldReceive('getToEmail')
-               ->once()
-               ->andReturn(['email' => $config->toEmail, 'name' => $config->toName]);
 
         // Mock Email History
         $emailHistory = $this->getEloquentMock(EmailHistory::class);
@@ -1201,15 +1195,9 @@ class EmailBuilderServiceTest extends TestCase
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->authType = SmtpConfig::AUTH_GMAIL;
-        $smtpConfig->shouldReceive('getAuthType')->once()->andReturn(SmtpConfig::AUTH_GMAIL);
         $smtpConfig->shouldReceive('isAuthTypeGmail')->once()->andReturn(true);
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->never();
         $config->smtpConfig = $smtpConfig;
-
-        // Mock Additional Fields
-        $config->shouldReceive('getToEmail')
-               ->once()
-               ->andReturn(['email' => $config->toEmail, 'name' => $config->toName]);
 
         // Mock Email History
         $emailHistory = $this->getEloquentMock(EmailHistory::class);
@@ -1277,15 +1265,9 @@ class EmailBuilderServiceTest extends TestCase
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->authType = SmtpConfig::AUTH_GMAIL;
-        $smtpConfig->shouldReceive('getAuthType')->once()->andReturn(SmtpConfig::AUTH_GMAIL);
         $smtpConfig->shouldReceive('isAuthTypeGmail')->once()->andReturn(true);
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->never();
         $config->smtpConfig = $smtpConfig;
-
-        // Mock Additional Fields
-        $config->shouldReceive('getToEmail')
-               ->once()
-               ->andReturn(['email' => $config->toEmail, 'name' => $config->toName]);
 
         // Mock Email History
         $emailHistory = $this->getEloquentMock(EmailHistory::class);
