@@ -301,6 +301,9 @@ class EmailBuilderServiceTest extends TestCase
 
             // Append
             $leadMocks[$i] = $lead;
+
+            // Pass Thru
+            $lead->shouldReceive('jsonSerialize')->passthru();
         }
 
         // Return Lead Mocks
