@@ -1169,7 +1169,6 @@ class EmailBuilderServiceTest extends TestCase
         // Send NTLM Email
         $this->ntlmEmailServiceMock
              ->shouldReceive('send')
-             ->withArgs([$smtpConfig, $parsed])
              ->once()
              ->andReturn($parsed);
 
@@ -1234,7 +1233,6 @@ class EmailBuilderServiceTest extends TestCase
         // Validate Google
         $this->googleServiceMock
              ->shouldReceive('validate')
-             ->with($accessToken)
              ->once()
              ->andReturn(null);
 
@@ -1317,21 +1315,18 @@ class EmailBuilderServiceTest extends TestCase
         // Validate Google
         $this->googleServiceMock
              ->shouldReceive('validate')
-             ->with($accessToken)
              ->once()
              ->andReturn(['new_token' => true]);
 
         // Refresh Token
         $this->tokenRepositoryMock
              ->shouldReceive('refresh')
-             ->withArgs([$accessToken->id, true])
              ->once()
              ->andReturn($newToken);
 
         // Send Gmail Email
         $this->gmailServiceMock
              ->shouldReceive('send')
-             ->withArgs([$smtpConfig, $parsed])
              ->once()
              ->andReturn($parsed);
 
