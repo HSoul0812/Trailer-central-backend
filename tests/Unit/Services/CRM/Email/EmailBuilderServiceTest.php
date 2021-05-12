@@ -750,7 +750,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Get From Email/To Email
         $subject = 'Test Template';
-        $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $fromEmail = '';
         $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
 
         // Mock Sales Person
@@ -794,7 +794,7 @@ class EmailBuilderServiceTest extends TestCase
         // Get Sales Person By ID
         $this->salesPersonRepositoryMock
              ->shouldReceive('get')
-             ->with(['id' => $salesperson->id])
+             ->with(['sales_person_id' => $salesperson->id])
              ->once()
              ->andReturn($salesperson);
 
@@ -805,7 +805,7 @@ class EmailBuilderServiceTest extends TestCase
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
         // Validate Send Inquiry Result
-        $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
+        $result = $service->sendTemplate($template->template_id, $subject, $toEmail, $salesperson->id);
 
         // Assert Same
         $this->assertSame($result['data']['id'], $template->template_id);
@@ -828,7 +828,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Get From Email/To Email
         $subject = 'Test Template';
-        $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $fromEmail = '';
         $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
 
         // Template Relations
@@ -865,7 +865,7 @@ class EmailBuilderServiceTest extends TestCase
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
         // Validate Send Inquiry Result
-        $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
+        $result = $service->sendTemplate($template->template_id, $subject, $toEmail);
 
         // Assert False
         $this->assertFalse($result);
