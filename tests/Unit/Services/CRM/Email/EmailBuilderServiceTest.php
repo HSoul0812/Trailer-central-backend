@@ -53,16 +53,6 @@ class EmailBuilderServiceTest extends TestCase
     ];
 
     /**
-     * @const array<string> Dummy Lead Inventory Titles
-     */
-    const DUMMY_LEAD_INVENTORY = [
-        'noreply@trailercentral.com',
-        'admin@operatebeyond.com',
-        'noreply@trailercentral.com',
-        'info@trailercentral.com'
-    ];
-
-    /**
      * @const int Dummy Lead Set as Duplicate Email
      */
     const DUMMY_LEAD_DUP = 2;
@@ -667,6 +657,307 @@ class EmailBuilderServiceTest extends TestCase
 
         // Validate Send Campaign Result
         $result = $service->sendCampaign($campaign->drip_campaigns_id, $leads);
+
+        // Assert False
+        $this->assertFalse($result);
+    }
+
+
+    /**
+     * @covers ::sendTemplate
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendTemplate()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Get From Email/To Email
+        $subject = 'Test Template';
+        $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+
+        // Mock Sales Person
+        $salesperson = $this->getEloquentMock(SalesPerson::class);
+        $salesperson->id = 1;
+        $salesperson->user_id = 1;
+        $salesperson->smtp_email = $fromEmail;
+        $salesperson->shouldReceive('getFullNameAttribute')
+                    ->once()
+                    ->andReturn('Operate Beyond');
+
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $salesperson->googleToken = $accessToken;
+
+        // Template Relations
+        $template->shouldReceive('setRelation')->passthru();
+        $template->shouldReceive('belongsTo')->passthru();
+        $template->shouldReceive('hasOne')->passthru();
+
+        // Sales Person Relations
+        $salesperson->shouldReceive('setRelation')->passthru();
+        $salesperson->shouldReceive('belongsTo')->passthru();
+        $salesperson->shouldReceive('hasOne')->passthru();
+
+
+        // Return Template
+        $this->templateRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $template->template_id])
+             ->once()
+             ->andReturn($template);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$salesperson->user_id, $fromEmail])
+             ->once()
+             ->andReturn($salesperson);
+
+        // Expect Jobs
+        $this->expectsJobs(SendEmailBuilderJob::class);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
+
+        // Assert Same
+        $this->assertSame($result['data']['id'], $template->template_id);
+        $this->assertSame($result['data']['type'], BuilderEmail::TYPE_TEMPLATE);
+    }
+
+    /**
+     * @covers ::sendTemplate
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendTemplateFromSalesperson()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Get From Email/To Email
+        $subject = 'Test Template';
+        $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+
+        // Mock Sales Person
+        $salesperson = $this->getEloquentMock(SalesPerson::class);
+        $salesperson->id = 1;
+        $salesperson->user_id = 1;
+        $salesperson->smtp_email = $fromEmail;
+        $salesperson->shouldReceive('getFullNameAttribute')
+                    ->once()
+                    ->andReturn('Operate Beyond');
+
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $salesperson->googleToken = $accessToken;
+
+        // Template Relations
+        $template->shouldReceive('setRelation')->passthru();
+        $template->shouldReceive('belongsTo')->passthru();
+        $template->shouldReceive('hasOne')->passthru();
+
+        // Sales Person Relations
+        $salesperson->shouldReceive('setRelation')->passthru();
+        $salesperson->shouldReceive('belongsTo')->passthru();
+        $salesperson->shouldReceive('hasOne')->passthru();
+
+
+        // Return Template
+        $this->templateRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $template->template_id])
+             ->once()
+             ->andReturn($template);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$salesperson->user_id, $fromEmail])
+             ->once()
+             ->andReturn(null);
+
+        // Get Sales Person By ID
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $salesperson->id])
+             ->once()
+             ->andReturn($salesperson);
+
+        // Expect Jobs
+        $this->expectsJobs(SendEmailBuilderJob::class);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
+
+        // Assert Same
+        $this->assertSame($result['data']['id'], $template->template_id);
+        $this->assertSame($result['data']['type'], BuilderEmail::TYPE_TEMPLATE);
+    }
+
+    /**
+     * @covers ::sendTemplate
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendTemplateInvalidEmail()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Get From Email/To Email
+        $subject = 'Test Template';
+        $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+
+        // Template Relations
+        $template->shouldReceive('setRelation')->passthru();
+        $template->shouldReceive('belongsTo')->passthru();
+        $template->shouldReceive('hasOne')->passthru();
+
+
+        // Return Template
+        $this->templateRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $template->template_id])
+             ->once()
+             ->andReturn($template);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$template->user_id, $template->from_email_address])
+             ->once()
+             ->andReturn(null);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('get')
+             ->once()
+             ->andReturn(null);
+
+        // Expect Exception
+        $this->expectException(FromEmailMissingSmtpConfigException::class);
+
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
+
+        // Assert False
+        $this->assertFalse($result);
+    }
+
+    /**
+     * @covers ::sendTemplate
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendTemplateEmailFailed()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Get From Email/To Email
+        $subject = 'Test Template';
+        $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+
+        // Mock Sales Person
+        $salesperson = $this->getEloquentMock(SalesPerson::class);
+        $salesperson->id = 1;
+        $salesperson->user_id = 1;
+        $salesperson->smtp_email = $template->from_email_address;
+        $salesperson->shouldReceive('getFullNameAttribute')
+                    ->once()
+                    ->andReturn('Operate Beyond');
+
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $salesperson->googleToken = $accessToken;
+
+        // Template Relations
+        $template->shouldReceive('setRelation')->passthru();
+        $template->shouldReceive('belongsTo')->passthru();
+        $template->shouldReceive('hasOne')->passthru();
+
+        // Sales Person Relations
+        $salesperson->shouldReceive('setRelation')->passthru();
+        $salesperson->shouldReceive('belongsTo')->passthru();
+        $salesperson->shouldReceive('hasOne')->passthru();
+
+
+        // Return Template
+        $this->templateRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $template->template_id])
+             ->once()
+             ->andReturn($template);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$salesperson->user_id, $fromEmail])
+             ->once()
+             ->andReturn($salesperson);
+
+        // For Each Lead!
+        $leads = [];
+        $leadMocks = $this->getLeadMocks();
+        foreach($leadMocks as $lead) {
+            // Template Was Sent?
+            $this->templateRepositoryMock
+                 ->shouldReceive('wasSent')
+                 ->withArgs([$template->template_id, $lead->identifier])
+                 ->once()
+                 ->andReturn(false);
+
+            // Get Lead
+            $this->leadRepositoryMock
+                 ->shouldReceive('get')
+                 ->with(['id' => $lead->identifier])
+                 ->once()
+                 ->andReturn(null);
+
+            // Append Leads
+            $leads[] = $lead->identifier;
+        }
+
+        // Expect Exception
+        $this->expectException(SendBuilderEmailsFailedException::class);
+
+        // Expect Exception
+        $this->expectException(SendTemplateEmailFailedException::class);
+
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
 
         // Assert False
         $this->assertFalse($result);
