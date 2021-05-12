@@ -5,6 +5,7 @@ namespace Tests\Unit\Services\CRM\Leads;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\Template;
+use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
