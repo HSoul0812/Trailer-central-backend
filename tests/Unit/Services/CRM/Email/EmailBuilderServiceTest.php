@@ -184,13 +184,13 @@ class EmailBuilderServiceTest extends TestCase
         $salesperson = $this->getEloquentMock(SalesPerson::class);
         $salesperson->id = 1;
         $salesperson->smtp_email = $blast->from_email_address;
+        $salesperson->shouldReceive('getFullNameAttribute')
+                    ->once()
+                    ->andReturn('Operate Beyond');
 
         // Mock SMTP Config
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->shouldReceive('fillFromSalesPerson')->once();
-
-        // @var EmailBuilderServiceInterface $service
-        $service = $this->app->make(EmailBuilderServiceInterface::class);
 
         // Lead Relations
         $blast->shouldReceive('setRelation')->passthru();
@@ -235,6 +235,9 @@ class EmailBuilderServiceTest extends TestCase
 
         // Expect Jobs
         $this->expectsJobs(SendEmailBuilderJob::class);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
 
         // Validate Send Inquiry Result
         $result = $service->sendBlast($blast->email_blasts_id, $leads);
