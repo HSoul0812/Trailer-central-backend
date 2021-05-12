@@ -10,7 +10,9 @@ use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Email\Blast;
+use App\Models\CRM\Email\BlastSent;
 use App\Models\CRM\Email\Campaign;
+use App\Models\CRM\Email\CampaignSent;
 use App\Models\CRM\Email\Template;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\Lead;
@@ -1355,6 +1357,12 @@ class EmailBuilderServiceTest extends TestCase
         $emailHistory = $this->getEloquentMock(EmailHistory::class);
         $emailHistory->email_id = 1;
 
+        // Mock Blast Sent
+        $blastSent = $this->getEloquentMock(BlastSent::class);
+        $blastSent->email_blasts_id = $config->id;
+        $blastSent->lead_id = $config->leadId;
+        $blastSent->message_id = self::DUMMY_LEAD_DETAILS[3]['email'];
+
         // Mock Parsed Email
         $parsed = $this->getEloquentMock(ParsedEmail::class);
         $parsed->emailHistoryId = 1;
@@ -1383,7 +1391,7 @@ class EmailBuilderServiceTest extends TestCase
                 'lead_id' => $config->leadId,
                 'message_id' => self::DUMMY_LEAD_DETAILS[3]['email']
              ])
-             ->andReturn($emailHistory);
+             ->andReturn($blastSent);
 
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
@@ -1417,6 +1425,12 @@ class EmailBuilderServiceTest extends TestCase
         $emailHistory = $this->getEloquentMock(EmailHistory::class);
         $emailHistory->email_id = 1;
 
+        // Mock Campaign Sent
+        $campaignSent = $this->getEloquentMock(CampaignSent::class);
+        $campaignSent->email_blasts_id = $config->id;
+        $campaignSent->lead_id = $config->leadId;
+        $campaignSent->message_id = self::DUMMY_LEAD_DETAILS[3]['email'];
+
         // Mock Parsed Email
         $parsed = $this->getEloquentMock(ParsedEmail::class);
         $parsed->emailHistoryId = 1;
@@ -1445,7 +1459,7 @@ class EmailBuilderServiceTest extends TestCase
                 'lead_id' => $config->leadId,
                 'message_id' => self::DUMMY_LEAD_DETAILS[3]['email']
              ])
-             ->andReturn($emailHistory);
+             ->andReturn($campaignSent);
 
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
