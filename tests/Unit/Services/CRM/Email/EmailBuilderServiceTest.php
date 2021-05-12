@@ -15,6 +15,7 @@ use App\Models\CRM\Email\Template;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
@@ -24,6 +25,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
@@ -1196,7 +1198,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
-        $smtpConfig->authType = SmtpConfig::AUTH_NTLM;
+        $smtpConfig->authType = SmtpConfig::AUTH_GMAIL;
         $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->never();
         $config->smtpConfig = $smtpConfig;
@@ -1272,7 +1274,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
-        $smtpConfig->authType = SmtpConfig::AUTH_NTLM;
+        $smtpConfig->authType = SmtpConfig::AUTH_GMAIL;
         $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->never();
         $config->smtpConfig = $smtpConfig;

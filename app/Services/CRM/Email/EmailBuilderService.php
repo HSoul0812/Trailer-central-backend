@@ -36,6 +36,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Carbon\Carbon;
 
 /**
  * Class EmailBuilderService
