@@ -16,7 +16,6 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
@@ -190,10 +189,6 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Access Token
         $accessToken = $this->getEloquentMock(AccessToken::class);
         $salesperson->googleToken = $accessToken;
-
-        // Mock SMTP Config
-        $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
-        $smtpConfig->shouldReceive('fillFromSalesPerson')->once();
 
         // Blast Relations
         $blast->shouldReceive('setRelation')->passthru();
