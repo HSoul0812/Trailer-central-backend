@@ -1333,6 +1333,174 @@ class EmailBuilderServiceTest extends TestCase
     }
 
 
+    /**
+     * @covers ::markSent
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testMarkSentBlast()
+    {
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->id = 1;
+        $config->type = BuilderEmail::TYPE_BLAST;
+        $config->leadId = 1;
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Blast';
+
+        // Mock Email History
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = 1;
+
+        // Mock Parsed Email
+        $parsed = $this->getEloquentMock(ParsedEmail::class);
+        $parsed->emailHistoryId = 1;
+        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $parsed->body = $this->getTemplate();
+
+
+        // Update Email History
+        $this->emailHistoryRepositoryMock
+             ->shouldReceive('update')
+             ->once()
+             ->with([
+                'id' => $parsed->emailHistoryId,
+                'message_id' => $parsed->messageId,
+                'body' => $parsed->body,
+                'date_sent' => 1
+             ])
+             ->andReturn($emailHistory);
+
+        // Mark Blast as Sent
+        $this->blastRepositoryMock
+             ->shouldReceive('sent')
+             ->once()
+             ->with([
+                'email_blasts_id' => $config->id,
+                'lead_id' => $config->lead,
+                'message_id' => self::DUMMY_LEAD_DETAILS[3]['email']
+             ])
+             ->andReturn($emailHistory);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Email Result
+        $result = $service->markSent($config, $parsed);
+
+        // Assert Same
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @covers ::markSent
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testMarkSentCampaign()
+    {
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->id = 1;
+        $config->type = BuilderEmail::TYPE_CAMPAIGN;
+        $config->leadId = 1;
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Campaign';
+
+        // Mock Email History
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = 1;
+
+        // Mock Parsed Email
+        $parsed = $this->getEloquentMock(ParsedEmail::class);
+        $parsed->emailHistoryId = 1;
+        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $parsed->body = $this->getTemplate();
+
+
+        // Update Email History
+        $this->emailHistoryRepositoryMock
+             ->shouldReceive('update')
+             ->once()
+             ->with([
+                'id' => $parsed->emailHistoryId,
+                'message_id' => $parsed->messageId,
+                'body' => $parsed->body,
+                'date_sent' => 1
+             ])
+             ->andReturn($emailHistory);
+
+        // Mark Campaign as Sent
+        $this->campaignRepositoryMock
+             ->shouldReceive('sent')
+             ->once()
+             ->with([
+                'drip_campaigns_id' => $config->id,
+                'lead_id' => $config->lead,
+                'message_id' => self::DUMMY_LEAD_DETAILS[3]['email']
+             ])
+             ->andReturn($emailHistory);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Email Result
+        $result = $service->markSent($config, $parsed);
+
+        // Assert Same
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @covers ::markSent
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testMarkSentTemplate()
+    {
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->id = 1;
+        $config->type = BuilderEmail::TYPE_TEMPLATE;
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Template';
+
+
+        // Email History Won't Update
+        $this->emailHistoryRepositoryMock
+             ->shouldReceive('update')
+             ->never();
+
+        // Mark Blast as Sent Won't Run
+        $this->campaignRepositoryMock
+             ->shouldReceive('sent')
+             ->never();
+
+        // Mark Campaign as Sent Won't Run
+        $this->campaignRepositoryMock
+             ->shouldReceive('sent')
+             ->never();
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Email Result
+        $result = $service->markSent($config);
+
+        // Assert False
+        $this->assertFalse($result);
+    }
+
+
 
     /**
      * Get Template for Type
