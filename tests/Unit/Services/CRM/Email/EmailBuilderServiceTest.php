@@ -1380,7 +1380,7 @@ class EmailBuilderServiceTest extends TestCase
              ->once()
              ->with([
                 'email_blasts_id' => $config->id,
-                'lead_id' => $config->lead,
+                'lead_id' => $config->leadId,
                 'message_id' => self::DUMMY_LEAD_DETAILS[3]['email']
              ])
              ->andReturn($emailHistory);
@@ -1442,7 +1442,7 @@ class EmailBuilderServiceTest extends TestCase
              ->once()
              ->with([
                 'drip_campaigns_id' => $config->id,
-                'lead_id' => $config->lead,
+                'lead_id' => $config->leadId,
                 'message_id' => self::DUMMY_LEAD_DETAILS[3]['email']
              ])
              ->andReturn($emailHistory);
