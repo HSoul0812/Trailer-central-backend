@@ -11,6 +11,7 @@ use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\Template;
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Integration\Auth\AccessToken;
@@ -943,6 +944,118 @@ class EmailBuilderServiceTest extends TestCase
 
         // Assert False
         $this->assertFalse($result);
+    }
+
+
+    /**
+     * @covers ::saveToDb
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function saveToDb()
+    {
+        // Mock Interaction
+        $interaction = $this->getEloquentMock(Interaction::class);
+        $interaction->interaction_id = 1;
+
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->leadId = 1;
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Campaign';
+
+        // Mock Additional Fields
+        $config->shouldReceive('getMessageId')
+               ->once()
+               ->andReturn(self::DUMMY_LEAD_DETAILS[3]['email']);
+        $config->shouldReceive('getFilledTemplate')
+               ->once()
+               ->andReturn($this->getTemplate());
+        $config->shouldReceive('getEmailHistoryParams')->passthru();
+
+        // Mock Email History
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = 1;
+        $emailHistory->interaction_id = 1;
+
+
+        // Create Interaction
+        $this->interactionRepositoryMock
+             ->shouldReceive('create')
+             ->once()
+             ->andReturn($interaction);
+
+        // Create Email History
+        $this->emailHistoryRepositoryMock
+             ->shouldReceive('create')
+             ->once()
+             ->andReturn($emailHistory);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->saveToDb($config);
+
+        // Assert Same
+        $this->assertSame($result->email_id, $emailHistory->email_id);
+    }
+
+    /**
+     * @covers ::saveToDb
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function saveToDbNoLead()
+    {
+        // Mock Interaction
+        $interaction = $this->getEloquentMock(Interaction::class);
+        $interaction->interaction_id = 1;
+
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Campaign';
+
+        // Mock Additional Fields
+        $config->shouldReceive('getMessageId')
+               ->once()
+               ->andReturn(self::DUMMY_LEAD_DETAILS[3]['email']);
+        $config->shouldReceive('getFilledTemplate')
+               ->once()
+               ->andReturn($this->getTemplate());
+        $config->shouldReceive('getEmailHistoryParams')->passthru();
+
+        // Mock Email History
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = 1;
+
+
+        // Create Interaction
+        $this->interactionRepositoryMock
+             ->shouldReceive('create')
+             ->never();
+
+        // Create Email History
+        $this->emailHistoryRepositoryMock
+             ->shouldReceive('create')
+             ->once()
+             ->andReturn($emailHistory);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->saveToDb($config);
+
+        // Assert Same
+        $this->assertSame($result->email_id, $emailHistory->email_id);
     }
 
 
