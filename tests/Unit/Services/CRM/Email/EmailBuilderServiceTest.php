@@ -193,6 +193,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Blast Relations
         $blast->shouldReceive('setRelation')->passthru();
+        $blast->shouldReceive('newDealerUser')->passthru();
         $blast->shouldReceive('belongsTo')->passthru();
         $blast->shouldReceive('hasOne')->passthru();
 
@@ -276,6 +277,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Blast Relations
         $blast->shouldReceive('setRelation')->passthru();
+        $blast->shouldReceive('newDealerUser')->passthru();
         $blast->shouldReceive('belongsTo')->passthru();
         $blast->shouldReceive('hasOne')->passthru();
 
@@ -350,6 +352,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Blast Relations
         $blast->shouldReceive('setRelation')->passthru();
+        $blast->shouldReceive('newDealerUser')->passthru();
         $blast->shouldReceive('belongsTo')->passthru();
         $blast->shouldReceive('hasOne')->passthru();
 
@@ -448,6 +451,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Campaign Relations
         $campaign->shouldReceive('setRelation')->passthru();
+        $campaign->shouldReceive('newDealerUser')->passthru();
         $campaign->shouldReceive('belongsTo')->passthru();
         $campaign->shouldReceive('hasOne')->passthru();
 
@@ -531,6 +535,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Campaign Relations
         $campaign->shouldReceive('setRelation')->passthru();
+        $campaign->shouldReceive('newDealerUser')->passthru();
         $campaign->shouldReceive('belongsTo')->passthru();
         $campaign->shouldReceive('hasOne')->passthru();
 
@@ -605,6 +610,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Campaign Relations
         $campaign->shouldReceive('setRelation')->passthru();
+        $campaign->shouldReceive('newDealerUser')->passthru();
         $campaign->shouldReceive('belongsTo')->passthru();
         $campaign->shouldReceive('hasOne')->passthru();
 
@@ -702,6 +708,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Template Relations
         $template->shouldReceive('setRelation')->passthru();
+        $template->shouldReceive('newDealerUser')->passthru();
         $template->shouldReceive('belongsTo')->passthru();
         $template->shouldReceive('hasOne')->passthru();
 
@@ -773,6 +780,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Template Relations
         $template->shouldReceive('setRelation')->passthru();
+        $template->shouldReceive('newDealerUser')->passthru();
         $template->shouldReceive('belongsTo')->passthru();
         $template->shouldReceive('hasOne')->passthru();
 
@@ -838,6 +846,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Template Relations
         $template->shouldReceive('setRelation')->passthru();
+        $template->shouldReceive('newDealerUser')->passthru();
         $template->shouldReceive('belongsTo')->passthru();
         $template->shouldReceive('hasOne')->passthru();
 
@@ -910,6 +919,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Template Relations
         $template->shouldReceive('setRelation')->passthru();
+        $template->shouldReceive('newDealerUser')->passthru();
         $template->shouldReceive('belongsTo')->passthru();
         $template->shouldReceive('hasOne')->passthru();
 
