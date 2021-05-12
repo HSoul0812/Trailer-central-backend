@@ -2,6 +2,11 @@
 
 namespace Tests\Unit\Services\CRM\Leads;
 
+use App\Exceptions\CRM\Email\Builder\SendBuilderEmailsFailedException;
+use App\Exceptions\CRM\Email\Builder\SendBlastEmailsFailedException;
+use App\Exceptions\CRM\Email\Builder\SendCampaignEmailsFailedException;
+use App\Exceptions\CRM\Email\Builder\SendTemplateEmailFailedException;
+use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\Campaign;
@@ -250,6 +255,69 @@ class EmailBuilderServiceTest extends TestCase
         // Assert Same
         $this->assertSame(count($result['sent']), 3);
     }
+
+    /**
+     * @covers ::sendBlast
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendBlastInvalidEmail()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Mock Blast
+        $blast = $this->getEloquentMock(Blast::class);
+        $blast->email_blasts_id = 1;
+        $blast->campaign_subject = 'Test Blast';
+        $blast->template = $template;
+        $blast->user_id = 1;
+        $blast->from_email_address = 'admin@operatebeyond.com';
+
+        // Blast Relations
+        $blast->shouldReceive('setRelation')->passthru();
+        $blast->shouldReceive('belongsTo')->passthru();
+        $blast->shouldReceive('hasOne')->passthru();
+
+
+        // Return Blast
+        $this->blastRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $blast->email_blasts_id])
+             ->once()
+             ->andReturn($blast);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$blast->user_id, $blast->from_email_address])
+             ->once()
+             ->andReturn(null);
+
+        // For Each Lead!
+        $leads = [];
+        $leadMocks = $this->getLeadMocks();
+        foreach($leadMocks as $lead) {
+            $leads[] = $lead->identifier;
+        }
+
+        // Expect Exception
+        $this->expectException(FromEmailMissingSmtpConfigException::class);
+
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->sendBlast($blast->email_blasts_id, $leads);
+
+        // Assert Same
+        $this->assertSame(count($result['sent']), 3);
+    }
+
 
 
     /**
