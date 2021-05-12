@@ -8,6 +8,7 @@ use App\Exceptions\CRM\Email\Builder\SendCampaignEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendTemplateEmailFailedException;
 use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
+use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\Template;
@@ -240,7 +241,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Blast Result
         $result = $service->sendBlast($blast->email_blasts_id, $leads);
 
         // Assert Same
@@ -304,7 +305,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Blast Result
         $result = $service->sendBlast($blast->email_blasts_id, $leads);
 
         // Assert False
@@ -401,7 +402,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Blast Result
         $result = $service->sendBlast($blast->email_blasts_id, $leads);
 
         // Assert False
@@ -495,7 +496,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Campaign Result
         $result = $service->sendCampaign($campaign->drip_campaigns_id, $leads);
 
         // Assert Same
@@ -559,7 +560,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Campaign Result
         $result = $service->sendCampaign($campaign->drip_campaigns_id, $leads);
 
         // Assert False
@@ -727,7 +728,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Template Result
         $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
 
         // Assert Same
@@ -805,7 +806,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Template Result
         $result = $service->sendTemplate($template->template_id, $subject, $toEmail, $salesperson->id, $fromEmail);
 
         // Assert Same
@@ -865,7 +866,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Template Result
         $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
 
         // Assert False
@@ -939,7 +940,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Send Template Result
         $result = $service->sendTemplate($template->template_id, $subject, $toEmail, 0, $fromEmail);
 
         // Assert False
@@ -953,7 +954,7 @@ class EmailBuilderServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    public function saveToDb()
+    public function testSaveToDb()
     {
         // Mock Interaction
         $interaction = $this->getEloquentMock(Interaction::class);
@@ -997,7 +998,7 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Save to DB Result
         $result = $service->saveToDb($config);
 
         // Assert Same
@@ -1010,7 +1011,7 @@ class EmailBuilderServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    public function saveToDbNoLead()
+    public function testSaveToDbNoLead()
     {
         // Mock Interaction
         $interaction = $this->getEloquentMock(Interaction::class);
@@ -1051,11 +1052,290 @@ class EmailBuilderServiceTest extends TestCase
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Inquiry Result
+        // Validate Save to DB Result
         $result = $service->saveToDb($config);
 
         // Assert Same
         $this->assertSame($result->email_id, $emailHistory->email_id);
+    }
+
+
+    /**
+     * @covers ::sendEmail
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendEmailSmtp()
+    {
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->leadId = 1;
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Campaign';
+
+        // Mock SmtpConfig
+        $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
+        $smtpConfig->authType = SmtpConfig::AUTH_AUTO;
+        $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
+        $smtpConfig->shouldReceive('isAuthTypeNtlm')->passthru();
+        $config->smtpConfig = $smtpConfig;
+
+        // Mock Additional Fields
+        $config->shouldReceive('getToEmail')
+               ->once()
+               ->andReturn(['email' => $config->toEmail, 'name' => $config->toName]);
+
+        // Mock Email History
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = 1;
+        $emailHistory->interaction_id = 1;
+
+        // Mock Parsed Email
+        $parsed = $this->getEloquentMock(ParsedEmail::class);
+        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $config->shouldReceive('getParsedEmail')
+               ->with($emailHistory->email_id)
+               ->once()
+               ->andReturn($parsed);
+
+
+        Mail::fake();
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Email Result
+        $result = $service->sendEmail($config, $emailHistory->email_id);
+
+        // Assert a message was sent to the email address...
+        Mail::assertSent(EmailBuilderEmail::class, function ($mail) use ($config) {
+            return $mail->hasTo($config->toEmail);
+        });
+
+        // Assert Same
+        $this->assertSame($result->messageId, self::DUMMY_LEAD_DETAILS[3]['email']);
+    }
+
+    /**
+     * @covers ::sendEmail
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendEmailNtlm()
+    {
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->leadId = 1;
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Campaign';
+
+        // Mock SmtpConfig
+        $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
+        $smtpConfig->authType = SmtpConfig::AUTH_NTLM;
+        $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
+        $smtpConfig->shouldReceive('isAuthTypeNtlm')->passthru();
+        $config->smtpConfig = $smtpConfig;
+
+        // Mock Additional Fields
+        $config->shouldReceive('getToEmail')
+               ->once()
+               ->andReturn(['email' => $config->toEmail, 'name' => $config->toName]);
+
+        // Mock Email History
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = 1;
+        $emailHistory->interaction_id = 1;
+
+        // Mock Parsed Email
+        $parsed = $this->getEloquentMock(ParsedEmail::class);
+        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $config->shouldReceive('getParsedEmail')
+               ->with($emailHistory->email_id)
+               ->once()
+               ->andReturn($parsed);
+
+
+        // Send NTLM Email
+        $this->ntlmEmailServiceMock
+             ->shouldReceive('send')
+             ->withArgs([$smtpConfig, $parsed])
+             ->once()
+             ->andReturn($parsed);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Email Result
+        $result = $service->sendEmail($config, $emailHistory->email_id);
+
+        // Assert Same
+        $this->assertSame($result->messageId, self::DUMMY_LEAD_DETAILS[3]['email']);
+    }
+
+    /**
+     * @covers ::sendEmail
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendEmailGmail()
+    {
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->leadId = 1;
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Campaign';
+
+        // Mock SmtpConfig
+        $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
+        $smtpConfig->authType = SmtpConfig::AUTH_NTLM;
+        $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
+        $smtpConfig->shouldReceive('isAuthTypeNtlm')->never();
+        $config->smtpConfig = $smtpConfig;
+
+        // Mock Additional Fields
+        $config->shouldReceive('getToEmail')
+               ->once()
+               ->andReturn(['email' => $config->toEmail, 'name' => $config->toName]);
+
+        // Mock Email History
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = 1;
+        $emailHistory->interaction_id = 1;
+
+        // Mock Parsed Email
+        $parsed = $this->getEloquentMock(ParsedEmail::class);
+        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $config->shouldReceive('getParsedEmail')
+               ->with($emailHistory->email_id)
+               ->once()
+               ->andReturn($parsed);
+
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $smtpConfig->accessToken = $accessToken;
+        $smtpConfig->shouldReceive('setAccessToken')->with($accessToken)->once();
+
+
+        // Validate Google
+        $this->googleServiceMock
+             ->shouldReceive('validate')
+             ->with($accessToken)
+             ->once()
+             ->andReturn(null);
+
+        // Refresh Token
+        $this->tokenRepositoryMock
+             ->shouldReceive('refresh')
+             ->never();
+
+        // Send Gmail Email
+        $this->gmailServiceMock
+             ->shouldReceive('send')
+             ->withArgs([$smtpConfig, $parsed])
+             ->once()
+             ->andReturn($parsed);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Email Result
+        $result = $service->sendEmail($config, $emailHistory->email_id);
+
+        // Assert Same
+        $this->assertSame($result->messageId, self::DUMMY_LEAD_DETAILS[3]['email']);
+    }
+
+    /**
+     * @covers ::sendEmail
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendEmailGmailRefresh()
+    {
+        // Mock Builder Email
+        $config = $this->getEloquentMock(BuilderEmail::class);
+        $config->leadId = 1;
+        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
+        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
+        $config->subject = 'Test Campaign';
+
+        // Mock SmtpConfig
+        $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
+        $smtpConfig->authType = SmtpConfig::AUTH_NTLM;
+        $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
+        $smtpConfig->shouldReceive('isAuthTypeNtlm')->never();
+        $config->smtpConfig = $smtpConfig;
+
+        // Mock Additional Fields
+        $config->shouldReceive('getToEmail')
+               ->once()
+               ->andReturn(['email' => $config->toEmail, 'name' => $config->toName]);
+
+        // Mock Email History
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = 1;
+        $emailHistory->interaction_id = 1;
+
+        // Mock Parsed Email
+        $parsed = $this->getEloquentMock(ParsedEmail::class);
+        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $config->shouldReceive('getParsedEmail')
+               ->with($emailHistory->email_id)
+               ->once()
+               ->andReturn($parsed);
+
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $accessToken->id = 1;
+        $smtpConfig->accessToken = $accessToken;
+        $smtpConfig->shouldReceive('setAccessToken')->never()->with($accessToken);
+
+        // Create New Token Mock
+        $newToken = $this->getEloquentMock(AccessToken::class);
+        $newToken->id = 2;
+        $smtpConfig->shouldReceive('setAccessToken')->once()->with($newToken);
+
+
+        // Validate Google
+        $this->googleServiceMock
+             ->shouldReceive('validate')
+             ->with($accessToken)
+             ->once()
+             ->andReturn(['new_token' => true]);
+
+        // Refresh Token
+        $this->tokenRepositoryMock
+             ->shouldReceive('refresh')
+             ->withArgs([$accessToken->id, true])
+             ->once()
+             ->andReturn($newToken);
+
+        // Send Gmail Email
+        $this->gmailServiceMock
+             ->shouldReceive('send')
+             ->withArgs([$smtpConfig, $parsed])
+             ->once()
+             ->andReturn($parsed);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Email Result
+        $result = $service->sendEmail($config, $emailHistory->email_id);
+
+        // Assert Same
+        $this->assertSame($result->messageId, self::DUMMY_LEAD_DETAILS[3]['email']);
     }
 
 

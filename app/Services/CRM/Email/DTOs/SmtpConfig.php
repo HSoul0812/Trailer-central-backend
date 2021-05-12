@@ -28,6 +28,11 @@ class SmtpConfig
     const TLS = 'tls';
 
     /**
+     * @const string Auth Auto
+     */
+    const AUTH_AUTO = 'auto';
+
+    /**
      * @const string Auth Gmail
      */
     const AUTH_GMAIL = 'GMAIL';

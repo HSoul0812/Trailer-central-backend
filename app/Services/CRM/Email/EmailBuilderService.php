@@ -335,7 +335,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $finalEmail = $this->gmail->send($config->smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
-        elseif(!empty($config->smtpConfig->isAuthTypeGmail())) {
+        elseif(!empty($config->smtpConfig->isAuthTypeNtlm())) {
             // Send NTLM Email
             $finalEmail = $this->ntlm->send($config->smtpConfig, $parsedEmail);
         }
