@@ -318,6 +318,100 @@ class EmailBuilderServiceTest extends TestCase
         $this->assertSame(count($result['sent']), 3);
     }
 
+    /**
+     * @covers ::sendBlast
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendBlastEmailsFailed()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Mock Blast
+        $blast = $this->getEloquentMock(Blast::class);
+        $blast->email_blasts_id = 1;
+        $blast->campaign_subject = 'Test Blast';
+        $blast->template = $template;
+        $blast->user_id = 1;
+        $blast->from_email_address = 'admin@operatebeyond.com';
+
+        // Mock Sales Person
+        $salesperson = $this->getEloquentMock(SalesPerson::class);
+        $salesperson->id = 1;
+        $salesperson->smtp_email = $blast->from_email_address;
+        $salesperson->shouldReceive('getFullNameAttribute')
+                    ->once()
+                    ->andReturn('Operate Beyond');
+
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $salesperson->googleToken = $accessToken;
+
+        // Blast Relations
+        $blast->shouldReceive('setRelation')->passthru();
+        $blast->shouldReceive('belongsTo')->passthru();
+        $blast->shouldReceive('hasOne')->passthru();
+
+        // Sales Person Relations
+        $salesperson->shouldReceive('setRelation')->passthru();
+        $salesperson->shouldReceive('belongsTo')->passthru();
+        $salesperson->shouldReceive('hasOne')->passthru();
+
+
+        // Return Blast
+        $this->blastRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $blast->email_blasts_id])
+             ->once()
+             ->andReturn($blast);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$blast->user_id, $blast->from_email_address])
+             ->once()
+             ->andReturn($salesperson);
+
+        // For Each Lead!
+        $leads = [];
+        $leadMocks = $this->getLeadMocks();
+        foreach($leadMocks as $lead) {
+            // Blast Was Sent?
+            $this->blastRepositoryMock
+                 ->shouldReceive('wasSent')
+                 ->withArgs([$blast->email_blasts_id, $lead->identifier])
+                 ->once()
+                 ->andReturn(false);
+
+            // Get Lead
+            $this->leadRepositoryMock
+                 ->shouldReceive('get')
+                 ->with(['id' => $lead->identifier])
+                 ->once()
+                 ->andReturn(null);
+
+            // Append Leads
+            $leads[] = $lead->identifier;
+        }
+
+        // Expect Exception
+        $this->expectException(SendBuilderEmailsFailedException::class);
+
+        // Expect Exception
+        $this->expectException(SendBlastEmailsFailedException::class);
+
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->sendBlast($blast->email_blasts_id, $leads);
+    }
+
 
 
     /**
