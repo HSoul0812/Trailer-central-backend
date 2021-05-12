@@ -179,9 +179,6 @@ class EmailBuilderServiceTest extends TestCase
         $blast->user_id = 1;
         $blast->from_email_address = 'admin@operatebeyond.com';
 
-        // Mock Leads
-        $leadMocks = $this->getLeadMocks();
-
         // Mock Sales Person
         $salesperson = $this->getEloquentMock(SalesPerson::class);
         $salesperson->id = 1;
@@ -225,6 +222,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // For Each Lead!
         $leads = [];
+        $leadMocks = $this->getLeadMocks();
         foreach($leadMocks as $lead) {
             // Blast Was Sent?
             $this->blastRepositoryMock
@@ -307,6 +305,7 @@ class EmailBuilderServiceTest extends TestCase
             $lead->shouldReceive('toArray')->passthru();
             $lead->shouldReceive('attributesToArray')->passthru();
             $lead->shouldReceive('getVisible')->passthru();
+            $lead->shouldReceive('getHidden')->passthru();
         }
 
         // Return Lead Mocks
