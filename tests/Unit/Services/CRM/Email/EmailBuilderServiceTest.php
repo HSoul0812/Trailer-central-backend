@@ -197,6 +197,7 @@ class EmailBuilderServiceTest extends TestCase
 
 
         // For Each Lead!
+        $leads = [];
         foreach($leadMocks as $i => $lead) {
             // Blast Was Sent?
             $this->blastRepositoryMock
@@ -211,6 +212,9 @@ class EmailBuilderServiceTest extends TestCase
                  ->with(['id' => $lead->identifier])
                  ->once()
                  ->andReturn($lead);
+
+            // Append Leads
+            $leads[] = $lead->identifier;
         }
 
         // Expect Jobs
