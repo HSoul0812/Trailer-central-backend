@@ -251,12 +251,6 @@ class EmailBuilderServiceTest extends TestCase
         // Validate Send Inquiry Result
         $result = $service->sendBlast($blast->email_blasts_id, $leads);
 
-        // Validate Get Blast
-        $this->blastRepositoryMock
-             ->shouldReceive('get')
-             ->once()
-             ->andReturn($blast);
-
         // Assert Same
         $this->assertSame(count($result['sent']), 3);
     }
