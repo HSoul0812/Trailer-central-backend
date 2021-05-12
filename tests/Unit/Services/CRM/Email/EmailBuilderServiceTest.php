@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\CRM\Leads;
 
+use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\Template;
