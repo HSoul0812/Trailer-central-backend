@@ -196,12 +196,19 @@ class EmailBuilderServiceTest extends TestCase
         $blast->shouldReceive('hasOne')->passthru();
 
 
-        // Blast Was Sent?
+        // Return Blast
         $this->blastRepositoryMock
              ->shouldReceive('get')
              ->with(['id' => $blast->email_blasts_id])
              ->once()
              ->andReturn($blast);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->with(['id' => $blast->from_email_address])
+             ->once()
+             ->andReturn($salesperson);
 
         // For Each Lead!
         $leads = [];
