@@ -6,6 +6,7 @@ use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\Template;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
@@ -188,14 +189,23 @@ class EmailBuilderServiceTest extends TestCase
                     ->once()
                     ->andReturn('Operate Beyond');
 
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $salesperson->setRelation('googleToken', $accessToken);
+
         // Mock SMTP Config
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->shouldReceive('fillFromSalesPerson')->once();
 
-        // Lead Relations
+        // Blast Relations
         $blast->shouldReceive('setRelation')->passthru();
         $blast->shouldReceive('belongsTo')->passthru();
         $blast->shouldReceive('hasOne')->passthru();
+
+        // Sales Person Relations
+        $salesperson->shouldReceive('setRelation')->passthru();
+        $salesperson->shouldReceive('belongsTo')->passthru();
+        $salesperson->shouldReceive('hasOne')->passthru();
 
 
         // Return Blast
