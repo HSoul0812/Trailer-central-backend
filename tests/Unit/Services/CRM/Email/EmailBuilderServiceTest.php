@@ -308,6 +308,7 @@ class EmailBuilderServiceTest extends TestCase
             $lead->shouldReceive('getHidden')->passthru();
             $lead->shouldReceive('getMutatedAttributes')->passthru();
             $lead->shouldReceive('cacheMutatedAttributes')->passthru();
+            $lead->shouldReceive('getInventoryTitleAttribute')->andReturn($lead->inventory_title);
         }
 
         // Return Lead Mocks
