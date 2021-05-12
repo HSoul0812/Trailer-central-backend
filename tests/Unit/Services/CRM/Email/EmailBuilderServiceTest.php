@@ -206,13 +206,13 @@ class EmailBuilderServiceTest extends TestCase
         // Get Sales Person For Email Address
         $this->salesPersonRepositoryMock
              ->shouldReceive('getBySmtpEmail')
-             ->with(['id' => $blast->from_email_address])
+             ->withArgs([$blast->user_id, $blast->from_email_address])
              ->once()
              ->andReturn($salesperson);
 
         // For Each Lead!
         $leads = [];
-        foreach($leadMocks as $i => $lead) {
+        foreach($leadMocks as $lead) {
             // Blast Was Sent?
             $this->blastRepositoryMock
                  ->shouldReceive('wasSent')
