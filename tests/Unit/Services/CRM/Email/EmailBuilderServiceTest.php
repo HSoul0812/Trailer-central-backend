@@ -253,6 +253,12 @@ class EmailBuilderServiceTest extends TestCase
         $result = $service->sendBlast($blast->email_blasts_id, $leads);
 
         // Assert Same
+        $this->assertSame($result['data']['id']), $blast->email_blasts_id);
+
+        // Assert Same
+        $this->assertSame($result['data']['type']), BuilderEmail::TYPE_BLAST);
+
+        // Assert Same
         $this->assertSame(count($result['sent']), 3);
     }
 
@@ -504,6 +510,12 @@ class EmailBuilderServiceTest extends TestCase
 
         // Validate Send Inquiry Result
         $result = $service->sendCampaign($campaign->drip_campaigns_id, $leads);
+
+        // Assert Same
+        $this->assertSame($result['data']['id']), $campaign->drip_campaigns_id);
+
+        // Assert Same
+        $this->assertSame($result['data']['type']), BuilderEmail::TYPE_CAMPAIGN);
 
         // Assert Same
         $this->assertSame(count($result['sent']), 3);
