@@ -258,7 +258,7 @@ class EmailBuilderServiceTest extends TestCase
              ->andReturn($blast);
 
         // Assert Same
-        $this->assertSame($result['sent'], 3);
+        $this->assertSame(count($result['sent']), 3);
     }
 
 
