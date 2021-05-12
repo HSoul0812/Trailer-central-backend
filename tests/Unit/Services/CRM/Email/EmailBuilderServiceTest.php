@@ -296,6 +296,8 @@ class EmailBuilderServiceTest extends TestCase
             $lead->email_address = $details['email'];
             $lead->full_name = $details['name'];
             $lead->inventory_title = $details['inventory'];
+            $lead->shouldReceive('getFullNameAttribute')->andReturn($lead->full_name);
+            $lead->shouldReceive('getInventoryTitleAttribute')->andReturn($lead->inventory_title);
 
             // Append
             $leadMocks[$i] = $lead;
@@ -308,7 +310,6 @@ class EmailBuilderServiceTest extends TestCase
             $lead->shouldReceive('getHidden')->passthru();
             $lead->shouldReceive('getMutatedAttributes')->passthru();
             $lead->shouldReceive('cacheMutatedAttributes')->passthru();
-            $lead->shouldReceive('getInventoryTitleAttribute')->andReturn($lead->inventory_title);
         }
 
         // Return Lead Mocks
