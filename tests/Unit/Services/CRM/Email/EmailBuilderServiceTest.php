@@ -163,7 +163,7 @@ class EmailBuilderServiceTest extends TestCase
     public function testSendBlast()
     {
         // Mock Template
-        $template = $this->getEloquent(Template::class);
+        $template = $this->getEloquentMock(Template::class);
         $template->template_id = 1;
         $template->html = $this->getTemplate('blast');
 
