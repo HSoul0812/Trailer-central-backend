@@ -32,6 +32,7 @@ use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Mockery;
 use Tests\TestCase;
@@ -1081,6 +1082,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->authType = SmtpConfig::AUTH_AUTO;
+        $smtpConfig->shouldReceive('getAuthType')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->passthru();
         $config->smtpConfig = $smtpConfig;
@@ -1140,6 +1142,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->authType = SmtpConfig::AUTH_NTLM;
+        $smtpConfig->shouldReceive('getAuthType')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->passthru();
         $config->smtpConfig = $smtpConfig;
@@ -1199,6 +1202,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->authType = SmtpConfig::AUTH_GMAIL;
+        $smtpConfig->shouldReceive('getAuthType')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->never();
         $config->smtpConfig = $smtpConfig;
@@ -1275,6 +1279,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock SmtpConfig
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
         $smtpConfig->authType = SmtpConfig::AUTH_GMAIL;
+        $smtpConfig->shouldReceive('getAuthType')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeGmail')->passthru();
         $smtpConfig->shouldReceive('isAuthTypeNtlm')->never();
         $config->smtpConfig = $smtpConfig;
