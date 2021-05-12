@@ -186,7 +186,7 @@ class EmailBuilderServiceTest extends TestCase
 
         // Mock SMTP Config
         $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
-        $smtpConfig->shouldReceive('fillFromSalesPerson')->passthru();
+        $smtpConfig->shouldReceive('fillFromSalesPerson')->once();
 
         // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
