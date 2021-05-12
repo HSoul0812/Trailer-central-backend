@@ -314,8 +314,8 @@ class EmailBuilderServiceTest extends TestCase
         // Validate Send Inquiry Result
         $result = $service->sendBlast($blast->email_blasts_id, $leads);
 
-        // Assert Same
-        $this->assertSame(count($result['sent']), 3);
+        // Assert False
+        $this->assertFalse($result);
     }
 
     /**
@@ -410,6 +410,262 @@ class EmailBuilderServiceTest extends TestCase
 
         // Validate Send Inquiry Result
         $result = $service->sendBlast($blast->email_blasts_id, $leads);
+
+        // Assert False
+        $this->assertFalse($result);
+    }
+
+
+    /**
+     * @covers ::sendCampaign
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendCampaign()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Mock Campaign
+        $campaign = $this->getEloquentMock(Campaign::class);
+        $campaign->drip_campaigns_id = 1;
+        $campaign->campaign_subject = 'Test Campaign';
+        $campaign->template = $template;
+        $campaign->user_id = 1;
+        $campaign->from_email_address = 'admin@operatebeyond.com';
+
+        // Mock Sales Person
+        $salesperson = $this->getEloquentMock(SalesPerson::class);
+        $salesperson->id = 1;
+        $salesperson->smtp_email = $campaign->from_email_address;
+        $salesperson->shouldReceive('getFullNameAttribute')
+                    ->once()
+                    ->andReturn('Operate Beyond');
+
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $salesperson->googleToken = $accessToken;
+
+        // Campaign Relations
+        $campaign->shouldReceive('setRelation')->passthru();
+        $campaign->shouldReceive('belongsTo')->passthru();
+        $campaign->shouldReceive('hasOne')->passthru();
+
+        // Sales Person Relations
+        $salesperson->shouldReceive('setRelation')->passthru();
+        $salesperson->shouldReceive('belongsTo')->passthru();
+        $salesperson->shouldReceive('hasOne')->passthru();
+
+
+        // Return Campaign
+        $this->campaignRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $campaign->drip_campaigns_id])
+             ->once()
+             ->andReturn($campaign);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$campaign->user_id, $campaign->from_email_address])
+             ->once()
+             ->andReturn($salesperson);
+
+        // For Each Lead!
+        $leads = [];
+        $leadMocks = $this->getLeadMocks();
+        foreach($leadMocks as $lead) {
+            // Campaign Was Sent?
+            $this->campaignRepositoryMock
+                 ->shouldReceive('wasSent')
+                 ->withArgs([$campaign->drip_campaigns_id, $lead->identifier])
+                 ->once()
+                 ->andReturn(false);
+
+            // Get Lead
+            $this->leadRepositoryMock
+                 ->shouldReceive('get')
+                 ->with(['id' => $lead->identifier])
+                 ->once()
+                 ->andReturn($lead);
+
+            // Append Leads
+            $leads[] = $lead->identifier;
+        }
+
+        // Expect Jobs
+        $this->expectsJobs(SendEmailBuilderJob::class);
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->sendCampaign($campaign->drip_campaigns_id, $leads);
+
+        // Assert Same
+        $this->assertSame(count($result['sent']), 3);
+    }
+
+    /**
+     * @covers ::sendCampaign
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendCampaignInvalidEmail()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Mock Campaign
+        $campaign = $this->getEloquentMock(Campaign::class);
+        $campaign->drip_campaigns_id = 1;
+        $campaign->campaign_subject = 'Test Campaign';
+        $campaign->template = $template;
+        $campaign->user_id = 1;
+        $campaign->from_email_address = 'admin@operatebeyond.com';
+
+        // Campaign Relations
+        $campaign->shouldReceive('setRelation')->passthru();
+        $campaign->shouldReceive('belongsTo')->passthru();
+        $campaign->shouldReceive('hasOne')->passthru();
+
+
+        // Return Campaign
+        $this->campaignRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $campaign->drip_campaigns_id])
+             ->once()
+             ->andReturn($campaign);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$campaign->user_id, $campaign->from_email_address])
+             ->once()
+             ->andReturn(null);
+
+        // For Each Lead!
+        $leads = [];
+        $leadMocks = $this->getLeadMocks();
+        foreach($leadMocks as $lead) {
+            $leads[] = $lead->identifier;
+        }
+
+        // Expect Exception
+        $this->expectException(FromEmailMissingSmtpConfigException::class);
+
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Inquiry Result
+        $result = $service->sendCampaign($campaign->drip_campaigns_id, $leads);
+
+        // Assert False
+        $this->assertFalse($result);
+    }
+
+    /**
+     * @covers ::sendCampaign
+     * @group EmailBuilder
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendCampaignEmailsFailed()
+    {
+        // Mock Template
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = 1;
+        $template->html = $this->getTemplate();
+
+        // Mock Campaign
+        $campaign = $this->getEloquentMock(Campaign::class);
+        $campaign->drip_campaigns_id = 1;
+        $campaign->campaign_subject = 'Test Campaign';
+        $campaign->template = $template;
+        $campaign->user_id = 1;
+        $campaign->from_email_address = 'admin@operatebeyond.com';
+
+        // Mock Sales Person
+        $salesperson = $this->getEloquentMock(SalesPerson::class);
+        $salesperson->id = 1;
+        $salesperson->smtp_email = $campaign->from_email_address;
+        $salesperson->shouldReceive('getFullNameAttribute')
+                    ->once()
+                    ->andReturn('Operate Beyond');
+
+        // Mock Access Token
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $salesperson->googleToken = $accessToken;
+
+        // Campaign Relations
+        $campaign->shouldReceive('setRelation')->passthru();
+        $campaign->shouldReceive('belongsTo')->passthru();
+        $campaign->shouldReceive('hasOne')->passthru();
+
+        // Sales Person Relations
+        $salesperson->shouldReceive('setRelation')->passthru();
+        $salesperson->shouldReceive('belongsTo')->passthru();
+        $salesperson->shouldReceive('hasOne')->passthru();
+
+
+        // Return Campaign
+        $this->campaignRepositoryMock
+             ->shouldReceive('get')
+             ->with(['id' => $campaign->drip_campaigns_id])
+             ->once()
+             ->andReturn($campaign);
+
+        // Get Sales Person For Email Address
+        $this->salesPersonRepositoryMock
+             ->shouldReceive('getBySmtpEmail')
+             ->withArgs([$campaign->user_id, $campaign->from_email_address])
+             ->once()
+             ->andReturn($salesperson);
+
+        // For Each Lead!
+        $leads = [];
+        $leadMocks = $this->getLeadMocks();
+        foreach($leadMocks as $lead) {
+            // Campaign Was Sent?
+            $this->campaignRepositoryMock
+                 ->shouldReceive('wasSent')
+                 ->withArgs([$campaign->drip_campaigns_id, $lead->identifier])
+                 ->once()
+                 ->andReturn(false);
+
+            // Get Lead
+            $this->leadRepositoryMock
+                 ->shouldReceive('get')
+                 ->with(['id' => $lead->identifier])
+                 ->once()
+                 ->andReturn(null);
+
+            // Append Leads
+            $leads[] = $lead->identifier;
+        }
+
+        // Expect Exception
+        $this->expectException(SendBuilderEmailsFailedException::class);
+
+        // Expect Exception
+        $this->expectException(SendCampaignEmailsFailedException::class);
+
+
+        // @var EmailBuilderServiceInterface $service
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        // Validate Send Campaign Result
+        $result = $service->sendCampaign($campaign->drip_campaigns_id, $leads);
+
+        // Assert False
+        $this->assertFalse($result);
     }
 
 
