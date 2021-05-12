@@ -674,6 +674,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Template
         $template = $this->getEloquentMock(Template::class);
         $template->template_id = 1;
+        $template->user_id = 1;
         $template->html = $this->getTemplate();
 
         // Get From Email/To Email
@@ -715,7 +716,7 @@ class EmailBuilderServiceTest extends TestCase
         // Get Sales Person For Email Address
         $this->salesPersonRepositoryMock
              ->shouldReceive('getBySmtpEmail')
-             ->withArgs([$salesperson->user_id, $fromEmail])
+             ->withArgs([$template->user_id, $fromEmail])
              ->once()
              ->andReturn($salesperson);
 
@@ -744,6 +745,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Template
         $template = $this->getEloquentMock(Template::class);
         $template->template_id = 1;
+        $template->user_id = 1;
         $template->html = $this->getTemplate();
 
         // Get From Email/To Email
@@ -785,7 +787,7 @@ class EmailBuilderServiceTest extends TestCase
         // Get Sales Person For Email Address
         $this->salesPersonRepositoryMock
              ->shouldReceive('getBySmtpEmail')
-             ->withArgs([$salesperson->user_id, $fromEmail])
+             ->withArgs([$template->user_id, $fromEmail])
              ->once()
              ->andReturn(null);
 
@@ -821,6 +823,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Template
         $template = $this->getEloquentMock(Template::class);
         $template->template_id = 1;
+        $template->user_id = 1;
         $template->html = $this->getTemplate();
 
         // Get From Email/To Email
@@ -844,7 +847,7 @@ class EmailBuilderServiceTest extends TestCase
         // Get Sales Person For Email Address
         $this->salesPersonRepositoryMock
              ->shouldReceive('getBySmtpEmail')
-             ->withArgs([$template->user_id, $template->from_email_address])
+             ->withArgs([$template->user_id, $fromEmail])
              ->once()
              ->andReturn(null);
 
@@ -879,6 +882,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Template
         $template = $this->getEloquentMock(Template::class);
         $template->template_id = 1;
+        $template->user_id = 1;
         $template->html = $this->getTemplate();
 
         // Get From Email/To Email
@@ -920,31 +924,9 @@ class EmailBuilderServiceTest extends TestCase
         // Get Sales Person For Email Address
         $this->salesPersonRepositoryMock
              ->shouldReceive('getBySmtpEmail')
-             ->withArgs([$salesperson->user_id, $fromEmail])
+             ->withArgs([$template->user_id, $fromEmail])
              ->once()
              ->andReturn($salesperson);
-
-        // For Each Lead!
-        $leads = [];
-        $leadMocks = $this->getLeadMocks();
-        foreach($leadMocks as $lead) {
-            // Template Was Sent?
-            $this->templateRepositoryMock
-                 ->shouldReceive('wasSent')
-                 ->withArgs([$template->template_id, $lead->identifier])
-                 ->once()
-                 ->andReturn(false);
-
-            // Get Lead
-            $this->leadRepositoryMock
-                 ->shouldReceive('get')
-                 ->with(['id' => $lead->identifier])
-                 ->once()
-                 ->andReturn(null);
-
-            // Append Leads
-            $leads[] = $lead->identifier;
-        }
 
         // Expect Exception
         $this->expectException(SendBuilderEmailsFailedException::class);
