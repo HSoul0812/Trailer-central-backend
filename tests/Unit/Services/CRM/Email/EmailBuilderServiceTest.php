@@ -680,7 +680,7 @@ class EmailBuilderServiceTest extends TestCase
         // Get From Email/To Email
         $subject = 'Test Template';
         $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
-        $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
 
         // Mock Sales Person
         $salesperson = $this->getEloquentMock(SalesPerson::class);
@@ -750,8 +750,8 @@ class EmailBuilderServiceTest extends TestCase
 
         // Get From Email/To Email
         $subject = 'Test Template';
-        $fromEmail = '';
-        $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
 
         // Mock Sales Person
         $salesperson = $this->getEloquentMock(SalesPerson::class);
@@ -829,7 +829,7 @@ class EmailBuilderServiceTest extends TestCase
         // Get From Email/To Email
         $subject = 'Test Template';
         $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
-        $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
 
         // Template Relations
         $template->shouldReceive('setRelation')->passthru();
@@ -888,7 +888,7 @@ class EmailBuilderServiceTest extends TestCase
         // Get From Email/To Email
         $subject = 'Test Template';
         $fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
-        $toEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
+        $toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
 
         // Mock Sales Person
         $salesperson = $this->getEloquentMock(SalesPerson::class);
