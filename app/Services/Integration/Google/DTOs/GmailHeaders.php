@@ -39,11 +39,11 @@ class GmailHeaders extends EmailHeaders
 
         // Fill Headers
         return new static([
-            'message_id' => $headers['Message-ID'] ?? '',
-            'subject' => $headers['Subject'] ?? '',
-            'to_email' => $headers['To'] ?? '',
-            'from_email' => $headers['From'] ?? '',
-            'date' => $headers['Date'] ?? ''
+            'message_id' => $clean['Message-ID'] ?? '',
+            'subject' => $clean['Subject'] ?? '',
+            'to_email' => $clean['To'] ?? '',
+            'from_email' => $clean['From'] ?? '',
+            'date' => $clean['Date'] ?? ''
         ]);
     }
 }
