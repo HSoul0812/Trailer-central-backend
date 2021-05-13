@@ -38,7 +38,7 @@ class GmailHeaders extends EmailHeaders
         var_dump($clean);
 
         // Fill Headers
-        return new static([
+        return new self([
             'message_id' => $clean['Message-ID'] ?? '',
             'subject' => $clean['Subject'] ?? '',
             'to_email' => $clean['To'] ?? '',
