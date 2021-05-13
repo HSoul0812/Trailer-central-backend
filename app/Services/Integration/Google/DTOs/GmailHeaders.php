@@ -23,6 +23,44 @@ class GmailHeaders extends EmailHeaders
      */
     public static function parse($headers) {
         // Initialize New Headers Array
+        $clean = self::getCleanHeaders($headers);
+
+        // Split To
+        $clean['To-Name'] = '';
+        if(isset($clean['To'])) {
+            $to = self::splitEmail($clean['To']);
+            $clean['To'] = $to['email'];
+            $clean['To-Name'] = $to['name'];
+        }
+
+        // Split From
+        $clean['From-Name'] = '';
+        if(isset($clean['From'])) {
+            $to = self::splitEmail($clean['From']);
+            $clean['From'] = $to['email'];
+            $clean['From-Name'] = $to['name'];
+        }
+
+        // Fill Headers
+        return new self([
+            'message_id' => $clean['Message-ID'] ?? '',
+            'subject' => $clean['Subject'] ?? '',
+            'to_email' => $clean['To'] ?? '',
+            'to_name' => $clean['To-Name'] ?? '',
+            'from_email' => $clean['From'] ?? '',
+            'from_name' => $clean['From-Name'] ?? '',
+            'date' => $clean['Date'] ?? ''
+        ]);
+    }
+
+    /**
+     * Get Clean Headers
+     * 
+     * @param array $headers
+     * @return array
+     */
+    public static function getCleanHeaders($headers) {
+        // Loop Headers and Get Results
         $clean = [];
         foreach($headers as $header) {
             // Clean Name
@@ -35,15 +73,34 @@ class GmailHeaders extends EmailHeaders
             // Add to Array
             $clean[$header->name] = trim($header->value);
         }
-        var_dump($clean);
 
-        // Fill Headers
-        return new self([
-            'message_id' => $clean['Message-ID'] ?? '',
-            'subject' => $clean['Subject'] ?? '',
-            'to_email' => $clean['To'] ?? '',
-            'from_email' => $clean['From'] ?? '',
-            'date' => $clean['Date'] ?? ''
-        ]);
+        // Return Cleaned Headers
+        return $clean;
+    }
+
+    /**
+     * Split Email Into Email and Name
+     * 
+     * @param string $fullEmail
+     * @return array{email: string, name: string}
+     */
+    public static function splitEmail($fullEmail) {
+        // Initialize Defaults
+        $email = $fullEmail;
+        $name = '';
+
+        // Split Full Email Into Email and Name
+        $split = split('<', $email);
+        if(!empty($split[1])) {
+            $name = $split[0];
+            $email = str_replace('>', '', $split[1]);
+        }
+        
+
+        // Return Cleaned Headers
+        return [
+            'email' => $email,
+            'name' => $name
+        ];
     }
 }
