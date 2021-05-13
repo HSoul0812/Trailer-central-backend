@@ -3,6 +3,8 @@
 namespace App\Services\Integration\Google\DTOs;
 
 use App\Services\Integration\Common\DTOs\EmailHeaders;
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 
 /**
  * Class GmailHeaders
@@ -12,6 +14,8 @@ use App\Services\Integration\Common\DTOs\EmailHeaders;
  */
 class GmailHeaders extends EmailHeaders
 {
+    use WithConstructor, WithGetter;
+
     /**
      * Parse Headers and Return Object
      * 
