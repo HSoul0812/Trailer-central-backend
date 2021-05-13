@@ -90,7 +90,7 @@ class GmailHeaders extends EmailHeaders
         $name = '';
 
         // Split Full Email Into Email and Name
-        $split = split('<', $email);
+        $split = explode('<', $email);
         if(!empty($split[1])) {
             $name = $split[0];
             $email = str_replace('>', '', $split[1]);
