@@ -119,18 +119,18 @@ class ADFService implements ADFServiceInterface {
                 $result = $this->importLead($adf);
                 if(!empty($result->identifier)) {
                     Log::info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
-                    //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }
             } catch(InvalidAdfDealerIdException $e) {
                 if(!empty($dealerId) && is_numeric($dealerId)) {
-                    //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
                 } else {
-                    //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
                 }
                 Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             } catch(InvalidAdfImportFormatException $e) {
-                //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
                 Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             } catch(\Exception $e) {
                 Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
