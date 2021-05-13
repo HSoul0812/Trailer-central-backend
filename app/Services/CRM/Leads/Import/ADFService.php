@@ -90,6 +90,7 @@ class ADFService implements ADFServiceInterface {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
         $inbox = config('adf.imports.gmail.inbox');
+        $inbox = config('adf.imports.gmail.invalid');
         $messages = $this->gmail->messages($accessToken, $inbox);
 
         // Checking Each Message

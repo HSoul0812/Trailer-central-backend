@@ -99,8 +99,8 @@ class GmailHeaders extends EmailHeaders
 
         // Return Cleaned Headers
         return [
-            'email' => $email,
-            'name' => $name
+            'email' => trim($email),
+            'name' => trim($name)
         ];
     }
 }
