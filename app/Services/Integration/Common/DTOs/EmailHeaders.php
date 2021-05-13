@@ -18,37 +18,37 @@ class EmailHeaders
     /**
      * @var string Message ID From Email
      */
-    private $messageId;
+    protected $messageId;
 
     /**
      * @var string To Email Address
      */
-    private $toEmail;
+    protected $toEmail;
 
     /**
      * @var string To Name
      */
-    private $toName;
+    protected $toName;
 
     /**
      * @var string From Email Address
      */
-    private $fromEmail;
+    protected $fromEmail;
 
     /**
      * @var string From Name
      */
-    private $fromName;
+    protected $fromName;
 
     /**
      * @var string Subject of Email
      */
-    private $subject;
+    protected $subject;
 
     /**
      * @var string Date Email Was Sent
      */
-    private $date;
+    protected $date;
 
 
     /**

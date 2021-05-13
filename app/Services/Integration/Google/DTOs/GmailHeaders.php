@@ -36,5 +36,14 @@ class GmailHeaders extends EmailHeaders
             $clean[$header->name] = trim($header->value);
         }
         var_dump($clean);
+
+        // Fill Headers
+        return self([
+            'message_id' => $headers['Message-ID'] ?? '',
+            'subject' => $headers['Subject'] ?? '',
+            'to_email' => $headers['To'] ?? '',
+            'from_email' => $headers['From'] ?? '',
+            'date' => $headers['Date'] ?? ''
+        ]);
     }
 }
