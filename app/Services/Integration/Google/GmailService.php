@@ -14,6 +14,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Services\Integration\Google\DTOs\GmailHeaders;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
