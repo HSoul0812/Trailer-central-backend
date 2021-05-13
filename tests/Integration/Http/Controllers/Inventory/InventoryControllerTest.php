@@ -228,7 +228,7 @@ class InventoryControllerTest extends TestCase
     /**
      * @covers ::exists
      * @dataProvider inventoryDataProvider
-     * 
+     *
      * @param array $inventoryParams
      */
     public function testExists(array $inventoryParams)
@@ -271,7 +271,7 @@ class InventoryControllerTest extends TestCase
     /**
      * @covers ::exists
      * @dataProvider inventoryDataProvider
-     * 
+     *
      * @param array $inventoryParams
      */
     public function testExistsFalse(array $inventoryParams)
@@ -314,7 +314,7 @@ class InventoryControllerTest extends TestCase
     /**
      * @covers ::exists
      * @dataProvider inventoryDataProvider
-     * 
+     *
      * @param array $inventoryParams
      */
     public function testExistsWithInventory(array $inventoryParams)
@@ -364,7 +364,7 @@ class InventoryControllerTest extends TestCase
     /**
      * @covers ::exists
      * @dataProvider inventoryDataProvider
-     * 
+     *
      * @param array $inventoryParams
      */
     public function testExistsWithInventoryFalse(array $inventoryParams)
@@ -460,7 +460,7 @@ class InventoryControllerTest extends TestCase
                 'weight' => 444,
                 'gvwr' => 555,
                 'axle_capacity' => 1,
-                'cost_of_unit' => 'test_cost_of_unit',
+                'cost_of_unit' => 100,
                 'true_cost' => 777,
                 'cost_of_shipping' => 'test_cost_of_shipping',
                 'cost_of_prep' => 'test_cost_of_prep',
