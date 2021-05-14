@@ -34,6 +34,8 @@ use App\Repositories\Dms\QuoteRepository;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepository;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepositoryInterface;
+use App\Repositories\Dms\ServiceOrder\ServiceReportRepository;
+use App\Repositories\Dms\ServiceOrder\ServiceReportRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\TechnicianRepository;
 use App\Repositories\Dms\ServiceOrder\TechnicianRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\TypeRepository;
@@ -72,6 +74,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(PrinterSettingsRepositoryInterface::class, PrinterSettingsRepository::class);
         $this->app->bind(InstructionsServiceInterface::class, InstructionsService::class);
         $this->app->bind(CVRGeneratorServiceInterface::class, CVRGeneratorService::class);
+        $this->app->bind(ServiceReportRepositoryInterface::class, ServiceReportRepository::class);
 
         $this->app->bind(DocumentTemplatesRepositoryInterface::class, DocumentTemplatesRepository::class);
 

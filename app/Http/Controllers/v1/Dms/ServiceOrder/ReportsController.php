@@ -20,12 +20,14 @@ class ReportsController extends RestfulController
 
     public function __construct(ServiceReportRepositoryInterface $repository)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['monthly']);
+
         $this->repository = $repository;
     }
 
     /**
      * @OA\Get(
-     *     path="/api/reports/service-monthly-hours",
+     *     path="/api/dms/reports/service-monthly-hours",
      *     description="Retrieve a report of services hours by dealer",
      *     tags={"Inventory"},
      *     @OA\Parameter(

@@ -40,6 +40,16 @@ class MonthlyServiceHours implements DTO
     private $created_at;
 
     /**
+     * @var int
+     */
+    private $aggregate;
+
+    /**
+     * @var int
+     */
+    private $dealer_id;
+
+    /**
      * @return array{month_name: string, type: string, unit_price: numeric, created_at: string}
      */
     public function asArray(): array
