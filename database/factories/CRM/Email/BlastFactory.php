@@ -16,7 +16,7 @@ use Carbon\Carbon;
  * Define Blast Factory
  */
 $factory->define(Blast::class, function (Faker $faker, array $attributes) {
-    $user_id = $attributes['user_id'] ?? factory(NewUser::class)->create->getKey();
+    $user_id = $attributes['user_id'] ?? factory(NewUser::class)->create()->getKey();
 
     $template_id = $attributes['template_id'] ?? factory(Template::class)->create([
         'user_id' => $user_id
@@ -38,9 +38,9 @@ $factory->define(Blast::class, function (Faker $faker, array $attributes) {
  * Define Blast Sent Factory
  */
 $factory->define(BlastSent::class, function(Faker $faker, array $attributes) {
-    $email_blasts_id = $attributes['email_blasts_id'] ?? factory(Blast::class)->create->getKey();
+    $email_blasts_id = $attributes['email_blasts_id'] ?? factory(Blast::class)->create()->getKey();
 
-    $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create->getKey();
+    $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create()->getKey();
 
     // Return Overrides
     return [

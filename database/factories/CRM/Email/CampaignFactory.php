@@ -15,7 +15,7 @@ use Faker\Generator as Faker;
  * Define Campaign Factory
  */
 $factory->define(Campaign::class, function (Faker $faker, array $attributes) {
-    $user_id = $attributes['user_id'] ?? factory(NewUser::class)->create->getKey();
+    $user_id = $attributes['user_id'] ?? factory(NewUser::class)->create()->getKey();
 
     $template_id = $attributes['template_id'] ?? factory(Template::class)->create([
         'user_id' => $user_id
@@ -36,9 +36,9 @@ $factory->define(Campaign::class, function (Faker $faker, array $attributes) {
  * Define Campaign Sent Factory
  */
 $factory->define(CampaignSent::class, function(Faker $faker, array $attributes) {
-    $drip_campaigns_id = $attributes['drip_campaigns_id'] ?? factory(Campaign::class)->create->getKey();
+    $drip_campaigns_id = $attributes['drip_campaigns_id'] ?? factory(Campaign::class)->create()->getKey();
 
-    $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create->getKey();
+    $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create()->getKey();
 
     // Return Overrides
     return [
