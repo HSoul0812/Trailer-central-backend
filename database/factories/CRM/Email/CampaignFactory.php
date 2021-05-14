@@ -36,7 +36,7 @@ $factory->define(Campaign::class, function (Faker $faker, array $attributes) {
  * Define Campaign Sent Factory
  */
 $factory->define(CampaignSent::class, function(Faker $faker, array $attributes) {
-    $drip_campaigns_id = $attributes['drip_campaigns_id'] ?? factory(CampaignSent::class)->create->getKey();
+    $drip_campaigns_id = $attributes['drip_campaigns_id'] ?? factory(Campaign::class)->create->getKey();
 
     $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create->getKey();
 
