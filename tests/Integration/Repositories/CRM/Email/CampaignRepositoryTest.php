@@ -67,7 +67,7 @@ class CampaignRepositoryTest extends TestCase
         self::assertInstanceOf(Campaign::class, $campaign);
 
         // Campaign id matches param id
-        self::assertSame($campaign->drip_campaigns_id, $values['drip_campaigns_id']);
+        self::assertSame($campaign->drip_campaigns_id, $values['id']);
     }
 
     /**
@@ -248,11 +248,11 @@ class CampaignRepositoryTest extends TestCase
      */
     public function invalidPropertiesProvider(): array
     {
-        $campaignIdLambda = static function (BlastSeeder $seeder) {
+        $campaignIdLambda = static function (CampaignSeeder $seeder) {
             return $seeder->campaignsSent[0]->drip_campaigns_id;
         };
 
-        $leadIdLambda = static function (BlastSeeder $seeder) {
+        $leadIdLambda = static function (CampaignSeeder $seeder) {
             return $seeder->campaignsSent[0]->lead_id;
         };
 
