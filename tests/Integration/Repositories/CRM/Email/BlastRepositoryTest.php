@@ -212,60 +212,11 @@ class BlastRepositoryTest extends TestCase
     public function validGetParametersProvider(): array
     {
         $blastIdLambda = static function (BlastSeeder $seeder) {
-            return $seeder->blasts[0]->getKey();
+            return $seeder->createdBlasts[0]->getKey();
         };
 
         return [                 // array $parameters, int $expectedTotal
             'By dummy blast' => [['id' => $blastIdLambda]],
-        ];
-    }
-
-    /**
-     * Examples of parameters with expected total.
-     *
-     * @return array[]
-     */
-    public function validFindParametersProvider(): array
-    {
-        $dealerIdLambda = static function (BlastSeeder $seeder) {
-            return $seeder->dealer->getKey();
-        };
-
-        $blastNameLambda = static function (BlastSeeder $seeder): string {
-            $blasts = $seeder->createdBlasts;
-            return $blasts[array_rand($blasts, 1)]->blast_name;
-        };
-
-        return [                                // array $parameters, int $expectedTotal
-            'By dummy dealer\'s blast name' => [['user_id' => $dealerIdLambda, 'blast_name' => $blastNameLambda], 1],
-        ];
-    }
-
-    /**
-     * Examples of invalid customer-inventory id properties with theirs expected exception messages.
-     *
-     * @return array[]
-     */
-    public function invalidPropertiesProvider(): array
-    {
-        $userIdLambda = static function (BlastSeeder $seeder) {
-            return $seeder->dealer->getKey();
-        };
-
-        $blastNameLambda = static function (BlastSeeder $seeder): string {
-            $blasts = $seeder->createdBlasts;
-            return $blasts[array_rand($blasts, 1)]->blast_name;
-        };
-
-        $duplicateEntryLambda = function (int $userId, string $blastName) {
-            return $this->getDuplicateEntryMessage(
-                "$userId-$blastName",
-                'user_blast'
-            );
-        };
-
-        return [                      // array $properties, string $expectedPDOExceptionMessage
-            'With duplicate entry' => [['user_id' => $userIdLambda, 'blast_name' => $blastNameLambda], $duplicateEntryLambda],
         ];
     }
 

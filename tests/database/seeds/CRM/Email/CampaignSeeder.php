@@ -35,11 +35,6 @@ class CampaignSeeder extends Seeder
     private $dealer;
 
     /**
-     * @var Website
-     */
-    private $website;
-
-    /**
      * @var User
      */
     private $user;
@@ -75,7 +70,6 @@ class CampaignSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
-        $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
     }
 
@@ -127,14 +121,16 @@ class CampaignSeeder extends Seeder
 
         collect($sentSeeds)->each(function (array $seed): void {
             // Create Lead
-            $lead = factory(Lead::class)->create();
+            $lead = factory(Lead::class)->create([
+                'dealer_id' => $this->dealer->getKey()
+            ]);
             $this->leads[] = $lead;
 
             // Create Campaign Sent
             if(isset($seed['action']) && $seed['action'] === 'create') {
                 // Create Campaign Sent
                 $sent = factory(CampaignSent::class)->create([
-                    'email_campaigns_id' => $this->campaigns[0]->getKey(),
+                    'email_campaigns_id' => $this->createdCampaigns[0]->getKey(),
                     'lead_id' => $lead->getKey()
                 ]);
 
@@ -144,7 +140,7 @@ class CampaignSeeder extends Seeder
 
             // Make Campaign Sent
             $sent = factory(CampaignSent::class)->create([
-                'email_campaigns_id' => $this->campaigns[0]->getKey(),
+                'email_campaigns_id' => $this->createdCampaigns[0]->getKey(),
                 'lead_id' => $lead->getKey()
             ]);
 

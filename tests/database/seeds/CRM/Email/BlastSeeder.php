@@ -75,7 +75,6 @@ class BlastSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
-        $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
     }
 
@@ -127,14 +126,16 @@ class BlastSeeder extends Seeder
 
         collect($sentSeeds)->each(function (array $seed): void {
             // Create Lead
-            $lead = factory(Lead::class)->create();
+            $lead = factory(Lead::class)->create([
+                'dealer_id' => $this->dealer->getKey()
+            ]);
             $this->leads[] = $lead;
 
             // Create Blast Sent
             if(isset($seed['action']) && $seed['action'] === 'create') {
                 // Create Blast Sent
                 $sent = factory(BlastSent::class)->create([
-                    'email_blasts_id' => $this->blasts[0]->getKey(),
+                    'email_blasts_id' => $this->createdBlasts[0]->getKey(),
                     'lead_id' => $lead->getKey()
                 ]);
 
@@ -144,7 +145,7 @@ class BlastSeeder extends Seeder
 
             // Make Blast Sent
             $sent = factory(BlastSent::class)->create([
-                'email_blasts_id' => $this->blasts[0]->getKey(),
+                'email_blasts_id' => $this->createdBlasts[0]->getKey(),
                 'lead_id' => $lead->getKey()
             ]);
 
@@ -169,7 +170,7 @@ class BlastSeeder extends Seeder
         SalesPerson::where('user_id', $dealerId)->delete();
         NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
-        Website::where('dealer_id', $dealerId)->delete();                
+        Website::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);
     }
 }

@@ -212,7 +212,7 @@ class CampaignRepositoryTest extends TestCase
     public function validGetParametersProvider(): array
     {
         $campaignIdLambda = static function (CampaignSeeder $seeder) {
-            return $seeder->campaigns[0]->getKey();
+            return $seeder->createdCampaigns[0]->getKey();
         };
 
         return [                 // array $parameters, int $expectedTotal
