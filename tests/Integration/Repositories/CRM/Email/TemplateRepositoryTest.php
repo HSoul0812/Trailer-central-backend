@@ -65,7 +65,7 @@ class TemplateRepositoryTest extends TestCase
         self::assertInstanceOf(Template::class, $template);
 
         // Template id matches param id
-        self::assertSame($template->template_id, $values['id']);
+        self::assertSame($template->id, $values['id']);
     }
 
 
