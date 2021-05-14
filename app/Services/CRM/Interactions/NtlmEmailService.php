@@ -98,6 +98,8 @@ class NtlmEmailService implements NtlmEmailServiceInterface
         // Save Attachments
         if($parsedEmail->hasAttachments()) {
             $finalChangeKey = $this->appendAttachments($changeKey, $parsedEmail);
+        } else {
+            $finalChangeKey = $changeKey;
         }
 
         // Send Item
