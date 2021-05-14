@@ -221,27 +221,6 @@ class CampaignRepositoryTest extends TestCase
     }
 
     /**
-     * Examples of parameters with expected total.
-     *
-     * @return array[]
-     */
-    public function validFindParametersProvider(): array
-    {
-        $dealerIdLambda = static function (CampaignSeeder $seeder) {
-            return $seeder->dealer->getKey();
-        };
-
-        $campaignNameLambda = static function (CampaignSeeder $seeder): string {
-            $campaigns = $seeder->createdCampaigns;
-            return $campaigns[array_rand($campaigns, 1)]->campaign_name;
-        };
-
-        return [                                // array $parameters, int $expectedTotal
-            'By dummy dealer\'s campaign name' => [['user_id' => $dealerIdLambda, 'campaign_name' => $campaignNameLambda], 1],
-        ];
-    }
-
-    /**
      * Examples of invalid customer-inventory id properties with theirs expected exception messages.
      *
      * @return array[]

@@ -21,7 +21,8 @@ use Tests\database\seeds\Seeder;
  * @property-read Website $website
  * @property-read SalesPerson $sales
  * @property-read array<Lead> $leads
- * @property-read array<Campaign> $campaigns
+ * @property-read array<Campaign> $createdCampaigns
+ * @property-read array<Campaign> $missingCampaigns
  * @property-read array<CampaignSent> $campaignsSent
  * @property-read array<CampaignSent> $campaignsUnsent
  */
