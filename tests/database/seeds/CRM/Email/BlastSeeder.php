@@ -8,6 +8,7 @@ use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\BlastSent;
 use App\Models\CRM\Email\Template;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
 use App\Models\User\NewUser;
 use App\Models\User\DealerLocation;
