@@ -129,7 +129,7 @@ class CampaignRepositoryTest extends TestCase
     ): void {
         $this->seeder->seed();
 
-        // Already Sent
+        $properties = $this->seeder->extractValues($properties);
         $expectedPDOExceptionMessage = is_callable($expectedPDOExceptionMessage) ?
             $expectedPDOExceptionMessage($properties['drip_campaigns_id'], $properties['lead_id']) :
             $expectedPDOExceptionMessage;

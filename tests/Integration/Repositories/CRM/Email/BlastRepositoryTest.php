@@ -129,7 +129,7 @@ class BlastRepositoryTest extends TestCase
     ): void {
         $this->seeder->seed();
 
-        // Already Sent
+        $properties = $this->seeder->extractValues($properties);
         $expectedPDOExceptionMessage = is_callable($expectedPDOExceptionMessage) ?
             $expectedPDOExceptionMessage($properties['email_blasts_id'], $properties['lead_id']) :
             $expectedPDOExceptionMessage;
