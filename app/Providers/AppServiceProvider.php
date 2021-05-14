@@ -143,6 +143,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');
         \Validator::extend('inquiry_type_valid', 'App\Rules\CRM\Leads\ValidInquiryType@passes');
         \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
+        \Validator::extend('valid_smtp_email', 'App\Rules\CRM\User\ValidSmtpEmail@passes');
         \Validator::extend('interaction_type_valid', 'App\Rules\CRM\Interactions\ValidInteractionType@passes');
         \Validator::extend('campaign_action_valid', 'App\Rules\CRM\Email\CampaignActionValid@passes');
         \Validator::extend('text_exists', 'App\Rules\CRM\Text\TextExists@passes');

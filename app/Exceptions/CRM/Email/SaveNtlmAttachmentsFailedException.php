@@ -9,7 +9,7 @@ namespace App\Exceptions\CRM\Email;
  *
  * @package App\Exceptions\CRM\Email
  */
-class SaveNtlmFailedException extends \Exception
+class SaveNtlmAttachmentsFailedException extends \Exception
 {
 
     protected $message = 'An error occurred trying to save the NTLM attachments email!'; 

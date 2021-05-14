@@ -2,10 +2,19 @@
 
 namespace App\Repositories\CRM\User;
 
+use App\Models\CRM\User\SalesPerson;
 use App\Repositories\Repository;
 use App\Utilities\JsonApi\RequestQueryable;
 
 interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
+    /**
+     * Get By Smtp Email
+     *
+     * @param int $userId
+     * @param string $email
+     * @return null|SalesPerson
+     */
+    public function getBySmtpEmail(int $userId, string $email): ?SalesPerson;
 
     /**
      * Generate a salesperson sales report;

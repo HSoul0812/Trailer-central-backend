@@ -1,0 +1,3 @@
+<!-- BEGIN EMAIL BUILDER TEMPLATE! -->
+{!! $body !!}
+<!-- END EMAIL BUILDER TEMPLATE! -->
