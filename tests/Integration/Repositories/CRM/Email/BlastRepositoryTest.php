@@ -67,7 +67,7 @@ class BlastRepositoryTest extends TestCase
         self::assertInstanceOf(Blast::class, $blast);
 
         // Blast id matches param id
-        self::assertSame($blast->email_blasts_id, $values['email_blasts_id']);
+        self::assertSame($blast->email_blasts_id, $values['id']);
     }
 
     /**
