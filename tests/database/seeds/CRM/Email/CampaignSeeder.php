@@ -155,8 +155,8 @@ class CampaignSeeder extends Seeder
         // Database clean up
         if(!empty($this->createdCampaigns) && count($this->createdCampaigns)) {
             foreach($this->createdCampaigns as $campaign) {
-                $campaignId = $campaign->email_campaigns_id;
-                CampaignSent::where('email_campaigns_id', $campaignId)->delete();
+                $campaignId = $campaign->drip_campaigns_id;
+                CampaignSent::where('drip_campaigns_id', $campaignId)->delete();
                 Campaign::destroy($campaignId);
             }
         }
