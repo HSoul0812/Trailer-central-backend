@@ -65,7 +65,7 @@ class TemplateRepositoryTest extends TestCase
         self::assertInstanceOf(Template::class, $template);
 
         // Template id matches param id
-        self::assertSame($template->templates_id, $values['id']);
+        self::assertSame($template->template_id, $values['id']);
     }
 
 
@@ -80,7 +80,7 @@ class TemplateRepositoryTest extends TestCase
             return $seeder->createdTemplates[0]->getKey();
         };
 
-        return [                 // array $parameters, int $expectedTotal
+        return [                 // array $parameters
             'By dummy template' => [['id' => $templateIdLambda]],
         ];
     }

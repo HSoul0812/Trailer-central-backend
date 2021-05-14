@@ -215,7 +215,7 @@ class CampaignRepositoryTest extends TestCase
             return $seeder->createdCampaigns[0]->getKey();
         };
 
-        return [                 // array $parameters, int $expectedTotal
+        return [                 // array $parameters
             'By dummy campaign' => [['id' => $campaignIdLambda]],
         ];
     }

@@ -215,7 +215,7 @@ class BlastRepositoryTest extends TestCase
             return $seeder->createdBlasts[0]->getKey();
         };
 
-        return [                 // array $parameters, int $expectedTotal
+        return [                 // array $parameters
             'By dummy blast' => [['id' => $blastIdLambda]],
         ];
     }
