@@ -139,7 +139,7 @@ class CampaignSeeder extends Seeder
             }
 
             // Make Campaign Sent
-            $sent = factory(CampaignSent::class)->create([
+            $sent = factory(CampaignSent::class)->make([
                 'email_campaigns_id' => $this->createdCampaigns[0]->getKey(),
                 'lead_id' => $lead->getKey()
             ]);

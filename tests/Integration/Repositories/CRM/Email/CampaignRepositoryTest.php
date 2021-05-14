@@ -75,8 +75,6 @@ class CampaignRepositoryTest extends TestCase
      *
      * @typeOfTest IntegrationTestCase
      *
-     * @throws BindingResolutionException when there is a problem with resolution of concreted class
-     *
      * @covers CampaignRepository::sent
      */
     public function testSent(): void {
@@ -116,21 +114,24 @@ class CampaignRepositoryTest extends TestCase
      * Test that SUT is inserting correctly
      *
      * @typeOfTest IntegrationTestCase
+     * @dataProvider invalidPropertiesProvider
+     *
+     * @param  array  $properties
+     * @param  string|callable  $expectedPDOExceptionMessage
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers CampaignRepository::sent
      */
-    public function testSentWithException(): void {
+    public function testSentWithException(
+        array $properties,
+        $expectedPDOExceptionMessage
+    ): void {
         $this->seeder->seed();
-
-        // Given I have a collection of campaign sent entries
-        $sents = $this->seeder->campaignsSent;
-        $sent = end($sents);
 
         // Already Sent
         $expectedPDOExceptionMessage = is_callable($expectedPDOExceptionMessage) ?
-            $expectedPDOExceptionMessage($sent->drip_campaigns_id, $sent->lead_id) :
+            $expectedPDOExceptionMessage($properties['drip_campaigns_id'], $properties['lead_id']) :
             $expectedPDOExceptionMessage;
 
         // When I call create with invalid parameters
@@ -142,9 +143,8 @@ class CampaignRepositoryTest extends TestCase
         // When I call create with valid parameters
         /** @var CampaignSent $leadCampaignToCustomer */
         $campaignSent = $this->getConcreteRepository()->sent([
-            'drip_campaigns_id' => $sent->drip_campaigns_id,
-            'lead_id' => $sent->lead_id,
-            'message_id' => $sent->message_id
+            'drip_campaigns_id' => $properties['drip_campaigns_id'],
+            'lead_id' => $properties['lead_id']
         ]);
 
         // And I should get a null value
@@ -248,24 +248,23 @@ class CampaignRepositoryTest extends TestCase
      */
     public function invalidPropertiesProvider(): array
     {
-        $userIdLambda = static function (CampaignSeeder $seeder) {
-            return $seeder->dealer->getKey();
+        $campaignIdLambda = static function (BlastSeeder $seeder) {
+            return $seeder->campaignsSent[0]->drip_campaigns_id;
         };
 
-        $campaignNameLambda = static function (CampaignSeeder $seeder): string {
-            $campaigns = $seeder->createdCampaigns;
-            return $campaigns[array_rand($campaigns, 1)]->campaign_name;
+        $leadIdLambda = static function (BlastSeeder $seeder) {
+            return $seeder->campaignsSent[0]->lead_id;
         };
 
-        $duplicateEntryLambda = function (int $userId, string $campaignName) {
+        $duplicateEntryLambda = function (int $campaignId, int $leadId) {
             return $this->getDuplicateEntryMessage(
-                "$userId-$campaignName",
-                'user_campaign'
+                "$campaignId-$leadId",
+                'PRIMARY'
             );
         };
 
         return [                      // array $properties, string $expectedPDOExceptionMessage
-            'With duplicate entry' => [['user_id' => $userIdLambda, 'campaign_name' => $campaignNameLambda], $duplicateEntryLambda],
+            'With duplicate entry' => [['drip_campaigns_id' => $campaignIdLambda, 'lead_id' => $leadIdLambda], $duplicateEntryLambda],
         ];
     }
 

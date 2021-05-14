@@ -75,8 +75,6 @@ class BlastRepositoryTest extends TestCase
      *
      * @typeOfTest IntegrationTestCase
      *
-     * @throws BindingResolutionException when there is a problem with resolution of concreted class
-     *
      * @covers BlastRepository::sent
      */
     public function testSent(): void {
@@ -116,21 +114,24 @@ class BlastRepositoryTest extends TestCase
      * Test that SUT is inserting correctly
      *
      * @typeOfTest IntegrationTestCase
+     * @dataProvider invalidPropertiesProvider
+     *
+     * @param  array  $properties
+     * @param  string|callable  $expectedPDOExceptionMessage
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers BlastRepository::sent
      */
-    public function testSentWithException(): void {
+    public function testSentWithException(
+        array $properties,
+        $expectedPDOExceptionMessage
+    ): void {
         $this->seeder->seed();
-
-        // Given I have a collection of blast sent entries
-        $sents = $this->seeder->blastsSent;
-        $sent = end($sents);
 
         // Already Sent
         $expectedPDOExceptionMessage = is_callable($expectedPDOExceptionMessage) ?
-            $expectedPDOExceptionMessage($sent->email_blasts_id, $sent->lead_id) :
+            $expectedPDOExceptionMessage($properties['email_blasts_id'], $properties['lead_id']) :
             $expectedPDOExceptionMessage;
 
         // When I call create with invalid parameters
@@ -142,9 +143,8 @@ class BlastRepositoryTest extends TestCase
         // When I call create with valid parameters
         /** @var BlastSent $leadBlastToCustomer */
         $blastSent = $this->getConcreteRepository()->sent([
-            'email_blasts_id' => $sent->email_blasts_id,
-            'lead_id' => $sent->lead_id,
-            'message_id' => $sent->message_id
+            'email_blasts_id' => $properties['email_blasts_id'],
+            'lead_id' => $properties['lead_id']
         ]);
 
         // And I should get a null value
@@ -217,6 +217,33 @@ class BlastRepositoryTest extends TestCase
 
         return [                 // array $parameters, int $expectedTotal
             'By dummy blast' => [['id' => $blastIdLambda]],
+        ];
+    }
+
+    /**
+     * Examples of invalid customer-inventory id properties with theirs expected exception messages.
+     *
+     * @return array[]
+     */
+    public function invalidPropertiesProvider(): array
+    {
+        $blastIdLambda = static function (BlastSeeder $seeder) {
+            return $seeder->blastsSent[0]->email_blasts_id;
+        };
+
+        $leadIdLambda = static function (BlastSeeder $seeder) {
+            return $seeder->blastsSent[0]->lead_id;
+        };
+
+        $duplicateEntryLambda = function (int $blastId, int $leadId) {
+            return $this->getDuplicateEntryMessage(
+                "$blastId-$leadId",
+                'PRIMARY'
+            );
+        };
+
+        return [                      // array $properties, string $expectedPDOExceptionMessage
+            'With duplicate entry' => [['email_blasts_id' => $blastIdLambda, 'lead_id' => $leadIdLambda], $duplicateEntryLambda],
         ];
     }
 

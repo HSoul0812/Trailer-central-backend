@@ -144,7 +144,7 @@ class BlastSeeder extends Seeder
             }
 
             // Make Blast Sent
-            $sent = factory(BlastSent::class)->create([
+            $sent = factory(BlastSent::class)->make([
                 'email_blasts_id' => $this->createdBlasts[0]->getKey(),
                 'lead_id' => $lead->getKey()
             ]);
