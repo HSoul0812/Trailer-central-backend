@@ -196,7 +196,7 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
                     });
 
                 if (!is_numeric($search_term) && (isset($params['status']) && $params['status'] === QuickbookApproval::TO_SEND)) {
-                    $q->where('qb_obj', 'LIKE', "%$search_term%");
+                    $q->orWhere('qb_obj', 'LIKE', "%$search_term%");
                 }
 
                 if (isset($params['status']) && $params['status'] === QuickbookApproval::FAILED) {
