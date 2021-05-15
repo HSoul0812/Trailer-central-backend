@@ -84,7 +84,7 @@ class CampaignRepositoryTest extends TestCase
         // When I call create with invalid parameters
         // Then I expect see that one exception have been thrown with a specific message
         $this->expectException(ModelNotFoundException::class);
-        $this->expectExceptionMessage('No query results for model [App\Models\CRM\Email\Campaign].');
+        $this->expectExceptionMessage('No query results for model [App\Models\CRM\Email\Campaign] 0');
 
         // When I call get
         // Then I got a single campaign

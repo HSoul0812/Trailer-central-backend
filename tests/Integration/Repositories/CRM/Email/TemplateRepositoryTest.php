@@ -54,18 +54,17 @@ class TemplateRepositoryTest extends TestCase
 
         // Get Template
         $template = reset($templates);
-        var_dump($template);
 
         // When I call get
         // Then I got a single template
         /** @var Template $emailTemplate */
-        $emailTemplate = $this->getConcreteRepository()->get(['id' => $template->template_id]);
+        $emailTemplate = $this->getConcreteRepository()->get(['id' => $template->id]);
 
         // Get must be Template
         self::assertInstanceOf(Template::class, $template);
 
         // Template id matches
-        self::assertSame($emailTemplate->template_id, $template->template_id);
+        self::assertSame($emailTemplate->id, $template->id);
     }
 
     /**
@@ -81,7 +80,7 @@ class TemplateRepositoryTest extends TestCase
         // When I call create with invalid parameters
         // Then I expect see that one exception have been thrown with a specific message
         $this->expectException(ModelNotFoundException::class);
-        $this->expectExceptionMessage('No query results for model [App\Models\CRM\Email\Template].');
+        $this->expectExceptionMessage('No query results for model [App\Models\CRM\Email\Template] 0');
 
         // When I call get
         // Then I got a single template
