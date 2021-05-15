@@ -42,32 +42,54 @@ class BlastRepositoryTest extends TestCase
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
      * @typeOfTest IntegrationTestCase
-     * @dataProvider validGetParametersProvider
-     *
-     *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
      *
      * @covers BlastRepository::get
      */
-    public function testGet(array $params): void
+    public function testGet(): void
     {
         // Given I have a collection of leads
         $this->seeder->seed();
 
-        // Parse Values
-        $values = $this->seeder->extractValues($params);
+        // Given I have a collection of blast entries
+        $blasts = $this->seeder->createdBlasts;
+
+        // Get Blast
+        $blast = reset($blasts);
 
         // When I call get
         // Then I got a single blast
-        /** @var Blast $blast */
-        $blast = $this->getConcreteRepository()->get($values);
+        /** @var Blast $emailBlast */
+        $emailBlast = $this->getConcreteRepository()->get(['id' => $blast->email_blasts_id]);
 
         // Get must be Blast
         self::assertInstanceOf(Blast::class, $blast);
 
         // Blast id matches param id
-        self::assertSame($blast->email_blasts_id, $values['id']);
+        self::assertSame($emailBlast->email_blasts_id, $blast->email_blasts_id);
+    }
+
+    /**
+     * Test that SUT is performing all desired operations (sort and filter) excepts pagination
+     *
+     * @typeOfTest IntegrationTestCase
+     *
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
+     *
+     * @covers BlastRepository::get
+     */
+    public function testGetWithException(): void {
+        // When I call create with invalid parameters
+        // Then I expect see that one exception have been thrown with a specific message
+        //$this->expectException(PDOException::class);
+        //$this->expectExceptionMessage($expectedPDOExceptionMessage);
+
+        // When I call get
+        // Then I got a single blast
+        /** @var Blast $emailBlast */
+        $emailBlast = $this->getConcreteRepository()->get(['id' => 0]);
+
+        // Blast id matches param id
+        self::assertNull($emailBlast);
     }
 
     /**

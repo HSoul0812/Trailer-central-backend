@@ -42,32 +42,30 @@ class CampaignRepositoryTest extends TestCase
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
      * @typeOfTest IntegrationTestCase
-     * @dataProvider validGetParametersProvider
-     *
-     *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
      *
      * @covers CampaignRepository::get
      */
-    public function testGet(array $params): void
+    public function testGet(): void
     {
         // Given I have a collection of leads
         $this->seeder->seed();
 
-        // Parse Values
-        $values = $this->seeder->extractValues($params);
+        // Given I have a collection of campaign entries
+        $campaigns = $this->seeder->createdCampaigns;
+
+        // Get Campaign
+        $campaign = reset($campaigns);
 
         // When I call get
         // Then I got a single campaign
-        /** @var Campaign $campaign */
-        $campaign = $this->getConcreteRepository()->get($values);
+        /** @var Campaign $emailCampaign */
+        $emailCampaign = $this->getConcreteRepository()->get(['id' => $campaign->drip_campaigns_id]);
 
         // Get must be Campaign
         self::assertInstanceOf(Campaign::class, $campaign);
 
         // Campaign id matches param id
-        self::assertSame($campaign->drip_campaigns_id, $values['id']);
+        self::assertSame($emailCampaign->drip_campaigns_id, $campaign->drip_campaigns_id);
     }
 
     /**

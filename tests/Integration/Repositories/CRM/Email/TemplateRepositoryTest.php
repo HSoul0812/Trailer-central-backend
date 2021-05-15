@@ -40,49 +40,30 @@ class TemplateRepositoryTest extends TestCase
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
      * @typeOfTest IntegrationTestCase
-     * @dataProvider validGetParametersProvider
-     *
-     *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
      *
      * @covers TemplateRepository::get
      */
-    public function testGet(array $params): void
+    public function testGet(): void
     {
         // Given I have a collection of leads
         $this->seeder->seed();
 
-        // Parse Values
-        $values = $this->seeder->extractValues($params);
+        // Given I have a collection of template entries
+        $templates = $this->seeder->createdTemplates;
+
+        // Get Template
+        $template = reset($templates);
 
         // When I call get
         // Then I got a single template
-        /** @var Template $template */
-        $template = $this->getConcreteRepository()->get($values);
+        /** @var Template $emailTemplate */
+        $emailTemplate = $this->getConcreteRepository()->get(['id' => $template->template_id]);
 
         // Get must be Template
         self::assertInstanceOf(Template::class, $template);
 
-        // Template id matches param id
-        self::assertSame($template->id, $values['id']);
-    }
-
-
-    /**
-     * Examples of parameters with expected total.
-     *
-     * @return array[]
-     */
-    public function validGetParametersProvider(): array
-    {
-        $templateIdLambda = static function (TemplateSeeder $seeder) {
-            return $seeder->createdTemplates[0]->getKey();
-        };
-
-        return [                 // array $parameters
-            'By dummy template' => [['id' => $templateIdLambda]],
-        ];
+        // Template id matches
+        self::assertSame($emailTemplate->template_id, $template->template_id);
     }
 
 
