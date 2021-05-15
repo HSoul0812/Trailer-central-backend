@@ -7,6 +7,7 @@ namespace Tests\Integration\Repositories\CRM\Email;
 use App\Models\CRM\Email\Template;
 use App\Repositories\CRM\Email\TemplateRepository;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tests\database\seeds\CRM\Email\TemplateSeeder;
 use Tests\TestCase;
@@ -53,6 +54,7 @@ class TemplateRepositoryTest extends TestCase
 
         // Get Template
         $template = reset($templates);
+        var_dump($template);
 
         // When I call get
         // Then I got a single template
@@ -64,6 +66,30 @@ class TemplateRepositoryTest extends TestCase
 
         // Template id matches
         self::assertSame($emailTemplate->template_id, $template->template_id);
+    }
+
+    /**
+     * Test that SUT is performing all desired operations (sort and filter) excepts pagination
+     *
+     * @typeOfTest IntegrationTestCase
+     *
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
+     *
+     * @covers TemplateRepository::get
+     */
+    public function testGetWithException(): void {
+        // When I call create with invalid parameters
+        // Then I expect see that one exception have been thrown with a specific message
+        $this->expectException(ModelNotFoundException::class);
+        $this->expectExceptionMessage('No query results for model [App\Models\CRM\Email\Template].');
+
+        // When I call get
+        // Then I got a single template
+        /** @var Template $emailTemplate */
+        $emailTemplate = $this->getConcreteRepository()->get(['id' => 0]);
+
+        // Template id matches param id
+        self::assertNull($emailTemplate);
     }
 
 

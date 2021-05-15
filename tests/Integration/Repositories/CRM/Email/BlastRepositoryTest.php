@@ -8,6 +8,7 @@ use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\BlastSent;
 use App\Repositories\CRM\Email\BlastRepository;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use PDOException;
 use Tests\database\seeds\CRM\Email\BlastSeeder;
@@ -42,6 +43,8 @@ class BlastRepositoryTest extends TestCase
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
      * @typeOfTest IntegrationTestCase
+     *
+     * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers BlastRepository::get
      */
@@ -80,8 +83,8 @@ class BlastRepositoryTest extends TestCase
     public function testGetWithException(): void {
         // When I call create with invalid parameters
         // Then I expect see that one exception have been thrown with a specific message
-        //$this->expectException(PDOException::class);
-        //$this->expectExceptionMessage($expectedPDOExceptionMessage);
+        $this->expectException(ModelNotFoundException::class);
+        $this->expectExceptionMessage('No query results for model [App\Models\CRM\Email\Blast].');
 
         // When I call get
         // Then I got a single blast
