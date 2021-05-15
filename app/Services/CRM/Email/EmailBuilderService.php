@@ -346,6 +346,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Get SMTP Config
         else {
             $this->setSmtpConfig($config->smtpConfig);
+            var_dump($config->smtpConfig);
 
             // Send Email
             Mail::to($this->getCleanTo($config->getToEmail()))
