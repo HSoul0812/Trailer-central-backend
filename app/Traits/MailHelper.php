@@ -13,7 +13,7 @@ trait MailHelper
      */
     public function setSmtpConfig(SmtpConfig $smtpConfig): void
     {
-        if (!empty($smtpConfig->host)) {
+        if (!empty($smtpConfig) && $smtpConfig->host) {
             $config = [
                 'driver'        => 'smtp',
                 'host'          => $smtpConfig->host,
