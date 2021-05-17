@@ -147,7 +147,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
 
         // Match Zip
         if(isset($params['zip'])) {
-            $query->where('zip', $params['zip']);
+            $query->where('postalcode', $params['zip']);
         }
 
         // Return Locations Found

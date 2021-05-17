@@ -14,6 +14,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Services\Integration\Google\DTOs\GmailHeaders;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
@@ -227,14 +228,14 @@ class GmailService implements GmailServiceInterface
         }
 
         // Get Headers/Body/Attachments
-        $headers = $this->parseMessageHeaders($payload->getHeaders());
-        $body = $this->parseMessageBody($headers['Message-ID'], $payload);
+        $headers = GmailHeaders::parse($payload->getHeaders());
+        $body = $this->parseMessageBody($headers->messageId, $payload);
         $attachments = new Collection();
         if(!empty($payload->parts)) {
-            $attachments = $this->parseMessageAttachments($headers['Message-ID'], $payload->parts);
+            $attachments = $this->parseMessageAttachments($headers->messageId, $payload->parts);
         }
         if(count($attachments) > 0) {
-            $this->log->info('Found ' . count($attachments) . ' total attachments on Message ' . $headers['Message-ID']);
+            $this->log->info('Found ' . count($attachments) . ' total attachments on Message ' . $headers->messageId);
         }
 
         // Parse Data
@@ -455,29 +456,6 @@ class GmailService implements GmailServiceInterface
     }
 
     /**
-     * Parse Message Headers Into More Reasonable Format
-     *
-     * @param array $headers
-     * @return array
-     */
-    private function parseMessageHeaders(array $headers) {
-        // Initialize New Headers Array
-        $clean = [];
-        foreach($headers as $header) {
-            // Clean Name
-            if($header->name === 'Message-Id') {
-                $header->name = 'Message-ID';
-            } elseif($header->name === 'Delivered-To') {
-                $header->name = 'To';
-            }
-
-            // Add to Array
-            $clean[$header->name] = trim($header->value);
-        }
-        return $clean;
-    }
-
-    /**
      * Parse Message Into Body
      *
      * @param string $message_id
@@ -552,30 +530,30 @@ class GmailService implements GmailServiceInterface
      * Get Parsed Message
      *
      * @param string $mailId
-     * @param array $headers
+     * @param GmailHeaders $headers
      * @param string $body
      * @param Collection<AttachmentFile> $attachments
      * @return ParsedEmail
      */
-    private function getParsedMessage(string $mailId, array $headers, string $body, Collection $attachments) {
+    private function getParsedMessage(string $mailId, GmailHeaders $headers, string $body, Collection $attachments) {
         // Create Parsed Email
         $parsed = new ParsedEmail();
         $parsed->setId($mailId);
 
         // Set Message ID
-        $parsed->setMessageId($headers['Message-ID']);
+        $parsed->setMessageId($headers->messageId);
 
         // Set To/From
-        $parsed->setTo($headers['To']);
-        $parsed->setFrom($headers['From']);
+        $parsed->setTo($headers->getFullTo());
+        $parsed->setFrom($headers->getFullFrom());
 
         // Set Subject/Body
-        $parsed->setSubject($headers['Subject']);
+        $parsed->setSubject($headers->subject);
         $parsed->setBody($body);
         $parsed->setAttachments($attachments);
 
         // Set Date
-        $parsed->setDate($headers['Date']);
+        $parsed->setDate($headers->getDate());
 
         // Return ParsedEmail
         return $parsed;
