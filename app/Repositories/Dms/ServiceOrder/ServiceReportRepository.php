@@ -51,31 +51,31 @@ class ServiceReportRepository implements ServiceReportRepositoryInterface
      */
     public function monthly(array $params):LengthAwarePaginator
     {
-            if (empty($params['dealer_id'])) {
-                throw new InvalidArgumentException("'dealer_id' param is required");
-            }
+        if (empty($params['dealer_id'])) {
+            throw new InvalidArgumentException("'dealer_id' param is required");
+        }
 
-            $query = DB::table('dms_service_hrs_report');
+        $query = DB::table('dms_service_hrs_report');
 
-            $params['per_page'] = $params['per_page'] ?? 15;
+        $params['per_page'] = $params['per_page'] ?? 15;
 
-            $query->where('dealer_id', $params['dealer_id']);
+        $query->where('dealer_id', $params['dealer_id']);
 
-            if (isset($params['search_term'])) {
-                $term = $params['search_term'];
+        if (isset($params['search_term'])) {
+            $term = $params['search_term'];
 
-                $query->where(static function ($subQuery) use ($term): void {
-                    $subQuery->where('month_name', 'LIKE', "%{$term}%");
-                });
-            }
+            $query->where(static function ($subQuery) use ($term): void {
+                $subQuery->where('month_name', 'LIKE', "%{$term}%");
+            });
+        }
 
-            $query->processor = $this->getProcessor();
+        $query->processor = $this->getProcessor();
 
-            if (isset($params['sort'])) {
-                $this->addSortQuery($query, $params['sort']);
-            }
+        if (isset($params['sort'])) {
+            $this->addSortQuery($query, $params['sort']);
+        }
 
-            return $query->paginate($params['per_page'])->appends($params);
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     protected function getSortOrders(): array
