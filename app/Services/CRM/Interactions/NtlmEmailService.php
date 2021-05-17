@@ -96,13 +96,17 @@ class NtlmEmailService implements NtlmEmailServiceInterface
         $changeKey = $this->createItem($smtpConfig, $parsedEmail);
 
         // Save Attachments
-        $finalChangeKey = $this->appendAttachments($changeKey, $parsedEmail);
+        if($parsedEmail->hasAttachments()) {
+            $finalChangeKey = $this->appendAttachments($changeKey, $parsedEmail);
+        } else {
+            $finalChangeKey = $changeKey;
+        }
 
         // Send Item
         $this->sendItem($finalChangeKey);
 
         // Store Attachments
-        if(!empty($parsedEmail->getAttachments())) {
+        if($parsedEmail->hasAttachments()) {
             $parsedEmail->setAttachments($this->interactionEmail->storeAttachments($dealerId, $parsedEmail));
         }
 
