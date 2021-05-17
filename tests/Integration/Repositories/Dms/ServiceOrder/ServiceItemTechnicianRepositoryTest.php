@@ -73,6 +73,7 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
         $unitSaleId21 = factory(UnitSale::class)->create([
             'sales_person_id' => $serviceTechnician21['sales_person_id'],
             'buyer_id' => $customerId21,
+            'inventory_id' => false
         ])->id;
 
         $invoiceId11 = factory(Invoice::class)->create([
@@ -490,6 +491,7 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
                 'sales_person_id' => 111,
                 'customer_name' => 'test_customer_name147',
                 'created_at' => (new \DateTime())->modify('-1 day'),
+                'closed_at' => (new \DateTime())->modify('-1 day'),
                 'repair_order_type' => 'internal',
                 'paid_retail' => 654,
                 'qb_invoice_items' => [
@@ -517,6 +519,7 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
                 'sales_person_id' => 333,
                 'customer_name' => 'test_customer_name258',
                 'created_at' => (new \DateTime())->modify('-1 week'),
+                'closed_at' => (new \DateTime())->modify('-1 week'),
                 'repair_order_type' => 'retail',
                 'paid_retail' => 789,
                 'qb_invoice_items' => [
@@ -550,6 +553,7 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
                 'sales_person_id' => 444,
                 'customer_name' => 'test_customer_name369',
                 'created_at' => (new \DateTime())->modify('-1 month'),
+                'closed_at' => (new \DateTime())->modify('-1 month'),
                 'repair_order_type' => 'warranty',
                 'paid_retail' => 123,
                 'qb_invoice_items' => [
@@ -586,7 +590,8 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
         $serviceOrder = factory(ServiceOrder::class)->create([
             'unit_sale_id' => $unitSaleId,
             'type' => $serviceTechnician['repair_order_type'],
-            'created_at' => $serviceTechnician['created_at']
+            'created_at' => $serviceTechnician['created_at'],
+            'closed_at' => $serviceTechnician['closed_at'],
         ]);
 
         $serviceItem = factory(ServiceItem::class)->create([
