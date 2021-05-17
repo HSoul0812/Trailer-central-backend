@@ -5,6 +5,7 @@ namespace App\Models\CRM\Email;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Email Blast
@@ -82,5 +83,15 @@ class Blast extends Model
     public function newDealerUser()
     {
         return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get Template
+     * 
+     * @return BelongsTo
+     */
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(Template::class, 'email_template_id', 'id');
     }
 }

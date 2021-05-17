@@ -197,6 +197,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $item;
     }
 
+    public function moveLocationId(int $from, int $to): int
+    {
+        return Inventory::where('dealer_location_id', $from)->update([
+            'dealer_location_id' => $to
+        ]);
+    }
+
     /**
      * @param $params
      * @return Inventory

@@ -118,14 +118,11 @@ class CVRGeneratorService implements CVRGeneratorServiceInterface
                     $writer->writeElement('Numeric_Year_from_Deal_Date', Carbon::parse($unitSale->created_at)->format('Y')); 
                     $writer->writeElement('Carline_of_Vehicle_Sold', ''); 
                     $writer->writeElement('Tax_Amount', $unitSale->taxTotal());
-                    
-                    
-                    $writer->writeElement('Numeric_Year_from_Deal_Date', Carbon::parse($unitSale->created_at)->format('Y')); 
+                                                          
                     
                     /**
                      * Start Data we don't have
                      */
-                    $writer->writeElement('Carline_of_Vehicle_Sold', ''); 
                     $writer->writeElement('Color_of_Car_Sold', ''); 
                     $writer->writeElement('Color_Code_of_Car_Sold', '');
                     $writer->writeElement('County_Tax_Rate', '');                     
@@ -189,7 +186,8 @@ class CVRGeneratorService implements CVRGeneratorServiceInterface
                     $writer->writeElement('Description_of_Lien', '');     
                     $writer->writeElement('Lienholder_Customer_Number', ''); 
                     $writer->writeElement('Type_of_Lien', '');
-                    $writer->writeElement('Sticker_Price_of_Vehcile', '');
+                    $writer->writeElement('Sticker_Price_of_Vehicle', '');
+                    $writer->writeElement('Temporary_Certificate_Number', '');
                     $writer->writeElement('Local_Tax_Rate', ''); 
                     $writer->writeElement('Local_Tax_Amount', '');
                     $writer->writeElement('Luxury_Tax_Amount', ''); 

@@ -8,6 +8,7 @@ use App\Nova\Resources\Dealer\Location;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
@@ -35,7 +36,7 @@ class Collector extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'process_name';
 
     public static $search = [
         'process_name',
@@ -88,7 +89,7 @@ class Collector extends Resource
                     'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
                 ),
             ]),
-            
+
             new Panel('Factory Settings', [
                 Boolean::make('Use Factory Mapping', 'use_factory_mapping')->hideFromIndex()->help(
                     'Whether or not to use the data from FV to populate these units'
@@ -164,6 +165,8 @@ class Collector extends Resource
                     'Enter the locations (as they show in the source file) you would like to skip separated by commas. Example: Grand Rapids, New York City, Miami'
                 ),
             ]),
+
+            HasMany::make('Specifications', 'specifications', CollectorSpecification::class)
         ];
     }
 

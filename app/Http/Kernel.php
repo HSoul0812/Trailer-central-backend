@@ -16,10 +16,13 @@ use App\Http\Middleware\SetUserIdOnRequest;
 use App\Http\Middleware\SetSalesPersonIdOnRequest;
 use App\Http\Middleware\ValidAccessToken;
 use App\Http\Middleware\CRM\Interactions\InteractionValidate;
+use App\Http\Middleware\CRM\Email\TemplateValidate as EmailTemplateValidate;
+use App\Http\Middleware\CRM\Email\BlastValidate as EmailBlastValidate;
+use App\Http\Middleware\CRM\Email\CampaignValidate as EmailCampaignValidate;
 use App\Http\Middleware\CRM\Text\TextValidate;
-use App\Http\Middleware\CRM\Text\TemplateValidate;
-use App\Http\Middleware\CRM\Text\BlastValidate;
-use App\Http\Middleware\CRM\Text\CampaignValidate;
+use App\Http\Middleware\CRM\Text\TemplateValidate as TextTemplateValidate;
+use App\Http\Middleware\CRM\Text\BlastValidate as TextBlastValidate;
+use App\Http\Middleware\CRM\Text\CampaignValidate as TextCampaignValidate;
 use App\Http\Middleware\CRM\User\SalesPersonValidate;
 use App\Http\Middleware\Integration\AuthValidate;
 use App\Http\Middleware\Integration\Facebook\CatalogValidate;
@@ -95,10 +98,13 @@ class Kernel extends HttpKernel
         'setUserIdOnRequest' => SetUserIdOnRequest::class,
         'setSalesPersonIdOnRequest' => SetSalesPersonIdOnRequest::class,
         'interaction.validate' => InteractionValidate::class,
+        'emailbuilder.template.validate' => EmailTemplateValidate::class,
+        'emailbuilder.campaign.validate' => EmailCampaignValidate::class,
+        'emailbuilder.blast.validate' => EmailBlastValidate::class,
         'text.validate' => TextValidate::class,
-        'text.template.validate' => TemplateValidate::class,
-        'text.campaign.validate' => CampaignValidate::class,
-        'text.blast.validate' => BlastValidate::class,
+        'text.template.validate' => TextTemplateValidate::class,
+        'text.campaign.validate' => TextCampaignValidate::class,
+        'text.blast.validate' => TextBlastValidate::class,
         'integration.auth.validate' => AuthValidate::class,
         'facebook.catalog.validate' => CatalogValidate::class,
         'sales-person.validate' => SalesPersonValidate::class,

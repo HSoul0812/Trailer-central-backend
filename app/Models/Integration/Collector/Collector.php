@@ -5,7 +5,10 @@ namespace App\Models\Integration\Collector;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use App\Utilities\JsonApi\Filterable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Collector
@@ -47,8 +50,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $use_factory_mapping
  * @property string $skip_categories
  * @property string $skip_locations
+ * @property string|null $ids_token
+ * @property string|null $ids_default_location
+ * @property string|null $xml_url
+ * @property string|null $zero_msrp
+ *
+ * @property Collection<CollectorSpecification> $specifications
+ * @property User $dealers
+ * @property DealerLocation $dealerLocation
  */
-class Collector extends Model  implements Filterable
+class Collector extends Model implements Filterable
 {
     public const FILE_FORMATS = [
         self::FILE_FORMAT_XML,
@@ -63,7 +74,7 @@ class Collector extends Model  implements Filterable
     public const FILE_FORMAT_CSV = 'csv';
     public const FILE_FORMAT_IDS = 'ids';
     public const FILE_FORMAT_XML_URL = 'xml_url';
-    
+
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
 
@@ -126,14 +137,19 @@ class Collector extends Model  implements Filterable
         'zero_msrp'
     ];
 
-    public function dealers()
+    public function dealers(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 
-    public function dealerLocation()
+    public function dealerLocation(): BelongsTo
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    public function specifications(): HasMany
+    {
+        return $this->hasMany(CollectorSpecification::class);
     }
 
     public function jsonApiFilterableColumns(): ?array

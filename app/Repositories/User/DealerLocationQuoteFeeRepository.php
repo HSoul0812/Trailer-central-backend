@@ -92,4 +92,17 @@ class DealerLocationQuoteFeeRepository implements DealerLocationQuoteFeeReposito
     {
         return $this->getAll(array_merge($extraParams, ['dealer_location_id' => $id]));
     }
+
+    public function create(array $params): DealerLocationQuoteFee
+    {
+        $item = new DealerLocationQuoteFee();
+        $item->fill($params)->save();
+
+        return $item;
+    }
+
+    public function deleteByDealerLocationId(int $dealerLocationId): int
+    {
+        return DealerLocationQuoteFee::where(['dealer_location_id' => $dealerLocationId])->delete();
+    }
 }

@@ -13,17 +13,17 @@ trait MailHelper
      */
     public function setSmtpConfig(SmtpConfig $smtpConfig): void
     {
-        if (!empty($smtpConfig->getHost())) {
+        if (!empty($smtpConfig->host)) {
             $config = [
                 'driver'        => 'smtp',
-                'host'          => $smtpConfig->getHost(),
-                'port'          => $smtpConfig->getPort() ?? '2525',
-                'username'      => $smtpConfig->getUsername(),
-                'password'      => $smtpConfig->getPassword(),
-                'encryption'    => $smtpConfig->getSecurity(),
+                'host'          => $smtpConfig->host,
+                'port'          => $smtpConfig->port ?? '2525',
+                'username'      => $smtpConfig->username,
+                'password'      => $smtpConfig->password,
+                'encryption'    => $smtpConfig->security,
                 'from'          => [
-                    'address'   => $smtpConfig->getUsername(),
-                    'name'      => $smtpConfig->getFromName()
+                    'address'   => $smtpConfig->username,
+                    'name'      => $smtpConfig->fromName
                 ]
             ];
             Config::set('mail', $config);
@@ -51,6 +51,7 @@ trait MailHelper
             Config::set('mail', $config);
         }
     }
+
 
     /**
      * Fix To Config

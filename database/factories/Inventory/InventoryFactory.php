@@ -8,6 +8,7 @@ use App\Models\Inventory\Category;
 use App\Models\Inventory\Manufacturers\Manufacturers;
 use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\Showroom\Showroom;
+use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use Faker\Generator as Faker;
 use Illuminate\Support\Str;

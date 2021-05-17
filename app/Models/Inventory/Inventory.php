@@ -125,6 +125,7 @@ use App\Models\Inventory\Category;
  * @property string $changed_fields_in_dashboard
  *
  * @method static Builder select($columns = ['*'])
+ * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
  */
 class Inventory extends Model
 {
