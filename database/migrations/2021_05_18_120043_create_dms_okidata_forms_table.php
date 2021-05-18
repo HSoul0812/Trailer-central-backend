@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class CreateDmsOkidataFormsTable extends Migration
 {
@@ -33,7 +34,9 @@ class CreateDmsOkidataFormsTable extends Migration
             $table->timestamps();
         });
 
-        DB::table('dms_okidata_forms')->insert(self::OKIDATA_FORM_DR2407);
+        $createdAt = Carbon::now()->setTimezone('UTC')->toDateTimeString();
+        DB::table('dms_okidata_forms')->insert(array_merge(self::OKIDATA_FORM_DR2407,
+                                               ['created_at' => $createdAt, 'updated_at' => $createdAt]));
     }
 
     /**
