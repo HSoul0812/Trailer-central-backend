@@ -6,6 +6,7 @@ use App\Http\Controllers\RestfulController;
 use App\Repositories\Dms\Printer\OkidataRepositoryInterface;
 use App\Http\Requests\Dms\Printer\GetOkidataRequest;
 use App\Http\Requests\Dms\Printer\ShowOkidataRequest;
+use App\Transformers\Dms\Printer\OkidataTransformer;
 use Dingo\Api\Http\Request;
 
 class OkidataController extends RestfulController 
