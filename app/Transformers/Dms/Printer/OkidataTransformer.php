@@ -2,6 +2,7 @@
 
 namespace App\Transformers\Dms\Printer;
 
+use App\Models\CRM\Dms\Printer\Okidata;
 use League\Fractal\TransformerAbstract;
 
 class OkidataTransformer extends TransformerAbstract
