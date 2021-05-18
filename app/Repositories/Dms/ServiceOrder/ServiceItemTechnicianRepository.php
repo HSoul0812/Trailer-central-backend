@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ServiceItemTechnicianRepository extends RepositoryAbstract implements ServiceItemTechnicianRepositoryInterface
 {
     use WithRequestQueryable;
-    
+
     private const STATUS_COMPLETE = 'completed';
     private const STATUS_INCOMPLETE = 'incomplete';
 
@@ -55,7 +55,6 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
      */
     public function serviceReport($params) :array
     {
-        
         $dbParams = [
             'dealerId' => $params['dealer_id'],
             'dealerId2' => $params['dealer_id'],
@@ -83,7 +82,7 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
                 $dbParams["rOrderType{$key}"] = $type;
             }
         }
-        
+
         if (!empty($params['repair_order_status'])) {
             if ($params['repair_order_status'] == self::STATUS_COMPLETE) {
                 $where .= " AND r_order.closed_at IS NOT NULL ";
@@ -97,7 +96,7 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
                     s_technician.act_hrs, s_technician.paid_hrs, s_technician.billed_hrs,
                     r_order.type repair_order_type, r_order.created_at ro_created_at, r_order.closed_at ro_completed_date,
                     s_item.amount paid_retail, r_order.user_defined_id ro_name,
-                    sales.* 
+                    sales.*
             FROM dms_settings_technician technician
             JOIN dms_service_technician AS s_technician ON technician.id = s_technician.dms_settings_technician_id
             JOIN dms_service_item AS s_item ON s_technician.service_item_id = s_item.id

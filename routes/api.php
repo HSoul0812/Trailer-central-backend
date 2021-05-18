@@ -49,7 +49,7 @@ $api->version('v1', function ($route) {
     $route->put('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@create');
     $route->post('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@create')->where('id', '[0-9]+');
     $route->delete('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@destroy')->where('id', '[0-9]+');
-    
+
     /**
      * Part brands
      */
@@ -347,7 +347,7 @@ $api->version('v1', function ($route) {
     $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
     $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
     $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
-    
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
     });
@@ -845,6 +845,7 @@ $api->version('v1', function ($route) {
         $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
         $route->post('reports/custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@customReport');
         $route->post('reports/export-custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@exportCustomReport');
+        $route->get('reports/service-monthly-hours', 'App\Http\Controllers\v1\Dms\ServiceOrder\ReportsController@monthly');
         /*
         |--------------------------------------------------------------------------
         | Parts related
