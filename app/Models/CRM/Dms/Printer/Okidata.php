@@ -2,7 +2,9 @@
 
 namespace App\Models\CRM\Dms\Printer;
 
+use App\Models\Region;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Okidata
@@ -23,4 +25,14 @@ class Okidata extends Model
         'division',
         'website'
     ];
+
+
+    /**
+     * Region
+     * 
+     * @return BelongsTo
+     */
+    public function region(): BelongsTo {
+        return $this->belongsTo(Region::class, 'region_code', 'region');
+    }
 }
