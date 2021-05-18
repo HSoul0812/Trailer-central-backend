@@ -884,8 +884,8 @@ $api->version('v1', function ($route) {
             'prefix' => 'printer/okidata',
             'middleware' => 'printer.okidata.validate'
         ], function ($route) {
-            $route->get('printer/okidata', 'App\Http\Controllers\v1\Dms\Printer\OkidataController@index');
-            $route->get('printer/okidata/{id}', 'App\Http\Controllers\v1\Dms\Printer\OkidataController@show')->where('id', '[0-9]+');
+            $route->get('*', 'App\Http\Controllers\v1\Dms\Printer\OkidataController@index');
+            $route->get('{id}', 'App\Http\Controllers\v1\Dms\Printer\OkidataController@show')->where('id', '[0-9]+');
         });
 
         /*
