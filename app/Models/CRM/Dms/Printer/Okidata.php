@@ -33,6 +33,6 @@ class Okidata extends Model
      * @return BelongsTo
      */
     public function region(): BelongsTo {
-        return $this->belongsTo(Region::class, 'region_code', 'region');
+        return $this->belongsTo(Region::class, 'region', 'region_code');
     }
 }
