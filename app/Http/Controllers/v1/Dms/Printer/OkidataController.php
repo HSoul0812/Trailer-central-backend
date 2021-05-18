@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\v1\Dms\Printer;
 
 use App\Http\Controllers\RestfulController;
-use App\Services\Dms\Printer\OkidataRepositoryInterface;
+use App\Repositories\Dms\Printer\OkidataRepositoryInterface;
 use App\Http\Requests\Dms\Printer\GetOkidataRequest;
 use App\Http\Requests\Dms\Printer\ShowOkidataRequest;
 use Dingo\Api\Http\Request;
