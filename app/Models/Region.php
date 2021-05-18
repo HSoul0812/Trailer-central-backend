@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Image extends Model
+class Region extends Model
 {
     public const TABLE_NAME = 'region';
 
