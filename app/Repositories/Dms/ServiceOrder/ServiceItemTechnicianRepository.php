@@ -64,7 +64,7 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
         $where = 'WHERE technician.dealer_id = :dealerId ';
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
-            $where .= " AND DATE(r_order.closed_at) BETWEEN :fromDate AND :toDate ";
+            $where .= " AND DATE(s_technician.completed_date) BETWEEN :fromDate AND :toDate ";
             $dbParams['fromDate'] = $params['from_date'];
             $dbParams['toDate'] = $params['to_date'];
         }
