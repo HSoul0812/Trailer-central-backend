@@ -2,25 +2,24 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use App\Models\Inventory\InventoryFeatureList;
 
 class AddOneBedroomToFeaturesDisplay extends Migration
 {
+    private const FLOOR_PLANS_ITEM = ", One Bedroom";
+
     /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        DB::statement("UPDATE
-	`inventory_feature_list`
-SET
-	`available_options` = concat(`available_options`, ', One Bedroom')
-WHERE
-	`feature_name` = 'Floor Plans'
-	AND `show_in_only` = 'rv'
-	AND `available_options` NOT LIKE '%, One Bedroom%';");
-
+        InventoryFeatureList::where('feature_name', 'Floor Plans')
+            ->where('show_in_only', 'rv')
+            ->update([
+            'available_options' => DB::raw('CONCAT(`available_options`, "' . self::FLOOR_PLANS_ITEM . '")')
+        ]);
     }
 
     /**
@@ -28,15 +27,12 @@ WHERE
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        DB::statement("UPDATE
-	`inventory_feature_list`
-SET
-	`available_options` = REPLACE(`available_options`, ', One Bedroom', '')
-WHERE
-	`feature_name` = 'Floor Plans'
-	AND `show_in_only` = 'rv'
-	AND `available_options` LIKE '%, One Bedroom%';");
+        InventoryFeatureList::where('feature_name', 'Floor Plans')
+            ->where('show_in_only', 'rv')
+            ->update([
+            'available_options' => DB::raw('REPLACE(`available_options`, "' . self::FLOOR_PLANS_ITEM . '", "")')
+        ]);
     }
 }
