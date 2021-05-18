@@ -13,8 +13,8 @@ class OkidataTransformer extends TransformerAbstract
         return [
             'id' => (int) $okidata->id,
             'name' => $okidata->name,
-            'region' => $okidata->region->region_code,
-            'region_name' => $okidata->region_name,
+            'region' => $okidata->region,
+            'region_name' => $okidata->regionCode->region_name,
             'description' => $okidata->description,
             'department' => $okidata->department,
             'division' => $okidata->division,

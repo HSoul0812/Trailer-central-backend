@@ -28,11 +28,11 @@ class Okidata extends Model
 
 
     /**
-     * Region
+     * Region Code
      * 
      * @return BelongsTo
      */
-    public function region(): BelongsTo {
-        return $this->belongsTo(Region::class, 'region', 'region_code');
+    public function regionCode(): BelongsTo {
+        return $this->belongsTo(Region::class, 'region_code', 'region');
     }
 }
