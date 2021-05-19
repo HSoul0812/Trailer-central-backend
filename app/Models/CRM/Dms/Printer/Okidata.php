@@ -26,6 +26,11 @@ class Okidata extends Model
         'website'
     ];
 
+    public static function getTableName(): string
+    {
+        return self::TABLE_NAME;
+    }
+
 
     /**
      * Region Code
