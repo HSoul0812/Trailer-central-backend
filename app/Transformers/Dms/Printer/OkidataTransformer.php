@@ -10,11 +10,12 @@ class OkidataTransformer extends TransformerAbstract
 
     public function transform(Okidata $okidata)
     {
+        var_dump($okidata->regionCode);
         return [
             'id' => (int) $okidata->id,
             'name' => $okidata->name,
             'region' => $okidata->region,
-            'region_name' => $okidata->regionCode->region_name,
+            'region_name' => $okidata->regionCode->region_name ?? '',
             'description' => $okidata->description,
             'department' => $okidata->department,
             'division' => $okidata->division,

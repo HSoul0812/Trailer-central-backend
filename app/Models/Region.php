@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Region extends Model
 {
@@ -33,6 +34,16 @@ class Region extends Model
         "region_code",
         "region_name"
     ];
+
+
+    /**
+     * Okidata Forms
+     * 
+     * @return HasMany
+     */
+    public function okidata(): HasMany {
+        return $this->hasMany(Region::class, 'region', 'region_code');
+    }
 
 
     /**
