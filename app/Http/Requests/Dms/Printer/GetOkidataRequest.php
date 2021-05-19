@@ -8,10 +8,10 @@ class GetOkidataRequest extends Request
 {
     protected $rules = [
         'name' => 'string',
-        'region' => 'string|max:2',
+        'region' => 'string|min:2',
         'department' => 'string',
         'division' => 'string',
-        'search_term' => 'string',
+        'search_term' => 'string|min:2',
     ];
 
 }

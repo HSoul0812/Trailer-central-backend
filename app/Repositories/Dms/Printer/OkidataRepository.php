@@ -5,6 +5,7 @@ namespace App\Repositories\Dms\Printer;
 use App\Repositories\Dms\Printer\OkidataRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\Printer\Okidata;
+use App\Models\Region;
 
 class OkidataRepository implements OkidataRepositoryInterface {
 
@@ -34,12 +35,12 @@ class OkidataRepository implements OkidataRepositoryInterface {
      * @return Collection<Okidata>
      */
     public function getAll($params) {
-        $query = Okidata::where('id', '>', 0);
+        $query = Okidata::where('id', '>', 0)
+                        ->leftJoin(Region::getTableName(), Okidata::getTableName().'.region', '=', Region::getTableName().'.region_code');
 
         // Search Term
         if(isset($params['search_term'])) {
-            $query->leftJoin(Region::getTableName(), Okidata::getTableName().'.region', '=', Region::getTableName().'.region_code')
-                  ->where(function($query) use($params) {
+            $query = $query->where(function($query) use($params) {
                 $query->where('region', $params['search_term'])
                       ->orWhere('name', 'LIKE', '%' . $params['search_term'] . '%')
                       ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
@@ -56,7 +57,10 @@ class OkidataRepository implements OkidataRepositoryInterface {
 
         // Find By Region
         if(isset($params['region'])) {
-            $query->where('region', $params['region']);
+            $query = $query->where(function($query) use($params) {
+                $query->where('region', $params['region'])
+                      ->orWhere(Region::getTableName() . '.region_name', '=', $params['region']);
+            });
         }
 
         // Find By Department
