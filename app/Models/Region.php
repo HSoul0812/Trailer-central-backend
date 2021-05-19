@@ -42,7 +42,7 @@ class Region extends Model
      * @return HasMany
      */
     public function okidata(): HasMany {
-        return $this->hasMany(Region::class, 'region', 'region_code');
+        return $this->hasMany(Region::class, 'region_code', 'region');
     }
 
 
