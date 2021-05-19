@@ -169,9 +169,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $blast = $this->blasts->get(['id' => $id]);
 
         // Get Sales Person
-        $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
-        if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
+        if(!empty($blast->from_email_address)) {
+            $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
         }
 
         // Create Email Builder Email!
@@ -183,9 +185,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $blast->template->template_id,
             'dealer_id' => $blast->newDealerUser->id,
             'user_id' => $blast->user_id,
-            'sales_person_id' => $salesPerson->id,
+            'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $blast->from_email_address,
-            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
+            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
         // Send Emails and Return Response
@@ -224,9 +226,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $campaign->template->template_id,
             'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
-            'sales_person_id' => $salesPerson->id,
+            'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $campaign->from_email_address,
-            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
+            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
         // Send Emails and Return Response
@@ -354,6 +356,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Return Final Email
+        $this->log->info('Sent Email ' . $config->type . ' #' . $config->id .
+                         ' via ' . $finalEmail->smtpConfig->getAuthConfig() .
+                         ' to: ' . $finalEmail->getTo());
         return $finalEmail;
     }
 
