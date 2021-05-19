@@ -13,9 +13,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Okidata extends Model
 {
+    public const TABLE_NAME = "dms_okidata_forms";
+
     public $timestamps = false;
 
-    protected $table = "dms_okidata_forms";
+    protected $table = self::TABLE_NAME;
 
     protected $fillable = [
         'name',
