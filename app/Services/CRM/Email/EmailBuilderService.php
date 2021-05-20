@@ -339,8 +339,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $config->smtpConfig->setAccessToken($accessToken);
 
             // Send Gmail Email
-            var_dump($parsedEmail->getToEmail());
-            var_dump($parsedEmail->getToName());
+            var_dump($parsedEmail->getFromEmail());
+            var_dump($parsedEmail->getFromName());
             $finalEmail = $this->gmail->send($config->smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
