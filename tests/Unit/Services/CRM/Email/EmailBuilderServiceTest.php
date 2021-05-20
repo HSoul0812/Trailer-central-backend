@@ -1112,6 +1112,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Parsed Email
         $parsed = $this->getEloquentMock(ParsedEmail::class);
         $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $parsed->shouldReceive('getTo')->passthru();
         $config->shouldReceive('getParsedEmail')
                ->with($emailHistory->email_id)
                ->once()
@@ -1168,6 +1169,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Parsed Email
         $parsed = $this->getEloquentMock(ParsedEmail::class);
         $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $parsed->shouldReceive('getTo')->passthru();
         $config->shouldReceive('getParsedEmail')
                ->with($emailHistory->email_id)
                ->once()
@@ -1222,6 +1224,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Parsed Email
         $parsed = $this->getEloquentMock(ParsedEmail::class);
         $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $parsed->shouldReceive('getTo')->passthru();
         $config->shouldReceive('getParsedEmail')
                ->with($emailHistory->email_id)
                ->once()
@@ -1293,6 +1296,7 @@ class EmailBuilderServiceTest extends TestCase
         // Mock Parsed Email
         $parsed = $this->getEloquentMock(ParsedEmail::class);
         $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
+        $parsed->shouldReceive('getTo')->passthru();
         $config->shouldReceive('getParsedEmail')
                ->with($emailHistory->email_id)
                ->once()
