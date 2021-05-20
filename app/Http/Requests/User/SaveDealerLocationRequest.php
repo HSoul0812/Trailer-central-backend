@@ -36,7 +36,7 @@ class SaveDealerLocationRequest extends Request
             'dealer_license_no' => 'nullable|min:0,max:20',
             'federal_id' => 'nullable|min:0,max:50',
             'pac_amount' => 'nullable|numeric',
-            'pac_type' => 'in|percent,amount',
+            'pac_type' => 'in:percent,amount',
             // coordinates
             'coordinates_updated' => 'checkbox|in:0,1',
             'latitude' => 'nullable|numeric|min:-90,max=90',
@@ -57,7 +57,7 @@ class SaveDealerLocationRequest extends Request
             'is_shop_supplies_taxed' => 'checkbox|in:0,1',
             'is_parts_on_service_taxed' => 'checkbox|in:0,1',
             'is_labor_on_service_taxed' => 'checkbox|in:0,1',
-            'tax_calculator_id' => 'required|tax_calculator_valid:' . $this->getDealerId(),
+            'tax_calculator_id' => 'tax_calculator_valid:' . $this->getDealerId(),
             'is_shipping_taxed' => 'checkbox|in:0,1',
             'use_local_tax' => 'checkbox|in:0,1',
             'is_env_fee_taxed' => 'checkbox|in:0,1',
