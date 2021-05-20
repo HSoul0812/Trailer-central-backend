@@ -319,6 +319,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Create Email History Entry
+        var_dump($config->getEmailHistoryParams());
         return $this->emailhistory->create($config->getEmailHistoryParams($interaction->interaction_id ?? 0));
     }
 
