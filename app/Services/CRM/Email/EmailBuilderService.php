@@ -189,6 +189,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'from_email' => $blast->from_email_address ?? $this->getDefaultFromEmail(),
             'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
+        var_dump($this->getDefaultFromEmail());
 
         // Send Emails and Return Response
         try {
