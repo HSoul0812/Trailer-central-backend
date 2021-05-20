@@ -269,11 +269,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
         if(empty($salesPerson->id)) {
             $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
-            $fromEmail = $salesPerson->smtp_email;
         }
         if(empty($salesPerson->id)) {
             throw new FromEmailMissingSmtpConfigException;
         }
+        $fromEmail = $salesPerson->smtp_email;
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
