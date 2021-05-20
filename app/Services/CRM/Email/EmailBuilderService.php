@@ -189,7 +189,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'from_email' => $blast->from_email_address ?? $this->getDefaultFromEmail(),
             'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
-        var_dump($this->getDefaultFromEmail());
 
         // Send Emails and Return Response
         try {
@@ -319,7 +318,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Create Email History Entry
-        var_dump($config->getEmailHistoryParams());
         return $this->emailhistory->create($config->getEmailHistoryParams($interaction->interaction_id ?? 0));
     }
 
@@ -335,7 +333,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $parsedEmail = $config->getParsedEmail($emailId);
 
         // Get SMTP Config
-        if(!empty($config->smtpConfig->isAuthTypeGmail())) {
+        if(!empty($config->isAuthTypeGmail())) {
             // Get Access Token
             $accessToken = $this->refreshAccessToken($config->smtpConfig->accessToken);
             $config->smtpConfig->setAccessToken($accessToken);
@@ -344,7 +342,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $finalEmail = $this->gmail->send($config->smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
-        elseif(!empty($config->smtpConfig->isAuthTypeNtlm())) {
+        elseif(!empty($config->isAuthTypeNtlm())) {
             // Send NTLM Email
             $finalEmail = $this->ntlm->send($config->dealerId, $config->smtpConfig, $parsedEmail);
         }
@@ -360,7 +358,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Return Final Email
         $this->log->info('Sent Email ' . $config->type . ' #' . $config->id .
-                         ' via ' . $config->smtpConfig->getAuthConfig() .
+                         ' via ' . $config->getAuthConfig() .
                          ' to: ' . $finalEmail->getTo());
         return $finalEmail;
     }

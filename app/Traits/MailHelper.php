@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Config;
 trait MailHelper
 {
     /**
-     * @param SmtpConfig $smtpConfig
+     * @param null|SmtpConfig $smtpConfig
      */
-    public function setSmtpConfig(SmtpConfig $smtpConfig): void
+    public function setSmtpConfig(?SmtpConfig $smtpConfig): void
     {
         if (!empty($smtpConfig) && $smtpConfig->host) {
             $config = [

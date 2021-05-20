@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Interactions\DTOs;
 
 use App\Models\CRM\Leads\Lead;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Traits\MailHelper;
 use App\Traits\WithConstructor;
@@ -158,6 +159,46 @@ class BuilderEmail
     {
         // Set To Email
         $this->toEmail = $toEmail;
+    }
+
+
+    /**
+     * Return Auth Configuration Type
+     * 
+     * @return string $this->smtpConfig->authType || SmtpConfig::AUTH_SMTP
+     */
+    public function getAuthConfig(): string
+    {
+        if(!empty($this->smtpConfig)) {
+            return $this->smtpConfig->getAuthConfig();
+        }
+        return SmtpConfig::AUTH_SMTP;
+    }
+
+    /**
+     * Is Auth Type Gmail?
+     * 
+     * @return bool $this->smtpConfig->getAuthType() === SmtpConfig::AUTH_GMAIL || false
+     */
+    public function isAuthTypeGmail(): bool
+    {
+        if(!empty($this->smtpConfig)) {
+            return $this->smtpConfig->isAuthTypeGmail();
+        }
+        return false;
+    }
+
+    /**
+     * Is Auth Type NTLM?
+     * 
+     * @return bool $this->smtpConfig->getAuthType() === SmtpConfig::AUTH_NTLM || false
+     */
+    public function isAuthTypeNtlm(): bool
+    {
+        if(!empty($this->smtpConfig)) {
+            return $this->smtpConfig->isAuthTypeNtlm();
+        }
+        return false;
     }
 
 
