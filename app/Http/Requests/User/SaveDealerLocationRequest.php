@@ -37,6 +37,7 @@ class SaveDealerLocationRequest extends Request
             'federal_id' => 'nullable|min:0,max:50',
             'pac_amount' => 'nullable|numeric',
             'pac_type' => 'in|percent,amount',
+            'location_id' => 'nullable|string|max:255',
             // coordinates
             'coordinates_updated' => 'checkbox|in:0,1',
             'latitude' => 'nullable|numeric|min:-90,max=90',
