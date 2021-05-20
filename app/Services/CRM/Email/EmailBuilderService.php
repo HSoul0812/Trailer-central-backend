@@ -186,7 +186,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $blast->newDealerUser->id,
             'user_id' => $blast->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $blast->from_email_address ?? $this->getDefaultFromEmail(),
+            'from_email' => !empty($blast->from_email_address) ? $blast->from_email_address : $this->getDefaultFromEmail(),
             'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
@@ -229,7 +229,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $campaign->from_email_address ?? $this->getDefaultFromEmail(),
+            'from_email' => !empty($campaign->from_email_address) ? $campaign->from_email_address : $this->getDefaultFromEmail(),
             'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
