@@ -52,6 +52,15 @@ trait MailHelper
         }
     }
 
+    /**
+     * Get Default From Email
+     * 
+     * @return string
+     */
+    public function getDefaultFromEmail(): string {
+        return config('mail.from.address', 'noreply@trailercentral.com');
+    }
+
 
     /**
      * Fix To Config

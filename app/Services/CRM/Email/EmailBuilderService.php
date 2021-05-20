@@ -186,7 +186,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $blast->newDealerUser->id,
             'user_id' => $blast->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $blast->from_email_address,
+            'from_email' => $blast->from_email_address ?? $this->getDefaultFromEmail(),
             'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
@@ -227,7 +227,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $campaign->from_email_address,
+            'from_email' => $campaign->from_email_address ?? $this->getDefaultFromEmail(),
             'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
@@ -267,6 +267,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
         if(empty($salesPerson->id)) {
             $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+            $fromEmail = $salesPerson->smtp_email;
         }
         if(empty($salesPerson->id)) {
             throw new FromEmailMissingSmtpConfigException;
@@ -282,7 +283,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
             'sales_person_id' => $salesPerson->id,
-            'from_email' => !empty($fromEmail) ? $fromEmail : $salesPerson->smtp_email,
+            'from_email' => !empty($fromEmail) ? $fromEmail : $this->getDefaultFromEmail(),
             'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
 
@@ -443,7 +444,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
                 // Send Notice
                 $sentLeads->push($leadId);
-                $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
+                $this->log->info('Sent Email ' . $builder->type . ' #' .
+                        $builder->id . ' to Lead with ID: ' . $leadId);
             } catch(\Exception $ex) {
                 $this->log->error($ex->getMessage(), $ex->getTrace());
                 $errorLeads->push($leadId);
@@ -478,7 +480,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->dispatch($job->onQueue('mails'));
 
             // Send Notice
-            $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email: ' . $toEmail);
+            $this->log->info('Sent Email ' . $builder->type . ' #' .
+                    $builder->id . ' to Email: ' . $toEmail);
 
             // Return Response Array
             $sent = new Collection();
@@ -501,11 +504,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     private function response(BuilderEmail $builder, ?Collection $sent = null, ?Collection $errors = null): array {
         // Handle Logging
         if($sent !== null) {
-            $this->log->info('Queued ' . $sent->count() . ' Email ' . $builder->type .
-                    '(s) for Dealer #' . $builder->userId);
+            $this->log->info('Queued ' . $sent->count() . ' Email ' .
+                    $builder->type . '(s) for Dealer #' . $builder->userId);
         }
         if($errors !== null && $errors->count() > 0) {
-            $this->log->info('Errors Occurring Trying to Queue ' . $errors->count() . ' Email ' . $builder->type .
+            $this->log->info('Errors Occurring Trying to Queue ' .
+                    $errors->count() . ' Email ' . $builder->type .
                     '(s) for Dealer #' . $builder->userId);
         }
 
