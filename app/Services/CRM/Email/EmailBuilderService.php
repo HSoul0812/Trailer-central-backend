@@ -212,9 +212,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $campaign = $this->campaigns->get(['id' => $id]);
 
         // Get Sales Person
-        $salesPerson = $this->salespeople->getBySmtpEmail($campaign->user_id, $campaign->from_email_address);
-        if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
+        if(!empty($campaign->from_email_address)) {
+            $salesPerson = $this->salespeople->getBySmtpEmail($campaign->user_id, $campaign->from_email_address);
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
         }
 
         // Create Email Builder Email!
@@ -339,8 +341,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $config->smtpConfig->setAccessToken($accessToken);
 
             // Send Gmail Email
-            var_dump($parsedEmail->getFromEmail());
-            var_dump($parsedEmail->getFromName());
             $finalEmail = $this->gmail->send($config->smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
