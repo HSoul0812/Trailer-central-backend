@@ -17,9 +17,9 @@ class RestfulControllerV2 extends Controller
     use Helpers;
 
     /**
-     * @return \Dingo\Api\Http\Response
+     * @return Response
      */
-    protected function successResponse()
+    protected function successResponse(): Response
     {
         return $this->response->array([
             'response' => ['status' => 'success']
@@ -31,6 +31,23 @@ class RestfulControllerV2 extends Controller
      * @return Response
      */
     protected function updatedResponse($id = null): Response
+    {
+        $params = [
+            'response' => ['status' => 'success']
+        ];
+
+        if ($id) {
+            $params['response']['data'] = ['id' => $id];
+        }
+
+        return $this->response->array($params);
+    }
+
+    /**
+     * @param mixed $id
+     * @return Response
+     */
+    protected function createdResponse($id = null): Response
     {
         $params = [
             'response' => ['status' => 'success']

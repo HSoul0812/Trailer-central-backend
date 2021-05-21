@@ -25,11 +25,11 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
 
     // Get Entity/Category
     $entityType = EntityType::where('entity_type_id', '<>', 2)->inRandomOrder()->first();
-    $category = Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first();
+    $category = $attributes['category'] ?? Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first();
 
     // Get Showroom Model
-    $mfg = Manufacturers::inRandomOrder()->first();
-    $brand = Brand::where('manufacturer_id', $mfg->id)->inRandomOrder()->first();
+    $mfg = $attributes['manufacturer'] ?? Manufacturers::inRandomOrder()->first();
+    $brand = $attributes['brand'] ?? Brand::where('manufacturer_id', $mfg->id)->inRandomOrder()->first();
     $showroom = Showroom::where('manufacturer', $mfg->name)->inRandomOrder()->first();
 
     // Get Prices

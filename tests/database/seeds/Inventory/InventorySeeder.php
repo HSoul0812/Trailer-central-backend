@@ -26,6 +26,7 @@ use Tests\database\seeds\Seeder;
  * @property-read InventoryMfg $inventoryMfg
  * @property-read Brand $brand
  * @property-read Category $category
+ * @property-read Inventory|null $inventory
  */
 class InventorySeeder extends Seeder
 {
@@ -83,10 +84,21 @@ class InventorySeeder extends Seeder
      */
     private $permissions;
 
-    public function __construct(string $userType = AuthToken::USER_TYPE_DEALER, array $permissions = [])
+    /**
+     * @var boolean
+     */
+    private $withInventory;
+
+    /**
+     * @var Inventory|null
+     */
+    private $inventory;
+
+    public function __construct(array $params = [])
     {
-        $this->userType = $userType;
-        $this->permissions = $permissions;
+        $this->userType = $params['userType'] ?? AuthToken::USER_TYPE_DEALER;
+        $this->permissions = $params['permissions'] ?? [];
+        $this->withInventory = $params['withInventory'] ?? false;
     }
 
     public function seed(): void
@@ -124,6 +136,18 @@ class InventorySeeder extends Seeder
         $this->inventoryMfg = factory(InventoryMfg::class)->create();
         $this->brand = factory(Brand::class)->create();
         $this->category = factory(Category::class)->create();
+
+        if ($this->withInventory) {
+            $inventoryParams = [
+                'dealer_id' => $this->dealer->dealer_id,
+                'dealer_location_id' => $this->dealerLocation->dealer_location_id,
+                'manufacturer' => $this->inventoryMfg,
+                'brand' => $this->brand,
+                'category' => $this->category,
+            ];
+
+            $this->inventory = factory(Inventory::class)->create($inventoryParams);
+        }
     }
 
     public function cleanUp(): void
