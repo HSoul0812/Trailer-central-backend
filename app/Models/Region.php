@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\CRM\Dms\Printer\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -37,12 +38,12 @@ class Region extends Model
 
 
     /**
-     * Okidata Forms
+     * Printer Forms
      * 
      * @return HasMany
      */
-    public function okidata(): HasMany {
-        return $this->hasMany(Region::class, 'region_code', 'region');
+    public function printerForms(): HasMany {
+        return $this->hasMany(Form::class, 'region_code', 'region');
     }
 
 

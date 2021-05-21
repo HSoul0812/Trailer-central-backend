@@ -24,7 +24,7 @@ use App\Http\Middleware\CRM\Text\TemplateValidate as TextTemplateValidate;
 use App\Http\Middleware\CRM\Text\BlastValidate as TextBlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate as TextCampaignValidate;
 use App\Http\Middleware\CRM\User\SalesPersonValidate;
-use App\Http\Middleware\Dms\Printer\OkidataValidate;
+use App\Http\Middleware\Dms\Printer\FormValidate as PrinterFormValidate;
 use App\Http\Middleware\Integration\AuthValidate;
 use App\Http\Middleware\Integration\Facebook\CatalogValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
@@ -110,7 +110,7 @@ class Kernel extends HttpKernel
         'facebook.catalog.validate' => CatalogValidate::class,
         'sales-person.validate' => SalesPersonValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
-        'printer.okidata.validate' => OkidataValidate::class,
+        'printer.form.validate' => PrinterFormValidate::class,
         'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
     ];
 

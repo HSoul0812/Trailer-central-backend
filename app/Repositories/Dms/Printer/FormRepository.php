@@ -2,12 +2,12 @@
 
 namespace App\Repositories\Dms\Printer;
 
-use App\Repositories\Dms\Printer\OkidataRepositoryInterface;
+use App\Repositories\Dms\Printer\FormRepositoryInterface;
 use App\Exceptions\NotImplementedException;
-use App\Models\CRM\Dms\Printer\Okidata;
+use App\Models\CRM\Dms\Printer\Form;
 use App\Models\Region;
 
-class OkidataRepository implements OkidataRepositoryInterface {
+class FormRepository implements FormRepositoryInterface {
 
     public function create($params) {
         throw new NotImplementedException;
@@ -18,25 +18,25 @@ class OkidataRepository implements OkidataRepositoryInterface {
     }
 
     /**
-     * Get Okidata Form
+     * Get Form Form
      * 
      * @param array{id: int} $params
-     * @throws \Exception when Okidata form does not exist
-     * @return Okidata
+     * @throws \Exception when Form form does not exist
+     * @return Form
      */
     public function get($params) {
-        return Okidata::findOrFail($params['id']);
+        return Form::findOrFail($params['id']);
     }
 
     /**
-     * Get All Okidata Forms With Filters
+     * Get All Form Forms With Filters
      * 
      * @param array $params
-     * @return Collection<Okidata>
+     * @return Collection<Form>
      */
     public function getAll($params) {
-        $query = Okidata::where('id', '>', 0)
-                        ->leftJoin(Region::getTableName(), Okidata::getTableName().'.region', '=', Region::getTableName().'.region_code');
+        $query = Form::where('id', '>', 0)
+                        ->leftJoin(Region::getTableName(), Form::getTableName().'.region', '=', Region::getTableName().'.region_code');
 
         // Search Term
         if(isset($params['search_term'])) {

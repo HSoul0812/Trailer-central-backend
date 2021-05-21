@@ -7,13 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Class Okidata
+ * Class Form
  * 
  * @package App\Models\CRM\Dms\Printer
  */
-class Okidata extends Model
+class Form extends Model
 {
-    public const TABLE_NAME = "dms_okidata_forms";
+    const PRINTER_FORM_TYPES = [
+        'ZPL'
+    ];
+
+    public const TABLE_NAME = "dms_printer_forms";
 
     public $timestamps = false;
 
@@ -21,6 +25,7 @@ class Okidata extends Model
 
     protected $fillable = [
         'name',
+        'type',
         'region',
         'description',
         'department',

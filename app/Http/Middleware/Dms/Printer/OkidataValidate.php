@@ -3,28 +3,28 @@
 namespace App\Http\Middleware\Dms\Printer;
 
 use App\Http\Middleware\ValidRoute;
-use App\Models\CRM\Dms\Printer\Okidata;
+use App\Models\CRM\Dms\Printer\Form;
 
-class OkidataValidate extends ValidRoute {
+class FormValidate extends ValidRoute {
 
     const ID_PARAM = 'id';
     protected $params = [
         self::ID_PARAM => [
             'optional' => true,
-            'message' => 'Okidata Form does not exist.'
+            'message' => 'Printer Form does not exist.'
         ]
     ];
-    
+
     protected $appendParams = [
         self::ID_PARAM => self::ID_PARAM
     ];
-       
+
     protected $validator = [];
     
     public function __construct() {
         $this->validator[self::ID_PARAM] = function ($data) {
-            $okidata = Okidata::find($data);
-            return !empty($okidata->id);
+            $form = Form::find($data);
+            return !empty($form->id);
         };
     }
 }

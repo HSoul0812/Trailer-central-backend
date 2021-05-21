@@ -1,14 +1,16 @@
 <?php
 
+use App\Models\CRM\Dms\Printer\Form;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
-class CreateDmsOkidataFormsTable extends Migration
+class CreateDmsPrinterFormsTable extends Migration
 {
-    const OKIDATA_FORM_DR2407 = [
+    const PRINTER_FORM_DR2407 = [
         'name' => 'DR2407',
+        'type' => 'ZPL',
         'region' => 'CO',
         'description' => 'Dealer\'s Bill of Sales for a Motor Vehicle',
         'department' => 'Department of Revenue',
@@ -23,9 +25,10 @@ class CreateDmsOkidataFormsTable extends Migration
      */
     public function up()
     {
-        Schema::create('dms_okidata_forms', function (Blueprint $table) {
+        Schema::create('dms_printer_forms', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name', 25)->unique();
+            $table->string('name', 25)->index();
+            $table->enum('type', Form::PRINTER_FORM_TYPES)->index();
             $table->string('region', 3)->index();
             $table->string('description', 255)->comment('Title of the Form');
             $table->string('department', 255);
@@ -35,7 +38,7 @@ class CreateDmsOkidataFormsTable extends Migration
         });
 
         $createdAt = Carbon::now()->setTimezone('UTC')->toDateTimeString();
-        DB::table('dms_okidata_forms')->insert(array_merge(self::OKIDATA_FORM_DR2407,
+        DB::table('dms_printer_forms')->insert(array_merge(self::PRINTER_FORM_DR2407,
                                                ['created_at' => $createdAt, 'updated_at' => $createdAt]));
     }
 
@@ -46,6 +49,6 @@ class CreateDmsOkidataFormsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dms_okidata_forms');
+        Schema::dropIfExists('dms_printer_forms');
     }
 }

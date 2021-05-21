@@ -4,5 +4,5 @@ namespace App\Repositories\Dms\Printer;
 
 use App\Repositories\Repository;
 
-interface OkidataRepositoryInterface extends Repository {
+interface FormRepositoryInterface extends Repository {
 }

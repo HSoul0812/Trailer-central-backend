@@ -870,22 +870,13 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('printer/instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Okidata Printer
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
         $route->group([
-            'prefix' => 'printer/okidata',
-            'middleware' => 'printer.okidata.validate'
+            'prefix' => 'printer',
+            'middleware' => 'printer.form.validate'
         ], function ($route) {
-            $route->get('/', 'App\Http\Controllers\v1\Dms\Printer\OkidataController@index');
-            $route->get('{id}', 'App\Http\Controllers\v1\Dms\Printer\OkidataController@show')->where('id', '[0-9]+');
+            $route->get('instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+            $route->get('forms', 'App\Http\Controllers\v1\Dms\Printer\FormController@index');
+            $route->get('forms/{id}', 'App\Http\Controllers\v1\Dms\Printer\FormController@show')->where('id', '[0-9]+');
         });
 
         /*

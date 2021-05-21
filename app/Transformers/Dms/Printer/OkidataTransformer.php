@@ -2,25 +2,26 @@
 
 namespace App\Transformers\Dms\Printer;
 
-use App\Models\CRM\Dms\Printer\Okidata;
+use App\Models\CRM\Dms\Printer\Form;
 use League\Fractal\TransformerAbstract;
 
-class OkidataTransformer extends TransformerAbstract
+class FormTransformer extends TransformerAbstract
 {
 
-    public function transform(Okidata $okidata)
+    public function transform(Form $form)
     {
         return [
-            'id' => (int) $okidata->id,
-            'name' => $okidata->name,
-            'region' => $okidata->region,
-            'region_name' => $okidata->regionCode->region_name ?? '',
-            'description' => $okidata->description,
-            'department' => $okidata->department,
-            'division' => $okidata->division,
-            'website' => $okidata->website,
-            'created_at' => $okidata->created_at,
-            'updated_at' => $okidata->updated_at
+            'id' => (int) $form->id,
+            'name' => $form->name,
+            'type' => $form->type,
+            'region' => $form->region,
+            'region_name' => $form->regionCode->region_name ?? '',
+            'description' => $form->description,
+            'department' => $form->department,
+            'division' => $form->division,
+            'website' => $form->website,
+            'created_at' => $form->created_at,
+            'updated_at' => $form->updated_at
         ];
     }
 }

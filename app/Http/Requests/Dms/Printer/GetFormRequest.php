@@ -4,7 +4,7 @@ namespace App\Http\Requests\Dms\Printer;
 
 use App\Http\Requests\Request;
 
-class GetOkidataRequest extends Request
+class GetFormRequest extends Request
 {
     protected $rules = [
         'name' => 'string',
