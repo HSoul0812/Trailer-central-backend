@@ -871,12 +871,26 @@ $api->version('v1', function ($route) {
         |
         */
         $route->group([
-            'prefix' => 'printer',
-            'middleware' => 'printer.form.validate'
+            'prefix' => 'printer'
         ], function ($route) {
-            $route->get('instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
-            $route->get('forms', 'App\Http\Controllers\v1\Dms\Printer\FormController@index');
-            $route->get('forms/{id}', 'App\Http\Controllers\v1\Dms\Printer\FormController@show')->where('id', '[0-9]+');
+            // Get Forms
+            $route->group([
+                'prefix' => 'forms',
+                'middleware' => 'printer.form.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Dms\Printer\FormController@index');
+                $route->get('{id}', 'App\Http\Controllers\v1\Dms\Printer\FormController@show')->where('id', '[0-9]+');
+            });
+
+            // Get Instructions
+            $route->group([
+                'prefix' => 'instruction',
+                'middleware' => 'printer.instruction.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+                $route->get('{id}', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@show')->where('id', '[0-9]+');
+                $route->put('{id}', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@create')->where('id', '[0-9]+');
+            });
         });
 
         /*
