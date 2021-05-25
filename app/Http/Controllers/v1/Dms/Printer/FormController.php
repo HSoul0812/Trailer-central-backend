@@ -6,6 +6,7 @@ use App\Http\Controllers\RestfulController;
 use App\Repositories\Dms\Printer\FormRepositoryInterface;
 use App\Http\Requests\Dms\Printer\GetFormRequest;
 use App\Http\Requests\Dms\Printer\ShowFormRequest;
+use App\Http\Requests\Dms\Printer\InstructionFormRequest;
 use App\Services\Dms\Printer\FormServiceInterface;
 use App\Transformers\Dms\Printer\FormTransformer;
 use Dingo\Api\Http\Request;
