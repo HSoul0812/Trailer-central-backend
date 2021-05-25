@@ -28,7 +28,7 @@ class Instructions extends Model
     {
         return self::TABLE_NAME;
     }
-    
+
     /**
      * Get Form
      *
