@@ -19,11 +19,14 @@ class FormController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param  App\Services\Dms\Printer\FormRepositoryInterface $repository
+     * @param  App\Repositories\Dms\Printer\FormRepositoryInterface $repository
+     * @param  App\Services\Dms\Printer\FormServiceInterface $service
      */
-    public function __construct(FormRepositoryInterface $repository)
+    public function __construct(FormRepositoryInterface $repository, FormServiceInterface $service)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['instruction']);
         $this->repository = $repository;
+        $this->service = $service;
     }
     
     public function index(Request $request) 
@@ -43,6 +46,19 @@ class FormController extends RestfulController
         
         if ($request->validate()) {
             return $this->response->item($this->repository->get(['id' => $id]), new FormTransformer());
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+    
+    public function instruction(int $id, Request $request)
+    {
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new InstructionFormRequest($requestData);
+        
+        if ($request->validate()) {
+            return $this->response->array($this->service->getFormInstruction($request->dealer_id, $id, $requestData));
         }
         
         return $this->response->errorBadRequest();

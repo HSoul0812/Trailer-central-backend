@@ -873,6 +873,9 @@ $api->version('v1', function ($route) {
         $route->group([
             'prefix' => 'printer'
         ], function ($route) {
+            // Get Preset Instructions
+            $route->get('instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+
             // Get Forms
             $route->group([
                 'prefix' => 'forms',
@@ -880,16 +883,7 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\Dms\Printer\FormController@index');
                 $route->get('{id}', 'App\Http\Controllers\v1\Dms\Printer\FormController@show')->where('id', '[0-9]+');
-            });
-
-            // Get Instructions
-            $route->group([
-                'prefix' => 'instruction',
-                'middleware' => 'printer.instruction.validate'
-            ], function ($route) {
-                $route->get('/', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
-                $route->get('{id}', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@show')->where('id', '[0-9]+');
-                $route->put('{id}', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@create')->where('id', '[0-9]+');
+                $route->put('{id}/instruction', 'App\Http\Controllers\v1\Dms\Printer\FormController@instruction')->where('id', '[0-9]+');
             });
         });
 
