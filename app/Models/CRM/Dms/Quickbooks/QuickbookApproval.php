@@ -5,6 +5,7 @@ namespace App\Models\CRM\Dms\Quickbooks;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class QuickbookApproval
@@ -27,10 +28,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 class QuickbookApproval extends Model
 {
+    use SoftDeletes;
+
     // Statuses of Quickbook Approvals
     const TO_SEND = 'to_send';
     const SENT = 'sent';
     const FAILED = 'failed';
+    const REMOVED = 'removed';
 
     const TABLE_NAME_MAPPER = [
         'qb_accounts' => 'Account',

@@ -138,7 +138,13 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
 
     public function delete($params)
     {
-        QuickbookApproval::where($params)->delete();
+        $quickBookApproval = QuickbookApproval::find($params['id']);
+        $quickBookApproval->update([
+            'removed_by' => $params['user']
+        ]);
+        $quickBookApproval->delete();
+
+        return $quickBookApproval;
     }
 
     public function get($params) {
@@ -156,21 +162,27 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
                 case QuickbookApproval::TO_SEND:
                     $query = $query->where([
                         ['send_to_quickbook', '=', 0],
-                        ['is_approved', '=', 0]
+                        ['is_approved', '=', 0],
+                        ['deleted_at', '=', null]
                     ]);
                     break;
                 case QuickbookApproval::SENT:
                     $query = $query->where([
                         ['send_to_quickbook', '=', 1],
-                        ['is_approved', '=', 1]
+                        ['is_approved', '=', 1],
+                        ['deleted_at', '=', null]
                     ]);
                     break;
                 case QuickbookApproval::FAILED:
                     $query = $query->where([
                         ['send_to_quickbook', '=', 1],
-                        ['is_approved', '=', 0]
+                        ['is_approved', '=', 0],
+                        ['deleted_at', '=', null]
                     ]);
                     $query = $query->whereNotNull('error_result');
+                    break;
+                case QuickbookApproval::REMOVED:
+                    $query = $query->whereNotNull(['deleted_at']);
                     break;
             }
         }
@@ -205,6 +217,11 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
                 }
             });
         }
+
+        if ($params['status'] === QuickbookApproval::REMOVED) {
+            $query->withTrashed();
+        }
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
@@ -218,7 +235,20 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
     }
 
     public function update($params) {
-        throw new NotImplementedException;
+        $qbApproval = QuickbookApproval::withTrashed()->find($params['id']);
+
+        if (isset($params['status'])) {
+            switch ($params['status']) {
+                case QuickbookApproval::TO_SEND:
+                    $qbApproval->update([
+                        'deleted_at' => null,
+                        'removed_by' => '',
+                    ]);
+                    break;
+            }
+        }
+
+        return $qbApproval;
     }
 
     public function getPoInvoiceApprovals($dealerId) {
