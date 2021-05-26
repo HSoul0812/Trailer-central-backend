@@ -27,10 +27,10 @@ class FormService implements FormServiceInterface
     public function getFormInstruction(int $dealerId, int $formId, array $params): array
     {
         return [
-            '\x1B' . '\x31',
-            '\x1B' . '\x30',
-            '\x1B' . '\x6C' . '40',
-            '\x1B' . '\x51' . '90',
+            '\x1B \x31',
+            '\x1B \x30',
+            '\x1B \x6C 40',
+            '\x1B \x51 90',
             'This is a Test Print Wow!' . '\x0A',
         ];
     }
