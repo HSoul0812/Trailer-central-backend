@@ -27,13 +27,13 @@ class FormService implements FormServiceInterface
     public function getFormInstruction(int $dealerId, int $formId, array $params): array
     {
         return [
-            chr('27') . ' ' . chr('64'),
-            chr('27') . ' ' . chr('48'),
-            chr('27') . ' ' . chr('108') . ' 40',
-            chr('27') . ' ' . chr('81') . ' 100',
-            'This is a Test Print Wow!' . chr('13') . chr('10'),
-            chr('12'),
-            chr('27') . ' ' . chr('64')
+            '27 64',
+            '27 48',
+            '27 108 40',
+            '27 81 100',
+            '68 65 86 73 68 13 10',
+            '12',
+            '27 64'
         ];
     }
 }
