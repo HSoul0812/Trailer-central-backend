@@ -28,11 +28,11 @@ class FormService implements FormServiceInterface
     {
         return [
             ['type' => 'raw', 'options' => ['language' => 'ESCPOS', 'dotDensity' => 'double' ]],
-            '\x1B' + '\x31',
-            '\x1B' + '\x30',
-            '\x1B' + '\x6C' + '40',
-            '\x1B' + '\x51' + '90',
-            'This is a Test Print Wow!' + '\x0A',
+            '\x1B' . '\x31',
+            '\x1B' . '\x30',
+            '\x1B' . '\x6C' . '40',
+            '\x1B' . '\x51' . '90',
+            'This is a Test Print Wow!' . '\x0A',
         ];
     }
 }
