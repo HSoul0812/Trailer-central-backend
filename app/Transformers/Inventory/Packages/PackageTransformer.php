@@ -17,12 +17,20 @@ class PackageTransformer extends TransformerAbstract
      */
     public function transform(Package $package): array
     {
+        $inventories = [];
+
+        foreach ($package->inventories as $inventory) {
+            $inventories[] = [
+                'inventory_id' => $inventory->inventory_id,
+                'title' => $inventory->title,
+                'is_main_item' => $inventory->pivot->is_main_item,
+            ];
+        }
+
         return [
             'id' => $package->id,
             'visible_with_main_item' => $package->visible_with_main_item,
-            'inventories' => $package->packagesInventory->map(function ($item, $key) {
-                return $item->only(['inventory_id', 'is_main_item']);
-            }),
+            'inventories' => $inventories,
         ];
     }
 }

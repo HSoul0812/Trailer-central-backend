@@ -4,6 +4,7 @@ namespace App\Repositories\Inventory\Packages;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\Inventory\Packages\Package;
+use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -13,7 +14,26 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
  */
 class PackageRepository implements PackageRepositoryInterface
 {
-    use Transaction;
+    use Transaction, SortTrait;
+
+    private $sortOrders = [
+        'id' => [
+            'field' => 'id',
+            'direction' => 'DESC'
+        ],
+        '-id' => [
+            'field' => 'id',
+            'direction' => 'ASC'
+        ],
+        'visible_with_main_item' => [
+            'field' => 'visible_with_main_item',
+            'direction' => 'DESC'
+        ],
+        '-visible_with_main_item' => [
+            'field' => 'visible_with_main_item',
+            'direction' => 'ASC'
+        ],
+    ];
 
     /**
      * @param $params
@@ -127,6 +147,18 @@ class PackageRepository implements PackageRepositoryInterface
             $params['per_page'] = 15;
         }
 
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getSortOrders(): array
+    {
+        return $this->sortOrders;
     }
 }

@@ -39,6 +39,7 @@ class Package extends Model
     public function inventories(): BelongsToMany
     {
         return $this->belongsToMany(Inventory::class, 'packages_inventory', 'package_id', 'inventory_id')
+            ->withPivot('is_main_item')
             ->using(PackageInventory::class);
     }
 
