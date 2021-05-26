@@ -70,6 +70,7 @@ class PaymentController extends RestfulControllerV2
      *         response="422",
      *         description="Error: Bad request.",
      *     ),
+     * )
      */
     public function show($id, Request $request)
     {

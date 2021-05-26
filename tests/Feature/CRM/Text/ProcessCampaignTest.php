@@ -801,7 +801,7 @@ class ProcessCampaignTest extends TestCase
         $campaign = Campaign::find($campaignId);
 
         // Get Website ID
-        $dealer = User::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
         $websiteId = $dealer->website->id;
 
         // Loop Leads

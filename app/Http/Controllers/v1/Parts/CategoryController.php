@@ -85,7 +85,7 @@ class CategoryController extends RestfulController
      *     ),
      *     @OA\Response(
      *         response="500",
-     *         description='Parameter "id" is required',
+     *         description="Parameter id is required",
      *     ),
      * )
      *

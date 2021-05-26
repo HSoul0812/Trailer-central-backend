@@ -47,7 +47,7 @@ class CampaignController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -152,7 +152,7 @@ class CampaignController extends RestfulControllerV2
     }
     
     /**
-     * @OA\Text(
+     * @OA\Post(
      *     path="/api/crm/{userId}/texts/campaign/{id}",
      *     description="Update a campaign",
      * 
@@ -236,7 +236,7 @@ class CampaignController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Sent(
+     * @OA\Post(
      *     path="/api/crm/{userId}/texts/campaign/{id}/sent",
      *     description="Mark campaign and sent to lead",
      *     tags={"Text"},

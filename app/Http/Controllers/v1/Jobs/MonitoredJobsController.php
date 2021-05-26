@@ -90,6 +90,11 @@ class MonitoredJobsController extends RestfulController
      *         name="token",
      *         in="path",
      *         required=true
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
      *     )
      * )
      */
@@ -138,6 +143,11 @@ class MonitoredJobsController extends RestfulController
      *         in="query",
      *         description="The job token",
      *         required=true
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
      *     )
      * )
      */

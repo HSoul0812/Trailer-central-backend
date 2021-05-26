@@ -55,7 +55,7 @@ class PartsController extends RestfulController
     }
 
     /**
-     * @OA\Put(
+     * @OA\Post(
      *     path="/api/parts/",
      *     description="Create a part",
      *     tags={"Parts"},
@@ -103,7 +103,7 @@ class PartsController extends RestfulController
      *     ),
      *   @OA\Parameter(
      *         name="category_id",
-     *         in="path",
+     *         in="query",
      *         description="Part category",
      *         required=true,
      *         @OA\Schema(type="integer")
@@ -466,7 +466,7 @@ class PartsController extends RestfulController
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
-     *         in="query",
+     *         in="path",
      *         description="Part ID",
      *         required=true,
      *         @OA\Schema(type="integer")
@@ -493,14 +493,14 @@ class PartsController extends RestfulController
     }
 
     /**
-     * @OA\Post(
+     * @OA\Put(
      *     path="/api/parts/{id}",
      *     description="Update a part",
 
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
-     *         in="query",
+     *         in="path",
      *         description="Part ID",
      *         required=true,
      *         @OA\Schema(type="integer")

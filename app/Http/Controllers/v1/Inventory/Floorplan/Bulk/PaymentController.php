@@ -32,14 +32,14 @@ class PaymentController extends RestfulController
     /**
      * @OA\Put(
      *     path="/api/inventory/floorplan/bulk/payments",
-     *     description="Create a floorplan payment
+     *     description="Create a floorplan payment",
      *     tags={"Floorplan Payments"},
      *     @OA\Parameter(
      *         name="inventory_id",
      *         in="query",
      *         description="Inventory ID",
      *         required=true,
-     *         @OA\Schema(@OA\Schema(type="integer"))
+     *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="type",

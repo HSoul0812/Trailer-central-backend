@@ -32,7 +32,7 @@ class SettingsController extends RestfulControllerV2
     }
     
     /**
-     * @OA\Text(
+     * @OA\Get(
      *     path="/api/user/settings",
      *     description="Get Dealer Admin Settings",
      * 
@@ -67,7 +67,7 @@ class SettingsController extends RestfulControllerV2
     }
     
     /**
-     * @OA\Text(
+     * @OA\Put(
      *     path="/api/user/settings",
      *     description="Update Dealer Admin Settings",
      * 

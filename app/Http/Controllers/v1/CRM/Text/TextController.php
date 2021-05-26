@@ -46,7 +46,7 @@ class TextController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -151,7 +151,7 @@ class TextController extends RestfulControllerV2
     }
     
     /**
-     * @OA\Text(
+     * @OA\Put(
      *     path="/api/leads/{leadId}/texts/{id}",
      *     description="Update a text",
      * 
@@ -243,6 +243,7 @@ class TextController extends RestfulControllerV2
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
+     *             mediaType="application/json",
      *             @OA\Schema(
      *                 @OA\Property(
      *                     property="user_id",

@@ -59,6 +59,6 @@ class AddHammertimesIntegration extends Migration
     public function down()
     {
         DB::table('integration_dealer')->delete(self::HAMMER_PARAMS['integration_id']);
-        DB::table('integrations')->delete(self::HAMMER_PARAMS['integration_id']);
+        DB::table('integration')->delete(self::HAMMER_PARAMS['integration_id']);
     }
 }
