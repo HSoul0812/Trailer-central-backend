@@ -31,7 +31,7 @@ class FormService implements FormServiceInterface
             chr('27') . ' ' . chr('48'),
             chr('27') . ' ' . chr('108') . ' 40',
             chr('27') . ' ' . chr('81') . ' 100',
-            'This is a Test Print Wow! ' . chr('13') . ' ' . chr('10'),
+            'This is a Test Print Wow!' . chr('13') . chr('10'),
             chr('12'),
             chr('27') . ' ' . chr('64')
         ];
