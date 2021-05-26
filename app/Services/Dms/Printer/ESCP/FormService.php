@@ -27,7 +27,6 @@ class FormService implements FormServiceInterface
     public function getFormInstruction(int $dealerId, int $formId, array $params): array
     {
         return [
-            ['type' => 'raw', 'options' => ['language' => 'ESCPOS', 'dotDensity' => 'double' ]],
             '\x1B' . '\x31',
             '\x1B' . '\x30',
             '\x1B' . '\x6C' . '40',
