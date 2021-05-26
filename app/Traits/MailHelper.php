@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Config;
 trait MailHelper
 {
     /**
-     * @param SmtpConfig $smtpConfig
+     * @param null|SmtpConfig $smtpConfig
      */
-    public function setSmtpConfig(SmtpConfig $smtpConfig): void
+    public function setSmtpConfig(?SmtpConfig $smtpConfig): void
     {
         if (!empty($smtpConfig) && $smtpConfig->host) {
             $config = [
@@ -50,6 +50,15 @@ trait MailHelper
             ];
             Config::set('mail', $config);
         }
+    }
+
+    /**
+     * Get Default From Email
+     * 
+     * @return string
+     */
+    public function getDefaultFromEmail(): string {
+        return config('mail.from.address', 'noreply@trailercentral.com');
     }
 
 
