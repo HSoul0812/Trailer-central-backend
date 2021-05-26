@@ -13,10 +13,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Form extends Model
 {
-    const PRINTER_FORM_TYPES = [
-        'ZPL'
-    ];
-
     public const TABLE_NAME = "dms_printer_forms";
 
     public $timestamps = false;
@@ -25,7 +21,6 @@ class Form extends Model
 
     protected $fillable = [
         'name',
-        'type',
         'region',
         'description',
         'department',

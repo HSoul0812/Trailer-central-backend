@@ -26,6 +26,14 @@ class FormService implements FormServiceInterface
     
     public function getFormInstruction(int $dealerId, int $formId, array $params): array
     {
-        return ['ESC @', 'ESC 0', 'ESC l 10', 'ESC Q 75', 'This is a Test Print Wow! CR LF', 'FF', 'ESC @'];
+        return [
+            chr('27') . ' ' . chr('64'),
+            chr('27') . ' ' . chr('48'),
+            chr('27') . ' ' . chr('108') . ' 40',
+            chr('27') . ' ' . chr('81') . ' 100',
+            'This is a Test Print Wow! ' . chr('13') . ' ' . chr('10'),
+            chr('12'),
+            chr('27') . ' ' . chr('64')
+        ];
     }
 }

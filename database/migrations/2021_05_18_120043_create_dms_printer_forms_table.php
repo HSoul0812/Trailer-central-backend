@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\CRM\Dms\Printer\Form;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,7 +9,6 @@ class CreateDmsPrinterFormsTable extends Migration
 {
     const PRINTER_FORM_DR2407 = [
         'name' => 'DR2407',
-        'type' => 'ZPL',
         'region' => 'CO',
         'description' => 'Dealer\'s Bill of Sales for a Motor Vehicle',
         'department' => 'Department of Revenue',
@@ -28,7 +26,6 @@ class CreateDmsPrinterFormsTable extends Migration
         Schema::create('dms_printer_forms', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 25)->index();
-            $table->enum('type', Form::PRINTER_FORM_TYPES)->index();
             $table->string('region', 3)->index();
             $table->string('description', 255)->comment('Title of the Form');
             $table->string('department', 255);

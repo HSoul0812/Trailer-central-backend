@@ -13,12 +13,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Instructions extends Model
 {
+    const PRINTER_FORM_TYPES = [
+        'ZPL',
+        'ESCP'
+    ];
+
     public const TABLE_NAME = "dms_printer_form_instructions";
 
     protected $table = self::TABLE_NAME;
 
     protected $fillable = [
-        'form_id',
+        'form_name',
+        'type',
+        'name',
+        'label',
         'font_size',
         'x_position',
         'y_position'
