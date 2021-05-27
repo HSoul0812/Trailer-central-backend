@@ -85,6 +85,7 @@
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
+        "post-install-cmd": "cghooks add --ignore-lock",
         "post-update-cmd": [
             "Google_Task_Composer::cleanup",
             "cghooks update"
