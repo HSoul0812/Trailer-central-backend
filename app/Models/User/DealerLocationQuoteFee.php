@@ -35,6 +35,9 @@ class DealerLocationQuoteFee extends Model
     public const CHARGED_TYPE_COMBINED = 'combined';
     public const CHARGED_TYPE_DEFAULT = self::CHARGED_TYPE_INCOME;
 
+    public const COST_DEFAULT_HANDLER = 'set_default_cost';
+    public const COST_AMOUNT_HANDLER = 'set_amount';
+
     /**
      * @var string
      */
@@ -59,7 +62,8 @@ class DealerLocationQuoteFee extends Model
         "visibility",
         "accounting_class",
         'fee_charged_type',
-        'cost_amount'
+        'cost_amount',
+        'cost_handler'
     ];
 
     protected $appends = [
