@@ -50,16 +50,27 @@ class BulkDownloadController extends MonitoredJobsController
      *     tags={"BulkDownloadParts"},
      *     @OA\Parameter(
      *         name="dealer_id",
+     *         in="path",
      *         description="The dealer ID.",
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="token",
+     *         in="path",
      *         description="The token for the job.",
      *         required=false,
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(type="string"),
      *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request."
+     *     )
      * )
      */
     public function create(Request $request)
@@ -115,7 +126,16 @@ class BulkDownloadController extends MonitoredJobsController
      *         name="token",
      *         in="path",
      *         required=true
-     *     )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
      * )
      *
      * @OA\Get(
@@ -126,7 +146,16 @@ class BulkDownloadController extends MonitoredJobsController
      *         name="token",
      *         in="path",
      *         required=true
-     *     )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
      * )
      */
 }

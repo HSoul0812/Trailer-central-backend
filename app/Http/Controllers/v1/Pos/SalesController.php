@@ -56,7 +56,16 @@ class SalesController extends RestfulControllerV2
      *
      * @return \Dingo\Api\Http\Response
      * @OA\Get(
-     *     path="/pos/sales"
+     *     path="/pos/sales",
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
      * )
      */
     public function index(Request $request)
@@ -91,6 +100,15 @@ class SalesController extends RestfulControllerV2
      *         description="POS Sales ID",
      *         required=true,
      *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
      *     ),
      * )
      */

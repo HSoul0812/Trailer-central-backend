@@ -47,7 +47,7 @@ class BlastController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -152,7 +152,7 @@ class BlastController extends RestfulControllerV2
     }
     
     /**
-     * @OA\Text(
+     * @OA\Put(
      *     path="/api/crm/{userId}/texts/blast/{id}",
      *     description="Update a blast",
      * 
@@ -236,9 +236,9 @@ class BlastController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Sent(
+     * @OA\Post(
      *     path="/api/crm/{userId}/texts/blast/{id}/sent",
-     *     description="Mark blast and sent to lead",
+     *     description="Mark blast and send to lead",
      *     tags={"Text"},
      *     @OA\Parameter(
      *         name="id",

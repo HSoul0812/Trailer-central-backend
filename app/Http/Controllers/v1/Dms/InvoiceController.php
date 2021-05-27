@@ -57,17 +57,17 @@ class InvoiceController extends RestfulControllerV2
      *     path="/invoices",
      *     @OA\Parameter(
      *          name="with",
-     *          description="model relations to load"
+     *          description="model relations to load",
      *          in="query"
      *     ),
      *     @OA\Parameter(
      *          name="filter",
-     *          description="filters to apply, like where clauses"
+     *          description="filters to apply, like where clauses",
      *          in="query"
      *     ),
      *     @OA\Parameter(
      *          name="sort",
-     *          description="sort specs"
+     *          description="sort specs",
      *          in="query"
      *     ),
      *     @OA\Response(

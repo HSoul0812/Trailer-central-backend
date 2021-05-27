@@ -60,7 +60,7 @@ class BlastController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of emails",
@@ -165,7 +165,7 @@ class BlastController extends RestfulControllerV2
     }*/
     
     /**
-     * @OA\Email(
+     * @OA\Put(
      *     path="/api/crm/{userId}/emails/blast/{id}",
      *     description="Update a blast",
      * 
@@ -249,7 +249,7 @@ class BlastController extends RestfulControllerV2
     }*/
 
     /**
-     * @OA\Send(
+     * @OA\Post(
      *     path="/api/crm/{userId}/emails/blast/{id}/send",
      *     description="Send Blast Email for All Provided Leads",
      *     tags={"Email"},
@@ -265,7 +265,7 @@ class BlastController extends RestfulControllerV2
      *         in="path",
      *         description="Array of Leads to Send Email To",
      *         required=true,
-     *         @OA\Schema(type="array")
+     *         @OA\Schema(type="array", @OA\Items(type="string"))
      *     ),
      *     @OA\Parameter(
      *         name="leads.*",

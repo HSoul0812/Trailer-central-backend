@@ -61,7 +61,7 @@ class TemplateController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of emails",
@@ -166,7 +166,7 @@ class TemplateController extends RestfulControllerV2
     }*/
     
     /**
-     * @OA\Update(
+     * @OA\Put(
      *     path="/api/crm/{userId}/emails/template/{id}",
      *     description="Update a template",
      * 
@@ -250,7 +250,7 @@ class TemplateController extends RestfulControllerV2
     }*/
     
     /**
-     * @OA\Send(
+     * @OA\Post(
      *     path="/api/crm/{userId}/emails/template/{id}/send",
      *     description="Send Template as Email",
      * 

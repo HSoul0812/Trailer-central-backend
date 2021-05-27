@@ -59,7 +59,8 @@
         "mockery/mockery": "^1.0",
         "phpunit/phpunit": "^9.0",
         "facade/ignition": "^1.4",
-        "nunomaduro/collision": "^3.0"
+        "nunomaduro/collision": "^3.0",
+        "brainmaestro/composer-git-hooks": "^2.8"
     },
     "autoload": {
         "classmap": [
@@ -80,10 +81,15 @@
         }
     },
     "scripts": {
+        "cghooks": "vendor/bin/cghooks",
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
-        "post-update-cmd": "Google_Task_Composer::cleanup"
+        "post-install-cmd": "cghooks add --ignore-lock",
+        "post-update-cmd": [
+            "Google_Task_Composer::cleanup",
+            "cghooks update"
+        ]
     },
     "config": {
         "preferred-install": "dist",
@@ -109,6 +115,11 @@
         "laravel": {
             "dont-discover": [
                 "Grimzy\\LaravelMysqlSpatial\\SpatialServiceProvider"
+            ]
+        },
+        "hooks": {
+            "pre-commit": [
+                "@php artisan l5-swagger:generate"
             ]
         }
     }
