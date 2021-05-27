@@ -14,12 +14,14 @@ use League\Fractal\Resource\Collection;
 use League\Fractal\Manager;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Jobs\Bulk\Parts\FinancialReportExportJob;
+use App\Jobs\Dms\ServiceTechnicianExportJob;
 use App\Models\Common\MonitoredJob;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Models\Bulk\Parts\BulkReport;
 use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
+use App\Services\Export\Parts\BulkCsvServiceReportJobServiceInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Dingo\Api\Http\Request;
@@ -41,6 +43,11 @@ class BulkReportsController extends MonitoredJobsController
      * @var BulkReportJobServiceInterface
      */
     protected $service;
+    
+    /**
+     * @var BulkCsvServiceReportJobServiceInterface
+     */
+    protected $technicianService;
 
     /**
      * @var Manager
@@ -51,6 +58,7 @@ class BulkReportsController extends MonitoredJobsController
                                 MonitoredJobRepositoryInterface $jobsRepository,
                                 StockRepositoryInterface $stockRepository,
                                 BulkReportJobServiceInterface $service,
+                                BulkCsvServiceReportJobServiceInterface $technicianService,
                                 Manager $fractal)
     {
         parent::__construct($jobsRepository);
@@ -60,6 +68,7 @@ class BulkReportsController extends MonitoredJobsController
         $this->repository = $repository;
         $this->stockRepository = $stockRepository;
         $this->service = $service;
+        $this->technicianService = $technicianService;
         $this->fractal = $fractal;
     }
 
@@ -244,17 +253,17 @@ class BulkReportsController extends MonitoredJobsController
 
             $payload = BulkReportPayload::from([
                 'filename' => str_replace('.', '-', uniqid('services-technicians-' . date('Ymd'), true)) . '.csv',
-                'type' => BulkReport::TYPE_SERVICES,
+                // 'type' => BulkReport::TYPE_SERVICES,
                 'filters' => $request->all()
             ]);
 
-            $model = $this->service
+            $model = $this->technicianService
                 ->setup($request->get('dealer_id'), $payload, $request->get('token'))
-                ->withQueueableJob(static function (BulkReport $job): FinancialReportExportJob {
-                    return new FinancialReportExportJob($job->token);
+                ->withQueueableJob(static function (MonitoredJob $job): ServiceTechnicianExportJob {
+                    return new ServiceTechnicianExportJob($job->token);
                 });
 
-            $this->service->dispatch($model);
+            $this->technicianService->dispatch($model);
 
             return response()->json(['token' => $model->token], 202);
         }

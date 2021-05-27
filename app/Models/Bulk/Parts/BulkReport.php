@@ -18,7 +18,6 @@ class BulkReport extends MonitoredJob
     public const LEVEL_DEFAULT = self::LEVEL_WITHOUT_RESTRICTIONS;
 
     public const TYPE_FINANCIALS = 'financials';
-    public const TYPE_SERVICES = 'services';
 
     public const QUEUE_NAME = 'reports';
 
