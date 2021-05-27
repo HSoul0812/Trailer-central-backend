@@ -26,10 +26,13 @@ class FormService implements FormServiceInterface
     
     public function getFormInstruction(int $dealerId, int $formId, array $params): array
     {
+        // Get Instructions for Specific Form ID
+        
+
         return [
             "\x1B" . "\x69" . "\x61" . "\x00", // set printer to ESC/P mode
             "\x1B" . "\x40", // clear memory buffer
-            "\x1B" . "\x4F", "\x1B" . "\x69" . "\x00" . "\x00", // clear margins
+            "\x1B" . "\x4F", "\x1B" . "\x69" . "\x30" . "\x30", // clear margins
             "\x1B" . "\x30", // set line feed smallest point
             "\x1B" . "\x6B" . "\x0B", "\x1B" . "\x58" . "\x00" . "\x15", // set font and font size
 
