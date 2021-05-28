@@ -253,7 +253,6 @@ class BulkReportsController extends MonitoredJobsController
 
             $payload = BulkReportPayload::from([
                 'filename' => str_replace('.', '-', uniqid('services-technicians-' . date('Ymd'), true)) . '.csv',
-                // 'type' => BulkReport::TYPE_SERVICES,
                 'filters' => $request->all()
             ]);
 
