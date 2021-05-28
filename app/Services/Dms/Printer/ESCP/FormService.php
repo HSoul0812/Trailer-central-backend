@@ -93,34 +93,34 @@ class FormService implements FormServiceInterface
 
         // Dealer Name
         $this->escpHelper->addText("Colorado Trailers Inc.", 4);
-        $this->escpHelper->addText("DL - 237298", 44);
+        $this->escpHelper->addText("DL - 237298", 44, 2);
         $this->escpHelper->addLineBreaks(10);
 
         // Address
         $this->escpHelper->addText("100 Main Street", 4);
         $this->escpHelper->addText("Springfield", 29);
-        $this->escpHelper->addText("TN", 44);
-        $this->escpHelper->addText("29021", 53);
+        $this->escpHelper->addText("TN", 44, 2);
+        $this->escpHelper->addText("29021", 53, 2);
         $this->escpHelper->addLineBreaks(10);
 
         // Inventory to Sell
         $this->escpHelper->addText("1HD1FMW166Y641723", 4);
         $this->escpHelper->addText("2020", 29);
         $this->escpHelper->addText("AMER", 37);
-        $this->escpHelper->addText("Alum", 44);
-        $this->escpHelper->addText("Rebel", 53);
+        $this->escpHelper->addText("Alum", 44, 2);
+        $this->escpHelper->addText("Rebel", 53, 2);
         $this->escpHelper->addLineBreaks(10);
 
         // Checkboxes / Date
         $this->escpHelper->makeBold();
-        $this->escpHelper->addText("X", 3);
-        $this->escpHelper->addText("X", 8);
-        $this->escpHelper->addText("X", 14);
-        $this->escpHelper->addText("X", 22);
+        $this->escpHelper->addText("X", 3, 4);
+        $this->escpHelper->addText("X", 8, 2);
+        $this->escpHelper->addText("X", 14, 4);
+        $this->escpHelper->addText("X", 22, 2);
         $this->escpHelper->addText("X", 29);
         $this->escpHelper->addText("X", 36);
         $this->escpHelper->makeBold(false);
-        $this->escpHelper->addText("19999.99", 55);
+        $this->escpHelper->addText("19999.99", 55, 2);
         $this->escpHelper->addLineBreaks(30);
 
         // Customer
@@ -139,20 +139,20 @@ class FormService implements FormServiceInterface
         $this->escpHelper->addText("X", 4);
         $this->escpHelper->makeBold(false);
         $this->escpHelper->addLineBreaks(12);
-        $this->escpHelper->addText("05/26/2021", 53);
+        $this->escpHelper->addText("05/26/2021", 53, 2);
         $this->escpHelper->addLineBreaks(41);
 
         // Address (Bottom)
         $this->escpHelper->addText("100 Main Street", 4);
         $this->escpHelper->addText("Springfield", 29);
-        $this->escpHelper->addText("TN", 44);
-        $this->escpHelper->addText("29021", 53);
+        $this->escpHelper->addText("TN", 44, 2);
+        $this->escpHelper->addText("29021", 53, 2);
         $this->escpHelper->addLineBreaks(10);
 
         // Bottom Row
         $this->escpHelper->addText("n/a", 4);
         $this->escpHelper->addText("05/26/2021", 44);
-        $this->escpHelper->addText("DL - 237298", 53);
+        $this->escpHelper->addText("DL - 237298", 53, 2);
 
         // Return Result Code From Helper
         return $this->escpHelper->getCode();

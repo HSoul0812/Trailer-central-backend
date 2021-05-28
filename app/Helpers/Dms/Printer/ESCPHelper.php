@@ -166,9 +166,11 @@ class ESCPHelper {
      */
     public function addLineBreaks(int $lines = 0): void
     {
+        $breaks = '';
         for($i = 0; $i < $lines; $i++) {
-            $this->escpCode[] = self::ESCP_BREAK;
+            $breaks .= self::ESCP_BREAK;
         }
+        $this->escpCode[] = $breaks;
     }
 
 
