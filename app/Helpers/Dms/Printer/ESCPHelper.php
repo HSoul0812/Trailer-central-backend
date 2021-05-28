@@ -8,8 +8,6 @@ use App\Exceptions\Helpers\Dms\Printer\InvalidFontException;
 
 class ESCPHelper {
 
-    use HexHelper;
-
     private const ESCP = "\x1B";
     private const ESCP_START = self::ESCP . "\x40";
     private const ESCP_RESET_MARGIN = self::ESCP . "\x4F";
