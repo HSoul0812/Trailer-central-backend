@@ -11,7 +11,6 @@ use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Dms\StockRepositoryInterface;
-use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
 use App\Services\Export\FilesystemPdfExporter;
 use App\Services\Export\HasExporterInterface;
@@ -37,11 +36,6 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
      * @var StockRepositoryInterface
      */
     private $stockRepository;
-    
-    /**
-     * @var ServiceItemTechnicianRepositoryInterface
-     */
-    private $serviceTechnicianRepository;
 
     /**
      * @var LoggerServiceInterface
@@ -51,7 +45,6 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
     public function __construct(
         BulkReportRepositoryInterface $bulkRepository,
         StockRepositoryInterface $stockRepository,
-        ServiceItemTechnicianRepositoryInterface $serviceTechnicianRepository,
         LoggerServiceInterface $logger,
         MonitoredJobRepositoryInterface $monitoredJobsRepository
     )
@@ -60,7 +53,6 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
 
         $this->bulkRepository = $bulkRepository;
         $this->stockRepository = $stockRepository;
-        $this->serviceTechnicianRepository = $serviceTechnicianRepository;
         $this->logger = $logger;
     }
 
@@ -92,36 +84,32 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
     public function run($job)
     {
         try {
-            switch ($job->payload->type) {
-                case BulkReport::TYPE_FINANCIALS:
-                    // @todo: the progress calculation should be accurate using a better way
-                    $this->logger->info(sprintf("[%s:] starting to export the pdf file for the monitored job '%s'", __CLASS__, $job->token));
+            // @todo: the progress calculation should be accurate using a better way
+            $this->logger->info(sprintf("[%s:] starting to export the pdf file for the monitored job '%s'", __CLASS__, $job->token));
 
-                    $this->bulkRepository->updateProgress($job->token, 0);
+            $this->bulkRepository->updateProgress($job->token, 0);
 
-                    $data = $this->getData($job);
+            $data = $this->getData($job);
 
-                    $this->bulkRepository->updateProgress($job->token, 10);
+            $this->bulkRepository->updateProgress($job->token, 10);
 
-                    // do the export
-                    $this->getExporter($job)
-                        ->withView($this->resolveView($job))
-                        ->withData($data)
-                        ->afterRender(function () use ($job) {
-                            $this->bulkRepository->updateProgress($job->token, 15);
-                        })
-                        ->afterLoadHtml(function () use ($job) {
-                            $this->bulkRepository->updateProgress($job->token, 95);
-                        })
-                        ->export();
+            // do the export
+            $this->getExporter($job)
+                ->withView($this->resolveView($job))
+                ->withData($data)
+                ->afterRender(function () use ($job) {
+                    $this->bulkRepository->updateProgress($job->token, 15);
+                })
+                ->afterLoadHtml(function () use ($job) {
+                    $this->bulkRepository->updateProgress($job->token, 95);
+                })
+                ->export();
 
-                    $this->bulkRepository->setCompleted($job->token);
+            $this->bulkRepository->setCompleted($job->token);
 
-                    $this->logger->info(sprintf("[%s:] process to export the pdf file for the monitored job '%s' was completed", __CLASS__, $job->token));
-                break;
-            }
+            $this->logger->info(sprintf("[%s:] process to export the pdf file for the monitored job '%s' was completed", __CLASS__, $job->token));
         } catch (Throwable $exception) {
-            $this->bulkRepository->setFailed($job->token, ['message' => "Got exception: {$exception->getMessage()} (line " . $exception->getLine() . ")"]);
+            $this->bulkRepository->setFailed($job->token, ['message' => "Got exception: {$exception->getMessage()}"]);
             $this->logger->error(sprintf('[%s:] got exception: %s', __CLASS__, $exception->getMessage()), $exception->getTrace());
 
             throw $exception;
@@ -158,7 +146,7 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
                 $filters = ['dealer_id' => $job->dealer_id] + array_filter($job->payload->filters);
 
                 return  $this->stockRepository->financialReport($filters);
-            break;
+            // more types here
         }
 
         throw new UndefinedReportTypeException("There is not a '{$job->payload->type}' report type defined");
