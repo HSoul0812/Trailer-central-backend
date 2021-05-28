@@ -84,7 +84,7 @@ class FormService implements FormServiceInterface
 
         // Initialize Fonts
         $this->escpHelper->setFont(ESCPHelper::ESCP_FONT_SANS);
-        $this->escpHelper->setFontSize();
+        $this->escpHelper->setFontSize(8);
 
         // Previous Bill of Sale
         $this->escpHelper->addLineBreaks(10);
@@ -129,7 +129,7 @@ class FormService implements FormServiceInterface
         $this->escpHelper->addLineBreaks(30);
 
         // Odometer
-        $this->escpHelper->addText("90,000", 0, 50);
+        $this->escpHelper->addText("90,000", 50);
         $this->escpHelper->addLineBreaks(10);
         $this->escpHelper->makeBold();
         $this->escpHelper->addText("X", 4);
