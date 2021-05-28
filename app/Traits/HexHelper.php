@@ -21,6 +21,6 @@ trait HexHelper
         if(strlen($hex) < 2) {
             $hex = "0" . $hex;
         }
-        return "\x{$hex}";
+        return "0x{$hex}";
     }
 }
