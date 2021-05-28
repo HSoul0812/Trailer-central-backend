@@ -761,6 +761,7 @@ $api->version('v1', function ($route) {
         $route->get('pos/search', 'App\Http\Controllers\v1\Pos\PosController@search');
         $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
         $route->get('pos/sales/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
+        $route->get('pos/registers', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@index');
 
         /*
         |--------------------------------------------------------------------------
