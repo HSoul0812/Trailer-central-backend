@@ -19,8 +19,8 @@ use Exception;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Provide capabilities to setup and dispatch a monitored job for parts bulk cvs download, also provide the runner
- * to handle the export of the csv file.
+ * Provide capabilities to setup and dispatch a monitored job for technician service order's cvs download.
+ * Also provide the runner to handle the generation, write and export of the csv file.
  *
  * This is to decouple service code from the job.
  */
@@ -28,6 +28,9 @@ class BulkCsvServiceReportJobService extends AbstractMonitoredJobService impleme
 {
     const QUEUE_NAME = 'reports';
     const QUEUE_JOB_NAME = 'technician-order-report';
+    const TOTAL_PROGRESS_STEPS = 80; // must be equal or less than 100. It equals the segment of the 100% export process that is related to each row of the CSV
+    const DEFAULT_PROGRESS_VALUE = 10;
+    const COLUMNS_TITLES = 'Technician,Ro Completed Date,RO Name,Sale Date,Paid Retail,Type,Invoice/Sale#,Customer,Act Hrs,Paid Hrs,Billed Hrs,Parts,Labor,Total (parts/labor),Cost,Profit,Margin';
 
     /**
      * @var ServiceItemTechnicianRepositoryInterface
@@ -59,7 +62,6 @@ class BulkCsvServiceReportJobService extends AbstractMonitoredJobService impleme
      */
     public function setup(int $dealerId, $payload, ?string $token = null): MonitoredJob
     {
-
         return $this->repository->create([
             'dealer_id' => $dealerId,
             'token' => $token,
@@ -82,9 +84,9 @@ class BulkCsvServiceReportJobService extends AbstractMonitoredJobService impleme
         $filters = ['dealer_id' => $job->dealer_id] + array_filter($job->payload->filters);
         $data = $this->serviceTechnicianRepository->serviceReport($filters);
 
-        $step = round(count($data) / 80);
-        $progress = 10;
-        $csv_data = 'Technician,Ro Completed Date,RO Name,Sale Date,Paid Retail,Type,Invoice/Sale#,Customer,Act Hrs,Paid Hrs,Billed Hrs,Parts,Labor,Total (parts/labor),Cost,Profit,Margin' . PHP_EOL;
+        $step = round(count($data) / self::TOTAL_PROGRESS_STEPS);
+        $progress = self::DEFAULT_PROGRESS_VALUE;
+        $csv_data = self::COLUMNS_TITLES . PHP_EOL;
 
         $this->repository->updateProgress($job->token, $progress);
         foreach($data as $key => $row) {
