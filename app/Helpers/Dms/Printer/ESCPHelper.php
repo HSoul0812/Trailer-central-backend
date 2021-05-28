@@ -117,10 +117,10 @@ class ESCPHelper {
     /**
      * Set Font Size
      * 
-     * @param string $fontSize
+     * @param int $fontSize
      * @return void
      */
-    public function setFontSize(string $fontSize = 10) : void
+    public function setFontSize(int $fontSize = 10) : void
     {
         $this->escpCode[] = self::ESCP_FONT_SIZE . "\x00" . $this->getHex($fontSize * 2) . "\x00";
     }

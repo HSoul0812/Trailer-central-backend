@@ -55,7 +55,7 @@ class FormService implements FormServiceInterface
         $form = $this->forms->get(['id' => $formId]);
 
         // Get Unit Sale
-        //$unitSale = $this->quotes->get(['id' => $unitSaleId]);
+        $unitSale = $this->quotes->get(['id' => $unitSaleId]);
 
         // Get Form By Name
         $method = 'getForm' . $form->name;
@@ -74,7 +74,7 @@ class FormService implements FormServiceInterface
      * @param UnitSale $unitSale
      * @return array
      */
-    private function getFormDR2407(/*UnitSale $unitSale*/): array {
+    private function getFormDR2407(UnitSale $unitSale): array {
         // Initialize Form Spacing
         $this->escpHelper->startEscpCode();
         $this->escpHelper->clearMargins();
