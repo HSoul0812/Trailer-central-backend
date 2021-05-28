@@ -12,7 +12,7 @@ class GetServiceReportRequest extends Request
     {
         return [
             'dealer_id' => 'required|exists:dealer,dealer_id',
-            'token' => 'string',
+            'token' => 'uuid',
             'completed_on_type' => 'string',
             'repair_order_status' => 'string',
             'repair_order_type' => 'string',
