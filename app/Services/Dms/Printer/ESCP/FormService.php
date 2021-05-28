@@ -121,7 +121,7 @@ class FormService implements FormServiceInterface
         $this->escpHelper->addText("X", 36);
         $this->escpHelper->makeBold(false);
         $this->escpHelper->addText("19999.99", 55, 2);
-        $this->escpHelper->addLineBreaks(30);
+        $this->escpHelper->addLineBreaks(10);
 
         // Customer
         $this->escpHelper->addText("Jane Doe", 13);
