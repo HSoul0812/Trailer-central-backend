@@ -20,16 +20,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property $exported_at
  * @property $qb_id
  * @property $error_result
- *
+ * @property $removed_by
+ * @property $deleted_at
  */
-class QuickbookApproval extends Model
+class QuickbookApprovalDeleted extends Model
 {
-    // Statuses of Quickbook Approvals
-    const TO_SEND = 'to_send';
-    const SENT = 'sent';
-    const FAILED = 'failed';
-    const REMOVED = 'removed';
-
     const TABLE_NAME_MAPPER = [
         'qb_accounts' => 'Account',
         'qb_bills' => 'Bill',
@@ -50,7 +45,7 @@ class QuickbookApproval extends Model
         'dealer_refunds' => 'Refunds Receipt',
     ];
 
-    protected $table = 'quickbook_approval';
+    protected $table = 'quickbook_approval_deleted';
 
     protected $appends = ['tb_label'];
 
@@ -229,9 +224,10 @@ class QuickbookApproval extends Model
     }
 
     /**
-     * @param QuickbookApprovalDeleted $obj
+     * @param QuickbookApproval $obj
+     * @param $removed_by
      */
-    public function createFrom(QuickbookApprovalDeleted $obj)
+    public function createFrom(QuickbookApproval $obj, $removed_by)
     {
         $this->id = $obj->id;
         $this->dealer_id = $obj->dealer_id;
@@ -246,7 +242,10 @@ class QuickbookApproval extends Model
         $this->exported_at = $obj->exported_at;
         $this->qb_id = $obj->qb_id;
         $this->error_result = $obj->error_result;
+        $this->deleted_at = new \DateTime();
+        $this->removed_by = $removed_by;
 
         $this->save();
     }
+
 }

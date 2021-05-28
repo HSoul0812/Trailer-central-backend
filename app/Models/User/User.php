@@ -189,7 +189,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
     }
-    
+
     public function locations() : HasMany
     {
         return $this->hasMany(DealerLocation::class, 'dealer_id', 'dealer_id');

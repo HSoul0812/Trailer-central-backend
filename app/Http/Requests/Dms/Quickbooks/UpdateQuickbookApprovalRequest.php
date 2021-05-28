@@ -11,8 +11,8 @@ use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 class UpdateQuickbookApprovalRequest extends Request {
 
     protected $rules = [
-        'id' => 'integer|required',
-        'status' => 'string|required',
+        'id' => 'integer|required|exists:quickbook_approval_deleted,id',
+        'status' => 'in:'. QuickbookApproval::TO_SEND,
     ];
 
 }

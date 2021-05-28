@@ -30,6 +30,8 @@ use App\Repositories\Dms\Quickbooks\AccountRepository;
 use App\Repositories\Dms\Quickbooks\AccountRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\BillRepository;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalDeletedRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalDeletedRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Dms\QuoteRepository;
@@ -70,6 +72,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
+        $this->app->bind(QuickbookApprovalDeletedRepositoryInterface::class, QuickbookApprovalDeletedRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(UnitSaleLaborRepositoryInterface::class, UnitSaleLaborRepository::class);
         $this->app->bind(BillRepositoryInterface::class, BillRepository::class);

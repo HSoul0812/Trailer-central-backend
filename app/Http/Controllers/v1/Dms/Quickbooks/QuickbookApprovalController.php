@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\v1\Dms\Quickbooks;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Dms\Quickbooks\DeleteQuickbookApprovalRequest;
 use App\Http\Requests\Dms\Quickbooks\UpdateQuickbookApprovalRequest;
+use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalDeletedRepositoryInterface;
 use Dingo\Api\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
@@ -15,10 +17,12 @@ use App\Http\Requests\Dms\Quickbooks\GetQuickbookApprovalRequest;
 /**
  * @author Marcel
  */
-class QuickbookApprovalController extends RestfulController
+class QuickbookApprovalController extends RestfulControllerV2
 {
 
     protected $quickbookApprovalRepo;
+
+    protected $quickbookApprovalDeletedRepo;
 
     protected $transformer;
 
@@ -27,11 +31,15 @@ class QuickbookApprovalController extends RestfulController
      *
      * @return void
      */
-    public function __construct(QuickbookApprovalRepositoryInterface $quickbookApprovalRepo)
+    public function __construct(QuickbookApprovalRepositoryInterface $quickbookApprovalRepo, QuickbookApprovalDeletedRepositoryInterface  $quickbookApprovalDeletedRepo)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->quickbookApprovalRepo = $quickbookApprovalRepo;
+        $this->quickbookApprovalDeletedRepo = $quickbookApprovalDeletedRepo;
         $this->transformer = new QuickbookApprovalTransformer();
+
+        $this->middleware('setDealerIdOnRequest')->only([
+            'index', 'destroy', 'update', 'moveStatus'
+        ]);
     }
 
     /**
@@ -76,7 +84,11 @@ class QuickbookApprovalController extends RestfulController
         $request = new GetQuickbookApprovalRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->paginator($this->quickbookApprovalRepo->getAll($request->all()), $this->transformer);
+            if ($request->get('status') === QuickbookApproval::REMOVED) {
+                return $this->response->paginator($this->quickbookApprovalDeletedRepo->getAll($request->all()), $this->transformer);
+            } else {
+                return $this->response->paginator($this->quickbookApprovalRepo->getAll($request->all()), $this->transformer);
+            }
         }
 
         return $this->response->errorBadRequest();
@@ -105,16 +117,12 @@ class QuickbookApprovalController extends RestfulController
      *     ),
      * )
      */
-    public function delete(int $qbId)
+    public function destroy(int $qbId, Request $request)
     {
-        $request = new DeleteQuickbookApprovalRequest(['id' => $qbId]);
+        $request = new DeleteQuickbookApprovalRequest(['id' => $qbId] + $request->all());
 
         if ($request->validate()) {
-            $params = [
-                'id' => $qbId,
-                'user' => Auth::user()->getAuthIdentifierName()
-            ];
-            return $this->quickbookApprovalRepo->delete($params);
+            return $this->quickbookApprovalRepo->delete($request->all());
         }
 
         return $this->response->errorBadRequest();
@@ -155,7 +163,7 @@ class QuickbookApprovalController extends RestfulController
         $request = new UpdateQuickbookApprovalRequest(['id' => $qbId, 'status' => $status]);
 
         if ($request->validate()) {
-            return $this->quickbookApprovalRepo->update($request->all());
+            return $this->quickbookApprovalDeletedRepo->delete($request->all());
         }
 
         return $this->response->errorBadRequest();
