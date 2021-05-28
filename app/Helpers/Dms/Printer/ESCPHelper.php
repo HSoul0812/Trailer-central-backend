@@ -108,7 +108,7 @@ class ESCPHelper {
      */
     public function setFont(string $font) : void
     {
-        if (!in_array($font, self::AVAILABLE_FONTS)) {
+        if (!in_array($font, self::ESCP_FONTS)) {
             throw new InvalidFontException;
         }
 
