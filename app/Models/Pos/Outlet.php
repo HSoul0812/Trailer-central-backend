@@ -16,6 +16,8 @@ class Outlet extends Model
 {
     protected $table = 'crm_pos_outlet';
 
+    public $timestamps = false;
+
     public function registers(): HasMany
     {
         return $this->hasMany(Register::class);
