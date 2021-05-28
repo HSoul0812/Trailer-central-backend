@@ -39,7 +39,7 @@ class FormService implements FormServiceInterface
         $this->quotes = $quotes;
         $this->forms = $forms;
         $this->settings = $printerSettings;
-        $this->escpHelper = new ESCPHelper;
+        $this->escpHelper = new ESCPHelper();
     }
 
     /**
