@@ -192,7 +192,7 @@ class ESCPHelper {
      */
     private function setHorizontal(int $left = 0): void
     {
-        $this->escpCode[] = $this->escp(self::ESCP_ABS_X) . $left;
+        $this->escpCode[] = $this->escp(self::ESCP_ABS_X) . $this->getHex($left);
     }
 
     /**

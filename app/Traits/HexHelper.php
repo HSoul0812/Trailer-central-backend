@@ -17,6 +17,10 @@ trait HexHelper
      */
     public function getHex(int $dec): string
     {
-        return "\x" . \dechex($dec);
+        $hex = \dechex($dec);
+        if(strlen($hex) < 2) {
+            $hex = "0" . $hex;
+        }
+        return "\x{$hex}";
     }
 }
