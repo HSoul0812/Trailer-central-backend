@@ -2,6 +2,8 @@
 
 namespace App\Models\Inventory\Packages;
 
+use App\Models\Inventory\Inventory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -27,4 +29,12 @@ class PackageInventory extends Pivot
         'inventory_id',
         'is_main_item',
     ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function inventory(): BelongsTo
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
 }

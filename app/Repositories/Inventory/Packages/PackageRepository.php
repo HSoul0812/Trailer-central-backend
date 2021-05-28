@@ -141,7 +141,34 @@ class PackageRepository implements PackageRepositoryInterface
         }
 
         $query = $query->where(['dealer_id' => $params['dealer_id']]);
-        $query = $query->with('inventories');
+
+        /**
+         * @todo Move it to event (after update inventory item)
+         * If the main inventory in package is not available, do not show this package
+         */
+        $query->whereHas('packagesInventory', function($query) {
+            $query->where(function ($query) {
+                $query->where('is_main_item', '=', 1)
+                    ->whereHas('inventory', function ($query) {
+                        $query->where('status', '=', 1);
+                    });
+            });
+        });
+
+        $query = $query->with(['inventories' => function ($query) use ($params) {
+            $query->where('status', '=', 1);
+        }]);
+
+        if (isset($params['visible_with_main_item'])) {
+            $query = $query->where(['visible_with_main_item' => $params['visible_with_main_item']]);
+        }
+
+        if (isset($params['inventory_id']) && isset($params['is_main_item'])) {
+            $query->whereHas('packagesInventory', function($query) use ($params) {
+                $query->where('inventory_id', $params['inventory_id']);
+                $query->where('is_main_item', $params['is_main_item']);
+            });
+        }
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
