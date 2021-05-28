@@ -83,6 +83,7 @@ class SaveDealerLocationRequest extends Request
             'fees.*.fee_type' => 'required_with:fees|min:1,max:50',
             'fees.*.amount' => 'required_with:fees|numeric|min:0',
             'fees.*.cost_amount' => 'required_if:fees.*.fee_charged_type,combined|numeric|min:0',
+            'fees.*.cost_handler' => 'required|in:set_default_cost,set_amount',
             'fees.*.is_additional' => 'checkbox|in:0,1',
             'fees.*.is_state_taxed' => 'checkbox|in:0,1',
             'fees.*.is_county_taxed' => 'checkbox|in:0,1',
