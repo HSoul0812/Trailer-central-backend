@@ -5,7 +5,6 @@ namespace App\Http\Controllers\v1\Dms\Pos;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Dms\Pos\GetRegistersRequest;
 use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
-use App\Transformers\Parts\ManufacturerTransformer;
 use Dingo\Api\Http\Request;
 
 class RegisterController extends RestfulControllerV2
