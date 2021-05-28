@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class RegisterRepositoryTest extends TestCase
 {
-    public function testMe()
+    public function testGetAllByDealerId()
     {
         $registers = [
             ['id' => 1, 'config' => '{genius:ipAddress}', 'register_name' => 'Test Register 1'],
