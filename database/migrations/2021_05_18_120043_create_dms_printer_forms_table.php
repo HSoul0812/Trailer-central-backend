@@ -27,6 +27,7 @@ class CreateDmsPrinterFormsTable extends Migration
             $table->increments('id');
             $table->string('name', 25)->index();
             $table->string('region', 3)->index();
+            $table->enum('type', Form::FORM_TYPES);
             $table->string('description', 255)->comment('Title of the Form');
             $table->string('department', 255);
             $table->string('division', 255);

@@ -126,7 +126,7 @@ class FormService implements FormServiceInterface
         // Customer
         $this->escpHelper->addText("Jane Doe", 13);
         $this->escpHelper->addText("05/26/2021", 53);
-        $this->escpHelper->addLineBreaks(30);
+        $this->escpHelper->addLineBreaks(31);
 
         // Odometer
         $this->escpHelper->addText("90,000", 50);
@@ -147,75 +147,15 @@ class FormService implements FormServiceInterface
         $this->escpHelper->addText("Springfield", 29);
         $this->escpHelper->addText("TN", 44, 2);
         $this->escpHelper->addText("29021", 53, 2);
-        $this->escpHelper->addLineBreaks(10);
 
         // Bottom Row
-        $this->escpHelper->addText("n/a", 4);
-        $this->escpHelper->addText("05/26/2021", 44);
-        $this->escpHelper->addText("DL - 237298", 53, 2);
+        //$this->escpHelper->addLineBreaks(10);
+        //$this->escpHelper->addText("n/a", 4);
+        //$this->escpHelper->addText("05/26/2021", 44);
+        //$this->escpHelper->addText("DL - 237298", 53, 2);
 
         // Return Result Code From Helper
+        $this->escpHelper->endEscpCode();
         return $this->escpHelper->getCode();
-        /*[
-            '\x1B' + '\x69' + '\x61' + '\x00', // set printer to ESC/P mode
-            '\x1B' + '\x40', // clear memory buffer
-            '\x1B' + '\x4F', '\x1B' + '\x69' + '\x00' + '\x00', // clear margins
-            '\x1B' + '\x33' + '\x07', // reduce line height
-            '\x1B' + '\x6B' + '\x0B', '\x1B' + '\x58' + '\x00' + '\x15', // set font and font size
-
-            getLineBreaks(10), '\x1B' + '\x24' + '\x00',
-            getWhitespace(53) + 'DR2407' + getLineBreaks(21),
-
-            '\x1B' + '\x24' + '\x00',
-            getWhitespace(4) + 'John Doe', '\x1B' + '\x24' + '\x02',
-            getWhitespace(44) + 'DL - 237298' + getLineBreaks(10),
-
-            '\x1B' + '\x24' + '\x00',                                                                                                                                                                            
-            getWhitespace(4) + '100 Main Street', '\x1B' + '\x24' + '\x00',
-            getWhitespace(29) + 'Springfield', '\x1B' + '\x24' + '\x02',
-            getWhitespace(44) + 'TN', '\x1B' + '\x24' + '\x02',
-            getWhitespace(53) + '39021' + getLineBreaks(10),
-
-            '\x1B' + '\x24' + '\x00',
-            getWhitespace(4) + '1HD1FMW166Y641723', '\x1B' + '\x24' + '\x00',
-            getWhitespace(29) + '2020', '\x1B' + '\x24' + '\x00',
-            getWhitespace(37) + 'AMER', '\x1B' + '\x24' + '\x02',
-            getWhitespace(44) + 'Alum', '\x1B' + '\x24' + '\x02',
-            getWhitespace(53) + 'Rebel' + getLineBreaks(10),
-
-            '\x1B' + '\x45', '\x1B' + '\x24' + '\x04',
-            getWhitespace(3) + 'X', '\x1B' + '\x24' + '\x02',
-            getWhitespace(8) + 'X', '\x1B' + '\x24' + '\x04',
-            getWhitespace(14) + 'X', '\x1B' + '\x24' + '\x02',
-            getWhitespace(22) + 'X', '\x1B' + '\x24' + '\x00',
-            getWhitespace(29) + 'X', '\x1B' + '\x24' + '\x00',
-            getWhitespace(36) + 'X', '\x1B' + '\x46', '\x1B' + '\x24' + '\x02',
-            getWhitespace(55) + '19999.99' + getLineBreaks(10),
-
-            '\x1B' + '\x24' + '\x00',
-            getWhitespace(13) + 'Jane Doe', '\x1B' + '\x24' + '\x00',
-            getWhitespace(53) + '05/26/2021' + getLineBreaks(30),
-
-            '\x1B' + '\x24' + '\x00',
-            getWhitespace(50) + '90,000' + getLineBreaks(10),
-
-            '\x1B' + '\x45', '\x1B' + '\x24' + '\x00',
-            getWhitespace(4) + 'X' + getLineBreaks(10), '\x1B' + '\x24' + '\x00',
-            getWhitespace(4) + 'X' + getLineBreaks(9), '\x1B' + '\x24' + '\x00',
-            getWhitespace(4) + 'X' + getLineBreaks(12), '\x1B' + '\x46', '\x1B' + '\x24' + '\x02',
-            getWhitespace(53) + '05/26/2021' + getLineBreaks(41),
-
-            '\x1B' + '\x24' + '\x00',
-            getWhitespace(4) + '100 Main Street', '\x1B' + '\x24' + '\x00',
-            getWhitespace(29) + 'Springfield', '\x1B' + '\x24' + '\x02',
-            getWhitespace(44) + 'TN', '\x1B' + '\x24' + '\x02',
-            getWhitespace(53) + '39021',// + getLineBreaks(5),
-
-            '\x1B' + '\x24' + '\x00',
-            getWhitespace(4) + 'n/a', '\x1B' + '\x24' + '\x00',
-            getWhitespace(44) + '05/23/2021', '\x1B' + '\x24' + '\x02',
-            getWhitespace(53) + 'DL - 237298',
-            '\x0C' // <--- Tells the printer to print 
-        ];*/
     }
 }

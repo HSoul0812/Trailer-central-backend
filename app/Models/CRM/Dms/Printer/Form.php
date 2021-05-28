@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Form extends Model
 {
+    public const FORM_TYPES = [
+        'quote',
+        'bill-of-sale'
+    ];
+
     public const TABLE_NAME = "dms_printer_forms";
 
     public $timestamps = false;
@@ -22,6 +27,7 @@ class Form extends Model
     protected $fillable = [
         'name',
         'region',
+        'type',
         'description',
         'department',
         'division',
