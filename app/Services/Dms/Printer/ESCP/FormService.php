@@ -43,7 +43,7 @@ class FormService implements FormServiceInterface
         try {
             $this->escpHelper = new ESCPHelper;
         } catch(\Exception $e) {
-            Log::error($e->getMessage(), $e->getTraceAsString());
+            Log::error($e->getMessage(), $e->getTrace());
         }
     }
 
