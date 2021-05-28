@@ -214,6 +214,6 @@ class FormService implements FormServiceInterface
             getWhitespace(44) + '05/23/2021', '\x1B' + '\x24' + '\x02',
             getWhitespace(53) + 'DL - 237298',
             '\x0C' // <--- Tells the printer to print 
-        ];&/
+        ];*/
     }
 }
