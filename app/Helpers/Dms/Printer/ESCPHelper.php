@@ -19,8 +19,9 @@ class ESCPHelper {
 
     private const ESCP_FONT = self::ESCP . "\x6B";
     private const ESCP_FONT_SIZE = self::ESCP . "\x58";
-    private const ESCP_FONT_ROMAN = "\x00";
-    private const ESCP_FONT_SANS = "\x01";
+
+    public const ESCP_FONT_ROMAN = "\x00";
+    public const ESCP_FONT_SANS = "\x01";
     private const ESCP_FONTS = [
         self::ESCP_FONT_ROMAN,
         self::ESCP_FONT_SANS
