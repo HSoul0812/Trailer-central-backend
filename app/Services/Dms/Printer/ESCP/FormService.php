@@ -8,6 +8,7 @@ use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Dms\Printer\FormRepositoryInterface;
 use App\Repositories\Dms\Printer\SettingsRepositoryInterface;
 use App\Helpers\Dms\Printer\ESCPHelper;
+use Illuminate\Support\Facades\Log;
 
 class FormService implements FormServiceInterface 
 {
@@ -27,7 +28,7 @@ class FormService implements FormServiceInterface
     protected $printerSettingsRepository;
 
     /**     
-     * @var App\Helpers\Dms\Printer\ZPLHelper
+     * @var App\Helpers\Dms\Printer\ESCPHelper
      */
     protected $escpHelper;
     
@@ -39,7 +40,11 @@ class FormService implements FormServiceInterface
         $this->quotes = $quotes;
         $this->forms = $forms;
         $this->settings = $printerSettings;
-        $this->escpHelper = new ESCPHelper();
+        try {
+            $this->escpHelper = new ESCPHelper;
+        } catch(\Exception $e) {
+            Log::error($e->getMessage(), $e->getTraceAsString());
+        }
     }
 
     /**

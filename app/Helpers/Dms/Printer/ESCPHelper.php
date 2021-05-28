@@ -35,7 +35,7 @@ class ESCPHelper {
     private $escpCode;
 
 
-    // Initialize ZPL Code
+    // Initialize ESCP Code
     public function __construct() 
     {
         $this->escpCode = [];

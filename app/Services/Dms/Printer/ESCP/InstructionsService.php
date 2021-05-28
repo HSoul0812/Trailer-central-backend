@@ -14,7 +14,7 @@ class InstructionsService implements InstructionsServiceInterface
     protected $printerSettingsRepository;
     
     /**     
-     * @var App\Helpers\Dms\Printer\ZPLHelper
+     * @var App\Helpers\Dms\Printer\ESCPHelper
      */
     protected $escpHelper;
     

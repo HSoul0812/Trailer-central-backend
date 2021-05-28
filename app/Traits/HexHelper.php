@@ -3,7 +3,7 @@
 namespace App\Traits;
 
 /**
- * Trait GetHex
+ * Trait HexHelper
  * 
  * @package App\Traits\Helpers
  */
