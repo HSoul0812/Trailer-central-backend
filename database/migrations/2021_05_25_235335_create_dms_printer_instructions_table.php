@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateDmsPrinterInstructionsTable extends Migration
 {
+    const PRINTER_FORM_NAME = 'DR2407';
+
     const PRINTER_FORM_INSTRUCTIONS = [
         // Row 1
         [

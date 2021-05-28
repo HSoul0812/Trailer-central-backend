@@ -2,258 +2,197 @@
 
 namespace App\Helpers\Dms\Printer;
 
+use App\Traits\HexHelper;
 use App\Exceptions\Helpers\Dms\Printer\EmptyESCPCodeException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyFontSizeException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyLabelOrientationException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextXPositionException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextYPositionException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeDataException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeHeightException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeWidthException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeXPositionException;
-use App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeYPositionException;
+use App\Exceptions\Helpers\Dms\Printer\InvalidFontException;
 
 class ESCPHelper {
-    
-    private const ESCP_START_LABEL = 'ESC @';
-    private const ESCP_END_LABEL = 'ESC @';
-    private const ESCP_FONTSIZE_INSTRUCTION = '^CFA';
-    private const ESCP_ORIENTATION_INSTRUCTION = '^FWR';
-    private const ESCP_LABEL_LOCATION_INSTRUCTION = '^FO';
-    private const ESCP_LABEL_TEXT_INSTRUCTION = '^FD';
-    private const ESCP_LABEL_TEXT_END_INSTRUCTION = '^FS';
-    private const ESCP_BARCODE_DIMESIONS_INSTRUCTION = '';
-    private const ESCP_BARCODE_POSITION_INSTRUCTION = '';
-    
-    private const ORIENTATION_LANDSCAPE = 'landscape';
-    
+
+    use HexHelper;
+
+    private const ESCP = "\x1B";
+    private const ESCP_START = self::ESCP . "\x40";
+    private const ESCP_RESET_MARGIN = self::ESCP . "\x4F";
+    private const ESCP_SET_MARGIN = self::ESCP . "\x69";
+    private const ESCP_ABS_X = self::ESCP . "\x24";
+    private const ESCP_END = "\x0C";
+
+    private const ESCP_FONT = self::ESCP . "\x6B";
+    private const ESCP_FONT_SIZE = self::ESCP . "\x58";
+    private const ESCP_FONT_ROMAN = "\x00";
+    private const ESCP_FONT_SANS = "\x01";
+    private const ESCP_FONTS = [
+        self::ESCP_FONT_ROMAN,
+        self::ESCP_FONT_SANS
+    ];
+
     /**     
      * @var array
      */
     private $escpCode;
-    
-    /**
-     * @var string
-     */
-    private $fontSize;
-    
-    /**
-     * @var string landscape|portrait
-     */
-    private $labelOrientation;
-    
-    /**
-     * @var int
-     */
-    private $labelTextXPosition;
-    
-    /**
-     * @var int
-     */
-    private $labelTextYPosition;
-    
-    /**
-     * @var string
-     */
-    private $labelText;
-    
-    /**
-     * @var int
-     */
-    private $barcodeWidth;
-    
-    /**
-     * @var int
-     */
-    private $barcodeHeight;
-    
-    /**
-     * @var int
-     */
-    private $barcodeXPosition;
-    
-    /**
-     * @var int
-     */
-    private $barcodeYPosition;
-    
-    /**
-     * @var string
-     */
-    private $barcodeData;
-    
+
+
+    // Initialize ZPL Code
     public function __construct() 
     {
-        $this->zplCode = [];
+        $this->escpCode = [];
     }
-    
-    public function setFontSize(string $fontSize) : void
-    {
-        $this->fontSize = $fontSize;
-    }
-    
-    public function setLabelOrientation(string $orientation) : void
-    {
-        $this->labelOrientation = $orientation;
-    }
-    
-    public function setLabelTextXPosition(int $labelTextXPosition) : void
-    {
-        $this->labelTextXPosition = $labelTextXPosition;
-    }
-    
-    public function setLabelTextYPosition(int $labelTextYPosition) : void
-    {
-        $this->labelTextYPosition = $labelTextYPosition;
-    }
-    
-    public function setLabelText(string $labelText) : void
-    {
-        $this->labelText = $labelText;
-    }
-    
-    public function setBarcodeWidth(int $barcodeWidth) : void
-    {
-        $this->barcodeWidth = $barcodeWidth;
-    }
-    
-    public function setBarcodeHeight(int $barcodeHeight) : void
-    {
-        $this->barcodeHeight = $barcodeHeight;
-    }
-    
-    public function setBarcodeXPosition(int $barcodeXPosition) : void
-    {
-        $this->barcodeXPosition = $barcodeXPosition;
-    }
-    
-    public function setBarcodeYPosition(int $barcodeYPosition) : void
-    {
-        $this->barcodeYPosition = $barcodeYPosition;
-    }
-    
-    public function setBarcodeData(string $barcodeData) : void
-    {
-        $this->barcodeData = $barcodeData;
-    }
-        
+
+
     /**
      * Returns the generated ESCP code
      * 
-     * @return array ESCP code
+     * @throws EmptyESCPCodeException
+     * @return array
      */
     public function getCode() : array
-    {           
-        $this->startEscpCode();
-            $this->setFontSizeCode();
-            $this->setLabelOrientationCode();
-            $this->setLabelCode();
-            $this->setBarcodeDimensionsCode();
-            $this->setLabelOrientationCode();
-            $this->setBarcodePositionCode();            
-        $this->endEscpCode();        
-        
+    {
+        if(empty($this->escpCode)) {
+            throw new EmptyESCPCodeException;
+        }
+
         return $this->escpCode;
     }
-    
-    private function startEscpCode() : void
+
+
+    /**
+     * Start ESC/P Code
+     * 
+     * @return void
+     */
+    public function startEscpCode() : void
     {
-        $this->zplCode[] = self::ESCP_START_LABEL . "\n";
+        $this->escpCode[] = self::ESCP_START;
     }
-    
-    private function endEscpCode() : void
+
+    /**
+     * Clear Margins With ESC/P Code
+     * 
+     * @return void
+     */
+    public function clearMargins(): void
     {
-        $this->zplCode[] = self::ESCP_END_LABEL . "\n";
+        $this->escpCode[] = self::ESCP_RESET_MARGIN;
+        $this->escpCode[] = self::ESCP_SET_MARGIN . $this->getHex(0) . $this->getHex(0);
+    }
+
+    /**
+     * Set Line Spacing
+     * 
+     * @param int $size set size n/72 inches | defaults to 7
+     * @return void
+     */
+    public function setLineSpacing(int $size = 7): void
+    {
+        $this->escpCode[] = self::ESCP . $this->getHex($size);
+    }
+
+    /**
+     * End ESC/P Code
+     * 
+     * @return void
+     */
+    public function endEscpCode() : void
+    {
+        $this->escpCode[] = self::ESCP_END;
+    }
+
+
+    /**
+     * Set Font + Code
+     * 
+     * @param string $font
+     * @throws InvalidFontException
+     * @return void
+     */
+    public function setFont(string $font) : void
+    {
+        if (!in_array($font, self::AVAILABLE_FONTS)) {
+            throw new InvalidFontException;
+        }
+
+        $this->escpCode[] = self::ESCP_FONT . $font;
+    }
+
+    /**
+     * Set Font Size
+     * 
+     * @param string $fontSize
+     * @return void
+     */
+    public function setFontSize(string $fontSize = 10) : void
+    {
+        $this->escpCode[] = self::ESCP_FONT_SIZE . "\x00" . $this->getHex($fontSize * 2) . "\x00";
+    }
+
+
+    /**
+     * Add Text
+     * 
+     * @param string $text
+     * @param int $spaces
+     * @param null|int $left
+     * @return void
+     */
+    public function addText(string $text, int $spaces = 0, ?int $left = 0): void
+    {
+        // Set Absolute Position
+        if($left !== null) {
+            $this->setHorizontal($left);
+        }
+
+        // Add Text
+        $this->escpCode[] = $this->getWhitespace($spaces) . $text;
+    }
+
+    /**
+     * Make Text Bold
+     * 
+     * @param bool $on
+     * @return void
+     */
+    public function makeBold(bool $on = true): void
+    {
+        $this->escpCode[] = $on ? self::ESCP_BOLD_ON : self::ESCP_BOLD_OFF;
+    }
+
+
+    /**
+     * Get X Line Breaks
+     * 
+     * @param int $lines
+     * @return void
+     */
+    public function addLineBreaks(int $lines = 0): void
+    {
+        for($i = 0; $i < $lines; $i++) {
+            $this->escpCode[] = "\s0A";
+        }
     }
 
 
 
     /**
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyFontSizeException
+     * Set Horizontal Absolute
      */
-    private function setFontSizeCode() : void
+    private function setHorizontal(int $left = 0): void
     {
-        if (empty($this->fontSize)) {
-            throw new EmptyFontSizeException;
-        }
-        
-        $this->zplCode[] = self::ESCP_FONTSIZE_INSTRUCTION . ",{$this->fontSize}\n";
-    }
-        
-    /**
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyLabelOrientationException
-     */
-    private function setLabelOrientationCode() : void
-    {
-        if (empty($this->labelOrientation)) {
-            throw new EmptyLabelOrientationException;
-        }
-        
-        if ($this->labelOrientation === self::ORIENTATION_LANDSCAPE) {
-            $this->zplCode[] = self::ESCP_ORIENTATION_INSTRUCTION . "\n";
-        }        
-    }    
-    
-    /**
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextException
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextXPositionException
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyLabelTextYPositionException
-     */
-    private function setLabelCode() : void
-    {
-        if (empty($this->labelTextXPosition)) {
-            throw new EmptyLabelTextXPositionException;
-        }
-        
-        if (empty($this->labelTextYPosition)) {
-            throw new EmptyLabelTextYPositionException;
-        }
-        
-        if (empty($this->labelText)) {
-            throw new EmptyLabelTextException;
-        }
-        
-        $this->zplCode[] = self::ESCP_LABEL_LOCATION_INSTRUCTION . $this->labelTextXPosition .', '.$this->labelTextYPosition.self::ESCP_LABEL_TEXT_INSTRUCTION . $this->labelText . self::ESCP_LABEL_TEXT_END_INSTRUCTION . "\n";
-    }
-        
-    /**
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeWidthException
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeHeightException
-     */
-    private function setBarcodeDimensionsCode() : void
-    {
-        if (empty($this->barcodeWidth)) {
-            throw new EmptyBarcodeWidthException;
-        }
-        
-        if (empty($this->barcodeHeight)) {
-            throw new EmptyBarcodeHeightException;
-        }
-        
-        $this->zplCode[] = self::ESCP_BARCODE_DIMESIONS_INSTRUCTION . $this->barcodeWidth . ',3,' . $this->barcodeHeight . "\n";
-    }
-    
-    /**
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeXPositionException
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeYPositionException
-     * @throws App\Exceptions\Helpers\Dms\Printer\EmptyBarcodeDataException
-     */
-    private function setBarcodePositionCode() : void
-    {
-        if (empty($this->barcodeXPosition)) {
-            throw new EmptyBarcodeXPositionException;
-        }
-        
-        if (empty($this->barcodeYPosition)) {
-            throw new EmptyBarcodeYPositionException;
-        }
-        
-        if (empty($this->barcodeData)) {
-            throw new EmptyBarcodeDataException;
-        }
-        
-        $this->zplCode[] = self::ESCP_LABEL_LOCATION_INSTRUCTION . $this->barcodeXPosition . ',' . $this->barcodeYPosition . self::ESCP_BARCODE_POSITION_INSTRUCTION . self::ESCP_LABEL_TEXT_INSTRUCTION . $this->barcodeData . self::ESCP_LABEL_TEXT_END_INSTRUCTION ."\n";
+        $this->escpCode[] = self::ESCP . $left;
     }
 
+    /**
+     * Get X Whitespace
+     * 
+     * @param int $spaces
+     * @return string
+     */
+    private function getWhitespace(int $spaces = 0): string {
+        $whitespace = '';
+        if(!empty($spaces)) {
+            for($i = 0; $i < $spaces; $i++) {
+                $whitespace .= ' ';
+            }
+        }
+        return $whitespace;
+    }
 }

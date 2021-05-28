@@ -60,7 +60,7 @@ class FormController extends RestfulController
         $request = new InstructionFormRequest($requestData);
         
         if ($request->validate()) {
-            return $this->response->array($this->service->getFormInstruction($request->dealer_id, $id, $requestData));
+            return $this->response->array($this->service->getFormInstruction($id, $request->unit_sale_id));
         }
         
         return $this->response->errorBadRequest();
