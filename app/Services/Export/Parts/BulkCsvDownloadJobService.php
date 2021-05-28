@@ -65,7 +65,7 @@ class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements B
     public function setup(int $dealerId, $payload, ?string $token = null): BulkDownload
     {
         if ($this->bulkRepository->isBusyByDealer($dealerId)) {
-            throw new BusyJobException("This job can't be set up due there is currently other job working");
+//            throw new BusyJobException("This job can't be set up due there is currently other job working");
         }
 
         return $this->bulkRepository->create([
