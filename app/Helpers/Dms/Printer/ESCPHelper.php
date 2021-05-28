@@ -17,6 +17,8 @@ class ESCPHelper {
     private const ESCP_ABS_X = self::ESCP . "\x24";
     private const ESCP_END = "\x0C";
 
+    private const ESCP_BOLD_ON = self::ESCP + "\x45";
+    private const ESCP_BOLD_OFF = self::ESCP + "\x46";
     private const ESCP_FONT = self::ESCP . "\x6B";
     private const ESCP_FONT_SIZE = self::ESCP . "\x58";
 
