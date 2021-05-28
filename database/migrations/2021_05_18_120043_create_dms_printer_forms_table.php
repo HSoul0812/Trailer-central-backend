@@ -11,6 +11,7 @@ class CreateDmsPrinterFormsTable extends Migration
     const PRINTER_FORM_DR2407 = [
         'name' => 'DR2407',
         'region' => 'CO',
+        'type' => 'bill-of-sale',
         'description' => 'Dealer\'s Bill of Sales for a Motor Vehicle',
         'department' => 'Department of Revenue',
         'division' => 'Division of Motor Vehicles',
