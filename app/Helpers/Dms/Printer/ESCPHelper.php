@@ -10,22 +10,22 @@ class ESCPHelper {
 
     use HexHelper;
 
-    private const ESCP = "0x1B";
-    private const ESCP_START = "0x40";
-    private const ESCP_RESET_MARGIN = "0x4F";
-    private const ESCP_SET_MARGIN = "0x69";
-    private const ESCP_SPACE = "0x33";
-    private const ESCP_ABS_X = "0x24";
-    private const ESCP_BREAK = "0x0A";
-    private const ESCP_END = "0x0C";
+    private const ESCP = "\x1B";
+    private const ESCP_START = "\x40";
+    private const ESCP_RESET_MARGIN = "\x4F";
+    private const ESCP_SET_MARGIN = "\x69";
+    private const ESCP_SPACE = "\x33";
+    private const ESCP_ABS_X = "\x24";
+    private const ESCP_BREAK = "\x0A";
+    private const ESCP_END = "\x0C";
 
-    private const ESCP_BOLD_ON = "0x45";
-    private const ESCP_BOLD_OFF = "0x46";
-    private const ESCP_FONT = "0x6B";
-    private const ESCP_FONT_SIZE = "0x58";
+    private const ESCP_BOLD_ON = "\x45";
+    private const ESCP_BOLD_OFF = "\x46";
+    private const ESCP_FONT = "\x6B";
+    private const ESCP_FONT_SIZE = "\x58";
 
-    public const ESCP_FONT_ROMAN = "0x00";
-    public const ESCP_FONT_SANS = "0x01";
+    public const ESCP_FONT_ROMAN = "\x00";
+    public const ESCP_FONT_SANS = "\x01";
     private const ESCP_FONTS = [
         self::ESCP_FONT_ROMAN,
         self::ESCP_FONT_SANS
@@ -127,7 +127,7 @@ class ESCPHelper {
      */
     public function setFontSize(int $fontSize = 10) : void
     {
-        $this->escpCode[] = $this->escp(self::ESCP_FONT_SIZE) . "0x00" . $this->getHex($fontSize * 2) . "0x00";
+        $this->escpCode[] = $this->escp(self::ESCP_FONT_SIZE) . "\x00" . $this->getHex($fontSize * 2) . "\x00";
     }
 
 
