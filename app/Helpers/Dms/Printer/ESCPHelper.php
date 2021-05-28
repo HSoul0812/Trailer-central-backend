@@ -2,14 +2,10 @@
 
 namespace App\Helpers\Dms\Printer;
 
-use App\Traits\HexHelper;
 use App\Exceptions\Helpers\Dms\Printer\EmptyESCPCodeException;
 use App\Exceptions\Helpers\Dms\Printer\InvalidFontException;
 
 class ESCPHelper {
-
-    use HexHelper;
-
     private const ESCP = "\x1B";
     private const ESCP_START = "\x40";
     private const ESCP_RESET_MARGIN = "\x4F";
@@ -78,7 +74,7 @@ class ESCPHelper {
     public function clearMargins(): void
     {
         $this->escpCode[] = $this->escp(self::ESCP_RESET_MARGIN);
-        $this->escpCode[] = $this->escp(self::ESCP_SET_MARGIN) . $this->getHex(0) . $this->getHex(0);
+        $this->escpCode[] = $this->escp(self::ESCP_SET_MARGIN) . chr(0) . chr(0);
     }
 
     /**
@@ -89,7 +85,7 @@ class ESCPHelper {
      */
     public function setLineSpacing(int $size = 7): void
     {
-        $this->escpCode[] = $this->escp(self::ESCP_SPACE) . $this->getHex($size);
+        $this->escpCode[] = $this->escp(self::ESCP_SPACE) . chr($size);
     }
 
     /**
@@ -127,7 +123,7 @@ class ESCPHelper {
      */
     public function setFontSize(int $fontSize = 10) : void
     {
-        $this->escpCode[] = $this->escp(self::ESCP_FONT_SIZE) . "\x00" . $this->getHex($fontSize * 2) . "\x00";
+        $this->escpCode[] = $this->escp(self::ESCP_FONT_SIZE) . chr(0) . chr($fontSize * 2) . chr(0);
     }
 
 
@@ -192,7 +188,7 @@ class ESCPHelper {
      */
     private function setHorizontal(int $left = 0): void
     {
-        $this->escpCode[] = $this->escp(self::ESCP_ABS_X) . $this->getHex($left);
+        $this->escpCode[] = $this->escp(self::ESCP_ABS_X) . chr($left);
     }
 
     /**
