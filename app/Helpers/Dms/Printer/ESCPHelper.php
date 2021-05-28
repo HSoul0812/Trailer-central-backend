@@ -10,24 +10,26 @@ class ESCPHelper {
 
     use HexHelper;
 
-    /*private const ESCP = "\x1B";
-    private const ESCP_START = self::ESCP . "\x40";
-    private const ESCP_RESET_MARGIN = self::ESCP . "\x4F";
-    private const ESCP_SET_MARGIN = self::ESCP . "\x69";
-    private const ESCP_ABS_X = self::ESCP . "\x24";
+    private const ESCP = "\x1B";
+    private const ESCP_START = "\x40";
+    private const ESCP_RESET_MARGIN = "\x4F";
+    private const ESCP_SET_MARGIN = "\x69";
+    private const ESCP_SPACE = "\x33";
+    private const ESCP_ABS_X = "\x24";
+    private const ESCP_BREAK = "\x0A";
     private const ESCP_END = "\x0C";
 
-    private const ESCP_BOLD_ON = self::ESCP + "\x45";
-    private const ESCP_BOLD_OFF = self::ESCP + "\x46";
-    private const ESCP_FONT = self::ESCP . "\x6B";
-    private const ESCP_FONT_SIZE = self::ESCP . "\x58";
+    private const ESCP_BOLD_ON = "\x45";
+    private const ESCP_BOLD_OFF = "\x46";
+    private const ESCP_FONT = "\x6B";
+    private const ESCP_FONT_SIZE = "\x58";
 
     public const ESCP_FONT_ROMAN = "\x00";
     public const ESCP_FONT_SANS = "\x01";
     private const ESCP_FONTS = [
         self::ESCP_FONT_ROMAN,
         self::ESCP_FONT_SANS
-    ];*/
+    ];
 
     /**     
      * @var array
@@ -65,7 +67,7 @@ class ESCPHelper {
      */
     public function startEscpCode() : void
     {
-        $this->escpCode[] = self::ESCP_START;
+        $this->escpCode[] = $this->escp(self::ESCP_START);
     }
 
     /**
@@ -75,8 +77,8 @@ class ESCPHelper {
      */
     public function clearMargins(): void
     {
-        $this->escpCode[] = self::ESCP_RESET_MARGIN;
-        $this->escpCode[] = self::ESCP_SET_MARGIN . $this->getHex(0) . $this->getHex(0);
+        $this->escpCode[] = $this->escp(self::ESCP_RESET_MARGIN);
+        $this->escpCode[] = $this->escp(self::ESCP_SET_MARGIN) . $this->getHex(0) . $this->getHex(0);
     }
 
     /**
@@ -87,7 +89,7 @@ class ESCPHelper {
      */
     public function setLineSpacing(int $size = 7): void
     {
-        $this->escpCode[] = self::ESCP . $this->getHex($size);
+        $this->escpCode[] = $this->escp(self::ESCP_SPACE) . $this->getHex($size);
     }
 
     /**
@@ -114,7 +116,7 @@ class ESCPHelper {
             throw new InvalidFontException;
         }
 
-        $this->escpCode[] = self::ESCP_FONT . $font;
+        $this->escpCode[] = $this->escp(self::ESCP_FONT) . $font;
     }
 
     /**
@@ -125,7 +127,7 @@ class ESCPHelper {
      */
     public function setFontSize(int $fontSize = 10) : void
     {
-        $this->escpCode[] = self::ESCP_FONT_SIZE . "\x00" . $this->getHex($fontSize * 2) . "\x00";
+        $this->escpCode[] = $this->escp(self::ESCP_FONT_SIZE) . "\x00" . $this->getHex($fontSize * 2) . "\x00";
     }
 
 
@@ -156,7 +158,7 @@ class ESCPHelper {
      */
     public function makeBold(bool $on = true): void
     {
-        $this->escpCode[] = $on ? self::ESCP_BOLD_ON : self::ESCP_BOLD_OFF;
+        $this->escpCode[] = $this->escp($on ? self::ESCP_BOLD_ON : self::ESCP_BOLD_OFF);
     }
 
 
@@ -169,18 +171,28 @@ class ESCPHelper {
     public function addLineBreaks(int $lines = 0): void
     {
         for($i = 0; $i < $lines; $i++) {
-            $this->escpCode[] = "\s0A";
+            $this->escpCode[] = self::ESCP_BREAK;
         }
     }
 
 
+    /**
+     * Prefix ESCP
+     * 
+     * @param stirng $code
+     * @return string
+     */
+    private function escp(string $code): string
+    {
+        return self::ESCP . $code;
+    }
 
     /**
      * Set Horizontal Absolute
      */
     private function setHorizontal(int $left = 0): void
     {
-        $this->escpCode[] = self::ESCP . $left;
+        $this->escpCode[] = $this->escp(self::ESCP_ABS_X) . $left;
     }
 
     /**
