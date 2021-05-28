@@ -35,16 +35,13 @@ class FormService implements FormServiceInterface
     public function __construct(
         QuoteRepositoryInterface $quotes,
         FormRepositoryInterface $forms,
-        SettingsRepositoryInterface $printerSettings
+        SettingsRepositoryInterface $printerSettings,
+        ESCPHelper $helper
     ) {
         $this->quotes = $quotes;
         $this->forms = $forms;
         $this->settings = $printerSettings;
-        try {
-            $this->escpHelper = new ESCPHelper;
-        } catch(\Exception $e) {
-            Log::error($e->getMessage(), $e->getTrace());
-        }
+        $this->escpHelper = $helper;
     }
 
     /**
