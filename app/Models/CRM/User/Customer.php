@@ -208,6 +208,6 @@ class Customer extends Model
         if(strlen($this->region) < 3) {
             return $this->region;
         }
-        return $this->regionName->getKey() ?? '';
+        return $this->regionName->region_code ?? '';
     }
 }
