@@ -108,7 +108,7 @@ class FormService implements FormServiceInterface
         // Inventory to Sell
         $this->escpHelper->addText($unitSale->inventory->vin, 4);
         $this->escpHelper->addText($unitSale->inventory->year, 29);
-        $this->escpHelper->addText($this->truncate($unitSale->inventory->manufacturer, 7, true), 36, 3);
+        $this->escpHelper->addText($this->truncate($unitSale->inventory->manufacturer, 7, true), 36);
         $this->escpHelper->addText($this->getShortBody($unitSale->inventory->construction), 44, 2);
         $this->escpHelper->addText($this->truncate($unitSale->inventory->model, 12), 53, 2);
         $this->escpHelper->addLineBreaks(10);
