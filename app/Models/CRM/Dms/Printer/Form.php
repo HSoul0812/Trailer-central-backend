@@ -48,4 +48,15 @@ class Form extends Model
     public function regionCode(): BelongsTo {
         return $this->belongsTo(Region::class, 'region', 'region_code');
     }
+
+
+    /**
+     * Get Label Attribute
+     * 
+     * @return string
+     */
+    public function getLabelAttribute(): string {
+        $region = $form->regionCode->region_name ?? '';
+        return ($region ? $region . ' ' : '') . $this->description;
+    }
 }
