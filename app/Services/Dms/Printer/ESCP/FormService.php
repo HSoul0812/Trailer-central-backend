@@ -160,7 +160,7 @@ class FormService implements FormServiceInterface
 
         // Set Odometer Date
         $this->escpHelper->addText(Carbon::now()->format('n/j/Y'), 53, 2);
-        $this->escpHelper->addLineBreaks(40);
+        $this->escpHelper->addLineBreaks(41);
 
         // Customer Address
         $this->escpHelper->addText($unitSale->customer->address, 4);
