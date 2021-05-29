@@ -3,6 +3,7 @@
 namespace App\Services\Dms\Printer\ESCP;
 
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\CRM\Dms\Printer\Form;
 use App\Models\Inventory\Inventory;
 use App\Services\Dms\Printer\ESCP\FormServiceInterface;
 use App\Repositories\Dms\QuoteRepositoryInterface;
