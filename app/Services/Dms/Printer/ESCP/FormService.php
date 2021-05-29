@@ -108,8 +108,8 @@ class FormService implements FormServiceInterface
         // Inventory to Sell
         $this->escpHelper->addText($unitSale->inventory->vin, 4);
         $this->escpHelper->addText($unitSale->inventory->year, 29);
-        $this->escpHelper->addText($this->truncate($unitSale->inventory->manufacturer, 7, true), 37);
-        $this->escpHelper->addText($this->getShortBody($unitSale->inventory->construction), 43, 5);
+        $this->escpHelper->addText($this->truncate($unitSale->inventory->manufacturer, 7, true), 36, 3);
+        $this->escpHelper->addText($this->getShortBody($unitSale->inventory->construction), 44, 2);
         $this->escpHelper->addText($this->truncate($unitSale->inventory->model, 12), 53, 2);
         $this->escpHelper->addLineBreaks(10);
 
@@ -205,6 +205,11 @@ class FormService implements FormServiceInterface
      * @return string
      */
     private function truncate(string $text, int $max, bool $strip = false): string {
+        // Too Long?
+        if(strlen($text) <= $max) {
+            return $text;
+        }
+
         // Strip Non-Alphanumeric Characters?
         if($strip) {
             $text = preg_replace("/[^0-9A-Za-z]/", "", $text);
