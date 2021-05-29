@@ -134,6 +134,7 @@ class Inventory extends Model
     const CONSTRUCTION_ATTRIBUTE_ID = 2;
     const COLOR_ATTRIBUTE_ID = 11;
     const FUEL_TYPE_ATTRIBUTE_ID = 14;
+    const MILEAGE_ATTRIBUTE_ID = 16;
 
     const TABLE_NAME = 'inventory';
 
@@ -440,6 +441,20 @@ class Inventory extends Model
     {
         // Get Attribute
         $attribute = $this->attributeValues()->where('attribute_id', self::FUEL_TYPE_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
+    }
+
+    /**
+     * Get Mileage
+     * 
+     * @return string
+     */
+    public function getMileageAttribute(): ?string
+    {
+        // Get Attribute
+        $attribute = $this->attributeValues()->where('attribute_id', self::MILEAGE_ATTRIBUTE_ID)->first();
 
         // Return Value
         return $attribute->value ?? '';
