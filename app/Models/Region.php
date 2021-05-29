@@ -27,6 +27,20 @@ class Region extends Model
     protected $primaryKey = 'region_code';
 
     /**
+     * Primary Key Doesn't Auto Increment
+     * 
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * Set String Primary Key
+     * 
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array

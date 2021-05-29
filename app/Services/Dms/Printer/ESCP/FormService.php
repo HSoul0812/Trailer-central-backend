@@ -108,9 +108,9 @@ class FormService implements FormServiceInterface
         // Inventory to Sell
         $this->escpHelper->addText($unitSale->inventory->vin, 4);
         $this->escpHelper->addText($unitSale->inventory->year, 29);
-        $this->escpHelper->addText($unitSale->inventory->manufacturer, 37);
+        $this->escpHelper->addText($this->truncate($unitSale->inventory->manufacturer, 7, true), 36);
         $this->escpHelper->addText($this->getShortBody($unitSale->inventory->construction), 44, 2);
-        $this->escpHelper->addText($unitSale->inventory->model, 53, 2);
+        $this->escpHelper->addText($this->truncate($unitSale->inventory->model, 12), 53, 2);
         $this->escpHelper->addLineBreaks(10);
 
         // Set Fuel Type
@@ -165,7 +165,7 @@ class FormService implements FormServiceInterface
         // Customer Address
         $this->escpHelper->addText($unitSale->customer->address, 4);
         $this->escpHelper->addText($unitSale->customer->city, 29);
-        $this->escpHelper->addText($unitSale->customer->region, 44, 2);
+        $this->escpHelper->addText($unitSale->customer->region_code, 44, 2);
         $this->escpHelper->addText($unitSale->customer->postal_code, 53, 2);
 
         // Bottom Row
@@ -194,5 +194,29 @@ class FormService implements FormServiceInterface
 
         // Return Empty
         return '';
+    }
+
+    /**
+     * Truncate Text for Print
+     * 
+     * @param string $text
+     * @param int $max
+     * @param bool $strip strips out non-alpha characters (spaces, hyphens, etc)
+     * @return string
+     */
+    private function truncate(string $text, int $max, bool $strip = false): string {
+        // Too Long?
+        if(strlen($text) <= $max) {
+            return $text;
+        }
+
+        // Strip Non-Alphanumeric Characters?
+        if($strip) {
+            $text = preg_replace("/[^0-9A-Za-z]/", "", $text);
+        }
+        $clean = trim($text);
+
+        // Truncate to Max Value
+        return trim(substr($clean, 0, $max));
     }
 }
