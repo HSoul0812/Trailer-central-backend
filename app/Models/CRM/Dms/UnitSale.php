@@ -11,6 +11,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
 use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
 use App\Models\CRM\Dms\Quickbooks\Item;
+use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User\User;
 use App\Models\CRM\Dms\UnitSale\TradeIn;
