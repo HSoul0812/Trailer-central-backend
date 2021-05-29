@@ -56,7 +56,7 @@ class Form extends Model
      * @return string
      */
     public function getLabelAttribute(): string {
-        $region = ucwords(strotolower($this->regionCode->region_name ?? ''));
+        $region = \ucwords(\strotolower($this->regionCode->region_name ?? ''));
         return ($region ? $region . ' ' : '') . $this->description;
     }
 }
