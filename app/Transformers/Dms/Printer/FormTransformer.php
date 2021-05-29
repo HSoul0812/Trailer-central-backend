@@ -16,7 +16,6 @@ class FormTransformer extends TransformerAbstract
             'type' => $form->type,
             'region' => $form->region,
             'region_name' => $form->regionCode->region_name ?? '',
-            'label' => $form->label,
             'description' => $form->description,
             'department' => $form->department,
             'division' => $form->division,
