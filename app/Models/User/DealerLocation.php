@@ -206,4 +206,33 @@ class DealerLocation extends Model
 
         return $numberOfInventories || $numberOfReferences;
     }
+
+
+    /**
+     * Return Whatever License Number We Can Find
+     * 
+     * @return string
+     */
+    public function getLicenseNumberAttribute(): string {
+        // Get Dealer License Number
+        $licenseNo = $this->dealer_license_no;
+
+        // Get Federal Number
+        if(empty($licenseNo)) {
+            $licenseNo = $this->federal_id;
+        }
+
+        // Get State License Number
+        if(empty($licenseNo)) {
+            $licenseNo = $this->state_issued;
+        }
+
+        // Get County License Number
+        if(empty($licenseNo)) {
+            $licenseNo = $this->county_issued;
+        }
+
+        // Return License Number
+        return $licenseNo ?: '';
+    }
 }
