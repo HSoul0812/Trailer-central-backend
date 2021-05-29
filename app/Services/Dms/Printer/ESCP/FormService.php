@@ -3,12 +3,13 @@
 namespace App\Services\Dms\Printer\ESCP;
 
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\Inventory\Inventory;
 use App\Services\Dms\Printer\ESCP\FormServiceInterface;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Dms\Printer\FormRepositoryInterface;
 use App\Repositories\Dms\Printer\SettingsRepositoryInterface;
 use App\Helpers\Dms\Printer\ESCPHelper;
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class FormService implements FormServiceInterface 
 {
@@ -88,65 +89,81 @@ class FormService implements FormServiceInterface
 
         // Previous Bill of Sale
         $this->escpHelper->addLineBreaks(10);
-        $this->escpHelper->addText("DR2407", 53);
+        //$this->escpHelper->addText("DR2407", 53);
         $this->escpHelper->addLineBreaks(21);
 
         // Dealer Name
-        $this->escpHelper->addText("Colorado Trailers Inc.", 4);
-        $this->escpHelper->addText("DL - 237298", 44, 2);
+        $this->escpHelper->addText($unitSale->dealer->name, 4);
+        $this->escpHelper->addText($unitSale->inventory->dealerLocation->license_number, 44, 2);
         $this->escpHelper->addLineBreaks(10);
 
-        // Address
-        $this->escpHelper->addText("100 Main Street", 4);
-        $this->escpHelper->addText("Springfield", 29);
-        $this->escpHelper->addText("TN", 44, 2);
-        $this->escpHelper->addText("29021", 53, 2);
+        // Dealer Address
+        $this->escpHelper->addText($unitSale->inventory->dealerLocation->address, 4);
+        $this->escpHelper->addText($unitSale->inventory->dealerLocation->city, 29);
+        $this->escpHelper->addText($unitSale->inventory->dealerLocation->region, 44, 2);
+        $this->escpHelper->addText($unitSale->inventory->dealerLocation->postalcode, 53, 2);
         $this->escpHelper->addLineBreaks(10);
 
         // Inventory to Sell
-        $this->escpHelper->addText("1HD1FMW166Y641723", 4);
-        $this->escpHelper->addText("2020", 29);
-        $this->escpHelper->addText("AMER", 37);
-        $this->escpHelper->addText("Alum", 44, 2);
-        $this->escpHelper->addText("Rebel", 53, 2);
+        $this->escpHelper->addText($unitSale->inventory->vin, 4);
+        $this->escpHelper->addText($unitSale->inventory->year, 29);
+        $this->escpHelper->addText($unitSale->inventory->manufacturer, 37);
+        $this->escpHelper->addText(Form::SHORT_BODY[$unitSale->inventory->construction], 44, 2);
+        $this->escpHelper->addText($unitSale->inventory->model, 53, 2);
         $this->escpHelper->addLineBreaks(10);
 
-        // Checkboxes / Date
+        // Set Fuel Type
         $this->escpHelper->makeBold();
-        $this->escpHelper->addText("X", 3, 4);
-        $this->escpHelper->addText("X", 8, 2);
-        $this->escpHelper->addText("X", 14, 4);
-        $this->escpHelper->addText("X", 22, 2);
-        $this->escpHelper->addText("X", 29);
-        $this->escpHelper->addText("X", 36);
+        switch($unitSale->inventory->fuel_type) {
+            case "gas":
+                $this->escpHelper->addText("X", 3, 4);
+            break;
+            case "diesel":
+                $this->escpHelper->addText("X", 8, 2);
+            break;
+            case "electric":
+                $this->escpHelper->addText("X", 14, 4);
+            break;
+            default:
+                $this->escpHelper->addText("X", 22, 2);
+            break;
+        }
+
+        // Set Condition
+        $this->escpHelper->addText("X", ($unitSale->inventory->condition === Inventory::CONDITION_NEW) ? 29 : 36);
         $this->escpHelper->makeBold(false);
-        $this->escpHelper->addText("19999.99", 55, 2);
+
+        // Set Price
+        $this->escpHelper->addText($unitSale->inventory->price, 55, 2);
         $this->escpHelper->addLineBreaks(10);
 
         // Customer
-        $this->escpHelper->addText("Jane Doe", 13);
-        $this->escpHelper->addText("05/26/2021", 53);
+        $this->escpHelper->addText($unitSale->customer->display_full_name, 13);
+        $this->escpHelper->addText(Carbon::now()->format('n/j/Y'), 53);
         $this->escpHelper->addLineBreaks(31);
 
         // Odometer
-        $this->escpHelper->addText("90,000", 50);
+        $this->escpHelper->addText($unitSale->inventory->miles, 50);
         $this->escpHelper->addLineBreaks(10);
         $this->escpHelper->makeBold();
         $this->escpHelper->addText("X", 4);
-        $this->escpHelper->addLineBreaks(10);
+        $this->escpHelper->makeBold(false);
+        $this->escpHelper->addLineBreaks(31);
+        /*$this->escpHelper->addLineBreaks(10);
         $this->escpHelper->addText("X", 4);
         $this->escpHelper->addLineBreaks(9);
         $this->escpHelper->addText("X", 4);
-        $this->escpHelper->makeBold(false);
-        $this->escpHelper->addLineBreaks(12);
-        $this->escpHelper->addText("05/26/2021", 53, 2);
-        $this->escpHelper->addLineBreaks(41);
+        $this->escpHelper->addLineBreaks(12);*/
 
-        // Address (Bottom)
-        $this->escpHelper->addText("100 Main Street", 4);
-        $this->escpHelper->addText("Springfield", 29);
-        $this->escpHelper->addText("TN", 44, 2);
-        $this->escpHelper->addText("29021", 53, 2);
+        // Set Odometer Date
+        $this->escpHelper->addText(Carbon::now()->format('n/j/Y'), 53, 2);
+        $this->escpHelper->addLineBreaks(40);
+
+        // Customer Address
+        $this->escpHelper->addText($unitSale->customer->address, 4);
+        $this->escpHelper->addText($unitSale->customer->city, 29);
+        $this->escpHelper->addText($unitSale->customer->region, 44, 2);
+        $this->escpHelper->addText($unitSale->customer->postal_code, 53, 2);
 
         // Bottom Row
         //$this->escpHelper->addLineBreaks(10);

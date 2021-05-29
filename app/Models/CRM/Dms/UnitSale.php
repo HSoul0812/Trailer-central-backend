@@ -78,6 +78,11 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->hasMany(TradeIn::class, 'unit_sale_id');
     }
 
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
     public function extraInventory()
     {
         return $this->hasMany(UnitSaleInventory::class, 'quote_id', 'id');

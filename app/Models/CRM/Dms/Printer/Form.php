@@ -18,6 +18,14 @@ class Form extends Model
         'bill-of-sale'
     ];
 
+    public const SHORT_BODY = [
+        'aluminum' => 'Alum',
+        'steel_frame_aluminum' => 'StlAlum',
+        'composite' => 'Comp',
+        'steel' => 'Steel',
+        'galvanized' => 'Galv'
+    ];
+
     public const TABLE_NAME = "dms_printer_forms";
 
     public $timestamps = false;

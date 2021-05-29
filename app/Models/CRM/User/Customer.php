@@ -136,7 +136,28 @@ class Customer extends Model
 
         return $array;
     }
-    
+
+
+    /**
+     * Returns the customer full name
+     * 
+     * @return string
+     */
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    /**
+     * Returns the customer display or full name
+     * 
+     * @return string
+     */
+    public function getDisplayFullNameAttribute(): string
+    {
+        return $this->display_name ?: $this->full_name;
+    }
+
     /**
      * Returns the customer age in years
      * 
