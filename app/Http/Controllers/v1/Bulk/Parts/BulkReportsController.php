@@ -75,21 +75,29 @@ class BulkReportsController extends MonitoredJobsController
      *     tags={"BulkReportParts"},
      *     @OA\Parameter(
      *         name="dealer_id",
+     *         in="path",
      *         description="The dealer ID.",
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="search_term",
+     *         in="path",
      *         description="Search by sku/stock, title and bin_name",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
      *         name="type_of_stock",
+     *         in="path",
      *         description="Type of data, ot could be inventories, parts and mixed",
      *         required=false,
      *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
      *     )
      * )
      */
@@ -124,27 +132,36 @@ class BulkReportsController extends MonitoredJobsController
      *     tags={"BulkReportParts"},
      *     @OA\Parameter(
      *         name="dealer_id",
+     *         in="path",
      *         description="The dealer ID.",
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="token",
+     *         in="path",
      *         description="The token for the job.",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
      *         name="search_term",
+     *         in="path",
      *         description="Search by sku/stock, title and bin_name",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
      *         name="type_of_stock",
+     *         in="path",
      *         description="Type of data, ot could be inventories, parts and mixed",
      *         required=false,
      *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
      *     )
      * )
      */
@@ -186,18 +203,4 @@ class BulkReportsController extends MonitoredJobsController
             fpassthru(Storage::disk('tmp')->readStream($payload->filename));
         }, $payload->filename);
     }
-
-    /**
-     * @OA\Get(
-     *     path="/api/reports/read",
-     *     description="Download the completed file created from the request",
-     *     tags={"BulkReportParts"},
-     *     @OA\Parameter(
-     *         name="token",
-     *         in="query",
-     *         description="The job token",
-     *         required=true
-     *     )
-     * )
-     */
 }

@@ -16,6 +16,9 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
 
     private const STATUS_COMPLETE = 'completed';
     private const STATUS_INCOMPLETE = 'incomplete';
+    
+    private const COMPLETED_ON_TYPE_TECH = 'tech_completed_on';
+    private const COMPLETED_ON_TYPE_RO = 'ro_completed_on';
 
     public function __construct(Builder $baseQuery)
     {
@@ -62,9 +65,25 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
             'dealerId4' => $params['dealer_id'],
         ];
         $where = 'WHERE technician.dealer_id = :dealerId ';
+        
+        $closedAtField = 's_technician.completed_date';
+        
+        if (!empty($params['completed_on_type']) && !empty($params['completed_on_type'])) {
+            switch($params['completed_on_type']) {
+                case self::COMPLETED_ON_TYPE_RO:                    
+                    $closedAtField = 'r_order.closed_at';
+                    break;
+                case self::COMPLETED_ON_TYPE_TECH:
+                    $closedAtField = 's_technician.completed_date';
+                    break;
+                default:
+                    $closedAtField = 's_technician.completed_date';
+                    break;
+            }
+        } 
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
-            $where .= " AND DATE(s_technician.completed_date) BETWEEN :fromDate AND :toDate ";
+            $where .= " AND DATE($closedAtField) BETWEEN :fromDate AND :toDate ";
             $dbParams['fromDate'] = $params['from_date'];
             $dbParams['toDate'] = $params['to_date'];
         }

@@ -42,6 +42,11 @@ class SmtpConfig
      */
     const AUTH_NTLM = 'NTLM';
 
+    /**
+     * @const string Auth SMTP
+     */
+    const AUTH_SMTP = 'SMTP';
+
 
     /**
      * @var string From Name for SMTP
@@ -246,6 +251,20 @@ class SmtpConfig
     public function getAuthType(): ?string
     {
         return $this->authType;
+    }
+
+    /**
+     * Return Auth Configuration Type
+     * 
+     * @return string $this->authType
+     */
+    public function getAuthConfig(): string
+    {
+        if($this->getAuthType() === self::AUTH_GMAIL ||
+           $this->getAuthType() === self::AUTH_NTLM) {
+            return $this->authType;
+        }
+        return self::AUTH_SMTP;
     }
 
     /**

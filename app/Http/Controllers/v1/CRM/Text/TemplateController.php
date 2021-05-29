@@ -46,7 +46,7 @@ class TemplateController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -151,7 +151,7 @@ class TemplateController extends RestfulControllerV2
     }
     
     /**
-     * @OA\Text(
+     * @OA\Put(
      *     path="/api/crm/{userId}/texts/template/{id}",
      *     description="Update a template",
      * 
