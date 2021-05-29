@@ -8,6 +8,7 @@ use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Account\Payment;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @author Marcel
@@ -163,6 +164,20 @@ class QuoteRepository implements QuoteRepositoryInterface {
             return;
         }
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    public function getCompletedDeals(int $dealerId): Collection 
+    {
+        return UnitSale::where('dealer_id', '=', $dealerId)
+                ->where('is_archived', '=', 0)
+                ->where(function($query) {
+                    $query->where('is_po', '=', 1)
+                        ->orWhereHas('payments', function($query) {
+                            $query->select(DB::raw('sum(amount) as paid_amount'))
+                                ->groupBy('unit_sale_id')
+                                ->havingRaw('paid_amount >= dms_unit_sale.total_price');
+                        });
+                })->orderBy('created_at', 'asc')->get();
     }
 
 }

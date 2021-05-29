@@ -39,7 +39,7 @@ class PartOrdersController extends RestfulController
 
     /**
      * @OA\Put(
-     *     path="/api/parts/",
+     *     path="/api/parts-order/",
      *     description="Create a part",
      *     tags={"Parts"},
      *     @OA\Parameter(
@@ -74,7 +74,7 @@ class PartOrdersController extends RestfulController
 
     /**
      * @OA\Delete(
-     *     path="/api/parts/{id}",
+     *     path="/api/parts-order/{id}",
      *     description="Delete a part",
      *     tags={"Parts"},
      *     @OA\Parameter(
@@ -108,7 +108,7 @@ class PartOrdersController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/parts",
+     *     path="/api/parts-order",
      *     description="Retrieve a list of parts",
 
      *     tags={"Parts"},
@@ -149,7 +149,7 @@ class PartOrdersController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/parts/{id}",
+     *     path="/api/parts-order/{id}",
      *     description="Retrieve a part",
 
      *     tags={"Parts"},
@@ -183,7 +183,7 @@ class PartOrdersController extends RestfulController
 
     /**
      * @OA\Post(
-     *     path="/api/parts/{id}",
+     *     path="/api/parts-order/{id}",
      *     description="Update a part",
 
      *     tags={"Parts"},

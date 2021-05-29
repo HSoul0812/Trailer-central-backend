@@ -169,9 +169,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $blast = $this->blasts->get(['id' => $id]);
 
         // Get Sales Person
-        $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
-        if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
+        if(!empty($blast->from_email_address)) {
+            $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
         }
 
         // Create Email Builder Email!
@@ -183,9 +185,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $blast->template->template_id,
             'dealer_id' => $blast->newDealerUser->id,
             'user_id' => $blast->user_id,
-            'sales_person_id' => $salesPerson->id,
-            'from_email' => $blast->from_email_address,
-            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
+            'sales_person_id' => $salesPerson->id ?? 0,
+            'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail(),
+            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
         // Send Emails and Return Response
@@ -210,9 +212,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $campaign = $this->campaigns->get(['id' => $id]);
 
         // Get Sales Person
-        $salesPerson = $this->salespeople->getBySmtpEmail($campaign->user_id, $campaign->from_email_address);
-        if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
+        if(!empty($campaign->from_email_address)) {
+            $salesPerson = $this->salespeople->getBySmtpEmail($campaign->user_id, $campaign->from_email_address);
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
         }
 
         // Create Email Builder Email!
@@ -224,9 +228,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $campaign->template->template_id,
             'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
-            'sales_person_id' => $salesPerson->id,
-            'from_email' => $campaign->from_email_address,
-            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
+            'sales_person_id' => $salesPerson->id ?? 0,
+            'from_email' => $campaign->from_email_address ?: $this->getDefaultFromEmail(),
+            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
         // Send Emails and Return Response
@@ -269,6 +273,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         if(empty($salesPerson->id)) {
             throw new FromEmailMissingSmtpConfigException;
         }
+        $fromEmail = $salesPerson->smtp_email;
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
@@ -280,7 +285,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
             'sales_person_id' => $salesPerson->id,
-            'from_email' => !empty($fromEmail) ? $fromEmail : $salesPerson->smtp_email,
+            'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
             'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
 
@@ -330,7 +335,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $parsedEmail = $config->getParsedEmail($emailId);
 
         // Get SMTP Config
-        if(!empty($config->smtpConfig->isAuthTypeGmail())) {
+        if(!empty($config->isAuthTypeGmail())) {
             // Get Access Token
             $accessToken = $this->refreshAccessToken($config->smtpConfig->accessToken);
             $config->smtpConfig->setAccessToken($accessToken);
@@ -339,7 +344,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $finalEmail = $this->gmail->send($config->smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
-        elseif(!empty($config->smtpConfig->isAuthTypeNtlm())) {
+        elseif(!empty($config->isAuthTypeNtlm())) {
             // Send NTLM Email
             $finalEmail = $this->ntlm->send($config->dealerId, $config->smtpConfig, $parsedEmail);
         }
@@ -354,6 +359,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Return Final Email
+        $this->log->info('Sent Email ' . $config->type . ' #' . $config->id .
+                         ' via ' . $config->getAuthConfig() .
+                         ' to: ' . $finalEmail->getTo());
         return $finalEmail;
     }
 
@@ -438,7 +446,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
                 // Send Notice
                 $sentLeads->push($leadId);
-                $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $leadId);
+                $this->log->info('Sent Email ' . $builder->type . ' #' .
+                        $builder->id . ' to Lead with ID: ' . $leadId);
             } catch(\Exception $ex) {
                 $this->log->error($ex->getMessage(), $ex->getTrace());
                 $errorLeads->push($leadId);
@@ -473,10 +482,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->dispatch($job->onQueue('mails'));
 
             // Send Notice
-            $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email: ' . $toEmail);
+            $this->log->info('Sent Email ' . $builder->type . ' #' .
+                    $builder->id . ' to Email: ' . $toEmail);
 
             // Return Response Array
-            return $this->response($builder);
+            return $this->response($builder, new Collection([$builder->id]));
         } catch(\Exception $ex) {
             $this->log->error($ex->getMessage(), $ex->getTrace());
             throw new SendBuilderEmailsFailedException;
@@ -494,11 +504,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     private function response(BuilderEmail $builder, ?Collection $sent = null, ?Collection $errors = null): array {
         // Handle Logging
         if($sent !== null) {
-            $this->log->info('Queued ' . $sent->count() . ' Email ' . $builder->type .
-                    '(s) for Dealer #' . $builder->userId);
+            $this->log->info('Queued ' . $sent->count() . ' Email ' .
+                    $builder->type . '(s) for Dealer #' . $builder->userId);
         }
         if($errors !== null && $errors->count() > 0) {
-            $this->log->info('Errors Occurring Trying to Queue ' . $errors->count() . ' Email ' . $builder->type .
+            $this->log->info('Errors Occurring Trying to Queue ' .
+                    $errors->count() . ' Email ' . $builder->type .
                     '(s) for Dealer #' . $builder->userId);
         }
 

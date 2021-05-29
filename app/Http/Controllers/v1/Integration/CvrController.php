@@ -51,12 +51,14 @@ class CvrController extends MonitoredJobsController
      *     operationId="create",
      *     @OA\Parameter(
      *         name="dealer_id",
+     *         in="path",
      *         description="The dealer ID.",
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="token",
+     *         in="path",
      *         description="The token for the job.",
      *         required=false,
      *         @OA\Schema(type="string")
@@ -66,41 +68,42 @@ class CvrController extends MonitoredJobsController
      *         description="Enqueue a CVR file to be sent",
      *         content={
      *              @OA\MediaType(
-     *              mediaType="application/json",
-     *              @OA\Schema(
-     *                  type="object",
-     *                  @OA\Property(
-     *                      property="data",
-     *                      description="data wrapper",
-     *                      type="object"
+     *                  mediaType="application/json",
+     *                  @OA\Schema(
+     *                      type="object",
      *                      @OA\Property(
-     *                          property="id",
-     *                          description="uuid of the queued job",
-     *                          type="string"
-     *                      ),
-     *                      @OA\Property(
-     *                          property="status",
-     *                          description="status of the queued job",
-     *                          type="string",
-     *                          enum={"pending", "processing", "completed", "failed"},
-     *                      ),
-     *                      @OA\Property(
-     *                          property="errors",
-     *                          description="job time sending errors",
-     *                          type="array",
-     *                          @OA\Items(
+     *                          property="data",
+     *                          description="data wrapper",
+     *                          type="object",
+     *                          @OA\Property(
+     *                              property="id",
+     *                              description="uuid of the queued job",
+     *                              type="string"
+     *                          ),
+     *                          @OA\Property(
+     *                              property="status",
+     *                              description="status of the queued job",
+     *                              type="string",
+     *                              enum={"pending", "processing", "completed", "failed"},
+     *                          ),
+     *                          @OA\Property(
+     *                              property="errors",
+     *                              description="job time sending errors",
      *                              type="array",
-     *                              @OA\Items({type="string"})
+     *                              @OA\Items(
+     *                                  type="array",
+     *                                  @OA\Items(type="string")
+     *                              ),
      *                          ),
      *                      ),
-     *                  ),
-     *                  example={
-     *                      "data": {
-     *                          "id": "237b164c-b0ff-4ba2-82f9-682647599f5c",
-     *                          "status": "pending",
-     *                          "errors": []
+     *                      example={
+     *                          "data": {
+     *                              "id": "237b164c-b0ff-4ba2-82f9-682647599f5c",
+     *                              "status": "pending",
+     *                              "errors": {}
+     *                          }
      *                      }
-     *                  }
+     *                  )
      *              )
      *         }
      *     ),
@@ -117,7 +120,7 @@ class CvrController extends MonitoredJobsController
      *                         description="The response errors collection",
      *                         @OA\Items(
      *                              type="array",
-     *                              @OA\Items({type="string"})
+     *                              @OA\Items(type="string")
      *                          ),
      *                     ),
      *                     @OA\Property(
@@ -133,9 +136,7 @@ class CvrController extends MonitoredJobsController
      *                     example={
      *                          "message": "Validation Failed",
      *                          "errors": {
-     *                              "document": [
-     *                                  "The dealer_id field is required."
-     *                              ]
+     *                              "document": "The dealer_id field is required."
      *                          },
      *                          "status_code": 422
      *                      }

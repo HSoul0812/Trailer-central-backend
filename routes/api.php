@@ -160,6 +160,12 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Inventory Entity
+     */
+    
+    $route->get('inventory/entity', 'App\Http\Controllers\v1\Inventory\EntityController@index');
+    
+    /**
      * Inventory Manufacturers
      */
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');

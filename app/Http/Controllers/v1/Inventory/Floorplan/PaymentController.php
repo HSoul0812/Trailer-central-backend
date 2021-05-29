@@ -94,14 +94,14 @@ class PaymentController extends RestfulController
     /**
      * @OA\Put(
      *     path="/api/inventory/floorplan/payments",
-     *     description="Create a floorplan payment
+     *     description="Create a floorplan payment",
      *     tags={"Floorplan Payments"},
      *     @OA\Parameter(
      *         name="inventory_id",
      *         in="query",
      *         description="Inventory ID",
      *         required=true,
-     *         @OA\Schema(@OA\Schema(type="integer"))
+     *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="type",
@@ -145,8 +145,8 @@ class PaymentController extends RestfulController
      *     ),
      *     @OA\Response(
      *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
+     *         description="Error: Bad request."
+     *     )
      * )
      */
     public function create(Request $request) {

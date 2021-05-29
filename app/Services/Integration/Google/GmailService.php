@@ -151,7 +151,7 @@ class GmailService implements GmailServiceInterface
             $message = $this->prepareMessage($parsedEmail);
         } catch (\Exception $e) {
             if(strpos($e->getMessage(), 'Address in mailbox given') !== FALSE) {
-                throw new InvalidToEmailAddressException;
+                throw new InvalidToEmailAddressException($e->getMessage());
             }
             throw new FailedInitializeGmailMessageException($e->getMessage() . ': ' . $e->getTraceAsString());
         }

@@ -395,7 +395,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
-        
+                
         if (isset($params['dealer_location_id'])) {
             $query = $query->where('inventory.dealer_location_id', $params['dealer_location_id']);
         }
@@ -415,12 +415,16 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
+        
+        if (isset($params['is_archived'])) {
+            $query = $query->where('inventory.is_archived', $params['is_archived']);
+        }
 
         if (isset($params[self::CONDITION_AND_WHERE_IN]) && is_array($params[self::CONDITION_AND_WHERE_IN])) {
             foreach ($params[self::CONDITION_AND_WHERE_IN] as $field => $values) {
                 $query = $query->whereIn($field, $values);
             }
-        }
+        } 
 
         if (isset($params['floorplan_vendor'])) {
             $query = $query->where('fp_vendor', $params['floorplan_vendor']);

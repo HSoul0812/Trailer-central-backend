@@ -85,6 +85,15 @@ class FinancingCompanyController extends RestfulControllerV2
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
      * )
      */
     public function show($id, Request $request)
@@ -106,6 +115,15 @@ class FinancingCompanyController extends RestfulControllerV2
      * @OA\Post(
      *     path="/api/dms/financing-companies",
      *     description="create a financing company object",
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
      * )
      */
     public function create(Request $request)
@@ -130,6 +148,15 @@ class FinancingCompanyController extends RestfulControllerV2
      *         description="Primary key",
      *         required=true,
      *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
      *     ),
      * )
      */
@@ -157,6 +184,15 @@ class FinancingCompanyController extends RestfulControllerV2
      *         description="Primary key",
      *         required=true,
      *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
      *     ),
      * )
      */    

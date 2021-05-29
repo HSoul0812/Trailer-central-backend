@@ -16,6 +16,7 @@ use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
+use Illuminate\Http\UploadedFile;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -72,6 +73,12 @@ class InteractionService implements InteractionServiceInterface
             $attachments = array_merge($attachments, $params['attachments']);
         } else {
             $params['attachments'] = $attachments;
+        }
+        
+        foreach($params['attachments'] as $key => $attachment) {
+            if (!is_a($attachment, UploadedFile::class)) {
+                unset($params['attachments'][$key]);
+            }
         }
 
         // Get SMTP Config
