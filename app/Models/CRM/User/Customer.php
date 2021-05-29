@@ -205,12 +205,9 @@ class Customer extends Model
      */
     public function getRegionCodeAttribute() : string
     {
-        var_dump($this->region);
         if(strlen($this->region) < 3) {
             return $this->region;
         }
-        var_dump($this->regionName);
-        var_dump($this->regionName->region_code);
-        return $this->regionName->region_code ?? '';
+        return $this->regionName->getKey() ?? '';
     }
 }
