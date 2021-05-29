@@ -131,7 +131,7 @@ class Inventory extends Model
 {
     use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
 
-    const CONSTRUCTION_ATTRIBUTE_ID = 11;
+    const CONSTRUCTION_ATTRIBUTE_ID = 2;
     const COLOR_ATTRIBUTE_ID = 11;
     const FUEL_TYPE_ATTRIBUTE_ID = 14;
 

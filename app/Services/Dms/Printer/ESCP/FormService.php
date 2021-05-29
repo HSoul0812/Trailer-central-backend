@@ -109,7 +109,7 @@ class FormService implements FormServiceInterface
         $this->escpHelper->addText($unitSale->inventory->vin, 4);
         $this->escpHelper->addText($unitSale->inventory->year, 29);
         $this->escpHelper->addText($unitSale->inventory->manufacturer, 37);
-        $this->escpHelper->addText(Form::SHORT_BODY[$unitSale->inventory->construction], 44, 2);
+        $this->escpHelper->addText($this->getShortBody($unitSale->inventory->construction), 44, 2);
         $this->escpHelper->addText($unitSale->inventory->model, 53, 2);
         $this->escpHelper->addLineBreaks(10);
 
@@ -175,5 +175,22 @@ class FormService implements FormServiceInterface
         // Return Result Code From Helper
         $this->escpHelper->endEscpCode();
         return $this->escpHelper->getCode();
+    }
+
+
+    /**
+     * Get Short Body
+     * 
+     * @param null|string $body
+     * @return string
+     */
+    private function getShortBody(?string $body): string {
+        // Find Shortened Body!
+        if(!empty(Form::SHORT_BODY[$body])) {
+            return Form::SHORT_BODY[$body];
+        }
+
+        // Return Empty
+        return '';
     }
 }
