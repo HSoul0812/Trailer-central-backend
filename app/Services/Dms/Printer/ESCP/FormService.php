@@ -91,7 +91,7 @@ class FormService implements FormServiceInterface
         // Previous Bill of Sale
         $this->escpHelper->addLineBreaks(10);
         //$this->escpHelper->addText("DR2407", 53);
-        $this->escpHelper->addLineBreaks(21);
+        $this->escpHelper->addLineBreaks(19);
 
         // Dealer Name
         $this->escpHelper->addText($unitSale->dealer->name, 4);
@@ -151,7 +151,7 @@ class FormService implements FormServiceInterface
             $this->escpHelper->addText("X", 4);
             $this->escpHelper->makeBold(false);
         }
-        $this->escpHelper->addLineBreaks(31);
+        $this->escpHelper->addLineBreaks(30);
         /*$this->escpHelper->addLineBreaks(10);
         $this->escpHelper->addText("X", 4);
         $this->escpHelper->addLineBreaks(9);
