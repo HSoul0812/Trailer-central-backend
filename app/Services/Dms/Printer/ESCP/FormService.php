@@ -144,7 +144,7 @@ class FormService implements FormServiceInterface
         $this->escpHelper->addLineBreaks(31);
 
         // Odometer
-        $this->escpHelper->addText($unitSale->inventory->miles, 50);
+        $this->escpHelper->addText($unitSale->inventory->mileage, 50);
         $this->escpHelper->addLineBreaks(10);
         $this->escpHelper->makeBold();
         $this->escpHelper->addText("X", 4);
