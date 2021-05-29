@@ -36,7 +36,7 @@ class FormController extends RestfulController
         $request = new GetFormRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->collection($this->repository->getAll($request->all()), new FormTransformer());
+            return $this->response->paginator($this->repository->getAll($request->all()), new FormTransformer());
         }
         
         return $this->response->errorBadRequest();

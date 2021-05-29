@@ -9,6 +9,42 @@ use App\Models\Region;
 
 class FormRepository implements FormRepositoryInterface {
 
+    private $sortOrders = [
+        'name' => [
+            'field' => 'name',
+            'direction' => 'DESC'
+        ],
+        '-name' => [
+            'field' => 'name',
+            'direction' => 'ASC'
+        ],
+        'region' => [
+            'field' => 'region',
+            'direction' => 'DESC'
+        ],
+        '-region' => [
+            'field' => 'region',
+            'direction' => 'ASC'
+        ],
+        'department' => [
+            'field' => 'department',
+            'direction' => 'DESC'
+        ],
+        '-department' => [
+            'field' => 'department',
+            'direction' => 'ASC'
+        ],
+        'division' => [
+            'field' => 'division',
+            'direction' => 'DESC'
+        ],
+        '-division' => [
+            'field' => 'department',
+            'direction' => 'ASC'
+        ]
+    ];
+
+
     public function create($params) {
         throw new NotImplementedException;
     }
@@ -37,6 +73,10 @@ class FormRepository implements FormRepositoryInterface {
     public function getAll($params) {
         $query = Form::where('id', '>', 0)
                         ->leftJoin(Region::getTableName(), Form::getTableName().'.region', '=', Region::getTableName().'.region_code');
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
 
         // Search Term
         if(isset($params['search_term'])) {
@@ -73,11 +113,32 @@ class FormRepository implements FormRepositoryInterface {
             $query->where('division', $params['division']);
         }
 
-        // Return Collection
-        return $query->get();
+        // Append Sort
+        if (!isset($params['sort'])) {
+            $params['sort'] = '-region';
+        }
+        $query = $this->addSortQuery($query, $params['sort']);
+        
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
         throw new NotImplementedException;
+    }
+
+
+    /**
+     * Add Sort Query
+     * 
+     * @param string $query
+     * @param string $sort
+     * @return string
+     */
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 }
