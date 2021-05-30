@@ -52,7 +52,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        return UnitSale::findOrFail($params['id']);
     }
 
     public function getAll($params) {

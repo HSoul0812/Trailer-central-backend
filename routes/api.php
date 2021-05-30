@@ -876,7 +876,22 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('printer/instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+        $route->group([
+            'prefix' => 'printer'
+        ], function ($route) {
+            // Get Preset Instructions
+            $route->get('instruction', 'App\Http\Controllers\v1\Dms\Printer\InstructionController@index');
+
+            // Get Forms
+            $route->group([
+                'prefix' => 'forms',
+                'middleware' => 'printer.form.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Dms\Printer\FormController@index');
+                $route->get('{id}', 'App\Http\Controllers\v1\Dms\Printer\FormController@show')->where('id', '[0-9]+');
+                $route->put('{id}/instruction', 'App\Http\Controllers\v1\Dms\Printer\FormController@instruction')->where('id', '[0-9]+');
+            });
+        });
 
         /*
         |--------------------------------------------------------------------------

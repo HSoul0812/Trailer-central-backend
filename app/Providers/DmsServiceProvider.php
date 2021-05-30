@@ -54,10 +54,14 @@ use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Dms\Printer\SettingsRepository as PrinterSettingsRepository;
 use App\Repositories\Dms\Printer\SettingsRepositoryInterface as PrinterSettingsRepositoryInterface;
+use App\Repositories\Dms\Printer\FormRepository as PrinterFormRepository;
+use App\Repositories\Dms\Printer\FormRepositoryInterface as PrinterFormRepositoryInterface;
 use App\Services\Dms\CVR\CVRGeneratorService;
 use App\Services\Dms\CVR\CVRGeneratorServiceInterface;
 use App\Services\Dms\Printer\InstructionsServiceInterface;
 use App\Services\Dms\Printer\ZPL\InstructionsService;
+use App\Services\Dms\Printer\FormServiceInterface as PrinterFormServiceInterface;
+use App\Services\Dms\Printer\ESCP\FormService as PrinterFormService;
 use Illuminate\Support\ServiceProvider;
 
 class DmsServiceProvider extends ServiceProvider
@@ -74,7 +78,9 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(UnitSaleLaborRepositoryInterface::class, UnitSaleLaborRepository::class);
         $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
         $this->app->bind(PrinterSettingsRepositoryInterface::class, PrinterSettingsRepository::class);
+        $this->app->bind(PrinterFormRepositoryInterface::class, PrinterFormRepository::class);
         $this->app->bind(InstructionsServiceInterface::class, InstructionsService::class);
+        $this->app->bind(PrinterFormServiceInterface::class, PrinterFormService::class);
         $this->app->bind(CVRGeneratorServiceInterface::class, CVRGeneratorService::class);
         $this->app->bind(ServiceReportRepositoryInterface::class, ServiceReportRepository::class);
 
