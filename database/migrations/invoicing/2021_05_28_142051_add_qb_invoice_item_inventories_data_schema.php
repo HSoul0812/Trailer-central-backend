@@ -28,12 +28,6 @@ class AddQbInvoiceItemInventoriesDataSchema extends Migration
                 ->on('qb_invoice_items')
                 ->onDelete('CASCADE')
                 ->onUpdate('CASCADE');
-
-            $table->foreign('inventory_id')
-                ->references('inventory_id')
-                ->on('inventory')
-                ->onDelete('CASCADE')
-                ->onUpdate('CASCADE');
         });
     }
 
