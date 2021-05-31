@@ -14,14 +14,14 @@ use League\Fractal\Resource\Collection;
 use League\Fractal\Manager;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Jobs\Bulk\Parts\FinancialReportExportJob;
-use App\Jobs\Dms\ServiceTechnicianExportJob;
+use App\Jobs\Dms\ServiceOrder\ServiceTechnicianExportJob;
 use App\Models\Common\MonitoredJob;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Models\Bulk\Parts\BulkReport;
 use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
-use App\Services\Export\Parts\BulkCsvServiceReportJobServiceInterface;
+use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Dingo\Api\Http\Request;
@@ -45,7 +45,7 @@ class BulkReportsController extends MonitoredJobsController
     protected $service;
     
     /**
-     * @var BulkCsvServiceReportJobServiceInterface
+     * @var BulkCsvTechnicianReportServiceInterface
      */
     protected $technicianService;
 
@@ -58,7 +58,7 @@ class BulkReportsController extends MonitoredJobsController
                                 MonitoredJobRepositoryInterface $jobsRepository,
                                 StockRepositoryInterface $stockRepository,
                                 BulkReportJobServiceInterface $service,
-                                BulkCsvServiceReportJobServiceInterface $technicianService,
+                                BulkCsvTechnicianReportServiceInterface $technicianService,
                                 Manager $fractal)
     {
         parent::__construct($jobsRepository);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Export\Parts;
+namespace App\Services\Dms\ServiceOrder;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Common\BusyJobException;
@@ -24,7 +24,8 @@ use Illuminate\Support\Facades\Storage;
  *
  * This is to decouple service code from the job.
  */
-class BulkCsvServiceReportJobService extends AbstractMonitoredJobService implements BulkCsvServiceReportJobServiceInterface
+
+class BulkCsvTechnicianReportService extends AbstractMonitoredJobService implements BulkCsvTechnicianReportServiceInterface
 {
     const QUEUE_NAME = 'reports';
     const QUEUE_JOB_NAME = 'technician-order-report';
