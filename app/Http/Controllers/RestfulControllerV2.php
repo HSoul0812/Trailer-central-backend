@@ -57,6 +57,14 @@ class RestfulControllerV2 extends Controller
             $params['response']['data'] = ['id' => $id];
         }
 
-        return $this->response->array($params);
+        return $this->response->created(null, $params);
+    }
+
+    /**
+     * @return Response
+     */
+    protected function deletedResponse(): Response
+    {
+        return $this->response->noContent();
     }
 }

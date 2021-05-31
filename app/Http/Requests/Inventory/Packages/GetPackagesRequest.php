@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Requests\Inventory\Packages;
 
 use App\Http\Requests\Request;

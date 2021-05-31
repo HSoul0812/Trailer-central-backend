@@ -33,6 +33,7 @@ class PackageController extends RestfulControllerV2
     /**
      * PackageController constructor.
      * @param PackageRepositoryInterface $packageRepository
+     * @param PackageServiceInterface $packageService
      */
     public function __construct(PackageRepositoryInterface $packageRepository, PackageServiceInterface $packageService)
     {
@@ -154,7 +155,7 @@ class PackageController extends RestfulControllerV2
      *         @OA\Schema(type="array")
      *     ),
      *     @OA\Response(
-     *         response="200",
+     *         response="201",
      *         description="Returns an inventory package id",
      *         @OA\JsonContent()
      *     ),
@@ -252,7 +253,7 @@ class PackageController extends RestfulControllerV2
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
-     *         response="200",
+     *         response="204",
      *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
@@ -266,7 +267,7 @@ class PackageController extends RestfulControllerV2
         $request = new DeletePackageRequest(array_merge(['id' => $id], $request->all()));
 
         if ($request->validate() && $this->packageService->delete($id)) {
-            return $this->successResponse();
+            return $this->deletedResponse();
         }
 
         return $this->response->errorBadRequest();

@@ -36,7 +36,7 @@ class PackageRepository implements PackageRepositoryInterface
     ];
 
     /**
-     * @param $params
+     * @param array $params
      * @return Package
      */
     public function create($params): Package
@@ -64,6 +64,10 @@ class PackageRepository implements PackageRepositoryInterface
         return $package;
     }
 
+    /**
+     * @param array $params
+     * @return Package
+     */
     public function update($params): Package
     {
         if (!isset($params['id'])) {

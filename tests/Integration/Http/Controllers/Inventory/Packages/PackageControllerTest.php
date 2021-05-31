@@ -144,7 +144,7 @@ class PackageControllerTest extends TestCase
 
         $response = $this->json('PUT', '/api/inventory/packages', $packageParams, ['access-token' => $inventorySeeder->authToken->access_token]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
@@ -313,12 +313,10 @@ class PackageControllerTest extends TestCase
 
         $response = $this->json('DELETE', '/api/inventory/packages/' . $packageSeeder->package->id, [], ['access-token' => $inventorySeeder->authToken->access_token]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
 
         $responseJson = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('response', $responseJson);
-        $this->assertArrayHasKey('status', $responseJson['response']);
-        $this->assertSame('success', $responseJson['response']['status']);
+        $this->assertEmpty($responseJson);
 
         $this->assertDatabaseMissing('packages', $createdPackage);
         $this->assertDatabaseMissing('packages_inventory', $createdPackagesInventory);
