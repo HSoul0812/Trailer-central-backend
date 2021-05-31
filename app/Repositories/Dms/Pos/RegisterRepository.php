@@ -19,7 +19,7 @@ class RegisterRepository extends RepositoryAbstract implements RegisterRepositor
      * Searches all the outlets with open registers by dealer_id
      *
      * @param int $dealerId
-     * @return mixed array
+     * @return mixed Collection<Outlet>
      */
     public function getAllByDealerId(int $dealerId)
     {
