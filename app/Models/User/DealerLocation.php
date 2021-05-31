@@ -120,7 +120,8 @@ class DealerLocation extends Model
         "federal_id",
         "pac_amount",
         "pac_type",
-        'sales_tax_item_column_titles'
+        'sales_tax_item_column_titles',
+        'location_id'
     ];
 
     protected $casts = [
@@ -204,5 +205,34 @@ class DealerLocation extends Model
         ])->count();
 
         return $numberOfInventories || $numberOfReferences;
+    }
+
+
+    /**
+     * Return Whatever License Number We Can Find
+     * 
+     * @return string
+     */
+    public function getLicenseNumberAttribute(): string {
+        // Get Dealer License Number
+        $licenseNo = $this->dealer_license_no;
+
+        // Get Federal Number
+        if(empty($licenseNo)) {
+            $licenseNo = $this->federal_id;
+        }
+
+        // Get State License Number
+        if(empty($licenseNo)) {
+            $licenseNo = $this->state_issued;
+        }
+
+        // Get County License Number
+        if(empty($licenseNo)) {
+            $licenseNo = $this->county_issued;
+        }
+
+        // Return License Number
+        return $licenseNo ?: '';
     }
 }

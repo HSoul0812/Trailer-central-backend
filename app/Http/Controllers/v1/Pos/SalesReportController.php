@@ -61,7 +61,12 @@ class SalesReportController extends RestfulControllerV2
      *
      * @return Response|void when there is a bad request it will throw an HttpException and request life cycle ends
      * @OA\Post(
-     *     path="/reports/custom-sales"
+     *     path="/reports/custom-sales",
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a floorplan payment created",
+     *         @OA\JsonContent()
+     *     )
      * )
      *
      * @throws NoObjectIdValueSetException

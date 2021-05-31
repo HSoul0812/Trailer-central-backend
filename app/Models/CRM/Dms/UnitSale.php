@@ -11,6 +11,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
 use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
 use App\Models\CRM\Dms\Quickbooks\Item;
+use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User\User;
 use App\Models\CRM\Dms\UnitSale\TradeIn;
@@ -76,6 +77,11 @@ class UnitSale extends Model implements GenericSaleInterface
     public function tradeIn() : HasMany
     {
         return $this->hasMany(TradeIn::class, 'unit_sale_id');
+    }
+
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
     public function extraInventory()

@@ -34,6 +34,7 @@ class DealerLocationSalesTax extends Model
         'dealer_location_id',
         'sales_tax_id',
         'labor_tax_type',
+        'use_local_tax',
         'tax_before_trade',
         'taxed_on_total_of',
         'shop_supply_basis',

@@ -5,6 +5,7 @@ namespace App\Models\CRM\User;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\Region;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
@@ -121,6 +122,25 @@ class Customer extends Model
         return $this->belongsTo(Dealer::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * Region Name
+     * 
+     * @return BelongsTo
+     */
+    public function regionName(): BelongsTo {
+        return $this->belongsTo(Region::class, 'region', 'region_name');
+    }
+
+    /**
+     * Region Code
+     * 
+     * @return BelongsTo
+     */
+    public function regionCode(): BelongsTo
+    {
+        return $this->belongsTo(Region::class, 'region', 'region_code');
+    }
+
     public function searchableAs()
     {
         return 'customers';
@@ -136,7 +156,28 @@ class Customer extends Model
 
         return $array;
     }
-    
+
+
+    /**
+     * Returns the customer full name
+     * 
+     * @return string
+     */
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    /**
+     * Returns the customer display or full name
+     * 
+     * @return string
+     */
+    public function getDisplayFullNameAttribute(): string
+    {
+        return $this->display_name ?: $this->full_name;
+    }
+
     /**
      * Returns the customer age in years
      * 
@@ -155,5 +196,18 @@ class Customer extends Model
     public function getBirthMonthAttribute() : string
     {
         return Carbon::parse($this->dob)->format('F');
+    }
+
+    /**
+     * Returns the region code for the customer address
+     * 
+     * @return string
+     */
+    public function getRegionCodeAttribute() : string
+    {
+        if(strlen($this->region) < 3) {
+            return $this->region;
+        }
+        return $this->regionName->region_code ?? '';
     }
 }

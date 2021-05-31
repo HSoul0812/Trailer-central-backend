@@ -424,6 +424,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
 
+        if (isset($params['is_archived'])) {
+            $query = $query->where('inventory.is_archived', $params['is_archived']);
+        }
+
         if (isset($params[self::CONDITION_AND_WHERE_IN]) && is_array($params[self::CONDITION_AND_WHERE_IN])) {
             foreach ($params[self::CONDITION_AND_WHERE_IN] as $field => $values) {
                 $query = $query->whereIn($field, $values);

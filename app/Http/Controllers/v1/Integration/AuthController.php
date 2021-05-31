@@ -29,7 +29,7 @@ class AuthController extends RestfulControllerV2
 
     /**
      * @OA\Get(
-     *     path="/api/integration/auth",
+     *     path="/api/integration/auth/duplicate-entry",
      *     description="Retrieve a list of texts by lead id",
      *     tags={"Text"},
      *     @OA\Parameter(
@@ -45,7 +45,7 @@ class AuthController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -153,7 +153,7 @@ class AuthController extends RestfulControllerV2
     }
     
     /**
-     * @OA\Text(
+     * @OA\Put(
      *     path="/api/integration/auth/{id}",
      *     description="Update a text",
      * 
@@ -162,7 +162,7 @@ class AuthController extends RestfulControllerV2
      *         in="query",
      *         description="Text ID",
      *         required=true,
-     *         @OA\Schema(@OA\Schema(type="integer"))
+     *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="title",
@@ -243,7 +243,7 @@ class AuthController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Login(
+     * @OA\Post(
      *     path="/api/integration/auth",
      *     description="Initialize login process",
      

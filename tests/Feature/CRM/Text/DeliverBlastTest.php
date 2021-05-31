@@ -801,7 +801,7 @@ class DeliverBlastTest extends TestCase
         $blast = Blast::find($blastId);
 
         // Get Website ID
-        $dealer = User::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
         $websiteId = $dealer->website->id;
 
         // Loop Leads

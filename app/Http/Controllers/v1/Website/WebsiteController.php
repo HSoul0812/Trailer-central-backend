@@ -32,7 +32,7 @@ class WebsiteController extends RestfulController
      * @param int $websiteId
      * @return \Dingo\Api\Http\Response|void
      *
-     * @OA\EnableProxiedDomainSsl(
+     * @OA\Post(
      *     path="/api/website/{websiteId}/enable-proxied-domain-ssl",
      *     description="Enable proxied domain for ssl",
      *     tags={"Website"},

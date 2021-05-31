@@ -24,7 +24,7 @@ class StopController extends RestfulControllerV2
 
 
     /**
-     * @OA\Stop(
+     * @OA\Get(
      *     path="/api/leads/{leadId}/texts/{id}/stop",
      *     description="Stop sending future texts to this number",
      *     tags={"Text"},

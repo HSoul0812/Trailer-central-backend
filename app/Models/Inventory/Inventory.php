@@ -131,7 +131,10 @@ class Inventory extends Model
 {
     use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
 
+    const CONSTRUCTION_ATTRIBUTE_ID = 2;
     const COLOR_ATTRIBUTE_ID = 11;
+    const FUEL_TYPE_ATTRIBUTE_ID = 14;
+    const MILEAGE_ATTRIBUTE_ID = 16;
 
     const TABLE_NAME = 'inventory';
 
@@ -413,6 +416,48 @@ class Inventory extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Get Construction
+     * 
+     * @return string
+     */
+    public function getConstructionAttribute(): ?string
+    {
+        // Get Construction
+        $attribute = $this->attributeValues()->where('attribute_id', self::CONSTRUCTION_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
+    }
+
+    /**
+     * Get Fuel Type
+     * 
+     * @return string
+     */
+    public function getFuelTypeAttribute(): ?string
+    {
+        // Get Attribute
+        $attribute = $this->attributeValues()->where('attribute_id', self::FUEL_TYPE_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
+    }
+
+    /**
+     * Get Mileage
+     * 
+     * @return string
+     */
+    public function getMileageAttribute(): ?string
+    {
+        // Get Attribute
+        $attribute = $this->attributeValues()->where('attribute_id', self::MILEAGE_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
     }
 
     public function getStatusLabelAttribute()
