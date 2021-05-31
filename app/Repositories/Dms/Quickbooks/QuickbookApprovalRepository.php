@@ -110,13 +110,6 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
             'tb_primary_id' => $params['tb_primary_id']
         ]);
 
-        // reinstate these when they're needed
-//        if ($data['tbName'] === 'qb_item_category') {
-//            $em->getRepository(QbItemCategory::class)->removeQbApproval($data['tbPrimaryId']);
-//        } else if ($data['tbName'] === 'qb_items_new') {
-//            $em->getRepository(QbItemsNew::class)->removeQbApproval($data['tbPrimaryId']);
-//        }
-
         // not sure what this is for yet; just copied from original
         if (empty($params['qb_id']) && isset($params['qb_info']['Active']) && !$params['qb_info']['Active']) return;
 
@@ -137,13 +130,13 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         return $qbApproval;
     }
 
-    public function delete($params)
+    public function delete($params): QuickbookApproval
     {
         $quickBookApproval = QuickbookApproval::find($params['id']);
 
         if ($quickBookApproval) {
             $qbaDeleted = new QuickbookApprovalDeleted();
-            $qbaDeleted->createFrom($quickBookApproval, $params['dealer_id']);
+            $qbaDeleted->createFromOriginal($quickBookApproval, $params['dealer_id']);
 
             $quickBookApproval->delete();
         }

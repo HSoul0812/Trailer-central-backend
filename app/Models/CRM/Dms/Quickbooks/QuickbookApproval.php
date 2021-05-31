@@ -231,7 +231,7 @@ class QuickbookApproval extends Model
     /**
      * @param QuickbookApprovalDeleted $obj
      */
-    public function createFrom(QuickbookApprovalDeleted $obj)
+    public function createFromDeleted(QuickbookApprovalDeleted $obj)
     {
         $this->id = $obj->id;
         $this->dealer_id = $obj->dealer_id;

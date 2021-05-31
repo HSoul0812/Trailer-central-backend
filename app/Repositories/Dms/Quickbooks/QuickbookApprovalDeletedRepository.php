@@ -3,15 +3,15 @@
 namespace App\Repositories\Dms\Quickbooks;
 
 use App\Models\CRM\Dms\Quickbooks\QuickbookApprovalDeleted;
-use App\Models\CRM\User\Customer;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
+use App\Repositories\RepositoryAbstract;
 
 /**
  * @author Marcel
  */
-class QuickbookApprovalDeletedRepository implements QuickbookApprovalDeletedRepositoryInterface {
+class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements QuickbookApprovalDeletedRepositoryInterface {
 
     private $sortOrders = [
         'created_at' => [
@@ -63,13 +63,6 @@ class QuickbookApprovalDeletedRepository implements QuickbookApprovalDeletedRepo
             'tb_primary_id' => $params['tb_primary_id']
         ]);
 
-        // reinstate these when they're needed
-//        if ($data['tbName'] === 'qb_item_category') {
-//            $em->getRepository(QbItemCategory::class)->removeQbApproval($data['tbPrimaryId']);
-//        } else if ($data['tbName'] === 'qb_items_new') {
-//            $em->getRepository(QbItemsNew::class)->removeQbApproval($data['tbPrimaryId']);
-//        }
-
         // not sure what this is for yet; just copied from original
         if (empty($params['qb_id']) && isset($params['qb_info']['Active']) && !$params['qb_info']['Active']) return;
 
@@ -90,13 +83,13 @@ class QuickbookApprovalDeletedRepository implements QuickbookApprovalDeletedRepo
         return $qbApproval;
     }
 
-    public function delete($params)
+    public function delete($params): QuickbookApproval
     {
         $quickBookApprovalDeleted = QuickbookApprovalDeleted::find($params['id']);
 
         if ($quickBookApprovalDeleted) {
             $qba = new QuickbookApproval();
-            $qba->createFrom($quickBookApprovalDeleted);
+            $qba->createFromDeleted($quickBookApprovalDeleted);
 
             $quickBookApprovalDeleted->delete();
         }
@@ -165,10 +158,5 @@ class QuickbookApprovalDeletedRepository implements QuickbookApprovalDeletedRepo
             return;
         }
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
-    }
-
-    public function update($params)
-    {
-         throw new NotImplementedException;
     }
 }

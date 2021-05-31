@@ -29,9 +29,13 @@ class QuickbookApprovalController extends RestfulControllerV2
     /**
      * Create a new controller instance.
      *
-     * @return void
+     * @param QuickbookApprovalRepositoryInterface $quickbookApprovalRepo
+     * @param QuickbookApprovalDeletedRepositoryInterface $quickbookApprovalDeletedRepo
      */
-    public function __construct(QuickbookApprovalRepositoryInterface $quickbookApprovalRepo, QuickbookApprovalDeletedRepositoryInterface  $quickbookApprovalDeletedRepo)
+    public function __construct(
+        QuickbookApprovalRepositoryInterface $quickbookApprovalRepo,
+        QuickbookApprovalDeletedRepositoryInterface  $quickbookApprovalDeletedRepo
+    )
     {
         $this->quickbookApprovalRepo = $quickbookApprovalRepo;
         $this->quickbookApprovalDeletedRepo = $quickbookApprovalDeletedRepo;
