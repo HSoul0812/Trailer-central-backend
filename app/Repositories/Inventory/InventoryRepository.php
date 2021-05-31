@@ -404,6 +404,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('inventory.dealer_location_id', $params['dealer_location_id']);
         }
 
+        if (isset($params['inventory_ids']) && is_array($params['inventory_ids'])) {
+            $query = $query->whereIn('inventory.inventory_id', $params['inventory_ids']);
+        }
+
         if (isset($params['units_with_true_cost'])) {
             if ($params['units_with_true_cost'] == self::SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', '>', 0);
