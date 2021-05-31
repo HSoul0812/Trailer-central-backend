@@ -210,8 +210,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     ) sale_type,
                     i.invoice_date sale_date, us.sales_person_id, c.display_name customer_name,
 
-                    (us.total_price - payments.paid_amount) remaining,
-
                     SUM(sales_units.cost_overhead) cost_overhead,
                     SUM(sales_units.true_total_cost) true_total_cost,
 
@@ -300,7 +298,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 WHERE us.dealer_id=:dealerId1
                 {$dateFromClause1} {$quotesFilters}
                 GROUP BY us.id
-                HAVING remaining <= 0 -- Only be shown those records totally paid
+                HAVING (us.total_price - payments.paid_amount) <= 0 -- Only be shown those records totally paid
                 ";
 
         $sql .= "
@@ -310,8 +308,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 /* POS sales via crm_pos_sales */
                 SELECT ps.id sale_id, ps.id invoice_id, ps.id doc_num, ps.total ,'pos' sale_type,
                     ps.created_at sale_date, ps.sales_person_id, c.display_name customer_name,
-
-                    (ps.total - ps.amount_received) remaining,
 
                     0 cost_overhead,  -- backward compatibility
                     0 true_total_cost, -- backward compatibility
@@ -380,7 +376,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
                 WHERE po.dealer_id=:dealerId2 AND DATE(ps.created_at) BETWEEN :fromDate2 AND :toDate2
                 GROUP BY ps.id
-                HAVING remaining <= 0 -- Only be shown those records totally paid
+                HAVING (ps.total - ps.amount_received) <= 0 -- Only be shown those records totally paid
 
               UNION
 
@@ -388,8 +384,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 SELECT qb_invoices.id sale_id, qb_invoices.id invoice_id, qb_invoices.doc_num doc_num,
                     qb_invoices.total total ,'pos' sale_type, qb_invoices.invoice_date sale_date,
                     qb_invoices.sales_person_id, c.display_name customer_name,
-
-                    (qb_invoices.total - SUM(payments.paid_amount)) remaining,
 
                     SUM(sales_unit.cost_overhead)                  cost_overhead,
                     SUM(sales_unit.true_total_cost)                true_total_cost,
@@ -468,7 +462,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 AND DATE(qb_invoices.invoice_date) BETWEEN :fromDate3 AND :toDate3 AND qb_invoices.unit_sale_id IS NULL
                 AND qb_invoices.repair_order_id IS NULL
                 GROUP BY qb_invoices.id
-                HAVING remaining <= 0 -- Only be shown those records totally paid
+                HAVING (qb_invoices.total - SUM(payments.paid_amount)) <= 0 -- Only be shown those records totally paid
                 ";
 
             $sql .= "
@@ -480,8 +474,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 SELECT qb_invoices.id sale_id, qb_invoices.id invoice_id, qb_invoices.doc_num doc_num,
                     qb_invoices.total total ,'RO' sale_type, qb_invoices.invoice_date sale_date,
                     qb_invoices.sales_person_id, c.display_name customer_name,
-
-                    (qb_invoices.total - SUM(payments.paid_amount)) remaining,
 
                     SUM(sales_unit.cost_overhead) cost_overhead,
                     SUM(sales_unit.true_total_cost) true_total_cost,
@@ -565,7 +557,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 AND qb_invoices.repair_order_id IS NOT NULL AND dms_repair_order.unit_sale_id IS NOT NULL $roFilters
 
                 GROUP BY qb_invoices.id
-                HAVING remaining <=0 -- Only be shown those records totally paid
+                HAVING (qb_invoices.total - SUM(payments.paid_amount)) <=0 -- Only be shown those records totally paid
 
             ) sales ON sales.sales_person_id=sp.id
 
