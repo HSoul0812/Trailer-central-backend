@@ -17,7 +17,7 @@ class FinancialReportExportJob extends Job
     /**
      * @var string
      */
-    private $token;
+    protected $token;
 
     public function __construct(string $token)
     {
