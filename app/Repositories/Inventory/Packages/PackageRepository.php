@@ -49,11 +49,11 @@ class PackageRepository implements PackageRepositoryInterface
             unset($params['inventories']);
         }
 
-        $package->fill($params)->save();
-
         if (!is_array($inventories)) {
             throw new RepositoryInvalidArgumentException('inventories param must be array. Params - ' . json_encode($params));
         }
+
+        $package->fill($params)->save();
 
         $inventories = array_column($inventories, null, 'inventory_id');
 
@@ -83,11 +83,11 @@ class PackageRepository implements PackageRepositoryInterface
             unset($params['inventories']);
         }
 
-        $package->fill($params)->save();
-
         if (!is_array($inventories)) {
             throw new RepositoryInvalidArgumentException('inventories param must be array. Params - ' . json_encode($params));
         }
+
+        $package->fill($params)->save();
 
         $package->inventories()->detach();
         $inventories = array_column($inventories, null, 'inventory_id');

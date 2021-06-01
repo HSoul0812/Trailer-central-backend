@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\Inventory\Packages;
 
+use App\Exceptions\Inventory\Packages\PackageException;
 use App\Models\Inventory\Packages\Package;
 use App\Repositories\Inventory\Packages\PackageRepositoryInterface;
 use App\Services\Inventory\Packages\PackageService;
@@ -100,6 +101,8 @@ class PackageServiceTest extends TestCase
         Log::shouldReceive('error')
             ->with('Package create error. Params - ' . json_encode($params), $exception->getTrace());
 
+        $this->expectException(PackageException::class);
+
         /** @var PackageService $service */
         $service = $this->app->make(PackageService::class);
 
@@ -187,6 +190,8 @@ class PackageServiceTest extends TestCase
 
         Log::shouldReceive('error')
             ->with('Package update error. Params - ' . json_encode($params), $exception->getTrace());
+
+        $this->expectException(PackageException::class);
 
         /** @var PackageService $service */
         $service = $this->app->make(PackageService::class);

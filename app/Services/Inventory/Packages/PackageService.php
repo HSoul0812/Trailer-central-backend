@@ -3,6 +3,7 @@
 
 namespace App\Services\Inventory\Packages;
 
+use App\Exceptions\Inventory\Packages\PackageException;
 use App\Models\Inventory\Packages\Package;
 use App\Repositories\Inventory\Packages\PackageRepositoryInterface;
 use Illuminate\Support\Facades\Log;
@@ -30,6 +31,7 @@ class PackageService implements PackageServiceInterface
     /**
      * @param array $params
      * @return Package
+     * @throws PackageException
      */
     public function create(array $params): ?Package
     {
@@ -42,7 +44,7 @@ class PackageService implements PackageServiceInterface
                 Log::error('Package hasn\'t been created.', ['params' => $params]);
                 $this->packageRepository->rollbackTransaction();
 
-                return null;
+                throw new PackageException('Package hasn\'t been created');
             }
 
             $this->packageRepository->commitTransaction();
@@ -52,7 +54,7 @@ class PackageService implements PackageServiceInterface
             Log::error('Package create error. Params - ' . json_encode($params), $e->getTrace());
             $this->packageRepository->rollbackTransaction();
 
-            return null;
+            throw new PackageException('Package create error');
         }
 
         return $package;
@@ -62,6 +64,7 @@ class PackageService implements PackageServiceInterface
      * @param int $id
      * @param array $params
      * @return Package|null
+     * @throws PackageException
      */
     public function update(int $id, array $params): ?Package
     {
@@ -78,7 +81,7 @@ class PackageService implements PackageServiceInterface
             Log::error('Package update error. Params - ' . json_encode($params), $e->getTrace());
             $this->packageRepository->rollbackTransaction();
 
-            return null;
+            throw new PackageException('Package update error');
         }
 
         return $package;
