@@ -1,10 +1,20 @@
 <?php
 namespace Tests\Integration\Http\Controllers\Dms\Quickbooks;
 
+use App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController;
+use App\Http\Requests\Dms\Quickbooks\DeleteQuickbookApprovalRequest;
+use Tests\database\seeds\Dms\Quickbook\QuickbookApprovalSeeder;
+use Tests\database\seeds\Dms\Quickbook\QuickbookApprovalDeletedSeeder;
 use Tests\TestCase;
 
 class QuickApprovalControllerTest extends TestCase
 {
+    /** @var QuickbookApprovalSeeder  */
+    private $qbaSeed;
+
+    /** @var QuickbookApprovalDeletedSeeder  */
+    private $qbaDelSeed;
+
     /**
      * @covers ::index
      * @group quickbook
@@ -87,5 +97,50 @@ class QuickApprovalControllerTest extends TestCase
         // Only in removed
         $this->assertArrayHasKey('removed_by',$responseJson['data'][0]);
         $this->assertArrayHasKey('deleted_at',$responseJson['data'][0]);
+    }
+
+
+    /**
+     * @covers ::destroy
+     * @group quickbook
+     */
+    public function testDestroy()
+    {
+        $this->qbaSeed = new QuickbookApprovalSeeder();
+        $this->qbaSeed->seed();
+
+        $request = new DeleteQuickbookApprovalRequest(
+            [
+                'id' => $this->qbaSeed->qbApproval->id,
+                'dealer_id' => $this->qbaSeed->qbApproval->dealer_id,
+            ]
+        );
+        $controller = app()->make(QuickbookApprovalController::class);
+
+        $response = $controller->destroy($this->qbaSeed->qbApproval->id, $request);
+
+        $this->qbaSeed->cleanUp();
+
+        self::assertEquals($this->qbaSeed->qbApproval->id, $response->id);
+
+    }
+
+    /**
+     * @covers ::moveStatus
+     * @group quickbook
+     */
+    public function testMoveStatus()
+    {
+        $this->qbaDelSeed = new QuickbookApprovalDeletedSeeder();
+        $this->qbaDelSeed->seed();
+
+        $controller = app()->make(QuickbookApprovalController::class);
+
+        $response = $controller->moveStatus($this->qbaDelSeed->qbApprovalDeleted->id, 'to_send');
+
+        $this->qbaDelSeed->cleanUp();
+
+        self::assertEquals($this->qbaDelSeed->qbApprovalDeleted->removed_by, $response->dealer_id);
+
     }
 }

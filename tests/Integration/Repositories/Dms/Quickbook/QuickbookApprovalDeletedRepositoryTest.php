@@ -12,7 +12,7 @@ class QuickbookApprovalDeletedRepositoryTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function testCreateFromDeleted()
+    public function testGetAll()
     {
         $repository = app(QuickbookApprovalDeletedRepository::class);
         $qbs = $repository->getAll(['dealer_id' => 1001, 'page' => 1, 'sort' => 'created_at']);
