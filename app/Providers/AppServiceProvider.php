@@ -13,6 +13,8 @@ use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\Dms\Pos\RegisterRepository;
+use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
@@ -293,5 +295,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationServiceInterface::class, DealerLocationService::class);
         $this->app->bind(DealerLocationSalesTaxItemRepositoryInterface::class, DealerLocationSalesTaxItemRepository::class);
         $this->app->bind(DealerLocationSalesTaxRepositoryInterface::class, DealerLocationSalesTaxRepository::class);
+
+        $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
     }
 }
