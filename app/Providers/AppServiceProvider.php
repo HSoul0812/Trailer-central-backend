@@ -29,6 +29,8 @@ use App\Repositories\Inventory\ImageRepository;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryHistoryRepository;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
+use App\Repositories\Inventory\Packages\PackageRepository;
+use App\Repositories\Inventory\Packages\PackageRepositoryInterface;
 use App\Repositories\Inventory\StatusRepository;
 use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
@@ -85,6 +87,8 @@ use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\Inventory\Packages\PackageService;
+use App\Services\Inventory\Packages\PackageServiceInterface;
 use App\Services\User\DealerLocationService;
 use App\Services\User\DealerLocationServiceInterface;
 use App\Services\User\PasswordResetServiceInterface;
@@ -296,6 +300,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationSalesTaxItemRepositoryInterface::class, DealerLocationSalesTaxItemRepository::class);
         $this->app->bind(DealerLocationSalesTaxRepositoryInterface::class, DealerLocationSalesTaxRepository::class);
 
+        $this->app->bind(PackageRepositoryInterface::class, PackageRepository::class);
+        $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
     }
 }

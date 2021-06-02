@@ -29,10 +29,10 @@ class InventoryRepository implements InventoryRepositoryInterface
     use SortTrait, Transaction;
 
     private const DEFAULT_PAGE_SIZE = 15;
-    
+
     private const SHOW_UNITS_WITH_TRUE_COST = 1;
     private const DO_NOT_SHOW_UNITS_WITH_TRUE_COST = 0;
-    
+
 
     private $sortOrders = [
         'title' => [
@@ -220,9 +220,9 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function exists(array $params): bool
     {
         $query = Inventory::query();
-        
+
         $query->where('status', '!=', Inventory::STATUS_QUOTE);
-        
+
         if (isset($params['dealer_id'])) {
             $query->where('dealer_id', '=', $params['dealer_id']);
         }
@@ -276,11 +276,11 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @return Collection|LengthAwarePaginator
      */
     public function getAll($params, bool $withDefault = true, bool $paginated = false)
-    {       
+    {
         if ($paginated) {
             return $this->getPaginatedResults($params, $withDefault);
         }
-        
+
         $query = $this->buildInventoryQuery($params, $withDefault);
 
         return $query->get();
@@ -373,22 +373,26 @@ class InventoryRepository implements InventoryRepositoryInterface
     protected function getSortOrders() {
         return $this->sortOrders;
     }
-    
+
     /**
      * @param array $params
      * @param bool $withDefault whether to apply default conditions or not
-     * 
+     *
      * @return Builder
      */
     private function buildInventoryQuery(array $params, bool $withDefault = true) : GrimzyBuilder
     {
         /** @var Builder $query */
         $query = Inventory::where('inventory.inventory_id', '>', 0);
-        
+
         if ($withDefault) {
             $query->where('status', '<>', Inventory::STATUS_QUOTE);
         }
-        
+
+        if (isset($params['status'])) {
+            $query = $query->where('status', $params['status']);
+        }
+
         if (isset($params['condition'])) {
             $query = $query->where('condition', $params['condition']);
         }
@@ -396,19 +400,23 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
-                
+
         if (isset($params['dealer_location_id'])) {
             $query = $query->where('inventory.dealer_location_id', $params['dealer_location_id']);
         }
-        
+
+        if (isset($params['inventory_ids']) && is_array($params['inventory_ids'])) {
+            $query = $query->whereIn('inventory.inventory_id', $params['inventory_ids']);
+        }
+
         if (isset($params['units_with_true_cost'])) {
             if ($params['units_with_true_cost'] == self::SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', '>', 0);
             } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
-            }            
+            }
         }
-        
+
         if ($withDefault) {
             $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
         }
@@ -416,7 +424,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
-        
+
         if (isset($params['is_archived'])) {
             $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
@@ -425,7 +433,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             foreach ($params[self::CONDITION_AND_WHERE_IN] as $field => $values) {
                 $query = $query->whereIn($field, $values);
             }
-        } 
+        }
 
         if (isset($params['floorplan_vendor'])) {
             $query = $query->where('fp_vendor', $params['floorplan_vendor']);
@@ -442,7 +450,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         });
             });
         }
-        
+
         if (isset($params['images_greater_than'])) {
             $query->havingRaw('image_count >= '. $params['images_greater_than']);
         } else if (isset($params['images_less_than'])) {
@@ -459,40 +467,40 @@ class InventoryRepository implements InventoryRepositoryInterface
                 $query = $this->addSortQuery($query, $params['sort']);
             }
         }
-        
+
         if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
             $query = $query->leftJoin('inventory_image', 'inventory_image.inventory_id', '=', 'inventory.inventory_id');
             $query->selectRaw('inventory.*, count(inventory_image.inventory_id) as image_count');
             $query->groupBy('inventory.inventory_id');
-                  
+
         }
 
         return $query;
     }
-    
+
     private function getResultsCountFromQuery(GrimzyBuilder $query) : int
     {
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
         return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as inventory_count")))->row_count;
     }
-    
-    private function getPaginatedResults($params, bool $withDefault = true) 
+
+    private function getPaginatedResults($params, bool $withDefault = true)
     {
         $perPage = !isset($params['per_page']) ? self::DEFAULT_PAGE_SIZE : (int)$params['per_page'];
         $currentPage = !isset($params['page']) ? 1 : (int)$params['page'];
-        
+
         $paginatedQuery = $this->buildInventoryQuery($params, $withDefault);
         $resultsCount = $this->getResultsCountFromQuery($paginatedQuery);
-        
+
         $paginatedQuery->skip(($currentPage - 1) * $perPage);
         $paginatedQuery->take($perPage);
-        
+
         return (new LengthAwarePaginator(
-            $paginatedQuery->get(), 
-            $resultsCount, 
-            $perPage, 
-            $currentPage, 
+            $paginatedQuery->get(),
+            $resultsCount,
+            $perPage,
+            $currentPage,
             ["path" => URL::to('/')."/api/inventory"]
         ))->appends($params);
     }

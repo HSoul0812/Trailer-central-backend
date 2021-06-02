@@ -197,6 +197,19 @@ $api->version('v1', function ($route) {
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Packages
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@index');
+    $route->get('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@show');
+    $route->put('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@create');
+    $route->post('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@update');
+    $route->delete('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@destroy');
 
     /*
     |--------------------------------------------------------------------------

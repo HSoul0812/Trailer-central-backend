@@ -120,12 +120,15 @@ class InventoryControllerTest extends TestCase
      */
     public function testDealerUserCreate(array $inventoryParams)
     {
-        $seeder = new InventorySeeder(AuthToken::USER_TYPE_DEALER_USER, [
-            [
+        $seederParams = [
+            'userType' => AuthToken::USER_TYPE_DEALER_USER,
+            'permissions' => [[
                 'feature' => PermissionsInterface::INVENTORY,
                 'permission_level' => PermissionsInterface::SUPER_ADMIN_PERMISSION,
-            ]
-        ]);
+            ]]
+        ];
+
+        $seeder = new InventorySeeder($seederParams);
 
         $seeder->seed();
 
@@ -161,12 +164,15 @@ class InventoryControllerTest extends TestCase
      */
     public function testDealerUserCreateWithoutAdminPermission(array $inventoryParams)
     {
-        $seeder = new InventorySeeder(AuthToken::USER_TYPE_DEALER_USER, [
-            [
+        $seederParams = [
+            'userType' => AuthToken::USER_TYPE_DEALER_USER,
+            'permissions' => [[
                 'feature' => PermissionsInterface::INVENTORY,
                 'permission_level' => PermissionsInterface::CAN_SEE_AND_CHANGE_PERMISSION,
-            ]
-        ]);
+            ]]
+        ];
+
+        $seeder = new InventorySeeder($seederParams);
 
         $seeder->seed();
 
@@ -227,30 +233,18 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
-     * @dataProvider inventoryDataProvider
-     *
-     * @param array $inventoryParams
      */
-    public function testExists(array $inventoryParams)
+    public function testExists()
     {
-        $seeder = new InventorySeeder();
+        $seeder = new InventorySeeder(['withInventory' => true]);
         $seeder->seed();
 
-        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
-        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
-        $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
-        $inventoryParams['brand'] = $seeder->brand->name;
-        $inventoryParams['category'] = $seeder->category->legacy_category;
-
-        // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams);
-        $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
-
+        $this->assertDatabaseHas('inventory', ['inventory_id' => $seeder->inventory->inventory_id]);
 
         // Get Exists Params
         $existsParams = [
-            'dealer_id' => $inventoryParams['dealer_id'],
-            'stock' => $inventoryParams['stock']
+            'dealer_id' => $seeder->dealer->dealer_id,
+            'stock' => $seeder->inventory->stock
         ];
         $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
 
@@ -270,30 +264,19 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
-     * @dataProvider inventoryDataProvider
-     *
-     * @param array $inventoryParams
      */
-    public function testExistsFalse(array $inventoryParams)
+    public function testExistsFalse()
     {
-        $seeder = new InventorySeeder();
+        $seeder = new InventorySeeder(['withInventory' => true]);
         $seeder->seed();
 
-        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
-        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
-        $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
-        $inventoryParams['brand'] = $seeder->brand->name;
-        $inventoryParams['category'] = $seeder->category->legacy_category;
-
         // Insert Into DB
-        $inventory = factory(Inventory::class)->create($inventoryParams);
-        $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
-
+        $this->assertDatabaseHas('inventory', ['inventory_id' => $seeder->inventory->inventory_id]);
 
         // Get Exists Params
         $existsParams = [
-            'dealer_id' => $inventoryParams['dealer_id'],
-            'stock' => $inventoryParams['stock'] . '_unused'
+            'dealer_id' => $seeder->dealer->dealer_id,
+            'stock' => $seeder->inventory->stock . '_unused'
         ];
         $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
 
@@ -324,9 +307,9 @@ class InventoryControllerTest extends TestCase
 
         $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
         $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
-        $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
-        $inventoryParams['brand'] = $seeder->brand->name;
-        $inventoryParams['category'] = $seeder->category->legacy_category;
+        $inventoryParams['manufacturer'] = $seeder->inventoryMfg;
+        $inventoryParams['brand'] = $seeder->brand;
+        $inventoryParams['category'] = $seeder->category;
 
         // Insert Into DB
         $inventory = factory(Inventory::class)->create($inventoryParams);
@@ -369,23 +352,16 @@ class InventoryControllerTest extends TestCase
      */
     public function testExistsWithInventoryFalse(array $inventoryParams)
     {
-        $seeder = new InventorySeeder();
+        $seeder = new InventorySeeder(['withInventory' => true]);
         $seeder->seed();
-
-        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
-        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
-        $inventoryParams['manufacturer'] = $seeder->inventoryMfg->name;
-        $inventoryParams['brand'] = $seeder->brand->name;
-        $inventoryParams['category'] = $seeder->category->legacy_category;
 
         // Insert Into DB
         $inventory = factory(Inventory::class)->create($inventoryParams);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
 
-
         // Get Exists Params
         $existsParams = [
-            'dealer_id' => $inventoryParams['dealer_id'],
+            'dealer_id' => $seeder->dealer->dealer_id,
             'inventory_id' => $inventory->inventory_id,
             'stock' => $inventoryParams['stock'] . '_unused'
         ];
