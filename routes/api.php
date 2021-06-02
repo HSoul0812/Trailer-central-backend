@@ -774,6 +774,7 @@ $api->version('v1', function ($route) {
         $route->get('pos/search', 'App\Http\Controllers\v1\Pos\PosController@search');
         $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
         $route->get('pos/sales/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
+        $route->get('pos/registers', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@index');
 
         /*
         |--------------------------------------------------------------------------
@@ -862,6 +863,7 @@ $api->version('v1', function ($route) {
         */
         $route->get('reports/sales-person-sales', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@salesReport');
         $route->get('reports/service-technician-sales', 'App\Http\Controllers\v1\Dms\ServiceOrder\ServiceItemTechnicianController@serviceReport');
+        $route->post('reports/service-technician-sales-export', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@serviceReportExport');
         $route->post('reports/custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@customReport');
         $route->post('reports/export-custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@exportCustomReport');
         $route->get('reports/service-monthly-hours', 'App\Http\Controllers\v1\Dms\ServiceOrder\ReportsController@monthly');

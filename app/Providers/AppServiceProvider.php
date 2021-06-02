@@ -13,6 +13,8 @@ use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\Dms\Pos\RegisterRepository;
+use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
@@ -300,5 +302,6 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(PackageRepositoryInterface::class, PackageRepository::class);
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
+        $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
     }
 }
