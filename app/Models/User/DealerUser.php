@@ -21,6 +21,18 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
      * @var string
      */
     protected $table = self::TABLE_NAME;
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'email',
+        'password',
+        'dealer_id',
+        'salt'
+    ];
 
     /**
      * The primary key associated with the table.

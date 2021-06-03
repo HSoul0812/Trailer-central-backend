@@ -14,7 +14,17 @@ class DealerUserPermission extends Model
      * @var string
      */
     protected $table = self::TABLE_NAME;
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'dealer_user_id',
+        'feature',
+        'permission_level'
+    ];
+    
     /**
      * The attributes excluded from the model's JSON form.
      *
