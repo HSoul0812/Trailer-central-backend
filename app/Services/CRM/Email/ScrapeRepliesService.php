@@ -170,7 +170,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $salesperson->setRelation('googleToken', $accessToken);
             }
         }
-
+        
         // Process Messages
         $this->log->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
         $imported = 0;

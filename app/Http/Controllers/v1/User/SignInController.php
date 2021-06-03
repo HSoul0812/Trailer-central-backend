@@ -13,6 +13,9 @@ use App\Http\Requests\User\GetDetailsRequest;
 use Dingo\Api\Http\Request;
 use App\Transformers\User\UserSignInTransformer;
 use App\Transformers\User\UserTransformer;
+use App\Http\Requests\User\UpdatePasswordRequest;
+use App\Repositories\User\DealerPasswordResetRepositoryInterface;
+use App\Models\User\User;
 
 class SignInController extends RestfulController {
     
@@ -22,10 +25,23 @@ class SignInController extends RestfulController {
     
     protected $transformer;
     
-    public function __construct(UserRepositoryInterface $userRepo, PasswordResetServiceInterface $passwordResetService)
+    /**
+     *
+     * @var DealerPasswordResetRepositoryInterface 
+     */
+    protected $passwordResetRepo;
+    
+    public function __construct(UserRepositoryInterface $userRepo, 
+                                PasswordResetServiceInterface $passwordResetService,
+                                DealerPasswordResetRepositoryInterface $passwordResetRepo)
     {
+        $this->middleware('setDealerIdOnRequest')->only([
+            'updatePassword'
+        ]);
+        
         $this->users = $userRepo;
         $this->passwordResetService = $passwordResetService;
+        $this->passwordResetRepo = $passwordResetRepo;
         $this->transformer = new UserSignInTransformer();
     }
     
@@ -81,6 +97,19 @@ class SignInController extends RestfulController {
             return $this->response->created();
             
         }
+        return $this->response->errorBadRequest();
+    }
+    
+    public function updatePassword(Request $request)
+    {
+        $request = new UpdatePasswordRequest($request->all());
+        
+        if ($request->validate()) {
+            $user = User::findOrFail($request->dealer_id);
+            $this->passwordResetRepo->updateDealerPassword($user, $request->password);
+            return $this->successResponse();
+        }
+        
         return $this->response->errorBadRequest();
     }
 }

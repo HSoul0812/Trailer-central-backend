@@ -11,7 +11,7 @@ use App\Models\CRM\User\EmailFolder;
  * 
  * @package App\Services\CRM\Email\DTOs
  */
-class ImapConfig
+class IMAPConfig
 {
     /**
      * @const string SSL
