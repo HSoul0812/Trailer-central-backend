@@ -3,6 +3,8 @@ namespace Tests\Integration\Http\Controllers\Dms\Quickbooks;
 
 use App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController;
 use App\Http\Requests\Dms\Quickbooks\DeleteQuickbookApprovalRequest;
+use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
+use Dingo\Api\Exception\ResourceException;
 use Tests\database\seeds\Dms\Quickbook\QuickbookApprovalSeeder;
 use Tests\database\seeds\Dms\Quickbook\QuickbookApprovalDeletedSeeder;
 use Tests\TestCase;
@@ -99,6 +101,24 @@ class QuickApprovalControllerTest extends TestCase
         $this->assertArrayHasKey('deleted_at',$responseJson['data'][0]);
     }
 
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->qbaSeed = new QuickbookApprovalSeeder();
+        $this->qbaSeed->seed();
+
+        $this->qbaDelSeed = new QuickbookApprovalDeletedSeeder();
+        $this->qbaDelSeed->seed();
+    }
+
+    public function tearDown(): void
+    {
+        $this->qbaSeed->cleanUp();
+        $this->qbaDelSeed->cleanUp();
+
+        parent::tearDown();
+    }
 
     /**
      * @covers ::destroy
@@ -106,9 +126,6 @@ class QuickApprovalControllerTest extends TestCase
      */
     public function testDestroy()
     {
-        $this->qbaSeed = new QuickbookApprovalSeeder();
-        $this->qbaSeed->seed();
-
         $request = new DeleteQuickbookApprovalRequest(
             [
                 'id' => $this->qbaSeed->qbApproval->id,
@@ -117,12 +134,46 @@ class QuickApprovalControllerTest extends TestCase
         );
         $controller = app()->make(QuickbookApprovalController::class);
 
-        $response = $controller->destroy($this->qbaSeed->qbApproval->id, $request);
+        $controller->destroy($this->qbaSeed->qbApproval->id, $request);
 
-        $this->qbaSeed->cleanUp();
+        self::assertDatabaseMissing('quickbook_approval', ['id' => $this->qbaSeed->qbApproval->id]);
+        self::assertDatabaseHas('quickbook_approval_deleted', ['id' => $this->qbaSeed->qbApproval->id]);
+    }
 
-        self::assertEquals($this->qbaSeed->qbApproval->id, $response->id);
+    /**
+     * @dataProvider noDealerSupportedInRequest
+     *
+     * @param array $params
+     * @param string $expectedException
+     * @param string $expectedExceptionMessage
+     * @param string|null $firstExpectedErrorMessage
+     *
+     * @covers ::destroy
+     * @group quickbook
+     */
+    public function testDestroyWithoutDealerId(array $params,
+                                               string $expectedException,
+                                               string $expectedExceptionMessage,
+                                               ?string $firstExpectedErrorMessage)
+    {
+        $request = new DeleteQuickbookApprovalRequest(
+            [
+                'id' => $this->qbaSeed->qbApproval->id,
+            ]
+        );
+        $controller = app()->make(QuickbookApprovalController::class);
 
+
+        $this->expectException($expectedException);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+
+        try {
+            $controller->destroy($this->qbaSeed->qbApproval->id, $request);
+        } catch (ResourceException $exception) {
+            self::assertSame($firstExpectedErrorMessage, $exception->getErrors()->first());
+
+            throw $exception;
+        }
     }
 
     /**
@@ -131,16 +182,24 @@ class QuickApprovalControllerTest extends TestCase
      */
     public function testMoveStatus()
     {
-        $this->qbaDelSeed = new QuickbookApprovalDeletedSeeder();
-        $this->qbaDelSeed->seed();
-
         $controller = app()->make(QuickbookApprovalController::class);
 
-        $response = $controller->moveStatus($this->qbaDelSeed->qbApprovalDeleted->id, 'to_send');
+        $controller->moveStatus($this->qbaDelSeed->qbApprovalDeleted->id, 'to_send');
 
-        $this->qbaDelSeed->cleanUp();
+        self::assertDatabaseHas('quickbook_approval', ['id' => $this->qbaDelSeed->qbApprovalDeleted->id]);
+        self::assertDatabaseMissing('quickbook_approval_deleted', ['id' => $this->qbaDelSeed->qbApprovalDeleted->id]);
+    }
 
-        self::assertEquals($this->qbaDelSeed->qbApprovalDeleted->removed_by, $response->dealer_id);
-
+    /**
+     * Examples of no dealer supported in request.
+     *
+     * @return array<string, array>
+     * @throws \Exception when Uuid::uuid4 cannot generate a uuid
+     */
+    public function noDealerSupportedInRequest(): array
+    {
+        return [  // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
+            'No dealer' => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
+        ];
     }
 }
