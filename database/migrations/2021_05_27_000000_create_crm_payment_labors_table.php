@@ -15,7 +15,7 @@ class CreateCrmPaymentLaborsTable extends Migration
     public function up(): void
     {
         Schema::create('qb_payment_labors', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id');
             $table->unsignedInteger('payment_id');
             $table->unsignedInteger('quantity');
             $table->decimal('unit_price', 10, 2);
@@ -29,6 +29,10 @@ class CreateCrmPaymentLaborsTable extends Migration
             $table->string('technician');
             $table->string('notes');
             $table->timestamps();
+
+            $table->index('payment_id');
+            $table->index('labor_code');
+            $table->index('technician');
         });
     }
 
