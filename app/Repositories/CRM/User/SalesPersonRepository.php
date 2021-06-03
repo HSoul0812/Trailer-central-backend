@@ -196,8 +196,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             $dbParams['toDate1'] = $dbParams['toDate2'] = $dbParams['toDate3'] = $dbParams['toDate4'] = $params['to_date'];
         }
 
-        $sql =
-            "SELECT sp.first_name, sp.last_name, sales.*
+        $sql = <<<SQL
+            SELECT sp.first_name, sp.last_name, sales.*
             FROM crm_sales_person sp
             JOIN (
                 /* unit sales */
@@ -301,9 +301,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 {$dateFromClause1} {$quotesFilters}
                 GROUP BY us.id
                 HAVING remaining <= 0 -- Only be shown those records totally paid
-                ";
-
-        $sql .= "
 
                 UNION
 
@@ -469,11 +466,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                 AND qb_invoices.repair_order_id IS NULL
                 GROUP BY qb_invoices.id
                 HAVING remaining <= 0 -- Only be shown those records totally paid
-                ";
 
-            $sql .= "
-
-            UNION
+                UNION
 
             /* RO sales */
 
@@ -571,7 +565,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
             LEFT JOIN new_dealer_user ndu ON ndu.user_id=sp.user_id
             WHERE ndu.id=:dealerId3 AND sp.deleted_at IS NULL
-            ";
+SQL;
 
         $result = DB::select($sql, $dbParams);
 
