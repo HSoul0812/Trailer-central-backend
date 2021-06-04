@@ -322,7 +322,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $query = Inventory::select('*');
 
         $query->where([
-            ['status', '<>', Inventory::STATUS_QUOTE],
+            ['status', '<>', NULL],
             ['is_floorplan_bill', '=', 1],
             ['active', '=', 1],
             ['fp_vendor', '>', 0],
