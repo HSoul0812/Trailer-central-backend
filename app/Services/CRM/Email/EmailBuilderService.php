@@ -48,11 +48,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     use DispatchesJobs, CustomerHelper, MailHelper;
 
     /**
-     * @const int
-     */
-    const RATE_LIMIT_MAX = 100;
-
-    /**
      * @var App\Repositories\CRM\Email\BlastRepositoryInterface
      */
     protected $blasts;
@@ -427,11 +422,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Loop Leads
         foreach($leads as $k => $leadId) {
-            // Prevent Rate Limiting
-            if(($k % self::RATE_LIMIT_MAX) === 0) {
-                sleep(1);
-            }
-
             // Already Exists?
             if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $leadId)) ||
                ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $leadId))) {
@@ -462,6 +452,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->log->error($ex->getMessage(), $ex->getTrace());
                 $errorLeads->push($leadId);
             }
+            sleep(1); // Only Allow 1 Per Second to Prevent Rate Limiting
         }
 
         // Errors Occurred and No Emails Sent?
