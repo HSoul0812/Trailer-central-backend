@@ -7,6 +7,10 @@ use App\Repositories\User\SettingsRepositoryInterface;
 use App\Transformers\User\SettingsTransformer;
 use App\Http\Requests\User\Settings\GetSettingsRequest;
 use App\Http\Requests\User\Settings\UpdateSettingsRequest;
+use App\Transformers\User\NewsletterTransformer;
+use App\Repositories\User\DealerXmlExportRepositoryInterface;
+use App\Transformers\User\DealerXmlExportTransformer;
+use App\Models\User\User;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -20,15 +24,21 @@ class SettingsController extends RestfulControllerV2
      * @var SettingsRepositoryInterface
      */
     private $repository;
+    
+    /**     
+     * @var DealerXmlExportRepositoryInterface 
+     */
+    protected $dealerXmlExportRepo;
 
     /**
      * SettingssController constructor.
      * @param SettingsRepositoryInterface $repository
      */
-    public function __construct(SettingsRepositoryInterface $repository)
+    public function __construct(SettingsRepositoryInterface $repository, DealerXmlExportRepositoryInterface $dealerXmlRepo)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'updateNewsletter', 'getNewsletter', 'updateXmlExport', 'getXmlExport']);
         $this->repository = $repository;
+        $this->dealerXmlExportRepo = $dealerXmlRepo;
     }
     
     /**
@@ -92,4 +102,26 @@ class SettingsController extends RestfulControllerV2
 
         return $this->response->errorBadRequest();
     }
+    
+    
+    public function updateNewsletter(Request $request): Response {
+        $user = User::findOrFail($request->dealer_id);
+        $user->newsletter_enabled = $request->newsletter_enabled;
+        $user->save();
+
+        return $this->response->item($user, new NewsletterTransformer());
+    }
+    
+    public function getNewsletter(Request $request): Response {                   
+        return $this->response->item(User::findOrFail($request->dealer_id), new NewsletterTransformer());
+    }
+    
+    public function getXmlExport(Request $request) : Response {
+        return $this->response->item($this->dealerXmlExportRepo->get($request->all()), new DealerXmlExportTransformer);
+    }
+    
+    public function updateXmlExport(Request $request) : Response {
+        return $this->response->item($this->dealerXmlExportRepo->updateExport($request->dealer_id, $request->export_status), new DealerXmlExportTransformer);
+    }
+    
 }
