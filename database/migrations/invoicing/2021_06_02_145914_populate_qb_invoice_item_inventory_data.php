@@ -57,8 +57,6 @@ class PopulateQbInvoiceItemInventoryData extends Migration
                     $this->saveItem($item);
                 });
             });
-
-        exit; // just for develop
     }
 
     /**
