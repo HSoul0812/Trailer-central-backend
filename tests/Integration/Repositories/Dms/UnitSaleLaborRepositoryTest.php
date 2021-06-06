@@ -12,6 +12,9 @@ use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Dms\UnitSaleLaborRepository;
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\User\DealerLocation;
+use App\Models\User\User;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -70,6 +73,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
      */
     public function testServiceReport(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
     {
+        $this->prepareDealer();
         $technician1 = 'unit_test_service_report_technician_1';
         $technician2 = 'unit_test_service_report_technician_2';
 
@@ -95,43 +99,61 @@ class UnitSaleLaborRepositoryTest extends TestCase
             'notes' => 'inventory12'
         ]);
 
-        $unitSaleId11 = factory(UnitSale::class)->create([
-            'sales_person_id' => $unitSaleLabor11['sales_person_id'],
-            'buyer_id' => $customerId11,
-            'inventory_id' => $inventory11->inventory_id
-        ])->id;
+        $unitSaleId11 = factory(UnitSale::class)->create(
+            [
+                'sales_person_id' => $unitSaleLabor11['sales_person_id'],
+                'buyer_id' => $customerId11,
+                'dealer_id' => self::getTestDealerId(),
+                'inventory_id' => $inventory11->inventory_id
+            ]
+        )->id;
 
-        $unitSaleId12 = factory(UnitSale::class)->create([
-            'sales_person_id' => $unitSaleLabor12['sales_person_id'],
-            'buyer_id' => $customerId12,
-            'inventory_id' => $inventory12->inventory_id
-        ])->id;
+        $unitSaleId12 = factory(UnitSale::class)->create(
+            [
+                'sales_person_id' => $unitSaleLabor12['sales_person_id'],
+                'buyer_id' => $customerId12,
+                'dealer_id' => self::getTestDealerId(),
+                'inventory_id' => $inventory12->inventory_id
+            ]
+        )->id;
 
-        $unitSaleId21 = factory(UnitSale::class)->create([
-            'sales_person_id' => $unitSaleLabor21['sales_person_id'],
-            'buyer_id' => $customerId21,
-        ])->id;
+        $unitSaleId21 = factory(UnitSale::class)->create(
+            [
+                'sales_person_id' => $unitSaleLabor21['sales_person_id'],
+                'dealer_id' => self::getTestDealerId(),
+                'buyer_id' => $customerId21,
+            ]
+        )->id;
 
-        $invoiceId11 = factory(Invoice::class)->create([
-            'unit_sale_id' => $unitSaleId11,
-            'total' => $unitSaleLabor11['invoice_total'],
-            'doc_num' => $unitSaleLabor11['doc_num'],
-            'invoice_date' => $unitSaleLabor11['sale_date'],
-        ])->id;
+        $invoiceId11 = factory(Invoice::class)->create(
+            [
+                'unit_sale_id' => $unitSaleId11,
+                'dealer_id' => self::getTestDealerId(),
+                'total' => $unitSaleLabor11['invoice_total'],
+                'doc_num' => $unitSaleLabor11['doc_num'],
+                'invoice_date' => $unitSaleLabor11['sale_date'],
+            ]
+        )->id;
 
-        $invoiceId12 = factory(Invoice::class)->create([
-            'unit_sale_id' => $unitSaleId12,
-            'total' => $unitSaleLabor12['invoice_total'],
-            'doc_num' => $unitSaleLabor12['doc_num'],
-            'invoice_date' => $unitSaleLabor12['sale_date'],
-        ])->id;
+        $invoiceId12 = factory(Invoice::class)->create(
+            [
+                'unit_sale_id' => $unitSaleId12,
+                'dealer_id' => self::getTestDealerId(),
+                'total' => $unitSaleLabor12['invoice_total'],
+                'doc_num' => $unitSaleLabor12['doc_num'],
+                'invoice_date' => $unitSaleLabor12['sale_date'],
+            ]
+        )->id;
 
-        $invoiceId21 = factory(Invoice::class)->create([
-            'unit_sale_id' => $unitSaleId21,
-            'total' => $unitSaleLabor21['invoice_total'],
-            'doc_num' => $unitSaleLabor21['doc_num'],
-            'invoice_date' => $unitSaleLabor21['sale_date'],
-        ])->id;
+        $invoiceId21 = factory(Invoice::class)->create(
+            [
+                'unit_sale_id' => $unitSaleId21,
+                'dealer_id' => self::getTestDealerId(),
+                'total' => $unitSaleLabor21['invoice_total'],
+                'doc_num' => $unitSaleLabor21['doc_num'],
+                'invoice_date' => $unitSaleLabor21['sale_date'],
+            ]
+        )->id;
 
         $invoices = [$invoiceId11 => $unitSaleLabor11, $invoiceId12 => $unitSaleLabor12, $invoiceId21 => $unitSaleLabor21];
 
@@ -351,7 +373,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $this->assertEquals($inventory11->stock, $result[$technician1][$unitSale11Key]['inventory_stock']);
         $this->assertEquals($inventory12->stock, $result[$technician1][$unitSale12Key]['inventory_stock']);
-        $this->assertEmpty($result[$technician2][$unitSale21Key]['inventory_stock']);
 
         $this->assertArrayHasKey('inventory_make', $result[$technician1][$unitSale11Key]);
         $this->assertArrayHasKey('inventory_make', $result[$technician1][$unitSale12Key]);
@@ -359,7 +380,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $this->assertEquals($inventory11->manufacturer, $result[$technician1][$unitSale11Key]['inventory_make']);
         $this->assertEquals($inventory12->manufacturer, $result[$technician1][$unitSale12Key]['inventory_make']);
-        $this->assertEmpty($result[$technician2][$unitSale21Key]['inventory_make']);
+
 
         $this->assertArrayHasKey('inventory_notes', $result[$technician1][$unitSale11Key]);
         $this->assertArrayHasKey('inventory_notes', $result[$technician1][$unitSale12Key]);
@@ -367,7 +388,9 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $this->assertEquals($inventory11->notes, $result[$technician1][$unitSale11Key]['inventory_notes']);
         $this->assertEquals($inventory12->notes, $result[$technician1][$unitSale12Key]['inventory_notes']);
-        $this->assertEmpty($result[$technician2][$unitSale21Key]['inventory_notes']);
+
+
+        $this->revertDB();
     }
 
     /**
@@ -380,18 +403,22 @@ class UnitSaleLaborRepositoryTest extends TestCase
      */
     public function testServiceReportWithDates(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
     {
+        $this->prepareDealer();
         $technician1 = 'unit_test_service_report_technician_1';
         $technician2 = 'unit_test_service_report_technician_2';
 
         $unitSaleId11 = factory(UnitSale::class)->create([
+            'dealer_id' => self::getTestDealerId(),
             'created_at' => $unitSaleLabor11['created_at']
         ])->id;
 
         $unitSaleId12 = factory(UnitSale::class)->create([
+            'dealer_id' => self::getTestDealerId(),
             'created_at' => $unitSaleLabor12['created_at']
         ])->id;
 
         $unitSaleId21 = factory(UnitSale::class)->create([
+            'dealer_id' => self::getTestDealerId(),
             'created_at' => $unitSaleLabor21['created_at']
         ])->id;
 
@@ -413,11 +440,13 @@ class UnitSaleLaborRepositoryTest extends TestCase
         /** @var UnitSaleLaborRepository $repository */
         $repository = app()->make(UnitSaleLaborRepository::class);
 
-        $result = $repository->serviceReport([
-            'dealer_id' => $this->getTestDealerId(),
-            'from_date' => (new \DateTime)->modify('-2 weeks'),
-            'to_date' => (new \DateTime)->modify('-1 week')->modify('+1 day')
-        ]);
+        $result = $repository->serviceReport(
+            [
+                'dealer_id' => $this->getTestDealerId(),
+                'from_date' => (new \DateTime)->modify('-2 weeks')->format('Y-m-d'),
+                'to_date' => (new \DateTime)->modify('-1 week')->modify('+1 day')->format('Y-m-d')
+            ]
+        );
 
         $this->assertArrayHasKey($technician1, $result);
         $this->assertArrayNotHasKey($technician2, $result);
@@ -427,6 +456,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $this->assertFalse($unitSale11Key);
         $this->assertNotFalse($unitSale12Key);
+        $this->revertDB();
     }
 
     /**
@@ -434,14 +464,21 @@ class UnitSaleLaborRepositoryTest extends TestCase
      */
     public function testServiceReportWithTechnician()
     {
+        $this->prepareDealer();
         $technician1 = 'unit_test_service_report_technician_1';
         $technician2 = 'unit_test_service_report_technician_2';
 
-        $unitSaleId11 = factory(UnitSale::class)->create([])->id;
+        $unitSaleId11 = factory(UnitSale::class)->create([
+            'dealer_id' => self::getTestDealerId(),
+        ])->id;
 
-        $unitSaleId12 = factory(UnitSale::class)->create([])->id;
+        $unitSaleId12 = factory(UnitSale::class)->create([
+            'dealer_id' => self::getTestDealerId(),
+        ])->id;
 
-        $unitSaleId21 = factory(UnitSale::class)->create([])->id;
+        $unitSaleId21 = factory(UnitSale::class)->create([
+            'dealer_id' => self::getTestDealerId(),
+        ])->id;
 
         factory(UnitSaleLabor::class)->create([
             'technician' => $technician1,
@@ -468,100 +505,105 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $this->assertArrayNotHasKey($technician1, $result);
         $this->assertArrayHasKey($technician2, $result);
+        $this->revertDB();
     }
 
     public function serviceReportProvider(): array
     {
-        return [[
+        return [
             [
-                'actual_hours' => 123.00,
-                'paid_hours' => 111.00,
-                'billed_hours' => 100.00,
-                'invoice_total' => 999.00,
-                'doc_num' => 'test11',
-                'sale_date' => (new \DateTime())->modify('-1 day'),
-                'sales_person_id' => 111,
-                'customer_name' => 'test_customer_name147',
-                'created_at' => (new \DateTime())->modify('-1 day'),
-                'qb_invoice_items' => [
-                    [
-                        'cost' => 44.00,
-                        'type' => 'trailer',
-                        'unit_price' => 0.00,
-                        'qty' => 0,
-                    ],
-                    [
-                        'cost' => 55.00,
-                        'type' => 'deposit_down_payment',
-                        'unit_price' => 0.00,
-                        'qty' => 0,
+                [
+                    'actual_hours' => 123.00,
+                    'paid_hours' => 111.00,
+                    'billed_hours' => 100.00,
+                    'invoice_total' => 999.00,
+                    'doc_num' => 'test11',
+                    'sale_date' => (new \DateTime())->modify('-1 day'),
+                    'sales_person_id' => 111,
+                    'customer_name' => 'test_customer_name147',
+                    'created_at' => (new \DateTime())->modify('-1 day'),
+                    'qb_invoice_items' => [
+                        [
+                            'cost' => 44.00,
+                            'type' => 'trailer',
+                            'unit_price' => 0.00,
+                            'qty' => 0,
+                        ],
+                        [
+                            'cost' => 55.00,
+                            'type' => 'deposit_down_payment',
+                            'unit_price' => 0.00,
+                            'qty' => 0,
+                        ]
+                    ]
+                ],
+                [
+                    'actual_hours' => 456.00,
+                    'paid_hours' => 112.00,
+                    'billed_hours' => 200.00,
+                    'invoice_total' => 888.00,
+                    'doc_num' => 'test12',
+                    'sale_date' => (new \DateTime())->modify('-1 week'),
+                    'sales_person_id' => 333,
+                    'customer_name' => 'test_customer_name258',
+                    'created_at' => (new \DateTime())->modify('-1 week'),
+                    'qb_invoice_items' => [
+                        [
+                            'cost' => 3256.00,
+                            'type' => 'trailer',
+                            'unit_price' => 0.00,
+                            'qty' => 0,
+                        ],
+                        [
+                            'cost' => 78.00,
+                            'type' => 'labor',
+                            'unit_price' => 15.00,
+                            'qty' => 2,
+                        ],
+                        [
+                            'cost' => 91.00,
+                            'type' => 'labor',
+                            'unit_price' => 16.00,
+                            'qty' => 3,
+                        ],
+                    ]
+                ],
+                [
+                    'actual_hours' => 789.00,
+                    'paid_hours' => 113.00,
+                    'billed_hours' => 300.00,
+                    'invoice_total' => 777.00,
+                    'doc_num' => 'test21',
+                    'sale_date' => (new \DateTime())->modify('-1 month'),
+                    'sales_person_id' => 444,
+                    'customer_name' => 'test_customer_name369',
+                    'created_at' => (new \DateTime())->modify('-1 month'),
+                    'qb_invoice_items' => [
+                        [
+                            'cost' => 222.00,
+                            'unit_price' => 12.00,
+                            'qty' => 10,
+                            'type' => 'part',
+                        ],
+                        [
+                            'cost' => 333.00,
+                            'unit_price' => 13.00,
+                            'qty' => 20,
+                            'type' => 'part',
+                        ],
+                        [
+                            'cost' => 444.00,
+                            'unit_price' => 14.00,
+                            'qty' => 30,
+                            'type' => 'part',
+                        ],
                     ]
                 ]
-            ],
-            [
-                'actual_hours' => 456.00,
-                'paid_hours' => 112.00,
-                'billed_hours' => 200.00,
-                'invoice_total' => 888.00,
-                'doc_num' => 'test12',
-                'sale_date' => (new \DateTime())->modify('-1 week'),
-                'sales_person_id' => 333,
-                'customer_name' => 'test_customer_name258',
-                'created_at' => (new \DateTime())->modify('-1 week'),
-                'qb_invoice_items' => [
-                    [
-                        'cost' => 3256.00,
-                        'type' => 'trailer',
-                        'unit_price' => 0.00,
-                        'qty' => 0,
-                    ],
-                    [
-                        'cost' => 78.00,
-                        'type' => 'labor',
-                        'unit_price' => 15.00,
-                        'qty' => 2,
-                    ],
-                    [
-                        'cost' => 91.00,
-                        'type' => 'labor',
-                        'unit_price' => 16.00,
-                        'qty' => 3,
-                    ],
-                ]
-            ],
-            [
-                'actual_hours' => 789.00,
-                'paid_hours' => 113.00,
-                'billed_hours' => 300.00,
-                'invoice_total' => 777.00,
-                'doc_num' => 'test21',
-                'sale_date' => (new \DateTime())->modify('-1 month'),
-                'sales_person_id' => 444,
-                'customer_name' => 'test_customer_name369',
-                'created_at' => (new \DateTime())->modify('-1 month'),
-                'qb_invoice_items' => [
-                    [
-                        'cost' => 222.00,
-                        'unit_price' => 12.00,
-                        'qty' => 10,
-                        'type' => 'part',
-                    ],
-                    [
-                        'cost' => 333.00,
-                        'unit_price' => 13.00,
-                        'qty' => 20,
-                        'type' => 'part',
-                    ],
-                    [
-                        'cost' => 444.00,
-                        'unit_price' => 14.00,
-                        'qty' => 30,
-                        'type' => 'part',
-                    ],
-                ]
             ]
-        ]];
+        ];
     }
+
+
 
     /**
      * @covers ::serviceReport
@@ -575,6 +617,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         array $paymentLabor32
     )
     {
+        $this->prepareDealer();
         $technician3 = 'unit_test_service_report_technician_3';
         $technician4 = 'unit_test_service_report_technician_4';
 
@@ -675,6 +718,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $this->assertEquals($paymentLabor32['billed_hours'], $result[$technician4][0]['billed_hours']);
         $this->assertEquals($paymentLabor32['quantity'] * $paymentLabor32['unit_price'], $result[$technician4][0]['labor_sale_amount']);
         $this->assertEquals($paymentLabor32['quantity'] * $paymentLabor32['dealer_cost'], $result[$technician4][0]['labor_cost_amount']);
+        $this->revertDB();
     }
 
     /**
@@ -689,6 +733,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         array $paymentLabor32
     )
     {
+        $this->prepareDealer();
         $technician3 = 'unit_test_service_report_technician_3';
         $technician4 = 'unit_test_service_report_technician_4';
 
@@ -788,6 +833,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $this->assertEquals($paymentLabor31['billed_hours'], $result[$technician3][0]['billed_hours']);
         $this->assertEquals($paymentLabor31['quantity'] * $paymentLabor31['unit_price'], $result[$technician3][0]['labor_sale_amount']);
         $this->assertEquals($paymentLabor31['quantity'] * $paymentLabor31['dealer_cost'], $result[$technician3][0]['labor_cost_amount']);
+        $this->revertDB();
     }
 
     public function serviceReportPaymentLaborProvider(): array
@@ -824,5 +870,30 @@ class UnitSaleLaborRepositoryTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    protected function revertDB()
+    {
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        User::where('dealer_id', $dealerId)->delete();
+        UnitSale::where('dealer_id', $dealerId)->delete();
+        Invoice::where('dealer_id', $dealerId)->delete();
+        Payment::where('dealer_id', $dealerId)->delete();
+        Inventory::where('dealer_id', $dealerId)->delete();
+        DealerLocation::where('dealer_location_id', $dealerLocationId)->delete();
+    }
+
+    protected function prepareDealer()
+    {
+        $dealerId = self::getTestDealerId();
+        $dealerLocationId = self::getTestDealerLocationId();
+        factory(User::class)->create([
+            'dealer_id' => $dealerId
+        ]);
+        factory(DealerLocation::class)->create([
+            'dealer_location_id' => $dealerLocationId,
+            'dealer_id' => $dealerId
+        ]);
     }
 }
