@@ -26,7 +26,6 @@ class BlastValidate extends ValidRoute {
     public function __construct() {
         $this->validator[self::ID_PARAM] = function ($data) {
             $blast = Blast::find($data);
-            var_dump($blast);
             if (empty($blast)) {
                 return false;
             }
