@@ -452,6 +452,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->log->error($ex->getMessage(), $ex->getTrace());
                 $errorLeads->push($leadId);
             }
+            sleep(1); // Only Allow 1 Per Second to Prevent Rate Limiting
         }
 
         // Errors Occurred and No Emails Sent?
