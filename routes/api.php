@@ -162,9 +162,9 @@ $api->version('v1', function ($route) {
     /**
      * Inventory Entity
      */
-    
+
     $route->get('inventory/entity', 'App\Http\Controllers\v1\Inventory\EntityController@index');
-    
+
     /**
      * Inventory Manufacturers
      */
@@ -870,6 +870,8 @@ $api->version('v1', function ($route) {
          * Quickbook Approval
          */
         $route->get('quickbooks/quickbook-approvals', 'App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController@index');
+        $route->delete('quickbooks/quickbook-approvals/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController@destroy')->where('id', '[0-9]+');
+        $route->put('quickbooks/quickbook-approvals/{id}/{status}', 'App\Http\Controllers\v1\Dms\Quickbooks\QuickbookApprovalController@moveStatus');
 
         /*
         |--------------------------------------------------------------------------

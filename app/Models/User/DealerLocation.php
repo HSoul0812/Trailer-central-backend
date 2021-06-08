@@ -62,6 +62,8 @@ class DealerLocation extends Model
     use TableAware;
     use SoftDeletes;
 
+    public const PAC_TYPE_PERCENT = 'percent';
+
     /**
      * The table associated with the model.
      *
@@ -210,7 +212,7 @@ class DealerLocation extends Model
 
     /**
      * Return Whatever License Number We Can Find
-     * 
+     *
      * @return string
      */
     public function getLicenseNumberAttribute(): string {

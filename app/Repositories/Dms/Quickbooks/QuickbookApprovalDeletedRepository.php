@@ -3,16 +3,15 @@
 namespace App\Repositories\Dms\Quickbooks;
 
 use App\Models\CRM\Dms\Quickbooks\QuickbookApprovalDeleted;
-use App\Models\CRM\User\Customer;
-use Illuminate\Support\Facades\DB;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
+use App\Repositories\RepositoryAbstract;
 
 /**
  * @author Marcel
  */
-class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterface {
+class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements QuickbookApprovalDeletedRepositoryInterface {
 
     private $sortOrders = [
         'created_at' => [
@@ -41,52 +40,6 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         ],
     ];
 
-
-    public function createForCustomer(Customer $customer)
-    {
-        $qbInfo = [
-            'BillAddr' => [
-                'Line1' => $customer->address,
-                'City' => $customer->city,
-                'Country' => $customer->country,
-                'PostalCode' => $customer->postal_code,
-                'CountrySubDivisionCode' => $customer->region,
-            ],
-            'ShipAddr' => [
-                'Line1' => $customer->shipping_address,
-                'City' => $customer->shipping_city,
-                'Country' => $customer->shipping_country,
-                'PostalCode' => $customer->shipping_postal_code,
-                'CountrySubDivisionCode' => $customer->shipping_region
-            ],
-            'Mobile' => [
-                'FreeFormNumber' => $customer->cell_phone
-            ],
-            'PrimaryPhone' => [
-                'FreeFormNumber' => $customer->work_phone
-            ],
-            'AlternatePhone' => [
-                'FreeFormNumber' => $customer->home_phone
-            ],
-            'GivenName' => $customer->first_name,
-            'MiddleName' => $customer->middle_name,
-            'FamilyName' => $customer->last_name,
-            'DisplayName' => $customer->display_name,
-            'CompanyName' => $customer->company_name,
-            'FullyQualifiedName' => $customer->display_name,
-            'PrimaryEmailAddr' => [
-                'Address' => $customer->email
-            ]
-        ];
-
-        return $this->create([
-            'dealer_id' => $customer->dealer_id,
-            'tb_name' => 'dms_customer',
-            'tb_primary_id' => $customer->id,
-            'qb_info' => $qbInfo,
-            'qb_id' => $customer->qb_id,
-        ]);
-    }
 
     /**
      * Create an approval object
@@ -132,16 +85,16 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
 
     public function delete($params): QuickbookApproval
     {
-        $quickBookApproval = QuickbookApproval::find($params['id']);
+        $quickBookApprovalDeleted = QuickbookApprovalDeleted::find($params['id']);
 
-        if ($quickBookApproval) {
-            $qbaDeleted = new QuickbookApprovalDeleted();
-            $qbaDeleted->createFromOriginal($quickBookApproval, $params['dealer_id']);
+        if ($quickBookApprovalDeleted) {
+            $qba = new QuickbookApproval();
+            $qba->createFromDeleted($quickBookApprovalDeleted);
 
-            $quickBookApproval->delete();
+            $quickBookApprovalDeleted->delete();
         }
 
-        return $quickBookApproval;
+        return $qba;
     }
 
     public function get($params) {
@@ -150,34 +103,11 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
 
     public function getAll($params) {
         if (isset($params['dealer_id'])) {
-            $query = QuickbookApproval::where('dealer_id', '=', $params['dealer_id']);
+            $query = QuickbookApprovalDeleted::where('dealer_id', '=', $params['dealer_id']);
         } else {
-            $query = QuickbookApproval::where('id', '>', 0);
+            $query = QuickbookApprovalDeleted::where('id', '>', 0);
         }
 
-        if (isset($params['status'])) {
-            switch ($params['status']) {
-                case QuickbookApproval::TO_SEND:
-                    $query = $query->where([
-                        ['send_to_quickbook', '=', 0],
-                        ['is_approved', '=', 0],
-                    ]);
-                    break;
-                case QuickbookApproval::SENT:
-                    $query = $query->where([
-                        ['send_to_quickbook', '=', 1],
-                        ['is_approved', '=', 1],
-                    ]);
-                    break;
-                case QuickbookApproval::FAILED:
-                    $query = $query->where([
-                        ['send_to_quickbook', '=', 1],
-                        ['is_approved', '=', 0],
-                    ]);
-                    $query = $query->whereNotNull('error_result');
-                    break;
-            }
-        }
         // In simple mode of quickbook settings, hide qb_items and qb_item_category approvals
         $inSimpleModeQBSetting = true;
         if ($inSimpleModeQBSetting) {
@@ -215,48 +145,18 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         }
 
         if (!isset($params['sort'])) {
-            $params['sort'] = 'created_at';
+            $params['sort'] = 'deleted_at';
         }
         $query = $this->addSortQuery($query, $params['sort']);
 
         return $query->paginate($params['per_page'])->appends($params);
     }
 
-    public function update($params) {
-        throw new NotImplementedException;
-    }
-
-    public function getPoInvoiceApprovals($dealerId) {
-        return DB::table('quickbook_approval AS qa')
-            ->leftJoin('qb_invoices AS i', 'qa.tb_primary_id', '=', 'i.id')
-            ->select('qa.*', 'i.id AS invoice_id')
-            ->where('qa.tb_name', '=', 'qb_invoices')
-            ->where('qa.dealer_id', '=', $dealerId)
-            ->where('is_approved', '=', 0)
-            ->whereNotNull('i.po_no')
-            ->get();
-    }
 
     private function addSortQuery($query, $sort) {
         if (!isset($this->sortOrders[$sort])) {
             return;
         }
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
-    }
-
-    /**
-     * @param int $tbPrimaryId
-     * @return bool
-     * @throws \Exception
-     */
-    public function deleteByTbPrimaryId(int $tbPrimaryId)
-    {
-        $quickbookApproval = QuickbookApproval::where('tb_primary_id', '=', $tbPrimaryId)->first();
-
-        if ($quickbookApproval instanceof QuickbookApproval) {
-            return $quickbookApproval->delete();
-        } else {
-            return false;
-        }
     }
 }
