@@ -313,6 +313,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                          LEFT JOIN dms_unit_sale us ON us.id = i.unit_sale_id
                          LEFT JOIN dms_repair_order ro ON ro.id = i.repair_order_id
                 WHERE i.dealer_id = :dealerId2
+                  AND qi.description != 'Trade In Inventory item' /* exclude trade-ins */
+                  AND ii.unit_price >= 0 /* exclude trade-ins */
                   $salesPersonClause2
                   AND (i.total - payments.paid_amount) <= 0
                   $dateClause2
