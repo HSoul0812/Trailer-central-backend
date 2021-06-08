@@ -421,7 +421,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $errorLeads = new Collection();
 
         // Loop Leads
-        foreach($leads as $k => $leadId) {
+        foreach($leads as $leadId) {
             // Already Exists?
             if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $leadId)) ||
                ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $leadId))) {
