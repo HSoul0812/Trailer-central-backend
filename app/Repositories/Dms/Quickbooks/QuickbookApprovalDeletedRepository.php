@@ -14,12 +14,12 @@ use App\Repositories\RepositoryAbstract;
 class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements QuickbookApprovalDeletedRepositoryInterface {
 
     private $sortOrders = [
-        'created_at' => [
-            'field' => 'created_at',
+        'deleted_at' => [
+            'field' => 'quickbook_approval_deleted.deleted_at',
             'direction' => 'DESC'
         ],
-        '-created_at' => [
-            'field' => 'created_at',
+        '-deleted_at' => [
+            'field' => 'quickbook_approval_deleted.deleted_at',
             'direction' => 'ASC'
         ],
         'action_type' => [
@@ -103,16 +103,20 @@ class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements Q
 
     public function getAll($params) {
         if (isset($params['dealer_id'])) {
-            $query = QuickbookApprovalDeleted::where('dealer_id', '=', $params['dealer_id']);
+            $query = QuickbookApprovalDeleted::where('quickbook_approval_deleted.dealer_id', '=', $params['dealer_id']);
         } else {
             $query = QuickbookApprovalDeleted::where('id', '>', 0);
         }
+
+        $query->join('dealer', 'dealer.dealer_id', '=', 'removed_by')
+        ->select('quickbook_approval_deleted.*', 'dealer.name as dealer_name');
 
         // In simple mode of quickbook settings, hide qb_items and qb_item_category approvals
         $inSimpleModeQBSetting = true;
         if ($inSimpleModeQBSetting) {
             $query = $query->whereNotIn('tb_name', ['qb_items', 'qb_item_category']);
         }
+
         if (isset($params['search_term'])) {
             $search_term = $params['search_term'];
             $query = $query->where(function ($q) use ($params, $search_term) {
@@ -147,6 +151,7 @@ class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements Q
         if (!isset($params['sort'])) {
             $params['sort'] = 'deleted_at';
         }
+
         $query = $this->addSortQuery($query, $params['sort']);
 
         return $query->paginate($params['per_page'])->appends($params);
