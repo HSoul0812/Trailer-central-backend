@@ -19,16 +19,27 @@ class InventoryRepositoryTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected $dealerId;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->dealerId = null;
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        $this->dealerId = null;
+    }
+
+
     /**
      * @covers ::getFloorplanned
      */
     public function testGetFloorplannedInventoryWithStatus()
     {
-        $this->prepareDB();
-        $dealerID = self::getTestDealerId();
         $itemHaveStatus = [
-            'dealer_id' => $dealerID,
-            'dealer_location_id' => self::getTestDealerLocationId(),
             'status' => Inventory::STATUS_SOLD,
             'is_floorplan_bill' => 1,
             'active' => 1 ,
@@ -40,14 +51,14 @@ class InventoryRepositoryTest extends TestCase
         ];
 
         $test = factory(Inventory::class)->create($itemHaveStatus);
+        $dealerId = $test->dealer_id;
 
-        /** @var InventoryRepository $inventoryService */
-        $inventoryService = $this->app->make(InventoryRepository::class);
-        $result = $inventoryService->getFloorplannedInventory(['dealer_id' => $dealerID]);
+        /** @var InventoryRepository $inventoryRepository */
+        $inventoryRepository = $this->app->make(InventoryRepository::class);
+        $result = $inventoryRepository->getFloorplannedInventory(['dealer_id' => $dealerId]);
         $this->assertEquals(1, count($result));
 
         $this->assertEquals($itemHaveStatus['fp_balance'], $result[0]['fp_balance']);
-        $this->revertDB();
     }
 
     /**
@@ -55,11 +66,7 @@ class InventoryRepositoryTest extends TestCase
      */
     public function testGetFloorplannedInventoryWithoutStatus()
     {
-        $this->prepareDB();
-        $dealerID = self::getTestDealerId();
         $itemHaveNoStatus = [
-            'dealer_id' => $dealerID,
-            'dealer_location_id' => self::getTestDealerLocationId(),
             'status' => null,
             'is_floorplan_bill' => 1,
             'active' => 1 ,
@@ -70,28 +77,12 @@ class InventoryRepositoryTest extends TestCase
             'notes' => 'floorplan item'
         ];
 
-        factory(Inventory::class)->create($itemHaveNoStatus);
+        $test = factory(Inventory::class)->create($itemHaveNoStatus);
+        $dealerId = $test->dealer_id;
 
-        /** @var InventoryRepository $inventoryService */
-        $inventoryService = app()->make(InventoryRepository::class);
-        $result = $inventoryService->getFloorplannedInventory(['dealer_id' => $dealerID]);
+        /** @var InventoryRepository $inventoryRepository */
+        $inventoryRepository = app()->make(InventoryRepository::class);
+        $result = $inventoryRepository->getFloorplannedInventory(['dealer_id' => $dealerId]);
         $this->assertEquals(0, count($result));
-        $this->revertDB();
-    }
-
-    protected function revertDB() {
-        Inventory::where('dealer_id', self::getTestDealerId())->delete();
-        User::where('dealer_id', self::getTestDealerId())->delete();
-        DealerLocation::where('dealer_id', self::getTestDealerId())->delete();
-    }
-
-    protected function prepareDB() {
-        factory(User::class)->create([
-            'dealer_id' => self::getTestDealerId()
-        ]);
-        factory(DealerLocation::class)->create([
-            'dealer_id' => self::getTestDealerId(),
-            'dealer_location_id' => self::getTestDealerLocationId()
-        ]);
     }
 }
