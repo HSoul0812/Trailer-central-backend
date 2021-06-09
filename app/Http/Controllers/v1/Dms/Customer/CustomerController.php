@@ -5,6 +5,8 @@ namespace App\Http\Controllers\v1\Dms\Customer;
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Dingo\Api\Exception\StoreResourceFailedException;
+use Dingo\Api\Exception\UpdateResourceFailedException;
 use Dingo\Api\Http\Request;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Http\Requests\Dms\GetCustomersRequest;
@@ -66,13 +68,13 @@ class CustomerController extends RestfulController
 
                 return $this->response->item($customer, $this->transformer);
             }
-        
+
             return $this->response->errorBadRequest();
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
 
-            throw new \Exception('Unable to create customer: ' . $e->getMessage());
+            throw new StoreResourceFailedException('Unable to create customer: ' . $e->getMessage());
         }
     }
 
@@ -97,7 +99,7 @@ class CustomerController extends RestfulController
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
 
-            throw new \Exception('Unable to create customer: ' . $e->getMessage());
+            throw new UpdateResourceFailedException('Unable to update customer: ' . $e->getMessage());
         }
     }
 
@@ -127,10 +129,10 @@ class CustomerController extends RestfulController
             // do the search
             $result = $this->customerRepository->search(
                 $query, $dealerId, [
-                    'allowAll' => true,
-                    'page' => $request->get('page'),
-                    'per_page' => $request->get('per_page', 10),
-                ], $paginator
+                'allowAll' => true,
+                'page' => $request->get('page'),
+                'per_page' => $request->get('per_page', 10),
+            ], $paginator
             );
             $data = new Collection($result, $this->transformer, 'data');
 
