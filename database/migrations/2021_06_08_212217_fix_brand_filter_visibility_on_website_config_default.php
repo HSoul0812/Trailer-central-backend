@@ -17,7 +17,7 @@ class FixBrandFilterVisibilityOnWebsiteConfigDefault extends Migration
     {
         DB::table('website_config_default')
           ->where('key', self::FILTERS_VISIBILITY_BRAND_KEY)
-          ->update(['values' => self::FILTERS_VISIBILITY_BRAND_OPTION]);
+          ->update(['values' => self::FILTERS_VISIBILITY_BRAND_VALUES]);
     }
 
     /**
