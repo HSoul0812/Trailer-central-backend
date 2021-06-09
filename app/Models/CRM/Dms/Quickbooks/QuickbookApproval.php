@@ -1,8 +1,5 @@
 <?php
-
-
 namespace App\Models\CRM\Dms\Quickbooks;
-
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,6 +28,7 @@ class QuickbookApproval extends Model
     const TO_SEND = 'to_send';
     const SENT = 'sent';
     const FAILED = 'failed';
+    const REMOVED = 'removed';
 
     const TABLE_NAME_MAPPER = [
         'qb_accounts' => 'Account',
@@ -230,4 +228,25 @@ class QuickbookApproval extends Model
         return $query->whereIn('tb_name', array_keys($filteredTables));
     }
 
+    /**
+     * @param QuickbookApprovalDeleted $obj
+     */
+    public function createFromDeleted(QuickbookApprovalDeleted $obj)
+    {
+        $this->id = $obj->id;
+        $this->dealer_id = $obj->dealer_id;
+        $this->action_type = $obj->action_type;
+        $this->tb_name = $obj->tb_name;
+        $this->tb_primary_id = $obj->tb_primary_id;
+        $this->send_to_quickbook = $obj->send_to_quickbook;
+        $this->qb_obj = $obj->qb_obj;
+        $this->is_approved = $obj->is_approved;
+        $this->sort_order = $obj->sort_order;
+        $this->created_at = $obj->created_at;
+        $this->exported_at = $obj->exported_at;
+        $this->qb_id = $obj->qb_id;
+        $this->error_result = $obj->error_result;
+
+        $this->save();
+    }
 }

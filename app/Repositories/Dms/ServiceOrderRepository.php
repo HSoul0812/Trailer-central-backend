@@ -2,22 +2,19 @@
 
 namespace App\Repositories\Dms;
 
-use Illuminate\Support\Facades\DB;
-use App\Repositories\Dms\ServiceOrderRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\ServiceOrder;
-use App\Models\CRM\Account\Payment;
 
 /**
  * @author Marcel
  */
 class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
-    
+
     /**
-     * @var App\Models\CRM\Dms\ServiceOrder 
+     * @var ServiceOrder
      */
     protected $model;
-        
+
     private $sortOrders = [
         'user_defined_id' => [
             'field' => 'user_defined_id',
@@ -60,7 +57,7 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
             'direction' => 'ASC'
         ],
     ];
-    
+
     public function __construct(ServiceOrder $serviceOrder) {
         $this->model = $serviceOrder;
     }
@@ -115,6 +112,9 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
                 case ServiceOrder::SERVICE_ORDER_COMPLETED:
                     $query = $query->whereIn('status', ['picked_up', 'ready_for_pickup']);
                     break;
+                case ServiceOrder::SERVICE_ORDER_NOT_COMPLETED:
+                    $query = $query->whereNotIn('status', ['picked_up', 'ready_for_pickup']);
+                    break;
             }
         }
         if (isset($params['sort'])) {
@@ -134,14 +134,14 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
                     ->orWhere('closed_at', '>=', $params['created_at_or_closed_at_gte']);
             });
         }
-                
+
         if (isset($params['date_in_or_date_out_lte'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('date_in', '<=', $params['date_in_or_date_out_lte'] . ' 23:59:59')
                     ->orWhere('date_out', '<=', $params['date_in_or_date_out_lte'] . ' 23:59:59');
             });
         }
-        
+
         if (isset($params['date_in_or_date_out_gte'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('date_in', '>=', $params['date_in_or_date_out_gte'] . ' 00:00:00')
@@ -149,15 +149,19 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
             });
         }
 
+        if (isset($params['inventory_ids']) && is_array($params['inventory_ids'])) {
+            $query = $query->whereIn('inventory_id', $params['inventory_ids']);
+        }
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
         $serviceOrder = $this->get($params);
-        
+
         $serviceOrder->fill($params);
         $serviceOrder->save();
-        
+
         return $serviceOrder;
     }
 

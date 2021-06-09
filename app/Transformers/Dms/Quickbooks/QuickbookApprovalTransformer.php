@@ -24,6 +24,8 @@ class QuickbookApprovalTransformer extends TransformerAbstract
             'sales_ticket_num' => $quickbookApproval->sales_ticket_num,
             'ticket_total' => $quickbookApproval->ticket_total,
             'qbo_account' => $quickbookApproval->account,
+            'removed_by' => $quickbookApproval->removed_by,
+            'deleted_at' => $quickbookApproval->deleted_at
         ];
     }
 }
