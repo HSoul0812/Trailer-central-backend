@@ -31,7 +31,7 @@ class CreateCustomerRequest extends Request
         'dob' => 'string|nullable',
         'deleted_at' => 'date|nullable',
         'is_wholesale' => 'integer',
-        'default_discount_percent' => 'integer',
+        '   default_discount_percent' => 'required|numeric',
         'middle_name' => 'string|nullable',
         'company_name' => 'string|nullable',
         'use_same_address' => 'integer',
