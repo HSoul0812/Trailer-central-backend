@@ -16,6 +16,7 @@ use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
 use InvalidArgumentException;
 use DomainException;
 use Exception;
+use Str;
 
 class DealerLocationService implements DealerLocationServiceInterface
 {
@@ -106,7 +107,11 @@ class DealerLocationService implements DealerLocationServiceInterface
                 }
 
                 foreach ($params['fees'] as $fee) {
-                    $this->quoteFeeRepo->create($fee + $locationRelDefinition);
+                    $this->quoteFeeRepo->create(array_merge(
+                        $fee,
+                        $locationRelDefinition,
+                        ['fee_type' => $this->assignFeeType($fee['title'], $fee['fee_type'], (bool)$fee['is_additional'])]
+                    ));
                 }
             }
 
@@ -184,8 +189,12 @@ class DealerLocationService implements DealerLocationServiceInterface
 
                 $this->quoteFeeRepo->deleteByDealerLocationId($locationId);
 
-                foreach ($params['fees'] as $item) {
-                    $this->quoteFeeRepo->create($item + $locationRelDefinition);
+                foreach ($params['fees'] as $fee) {
+                    $this->quoteFeeRepo->create(array_merge(
+                        $fee,
+                        $locationRelDefinition,
+                        ['fee_type' => $this->assignFeeType($fee['title'], $fee['fee_type'], (bool)$fee['is_additional'])]
+                    ));
                 }
             }
 
@@ -326,5 +335,17 @@ class DealerLocationService implements DealerLocationServiceInterface
         }
 
         return $salesTaxItemColumnTitles;
+    }
+
+    /**
+     * Assign a fee type depending on provided param `$isAdditional`,
+     * if it is true, it will use the currently fee type which is using snake_case, otherwise
+     * it will generate a fee type using camel case and a radon integer
+     *
+     * @throws Exception when it was not possible to gather sufficient entropy.
+     */
+    private function assignFeeType(string $title, string $type, bool $isAdditional = false): string
+    {
+        return $isAdditional ?  Str::camel($title) . random_int(1, 1000) : $type;
     }
 }
