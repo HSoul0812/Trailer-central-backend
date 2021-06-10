@@ -335,7 +335,6 @@ class AutoAssignService implements AutoAssignServiceInterface {
                             ' at ' . $date->tz($lead->crmUser->dealer_timezone)->format("g:i A T");
 
         // Send Email to Sales Person
-        $salesEmail = 'david@jrconway.net';
         Mail::to($salesEmail ?? "" )->send(
             new AutoAssignEmail([
                 'date' => Carbon::now()->toDateTimeString(),
