@@ -366,10 +366,6 @@ SQL;
         if(!empty($dealerLocationId)) {
             $query = $query->where(SalesPerson::getTableName() . '.dealer_location_id', $dealerLocationId);
         }
-        var_dump($dealerId);
-        var_dump($salesType);
-        var_dump($dealerLocationId);
-        dd($query->toSql());
 
         // Return Sales Person
         return $query->first();
