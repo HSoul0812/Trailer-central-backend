@@ -111,7 +111,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
     public function autoAssign(Lead $lead): LeadAssign {
         // Initialize Comments
         $dealer = $lead->newDealerUser;
-        $this->addLeadExplanationNotes($lead->identifier, 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign');
+        $this->addLeadExplanationNotes($lead->identifier, 'Checking Lead #' . $lead->identifier . ' and Dealer #' . $dealer->id . ' ' . $dealer->name . ' to Auto Assign');
 
         // Get Sales Type
         $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
@@ -120,8 +120,8 @@ class AutoAssignService implements AutoAssignServiceInterface {
         // Get Dealer Location
         $dealerLocationId = $this->getLeadDealerLocation($lead);
 
-        // Find Newest Sales Person From DB
-        $newestSalesPerson = $this->getNewestSalesPerson($dealer->id, $dealerLocationId);
+        // Get Newest Sales Person
+        $newestSalesPerson = $this->getNewestSalesPerson($lead, $dealerLocationId);
         $newestSalesPersonId = $newestSalesPerson->id ?? 0;
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $newestSalesPersonId);
         if(!empty($dealerLocationId)) {
