@@ -64,7 +64,7 @@ class Request extends BaseRequest {
 
         return true;
     }
-
+    
     /**
      * @return mixed
      */

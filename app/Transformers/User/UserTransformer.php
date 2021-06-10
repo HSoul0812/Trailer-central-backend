@@ -19,6 +19,7 @@ class UserTransformer extends TransformerAbstract
              'id' => $user->dealer_id,
              'created_at' => $user->created_at ?? $user->user->created_at,
              'name' => $user->name ?? $user->user->name,
+             'email' => $user->email ?? $user->user->email,
              'profile_image' => self::PROFILE_IMAGE
         ];
     }
