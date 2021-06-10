@@ -5,7 +5,7 @@ namespace App\Repositories\CRM\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Repositories\Repository;
 use App\Utilities\JsonApi\RequestQueryable;
-use League\Fractal\Resource\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
     /**
