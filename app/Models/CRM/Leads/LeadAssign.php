@@ -29,6 +29,7 @@ class LeadAssign extends Model
      */
     const STATUS_ASSIGNING = 'assigning';
     const STATUS_ASSIGNED  = 'assigned';
+    const STATUS_MAILING   = 'mailing';
     const STATUS_MAILED    = 'mailed';
     const STATUS_SKIPPED   = 'skipped';
     const STATUS_ERROR     = 'error';
