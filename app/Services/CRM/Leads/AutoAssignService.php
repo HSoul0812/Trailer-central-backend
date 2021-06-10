@@ -267,7 +267,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
             $status = $this->finishAssignLead($lead, $salesPerson, $date);
 
             // Send Sales Email
-            if(!empty($lead->dealer->crmUser->enable_assign_notification)) {
+            if(!empty($lead->crmUser->enable_assign_notification)) {
                 $status = LeadAssign::STATUS_MAILING;
                 $status = $this->sendAssignLeadEmail($lead, $salesPerson, $date);
             }
@@ -310,7 +310,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         ]);
 
         // Finish Assigning
-        $this->addLeadExplanationNotes($lead->identifier, 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $lead->id_name);
+        $this->addLeadExplanationNotes($lead->identifier, 'Assigned Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $lead->id_name);
         return LeadAssign::STATUS_ASSIGNED;
     }
 
@@ -334,6 +334,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         $nextContactText  = ' on ' . $date->format("l, F jS, Y") . ' at ' . $date->format("g:i A T");
 
         // Send Email to Sales Person
+        $salesEmail = 'david@jrconway.net';
         Mail::to($salesEmail ?? "" )->send(
             new AutoAssignEmail([
                 'date' => Carbon::now()->toDateTimeString(),
