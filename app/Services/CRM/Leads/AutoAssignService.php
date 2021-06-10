@@ -236,7 +236,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         try {
             // Prepare to Assign
             $status = LeadAssign::STATUS_ASSIGNING;
-            $status = $this->finishAssignLead($lead, $salesPerson);
+            $status = $this->finishAssignLead($lead, $salesPerson, $nextContactStamp);
 
             // Send Sales Email
             if(!empty($lead->dealer->crmUser->enable_assign_notification)) {
