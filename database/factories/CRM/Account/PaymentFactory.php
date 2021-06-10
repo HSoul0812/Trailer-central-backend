@@ -12,7 +12,6 @@ $factory->define(Payment::class, function(Faker $faker){
         'invoice_id' => function () {
             return factory(Invoice::class)->create()->id;
         },
-        'dealer_id' => 9999,
         'amount' => 123.00,
         'date' => $faker->date(),
         'created_at' => $faker->dateTime()
