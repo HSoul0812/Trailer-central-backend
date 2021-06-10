@@ -121,7 +121,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         $dealerLocationId = $this->getLeadDealerLocation($lead);
 
         // Find Newest Sales Person From DB
-        $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+        $newestSalesPerson = $this->getNewestSalesPerson($dealer->id, $dealerLocationId);
         $newestSalesPersonId = $newestSalesPerson->id ?? 0;
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $newestSalesPersonId);
         if(!empty($dealerLocationId)) {
@@ -177,6 +177,36 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // Return Corrected Dealer Location
         return $dealerLocationId;
+    }
+
+    /**
+     * Get Newest Sales Person
+     * 
+     * @param Lead $lead
+     * @param int $dealerLocationId
+     * @return SalesPerson
+     */
+    private function getNewestSalesPerson(Lead $lead, int $dealerLocationId): SalesPerson {
+        // Initialize
+        $newestSalesPerson = null;
+        $dealerId = $lead->newDealerUser->id;
+        $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
+
+        // Last Sales Person Already Exists?
+        if(!empty($this->roundRobinSalesPeople[$dealerId][$dealerLocationId][$salesType])) {
+            $newestSalesPersonId = $this->roundRobinSalesPeople[$dealerId][$dealerLocationId][$salesType];
+            $newestSalesPerson = $this->salesPersonRepository->get([
+                'sales_person_id' => $newestSalesPersonId
+            ]);
+        }
+
+        // Newest Sales Person Doesn't Exist?
+        if(empty($newestSalesPerson->id)) {
+            $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealerId, $dealerLocationId, $salesType);
+        }
+
+        // Return Newest Sales Person
+        return $newestSalesPerson;
     }
 
 

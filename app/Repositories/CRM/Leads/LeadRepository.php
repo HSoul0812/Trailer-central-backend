@@ -150,8 +150,8 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Return By Dealer?
         if($params['per_page'] === 'all') {
-            return $query->orderBy(Lead::getTableName() . '.date_submitted', 'DESC')
-                         ->orderBy(Lead::getTableName() . '.identifier', 'DESC')->get();
+            return $query->orderBy(Lead::getTableName() . '.date_submitted', 'ASC')
+                         ->orderBy(Lead::getTableName() . '.identifier', 'ASC')->get();
         }
 
         // Paginate!
