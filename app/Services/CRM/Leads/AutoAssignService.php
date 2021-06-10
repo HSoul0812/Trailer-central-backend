@@ -15,7 +15,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\MailHelper;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use League\Fractal\Resource\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 
 class AutoAssignService implements AutoAssignServiceInterface {
