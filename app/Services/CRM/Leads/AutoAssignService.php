@@ -72,10 +72,10 @@ class AutoAssignService implements AutoAssignServiceInterface {
     /**
      * Handle Auto Assign for Dealer
      * 
-     * @param User $dealer
+     * @param NewDealerUser $dealer
      * @return Collection<LeadAssign>
      */
-    public function dealer(User $dealer): Collection {
+    public function dealer(NewDealerUser $dealer): Collection {
         // Get Unassigned Leads
         $leads = $this->leadRepository->getAllUnassigned([
             'per_page' => 'all',
