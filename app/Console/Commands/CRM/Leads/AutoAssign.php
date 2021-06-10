@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
-use League\Fractal\Resource\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class AutoAssign extends Command
 {    
@@ -127,18 +127,18 @@ class AutoAssign extends Command
      * @return Collection<NewDealerUser>
      */
     private function getDealersToProcess(): Collection {
-        $dealers = array();
+        $dealers = new Collection();
         if(!empty($this->dealerId)) {
             // Get Single Dealer
             $dealer = NewDealerUser::findOrFail($this->dealerId);
-            $dealers[] = $dealer;
+            $dealers->push($dealer);
         } else if ($this->boundLower && $this->boundUpper) {
             // Get Dealers In Range
             $dealers = NewDealerUser::where('id', '>=', $this->boundLower)
                             ->where('id', '<=', $this->boundUpper)
                             ->has('activeCrmUser')
                             ->has('salespeopleEmails')
-                                ->get();
+                            ->get();
         } else if ($this->boundLower) {
             // Get Dealers From Minimum
             $dealers = NewDealerUser::where('id', '>=', $this->boundLower)
