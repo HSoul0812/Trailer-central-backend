@@ -306,7 +306,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         $this->leadStatus->createOrUpdate([
             'lead_id' => $lead->identifier,
             'sales_person_id' => $salesPerson->id,
-            'next_contact_date' => $date->utc->format("Y-m-d H:i:s")
+            'next_contact_date' => $date->utc()->format("Y-m-d H:i:s")
         ]);
 
         // Finish Assigning
