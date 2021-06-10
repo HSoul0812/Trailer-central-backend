@@ -4,7 +4,6 @@ namespace App\Console\Commands\CRM\Leads;
 
 use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -27,11 +26,6 @@ class AutoAssign extends Command
      * @var string
      */
     protected $description = 'Auto Assign leads to SalesPeople.';
-
-    /**     
-     * @var App\Repositories\CRM\Leads\LeadRepository
-     */
-    protected $leadRepository;
 
     /**     
      * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
@@ -68,11 +62,10 @@ class AutoAssign extends Command
      *
      * @return void
      */
-    public function __construct(LeadRepositoryInterface $leadRepo, AutoAssignServiceInterface $autoAssignService)
+    public function __construct(AutoAssignServiceInterface $autoAssignService)
     {
         parent::__construct();
 
-        $this->leadRepository = $leadRepo;
         $this->autoAssignService = $autoAssignService;
         
         date_default_timezone_set(env('DB_TIMEZONE'));
