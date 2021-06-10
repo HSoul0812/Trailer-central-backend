@@ -353,7 +353,6 @@ SQL;
         $query = SalesPerson::select(SalesPerson::getTableName() . '.*')
                             ->leftJoin(LeadStatus::getTableName(), LeadStatus::getTableName() . '.sales_person_id', '=', SalesPerson::getTableName() . '.id')
                             ->leftJoin(Lead::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
-                            ->leftJoin(SalesPerson::getTableName(), SalesPerson::getTableName() . '.id', '=', LeadStatus::getTableName() . '.sales_person_id')
                             ->leftJoin(NewDealerUser::getTableName(), SalesPerson::getTableName() . '.user_id', '=', NewDealerUser::getTableName() . '.user_id')
                             ->where(Lead::getTableName() . '.dealer_id', $dealerId)
                             ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
