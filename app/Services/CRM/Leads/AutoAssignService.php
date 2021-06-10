@@ -184,9 +184,9 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * 
      * @param Lead $lead
      * @param int $dealerLocationId
-     * @return SalesPerson
+     * @return null|SalesPerson
      */
-    private function getNewestSalesPerson(Lead $lead, int $dealerLocationId): SalesPerson {
+    private function getNewestSalesPerson(Lead $lead, int $dealerLocationId): ?SalesPerson {
         // Initialize
         $newestSalesPerson = null;
         $dealerId = $lead->newDealerUser->id;
