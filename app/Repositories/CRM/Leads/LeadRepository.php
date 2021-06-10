@@ -132,12 +132,10 @@ class LeadRepository implements LeadRepositoryInterface {
         });
 
         // Require Sales Person ID NULL or 0
-        $query = $query->where(function($query) {
-            $query->whereNull(SalesPerson::getTableName() . '.sales_person_id')
-                  ->orWhere(SalesPerson::getTableName() . '.sales_person_id', 0);
-        })->where(Lead::getTableName() . '.is_archived', 0)
-          ->where(Lead::getTableName() . '.is_spam', 0)
-          ->whereRaw(Lead::getTableName() . '.date_submitted > CURDATE() - INTERVAL 30 DAY');
+        $query = $query->whereNull(SalesPerson::getTableName() . '.id')
+            ->where(Lead::getTableName() . '.is_archived', 0)
+            ->where(Lead::getTableName() . '.is_spam', 0)
+            ->whereRaw(Lead::getTableName() . '.date_submitted > CURDATE() - INTERVAL 30 DAY');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
