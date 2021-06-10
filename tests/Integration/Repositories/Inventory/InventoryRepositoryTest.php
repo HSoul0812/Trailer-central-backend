@@ -8,6 +8,7 @@ use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 use App\Repositories\Inventory\InventoryRepository;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class InventoryRepositoryTest
@@ -24,13 +25,15 @@ class InventoryRepositoryTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->dealerId = null;
+        $this->dealerId = factory(User::class)->create()->dealer_id;
     }
 
     public function tearDown(): void
     {
-        parent::tearDown();
+        User::where('dealer_id', $this->dealerId)->delete();
+        Inventory::where('dealer_id', $this->dealerId)->delete();
         $this->dealerId = null;
+        parent::tearDown();
     }
 
 
@@ -40,6 +43,7 @@ class InventoryRepositoryTest extends TestCase
     public function testGetFloorplannedInventoryWithStatus()
     {
         $itemHaveStatus = [
+            'dealer_id' => $this->dealerId,
             'status' => Inventory::STATUS_SOLD,
             'is_floorplan_bill' => 1,
             'active' => 1 ,
@@ -50,12 +54,11 @@ class InventoryRepositoryTest extends TestCase
             'notes' => 'floorplan item'
         ];
 
-        $test = factory(Inventory::class)->create($itemHaveStatus);
-        $dealerId = $test->dealer_id;
+        factory(Inventory::class)->create($itemHaveStatus);
 
         /** @var InventoryRepository $inventoryRepository */
         $inventoryRepository = $this->app->make(InventoryRepository::class);
-        $result = $inventoryRepository->getFloorplannedInventory(['dealer_id' => $dealerId]);
+        $result = $inventoryRepository->getFloorplannedInventory(['dealer_id' => $this->dealerId]);
         $this->assertEquals(1, count($result));
 
         $this->assertEquals($itemHaveStatus['fp_balance'], $result[0]['fp_balance']);
@@ -67,6 +70,7 @@ class InventoryRepositoryTest extends TestCase
     public function testGetFloorplannedInventoryWithoutStatus()
     {
         $itemHaveNoStatus = [
+            'dealer_id' => $this->dealerId,
             'status' => null,
             'is_floorplan_bill' => 1,
             'active' => 1 ,
@@ -77,12 +81,11 @@ class InventoryRepositoryTest extends TestCase
             'notes' => 'floorplan item'
         ];
 
-        $test = factory(Inventory::class)->create($itemHaveNoStatus);
-        $dealerId = $test->dealer_id;
+        factory(Inventory::class)->create($itemHaveNoStatus);
 
         /** @var InventoryRepository $inventoryRepository */
         $inventoryRepository = app()->make(InventoryRepository::class);
-        $result = $inventoryRepository->getFloorplannedInventory(['dealer_id' => $dealerId]);
+        $result = $inventoryRepository->getFloorplannedInventory(['dealer_id' => $this->dealerId]);
         $this->assertEquals(0, count($result));
     }
 }
