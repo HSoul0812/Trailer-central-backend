@@ -12,6 +12,7 @@ use App\Models\CRM\Leads\InventoryLead;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
+use App\Models\User\CrmUser;
 use App\Models\Inventory\Inventory;
 use App\Models\Traits\TableAware;
 use App\Models\Website\Website;
