@@ -307,11 +307,11 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // Assign Lead to Sales Person
         $this->addLeadExplanationNotes($lead->identifier, 'Assigning Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $lead->id_name);
-        /*$this->leadStatus->createOrUpdate([
+        $this->leadStatus->createOrUpdate([
             'lead_id' => $lead->identifier,
             'sales_person_id' => $salesPerson->id,
             'next_contact_date' => $nextContactGmt
-        ]);*/
+        ]);
 
         // Finish Assigning
         $this->addLeadExplanationNotes($lead->identifier, 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $lead->id_name);
