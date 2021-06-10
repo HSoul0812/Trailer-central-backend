@@ -125,9 +125,9 @@ class AutoAssignService implements AutoAssignServiceInterface {
         $newestSalesPersonId = $newestSalesPerson->id ?? 0;
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $newestSalesPersonId);
         if(!empty($dealerLocationId)) {
-            $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer Location #' . $dealerLocationId . ' and Salesperson Type ' . $salesType);
+            $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPersonId . ' for Dealer Location #' . $dealerLocationId . ' and Salesperson Type ' . $salesType);
         } else {
-            $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType);
+            $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPersonId . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType);
         }
 
         // Find Next Salesperson
