@@ -151,6 +151,6 @@ class AutoAssign extends Command
         }
 
         // Return Dealers Collection
-        return collect($dealers);
+        return $dealers;
     }
 }
