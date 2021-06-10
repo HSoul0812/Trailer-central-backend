@@ -4,7 +4,7 @@ namespace App\Services\CRM\Leads;
 
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
-use App\Models\User\User;
+use App\Models\User\NewDealerUser;
 use League\Fractal\Resource\Collection;
 
 interface AutoAssignServiceInterface {
@@ -14,7 +14,7 @@ interface AutoAssignServiceInterface {
      * @param User $dealer
      * @return Collection<LeadAssign>
      */
-    public function dealer(User $dealer): Collection;
+    public function dealer(NewDealerUser $dealer): Collection;
     
     /**
      * Handle Auto Assign for Lead

@@ -6,7 +6,7 @@ use App\Mail\AutoAssignEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\User\SalesPerson;
-use App\Models\User\User;
+use App\Models\User\NewDealerUser;
 use App\Models\User\NewUser;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
