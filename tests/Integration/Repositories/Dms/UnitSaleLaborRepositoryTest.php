@@ -28,6 +28,26 @@ class UnitSaleLaborRepositoryTest extends TestCase
 {
     use DatabaseTransactions;
 
+    private $dealerId;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->dealerId = factory(User::class)->create()->dealer_id;
+    }
+
+    public function tearDown(): void
+    {
+        User::where('dealer_id', $this->dealerId)->delete();
+        Inventory::where('dealer_id', $this->dealerId)->delete();
+        UnitSale::where('dealer_id', $this->dealerId)->delete();
+        Invoice::where('dealer_id', $this->dealerId)->delete();
+        Payment::where('dealer_id', $this->dealerId)->delete();
+        $this->dealerId = null;
+        parent::tearDown();
+
+    }
+
     /**
      * @covers ::getTechnicians
      */
@@ -73,7 +93,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
      */
     public function testServiceReport(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
     {
-        $this->prepareDealer();
         $technician1 = 'unit_test_service_report_technician_1';
         $technician2 = 'unit_test_service_report_technician_2';
 
@@ -90,12 +109,12 @@ class UnitSaleLaborRepositoryTest extends TestCase
         ])->id;
 
         $inventory11 = factory(Inventory::class)->create([
-            'dealer_id' => self::getTestDealerId(),
+            'dealer_id' => $this->dealerId,
             'notes' => 'inventory11'
         ]);
 
         $inventory12 = factory(Inventory::class)->create([
-            'dealer_id' => self::getTestDealerId(),
+            'dealer_id' => $this->dealerId,
             'notes' => 'inventory12'
         ]);
 
@@ -103,7 +122,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
             [
                 'sales_person_id' => $unitSaleLabor11['sales_person_id'],
                 'buyer_id' => $customerId11,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'inventory_id' => $inventory11->inventory_id
             ]
         )->id;
@@ -112,7 +131,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
             [
                 'sales_person_id' => $unitSaleLabor12['sales_person_id'],
                 'buyer_id' => $customerId12,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'inventory_id' => $inventory12->inventory_id
             ]
         )->id;
@@ -120,7 +139,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $unitSaleId21 = factory(UnitSale::class)->create(
             [
                 'sales_person_id' => $unitSaleLabor21['sales_person_id'],
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'buyer_id' => $customerId21,
             ]
         )->id;
@@ -128,7 +147,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $invoiceId11 = factory(Invoice::class)->create(
             [
                 'unit_sale_id' => $unitSaleId11,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'total' => $unitSaleLabor11['invoice_total'],
                 'doc_num' => $unitSaleLabor11['doc_num'],
                 'invoice_date' => $unitSaleLabor11['sale_date'],
@@ -138,7 +157,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $invoiceId12 = factory(Invoice::class)->create(
             [
                 'unit_sale_id' => $unitSaleId12,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'total' => $unitSaleLabor12['invoice_total'],
                 'doc_num' => $unitSaleLabor12['doc_num'],
                 'invoice_date' => $unitSaleLabor12['sale_date'],
@@ -148,7 +167,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $invoiceId21 = factory(Invoice::class)->create(
             [
                 'unit_sale_id' => $unitSaleId21,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'total' => $unitSaleLabor21['invoice_total'],
                 'doc_num' => $unitSaleLabor21['doc_num'],
                 'invoice_date' => $unitSaleLabor21['sale_date'],
@@ -200,7 +219,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         /** @var UnitSaleLaborRepository $repository */
         $repository = app()->make(UnitSaleLaborRepository::class);
 
-        $result = $repository->serviceReport(['dealer_id' => $this->getTestDealerId()]);
+        $result = $repository->serviceReport(['dealer_id' => $this->dealerId]);
 
         $this->assertArrayHasKey($technician1, $result);
         $this->assertArrayHasKey($technician2, $result);
@@ -389,8 +408,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $this->assertEquals($inventory11->notes, $result[$technician1][$unitSale11Key]['inventory_notes']);
         $this->assertEquals($inventory12->notes, $result[$technician1][$unitSale12Key]['inventory_notes']);
 
-
-        $this->revertDB();
     }
 
     /**
@@ -403,22 +420,21 @@ class UnitSaleLaborRepositoryTest extends TestCase
      */
     public function testServiceReportWithDates(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
     {
-        $this->prepareDealer();
         $technician1 = 'unit_test_service_report_technician_1';
         $technician2 = 'unit_test_service_report_technician_2';
 
         $unitSaleId11 = factory(UnitSale::class)->create([
-            'dealer_id' => self::getTestDealerId(),
+            'dealer_id' => $this->dealerId,
             'created_at' => $unitSaleLabor11['created_at']
         ])->id;
 
         $unitSaleId12 = factory(UnitSale::class)->create([
-            'dealer_id' => self::getTestDealerId(),
+            'dealer_id' => $this->dealerId,
             'created_at' => $unitSaleLabor12['created_at']
         ])->id;
 
         $unitSaleId21 = factory(UnitSale::class)->create([
-            'dealer_id' => self::getTestDealerId(),
+            'dealer_id' => $this->dealerId,
             'created_at' => $unitSaleLabor21['created_at']
         ])->id;
 
@@ -442,7 +458,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $result = $repository->serviceReport(
             [
-                'dealer_id' => $this->getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'from_date' => (new \DateTime)->modify('-2 weeks')->format('Y-m-d'),
                 'to_date' => (new \DateTime)->modify('-1 week')->modify('+1 day')->format('Y-m-d')
             ]
@@ -456,7 +472,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $this->assertFalse($unitSale11Key);
         $this->assertNotFalse($unitSale12Key);
-        $this->revertDB();
     }
 
     /**
@@ -464,20 +479,19 @@ class UnitSaleLaborRepositoryTest extends TestCase
      */
     public function testServiceReportWithTechnician()
     {
-        $this->prepareDealer();
         $technician1 = 'unit_test_service_report_technician_1';
         $technician2 = 'unit_test_service_report_technician_2';
 
         $unitSaleId11 = factory(UnitSale::class)->create([
-            'dealer_id' => self::getTestDealerId(),
+            'dealer_id' => $this->dealerId
         ])->id;
 
         $unitSaleId12 = factory(UnitSale::class)->create([
-            'dealer_id' => self::getTestDealerId(),
+            'dealer_id' => $this->dealerId,
         ])->id;
 
         $unitSaleId21 = factory(UnitSale::class)->create([
-            'dealer_id' => self::getTestDealerId(),
+            'dealer_id' => $this->dealerId,
         ])->id;
 
         factory(UnitSaleLabor::class)->create([
@@ -499,13 +513,12 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $repository = app()->make(UnitSaleLaborRepository::class);
 
         $result = $repository->serviceReport([
-            'dealer_id' => $this->getTestDealerId(),
+            'dealer_id' => $this->dealerId,
             'technician' => [$technician2],
         ]);
 
         $this->assertArrayNotHasKey($technician1, $result);
         $this->assertArrayHasKey($technician2, $result);
-        $this->revertDB();
     }
 
     public function serviceReportProvider(): array
@@ -617,7 +630,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
         array $paymentLabor32
     )
     {
-        $this->prepareDealer();
         $technician3 = 'unit_test_service_report_technician_3';
         $technician4 = 'unit_test_service_report_technician_4';
 
@@ -635,8 +647,8 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $invoiceId31 = factory(Invoice::class)->create(
             [
+                'dealer_id' => $this->dealerId,
                 'unit_sale_id' => null,
-                'dealer_id' => self::getTestDealerId(),
                 'total' => $paymentLabor31['invoice_total'],
                 'doc_num' => $paymentLabor31['doc_num'],
                 'invoice_date' => $paymentLabor31['sale_date'],
@@ -647,7 +659,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $invoiceId32 = factory(Invoice::class)->create(
             [
                 'unit_sale_id' => null,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'total' => $paymentLabor32['invoice_total'],
                 'doc_num' => $paymentLabor32['doc_num'],
                 'invoice_date' => $paymentLabor32['sale_date'],
@@ -658,7 +670,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $paymentId31 = factory(Payment::class)->create(
             [
                 'invoice_id' => $invoiceId31,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'created_at' => $paymentLabor31['created_at'],
             ]
         );
@@ -666,7 +678,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $paymentId32 = factory(Payment::class)->create(
             [
                 'invoice_id' => $invoiceId32,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'created_at' => $paymentLabor32['created_at'],
             ]
         );
@@ -699,7 +711,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         /** @var UnitSaleLaborRepository $repository */
         $repository = app()->make(UnitSaleLaborRepository::class);
-        $result = $repository->serviceReport(['dealer_id' => $this->getTestDealerId()]);
+        $result = $repository->serviceReport(['dealer_id' => $this->dealerId]);
 
         $this->assertArrayHasKey($technician3, $result);
         $this->assertArrayHasKey($technician4, $result);
@@ -718,7 +730,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $this->assertEquals($paymentLabor32['billed_hours'], $result[$technician4][0]['billed_hours']);
         $this->assertEquals($paymentLabor32['quantity'] * $paymentLabor32['unit_price'], $result[$technician4][0]['labor_sale_amount']);
         $this->assertEquals($paymentLabor32['quantity'] * $paymentLabor32['dealer_cost'], $result[$technician4][0]['labor_cost_amount']);
-        $this->revertDB();
     }
 
     /**
@@ -733,7 +744,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
         array $paymentLabor32
     )
     {
-        $this->prepareDealer();
         $technician3 = 'unit_test_service_report_technician_3';
         $technician4 = 'unit_test_service_report_technician_4';
 
@@ -751,8 +761,8 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
         $invoiceId31 = factory(Invoice::class)->create(
             [
+                'dealer_id' => $this->dealerId,
                 'unit_sale_id' => null,
-                'dealer_id' => self::getTestDealerId(),
                 'total' => $paymentLabor31['invoice_total'],
                 'doc_num' => $paymentLabor31['doc_num'],
                 'invoice_date' => $paymentLabor31['sale_date'],
@@ -763,7 +773,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $invoiceId32 = factory(Invoice::class)->create(
             [
                 'unit_sale_id' => null,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'total' => $paymentLabor32['invoice_total'],
                 'doc_num' => $paymentLabor32['doc_num'],
                 'invoice_date' => $paymentLabor32['sale_date'],
@@ -774,7 +784,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $paymentId31 = factory(Payment::class)->create(
             [
                 'invoice_id' => $invoiceId31,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'created_at' => $paymentLabor31['created_at'],
             ]
         );
@@ -782,7 +792,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $paymentId32 = factory(Payment::class)->create(
             [
                 'invoice_id' => $invoiceId32,
-                'dealer_id' => self::getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'created_at' => $paymentLabor32['created_at'],
             ]
         );
@@ -817,7 +827,7 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $repository = app()->make(UnitSaleLaborRepository::class);
         $result = $repository->serviceReport(
             [
-                'dealer_id' => $this->getTestDealerId(),
+                'dealer_id' => $this->dealerId,
                 'from_date' => (new \DateTime())->modify('-2 week')->format('Y-m-d'),
                 'to_date' => (new \DateTime())->modify('+1 day')->format('Y-m-d')
             ]
@@ -833,7 +843,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
         $this->assertEquals($paymentLabor31['billed_hours'], $result[$technician3][0]['billed_hours']);
         $this->assertEquals($paymentLabor31['quantity'] * $paymentLabor31['unit_price'], $result[$technician3][0]['labor_sale_amount']);
         $this->assertEquals($paymentLabor31['quantity'] * $paymentLabor31['dealer_cost'], $result[$technician3][0]['labor_cost_amount']);
-        $this->revertDB();
     }
 
     public function serviceReportPaymentLaborProvider(): array
@@ -870,30 +879,5 @@ class UnitSaleLaborRepositoryTest extends TestCase
                 ],
             ],
         ];
-    }
-
-    protected function revertDB()
-    {
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        User::where('dealer_id', $dealerId)->delete();
-        UnitSale::where('dealer_id', $dealerId)->delete();
-        Invoice::where('dealer_id', $dealerId)->delete();
-        Payment::where('dealer_id', $dealerId)->delete();
-        Inventory::where('dealer_id', $dealerId)->delete();
-        DealerLocation::where('dealer_location_id', $dealerLocationId)->delete();
-    }
-
-    protected function prepareDealer()
-    {
-        $dealerId = self::getTestDealerId();
-        $dealerLocationId = self::getTestDealerLocationId();
-        factory(User::class)->create([
-            'dealer_id' => $dealerId
-        ]);
-        factory(DealerLocation::class)->create([
-            'dealer_location_id' => $dealerLocationId,
-            'dealer_id' => $dealerId
-        ]);
     }
 }
