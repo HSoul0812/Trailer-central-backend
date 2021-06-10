@@ -51,7 +51,7 @@ interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
     public function roundRobinSalesPerson(
         int $dealerId,
         int $dealerLocationId,
-        int $salesType,
+        string $salesType,
         SalesPerson $newestSalesPerson
     ): SalesPerson;
 
