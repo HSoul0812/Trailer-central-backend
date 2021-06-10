@@ -360,7 +360,8 @@ SQL;
                             ->where(SalesPerson::getTableName() . '.id', '<>', '')
                             ->whereNotNull(SalesPerson::getTableName() . '.id')
                             ->whereNotNull(NewDealerUser::getTableName() . '.id')
-                            ->orderBy(Lead::getTableName() . '.date_submitted', 'DESC');
+                            ->orderBy(Lead::getTableName() . '.date_submitted', 'DESC')
+                            ->orderBy(Lead::getTableName() . '.identifier', 'DESC');
 
         // Append Dealer Location
         if(!empty($dealerLocationId)) {

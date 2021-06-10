@@ -84,13 +84,13 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // No Leads? Skip Dealer
         $assigned = new Collection();
-        if(count($leads) < 1) {
+        if($leads->count() < 1) {
             $this->log->info("AutoAssignService skipping dealer {$dealer->id} because there are no pending leads");
             return new $assigned;
         }
 
         // Loop Leads to Auto Assign
-        $this->log->info("AutoAssignService dealer #{$dealer->id} found " . count($leads) . " to process");
+        $this->log->info("AutoAssignService dealer #{$dealer->id} found " . $leads->count() . " to process");
         foreach($leads as $lead) {                    
             $assign = $this->autoAssign($lead);
             if(!empty($assign->id)) {
