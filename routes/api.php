@@ -387,6 +387,9 @@ $api->version('v1', function ($route) {
         
         $route->put('user/xml-export', 'App\Http\Controllers\v1\User\SettingsController@updateXmlExport');
         $route->get('user/xml-export', 'App\Http\Controllers\v1\User\SettingsController@getXmlExport');
+        
+        $route->put('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@updateBulk');
+        $route->get('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@index');
     });
 
     /*

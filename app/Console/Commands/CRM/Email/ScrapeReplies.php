@@ -102,8 +102,6 @@ class ScrapeReplies extends Command
                 } else {
                     $this->info("{$this->command} skipped importing emails on dealer #{$dealer->id}");
                 }
-                
-                sleep(100);
             }
         } catch(\Exception $e) {
             $this->error("{$this->command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
