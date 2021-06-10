@@ -139,7 +139,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // Finish Assigning Lead and Return Result
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
-        $status = $this->handleAssignLead($lead, $dealerLocationId, $newestSalesPerson, $salesPerson);
+        $status = $this->handleAssignLead($lead, $salesPerson);
         return $this->markAssignLead($lead, $dealerLocationId, $newestSalesPerson, $salesPerson, $status);
     }
 
