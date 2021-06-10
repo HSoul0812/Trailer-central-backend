@@ -455,7 +455,7 @@ SQL;
      * @param string $leadType
      * @return string
      */
-    public function findSalesType($leadType) {
+    public function findSalesType(string $leadType): string {
         // Set Default Lead Type
         $salesType = 'default';
         if(in_array($leadType, SalesPerson::TYPES_DEFAULT) || empty($leadType)) {

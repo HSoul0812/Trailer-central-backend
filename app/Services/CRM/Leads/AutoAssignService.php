@@ -6,6 +6,7 @@ use App\Mail\AutoAssignEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\User\User;
 use App\Models\User\NewUser;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
@@ -14,6 +15,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\MailHelper;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Resource\Collection;
 use Carbon\Carbon;
 
 class AutoAssignService implements AutoAssignServiceInterface {
