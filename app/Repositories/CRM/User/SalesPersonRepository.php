@@ -383,7 +383,7 @@ SQL;
     public function roundRobinSalesPerson(
         int $dealerId,
         int $dealerLocationId,
-        int $salesType,
+        string $salesType,
         SalesPerson $newestSalesPerson
     ): SalesPerson {
         // Initialize
