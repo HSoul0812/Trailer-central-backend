@@ -361,6 +361,7 @@ SQL;
                             ->whereNotNull(SalesPerson::getTableName() . '.id')
                             ->whereNotNull(NewDealerUser::getTableName() . '.id')
                             ->orderBy(Lead::getTableName() . '.date_submitted', 'DESC');
+        dd($query->toSql());
 
         // Append Dealer Location
         if(!empty($dealerLocationId)) {

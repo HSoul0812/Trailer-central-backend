@@ -346,7 +346,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // Log Skipping Assigning This Lead
         $this->addLeadExplanationNotes($lead->identifier, 'Couldn\'t Find Salesperson ' .
-            'ID to Assign Lead #' . $lead->id_name . ' to, skipping temporarily!', 'error');
+            'ID to Assign Lead ' . $lead->id_name . ' to, skipping temporarily!', 'error');
 
         // Mark as Skipped
         return $this->leads->assign([

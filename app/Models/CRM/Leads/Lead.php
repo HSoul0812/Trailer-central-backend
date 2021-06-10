@@ -352,7 +352,7 @@ class Lead extends Model
      * @return string
      */
     public function getIdNameAttribute() {
-        $idName = $this->getFullNameAttribute();
+        $idName = $this->full_name;
         if(empty($idName)) {
             $idName = "#" . $this->identifier;
         }
