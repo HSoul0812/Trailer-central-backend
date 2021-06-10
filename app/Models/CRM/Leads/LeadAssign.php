@@ -20,7 +20,19 @@ class LeadAssign extends Model
      * 
      * @var array
      */
-    const ASSIGNED_STATUS = ['assigned', 'mailed', 'skipped', 'error'];
+    const ASSIGNED_STATUS = ['assigning', 'assigned', 'mailed', 'skipped', 'error'];
+
+    /**
+     * Specific Statuses for Lead Assign
+     * 
+     * @var string
+     */
+    const STATUS_ASSIGNING = 'assigning';
+    const STATUS_ASSIGNED  = 'assigned';
+    const STATUS_MAILING   = 'mailing';
+    const STATUS_MAILED    = 'mailed';
+    const STATUS_SKIPPED   = 'skipped';
+    const STATUS_ERROR     = 'error';
 
     /**
      * @var string
