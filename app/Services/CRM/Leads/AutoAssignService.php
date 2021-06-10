@@ -2,16 +2,18 @@
 
 namespace App\Services\CRM\Leads;
 
+use App\Mail\AutoAssignEmail;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadAssign;
+use App\Models\CRM\User\SalesPerson;
+use App\Models\User\NewUser;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
-use Illuminate\Support\Facades\Mail;
-use App\Models\User\NewUser;
-use Illuminate\Support\Facades\Log;
-use App\Models\CRM\Leads\Lead;
-use App\Mail\AutoAssignEmail;
 use App\Traits\MailHelper;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AutoAssignService implements AutoAssignServiceInterface {
@@ -63,184 +65,133 @@ class AutoAssignService implements AutoAssignServiceInterface {
         // Initialize Logger
         $this->log = Log::channel('autoassign');
     }
-    
-    public function autoAssign($lead) {
+
+
+    /**
+     * Handle Auto Assign for Dealer
+     * 
+     * @param User $dealer
+     * @return Collection<LeadAssign>
+     */
+    public function dealer(User $dealer): Collection {
+        // Get Unassigned Leads
+        $leads = $this->leadRepository->getAllUnassigned([
+            'per_page' => 'all',
+            'dealer_id' => $dealer->id
+        ]);
+
+        // No Leads? Skip Dealer
+        $assigned = new Collection();
+        if(count($leads) < 1) {
+            $this->log->info("AutoAssignService skipping dealer {$dealer->id} because there are no pending leads");
+            return new $assigned;
+        }
+
+        // Loop Leads to Auto Assign
+        $this->log->info("AutoAssignService dealer #{$dealer->id} found " . count($leads) . " to process");
+        foreach($leads as $lead) {                    
+            $assign = $this->autoAssign($lead);
+            if(!empty($assign->id)) {
+                $assigned->push($assign);
+            }
+        }
+
+        // Return Collection of LeadAssign
+        return $assigned;
+    }
+
+    /**
+     * Handle Auto Assign for Lead
+     * 
+     * @param Lead $lead
+     * @return null|LeadAssign
+     */
+    public function autoAssign(Lead $lead): LeadAssign {
+        // Initialize Comments
         $dealer = $lead->newDealerUser;
-        $leadName = $lead->id_name;
-        
-        $this->setLeadExplanationNotes($lead->identifier, 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign');
+        $this->addLeadExplanationNotes($lead->identifier, 'Checking Dealer #' . $dealer->id . ' ' . $dealer->name . ' for leads to auto assign');
 
         // Get Sales Type
         $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
-
-        $this->setLeadExplanationNotes($lead->identifier, 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead ' . $leadName);
-        $this->log->info("AutoAssignService matched lead type {$lead->lead_type} to sales type {$salesType} for lead {$leadName}");
+        $this->addLeadExplanationNotes($lead->identifier, 'Matched Lead Type ' . $lead->lead_type . ' to Sales Type ' . $salesType . ' for Lead ' . $lead->id_name);
 
         // Get Dealer Location
-        $dealerLocationId = $lead->dealer_location_id;
-        if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
-            $dealerLocationId = $lead->inventory->dealer_location_id;
-            $this->setLeadExplanationNotes($lead->identifier, 'Preferred Location doesn\'t exist on Lead ' . $leadName . ', grabbed Inventory Location instead: ' . $dealerLocationId);
-            $this->log->info("AutoAssignService lead {$leadName} doesn't have preferred location, found inventory location {$dealerLocationId}");
-        } elseif(!empty($dealerLocationId)) {
-            $this->setLeadExplanationNotes($lead->identifier, 'Got Preferred Location ID ' . $dealerLocationId . ' on Lead ' . $leadName);
-            $this->log->info("AutoAssignService lead {$leadName} found preferred location {$dealerLocationId}");
-        } else {
-            $dealerLocationId = 0;
-            $this->setLeadExplanationNotes($lead->identifier, 'Cannot Find Preferred Location on Lead ' . $leadName . ', only matching sales type ' . $salesType . ' instead');
-            $this->log->info("AutoAssignService lead {$leadName} doesn't have preferred location, only matching sales type {$salesType} instead");
-        }
+        $dealerLocationId = $this->getLeadDealerLocation($lead);
 
-        // Last Sales Person Already Exists?
-        $newestSalesPerson = null;
-        if(isset($this->roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType])) {
-            $newestSalesPersonId = $this->roundRobinSalesPeople[$dealer->id][$dealerLocationId][$salesType];
-            $newestSalesPerson = $this->salesPersonRepository->get([
-                'sales_person_id' => $newestSalesPersonId
-            ]);
-        }
-
-        // Newest Sales Person DOESN'T Exist?
-        if(empty($newestSalesPerson->id)) {
-            // Look it up!
-            $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
-            if (empty($newestSalesPerson)) {
-                $newestSalesPerson = new \stdClass();
-                $newestSalesPerson->id = 0;
-            }
-            $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson->id);
-        }
+        // Find Newest Sales Person From DB
+        $newestSalesPerson = $this->salesPersonRepository->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+        $newestSalesPersonId = $newestSalesPerson->id ?? 0;
+        $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $newestSalesPersonId);
         if(!empty($dealerLocationId)) {
-            $this->setLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer Location #' . $dealerLocationId . ' and Salesperson Type ' . $salesType);
-            $this->log->info("AutoAssignService found newest sales person {$newestSalesPerson->id} for location {$dealerLocationId} and salesperson type {$salesType}");
+            $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer Location #' . $dealerLocationId . ' and Salesperson Type ' . $salesType);
         } else {
-            $this->setLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType);
-            $this->log->info("AutoAssignService found newest sales person {$newestSalesPerson->id} for dealer {$dealer->id} and salesperson type {$salesType}");
+            $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPerson->id . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType);
         }
 
         // Find Next Salesperson
         $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
-        $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
+        $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
 
         // Skip Entry!
         if(empty($salesPerson->id)) {
-            $this->setLeadExplanationNotes($lead->identifier, 'Couldn\'t Find Salesperson ID to Assign Lead #' . $leadName . ' to, skipping temporarily!');
-            $this->log->error("AutoAssignService couldn't find next sales person for lead {$leadName}");
-            $status = 'skipped';
-            $this->leads->assign([
-                'dealer_id' => $dealer->id,
-                'lead_id' => $lead->identifier,
-                'dealer_location_id' => $dealerLocationId,
-                'salesperson_type' => $salesType,
-                'found_salesperson_id' => $newestSalesPerson->id,
-                'chosen_salesperson_id' => $salesPerson->id,
-                'assigned_by' => 'autoassign',
-                'status' => $status,
-                'explanation' => $this->getLeadExplanationNotes($lead->identifier)
-            ]);
-            return;
-        }
-        // Process Auto Assign!
-        else {
-            $this->setLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $leadName);
-            $this->log->info("AutoAssignService found next sales person {$salesPerson->id} for lead {$leadName}");
-
-            // Initialize Next Contact Date
-            $nextDay = date("d") + 1;
-            $nextContactStamp = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
-            $nextContactObj   = new \DateTime(date("Y:m:d H:i:s", $nextContactStamp), new \DateTimeZone(env('DB_TIMEZONE')));
-
-            // Set Next Contact Date
-            $nextContactGmt   = gmdate("Y-m-d H:i:s", $nextContactStamp);
-            $nextContact      = $nextContactObj->format("Y-m-d H:i:s");
-            $nextContactText  = ' on ' . $nextContactObj->format("l, F jS, Y") . ' at ' . $nextContactObj->format("g:i A T");
-            $this->setLeadExplanationNotes($lead->identifier, 'Setting Next Contact Date: ' . $nextContact . ' to Lead: ' . $leadName);
-            $this->log->info("AutoAssignService setting next contact date {$nextContact} for lead {$leadName}");
-
-            // Set Salesperson to Lead
-            try {
-                // Prepare to Assign
-                $status = 'assigning';
-                $this->setLeadExplanationNotes($lead->identifier, 'Assigning Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName);
-                $this->log->info("AutoAssignService assigning next sales person {$salesPerson->id} for lead {$leadName}");
-                $this->leadStatus->createOrUpdate([
-                    'lead_id' => $lead->identifier,
-                    'sales_person_id' => $salesPerson->id,
-                    'next_contact_date' => $nextContactGmt
-                ]);
-
-                // Finish Assigning
-                $status = 'assigned';
-                $this->setLeadExplanationNotes($lead->identifier, 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $leadName);
-                $this->log->info("AutoAssignService assigned next sales person {$salesPerson->id} for lead {$leadName}");
-
-                // Send Sales Email
-                if(!empty($dealer->crmUser->enable_assign_notification)) {
-                    // Get Sales Person Email
-                    $salesEmail = $salesPerson->email;
-                    $status = 'mailing';
-                    $this->setLeadExplanationNotes($lead->identifier, 'Attempting to Send Notification Email to: ' . $salesEmail . ' for Lead: ' . $leadName);
-                    $this->log->info("AutoAssignService sending notification email to {$salesEmail} for lead {$leadName}");
-                    
-                    $credential = NewUser::getDealerCredential($dealer->user_id, $salesPerson->id);
-                    
-                    // Send Email to Sales Person
-                    Mail::to($salesEmail ?? "" )->send(
-                        new AutoAssignEmail([
-                            'date' => Carbon::now()->toDateTimeString(),
-                            'salesperson_name' => $salesPerson->getFullNameAttribute(),
-                            'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
-                            'lead_name' => $leadName,
-                            'lead_email' => $lead->email_address,
-                            'lead_phone' => $lead->phone_number,
-                            'lead_address' => $lead->getFullAddressAttribute(),
-                            'lead_status' => !empty($lead->leadStatus->status) ? $lead->leadStatus->status : 'Uncontacted',
-                            'lead_comments' => $lead->comments,
-                            'next_contact_date' => $nextContactText
-                        ])
-                    );
-
-                    // Success, Marked Mailed
-                    $status = 'mailed';
-                    $this->setLeadExplanationNotes($lead->identifier, 'Sent Notification Email to: ' . $salesEmail . ' for Lead: ' . $leadName);
-                    $this->log->info("AutoAssignService sent notification email to {$salesEmail} for lead {$leadName}");
-                }
-            } catch(\Exception $e) {
-                // Add Error
-                if(empty($status)) {
-                    $status = 'error';
-                }
-                $this->setLeadExplanationNotes($lead->identifier, 'Exception Returned! ' . $e->getMessage() . ': ' . $e->getTraceAsString());
-                $this->log->error("AutoAssignService exception returned on update or email {$e->getMessage()}: {$e->getTraceAsString()}");
-            }
+            return $this->skipAssignLead($lead, $dealerLocationId, $newestSalesPersonId);
         }
 
-        // Log Details for Process
-        $this->leads->assign([
-            'dealer_id' => $dealer->id,
-            'lead_id' => $lead->identifier,
-            'dealer_location_id' => $dealerLocationId,
-            'salesperson_type' => $salesType,
-            'found_salesperson_id' => $newestSalesPerson->id,
-            'chosen_salesperson_id' => $salesPerson->id,
-            'assigned_by' => 'autoassign',
-            'status' => $status,
-            'explanation' => $this->getLeadExplanationNotes($lead->identifier)
-        ]);
-
-        $this->log->info("AutoAssignService inserted assign notification for lead {$leadName} with status {$status}");
+        // Finish Assigning Lead and Return Result
+        $status = $this->handleAssignLead($lead, $dealerLocationId, $newestSalesPerson, $salesPerson);
+        return $this->markAssignLead($lead, $dealerLocationId, $newestSalesPerson, $salesPerson, $status);
     }
-    
+
+
+    /**
+     * Get Dealer Location By Lead
+     * 
+     * @param Lead $lead
+     * @return int
+     */
+    private function getLeadDealerLocation(Lead $lead): int {
+        // Initialize Getting Lead's Dealer Location
+        $dealerLocationId = $lead->dealer_location_id;
+        $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
+
+        // Get Inventory Dealer Location
+        if(empty($dealerLocationId) && !empty($lead->inventory->dealer_location_id)) {
+            $dealerLocationId = $lead->inventory->dealer_location_id;
+            $this->addLeadExplanationNotes($lead->identifier,
+                'Preferred Location doesn\'t exist on Lead ' . $lead->id_name .
+                ', grabbed Inventory Location instead: ' . $dealerLocationId);
+        }
+        // Get Lead Dealer Location
+        elseif(!empty($dealerLocationId)) {
+            $this->addLeadExplanationNotes($lead->identifier, 'Got Preferred Location ID ' .
+                $dealerLocationId . ' on Lead ' . $lead->id_name);
+        }
+        // No Lead Location
+        else {
+            $dealerLocationId = 0;
+            $this->addLeadExplanationNotes($lead->identifier,
+                'Cannot Find Preferred Location on Lead ' . $lead->id_name .
+                ', only matching sales type ' . $salesType . ' instead');
+        }
+
+        // Return Corrected Dealer Location
+        return $dealerLocationId;
+    }
+
+
     /**
      * Preserve the Round Robin Sales Person Temporarily
      * 
      * @param int $dealerId
      * @param int $dealerLocationId
-     * @param string $salesType
+     * @param Lead $lead
      * @param int $salesPersonId
      * @return int last sales person ID
      */
-    private function setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId) {
+    private function setRoundRobinSalesPerson(int $dealerId, int $dealerLocationId, Lead $lead, int $salesPersonId): int {
+        // Initialize
+        $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
+
         // Assign to Arrays
         if(!isset($this->roundRobinSalesPeople[$dealerId])) {
             $this->roundRobinSalesPeople[$dealerId] = array();
@@ -263,18 +214,215 @@ class AutoAssignService implements AutoAssignServiceInterface {
         // Return Last Sales Person ID
         return $this->roundRobinSalesPeople[$dealerId][0][$salesType];
     }
-    
-        
-    private function setLeadExplanationNotes($leadId, $notes) {
-        if (isset($this->leadExplanationNotes[$leadId])) {
-            $this->leadExplanationNotes[$leadId][] = $notes;
+
+
+    /**
+     * Prepare Assigning Lead
+     * 
+     * @param Lead $lead
+     * @param SalesPerson $salesPerson
+     * @return string status of assign
+     */
+    private function handleAssignLead(Lead $lead, SalesPerson $salesPerson): string {
+        // Initialize Next Contact Date
+        $nextDay = date("d") + 1;
+        $nextContactStamp = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
+        $nextContactObj   = new \DateTime(date("Y:m:d H:i:s", $nextContactStamp), new \DateTimeZone(env('DB_TIMEZONE')));
+        $nextContactText  = ' on ' . $nextContactObj->format("l, F jS, Y") . ' at ' . $nextContactObj->format("g:i A T");
+
+        // Try Processing Assign Lead
+        $this->addLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $lead->id_name);
+        try {
+            // Prepare to Assign
+            $status = LeadAssign::STATUS_ASSIGNING;
+            $status = $this->finishAssignLead($lead, $salesPerson);
+
+            // Send Sales Email
+            if(!empty($lead->dealer->crmUser->enable_assign_notification)) {
+                $status = LeadAssign::STATUS_MAILING;
+                $status = $this->sendAssignLeadEmail($lead, $salesPerson, $nextContactText);
+            }
+        } catch(\Exception $e) {
+            // Add Error
+            if(empty($status)) {
+                $status = 'error';
+            }
+            $this->addLeadExplanationNotes($lead->identifier, 'Exception Returned! ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error("AutoAssignService exception returned on update or email {$e->getMessage()}: {$e->getTraceAsString()}");
+        }
+
+        // Mark Lead as Assign
+        return $status;
+    }
+
+    /**
+     * Finish Assigning Lead
+     * 
+     * @param Lead $lead
+     * @param SalesPerson $salesPerson
+     * @param int $nextContactStamp
+     * @return string
+     */
+    private function finishAssignLead(
+        Lead $lead,
+        SalesPerson $salesPerson,
+        int $nextContactStamp
+    ): string {
+        // Set Next Contact Date
+        $nextContactObj = new \DateTime(date("Y:m:d H:i:s", $nextContactStamp), new \DateTimeZone(env('DB_TIMEZONE')));
+        $nextContactGmt = gmdate("Y-m-d H:i:s", $nextContactStamp);
+        $nextContact    = $nextContactObj->format("Y-m-d H:i:s");
+        $this->addLeadExplanationNotes($lead->identifier, 'Setting Next Contact Date: ' . $nextContact . ' to Lead: ' . $lead->id_name);
+
+        // Assign Lead to Sales Person
+        $this->addLeadExplanationNotes($lead->identifier, 'Assigning Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $lead->id_name);
+        $this->leadStatus->createOrUpdate([
+            'lead_id' => $lead->identifier,
+            'sales_person_id' => $salesPerson->id,
+            'next_contact_date' => $nextContactGmt
+        ]);
+
+        // Finish Assigning
+        $this->addLeadExplanationNotes($lead->identifier, 'Assign Next Sales Person: ' . $salesPerson->id . ' to Lead: ' . $lead->id_name);
+        return LeadAssign::STATUS_ASSIGNED;
+    }
+
+    /**
+     * Send Assign Lead Email
+     * 
+     * @param Lead $lead
+     * @param SalesPerson $salesPerson
+     * @param string $nextContactText
+     * @return string
+     */
+    private function sendAssignLeadEmail(
+        Lead $lead,
+        SalesPerson $salesPerson,
+        string $nextContactText
+    ): string {
+        // Get Sales Person Email
+        $salesEmail = $salesPerson->email;
+        $this->addLeadExplanationNotes($lead->identifier, 'Attempting to Send Notification Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
+        $credential = NewUser::getDealerCredential($lead->newDealerUser->user_id, $salesPerson->id);
+
+        // Send Email to Sales Person
+        Mail::to($salesEmail ?? "" )->send(
+            new AutoAssignEmail([
+                'date' => Carbon::now()->toDateTimeString(),
+                'salesperson_name' => $salesPerson->getFullNameAttribute(),
+                'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
+                'lead_name' => $lead->id_name,
+                'lead_email' => $lead->email_address,
+                'lead_phone' => $lead->phone_number,
+                'lead_address' => $lead->full_address,
+                'lead_status' => !empty($lead->leadStatus->status) ? $lead->leadStatus->status : LeadStatus::STATUS_UNCONTACTED,
+                'lead_comments' => $lead->comments,
+                'next_contact_date' => $nextContactText
+            ])
+        );
+
+        // Success, Marked Mailed
+        $this->addLeadExplanationNotes($lead->identifier, 'Sent Notification Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
+        return LeadAssign::STATUS_MAILED;
+    }
+
+    /**
+     * Skip Assigning Lead
+     * 
+     * @param Lead $lead
+     * @param int $dealerLocationId
+     * @param int $newestSalesPersonId
+     * @return LeadAssign
+     */
+    private function skipAssignLead(
+        Lead $lead,
+        int $dealerLocationId,
+        int $newestSalesPersonId
+    ): LeadAssign {
+        // Initialize
+        $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
+
+        // Log Skipping Assigning This Lead
+        $this->addLeadExplanationNotes($lead->identifier, 'Couldn\'t Find Salesperson ' .
+            'ID to Assign Lead #' . $lead->id_name . ' to, skipping temporarily!', 'error');
+
+        // Mark as Skipped
+        return $this->leads->assign([
+            'dealer_id' => $lead->newDealerUser->id,
+            'lead_id' => $lead->identifier,
+            'dealer_location_id' => $dealerLocationId,
+            'salesperson_type' => $salesType,
+            'found_salesperson_id' => $newestSalesPersonId,
+            'chosen_salesperson_id' => 0,
+            'assigned_by' => 'autoassign',
+            'status' => LeadAssign::STATUS_SKIPPED,
+            'explanation' => $this->getLeadExplanationNotes($lead->identifier)
+        ]);
+    }
+
+    /**
+     * Mark Lead as Assigned
+     * 
+     * @param Lead $lead
+     * @param int $dealerLocationId
+     * @param SalesPerson $found
+     * @param SalesPerson $chosen
+     * @param string $status
+     * @return LeadAssign
+     */
+    private function markAssignLead(
+        Lead $lead,
+        int $dealerLocationId,
+        SalesPerson $found,
+        SalesPerson $chosen,
+        string $status
+    ): LeadAssign {
+        // Initialize
+        $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
+
+        // Log Details for Process
+        $this->log->info("AutoAssignService inserted assign notification for lead {$lead->id_name} with status {$status}");
+        return $this->leads->assign([
+            'dealer_id' => $lead->newDealerUser->id,
+            'lead_id' => $lead->identifier,
+            'dealer_location_id' => $dealerLocationId,
+            'salesperson_type' => $salesType,
+            'found_salesperson_id' => $found->id,
+            'chosen_salesperson_id' => $chosen->id,
+            'assigned_by' => 'autoassign',
+            'status' => $status,
+            'explanation' => $this->getLeadExplanationNotes($lead->identifier)
+        ]);
+    }
+
+    /**
+     * Add Lead Explanation Notes
+     * 
+     * @param int $leadId
+     * @param string $notes
+     * @return void
+     */
+    private function addLeadExplanationNotes(int $leadId, string $notes, string $log = 'info'): void {
+        if (!isset($this->leadExplanationNotes[$leadId])) {
+            $this->leadExplanationNotes[$leadId] = [];
+        }
+        $this->leadExplanationNotes[$leadId][] = $notes;
+
+        // Update Logs
+        if($log === 'error') {
+            $this->log->error("AutoAssignService: {$notes}");
         } else {
-            $this->leadExplanationNotes[$leadId] = array_merge([], [$notes]);
+            $this->log->info("AutoAssignService: {$notes}");
         }
     }
-    
+
+    /**
+     * Get Lead Explanation Notes
+     * 
+     * @param int $leadId
+     * @return array<string>
+     */
     private function getLeadExplanationNotes($leadId) {
         return $this->leadExplanationNotes[$leadId];
     }
-
 }

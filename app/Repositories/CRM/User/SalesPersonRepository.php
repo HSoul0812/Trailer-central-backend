@@ -342,18 +342,25 @@ SQL;
      * @param int $dealerId
      * @param int $dealerLocationId
      * @param string $salesType
-     * @param SalesPerson
+     * @param null|SalesPerson
      */
-    public function findNewestSalesPerson($dealerId, $dealerLocationId, $salesType) {
+    public function findNewestSalesPerson(
+        int $dealerId,
+        int $dealerLocationId,
+        string $salesType
+    ): ?SalesPerson {
         // Find Newest Salesperson in DB
         $query = SalesPerson::select(SalesPerson::getTableName() . '.*')
                             ->leftJoin(LeadStatus::getTableName(), LeadStatus::getTableName() . '.sales_person_id', '=', SalesPerson::getTableName() . '.id')
                             ->leftJoin(Lead::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
+                            ->leftJoin(SalesPerson::getTableName(), SalesPerson::getTableName() . '.id', '=', LeadStatus::getTableName() . '.sales_person_id')
+                            ->leftJoin(NewDealerUser::getTableName(), SalesPerson::getTableName() . '.user_id', '=', NewDealerUser::getTableName() . '.user_id')
                             ->where(Lead::getTableName() . '.dealer_id', $dealerId)
                             ->where(SalesPerson::getTableName() . '.is_' . $salesType, 1)
                             ->where(SalesPerson::getTableName() . '.id', '<>', 0)
                             ->where(SalesPerson::getTableName() . '.id', '<>', '')
                             ->whereNotNull(SalesPerson::getTableName() . '.id')
+                            ->whereNotNull(NewDealerUser::getTableName() . '.id')
                             ->orderBy(Lead::getTableName() . '.date_submitted', 'DESC');
 
         // Append Dealer Location
@@ -372,26 +379,23 @@ SQL;
      * @param int $dealerLocationId
      * @param string $salesType
      * @param SalesPerson $newestSalesPerson
-     * @param array $salesPeople
      * @return SalesPerson next sales person
      */
-    public function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson) {
-        // Set Newest ID
-        $newestSalesPersonId = 0;
-        if(!empty($newestSalesPerson->id)) {
-            $newestSalesPersonId = $newestSalesPerson->id;
-        }
-
-        $nextSalesPerson = null;
-        $lastId = 0;
-        $dealerLocationId = (int) $dealerLocationId;
-
+    public function roundRobinSalesPerson(
+        int $dealerId,
+        int $dealerLocationId,
+        int $salesType,
+        SalesPerson $newestSalesPerson
+    ): SalesPerson {
+        // Initialize
+        $newestSalesPersonId = $newestSalesPerson->id ?? 0;
         $salesPeople = $this->getSalesPeopleBy($dealerId, $dealerLocationId, $salesType);
 
         // Loop Valid Sales People
-        if(count($salesPeople) > 1) {
-            $lastSalesPerson = $salesPeople->last();
-            $lastId = $lastSalesPerson->id;
+        $lastId = 0;
+        $nextSalesPerson = null;
+        if($salesPeople->count() > 1) {
+            $lastId = $salesPeople->last()->id;
             foreach($salesPeople as $salesPerson) {
                 // Compare ID
                 if($lastId === $newestSalesPersonId || $newestSalesPersonId === 0) {
@@ -406,39 +410,43 @@ SQL;
                 $salesPerson = $salesPeople->first();
                 $nextSalesPerson = $salesPerson;
             }
-        } elseif(count($salesPeople) === 1) {
+        } elseif($salesPeople->count() === 1) {
             $nextSalesPerson = $salesPeople->first();
         }
 
-        // Still No Next Sales Person?
-        if(empty($nextSalesPerson)) {
-            $nextSalesPerson = $newestSalesPerson;
-        }
-
         // Return Next Sales Person
-        return $nextSalesPerson;
+        return $nextSalesPerson ?: $newestSalesPerson;
     }
 
     /**
      * Find Sales People By Dealer ID
      *
-     * @param type $dealerId
+     * @param int $dealerId
+     * @param null|int $dealerLocationId
+     * @param null|string $salesType
+     * @return Collection<SalesPerson>
      */
-    public function getSalesPeopleBy($dealerId, $dealerLocationId = null, $salesType = null) {
+    public function getSalesPeopleBy(
+        int $dealerId,
+        ?int $dealerLocationId = null,
+        ?string $salesType = null
+    ): Collection {
         // Get New Sales People By Dealer ID
         $newDealerUser = NewDealerUser::findOrFail($dealerId);
         $query = SalesPerson::select('*')->where('user_id', $newDealerUser->user_id);
 
+        // Check Dealer Location ID on Sales People
         if ($dealerLocationId) {
             $query->where('dealer_location_id', $dealerLocationId);
         }
 
+        // Check Sales Type on Sales People
         if ($salesType) {
             $query->where("is_{$salesType}", 1);
         }
 
+        // Return Collection Results
         return $query->get();
-
     }
 
     /**

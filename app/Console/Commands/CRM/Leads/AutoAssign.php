@@ -102,25 +102,12 @@ class AutoAssign extends Command
             $dealers = $this->getDealersToProcess();
             
             $this->info("{$command} found " . count($dealers) . " dealers to process");
-            
+
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
-                // Get Unassigned Leads
-                $leads = $this->leadRepository->getAllUnassigned([
-                    'per_page' => 'all',
-                    'dealer_id' => $dealer->id
-                ]);
-                                
-                if(count($leads) < 1) {
-                    $this->info("{$command} skipping dealer {$dealer->id} because there are no pending leads");
-                    continue;
-                }
-
-                $this->info("{$command} dealer #{$dealer->id} found " . count($leads) . " to process");
-
-                foreach($leads as $lead) {                    
-                    $this->autoAssignService->autoAssign($lead);
-                }
+                // Handle All Leads For Dealer
+                $leads = $this->autoAssignService->dealer($dealer);
+                $this->info("{$command} found " . $leads->count() . " leads to process for dealer " . $dealer->id);
             }
         } catch(\Exception $e) {
             $this->error("{$command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
@@ -132,26 +119,37 @@ class AutoAssign extends Command
         $this->info("{$command} finished on " . $datetime->format("l, F jS, Y"));
     }
 
-    
-    private function getDealersToProcess() {
+
+    /**
+     * Get Dealers to Process
+     * 
+     * @return Collection<NewDealerUser>
+     */
+    private function getDealersToProcess(): Collection {
         $dealers = array();
         if(!empty($this->dealerId)) {
+            // Get Single Dealer
             $dealer = NewDealerUser::findOrFail($this->dealerId);
             $dealers[] = $dealer;
-        } else if ($this->boundLower && $this->boundUpper) {            
+        } else if ($this->boundLower && $this->boundUpper) {
+            // Get Dealers In Range
             $dealers = NewDealerUser::where('id', '>=', $this->boundLower)
                             ->where('id', '<=', $this->boundUpper)
                             ->has('activeCrmUser')
                             ->has('salespeopleEmails')
                                 ->get();
         } else if ($this->boundLower) {
+            // Get Dealers From Minimum
             $dealers = NewDealerUser::where('id', '>=', $this->boundLower)
                             ->has('activeCrmUser')
                             ->has('salespeopleEmails')
-                                ->get();
+                            ->get();
         } else {
+            // Get All Dealers
             $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
         }
-        return $dealers;
+
+        // Return Dealers Collection
+        return collect($dealers);
     }
 }
