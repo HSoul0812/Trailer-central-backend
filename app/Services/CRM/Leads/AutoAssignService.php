@@ -331,7 +331,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         $salesEmail = $salesPerson->email;
         $this->addLeadExplanationNotes($lead->identifier, 'Attempting to Send Notification Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
         $credential = NewUser::getDealerCredential($lead->newDealerUser->user_id, $salesPerson->id);
-        $nextContactText  = ' on ' . $date->format("l, F jS, Y") . ' at ' . $date->format("g:i A T");
+        $nextContactText  = ' on ' . $date->format("l, F jS, Y") . ' at ' . $date->format("g:i A") . ' ' . $lead->crmUser->dealer_timezone;
 
         // Send Email to Sales Person
         $salesEmail = 'david@jrconway.net';
