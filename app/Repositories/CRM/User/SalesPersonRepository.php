@@ -378,14 +378,14 @@ SQL;
      * @param int $dealerLocationId
      * @param string $salesType
      * @param null|SalesPerson $newestSalesPerson
-     * @return SalesPerson next sales person
+     * @return null|SalesPerson next sales person
      */
     public function roundRobinSalesPerson(
         int $dealerId,
         int $dealerLocationId,
         string $salesType,
         ?SalesPerson $newestSalesPerson = null
-    ): SalesPerson {
+    ): ?SalesPerson {
         // Initialize
         $newestSalesPersonId = $newestSalesPerson->id ?? 0;
         $salesPeople = $this->getSalesPeopleBy($dealerId, $dealerLocationId, $salesType);
