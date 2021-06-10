@@ -377,14 +377,14 @@ SQL;
      * @param int $dealerId
      * @param int $dealerLocationId
      * @param string $salesType
-     * @param SalesPerson $newestSalesPerson
+     * @param null|SalesPerson $newestSalesPerson
      * @return SalesPerson next sales person
      */
     public function roundRobinSalesPerson(
         int $dealerId,
         int $dealerLocationId,
         string $salesType,
-        SalesPerson $newestSalesPerson
+        ?SalesPerson $newestSalesPerson = null
     ): SalesPerson {
         // Initialize
         $newestSalesPersonId = $newestSalesPerson->id ?? 0;
