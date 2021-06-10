@@ -108,7 +108,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param Lead $lead
      * @return null|LeadAssign
      */
-    public function autoAssign(Lead $lead): LeadAssign {
+    public function autoAssign(Lead $lead): ?LeadAssign {
         // Initialize Comments
         $dealer = $lead->newDealerUser;
         $this->addLeadExplanationNotes($lead->identifier, 'Checking Lead #' . $lead->identifier . ' and Dealer #' . $dealer->id . ' ' . $dealer->name . ' to Auto Assign');
@@ -256,22 +256,20 @@ class AutoAssignService implements AutoAssignServiceInterface {
      */
     private function handleAssignLead(Lead $lead, SalesPerson $salesPerson): string {
         // Initialize Next Contact Date
-        $nextDay = date("d") + 1;
-        $nextContactStamp = mktime(9, 0, 0, $this->datetime->format("n"), $nextDay);
-        $nextContactObj   = new \DateTime(date("Y:m:d H:i:s", $nextContactStamp), new \DateTimeZone(env('DB_TIMEZONE')));
-        $nextContactText  = ' on ' . $nextContactObj->format("l, F jS, Y") . ' at ' . $nextContactObj->format("g:i A T");
+        $date = Carbon::now()->timezone($lead->crmUser->dealer_timezone)
+                      ->addDay()->hour(9)->minute(0)->second(0);
 
         // Try Processing Assign Lead
         $this->addLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $lead->id_name);
         try {
             // Prepare to Assign
             $status = LeadAssign::STATUS_ASSIGNING;
-            $status = $this->finishAssignLead($lead, $salesPerson, $nextContactStamp);
+            $status = $this->finishAssignLead($lead, $salesPerson, $date);
 
             // Send Sales Email
             if(!empty($lead->dealer->crmUser->enable_assign_notification)) {
                 $status = LeadAssign::STATUS_MAILING;
-                $status = $this->sendAssignLeadEmail($lead, $salesPerson, $nextContactText);
+                $status = $this->sendAssignLeadEmail($lead, $salesPerson, $date);
             }
         } catch(\Exception $e) {
             // Add Error
@@ -291,18 +289,16 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * 
      * @param Lead $lead
      * @param SalesPerson $salesPerson
-     * @param int $nextContactStamp
+     * @param Carbon $date
      * @return string
      */
     private function finishAssignLead(
         Lead $lead,
         SalesPerson $salesPerson,
-        int $nextContactStamp
+        Carbon $date
     ): string {
         // Set Next Contact Date
-        $nextContactObj = new \DateTime(date("Y:m:d H:i:s", $nextContactStamp), new \DateTimeZone(env('DB_TIMEZONE')));
-        $nextContactGmt = gmdate("Y-m-d H:i:s", $nextContactStamp);
-        $nextContact    = $nextContactObj->format("Y-m-d H:i:s");
+        $nextContact = $date->format("Y-m-d H:i:s");
         $this->addLeadExplanationNotes($lead->identifier, 'Setting Next Contact Date: ' . $nextContact . ' to Lead: ' . $lead->id_name);
 
         // Assign Lead to Sales Person
@@ -310,7 +306,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         $this->leadStatus->createOrUpdate([
             'lead_id' => $lead->identifier,
             'sales_person_id' => $salesPerson->id,
-            'next_contact_date' => $nextContactGmt
+            'next_contact_date' => $date->utc->format("Y-m-d H:i:s")
         ]);
 
         // Finish Assigning
@@ -323,18 +319,19 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * 
      * @param Lead $lead
      * @param SalesPerson $salesPerson
-     * @param string $nextContactText
+     * @param Carbon Date
      * @return string
      */
     private function sendAssignLeadEmail(
         Lead $lead,
         SalesPerson $salesPerson,
-        string $nextContactText
+        Carbon $date
     ): string {
         // Get Sales Person Email
         $salesEmail = $salesPerson->email;
         $this->addLeadExplanationNotes($lead->identifier, 'Attempting to Send Notification Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
         $credential = NewUser::getDealerCredential($lead->newDealerUser->user_id, $salesPerson->id);
+        $nextContactText  = ' on ' . $date->format("l, F jS, Y") . ' at ' . $date->format("g:i A T");
 
         // Send Email to Sales Person
         Mail::to($salesEmail ?? "" )->send(

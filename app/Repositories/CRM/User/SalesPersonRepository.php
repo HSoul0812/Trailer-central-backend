@@ -342,7 +342,7 @@ SQL;
      * @param int $dealerId
      * @param int $dealerLocationId
      * @param string $salesType
-     * @param null|SalesPerson
+     * @return null|SalesPerson
      */
     public function findNewestSalesPerson(
         int $dealerId,
@@ -379,7 +379,7 @@ SQL;
      * @param int $dealerLocationId
      * @param string $salesType
      * @param null|SalesPerson $newestSalesPerson
-     * @return null|SalesPerson next sales person
+     * @return null|SalesPerson
      */
     public function roundRobinSalesPerson(
         int $dealerId,

@@ -73,4 +73,13 @@ class CrmUser extends Model
     public function getFullNameAttribute() {
         return trim("{$this->first_name} {$this->last_name}");
     }
+
+    /**
+     * Get Dealer Timezone
+     * 
+     * @return string
+     */
+    public function getDealerTimezoneAttribute(): string {
+        return $this->timezone ?: env('DB_TIMEZONE');
+    }
 }

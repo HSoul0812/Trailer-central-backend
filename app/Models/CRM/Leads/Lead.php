@@ -8,15 +8,16 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Product\Product;
 use App\Models\CRM\Leads\LeadProduct;
+use App\Models\CRM\Leads\InventoryLead;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
 use App\Models\Inventory\Inventory;
-use App\Traits\CompactHelper;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\CRM\Leads\InventoryLead;
 use App\Models\Traits\TableAware;
 use App\Models\Website\Website;
+use App\Traits\CompactHelper;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * Class Lead
@@ -220,6 +221,16 @@ class Lead extends Model
     public function newDealerUser()
     {
         return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
+    }
+
+    /**
+     * Get Crm User
+     * 
+     * @return HasOneThrough
+     */
+    public function crmUser(): HasOneThrough
+    {
+        return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
     }
 
     /**

@@ -22,6 +22,6 @@ interface AutoAssignServiceInterface {
      * @param Lead $lead
      * @return null|LeadAssign
      */
-    public function autoAssign(Lead $lead): LeadAssign;
+    public function autoAssign(Lead $lead): ?LeadAssign;
     
 }
