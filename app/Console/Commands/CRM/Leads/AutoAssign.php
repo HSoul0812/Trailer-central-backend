@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
+use League\Fractal\Resource\Collection;
 
 class AutoAssign extends Command
 {    
