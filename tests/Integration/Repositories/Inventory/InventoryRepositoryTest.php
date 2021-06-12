@@ -1,8 +1,8 @@
 <?php
+declare(strict_types=1);
 
 namespace Tests\Integration\Repositories\Dms;
 
-use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
