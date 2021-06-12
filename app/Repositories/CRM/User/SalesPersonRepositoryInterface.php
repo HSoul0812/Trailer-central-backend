@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\User;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Models\User\NewDealerUser;
 use App\Repositories\Repository;
 use App\Utilities\JsonApi\RequestQueryable;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,14 +43,14 @@ interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
     /**
      * Round Robin to Next Sales Person
      *
-     * @param int $dealerId
+     * @param NewDealerUser $dealer
      * @param int $dealerLocationId
      * @param string $salesType
      * @param null|SalesPerson $newestSalesPerson
      * @return null|SalesPerson
      */
     public function roundRobinSalesPerson(
-        int $dealerId,
+        NewDealerUser $dealer,
         int $dealerLocationId,
         string $salesType,
         ?SalesPerson $newestSalesPerson = null
