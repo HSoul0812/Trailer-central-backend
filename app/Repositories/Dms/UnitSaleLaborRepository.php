@@ -40,10 +40,13 @@ class UnitSaleLaborRepository extends RepositoryAbstract implements UnitSaleLabo
     {
         $dbParams = ['dealerId' => $params['dealer_id']];
         $usWhere = "";
-        $where = 'WHERE 1=1 ';
+        $where = 'WHERE 1=1';
+        $uWhere = 'WHERE 1=1';
+        $posWhere = "";
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
             $usWhere .= " AND DATE(us.created_at) BETWEEN :fromDate AND :toDate ";
+            $posWhere .= "AND DATE(p.created_at) BETWEEN '".$params['from_date']."' AND '".$params['to_date']."'";
             $dbParams['fromDate'] = $params['from_date'];
             $dbParams['toDate'] = $params['to_date'];
         }
@@ -51,6 +54,7 @@ class UnitSaleLaborRepository extends RepositoryAbstract implements UnitSaleLabo
         if (!empty($params['technician']) && is_array($params['technician'])) {
             foreach ($params['technician'] as $key => $technician) {
                 $where .= " AND labor.technician = :technician{$key} ";
+                $uWhere .= " AND l.technician = '".$technician."' ";
                 $dbParams["technician{$key}"] = $technician;
             }
         }
@@ -128,6 +132,33 @@ class UnitSaleLaborRepository extends RepositoryAbstract implements UnitSaleLabo
                 {$usWhere}
                 GROUP BY us.id) sales ON labor.unit_sale_id=sales.sale_id
             {$where}";
+
+        $union = "SELECT
+                        l.actual_hours, l.paid_hours, l.billed_hours, l.technician,
+                        NULL AS sale_id, i.id invoice_id, i.doc_num AS doc_num, i.total invoice_total,
+                        i.invoice_date sale_date, i.sales_person_id, c.display_name customer_name,
+
+                        0 AS unit_sale_amount,
+                        0 AS unit_cost_amount,
+                        0 AS part_sale_amount,
+                        0 AS part_cost_amount,
+
+                        SUM(l.quantity * l.unit_price) AS labor_sale_amount,
+                        SUM(l.quantity * l.dealer_cost) AS labor_cost_amount,
+
+                        NULL as inventory_stock,
+                        NULL as inventory_make,
+                        NULL as inventory_notes
+                    FROM
+                        qb_payment_labors l
+                        JOIN qb_payment p ON l.payment_id = p.id
+                        JOIN qb_invoices i ON p.invoice_id = i.id
+                        JOIN dms_customer c ON i.customer_id = c.id
+                    ".$uWhere." ".$posWhere." AND p.dealer_id = ".$params['dealer_id']."
+                        GROUP BY l.technician, p.id";
+
+        $sql .= " UNION ALL ";
+        $sql .= $union;
 
         $result = DB::select($sql, $dbParams);
 
