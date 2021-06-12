@@ -131,7 +131,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         }
 
         // Find Next Salesperson
-        $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
+        $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer, $dealerLocationId, $salesType, $newestSalesPerson);
         if(empty($salesPerson->id)) {
             // Skip Entry!
             return $this->skipAssignLead($lead, $dealerLocationId, $newestSalesPersonId);

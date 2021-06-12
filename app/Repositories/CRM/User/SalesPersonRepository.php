@@ -375,21 +375,26 @@ SQL;
     /**
      * Round Robin to Next Sales Person
      *
-     * @param int $dealerId
+     * @param NewDealerUser $dealer
      * @param int $dealerLocationId
      * @param string $salesType
      * @param null|SalesPerson $newestSalesPerson
      * @return null|SalesPerson
      */
     public function roundRobinSalesPerson(
-        int $dealerId,
+        NewDealerUser $dealer,
         int $dealerLocationId,
         string $salesType,
         ?SalesPerson $newestSalesPerson = null
     ): ?SalesPerson {
+        // Kill If Somehow Newest Sales Person Does Not Belong to Current Dealer
+        if(!empty($newestSalesPerson->id) && $dealer->user_id !== $newestSalesPerson->user_id) {
+            $newestSalesPerson = null;
+        }
+
         // Initialize
         $newestSalesPersonId = $newestSalesPerson->id ?? 0;
-        $salesPeople = $this->getSalesPeopleBy($dealerId, $dealerLocationId, $salesType);
+        $salesPeople = $this->getSalesPeopleBy($dealer->id, $dealerLocationId, $salesType);
 
         // Loop Valid Sales People
         $lastId = 0;
