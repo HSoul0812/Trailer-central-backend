@@ -131,7 +131,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         }
 
         // Find Next Salesperson
-        $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson);
+        $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer, $dealerLocationId, $salesType, $newestSalesPerson);
         if(empty($salesPerson->id)) {
             // Skip Entry!
             return $this->skipAssignLead($lead, $dealerLocationId, $newestSalesPersonId);
@@ -374,6 +374,12 @@ class AutoAssignService implements AutoAssignServiceInterface {
         // Log Skipping Assigning This Lead
         $this->addLeadExplanationNotes($lead->identifier, 'Couldn\'t Find Salesperson ' .
             'ID to Assign Lead ' . $lead->id_name . ' to, skipping temporarily!', 'error');
+
+        // Unassign Lead
+        $this->leadStatus->createOrUpdate([
+            'lead_id' => $lead->identifier,
+            'sales_person_id' => NULL
+        ]);
 
         // Mark as Skipped
         return $this->leads->assign([
