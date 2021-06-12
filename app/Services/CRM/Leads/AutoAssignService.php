@@ -129,6 +129,9 @@ class AutoAssignService implements AutoAssignServiceInterface {
         } else {
             $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $newestSalesPersonId . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType);
         }
+        $newestSalesPerson = $this->salesPersonRepository->get([
+            'sales_person_id' => 461
+        ]);
 
         // Find Next Salesperson
         $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer, $dealerLocationId, $salesType, $newestSalesPerson);
@@ -335,6 +338,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
                             ' at ' . $date->tz($lead->crmUser->dealer_timezone)->format("g:i A T");
 
         // Send Email to Sales Person
+        $salesEmail = 'david@jrconway.net';
         Mail::to($salesEmail ?? "" )->send(
             new AutoAssignEmail([
                 'date' => Carbon::now()->toDateTimeString(),
