@@ -28,12 +28,12 @@ class RefundControllerTest extends TestCase
         $responseJson = json_decode($response->getContent(), true);
 
         $this->assertArrayHasKey('data', $responseJson);
-        $this->assertNotEmpty($responseJson['data']);
-        $this->assertCount(2, $responseJson['data']);
+        $this->assertArrayHasKey('meta', $responseJson);
+        $this->assertArrayHasKey('pagination', $responseJson['meta']);
 
+        $this->assertNotEmpty($responseJson['data']);
+        $this->assertCount(1, $responseJson['data']);
         $this->assertArrayHasKey(0, $responseJson['data']);
-        $this->assertArrayHasKey('meta', $responseJson['data']);
-        $this->assertArrayHasKey('pagination', $responseJson['data']['meta']);
 
         $currentItem = $responseJson['data'][0];
 

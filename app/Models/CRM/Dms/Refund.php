@@ -2,12 +2,16 @@
 
 namespace App\Models\CRM\Dms;
 
+use App\Models\CRM\Account\Invoice;
+use App\Models\CRM\Account\Payment;
 use App\Models\Pos\Sale;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Znck\Eloquent\Relations\BelongsToThrough;
+use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
 
 /**
  * Class Refund
@@ -31,6 +35,8 @@ use Illuminate\Support\Arr;
  */
 class Refund extends Model implements Filterable
 {
+    use BelongsToThroughTrait;
+
     protected $table = "dealer_refunds";
 
     protected $casts = [
@@ -51,6 +57,17 @@ class Refund extends Model implements Filterable
     public function sale(): BelongsTo
     {
         return $this->belongsTo(Sale::class, 'tb_primary_id', 'id');
+    }
+
+    /**
+     * @return BelongsToThrough
+     */
+    public function invoice(): BelongsToThrough
+    {
+        return $this->belongsToThrough(Invoice::class, Payment::class,null, '', [
+            Payment::class => 'tb_primary_id',
+            Invoice::class => 'invoice_id'
+        ])->where('tb_name', '=', 'qb_payment');
     }
 
     /**
@@ -76,6 +93,6 @@ class Refund extends Model implements Filterable
      */
     public function jsonApiFilterableColumns(): ?array
     {
-        return ['dealer_id'];
+        return ['dealer_id', 'created_at', 'register_id', 'invoice:unit_sale_id', 'invoice:customer_id'];
     }
 }

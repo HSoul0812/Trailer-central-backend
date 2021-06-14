@@ -88,8 +88,14 @@ class RestfulControllerV2 extends Controller
         $collection = new Collection($data, $transformer);
         $collection->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
+        $responseData = $fractal->createData($collection)->toArray();
+
+        $meta = $responseData['meta'];
+        unset($responseData['meta']);
+
         return $this->response->array([
-            'data' => $fractal->createData($collection)->toArray()
+            'data' => $responseData,
+            'meta' => $meta,
         ]);
     }
 }

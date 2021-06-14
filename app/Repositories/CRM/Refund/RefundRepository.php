@@ -26,8 +26,6 @@ class RefundRepository extends RepositoryAbstract implements RefundRepositoryInt
      */
     public function getAll($params): Collection
     {
-        $query = $this->query();
-
-        return $query->get();
+        return $this->query()->get();
     }
 }
