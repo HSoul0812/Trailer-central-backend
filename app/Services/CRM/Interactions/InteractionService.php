@@ -68,6 +68,7 @@ class InteractionService implements InteractionServiceInterface
         $user = User::find($params['dealer_id']);
         $lead = Lead::findOrFail($leadId);
         $salesPerson = null;
+        $interactionEmail = null;
         if(isset($params['sales_person_id'])) {
             $salesPerson = SalesPerson::find($params['sales_person_id']);
         }
@@ -105,6 +106,7 @@ class InteractionService implements InteractionServiceInterface
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
             $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
+            $interactionEmail = true;
         }
 
         // Save Lead Status
@@ -115,7 +117,7 @@ class InteractionService implements InteractionServiceInterface
         ]);
 
         // Save Email
-        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail, $salesPerson);
+        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail, $salesPerson, $interactionEmail);
     }
 
 
@@ -208,9 +210,9 @@ class InteractionService implements InteractionServiceInterface
      * @param null|SalesPerson $salesPerson
      * @return Interaction
      */
-    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null): Interaction {
+    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail): Interaction {
         // Initialize Transaction
-        DB::transaction(function() use (&$parsedEmail, $leadId, $userId, $salesPerson) {
+        DB::transaction(function() use (&$parsedEmail, $leadId, $userId, $salesPerson, $interactionEmail) {
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
@@ -229,7 +231,16 @@ class InteractionService implements InteractionServiceInterface
             $parsedEmail->setDateNow();
 
             // Create or Update Email
-            $this->emailHistory->createOrUpdate($parsedEmail->getParams());
+            $emailHistory = $this->emailHistory->createOrUpdate($parsedEmail->getParams());
+
+            // Create Interaction Email
+            if ($interactionEmail) {
+              $this->interactions->createInteractionEmail([
+                'interaction_id'  => $interaction->interaction_id,
+                'message_id'      => $emailHistory->message_id
+              ]);
+            }
+
         });
 
         // Return Interaction
