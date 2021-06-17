@@ -4,11 +4,13 @@ namespace App\Models\CRM\Dms;
 
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
+use App\Models\CRM\Dms\Payment\DealerSalesReceipt;
 use App\Models\Pos\Sale;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Arr;
 use Znck\Eloquent\Relations\BelongsToThrough;
 use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
@@ -31,6 +33,8 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
  * @property int $register_id
  *
  * @property RefundItem[] $items
+ * @property Invoice $invoice
+ * @property DealerSalesReceipt $receipt
  * @property Sale $sale the sale associated with this refund
  */
 class Refund extends Model implements Filterable
@@ -67,7 +71,15 @@ class Refund extends Model implements Filterable
         return $this->belongsToThrough(Invoice::class, Payment::class,null, '', [
             Payment::class => 'tb_primary_id',
             Invoice::class => 'invoice_id'
-        ])->where('tb_name', '=', 'qb_payment');
+        ]);
+    }
+
+    /**
+     * @return MorphOne
+     */
+    public function receipt(): MorphOne
+    {
+        return $this->morphOne(DealerSalesReceipt::class, 'receipt', 'tb_name', 'tb_primary_id');
     }
 
     /**

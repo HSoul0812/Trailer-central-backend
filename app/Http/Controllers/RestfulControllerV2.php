@@ -85,6 +85,8 @@ class RestfulControllerV2 extends Controller
         $fractal = new Manager();
         $fractal->setSerializer(new NoDataArraySerializer());
 
+        $fractal->parseIncludes(request()->query('with', ''));
+
         $collection = new Collection($data, $transformer);
         $collection->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
