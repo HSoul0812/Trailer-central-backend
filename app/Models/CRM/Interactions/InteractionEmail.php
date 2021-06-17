@@ -3,9 +3,11 @@
 namespace App\Models\CRM\Interactions;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\TableAware;
 
 class InteractionEmail extends Model
 {
+    use TableAware;
 
     const TABLE_NAME = 'crm_interaction_emails';
 
@@ -46,8 +48,4 @@ class InteractionEmail extends Model
         'interaction_id',
         'message_id'
     ];
-
-    public static function getTableName() {
-        return self::TABLE_NAME;
-    }
 }

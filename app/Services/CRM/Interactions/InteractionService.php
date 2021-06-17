@@ -62,6 +62,7 @@ class InteractionService implements InteractionServiceInterface
      * @param array $params
      * @param array $attachments
      * @return Interaction || error
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function email($leadId, $params, $attachments = array()) {
         // Get User

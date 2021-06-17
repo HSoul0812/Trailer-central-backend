@@ -142,6 +142,13 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         return $this->create($params);
     }
 
+    /**
+     * Create InteractionEmail
+     * 
+     * @param array $params
+     * @return InteractionEmail
+     */
+
     public function createInteractionEmail($params) {
         return InteractionEmail::create($params);
     }
