@@ -60,6 +60,7 @@ trait SmtpHelper
             $transport = new \Swift_SmtpTransport($config->host, $config->port, $config->security ?? null);
             $transport->setUsername($config->username);
             $transport->setPassword($config->password);
+            $transport->setTimeout(SmtpConfig::DEFAULT_TIMEOUT);
 
             // Start Transport! If Invalid, an Exception Will be Thrown...
             $mailer = new \Swift_Mailer($transport);

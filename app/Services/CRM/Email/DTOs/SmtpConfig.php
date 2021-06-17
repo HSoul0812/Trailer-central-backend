@@ -49,6 +49,12 @@ class SmtpConfig
 
 
     /**
+     * @const int SMTP Timeout
+     */
+    const DEFAULT_TIMEOUT = 30;
+
+
+    /**
      * @var string From Name for SMTP
      */
     private $fromName;

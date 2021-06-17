@@ -49,7 +49,7 @@ class SalesPersonTransformer extends TransformerAbstract
                 'port' => $salesPerson->smtp_port,
                 'security' => $salesPerson->smtp_security,
                 'auth' => $salesPerson->smtp_auth,
-                'failed' => $salesPerson->smtp_validate,
+                'failed' => !$salesPerson->smtp_validate,
                 'error' => $salesPerson->smtp_error
             ];
         });
