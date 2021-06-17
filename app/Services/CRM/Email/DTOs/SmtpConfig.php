@@ -51,7 +51,7 @@ class SmtpConfig
     /**
      * @const int SMTP Timeout
      */
-    const DEFAULT_TIMEOUT = 30;
+    const DEFAULT_TIMEOUT = 5;
 
 
     /**
