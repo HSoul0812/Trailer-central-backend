@@ -2,6 +2,7 @@
 
 use App\Models\CRM\Dms\Quickbooks\Item;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 class FixSubtlesItemsType extends Migration
 {
