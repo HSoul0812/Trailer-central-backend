@@ -10,6 +10,7 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\Integration\Auth\AccessToken;
 use App\Utilities\JsonApi\Filterable;
+use App\Traits\SmtpHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class SalesPerson extends Model implements Filterable
 {
-    use SoftDeletes;
+    use SoftDeletes, SmtpHelper;
 
     const TABLE_NAME = 'crm_sales_person';
 
@@ -198,6 +199,25 @@ class SalesPerson extends Model implements Filterable
 
         // Return Default Folders
         return EmailFolder::getDefaultFolders();
+    }
+
+    /**
+     * Validate SMTP Details Using Swift Transport
+     * 
+     * @return bool
+     */
+    public function smtpValidateAttribute(): bool {
+        return $this->validateSalesPersonSmtp($this);
+    }
+
+    /**
+     * Validate IMAP Details
+     * TO DO: Validate from here like SMTP above!
+     * 
+     * @return bool
+     */
+    public function imapValidateAttribute(): bool {
+        return $this->imap_failed;
     }
 
     public static function getTableName() {
