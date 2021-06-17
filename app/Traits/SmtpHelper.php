@@ -62,7 +62,7 @@ trait SmtpHelper
             $transport->setPassword($config->password);
 
             // Start Transport! If Invalid, an Exception Will be Thrown...
-            $mailer = \Swift_Mailer::newInstance($transport);
+            $mailer = new \Swift_Mailer($transport);
             $mailer->getTransport()->start();
 
             // No Exception, Success!
