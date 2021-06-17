@@ -206,7 +206,7 @@ class SalesPerson extends Model implements Filterable
      * 
      * @return bool
      */
-    public function smtpValidateAttribute(): bool {
+    public function getSmtpValidateAttribute(): bool {
         return $this->validateSalesPersonSmtp($this);
     }
 
@@ -216,7 +216,7 @@ class SalesPerson extends Model implements Filterable
      * 
      * @return bool
      */
-    public function imapValidateAttribute(): bool {
+    public function getImapValidateAttribute(): bool {
         return $this->imap_failed;
     }
 

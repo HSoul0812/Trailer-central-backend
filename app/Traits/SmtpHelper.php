@@ -51,9 +51,10 @@ trait SmtpHelper
     /**
      * Validate SwiftMailer SMTP Config
      * 
+     * @param SmtpConfig $config
      * @return bool
      */
-    private function validateSwiftSmtp(SmtpConfig $config) {
+    private function validateSwiftSmtp(SmtpConfig $config): bool {
         try {
             // Get Security Details
             $transport = Swift_SmtpTransport::newInstance($config->host, $config->port, $config->security ?? null);
