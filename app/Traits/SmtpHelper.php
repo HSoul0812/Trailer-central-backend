@@ -57,7 +57,7 @@ trait SmtpHelper
     private function validateSwiftSmtp(SmtpConfig $config): bool {
         try {
             // Get Security Details
-            $transport = \Swift_SmtpTransport::newInstance($config->host, $config->port, $config->security ?? null);
+            $transport = new \Swift_SmtpTransport($config->host, $config->port, $config->security ?? null);
             $transport->setUsername($config->username);
             $transport->setPassword($config->password);
 
