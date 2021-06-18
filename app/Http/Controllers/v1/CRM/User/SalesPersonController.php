@@ -23,6 +23,11 @@ class SalesPersonController extends RestfulController {
     protected $salesPerson;
 
     /**
+     * @var SalesAuthServiceInterface
+     */
+    protected $salesAuth;
+
+    /**
      * @var SalesPersonTransformer
      */
     private $salesPersonTransformer;
@@ -86,8 +91,12 @@ class SalesPersonController extends RestfulController {
     {
         $request = new ValidateSalesPeopleRequest($request->all());
         if ($request->validate()) {
+            // Get Item
+            $data = new Item($this->salesAuth->validate($request->all()));
+            $response = $this->fractal->createData($data)->toArray();
+
             // Return Validation
-            return $this->response->array(['data' => $this->salesAuth->validate($request->all())]);
+            return $this->response->array($response);
         }
         
         return $this->response->errorBadRequest();
