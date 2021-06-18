@@ -116,43 +116,42 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return type
      */
     public function getAllUnassigned($params) {
-        $query = Lead::select(Lead::getTableName().'.*')->with('inventory');
+        $query = Lead::select(Lead::getTableName() . '.*')->with('inventory');
 
         if (isset($params['dealer_id'])) {
-            $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
+            $query = $query->where(Lead::getTableName() . '.dealer_id', $params['dealer_id']);
         }
 
         // Join Lead Status
-        $query = $query->leftJoin(NewDealerUser::getTableName(), Lead::getTableName().'.dealer_id', '=', NewDealerUser::getTableName().'.id');
-        $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
+        $query = $query->leftJoin(NewDealerUser::getTableName(), Lead::getTableName() . '.dealer_id', '=', NewDealerUser::getTableName() . '.id');
+        $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier');
         $query = $query->leftJoin(SalesPerson::getTableName(), function ($join) {
-            $join->on(LeadStatus::getTableName().'.sales_person_id', '=', SalesPerson::getTableName().'.id')
-                 ->on(SalesPerson::getTableName().'.user_id', '=', NewDealerUser::getTableName().'.user_id')
-                 ->whereNull(SalesPerson::getTableName().'.deleted_at');
+            $join->on(LeadStatus::getTableName() . '.sales_person_id', '=', SalesPerson::getTableName() . '.id')
+                 ->on(SalesPerson::getTableName() . '.user_id', '=', NewDealerUser::getTableName() . '.user_id')
+                 ->whereNull(SalesPerson::getTableName() . '.deleted_at');
         });
 
         // Require Sales Person ID NULL or 0
-        $query = $query->where(function($query) {
-            $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
-                  ->orWhere(LeadStatus::getTableName().'.sales_person_id', 0);
-        })->where(Lead::getTableName().'.is_archived', 0)
-          ->where(Lead::getTableName().'.is_spam', 0)
-          ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY');
+        $query = $query->whereNull(SalesPerson::getTableName() . '.id')
+            ->where(Lead::getTableName() . '.is_archived', 0)
+            ->where(Lead::getTableName() . '.is_spam', 0)
+            ->whereRaw(Lead::getTableName() . '.date_submitted > CURDATE() - INTERVAL 30 DAY');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         if (isset($params['sort'])) {
-            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
+            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName() . '.tc_lead_id',  '=', Lead::getTableName() . '.identifier');
             $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
         }
 
-        $query = $query->groupBy(Lead::getTableName().'.identifier');
+        $query = $query->groupBy(Lead::getTableName() . '.identifier');
 
         // Return By Dealer?
         if($params['per_page'] === 'all') {
-            return $query->get();
+            return $query->orderBy(Lead::getTableName() . '.date_submitted', 'ASC')
+                         ->orderBy(Lead::getTableName() . '.identifier', 'ASC')->get();
         }
 
         // Paginate!

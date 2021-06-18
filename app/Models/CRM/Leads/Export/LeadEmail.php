@@ -9,6 +9,12 @@ class LeadEmail extends Model
     const EXPORT_FORMAT_VINSOLUTIONS = 1;
     const EXPORT_FORMAT_IDS = 2;
     
+    public const EXPORT_FORMAT_TYPES = [
+        self::EXPORT_FORMAT_ADF,
+        self::EXPORT_FORMAT_VINSOLUTIONS,
+        self::EXPORT_FORMAT_IDS
+    ];
+    
     /**
      * The table associated with the model.
      *
@@ -35,6 +41,8 @@ class LeadEmail extends Model
         'cc_email',
         'dealer_location_id'
     ];
+    
+    public $timestamps = false;
     
     public function getToEmailsAttribute() : array
     {

@@ -6,6 +6,8 @@ use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Export\LeadEmail;
 use App\Models\CRM\Leads\Lead;
+use App\DTO\CRM\Leads\Export\LeadEmail as LeadEmailDTO;
+use Illuminate\Database\Eloquent\Collection;
 
 class LeadEmailRepository implements LeadEmailRepositoryInterface 
 {
@@ -22,11 +24,21 @@ class LeadEmailRepository implements LeadEmailRepositoryInterface
     }
 
     public function getAll($params) {
-        throw new NotImplementedException;
+        return LeadEmail::where('dealer_id', $params['dealer_id'])->get();
     }
 
     public function update($params) {
-        throw new NotImplementedException;
+        $leadEmail = $this->getByDealerIdAndLocation($params['dealer_id'], $params['dealer_location_id']);
+        
+        if ($leadEmail) {
+            $leadEmail->fill($params);
+        } else {
+            $leadEmail = new LeadEmail();
+            $leadEmail->fill($params);
+        }
+        
+        $leadEmail->save();
+        return $leadEmail;
     }
 
     /**
@@ -64,4 +76,26 @@ class LeadEmailRepository implements LeadEmailRepositoryInterface
         return LeadEmail::where('dealer_location_id', $dealerLocationId)->where('dealer_id', $lead->website->dealer_id)->firstOrFail();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function updateBulk(Collection $leads) : Collection
+    {
+        $collection =  new Collection;
+        foreach($leads as $leadEmailDto) {
+            $collection->add($this->update([
+                'dealer_id' => $leadEmailDto->getDealerId(),
+                'email' => $leadEmailDto->getEmail(),
+                'export_format' => $leadEmailDto->getExportFormat(),
+                'cc_email' => $leadEmailDto->getCcEmail(),
+                'dealer_location_id' => $leadEmailDto->getDealerLocationId()
+            ]));
+        }
+        return $collection;
+    }
+    
+    public function getByDealerIdAndLocation(int $dealerId, int $locationId) : ?LeadEmail
+    {
+        return LeadEmail::where('dealer_id', $dealerId)->where('dealer_location_id', $locationId)->first();
+    }
 }
