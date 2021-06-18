@@ -43,5 +43,5 @@ interface SalesAuthServiceInterface {
      * @param array $params
      * @return bool
      */
-    public function validate(array $params): array;
+    public function validate(array $params): bool;
 }

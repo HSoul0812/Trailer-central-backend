@@ -24,6 +24,17 @@ class SalesPerson extends Model implements Filterable
 {
     use SoftDeletes, SmtpHelper;
 
+    /**
+     * @const string
+     */
+    const TYPE_SMTP = 'smtp';
+
+    /**
+     * @const string
+     */
+    const TYPE_IMAP = 'imap';
+
+
     const TABLE_NAME = 'crm_sales_person';
 
     /**

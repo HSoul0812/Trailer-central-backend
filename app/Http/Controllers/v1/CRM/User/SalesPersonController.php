@@ -9,6 +9,7 @@ use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
@@ -81,12 +82,12 @@ class SalesPersonController extends RestfulController {
         return $this->response->array($response);
     }
 
-    public function validate(Request $request)
+    public function valid(Request $request): Response
     {
         $request = new ValidateSalesPeopleRequest($request->all());
         if ($request->validate()) {
             // Return Validation
-            return $this->response->array(['data' => $this->salesAuth->getAll($request->all())]);
+            return $this->response->array(['data' => $this->salesAuth->validate($request->all())]);
         }
         
         return $this->response->errorBadRequest();
