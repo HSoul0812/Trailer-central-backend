@@ -4,11 +4,11 @@ namespace App\Http\Controllers\v1\CRM\User;
 
 use App\Http\Controllers\RestfulController;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Services\CRM\User\SalesAuthServiceInterface;
+use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
-use App\Transformers\CRM\User\SalesPersonTransformer;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
@@ -33,12 +33,14 @@ class SalesPersonController extends RestfulController {
 
     public function __construct(
         SalesPersonRepositoryInterface $salesPersonRepo,
+        SalesAuthServiceInterface $salesAuthService,
         SalesPersonTransformer $salesPersonTransformer,
         Manager $fractal
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'salesReport']);
 
         $this->salesPerson = $salesPersonRepo;
+        $this->salesAuth = $salesAuthService;
         $this->salesPersonTransformer = $salesPersonTransformer;
         $this->fractal = $fractal;
 
@@ -77,5 +79,16 @@ class SalesPersonController extends RestfulController {
 
         $response = $this->fractal->createData($data)->toArray();
         return $this->response->array($response);
+    }
+
+    public function validate(Request $request)
+    {
+        $request = new ValidateSalesPeopleRequest($request->all());
+        if ($request->validate()) {
+            // Return Validation
+            return $this->response->array(['data' => $this->salesAuth->getAll($request->all())]);
+        }
+        
+        return $this->response->errorBadRequest();
     }
 }

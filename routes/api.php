@@ -641,6 +641,9 @@ $api->version('v1', function ($route) {
                 $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
 
+                // Validate SMTP/IMAP
+                $route->get('validate', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@validate');
+
                 // Sales People w/Auth
                 $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
                 $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');

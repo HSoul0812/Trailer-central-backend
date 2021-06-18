@@ -111,6 +111,32 @@ class SalesAuthService implements SalesAuthServiceInterface
         return $this->response($accessToken, $params);
     }
 
+    /**
+     * Validate SMTP/IMAP Details
+     * 
+     * @param array $params
+     * @return Fractal
+     */
+    public function validate($params) {
+        // Get Smtp Config Details
+        if($params['type'] === SalesPerson::TYPE_SMTP) {
+            // Get SMTP Details
+            $config = new SmtpConfig([
+                'username' => $params['username'],
+                'password' => $params['password'],
+                'security' => $params['security'],
+                'host' => $params['host'],
+                'port' => $params['port']
+            ]);
+
+            // Validate SMTP Config
+            return $this->validateSmtp($config);
+        }
+
+        // Return Response
+        return false;
+    }
+
 
     /**
      * Return Response
