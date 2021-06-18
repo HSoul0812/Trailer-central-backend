@@ -119,7 +119,12 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * Validate SMTP/IMAP Details
      * 
-     * @param array $params
+     * @param array $params {type: smtp|imap,
+     *                       username: string,
+     *                       password: string,
+     *                       security: string (ssl|tls)
+     *                       host: string
+     *                       port: int}
      * @return bool
      */
     public function validate(array $params): bool {
