@@ -147,6 +147,64 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
+     * @param array $params
+     * @return Inventory|null
+     */
+    public function update(array $params): ?Inventory
+    {
+        try {
+            $this->inventoryRepository->beginTransaction();
+
+            $newImages = $params['new_images'] ?? [];
+            $newFiles = $params['new_files'] ?? [];
+            $hiddenFiles = $params['hidden_files'] ?? [];
+            $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
+
+            $addBill = $params['add_bill'] ?? false;
+
+            if (!empty($newImages)) {
+                $params['new_images'] = $this->uploadImages($params, 'new_images');
+            }
+
+            $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
+            unset($params['hidden_files']);
+
+            if (!empty($newFiles)) {
+                $params['new_files'] = $this->uploadFiles($params, 'new_files');
+            }
+
+            if (!empty($clappsDefaultImage)) {
+                $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
+                $params['clapps']['default-image'] = $clappImage['path'];
+            }
+
+            $inventory = $this->inventoryRepository->create($params);
+
+            if (!$inventory instanceof Inventory) {
+                Log::error('Item hasn\'t been created.', ['params' => $params]);
+                $this->inventoryRepository->rollbackTransaction();
+
+                return null;
+            }
+
+            if ($addBill) {
+                $this->addBill($params, $inventory);
+            }
+
+            $this->inventoryRepository->commitTransaction();
+
+            Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+        } catch (\Exception $e) {
+            Log::error('Item create error. Params - ' . json_encode($params), $e->getTrace());
+            $this->inventoryRepository->rollbackTransaction();
+
+            return null;
+        }
+
+        return $inventory;
+    }
+
+    /**
      * @param int $inventoryId
      * @return bool
      */
@@ -447,42 +505,5 @@ class InventoryService implements InventoryServiceInterface
 
             $this->inventoryRepository->update($inventoryParams);
         }
-    }
-
-    /**
-     * @param float $costOfUnit
-     * @param float $costOfShipping
-     * @param float $costOfPrep
-     * @param float $costOfRos
-     * @return Money
-     */
-    public function calculateTotalOfCost(float $costOfUnit, float $costOfShipping, float $costOfPrep, float $costOfRos): Money
-    {
-        return Money::of($costOfUnit + $costOfShipping + $costOfPrep + $costOfRos, 'USD', null, RoundingMode::DOWN);
-    }
-
-    /**
-     * @param float $trueCost
-     * @param float $costOfShipping
-     * @param float $costOfPrep
-     * @param float $costOfRos
-     * @return Money
-     */
-    public function calculateTrueTotalCost(float $trueCost, float $costOfShipping, float $costOfPrep, float $costOfRos): Money
-    {
-        return  Money::of($trueCost + $costOfShipping + $costOfPrep + $costOfRos, 'USD', null, RoundingMode::DOWN);
-    }
-
-    /**
-     * @param float $totalOfCost
-     * @param float $pacAmount
-     * @param string $pacType
-     * @return Money
-     */
-    public function calculateCostOverhead(float $totalOfCost, float $pacAmount, string $pacType): Money
-    {
-        $pacActualAmount = $pacType === DealerLocation::PAC_TYPE_PERCENT ? ($totalOfCost * $pacAmount) / 100 : $pacAmount;
-
-        return Money::of($totalOfCost + $pacActualAmount, 'USD', null, RoundingMode::DOWN);
     }
 }
