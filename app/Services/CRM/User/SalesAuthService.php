@@ -115,9 +115,9 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Validate SMTP/IMAP Details
      * 
      * @param array $params
-     * @return Fractal
+     * @return bool
      */
-    public function validate($params) {
+    public function validate(array $params): bool {
         // Get Smtp Config Details
         if($params['type'] === SalesPerson::TYPE_SMTP) {
             // Get SMTP Details

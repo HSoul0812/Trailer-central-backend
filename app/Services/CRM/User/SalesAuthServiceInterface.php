@@ -36,4 +36,12 @@ interface SalesAuthServiceInterface {
      * @return array
      */
     public function response($accessToken, $params);
+
+    /**
+     * Validate SMTP/IMAP Details
+     * 
+     * @param array $params
+     * @return bool
+     */
+    public function validate(array $params): array;
 }
