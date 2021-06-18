@@ -444,7 +444,7 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
-        | Sales People
+        | Dealer Locations
         |--------------------------------------------------------------------------
         |
         |
@@ -643,6 +643,9 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
+
+                // Validate SMTP/IMAP
+                $route->put('validate', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@valid');
 
                 // Sales People w/Auth
                 $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
