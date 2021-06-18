@@ -642,7 +642,7 @@ $api->version('v1', function ($route) {
                 $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
 
                 // Validate SMTP/IMAP
-                $route->put('validate', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@validate');
+                $route->put('validate', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@valid');
 
                 // Sales People w/Auth
                 $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');

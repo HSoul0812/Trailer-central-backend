@@ -92,9 +92,9 @@ class SalesPersonController extends RestfulController {
         $request = new ValidateSalesPeopleRequest($request->all());
         if ($request->validate()) {
             // Return Validation
-            $result = $this->salesAuth->validate($request->all());
-            var_dump($result);
-            return $this->response->array(['data' => $result]);
+            return $this->response->array([
+                'data' => $this->salesAuth->validate($request->all())
+            ]);
         }
         
         return $this->response->errorBadRequest();
