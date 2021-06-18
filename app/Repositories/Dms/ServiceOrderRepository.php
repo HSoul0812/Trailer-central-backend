@@ -159,6 +159,11 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
     public function update($params) {
         $serviceOrder = $this->get($params);
 
+        // Adds additional field to mark it as completed in params.
+        if (in_array($params['status'], ServiceOrder::COMPLETED_ORDER_STATUS)) {
+            $params['closed_at'] = now()->format('Y-m-d H:i:s');
+        }
+
         $serviceOrder->fill($params);
         $serviceOrder->save();
 

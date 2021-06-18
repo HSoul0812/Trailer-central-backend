@@ -51,5 +51,4 @@ class QuickbookApprovalDeleted extends QuickbookApproval
 
         $this->save();
     }
-
 }

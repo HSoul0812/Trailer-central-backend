@@ -3,8 +3,10 @@
 namespace App\Repositories\CRM\User;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Models\User\NewDealerUser;
 use App\Repositories\Repository;
 use App\Utilities\JsonApi\RequestQueryable;
+use Illuminate\Database\Eloquent\Collection;
 
 interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
     /**
@@ -26,34 +28,47 @@ interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
 
     /**
      * Find Newest Sales Person From Vars or Check DB
-     * 
+     *
      * @param int $dealerId
      * @param int $dealerLocationId
      * @param string $salesType
-     * @param SalesPerson
+     * @return null|SalesPerson
      */
-    public function findNewestSalesPerson($dealerId, $dealerLocationId, $salesType);
+    public function findNewestSalesPerson(
+        int $dealerId,
+        int $dealerLocationId,
+        string $salesType
+    ): ?SalesPerson;
 
     /**
      * Round Robin to Next Sales Person
-     * 
-     * @param int $dealerId
+     *
+     * @param NewDealerUser $dealer
      * @param int $dealerLocationId
      * @param string $salesType
-     * @param SalesPerson $newestSalesPerson
-     * @param array $salesPeople
-     * @return SalesPerson next sales person
+     * @param null|SalesPerson $newestSalesPerson
+     * @return null|SalesPerson
      */
-    public function roundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $newestSalesPerson);
+    public function roundRobinSalesPerson(
+        NewDealerUser $dealer,
+        int $dealerLocationId,
+        string $salesType,
+        ?SalesPerson $newestSalesPerson = null
+    ): ?SalesPerson;
 
     /**
      * Find Sales People By Dealer ID
-     * 
-     * @param type $dealerId
+     *
+     * @param int $dealerId
      * @param null|int $dealerLocationId
      * @param null|string $salesType
+     * @return Collection<SalesPerson>
      */
-    public function getSalesPeopleBy($dealerId, $dealerLocationId = null, $salesType = null);
+    public function getSalesPeopleBy(
+        int $dealerId,
+        ?int $dealerLocationId = null,
+        ?string $salesType = null
+    ): Collection;
 
     /**
      * Find Sales Person Type
@@ -61,6 +76,6 @@ interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
      * @param string $leadType
      * @return string
      */
-    public function findSalesType($leadType);
+    public function findSalesType(string $leadType): string;
 
 }

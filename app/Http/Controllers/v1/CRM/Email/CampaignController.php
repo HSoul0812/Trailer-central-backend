@@ -290,9 +290,8 @@ class CampaignController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Send Emails for Campaign
-            $requestData = $request->all();
             return $this->response->array(
-                $this->emailbuilder->sendCampaign($requestData['id'], $requestData['leads'])
+                $this->emailbuilder->sendCampaign($id, $request->leads)
             );
         }
         

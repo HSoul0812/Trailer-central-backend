@@ -7,6 +7,7 @@ use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Interactions\InteractionEmail;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
@@ -139,6 +140,17 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
 
         // Create Interaction
         return $this->create($params);
+    }
+
+    /**
+     * Create InteractionEmail
+     * 
+     * @param array $params
+     * @return InteractionEmail
+     */
+
+    public function createInteractionEmail($params) {
+        return InteractionEmail::create($params);
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
