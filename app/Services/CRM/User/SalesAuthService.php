@@ -7,8 +7,9 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\AuthServiceInterface;
-use App\Utilities\Fractal\NoDataArraySerializer;
+use App\Traits\SmtpHelper;
 use App\Transformers\CRM\User\SalesPersonTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
@@ -19,6 +20,8 @@ use League\Fractal\Resource\Item;
  */
 class SalesAuthService implements SalesAuthServiceInterface
 {
+    use SmtpHelper;
+
     /**
      * @var SalesPersonRepository
      */
