@@ -2,10 +2,10 @@
 
 namespace App\Services\Inventory;
 
+use App\Exceptions\Inventory\InventoryException;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
-use App\Models\User\DealerLocation;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
@@ -14,8 +14,6 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
-use Brick\Math\RoundingMode;
-use Brick\Money\Money;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -87,12 +85,13 @@ class InventoryService implements InventoryServiceInterface
         $this->fileService = $fileService;
     }
 
-
     /**
      * @param array $params
-     * @return Inventory|null
+     * @return Inventory
+     *
+     * @throws InventoryException
      */
-    public function create(array $params): ?Inventory
+    public function create(array $params): Inventory
     {
         try {
             $this->inventoryRepository->beginTransaction();
@@ -126,7 +125,7 @@ class InventoryService implements InventoryServiceInterface
                 Log::error('Item hasn\'t been created.', ['params' => $params]);
                 $this->inventoryRepository->rollbackTransaction();
 
-                return null;
+                throw new InventoryException('Inventory item create error');
             }
 
             if ($addBill) {
@@ -140,7 +139,7 @@ class InventoryService implements InventoryServiceInterface
             Log::error('Item create error. Params - ' . json_encode($params), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
-            return null;
+            throw new InventoryException('Inventory item create error');
         }
 
         return $inventory;
