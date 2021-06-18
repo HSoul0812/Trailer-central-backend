@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\v1\CRM\User;
 
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
+use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\User\SalesAuthServiceInterface;
 use App\Transformers\CRM\User\SalesPersonTransformer;
