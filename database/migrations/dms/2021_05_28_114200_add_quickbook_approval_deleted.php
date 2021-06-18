@@ -17,7 +17,7 @@ class AddQuickbookApprovalDeleted extends Migration
             Schema::create('quickbook_approval_deleted', function(Blueprint $table)
             {
                 $table->bigIncrements('id');
-                $table->integer('dealer_id');
+                $table->unsignedInteger('dealer_id');
                 $table->enum('tb_name', [
                     'qb_bills','qb_bill_payment','qb_items','qb_vendors','dealer_employee','qb_invoices','dms_customer','qb_payment','crm_pos_sales','dms_unit_sale','dms_unit_sale_payment','qb_accounts','qb_item_category','qb_payment_methods','qb_journal_entry','qb_expenses','qb_items_new','inventory_floor_plan_payment','dealer_refunds'
                 ]);
@@ -37,6 +37,12 @@ class AddQuickbookApprovalDeleted extends Migration
                 $table->dateTime('deleted_at')->nullable();
             });
         }
+
+        Schema::table('quickbook_approval_deleted', function (Blueprint $table) {
+            $table->foreign('removed_by')
+                ->references('dealer_id')
+                ->on('dealer');
+        });
     }
 
     /**

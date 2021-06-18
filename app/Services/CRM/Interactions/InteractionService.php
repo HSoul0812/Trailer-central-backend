@@ -9,6 +9,7 @@ use App\Models\User\User;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
@@ -41,7 +42,8 @@ class InteractionService implements InteractionServiceInterface
         InteractionEmailServiceInterface $service,
         InteractionsRepositoryInterface $interactions,
         EmailHistoryRepositoryInterface $emailHistory,
-        TokenRepositoryInterface $tokens
+        TokenRepositoryInterface $tokens,
+        StatusRepositoryInterface $leadStatus
     ) {
         $this->google = $google;
         $this->gmail = $gmail;
@@ -50,6 +52,7 @@ class InteractionService implements InteractionServiceInterface
         $this->interactions = $interactions;
         $this->emailHistory = $emailHistory;
         $this->tokens = $tokens;
+        $this->leadStatus = $leadStatus;
     }
 
     /**
@@ -59,11 +62,14 @@ class InteractionService implements InteractionServiceInterface
      * @param array $params
      * @param array $attachments
      * @return Interaction || error
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function email($leadId, $params, $attachments = array()) {
         // Get User
         $user = User::find($params['dealer_id']);
+        $lead = Lead::findOrFail($leadId);
         $salesPerson = null;
+        $interactionEmail = null;
         if(isset($params['sales_person_id'])) {
             $salesPerson = SalesPerson::find($params['sales_person_id']);
         }
@@ -101,10 +107,18 @@ class InteractionService implements InteractionServiceInterface
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
             $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
+            $interactionEmail = true;
         }
 
+        // Save Lead Status
+        $this->leadStatus->createOrUpdate([
+            'lead_id' => $lead->identifier,
+            'status' => Lead::STATUS_MEDIUM,
+            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+        ]);
+
         // Save Email
-        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail, $salesPerson);
+        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail, $salesPerson, $interactionEmail);
     }
 
 
@@ -197,9 +211,9 @@ class InteractionService implements InteractionServiceInterface
      * @param null|SalesPerson $salesPerson
      * @return Interaction
      */
-    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null): Interaction {
+    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail): Interaction {
         // Initialize Transaction
-        DB::transaction(function() use (&$parsedEmail, $leadId, $userId, $salesPerson) {
+        DB::transaction(function() use (&$parsedEmail, $leadId, $userId, $salesPerson, $interactionEmail) {
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
@@ -218,7 +232,16 @@ class InteractionService implements InteractionServiceInterface
             $parsedEmail->setDateNow();
 
             // Create or Update Email
-            $this->emailHistory->createOrUpdate($parsedEmail->getParams());
+            $emailHistory = $this->emailHistory->createOrUpdate($parsedEmail->getParams());
+
+            // Create Interaction Email
+            if ($interactionEmail) {
+              $this->interactions->createInteractionEmail([
+                'interaction_id'  => $interaction->interaction_id,
+                'message_id'      => $emailHistory->message_id
+              ]);
+            }
+
         });
 
         // Return Interaction
