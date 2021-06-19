@@ -5,6 +5,7 @@ namespace App\Services\CRM\Email;
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
+use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
