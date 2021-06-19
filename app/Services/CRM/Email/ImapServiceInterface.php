@@ -5,6 +5,7 @@ namespace App\Services\CRM\Email;
 use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Illuminate\Support\Collection;
 
 interface ImapServiceInterface {
     /**
