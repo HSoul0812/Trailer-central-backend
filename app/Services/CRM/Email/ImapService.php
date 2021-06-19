@@ -143,8 +143,6 @@ class ImapService implements ImapServiceInterface
             'security' => $imapConfig->security,
             'charset'  => $imapConfig->charset
         ]);
-        $imap->setTimeouts(ImapConfig::DEFAULT_TIMEOUT);
-        $imap->setConnectionArgs(OP_READONLY, 0, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
 
         // Error Occurred
         if($imap === null) {
@@ -154,6 +152,8 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Get Messages
+            $imap->setTimeouts(ImapConfig::DEFAULT_TIMEOUT);
+            $imap->setConnectionArgs(OP_READONLY, 0, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
             return $this->getMailboxes();
         } catch (ConnectionException $e) {
             throw new ImapMailboxesMissingException($e->getMessage());
