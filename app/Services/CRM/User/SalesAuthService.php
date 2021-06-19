@@ -5,6 +5,7 @@ namespace App\Services\CRM\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\CRM\Email\ImapServiceInterface;
