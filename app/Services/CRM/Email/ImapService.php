@@ -61,7 +61,7 @@ class ImapService implements ImapServiceInterface
         // Get Mailboxes
         try {
             $mailboxes = $this->mailboxes($imapConfig);
-            return ConfigValidate([
+            return new ConfigValidate([
                 'type' => SalesPerson::TYPE_IMAP,
                 'success' => true,
                 'folders' => $mailboxes
@@ -75,14 +75,14 @@ class ImapService implements ImapServiceInterface
             $this->messages($imapConfig);
 
             // Return ConfigValidate
-            return ConfigValidate([
+            return new ConfigValidate([
                 'type' => SalesPerson::TYPE_IMAP,
                 'success' => true
             ]);
         } catch (\Exception $e) {}
 
         // Return ConfigValidate
-        return ConfigValidate([
+        return new ConfigValidate([
             'type' => SalesPerson::TYPE_IMAP,
             'success' => true
         ]);

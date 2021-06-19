@@ -27,7 +27,7 @@ trait SmtpHelper
         }
 
         // Return Validate SMTP as False
-        return ConfigValidate([
+        return new ConfigValidate([
             'type' => SalesPerson::TYPE_SMTP,
             'success' => $success
         ]);
@@ -54,7 +54,7 @@ trait SmtpHelper
         }
 
         // Return Validate SMTP as False
-        return ConfigValidate([
+        return new ConfigValidate([
             'type' => SalesPerson::TYPE_SMTP,
             'success' => $success
         ]);

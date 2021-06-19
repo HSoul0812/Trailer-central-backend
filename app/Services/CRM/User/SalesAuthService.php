@@ -159,7 +159,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         }
 
         // Return Response
-        return ConfigValidate([
+        return new ConfigValidate([
             'type' => $params['type'],
             'success' => false
         ]);
