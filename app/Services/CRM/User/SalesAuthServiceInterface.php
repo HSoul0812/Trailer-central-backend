@@ -2,6 +2,8 @@
 
 namespace App\Services\CRM\User;
 
+use App\Services\CRM\Email\DTOs\ConfigValidate;
+
 interface SalesAuthServiceInterface {
     /**
      * Show Sales Auth Response
