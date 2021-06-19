@@ -4,6 +4,8 @@ namespace App\Services\CRM\Email\DTOs;
 
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 
 
 /**
@@ -13,6 +15,8 @@ use App\Models\CRM\User\EmailFolder;
  */
 class ImapConfig
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @const string SSL
      */

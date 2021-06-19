@@ -5,6 +5,7 @@ namespace App\Services\CRM\Email;
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
@@ -54,19 +55,37 @@ class ImapService implements ImapServiceInterface
      * Validate Imap
      *
      * @param ImapConfig $imapConfig
-     * @return bool
+     * @return ConfigValidate
      */
-    public function validate(ImapConfig $imapConfig): bool {
+    public function validate(ImapConfig $imapConfig): ConfigValidate {
         // Get Mailboxes
         try {
-            $this->mailboxes($imapConfig);
-            return true;
+            $mailboxes = $this->mailboxes($imapConfig);
+            return ConfigValidate([
+                'type' => SalesPerson::TYPE_IMAP,
+                'success' => true,
+                'folders' => $mailboxes
+            ]);
         } catch (\Exception $e) {}
 
-        // No Mailboxes Returned?
-        $imapConfig->setFolderName(ImapConfig::FOLDER_INBOX);
-        $this->messages($imapConfig);
-        return true;
+        // Verify We Can Get Messages Without Errors Instead
+        try {
+            // No Mailboxes Returned?
+            $imapConfig->setFolderName(ImapConfig::FOLDER_INBOX);
+            $this->messages($imapConfig);
+
+            // Return ConfigValidate
+            return ConfigValidate([
+                'type' => SalesPerson::TYPE_IMAP,
+                'success' => true
+            ]);
+        } catch (\Exception $e) {}
+
+        // Return ConfigValidate
+        return ConfigValidate([
+            'type' => SalesPerson::TYPE_IMAP,
+            'success' => true
+        ]);
     }
 
     /**
@@ -114,15 +133,15 @@ class ImapService implements ImapServiceInterface
      * @throws App\Exceptions\CRM\Email\ImapFolderUnknownErrorException
      * @return Collection<ImapMailbox>
      */
-    public function mailboxes(ImapConfig $imapConfig): ImapMailbox {
+    public function mailboxes(ImapConfig $imapConfig): Collection {
         // Get IMAP
         $imap = $this->connectIMAP('', [
-            'email'    => $imapConfig->getUsername(),
-            'password' => $imapConfig->getPassword(),
-            'host'     => $imapConfig->getHost(),
-            'port'     => $imapConfig->getPort(),
-            'security' => $imapConfig->getSecurity(),
-            'charset'  => $imapConfig->getCharset()
+            'email'    => $imapConfig->username,
+            'password' => $imapConfig->password,
+            'host'     => $imapConfig->host,
+            'port'     => $imapConfig->port,
+            'security' => $imapConfig->security,
+            'charset'  => $imapConfig->charset
         ]);
         $imap->setTimeouts(ImapConfig::DEFAULT_TIMEOUT);
         $imap->setConnectionArgs(OP_READONLY, 0, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));

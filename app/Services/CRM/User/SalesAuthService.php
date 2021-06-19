@@ -134,9 +134,9 @@ class SalesAuthService implements SalesAuthServiceInterface
      *                       security: string (ssl|tls)
      *                       host: string
      *                       port: int}
-     * @return bool
+     * @return ConfigValidate
      */
-    public function validate(array $params): bool {
+    public function validate(array $params): ConfigValidate {
         // Initialize Config Params
         $config = [
             'username' => $params['username'],
@@ -158,7 +158,10 @@ class SalesAuthService implements SalesAuthServiceInterface
         }
 
         // Return Response
-        return false;
+        return ConfigValidate([
+            'type' => $params['type'],
+            'success' => false
+        ]);
     }
 
 

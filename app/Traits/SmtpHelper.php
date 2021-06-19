@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use Illuminate\Support\Facades\Log;
 
@@ -12,39 +13,51 @@ trait SmtpHelper
      * Validate SMTP From SmtpConfig
      * 
      * @param null|SmtpConfig $smtpConfig
-     * @return bool
+     * @return ConfigValidate
      */
-    public function validateSmtp(?SmtpConfig $smtpConfig): bool
+    public function validateSmtp(?SmtpConfig $smtpConfig): ConfigValidate
     {
+        // Initialize as False
+        $success = false;
+
         // SMTP Config Exists?
         if (!empty($smtpConfig) && $smtpConfig->host) {
             // Validate Smtp Via Swift Mailer
-            return $this->validateSwiftSmtp($smtpConfig);
+            $success = $this->validateSwiftSmtp($smtpConfig);
         }
 
         // Return Validate SMTP as False
-        return false;
+        return ConfigValidate([
+            'type' => SalesPerson::TYPE_SMTP,
+            'success' => $success
+        ]);
     }
 
     /**
      * Validate SMTP From SalesPerson
      * 
      * @param SalesPerson $salesPerson
-     * @return bool
+     * @return ConfigValidate
      */
-    public function validateSalesPersonSmtp(SalesPerson $salesPerson): bool
+    public function validateSalesPersonSmtp(SalesPerson $salesPerson): ConfigValidate
     {
+        // Initialize as False
+        $success = false;
+
         // Sales Person SMTP Service Exists?
         if (!empty($salesPerson->smtp_server)) {
             // Get Smtp Config From Sales Person
             $config = SmtpConfig::fillFromSalesPerson($salesPerson);
 
             // Validate Smtp Via Swift Mailer
-            return $this->validateSwiftSmtp($config);
+            $success = $this->validateSwiftSmtp($config);
         }
 
         // Return Validate SMTP as False
-        return false;
+        return ConfigValidate([
+            'type' => SalesPerson::TYPE_SMTP,
+            'success' => $success
+        ]);
     }
 
 
