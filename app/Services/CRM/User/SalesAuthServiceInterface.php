@@ -46,7 +46,7 @@ interface SalesAuthServiceInterface {
      *                       security: string (ssl|tls)
      *                       host: string
      *                       port: int}
-     * @return bool
+     * @return ConfigValidate
      */
-    public function validate(array $params): bool;
+    public function validate(array $params): ConfigValidate;
 }
