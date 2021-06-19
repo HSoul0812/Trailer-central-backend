@@ -18,6 +18,7 @@ use App\Models\User\DealerLocation;
 /**
  * Class ServiceOrder
  * @package App\Models\CRM\Dms
+ * @property boolean $closed_by_related_unit_sale
  * @property Collection<PartItem> $partItems
  * @property Collection<MiscPartItem> $miscPartItems
  * @property Collection<ServiceItem> $serviceItems
