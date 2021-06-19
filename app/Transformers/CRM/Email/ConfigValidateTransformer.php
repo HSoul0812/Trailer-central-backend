@@ -33,9 +33,6 @@ class ConfigValidateTransformer extends TransformerAbstract
      */
     public function includeFolders(ConfigValidate $validate)
     {
-        if($validate->folders) {
-            return $this->collection($validate->folders, new ImapMailboxTransformer());
-        }
-        return [];
+        return $this->collection($validate->folders, new ImapMailboxTransformer());
     }
 }
