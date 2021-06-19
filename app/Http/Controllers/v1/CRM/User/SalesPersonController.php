@@ -7,6 +7,7 @@ use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
 use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\User\SalesAuthServiceInterface;
+use App\Transformers\CRM\Email\ConfigValidateTransformer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -43,6 +44,7 @@ class SalesPersonController extends RestfulController {
         SalesPersonRepositoryInterface $salesPersonRepo,
         SalesAuthServiceInterface $salesAuthService,
         SalesPersonTransformer $salesPersonTransformer,
+        ConfigValidateTransformer $emailConfigTransformer,
         Manager $fractal
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'salesReport']);
@@ -50,6 +52,7 @@ class SalesPersonController extends RestfulController {
         $this->salesPerson = $salesPersonRepo;
         $this->salesAuth = $salesAuthService;
         $this->salesPersonTransformer = $salesPersonTransformer;
+        $this->emailConfigTransformer = $emailConfigTransformer;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -94,9 +97,7 @@ class SalesPersonController extends RestfulController {
         $request = new ValidateSalesPeopleRequest($request->all());
         if ($request->validate()) {
             // Return Validation
-            return $this->response->array([
-                'data' => $this->salesAuth->validate($request->all())
-            ]);
+            return $this->response->collection($this->salesAuth->validate($request->all()), $this->emailConfigTransformer);
         }
         
         return $this->response->errorBadRequest();
