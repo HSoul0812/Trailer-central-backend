@@ -2,6 +2,9 @@
 
 namespace App\Services\CRM\Email\DTOs;
 
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
+
 /**
  * Class ConfigConfig
  * 
@@ -9,6 +12,8 @@ namespace App\Services\CRM\Email\DTOs;
  */
 class ConfigValidate
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @var string Type of Config: smtp|imap
      */
