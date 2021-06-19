@@ -11,7 +11,7 @@ use App\Models\CRM\User\EmailFolder;
  * 
  * @package App\Services\CRM\Email\DTOs
  */
-class ImapConfig
+class ImapMailbox
 {
     /**
      * @const string SSL
@@ -23,7 +23,6 @@ class ImapConfig
      */
     const TLS = 'tls';
 
-
     /**
      * @const default charset
      */
@@ -34,7 +33,6 @@ class ImapConfig
      */
     const CHARSET_NTLM = 'US-ASCII';
 
-
     /**
      * @const No Certificate Suffix
      */
@@ -44,17 +42,6 @@ class ImapConfig
      * @const No Valid Certificates
      */
     const NO_CERT_HOSTS = ['imap.gmail.com'];
-
-    /**
-     * @const No SSL By Default on These Ports
-     */
-    const NO_SSL_HOSTS = [143];
-
-
-    /**
-     * @const Folder Inbox
-     */
-    const FOLDER_INBOX = 'INBOX';
 
 
     /**
@@ -238,9 +225,6 @@ class ImapConfig
      */
     public function getSecurity(): string
     {
-        // 
-        if($this->is)
-
         // Set Security Default
         $security = $this->security ?: self::SSL;
 
@@ -375,15 +359,5 @@ class ImapConfig
     public function isNoCert(): bool {
         // Validate if Host is No Certificate
         return (!empty($this->host) && in_array($this->host, self::NO_CERT_HOSTS));
-    }
-
-    /**
-     * Current IMAP Config Doesn't Append Any Security Settings?
-     * 
-     * @return bool
-     */
-    public function isNoSecurity(): bool {
-        // Validate if Port is No Security
-        return (!empty($this->port) && in_array($this->port, self::NO_SSL_PORTS));
     }
 }

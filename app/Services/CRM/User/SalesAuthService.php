@@ -6,6 +6,7 @@ use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Traits\SmtpHelper;
 use App\Transformers\CRM\User\SalesPersonTransformer;
@@ -38,6 +39,11 @@ class SalesAuthService implements SalesAuthServiceInterface
     protected $auth;
 
     /**
+     * @var ImapServiceInterface
+     */
+    protected $imap;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -49,11 +55,13 @@ class SalesAuthService implements SalesAuthServiceInterface
         SalesPersonRepositoryInterface $salesPersonRepo,
         TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
+        ImapServiceInterface $imap,
         Manager $fractal
     ) {
         $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
         $this->auth = $auth;
+        $this->imap = $imap;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -128,19 +136,24 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return bool
      */
     public function validate(array $params): bool {
+        // Initialize Config Params
+        $config = [
+            'username' => $params['username'],
+            'password' => $params['password'],
+            'security' => $params['security'],
+            'host' => $params['host'],
+            'port' => $params['port']
+        ];
+
         // Get Smtp Config Details
         if($params['type'] === SalesPerson::TYPE_SMTP) {
-            // Get SMTP Details
-            $config = new SmtpConfig([
-                'username' => $params['username'],
-                'password' => $params['password'],
-                'security' => $params['security'],
-                'host' => $params['host'],
-                'port' => $params['port']
-            ]);
-
             // Validate SMTP Config
-            return $this->validateSmtp($config);
+            return $this->validateSmtp(new SmtpConfig($config));
+        }
+        // Get Imap Config Details
+        elseif($params['type'] === SalesPerson::TYPE_IMAP) {
+            // Validate IMAP Config
+            return $this->imap->validate(new ImapConfig($config));
         }
 
         // Return Response

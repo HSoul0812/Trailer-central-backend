@@ -8,6 +8,7 @@ use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use PhpImap\Mailbox;
 use PhpImap\Exceptions\ConnectionException;
@@ -50,6 +51,25 @@ class ImapService implements ImapServiceInterface
     }
 
     /**
+     * Validate Imap
+     *
+     * @param ImapConfig $imapConfig
+     * @return bool
+     */
+    public function validate(ImapConfig $imapConfig): bool {
+        // Get Mailboxes
+        try {
+            $this->mailboxes($imapConfig);
+            return true;
+        } catch (\Exception $e) {}
+
+        // No Mailboxes Returned?
+        $imapConfig->setFolderName(ImapConfig::FOLDER_INBOX);
+        $this->messages($imapConfig);
+        return true;
+    }
+
+    /**
      * Import Email Replies
      *
      * @param ImapConfig $imapConfig
@@ -82,6 +102,44 @@ class ImapService implements ImapServiceInterface
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
             throw new ImapFolderUnknownErrorException($e->getMessage());
+        }
+    }
+
+    /**
+     * Import Mailboxes
+     *
+     * @param ImapConfig $imapConfig
+     * @throws App\Exceptions\CRM\Email\ImapConnectionFailedException
+     * @throws App\Exceptions\CRM\Email\ImapFolderConnectionFailedException
+     * @throws App\Exceptions\CRM\Email\ImapFolderUnknownErrorException
+     * @return Collection<ImapMailbox>
+     */
+    public function mailboxes(ImapConfig $imapConfig): ImapMailbox {
+        // Get IMAP
+        $imap = $this->connectIMAP('', [
+            'email'    => $imapConfig->getUsername(),
+            'password' => $imapConfig->getPassword(),
+            'host'     => $imapConfig->getHost(),
+            'port'     => $imapConfig->getPort(),
+            'security' => $imapConfig->getSecurity(),
+            'charset'  => $imapConfig->getCharset()
+        ]);
+        $imap->setTimeouts(ImapConfig::DEFAULT_TIMEOUT);
+        $imap->setConnectionArgs(OP_READONLY, 0, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
+
+        // Error Occurred
+        if($imap === null) {
+            throw new ImapConnectionFailedException;
+        }
+
+        // Return Mailbox
+        try {
+            // Get Messages
+            return $this->getMailboxes();
+        } catch (ConnectionException $e) {
+            throw new ImapMailboxesMissingException($e->getMessage());
+        } catch (\Exception $e) {
+            throw new ImapMailboxesErrorException($e->getMessage());
         }
     }
 
@@ -186,7 +244,7 @@ class ImapService implements ImapServiceInterface
      */
     private function connectIMAP($folder, $config) {
         // Get SMTP Config
-        $ssl = '/imap/' . $config['security'];
+        $ssl = '/imap' . (!empty($config['security']) ? '/' . $config['security'] : '');
         $hostname = '{' . $config['host'] . ':' . $config['port'] . $ssl . '}' . $folder;
         $username = $config['email'];
         $password = $config['password'];
@@ -248,6 +306,29 @@ class ImapService implements ImapServiceInterface
 
         // No Mail ID's Found? Return Empty Array!
         return [];
+    }
+
+    /**
+     * Get Mailboxes From IMAP Config
+     * 
+     * @return Collection<ImapMailbox>
+     */
+    private function getMailboxes(): Collection {
+        // Get Mailboxes
+        $folders = $this->imap->getMailboxes();
+
+        // Create Imap Mailboxes
+        $mailboxes = new Collection();
+        foreach($folders as $folder) {
+            var_dump($folder);
+            die;
+            $mailboxes->push(new ImapMailbox([
+                
+            ]));
+        }
+
+        // Return Mailboxes
+        return $mailboxes;
     }
 
     /**
