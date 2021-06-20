@@ -344,6 +344,8 @@ class ImapService implements ImapServiceInterface
     private function getMailboxes(): Collection {
         // Get Mailboxes
         $folders = $this->imap->getMailboxes();
+        var_dump($folders);
+        die;
 
         // Create Imap Mailboxes
         $mailboxes = new Collection();
