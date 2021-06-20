@@ -52,7 +52,7 @@ class ImapConfig
     /**
      * @const No SSL By Default on These Ports
      */
-    const NO_SSL_HOSTS = [143];
+    const NO_SSL_PORTS = [143];
 
 
     /**
