@@ -142,7 +142,7 @@ class ImapService implements ImapServiceInterface
             'host'     => $imapConfig->host,
             'port'     => $imapConfig->port,
             'security' => $imapConfig->security,
-            'charset'  => $imapConfig->charset
+            'charset'  => $imapConfig->calcCharset()
         ]);
 
         // Error Occurred
@@ -283,8 +283,14 @@ class ImapService implements ImapServiceInterface
             $this->log->error('Cannot connect to ' . $username . ' via IMAP, exception returned: ' . $error);
 
             // Check for Chartype Error
-            if(strpos($error, "BADCHARSET") !== FALSE) {
+            if(strpos($error, "BADCHARSET") !== FALSE || strpos($error, "is not supported by setServerEncoding()") !== FALSE) {
                 $this->log->error('Detected bad CHARSET, cannot import emails on ' . $username);
+                try {
+                    $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir);
+                } catch (\Exception $e) {
+                    $this->imap = null;
+                    $this->log->error('Failed retrying to get Mailbox with different charset, error returned: ' . $e->getMessage());
+                }
             }
         }
 

@@ -326,6 +326,20 @@ class ImapConfig
         }
     }
 
+    /**
+     * Toggle Charset From One to the Other
+     * 
+     * @return void
+     */
+    public function toggleCharset(): void
+    {
+        if($this->charset === self::CHARSET_NTLM) {
+            $this->setCharset(self::CHARSET_DEFAULT);
+        } else {
+            $this->setCharset(self::CHARSET_NTLM);
+        }
+    }
+
 
     /**
      * Return Folder Name
