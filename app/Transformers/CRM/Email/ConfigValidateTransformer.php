@@ -18,7 +18,7 @@ class ConfigValidateTransformer extends TransformerAbstract
         return [
             'type' => $validate->type,
             'success' => $validate->success,
-            'folders' => $validate->folders ? $this->collection($validate->folders, new ImapMailboxTransformer()) : null
+            'folders' => $validate->folders ? $this->array($validate->folders, new ImapMailboxTransformer()) : null
         ];
     }
 }
