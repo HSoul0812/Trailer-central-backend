@@ -352,6 +352,8 @@ class ImapService implements ImapServiceInterface
         // Create Imap Mailboxes
         $mailboxes = new Collection();
         foreach($folders as $folder) {
+            var_dump($folder);
+            die;
             $mailboxes->push(new ImapMailbox([
                 
             ]));
