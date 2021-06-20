@@ -69,7 +69,9 @@ class ImapService implements ImapServiceInterface
                 'success' => true,
                 'folders' => $mailboxes
             ]);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            $this->log->error($e->getMessage());
+        }
 
         // Verify We Can Get Messages Without Errors Instead
         try {
@@ -82,7 +84,9 @@ class ImapService implements ImapServiceInterface
                 'type' => SalesPerson::TYPE_IMAP,
                 'success' => true
             ]);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            $this->log->error($e->getMessage());
+        }
 
         // Return ConfigValidate
         return new ConfigValidate([
