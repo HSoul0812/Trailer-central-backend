@@ -353,6 +353,7 @@ class ImapService implements ImapServiceInterface
         // Create Imap Mailboxes
         $mailboxes = new Collection();
         foreach($folders as $folder) {
+            var_dump($folder);
             $mailboxes->push(new ImapMailbox([
                 'full' => $folder->fullpath,
                 'attributes' => $folder->attributes,
