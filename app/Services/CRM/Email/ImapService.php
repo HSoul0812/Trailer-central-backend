@@ -147,7 +147,7 @@ class ImapService implements ImapServiceInterface
             'password' => $imapConfig->password,
             'host'     => $imapConfig->host,
             'port'     => $imapConfig->port,
-            'security' => $imapConfig->security,
+            'security' => $imapConfig->getSecurity(),
             'charset'  => $imapConfig->charset
         ]);
 
