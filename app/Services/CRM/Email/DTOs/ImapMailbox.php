@@ -2,6 +2,8 @@
 
 namespace App\Services\CRM\Email\DTOs;
 
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 
 /**
  * Class ImapMailbox
@@ -10,6 +12,8 @@ namespace App\Services\CRM\Email\DTOs;
  */
 class ImapMailbox
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @var string Full Path to Folder
      */
