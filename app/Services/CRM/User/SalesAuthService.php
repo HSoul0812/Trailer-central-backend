@@ -70,7 +70,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         $this->tokens = $tokens;
         $this->auth = $auth;
         $this->imap = $imap;
-        $this->salesTransformer = $salesTransformer
+        $this->salesTransformer = $salesTransformer;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -187,7 +187,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         $salesPerson = $this->salesPerson->get([
             'sales_person_id' => $params['relation_id']
         ]);
-        $item = new Item($salesPerson, $this->salesPersonTransformer, 'sales_person');
+        $item = new Item($salesPerson, $this->salesTransformer, 'sales_person');
         $this->fractal->parseIncludes('smtp,imap,folders');
         $response = $this->fractal->createData($item)->toArray();
 
