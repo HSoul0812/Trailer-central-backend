@@ -242,8 +242,10 @@ class ImapConfig
      */
     public function getSecurity(): string
     {
-        // 
-        if($this->is)
+        // If No Security, Return Empty
+        if($this->isNoSecurity()) {
+            return '';
+        }
 
         // Set Security Default
         $security = $this->security ?: self::SSL;
