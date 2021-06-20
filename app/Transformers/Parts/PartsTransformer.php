@@ -30,6 +30,7 @@ class PartsTransformer extends TransformerAbstract
              'alternative_part_number' => $part->alternative_part_number,
              'price' => (double)number_format((double)$part->modified_cost, 2, '.', ''),
              'dealer_cost' => (double)$part->dealer_cost,
+             'latest_cost' => (double)$part->latest_cost,
              'msrp' => (double)$part->msrp,
              'shipping_fee' => (double) $part->shipping_fee,
              'use_handling_fee' => (bool) $part->use_handling_fee,
