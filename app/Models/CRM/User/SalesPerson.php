@@ -218,7 +218,8 @@ class SalesPerson extends Model implements Filterable
      * @return bool
      */
     public function getSmtpValidateAttribute(): bool {
-        return $this->validateSalesPersonSmtp($this);
+        $validate = $this->validateSalesPersonSmtp($this);
+        return $validate->success;
     }
 
     /**
