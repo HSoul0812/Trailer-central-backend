@@ -2,14 +2,19 @@
 
 namespace App\Transformers\CRM\User;
 
+use App\Models\CRM\User\SalesPerson;
+use App\Services\CRM\Email\ImapServiceInterface;
 use App\Transformers\Dms\GenericSaleTransformer;
 use App\Transformers\Pos\SaleTransformer;
 use League\Fractal\TransformerAbstract;
-use App\Models\CRM\User\SalesPerson;
-use App\Models\CRM\User\EmailFolder;
 
 class SalesPersonTransformer extends TransformerAbstract
 {
+    /**
+     * @var ImapServiceInterface
+     */
+    private $imapService;
+
     protected $defaultIncludes = [];
 
     protected $availableIncludes = [
@@ -19,6 +24,16 @@ class SalesPersonTransformer extends TransformerAbstract
         'imap',
         'folders'
     ];
+
+    /**
+     * SalesPersonTransformer constructor.
+     * @param ImapServiceInterface $imapService
+     */
+    public function __construct(
+        ImapServiceInterface $imapService
+    ) {
+        $this->imapService = $imapService;
+    }
 
     public function transform(SalesPerson $salesPerson)
     {
@@ -58,13 +73,17 @@ class SalesPersonTransformer extends TransformerAbstract
     public function includeImap(SalesPerson $salesPerson)
     {
         return $this->item($salesPerson, function($salesPerson) {
+            // Get Validate
+            $validate = $this->imapService->validate($salesPerson->imap_config);
+
+            // Return Results
             return [
                 'email' => !empty($salesPerson->imap_email) ? $salesPerson->imap_email : $salesPerson->email,
                 'password' => $salesPerson->imap_password,
                 'host' => $salesPerson->imap_server,
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
-                'failed' => $salesPerson->imap_validate
+                'failed' => !$validate->success
             ];
         });
     }
