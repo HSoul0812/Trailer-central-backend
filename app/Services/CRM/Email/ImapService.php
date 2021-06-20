@@ -344,13 +344,13 @@ class ImapService implements ImapServiceInterface
     private function getMailboxes(): Collection {
         // Get Mailboxes
         $folders = $this->imap->getMailboxes();
-        var_dump($folders);
+        dd($folders);
         die;
 
         // Create Imap Mailboxes
         $mailboxes = new Collection();
         foreach($folders as $folder) {
-            var_dump($folder);
+            dd($folder);
             die;
             $mailboxes->push(new ImapMailbox([
                 
