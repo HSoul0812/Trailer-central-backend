@@ -16,7 +16,7 @@ class ImapMailbox
     private $full;
 
     /**
-     * @var string Folder Attributes
+     * @var int Folder Attributes
      */
     private $attributes;
 

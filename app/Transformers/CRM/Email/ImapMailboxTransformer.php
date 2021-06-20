@@ -15,6 +15,11 @@ class ImapMailboxTransformer extends TransformerAbstract
      */
     public function transform(ImapMailbox $mailbox)
     {
-        return [];
+        return [
+            'full' => $mailbox->full,
+            'attributes' => (int) $mailbox->attributes,
+            'delimiter' => $mailbox->delimiter,
+            'name' => $mailbox->name
+        ];
     }
 }
