@@ -362,6 +362,7 @@ class ImapService implements ImapServiceInterface
         }
 
         // Return Mailboxes
+        $this->log->info("Found " . $mailboxes->count() . " mailboxes from IMAP");
         return $mailboxes;
     }
 
