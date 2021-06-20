@@ -372,7 +372,7 @@ class ImapConfig
      */
     public function getStartDate(): string
     {
-        return $this->startDate;
+        return $this->startDate ?? 'days';
     }
 
     /**
