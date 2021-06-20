@@ -10,6 +10,7 @@ use App\Exceptions\CRM\Email\ImapMailboxesErrorException;
 use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\ImapConfig;
+use App\Services\CRM\Email\DTOs\ImapMailbox;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use Illuminate\Support\Collection;
@@ -352,10 +353,11 @@ class ImapService implements ImapServiceInterface
         // Create Imap Mailboxes
         $mailboxes = new Collection();
         foreach($folders as $folder) {
-            var_dump($folder);
-            die;
             $mailboxes->push(new ImapMailbox([
-                
+                'full' => $folder->fullpath,
+                'attributes' => $folder->attributes,
+                'delimiter' => $folder->delimiter,
+                'name' => $folder->shortpath
             ]));
         }
 
