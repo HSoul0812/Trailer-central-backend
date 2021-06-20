@@ -30,7 +30,7 @@ class SalesPersonTransformer extends TransformerAbstract
      * @param ImapServiceInterface $imapService
      */
     public function __construct(
-        ImapServiceInterface $imapService
+        ?ImapServiceInterface $imapService = null
     ) {
         $this->imapService = $imapService;
     }
@@ -74,7 +74,11 @@ class SalesPersonTransformer extends TransformerAbstract
     {
         return $this->item($salesPerson, function($salesPerson) {
             // Get Validate
-            $validate = $this->imapService->validate($salesPerson->imap_config);
+            $success = !$salesPerson->imap_failed;
+            if(!empty($this->imapService)) {
+                $validate = $this->imapService->validate($salesPerson->imap_config);
+                $success = $validate->success;
+            }
 
             // Return Results
             return [
@@ -83,7 +87,7 @@ class SalesPersonTransformer extends TransformerAbstract
                 'host' => $salesPerson->imap_server,
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
-                'failed' => !$validate->success
+                'failed' => !$success
             ];
         });
     }
