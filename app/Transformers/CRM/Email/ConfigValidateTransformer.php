@@ -7,6 +7,10 @@ use League\Fractal\TransformerAbstract;
 
 class ConfigValidateTransformer extends TransformerAbstract
 {
+    protected $defaultIncludes = [
+        'folders'
+    ];
+
     /**
      * Transform ConfigValidate
      * 
@@ -17,8 +21,18 @@ class ConfigValidateTransformer extends TransformerAbstract
     {
         return [
             'type' => $validate->type,
-            'success' => $validate->success,
-            'folders' => $validate->folders ? $this->array($validate->folders, new ImapMailboxTransformer()) : null
+            'success' => $validate->success
         ];
+    }
+
+    /**
+     * Transform ImapMailbox Folders
+     * @return array
+     */
+    public function includeFolders(ConfigValidate $validate) {
+        if($validate->folders) {
+            return $this->collection($validate->folders, new ImapMailboxTransformer());
+        }
+        return $this->null();
     }
 }
