@@ -74,6 +74,10 @@ class SalesPersonTransformer extends TransformerAbstract
     {
         return $this->item($salesPerson, function($salesPerson) {
             // Get Validate
+            // TO DO: Replace every instance of new SalesPersonTransformer()
+            //        with construct loaded version of the transformer
+            //        This is out of scope of this task for now, so we're only
+            //        forcing it in SalesAuthService for now
             $success = !$salesPerson->imap_failed;
             if(!empty($this->imapService)) {
                 $validate = $this->imapService->validate($salesPerson->imap_config);
