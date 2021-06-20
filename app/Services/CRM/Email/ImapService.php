@@ -144,7 +144,7 @@ class ImapService implements ImapServiceInterface
             'host'     => $imapConfig->host,
             'port'     => $imapConfig->port,
             'security' => $imapConfig->security,
-            'charset'  => $imapConfig->calcCharset()
+            'charset'  => $imapConfig->charset
         ]);
 
         // Error Occurred

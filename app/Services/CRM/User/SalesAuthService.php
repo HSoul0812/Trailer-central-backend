@@ -155,7 +155,9 @@ class SalesAuthService implements SalesAuthServiceInterface
         // Get Imap Config Details
         elseif($params['type'] === SalesPerson::TYPE_IMAP) {
             // Validate IMAP Config
-            return $this->imap->validate(new ImapConfig($config));
+            $imapConfig = new ImapConfig($config);
+            $imapConfig->calcCharset();
+            return $this->imap->validate($imapConfig);
         }
 
         // Return Response
