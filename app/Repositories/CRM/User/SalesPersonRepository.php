@@ -269,8 +269,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                        i.doc_num                                                             AS doc_num,
                        i.total                                                               AS total,
                        CASE
-                           WHEN i.unit_sale_id IS NOT NULL AND i.repair_order_id IS NULL THEN 'unit_sale_completed'
-                           WHEN i.repair_order_id IS NOT NULL THEN 'repair_order'
+                           WHEN i.unit_sale_id IS NOT NULL THEN 'unit_sale_completed'
                            ELSE 'pos' /* @todo must have a clear marker in invoice that it is a pos sale */
                            END                                                               AS sale_type,
                        i.invoice_date                                                           sale_date,
