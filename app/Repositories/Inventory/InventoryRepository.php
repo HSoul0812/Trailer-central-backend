@@ -102,10 +102,10 @@ class InventoryRepository implements InventoryRepositoryInterface
     ];
 
     /**
-     * @param $params
+     * @param array $params
      * @return Inventory
      */
-    public function create($params)
+    public function create($params): Inventory
     {
         $attributes = $params['attributes'] ?? [];
         $features = $params['features'] ?? [];
@@ -185,10 +185,12 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
-     * @param $params
+     * @param array $params
+     * @param array $options
+     *
      * @return Inventory
      */
-    public function update($params)
+    public function update($params, array $options = []): Inventory
     {
         $item = Inventory::findOrFail($params['inventory_id']);
 
