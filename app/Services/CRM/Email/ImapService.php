@@ -285,7 +285,7 @@ class ImapService implements ImapServiceInterface
             $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
             $this->imap->setTimeouts(ImapConfig::DEFAULT_TIMEOUT);
             $this->imap->setConnectionArgs(OP_READONLY, 0, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
-            $this->log->info('Connected to IMAP for email address: ' . $username);
+            $this->log->info('Initialized IMAP Mailbox with the following config: ' . print_r($config, true));
         } catch (\Exception $e) {
             // Logged Exceptions
             $this->imap = null;
