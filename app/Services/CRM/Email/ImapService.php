@@ -285,6 +285,7 @@ class ImapService implements ImapServiceInterface
             $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
             $this->imap->setTimeouts(ImapConfig::DEFAULT_TIMEOUT);
             $this->imap->setConnectionArgs(OP_READONLY, 0, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
+            ini_set('default_socket_timeout', ImapConfig::DEFAULT_TIMEOUT);
             $this->log->info('Initialized IMAP Mailbox with the following config: ' . print_r($config, true));
         } catch (\Exception $e) {
             // Logged Exceptions
@@ -335,6 +336,7 @@ class ImapService implements ImapServiceInterface
         // Imap Inbox ALREADY Exists?
         $this->log->info('Getting Messages From IMAP With Filter: "' . $search . '"');
         $mailIds = $this->imap->searchMailbox($search);
+        ini_restore('default_socket_timeout');
         if(count($mailIds) > 0) {
             $this->log->info('Found ' . count($mailIds) . ' Message ID\'s to Process');
             return $mailIds;
@@ -352,6 +354,7 @@ class ImapService implements ImapServiceInterface
     private function getMailboxes(): Collection {
         // Get Mailboxes
         $folders = $this->imap->getMailboxes();
+        ini_restore('default_socket_timeout');
 
         // Create Imap Mailboxes
         $mailboxes = new Collection();
