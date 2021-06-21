@@ -160,8 +160,6 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Get Messages
-            $imap->setTimeouts(ImapConfig::DEFAULT_TIMEOUT);
-            $imap->setConnectionArgs(OP_READONLY, 0, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
             return $this->getMailboxes();
         } catch (ConnectionException $e) {
             throw new ImapMailboxesMissingException($e->getMessage());
@@ -218,7 +216,10 @@ class ImapService implements ImapServiceInterface
         }
 
         // Set Date
-        $parsed->setDate($overview->date);
+        $parsed->setDateNow();
+        if(!empty($overview->date)) {
+            $parsed->setDate($overview->date);
+        }
 
         // Return Parsed Array
         return $parsed;
@@ -282,6 +283,8 @@ class ImapService implements ImapServiceInterface
             // Imap Inbox ALREADY Exists?
             $this->log->info("Connecting to IMAP host: " . $hostname . " with email: " . $username);
             $this->imap = new Mailbox($hostname, $username, $password, $this->attachmentDir, $charset);
+            $this->imap->setTimeouts(ImapConfig::DEFAULT_TIMEOUT);
+            $this->imap->setConnectionArgs(OP_READONLY, 0, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
             $this->log->info('Connected to IMAP for email address: ' . $username);
         } catch (\Exception $e) {
             // Logged Exceptions
