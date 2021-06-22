@@ -5,6 +5,7 @@ namespace App\Models\Parts;
 
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\CRM\Dms\Quickbooks\Expense;
 
 /**
@@ -29,12 +30,15 @@ class CostHistory extends Model implements Filterable
         'expense_id'
     ];
 
-    public function part()
+    /**
+     * @return HasOne
+     */
+    public function part(): HasOne
     {
         return $this->hasOne(Part::class, 'id', 'part_id');
     }
 
-    public function expense()
+    public function expense(): HasOne
     {
         return $this->hasOne(Expense::class, 'id', 'expense_id');
     }

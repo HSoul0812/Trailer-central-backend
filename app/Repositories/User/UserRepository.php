@@ -172,6 +172,9 @@ class UserRepository implements UserRepositoryInterface {
         return $dealer;
     }
 
+    /**
+     * Use sha1 encryption algorithm to compare admin password
+     */
     public function checkAdminPassword(int $dealerId, string $password): bool
     {
         $dealer = User::findOrFail($dealerId);

@@ -11,6 +11,7 @@ use App\Http\Requests\User\StartPasswordResetRequest;
 use App\Models\User\AuthToken;
 use App\Http\Requests\User\GetDetailsRequest;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 use App\Transformers\User\UserSignInTransformer;
 use App\Transformers\User\UserTransformer;
 use App\Http\Requests\User\CheckAdminPasswordRequest;
@@ -115,7 +116,11 @@ class SignInController extends RestfulController {
         return $this->response->errorBadRequest();
     }
 
-    public function checkAdminPassword(Request $request)
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function checkAdminPassword(Request $request): Response
     {
         $request = new CheckAdminPasswordRequest($request->all());
         
