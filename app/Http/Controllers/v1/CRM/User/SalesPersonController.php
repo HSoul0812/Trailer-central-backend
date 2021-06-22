@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\v1\CRM\User;
 
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
+use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Services\CRM\User\SalesAuthServiceInterface;
+use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
-use App\Transformers\CRM\User\SalesPersonTransformer;
+use Dingo\Api\Http\Response;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
@@ -22,6 +25,11 @@ class SalesPersonController extends RestfulController {
     protected $salesPerson;
 
     /**
+     * @var SalesAuthServiceInterface
+     */
+    protected $salesAuth;
+
+    /**
      * @var SalesPersonTransformer
      */
     private $salesPersonTransformer;
@@ -33,12 +41,14 @@ class SalesPersonController extends RestfulController {
 
     public function __construct(
         SalesPersonRepositoryInterface $salesPersonRepo,
+        SalesAuthServiceInterface $salesAuthService,
         SalesPersonTransformer $salesPersonTransformer,
         Manager $fractal
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'salesReport']);
 
         $this->salesPerson = $salesPersonRepo;
+        $this->salesAuth = $salesAuthService;
         $this->salesPersonTransformer = $salesPersonTransformer;
         $this->fractal = $fractal;
 
@@ -77,5 +87,18 @@ class SalesPersonController extends RestfulController {
 
         $response = $this->fractal->createData($data)->toArray();
         return $this->response->array($response);
+    }
+
+    public function valid(Request $request): Response
+    {
+        $request = new ValidateSalesPeopleRequest($request->all());
+        if ($request->validate()) {
+            // Return Validation
+            return $this->response->array([
+                'data' => $this->salesAuth->validate($request->all())
+            ]);
+        }
+        
+        return $this->response->errorBadRequest();
     }
 }

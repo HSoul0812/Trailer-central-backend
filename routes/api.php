@@ -374,18 +374,18 @@ $api->version('v1', function ($route) {
         $route->get('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@index');
         $route->post('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@create');
         $route->put('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@updateBulk');
-        
+
         $route->put('user/password/update', 'App\Http\Controllers\v1\User\SignInController@updatePassword');
-        
+
         $route->get('user/auto-import/settings', 'App\Http\Controllers\v1\User\AutoImportController@index');
         $route->put('user/auto-import/settings', 'App\Http\Controllers\v1\User\AutoImportController@updateSettings');
 
         $route->get('user/overlay/settings', 'App\Http\Controllers\v1\User\OverlaySettingsController@index');
         $route->post('user/overlay/settings', 'App\Http\Controllers\v1\User\OverlaySettingsController@updateSettings');
-        
+
         $route->put('user/newsletter', 'App\Http\Controllers\v1\User\SettingsController@updateNewsletter');
         $route->get('user/newsletter', 'App\Http\Controllers\v1\User\SettingsController@getNewsletter');
-        
+
         $route->put('user/xml-export', 'App\Http\Controllers\v1\User\SettingsController@updateXmlExport');
         $route->get('user/xml-export', 'App\Http\Controllers\v1\User\SettingsController@getXmlExport');
         
@@ -445,7 +445,7 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
-        | Sales People
+        | Dealer Locations
         |--------------------------------------------------------------------------
         |
         |
@@ -645,6 +645,9 @@ $api->version('v1', function ($route) {
                 $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
 
+                // Validate SMTP/IMAP
+                $route->put('validate', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@valid');
+
                 // Sales People w/Auth
                 $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
                 $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');
@@ -818,6 +821,16 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('payments/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Refunds
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('refunds', 'App\Http\Controllers\v1\Dms\RefundController@index');
 
         /*
         |--------------------------------------------------------------------------

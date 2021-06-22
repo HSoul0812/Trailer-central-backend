@@ -322,13 +322,12 @@ class InventoryRepository implements InventoryRepositoryInterface
         $query = Inventory::select('*');
 
         $query->where([
-            ['status', '<>', Inventory::STATUS_QUOTE],
             ['is_floorplan_bill', '=', 1],
             ['active', '=', 1],
             ['fp_vendor', '>', 0],
             ['true_cost', '>', 0],
             ['fp_balance', '>', 0]
-        ])->whereNotNull('bill_id');
+        ])->whereNotNull('bill_id')->whereNotNull('status');
 
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
