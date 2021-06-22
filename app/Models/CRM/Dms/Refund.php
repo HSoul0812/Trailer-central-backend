@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Arr;
-use Znck\Eloquent\Relations\BelongsToThrough;
-use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
+//use Znck\Eloquent\Relations\BelongsToThrough;
+//use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
 
 /**
  * Class Refund
@@ -39,7 +39,7 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
  */
 class Refund extends Model implements Filterable
 {
-    use BelongsToThroughTrait;
+//    use BelongsToThroughTrait;
 
     protected $table = "dealer_refunds";
 
