@@ -172,4 +172,10 @@ class UserRepository implements UserRepositoryInterface {
         return $dealer;
     }
 
+    public function checkAdminPassword(int $dealerId, string $password): bool
+    {
+        $dealer = User::findOrFail($dealerId);
+        return sha1($password) === $dealer->admin_passwd;
+    }
+
 }

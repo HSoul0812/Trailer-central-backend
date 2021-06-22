@@ -13,6 +13,7 @@ use App\Http\Requests\User\GetDetailsRequest;
 use Dingo\Api\Http\Request;
 use App\Transformers\User\UserSignInTransformer;
 use App\Transformers\User\UserTransformer;
+use App\Http\Requests\User\CheckAdminPasswordRequest;
 use App\Http\Requests\User\UpdatePasswordRequest;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Models\User\User;
@@ -36,7 +37,8 @@ class SignInController extends RestfulController {
                                 DealerPasswordResetRepositoryInterface $passwordResetRepo)
     {
         $this->middleware('setDealerIdOnRequest')->only([
-            'updatePassword'
+            'updatePassword',
+            'checkAdminPassword'
         ]);
         
         $this->users = $userRepo;
@@ -108,6 +110,18 @@ class SignInController extends RestfulController {
             $user = User::findOrFail($request->dealer_id);
             $this->passwordResetRepo->updateDealerPassword($user, $request->password);
             return $this->successResponse();
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function checkAdminPassword(Request $request)
+    {
+        $request = new CheckAdminPasswordRequest($request->all());
+        
+        if ($request->validate()) {
+            $isValid = $this->users->checkAdminPassword($request->dealer_id, $request->password);
+            return $this->existsResponse($isValid);
         }
         
         return $this->response->errorBadRequest();
