@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
 use App\Models\Parts\BinQuantity;
+use App\Models\Parts\CostHistory;
 use App\Exceptions\ImageNotDownloadedException;
 use App\Repositories\Traits\SortTrait;
 
@@ -414,12 +415,16 @@ class PartRepository implements PartRepositoryInterface {
         return Part::with(['vendor', 'brand', 'images', 'bins'])->where('dealer_id', $dealerId);
     }
 
+    /**
+     * If a dealer_cost (an average cost of an part) is changed, create a new parts_cost_history record
+     */
     public function update($params) {
         /** @var Part $part */
         $part = $this->get($params);
 
         DB::transaction(function() use (&$part, $params) {
 
+            $oldDealerCost = $part->dealer_cost;
             if (isset($params['is_vehicle_specific']) && $params['is_vehicle_specific']) {
                 VehicleSpecific::updateOrCreate([
                     'make' => $params['vehicle_make'],
@@ -463,6 +468,13 @@ class PartRepository implements PartRepositoryInterface {
                 }
             }
 
+            if (isset($params['dealer_cost']) && $oldDealerCost != $params['dealer_cost']) {
+                CostHistory::create([
+                    'part_id' => $params['id'],
+                    'old_cost' => $oldDealerCost,
+                    'new_cost' => $params['dealer_cost']
+                ]);
+            }
         });
 
         return $part;
