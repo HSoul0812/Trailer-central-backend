@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Carbon\Carbon;
 
 class AddMarineworldIntegration extends Migration
 {
@@ -46,7 +47,7 @@ class AddMarineworldIntegration extends Migration
       DB::table('integration')->insert(self::MARINEWORLD_PARAMS);
 
       $marineWorldDealer = self::MARINEWORLD_DEALER;
-      $marineWorldDealer['created_at'] = (new \DateTime())->format('Y:m:d H:i:s');
+      $marineWorldDealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
       $marineWorldDealer['settings'] = serialize($marineWorldDealer['settings']);
 
       DB::table('integration_dealer')->insert($marineWorldDealer);
