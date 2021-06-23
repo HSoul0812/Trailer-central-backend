@@ -26,6 +26,8 @@ class InventoryService implements InventoryServiceInterface
 {
     use DispatchesJobs;
 
+    const SOURCE_DASHBOARD = 'dashboard';
+
     /**
      * @var InventoryRepositoryInterface
      */
@@ -136,7 +138,7 @@ class InventoryService implements InventoryServiceInterface
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item create error. Params - ' . json_encode($params), $e->getTrace());
+            Log::error('Item create error. Message - ' . $e->getMessage() , $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             throw new InventoryException('Inventory item create error');
@@ -147,9 +149,11 @@ class InventoryService implements InventoryServiceInterface
 
     /**
      * @param array $params
-     * @return Inventory|null
+     * @return Inventory
+     *
+     * @throws InventoryException
      */
-    public function update(array $params): ?Inventory
+    public function update(array $params): Inventory
     {
         try {
             $this->inventoryRepository->beginTransaction();
@@ -159,6 +163,13 @@ class InventoryService implements InventoryServiceInterface
             $hiddenFiles = $params['hidden_files'] ?? [];
             $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
+            $options = [
+                'updateAttributes' => $params['update_attributes'] ?? false,
+                'updateFeatures' => $params['update_features'] ?? false,
+                'updateClapps' => $params['update_clapps'] ?? false,
+            ];
+
+            $source = $params['source'] ?? '';
             $addBill = $params['add_bill'] ?? false;
 
             if (!empty($newImages)) {
@@ -177,27 +188,34 @@ class InventoryService implements InventoryServiceInterface
                 $params['clapps']['default-image'] = $clappImage['path'];
             }
 
-            $inventory = $this->inventoryRepository->create($params);
+            $inventory = $this->inventoryRepository->update($params, $options);
 
             if (!$inventory instanceof Inventory) {
-                Log::error('Item hasn\'t been created.', ['params' => $params]);
+                Log::error('Item hasn\'t been updated.', ['params' => $params]);
                 $this->inventoryRepository->rollbackTransaction();
 
-                return null;
+                throw new InventoryException('Inventory item update error');
             }
 
             if ($addBill) {
                 $this->addBill($params, $inventory);
             }
 
+            if ($source === self::SOURCE_DASHBOARD) {
+                $this->inventoryRepository->update([
+                    'inventory_id' => $params['inventory_id'],
+                    'changed_fields_in_dashboard' => $this->getChangedFields($inventory, $params)
+                ]);
+            }
+
             $this->inventoryRepository->commitTransaction();
 
-            Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+            Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item create error. Params - ' . json_encode($params), $e->getTrace());
+            Log::error('Item update error. Message - ' . $e->getMessage() , $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
-            return null;
+            throw new InventoryException('Inventory item update error');
         }
 
         return $inventory;
@@ -504,5 +522,27 @@ class InventoryService implements InventoryServiceInterface
 
             $this->inventoryRepository->update($inventoryParams);
         }
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @param array $params
+     * @return array
+     */
+    private function getChangedFields(Inventory $inventory, array $params): array
+    {
+        $changedFields = array_values(array_unique(array_merge(
+            $inventory->changed_fields_in_dashboard ?? [], array_keys($inventory->getChanges())
+        )));
+
+        if ($params['unlock_images'] ?? false) {
+            $changedFields = array_diff($changedFields, ['existing_images', 'images']);
+        }
+
+        if ($params['unlock_video'] ?? false) {
+            $changedFields = array_diff($changedFields, ['video_embed_code']);
+        }
+
+        return $changedFields;
     }
 }

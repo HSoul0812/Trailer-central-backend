@@ -9,6 +9,7 @@ use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
@@ -57,8 +58,8 @@ class InventoryController extends RestfulControllerV2
         InventoryHistoryRepositoryInterface $inventoryHistoryRepository
     )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'destroy', 'exists']);
-        $this->middleware('inventory.create.permission')->only(['create']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'destroy', 'exists']);
+        $this->middleware('inventory.create.permission')->only(['create', 'update']);
 
         $this->inventoryService = $inventoryService;
         $this->inventoryRepository = $inventoryRepository;
@@ -213,21 +214,22 @@ class InventoryController extends RestfulControllerV2
     }
 
     /**
+     * @param int $id
      * @param Request $request
      * @return Response
      *
-     * @throws NoObjectIdValueSetException
      * @throws BindingResolutionException
+     * @throws NoObjectIdValueSetException
      * @throws NoObjectTypeSetException
      */
-    public function update(Request $request): Response
+    public function update(int $id, Request $request): Response
     {
-        $inventoryRequest = new CreateInventoryRequest($request->all());
+        $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
 
         $transformer = app()->make(SaveInventoryTransformer::class);
         $inventoryRequest->setTransformer($transformer);
 
-        if (!$inventoryRequest->validate() || !($inventory = $this->inventoryService->create($inventoryRequest->all()))) {
+        if (!$inventoryRequest->validate() || !($inventory = $this->inventoryService->update($inventoryRequest->all()))) {
             return $this->response->errorBadRequest();
         }
 

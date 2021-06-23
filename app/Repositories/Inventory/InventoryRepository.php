@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Inventory;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -25,7 +26,6 @@ use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
  */
 class InventoryRepository implements InventoryRepositoryInterface
 {
-
     use SortTrait, Transaction;
 
     private const DEFAULT_PAGE_SIZE = 15;
@@ -192,7 +192,126 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function update($params, array $options = []): Inventory
     {
+        if (!isset($params['inventory_id'])) {
+            throw new RepositoryInvalidArgumentException('inventory_id has been missed. Params - ' . json_encode($params));
+        }
+
+        /** @var Inventory $item */
         $item = Inventory::findOrFail($params['inventory_id']);
+
+        $inventoryImageObjs = [];
+        $inventoryFilesObjs = [];
+
+        foreach ($params['new_images'] ?? [] as $newImage) {
+            $imageObj = new Image($newImage);
+            $imageObj->save();
+
+            $inventoryImageObj = new InventoryImage($newImage);
+            $inventoryImageObj->image_id = $imageObj->image_id;
+
+            $inventoryImageObjs[] = $inventoryImageObj;
+        }
+
+        if (!empty($inventoryImageObjs)) {
+            $item->inventoryImages()->saveMany($inventoryImageObjs);
+        }
+
+        foreach ($params['existing_images'] ?? [] as $existingImage) {
+            if (!isset($existingImage['image_id'])) {
+                continue;
+            }
+
+            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($existingImage);
+        }
+
+        if (!empty($params['images_to_delete'])) {
+            $item->images()->whereIn('image.image_id', array_column($params['images_to_delete'], 'image_id'))->delete();
+        }
+
+        foreach ($params['new_files'] ?? [] as $newFile) {
+            $fileObj = new File($newFile);
+            $fileObj->save();
+
+            $inventoryFileObj = new InventoryFile($newFile);
+            $inventoryFileObj->file_id = $fileObj->id;
+
+            $inventoryFilesObjs[] = $inventoryFileObj;
+        }
+
+        if (!empty($inventoryFilesObjs)) {
+            $item->inventoryFiles()->saveMany($inventoryFilesObjs);
+        }
+
+        foreach ($params['existing_files'] ?? [] as $existingFile) {
+            if (!isset($existingFile['file_id'])) {
+                continue;
+            }
+
+            $fileFields = with(new File())->getFillable();
+            $fileParams = array_intersect_key($existingFile, array_combine($fileFields, array_fill(0, count($fileFields), 0)));
+
+            $inventoryFileFields = with(new InventoryFile())->getFillable();
+            $inventoryFileParams = array_intersect_key($existingFile, array_combine($inventoryFileFields, array_fill(0, count($inventoryFileFields), 0)));
+
+            $item->files()->where('file.id', '=', $existingFile['file_id'])->update($fileParams);
+            $item->inventoryFiles()->where('file_id', '=', $existingFile['file_id'])->update($inventoryFileParams);
+        }
+
+        if (!empty($params['files_to_delete'])) {
+            $item->files()->whereIn('file.id', array_column($params['files_to_delete'], 'file_id'))->delete();
+        }
+
+        if ($options['updateAttributes'] ?? false) {
+            $attributeObjs = [];
+
+            $item->attributeValues()->delete();
+
+            foreach ($params['attributes'] ?? [] as $attribute) {
+                $attributeObjs[] = new AttributeValue($attribute);
+            }
+
+            if (!empty($attributeObjs)) {
+                $item->attributeValues()->saveMany($attributeObjs);
+            }
+        }
+
+        if ($options['updateFeatures'] ?? false) {
+            $featureObjs = [];
+
+            $item->inventoryFeatures()->delete();
+
+            foreach ($params['features'] ?? [] as $feature) {
+                $featureObjs[] = new InventoryFeature($feature);
+            }
+
+            if (!empty($featureObjs)) {
+                $item->inventoryFeatures()->saveMany($featureObjs);
+            }
+        }
+
+        if ($options['updateClapps'] ?? false) {
+            $clappObjs = [];
+
+            $item->clapps()->delete();
+
+            foreach (array_filter($params['clapps'] ?? []) as $field => $value) {
+                $clappObjs[] = new InventoryClapp(['field' => $field, 'value' => $value]);
+            }
+
+            if (!empty($clappObjs)) {
+                $item->clapps()->saveMany($clappObjs);
+            }
+        }
+
+        unset($params['attributes']);
+        unset($params['features']);
+        unset($params['new_images']);
+        unset($params['existing_images']);
+        unset($params['images_to_delete']);
+        unset($params['new_files']);
+        unset($params['existing_files']);
+        unset($params['files_to_delete']);
+        unset($params['clapps']);
 
         $item->fill($params)->save();
 

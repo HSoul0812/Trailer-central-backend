@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware\Inventory;
 
-use App\Models\Inventory\Inventory;
 use App\Models\User\DealerUser;
 use App\Models\User\Interfaces\PermissionsInterface as Permissions;
 use App\Models\User\User;

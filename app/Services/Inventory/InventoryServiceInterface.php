@@ -13,9 +13,15 @@ interface InventoryServiceInterface
 {
     /**
      * @param array $params
-     * @return Inventory|null
+     * @return Inventory
      */
-    public function create(array $params): ?Inventory;
+    public function create(array $params): Inventory;
+
+    /**
+     * @param array $params
+     * @return Inventory
+     */
+    public function update(array $params): Inventory;
 
     /**
      * @param int $inventoryId

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Inventory;
 
+use App\Models\Inventory\Inventory;
 use App\Repositories\Repository;
 
 interface InventoryRepositoryInterface extends Repository
@@ -21,7 +22,7 @@ interface InventoryRepositoryInterface extends Repository
 
     public function getFloorplannedInventory($params);
 
-    public function update($params, array $options = []);
+    public function update($params, array $options = []): Inventory;
 
     public function beginTransaction(): void;
 
