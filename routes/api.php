@@ -387,7 +387,7 @@ $api->version('v1', function ($route) {
 
         $route->put('user/xml-export', 'App\Http\Controllers\v1\User\SettingsController@updateXmlExport');
         $route->get('user/xml-export', 'App\Http\Controllers\v1\User\SettingsController@getXmlExport');
-        
+
         $route->put('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@updateBulk');
         $route->get('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@index');
     });
@@ -799,6 +799,7 @@ $api->version('v1', function ($route) {
         $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
         $route->get('pos/sales/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
         $route->get('pos/registers', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@index');
+        $route->post('pos/registers/open', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@open');
 
         /*
         |--------------------------------------------------------------------------
