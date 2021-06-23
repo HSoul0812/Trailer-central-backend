@@ -7,6 +7,7 @@ use App\Models\Pos\Outlet;
 use App\Models\Pos\Register;
 use App\Repositories\RepositoryAbstract;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RegisterRepository extends RepositoryAbstract implements RegisterRepositoryInterface
 {
@@ -41,30 +42,28 @@ class RegisterRepository extends RepositoryAbstract implements RegisterRepositor
      * @param array $params
      * @return bool
      */
-    public function open(array $params): bool
+    public function create($params): bool
     {
-        /* return without any action if a register is already open. */
-        if ($this->isRegisterOpen($params['outlet_id'])) {
-            return true;
-        }
-
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($params) {
-                $register = new Register($params);
-                $register->open_date = date('Y-m-d H:i:s');
-                $register->close_date = null;
-                $register->save();
+            $register = new Register($params);
+            $register->open_date = date('Y-m-d H:i:s');
+            $register->close_date = null;
+            $register->save();
 
-                $cashMovement = new CashMovement([
-                    'register_id' => $register->id,
-                    'amount' => $register->floating_amount,
-                    'reason' => 'Opening float',
-                ]);
-                $cashMovement->save();
-            });
+            $cashMovement = new CashMovement([
+                'register_id' => $register->id,
+                'amount' => $register->floating_amount,
+                'reason' => 'Opening float',
+            ]);
+            $cashMovement->save();
+            DB::commit();
 
             return true;
         } catch (\Exception $exception) {
+            DB::rollback();
+            Log::error($exception->getMessage());
+
             return false;
         }
     }
@@ -75,7 +74,7 @@ class RegisterRepository extends RepositoryAbstract implements RegisterRepositor
      * @param int $outletId
      * @return bool
      */
-    public function isRegisterOpen(int $outletId): bool
+    public function hasOpenRegister(int $outletId): bool
     {
         return Register::query()->where('outlet_id', $outletId)->whereNull('close_date')->count() > 0;
     }
