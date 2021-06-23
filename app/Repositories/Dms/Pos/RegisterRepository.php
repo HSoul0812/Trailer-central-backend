@@ -43,6 +43,7 @@ class RegisterRepository extends RepositoryAbstract implements RegisterRepositor
      */
     public function open(array $params): bool
     {
+        /* return without any action if a register is already open. */
         if ($this->isRegisterOpen($params['outlet_id'])) {
             return true;
         }
@@ -64,11 +65,16 @@ class RegisterRepository extends RepositoryAbstract implements RegisterRepositor
 
             return true;
         } catch (\Exception $exception) {
-            dd($exception->getMessage());
             return false;
         }
     }
 
+    /**
+     * Validates if a register is already open for requested outlet
+     *
+     * @param int $outletId
+     * @return bool
+     */
     public function isRegisterOpen(int $outletId): bool
     {
         return Register::query()->where('outlet_id', $outletId)->whereNull('close_date')->count() > 0;
