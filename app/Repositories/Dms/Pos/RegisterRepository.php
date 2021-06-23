@@ -2,8 +2,11 @@
 
 namespace App\Repositories\Dms\Pos;
 
+use App\Models\Pos\CashMovement;
 use App\Models\Pos\Outlet;
+use App\Models\Pos\Register;
 use App\Repositories\RepositoryAbstract;
+use Illuminate\Support\Facades\DB;
 
 class RegisterRepository extends RepositoryAbstract implements RegisterRepositoryInterface
 {
@@ -30,5 +33,44 @@ class RegisterRepository extends RepositoryAbstract implements RegisterRepositor
             ->orderBy('crm_pos_outlet.register_name')
             ->get()
             ;
+    }
+
+    /**
+     * Opens new register for the given outlet
+     *
+     * @param array $params
+     * @return bool
+     */
+    public function open(array $params): bool
+    {
+        if ($this->isRegisterOpen($params['outlet_id'])) {
+            return true;
+        }
+
+        try {
+            DB::transaction(function () use ($params) {
+                $register = new Register($params);
+                $register->open_date = date('Y-m-d H:i:s');
+                $register->close_date = null;
+                $register->save();
+
+                $cashMovement = new CashMovement([
+                    'register_id' => $register->id,
+                    'amount' => $register->floating_amount,
+                    'reason' => 'Opening float',
+                ]);
+                $cashMovement->save();
+            });
+
+            return true;
+        } catch (\Exception $exception) {
+            dd($exception->getMessage());
+            return false;
+        }
+    }
+
+    public function isRegisterOpen(int $outletId): bool
+    {
+        return Register::query()->where('outlet_id', $outletId)->whereNull('close_date')->count() > 0;
     }
 }

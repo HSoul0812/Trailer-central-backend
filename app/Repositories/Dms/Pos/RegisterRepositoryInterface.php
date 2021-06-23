@@ -13,4 +13,13 @@ interface RegisterRepositoryInterface extends Repository
      * @return mixed array<Outlet>
      */
     public function getAllByDealerId(int $dealerId);
+
+    /**
+     * Opens new register for the given outlet
+     *
+     * @param array $params
+     */
+    public function open(array $params): bool;
+
+    public function isRegisterOpen(int $outletId): bool;
 }
