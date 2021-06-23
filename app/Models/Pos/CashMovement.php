@@ -1,15 +1,13 @@
 <?php
 
-
 namespace App\Models\Pos;
-
 
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Register
+ * Cash Movement model associated with Register
  *
- * A POS register "session"
+ * A POS register cash movement "session"
  *
  * @package App\Models\Pos
  */
