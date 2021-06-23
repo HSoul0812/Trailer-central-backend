@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\CRM\Dms\Refund;
+use App\Repositories\CRM\Refund\RefundRepository;
+use App\Repositories\CRM\Refund\RefundRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailService;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\InquiryServiceInterface;
@@ -64,6 +67,10 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
+
+        $this->app->bind(RefundRepositoryInterface::class, function () {
+            return new RefundRepository(Refund::query());
+        });
     }
 
 }
