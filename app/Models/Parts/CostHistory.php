@@ -30,6 +30,11 @@ class CostHistory extends Model implements Filterable
         'expense_id'
     ];
 
+    protected $casts = [
+        'old_cost' => 'float',
+        'new_cost' => 'float'
+    ];
+
     /**
      * @return HasOne
      */
