@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Models\CRM\Account;
-
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\Refund;
@@ -51,7 +49,7 @@ class Payment extends Model
     {
         return $this->hasMany(Refund::class, 'tb_primary_id');
     }
-    
+
     public function getReceiptsAttribute()
     {
         return DealerSalesReceipt::where('tb_name', 'qb_payment')->where('tb_primary_id', $this->id)->get();

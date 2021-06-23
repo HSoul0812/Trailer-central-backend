@@ -17,7 +17,7 @@ class SaveDealerLocationRequest extends Request
             'name' => 'required|string|min:3,max:255',
             'contact' => 'required|string|min:1,max:255',
             'website' => 'nullable|string|min:0,max:255',
-            'email' => 'nullable|string|min:0,max:255|email',
+            'email' => 'nullable|string|min:0,max:255',
             'address' => 'required|string|min:3,max:255|regex:/^[^&]+$/',
             'city' => 'required|string|min:2,max:255',
             'county' => 'required|string|min:2,max:255',

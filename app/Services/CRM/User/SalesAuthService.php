@@ -2,11 +2,14 @@
 
 namespace App\Services\CRM\User;
 
+use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\AuthServiceInterface;
-use App\Utilities\Fractal\NoDataArraySerializer;
+use App\Traits\SmtpHelper;
 use App\Transformers\CRM\User\SalesPersonTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
@@ -17,6 +20,8 @@ use League\Fractal\Resource\Item;
  */
 class SalesAuthService implements SalesAuthServiceInterface
 {
+    use SmtpHelper;
+
     /**
      * @var SalesPersonRepository
      */
@@ -109,6 +114,37 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Return Response
         return $this->response($accessToken, $params);
+    }
+
+    /**
+     * Validate SMTP/IMAP Details
+     * 
+     * @param array $params {type: smtp|imap,
+     *                       username: string,
+     *                       password: string,
+     *                       security: string (ssl|tls)
+     *                       host: string
+     *                       port: int}
+     * @return bool
+     */
+    public function validate(array $params): bool {
+        // Get Smtp Config Details
+        if($params['type'] === SalesPerson::TYPE_SMTP) {
+            // Get SMTP Details
+            $config = new SmtpConfig([
+                'username' => $params['username'],
+                'password' => $params['password'],
+                'security' => $params['security'],
+                'host' => $params['host'],
+                'port' => $params['port']
+            ]);
+
+            // Validate SMTP Config
+            return $this->validateSmtp($config);
+        }
+
+        // Return Response
+        return false;
     }
 
 

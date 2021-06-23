@@ -39,6 +39,14 @@ class ServiceOrder extends Model
         'work_available' => 'Work Available'
     ];
 
+    /*
+     * RO statuses which consider it done.
+     */
+    const COMPLETED_ORDER_STATUS = [
+        'picked_up',
+        'ready_for_pickup',
+    ];
+
     public const TYPES = [
         self::TYPE_ESTIMATE,
         self::TYPE_INTERNAL,
@@ -63,7 +71,8 @@ class ServiceOrder extends Model
     protected $table = 'dms_repair_order';
 
     protected $fillable = [
-        'status'
+        'status',
+        'closed_at',
     ];
 
     const UPDATED_AT = null;

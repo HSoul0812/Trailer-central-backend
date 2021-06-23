@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class Invoice
  * @package App\Models\CRM\Account
+ *
+ * @property string $doc_num
+ *
  * @property UnitSale $unitSale
  * @property Payment[] $payments
  * @property InvoiceItem[] $items
