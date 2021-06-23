@@ -799,7 +799,7 @@ $api->version('v1', function ($route) {
         $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
         $route->get('pos/sales/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
         $route->get('pos/registers', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@index');
-        $route->post('pos/registers/open', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@open');
+        $route->post('pos/registers', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@create');
 
         /*
         |--------------------------------------------------------------------------

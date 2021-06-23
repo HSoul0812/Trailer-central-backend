@@ -17,7 +17,7 @@ class RegisterController extends RestfulControllerV2
 
     public function __construct(RegisterRepositoryInterface $registerRepository)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'open']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create']);
         $this->registerRepository = $registerRepository;
     }
 
@@ -39,7 +39,7 @@ class RegisterController extends RestfulControllerV2
         return $this->response->errorBadRequest();
     }
 
-    public function open(Request $request)
+    public function create(Request $request)
     {
         $request = new PostOpenRegisterRequest($request->all());
 
