@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AddMarineworldIntegration extends Migration
 {
@@ -44,13 +45,15 @@ class AddMarineworldIntegration extends Migration
      */
     public function up()
     {
-      DB::table('integration')->insert(self::MARINEWORLD_PARAMS);
+      DB::transaction(function () {
+        DB::table('integration')->insert(self::MARINEWORLD_PARAMS);
 
-      $marineWorldDealer = self::MARINEWORLD_DEALER;
-      $marineWorldDealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
-      $marineWorldDealer['settings'] = serialize($marineWorldDealer['settings']);
+        $marineWorldDealer = self::MARINEWORLD_DEALER;
+        $marineWorldDealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
+        $marineWorldDealer['settings'] = serialize($marineWorldDealer['settings']);
 
-      DB::table('integration_dealer')->insert($marineWorldDealer);
+        DB::table('integration_dealer')->insert($marineWorldDealer);
+      });
     }
 
     /**
@@ -60,7 +63,9 @@ class AddMarineworldIntegration extends Migration
      */
     public function down()
     {
-      DB::table('integration_dealer')->delete(self::MARINEWORLD_PARAMS['integration_id']);
-      DB::table('integration')->delete(self::MARINEWORLD_PARAMS['integration_id']);
+      DB::transaction(function () {
+        DB::table('integration_dealer')->delete(self::MARINEWORLD_PARAMS['integration_id']);
+        DB::table('integration')->delete(self::MARINEWORLD_PARAMS['integration_id']);
+      });
     }
 }
