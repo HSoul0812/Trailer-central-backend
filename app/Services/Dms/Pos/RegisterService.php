@@ -1,54 +1,61 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services\Dms\Pos;
 
-use App\Contracts\LoggerServiceInterface;
+use App\Exceptions\Dms\Pos\RegisterException;
+use App\Models\Pos\Register;
 use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
-use App\Services\Common\LoggerService;
+use Illuminate\Support\Facades\Log;
 
 class RegisterService implements RegisterServiceInterface
 {
     /**
      * @var RegisterRepositoryInterface
      */
-    private $repository;
+    private $registerRepository;
 
-    /**
-     * @var LoggerService
-     */
-    private $logger;
-
-    public function __construct(
-        RegisterRepositoryInterface $registerRepository,
-        LoggerServiceInterface $loggerService
-    )
+    public function __construct(RegisterRepositoryInterface $registerRepository)
     {
-        $this->repository = $registerRepository;
-        $this->logger = $loggerService;
+        $this->registerRepository = $registerRepository;
     }
 
     /**
      * Validates and opens register for given outlet
      *
      * @param array $params
-     * @return bool
+     * @return bool|null
+     * @throws RegisterException
      */
-    public function open(array $params): bool
+    public function open(array $params): ?bool
     {
-        if ($this->repository->hasOpenRegister((int)$params['outlet_id'])) {
+        if ($this->registerRepository->hasOpenRegister((int)$params['outlet_id'])) {
+            Log::info('Register already opened for the outlet.', ['params' => $params]);
+
             return true;
         }
 
         try {
-            return $this->repository->create($params);
+            $this->registerRepository->beginTransaction();
+
+            $register = $this->registerRepository->create($params);
+
+            if (!$register instanceof Register) {
+                Log::error('Register hasn\'t been opened.', ['params' => $params]);
+                $this->registerRepository->rollbackTransaction();
+
+                throw new RegisterException('Register hasn\'t been opened');
+            }
+            $this->registerRepository->commitTransaction();
+
+            Log::info('Register has been successfully opened for outlet.', ['register' => $register]);
+
         } catch (\Exception $exception) {
-            $this->logger->error(
-                'Register open error. Message - ' . $exception->getMessage() ,
-                $exception->getTrace()
-            );
-            return false;
+            Log::error('Register open error. Params - ' . json_encode($params), $exception->getTrace());
+            $this->registerRepository->rollbackTransaction();
+
+            throw new RegisterException('Register hasn\'t been opened');
         }
+
+        return true;
     }
 }

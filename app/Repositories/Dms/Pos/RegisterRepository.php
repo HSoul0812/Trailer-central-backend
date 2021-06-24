@@ -6,11 +6,12 @@ use App\Models\Pos\CashMovement;
 use App\Models\Pos\Outlet;
 use App\Models\Pos\Register;
 use App\Repositories\RepositoryAbstract;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Traits\Repository\Transaction;
 
 class RegisterRepository extends RepositoryAbstract implements RegisterRepositoryInterface
 {
+    use Transaction;
+
     /* @var Outlet */
     private $outlet;
 
@@ -40,32 +41,20 @@ class RegisterRepository extends RepositoryAbstract implements RegisterRepositor
      * Opens new register for the given outlet
      *
      * @param array $params
-     * @return bool
      */
-    public function create($params): bool
+    public function create($params)
     {
-        DB::beginTransaction();
-        try {
-            $register = new Register($params);
-            $register->open_date = date('Y-m-d H:i:s');
-            $register->close_date = null;
-            $register->save();
+        $register = new Register($params);
+        $register->open_date = date('Y-m-d H:i:s');
+        $register->close_date = null;
+        $register->save();
 
-            $cashMovement = new CashMovement([
-                'register_id' => $register->id,
-                'amount' => $register->floating_amount,
-                'reason' => 'Opening float',
-            ]);
-            $cashMovement->save();
-            DB::commit();
-
-            return true;
-        } catch (\Exception $exception) {
-            DB::rollback();
-            Log::error($exception->getMessage());
-
-            return false;
-        }
+        $cashMovement = new CashMovement([
+            'register_id' => $register->id,
+            'amount' => $register->floating_amount,
+            'reason' => 'Opening float',
+        ]);
+        $cashMovement->save();
     }
 
     /**
