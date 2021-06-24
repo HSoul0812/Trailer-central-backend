@@ -17,7 +17,7 @@ class RegisterServiceTest extends TestCase
     /**
      * @var RegisterRepositoryInterface
      */
-    private $repository;
+    private $registerRepositoryMock;
 
     /**
      * @var RegisterServiceInterface
@@ -33,13 +33,13 @@ class RegisterServiceTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->repository = Mockery::mock(RegisterRepositoryInterface::class);
-        $this->service = new RegisterService($this->repository);
+        $this->registerRepositoryMock = Mockery::mock(RegisterRepositoryInterface::class);
+        $this->service = new RegisterService($this->registerRepositoryMock);
     }
 
     public function testRegisterIsOpen()
     {
-        $this->repository->shouldReceive('hasOpenRegister')
+        $this->registerRepositoryMock->shouldReceive('hasOpenRegister')
             ->once()
             ->with($this->requestPayload['outlet_id'])
             ->andReturn(true);
@@ -52,21 +52,21 @@ class RegisterServiceTest extends TestCase
     public function testOpenNewRegisterSuccessful()
     {
         $register = $this->getEloquentMock(Register::class);
-        $this->repository->shouldReceive('hasOpenRegister')
+        $this->registerRepositoryMock->shouldReceive('hasOpenRegister')
             ->once()
             ->with($this->requestPayload['outlet_id'])
             ->andReturn(false);
 
-        $this->repository
+        $this->registerRepositoryMock
             ->shouldReceive('beginTransaction')
             ->once();
 
-        $this->repository->shouldReceive('create')
+        $this->registerRepositoryMock->shouldReceive('create')
             ->once()
             ->with($this->requestPayload)
             ->andReturns($register);
 
-        $this->repository
+        $this->registerRepositoryMock
             ->shouldReceive('commitTransaction')
             ->once();
 
@@ -81,25 +81,25 @@ class RegisterServiceTest extends TestCase
     public function testOpenNewRegisterFailed()
     {
         $exception = new \Exception();
-        $this->repository->shouldReceive('hasOpenRegister')
+        $this->registerRepositoryMock->shouldReceive('hasOpenRegister')
             ->once()
             ->with($this->requestPayload['outlet_id'])
             ->andReturn(false);
 
-        $this->repository
+        $this->registerRepositoryMock
             ->shouldReceive('beginTransaction')
             ->once();
 
-        $this->repository->shouldReceive('create')
+        $this->registerRepositoryMock->shouldReceive('create')
             ->once()
             ->with($this->requestPayload)
             ->andThrows($exception);
 
-        $this->repository
+        $this->registerRepositoryMock
             ->shouldReceive('commitTransaction')
             ->never();
 
-        $this->repository
+        $this->registerRepositoryMock
             ->shouldReceive('rollbackTransaction')
             ->once();
 
