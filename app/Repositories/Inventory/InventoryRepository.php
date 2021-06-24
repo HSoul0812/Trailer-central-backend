@@ -107,55 +107,18 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function create($params): Inventory
     {
-        $attributes = $params['attributes'] ?? [];
-        $features = $params['features'] ?? [];
-        $newImages = $params['new_images'] ?? [];
-        $newFiles = $params['new_files'] ?? [];
-        $clapps = $params['clapps'] ?? [];
+        $attributeObjs = $this->createAttributes($params['attributes'] ?? []);
+        $featureObjs = $this->createFeatures($params['features'] ?? []);
+        $clappObjs = $this->createClapps($params['clapps'] ?? []);
 
-        $attributeObjs = [];
-        $featureObjs = [];
-        $inventoryImageObjs = [];
-        $inventoryFilesObjs = [];
-        $clappObjs = [];
+        $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
+        $inventoryFilesObjs = $this->createFiles($params['new_files'] ?? []);
 
         unset($params['attributes']);
         unset($params['features']);
         unset($params['new_images']);
         unset($params['new_files']);
         unset($params['clapps']);
-
-        foreach ($attributes as $attribute) {
-            $attributeObjs[] = new AttributeValue($attribute);
-        }
-
-        foreach ($features as $feature) {
-            $featureObjs[] = new InventoryFeature($feature);
-        }
-
-        foreach ($newImages as $newImage) {
-            $imageObj = new Image($newImage);
-            $imageObj->save();
-
-            $inventoryImageObj = new InventoryImage($newImage);
-            $inventoryImageObj->image_id = $imageObj->image_id;
-
-            $inventoryImageObjs[] = $inventoryImageObj;
-        }
-
-        foreach ($newFiles as $newFile) {
-            $fileObj = new File($newFile);
-            $fileObj->save();
-
-            $inventoryFileObj = new InventoryFile($newFile);
-            $inventoryFileObj->file_id = $fileObj->id;
-
-            $inventoryFilesObjs[] = $inventoryFileObj;
-        }
-
-        foreach (array_filter($clapps) as $field => $value) {
-            $clappObjs[] = new InventoryClapp(['field' => $field, 'value' => $value]);
-        }
 
         $item = new Inventory($params);
 
@@ -199,76 +162,34 @@ class InventoryRepository implements InventoryRepositoryInterface
         /** @var Inventory $item */
         $item = Inventory::findOrFail($params['inventory_id']);
 
-        $inventoryImageObjs = [];
-        $inventoryFilesObjs = [];
-
-        foreach ($params['new_images'] ?? [] as $newImage) {
-            $imageObj = new Image($newImage);
-            $imageObj->save();
-
-            $inventoryImageObj = new InventoryImage($newImage);
-            $inventoryImageObj->image_id = $imageObj->image_id;
-
-            $inventoryImageObjs[] = $inventoryImageObj;
-        }
+        $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
 
         if (!empty($inventoryImageObjs)) {
             $item->inventoryImages()->saveMany($inventoryImageObjs);
         }
 
-        foreach ($params['existing_images'] ?? [] as $existingImage) {
-            if (!isset($existingImage['image_id'])) {
-                continue;
-            }
-
-            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($existingImage);
-        }
+        $this->updateImages($item, $params['existing_images'] ?? []);
 
         if (!empty($params['images_to_delete'])) {
             $item->images()->whereIn('image.image_id', array_column($params['images_to_delete'], 'image_id'))->delete();
         }
 
-        foreach ($params['new_files'] ?? [] as $newFile) {
-            $fileObj = new File($newFile);
-            $fileObj->save();
-
-            $inventoryFileObj = new InventoryFile($newFile);
-            $inventoryFileObj->file_id = $fileObj->id;
-
-            $inventoryFilesObjs[] = $inventoryFileObj;
-        }
+        $inventoryFilesObjs = $this->createFiles($params['new_files'] ?? []);
 
         if (!empty($inventoryFilesObjs)) {
             $item->inventoryFiles()->saveMany($inventoryFilesObjs);
         }
 
-        foreach ($params['existing_files'] ?? [] as $existingFile) {
-            if (!isset($existingFile['file_id'])) {
-                continue;
-            }
-
-            $fileFields = with(new File())->getFillable();
-            $fileParams = array_intersect_key($existingFile, array_combine($fileFields, array_fill(0, count($fileFields), 0)));
-
-            $inventoryFileFields = with(new InventoryFile())->getFillable();
-            $inventoryFileParams = array_intersect_key($existingFile, array_combine($inventoryFileFields, array_fill(0, count($inventoryFileFields), 0)));
-
-            $item->files()->where('file.id', '=', $existingFile['file_id'])->update($fileParams);
-            $item->inventoryFiles()->where('file_id', '=', $existingFile['file_id'])->update($inventoryFileParams);
-        }
+        $this->updateFiles($item, $params['existing_files'] ?? []);
 
         if (!empty($params['files_to_delete'])) {
             $item->files()->whereIn('file.id', array_column($params['files_to_delete'], 'file_id'))->delete();
         }
 
         if ($options['updateAttributes'] ?? false) {
-            $attributeObjs = [];
-
             $item->attributeValues()->delete();
 
-            foreach ($params['attributes'] ?? [] as $attribute) {
-                $attributeObjs[] = new AttributeValue($attribute);
-            }
+            $attributeObjs = $this->createAttributes($params['attributes'] ?? []);
 
             if (!empty($attributeObjs)) {
                 $item->attributeValues()->saveMany($attributeObjs);
@@ -276,13 +197,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($options['updateFeatures'] ?? false) {
-            $featureObjs = [];
-
             $item->inventoryFeatures()->delete();
 
-            foreach ($params['features'] ?? [] as $feature) {
-                $featureObjs[] = new InventoryFeature($feature);
-            }
+            $featureObjs = $this->createFeatures($params['features'] ?? []);
 
             if (!empty($featureObjs)) {
                 $item->inventoryFeatures()->saveMany($featureObjs);
@@ -290,13 +207,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($options['updateClapps'] ?? false) {
-            $clappObjs = [];
-
             $item->clapps()->delete();
 
-            foreach (array_filter($params['clapps'] ?? []) as $field => $value) {
-                $clappObjs[] = new InventoryClapp(['field' => $field, 'value' => $value]);
-            }
+            $clappObjs = $this->createClapps($params['clapps'] ?? []);
 
             if (!empty($clappObjs)) {
                 $item->clapps()->saveMany($clappObjs);
@@ -623,5 +536,129 @@ class InventoryRepository implements InventoryRepositoryInterface
             $currentPage,
             ["path" => URL::to('/')."/api/inventory"]
         ))->appends($params);
+    }
+
+    /**
+     * @param array $newImages
+     * @return InventoryImage[]
+     */
+    private function createImages(array $newImages): array
+    {
+        $inventoryImageObjs = [];
+
+        foreach ($newImages as $newImage) {
+            $imageObj = new Image($newImage);
+            $imageObj->save();
+
+            $inventoryImageObj = new InventoryImage($newImage);
+            $inventoryImageObj->image_id = $imageObj->image_id;
+
+            $inventoryImageObjs[] = $inventoryImageObj;
+        }
+
+        return $inventoryImageObjs;
+    }
+
+    /**
+     * @param array $newFiles
+     * @return InventoryFile[]
+     */
+    private function createFiles(array $newFiles): array
+    {
+        $inventoryFilesObjs = [];
+
+        foreach ($newFiles as $newFile) {
+            $fileObj = new File($newFile);
+            $fileObj->save();
+
+            $inventoryFileObj = new InventoryFile($newFile);
+            $inventoryFileObj->file_id = $fileObj->id;
+
+            $inventoryFilesObjs[] = $inventoryFileObj;
+        }
+
+        return $inventoryFilesObjs;
+    }
+
+    /**
+     * @param array $attributes
+     * @return AttributeValue[]
+     */
+    private function createAttributes(array $attributes): array
+    {
+        $attributeObjs = [];
+
+        foreach ($attributes as $attribute) {
+            $attributeObjs[] = new AttributeValue($attribute);
+        }
+
+        return $attributeObjs;
+    }
+
+    /**
+     * @param array $features
+     * @return InventoryFeature[]
+     */
+    private function createFeatures(array $features): array
+    {
+        $featureObjs = [];
+
+        foreach ($features as $feature) {
+            $featureObjs[] = new InventoryFeature($feature);
+        }
+
+        return $featureObjs;
+    }
+
+    /**
+     * @param array $clapps
+     * @return InventoryClapp[]
+     */
+    private function createClapps(array $clapps): array
+    {
+        $clappObjs = [];
+
+        foreach (array_filter($clapps) as $field => $value) {
+            $clappObjs[] = new InventoryClapp(['field' => $field, 'value' => $value]);
+        }
+
+        return $clappObjs;
+    }
+
+    /**
+     * @param Inventory $item
+     * @param array $images
+     */
+    private function updateImages(Inventory $item, array $images)
+    {
+        foreach ($images as $existingImage) {
+            if (!isset($existingImage['image_id'])) {
+                continue;
+            }
+
+            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($existingImage);
+        }
+    }
+
+    /**
+     * @param Inventory $item
+     * @param array $existingFiles
+     */
+    private function updateFiles(Inventory $item, array $existingFiles)
+    {
+        foreach ($existingFiles ?? [] as $existingFile) {
+            if (!isset($existingFile['file_id'])) {
+                continue;
+            }
+
+            $fileFields = with(new File())->getFillable();
+            $fileParams = array_intersect_key($existingFile, array_combine($fileFields, array_fill(0, count($fileFields), 0)));
+
+            $inventoryFileFields = with(new InventoryFile())->getFillable();
+            $inventoryFileParams = array_intersect_key($existingFile, array_combine($inventoryFileFields, array_fill(0, count($inventoryFileFields), 0)));
+
+            $item->files()->where('file.id', '=', $existingFile['file_id'])->update($fileParams);
+            $item->inventoryFiles()->where('file_id', '=', $existingFile['file_id'])->update($inventoryFileParams);
+        }
     }
 }
