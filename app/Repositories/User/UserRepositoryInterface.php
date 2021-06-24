@@ -98,4 +98,12 @@ interface UserRepositoryInterface extends Repository {
                                           int $overlay_lower_size = null,
                                           int $overlay_lower_margin = null,
                                           string $overlay_logo_src = null) : User;
+
+    /**
+     * Check admin password
+     * 
+     * @param int $dealerId
+     * @param string $password
+     */
+    public function checkAdminPassword(int $dealerId, string $password): bool;
 }

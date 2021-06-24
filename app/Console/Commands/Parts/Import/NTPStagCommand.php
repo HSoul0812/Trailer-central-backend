@@ -53,6 +53,7 @@ class NTPStagCommand extends Command
                     'alternative_part_number' => $vendorProductNumber,
                     'price' => $suggestedRetail,
                     'dealer_cost' => $customerCost,
+                    'latest_cost' => $customerCost,
                     'dealer_id' => $this->dealerId,
                     'type_id' => self::MISC_PART_TYPE_ID,
                     'brand_id' => self::OTHER_BRAND_ID,
