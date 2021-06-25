@@ -75,6 +75,20 @@ class RestfulControllerV2 extends Controller
     }
 
     /**
+     * @param bool $isExists
+     * @return Response
+     */
+    protected function existsResponse(bool $isExists): Response
+    {
+        return $this->response->array([
+            'response' => [
+                'status' => 'success',
+                'data' => $isExists
+            ]
+        ]);
+    }
+
+    /**
      * @param mixed $data
      * @param TransformerAbstract $transformer
      * @param LengthAwarePaginator $paginator

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Inventory;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -25,7 +26,6 @@ use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
  */
 class InventoryRepository implements InventoryRepositoryInterface
 {
-
     use SortTrait, Transaction;
 
     private const DEFAULT_PAGE_SIZE = 15;
@@ -102,60 +102,23 @@ class InventoryRepository implements InventoryRepositoryInterface
     ];
 
     /**
-     * @param $params
+     * @param array $params
      * @return Inventory
      */
-    public function create($params)
+    public function create($params): Inventory
     {
-        $attributes = $params['attributes'] ?? [];
-        $features = $params['features'] ?? [];
-        $newImages = $params['new_images'] ?? [];
-        $newFiles = $params['new_files'] ?? [];
-        $clapps = $params['clapps'] ?? [];
+        $attributeObjs = $this->createAttributes($params['attributes'] ?? []);
+        $featureObjs = $this->createFeatures($params['features'] ?? []);
+        $clappObjs = $this->createClapps($params['clapps'] ?? []);
 
-        $attributeObjs = [];
-        $featureObjs = [];
-        $inventoryImageObjs = [];
-        $inventoryFilesObjs = [];
-        $clappObjs = [];
+        $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
+        $inventoryFilesObjs = $this->createFiles($params['new_files'] ?? []);
 
         unset($params['attributes']);
         unset($params['features']);
         unset($params['new_images']);
         unset($params['new_files']);
         unset($params['clapps']);
-
-        foreach ($attributes as $attribute) {
-            $attributeObjs[] = new AttributeValue($attribute);
-        }
-
-        foreach ($features as $feature) {
-            $featureObjs[] = new InventoryFeature($feature);
-        }
-
-        foreach ($newImages as $newImage) {
-            $imageObj = new Image($newImage);
-            $imageObj->save();
-
-            $inventoryImageObj = new InventoryImage($newImage);
-            $inventoryImageObj->image_id = $imageObj->image_id;
-
-            $inventoryImageObjs[] = $inventoryImageObj;
-        }
-
-        foreach ($newFiles as $newFile) {
-            $fileObj = new File($newFile);
-            $fileObj->save();
-
-            $inventoryFileObj = new InventoryFile($newFile);
-            $inventoryFileObj->file_id = $fileObj->id;
-
-            $inventoryFilesObjs[] = $inventoryFileObj;
-        }
-
-        foreach (array_filter($clapps) as $field => $value) {
-            $clappObjs[] = new InventoryClapp(['field' => $field, 'value' => $value]);
-        }
 
         $item = new Inventory($params);
 
@@ -185,12 +148,83 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
-     * @param $params
+     * @param array $params
+     * @param array $options
+     *
      * @return Inventory
      */
-    public function update($params)
+    public function update($params, array $options = []): Inventory
     {
+        if (!isset($params['inventory_id'])) {
+            throw new RepositoryInvalidArgumentException('inventory_id has been missed. Params - ' . json_encode($params));
+        }
+
+        /** @var Inventory $item */
         $item = Inventory::findOrFail($params['inventory_id']);
+
+        $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
+
+        if (!empty($inventoryImageObjs)) {
+            $item->inventoryImages()->saveMany($inventoryImageObjs);
+        }
+
+        $this->updateImages($item, $params['existing_images'] ?? []);
+
+        if (!empty($params['images_to_delete'])) {
+            $item->images()->whereIn('image.image_id', array_column($params['images_to_delete'], 'image_id'))->delete();
+        }
+
+        $inventoryFilesObjs = $this->createFiles($params['new_files'] ?? []);
+
+        if (!empty($inventoryFilesObjs)) {
+            $item->inventoryFiles()->saveMany($inventoryFilesObjs);
+        }
+
+        $this->updateFiles($item, $params['existing_files'] ?? []);
+
+        if (!empty($params['files_to_delete'])) {
+            $item->files()->whereIn('file.id', array_column($params['files_to_delete'], 'file_id'))->delete();
+        }
+
+        if ($options['updateAttributes'] ?? false) {
+            $item->attributeValues()->delete();
+
+            $attributeObjs = $this->createAttributes($params['attributes'] ?? []);
+
+            if (!empty($attributeObjs)) {
+                $item->attributeValues()->saveMany($attributeObjs);
+            }
+        }
+
+        if ($options['updateFeatures'] ?? false) {
+            $item->inventoryFeatures()->delete();
+
+            $featureObjs = $this->createFeatures($params['features'] ?? []);
+
+            if (!empty($featureObjs)) {
+                $item->inventoryFeatures()->saveMany($featureObjs);
+            }
+        }
+
+        if ($options['updateClapps'] ?? false) {
+            $item->clapps()->delete();
+
+            $clappObjs = $this->createClapps($params['clapps'] ?? []);
+
+            if (!empty($clappObjs)) {
+                $item->clapps()->saveMany($clappObjs);
+            }
+        }
+
+        unset($params['attributes']);
+        unset($params['features']);
+        unset($params['new_images']);
+        unset($params['existing_images']);
+        unset($params['images_to_delete']);
+        unset($params['new_files']);
+        unset($params['existing_files']);
+        unset($params['files_to_delete']);
+        unset($params['clapps']);
 
         $item->fill($params)->save();
 
@@ -502,5 +536,129 @@ class InventoryRepository implements InventoryRepositoryInterface
             $currentPage,
             ["path" => URL::to('/')."/api/inventory"]
         ))->appends($params);
+    }
+
+    /**
+     * @param array $newImages
+     * @return InventoryImage[]
+     */
+    private function createImages(array $newImages): array
+    {
+        $inventoryImageObjs = [];
+
+        foreach ($newImages as $newImage) {
+            $imageObj = new Image($newImage);
+            $imageObj->save();
+
+            $inventoryImageObj = new InventoryImage($newImage);
+            $inventoryImageObj->image_id = $imageObj->image_id;
+
+            $inventoryImageObjs[] = $inventoryImageObj;
+        }
+
+        return $inventoryImageObjs;
+    }
+
+    /**
+     * @param array $newFiles
+     * @return InventoryFile[]
+     */
+    private function createFiles(array $newFiles): array
+    {
+        $inventoryFilesObjs = [];
+
+        foreach ($newFiles as $newFile) {
+            $fileObj = new File($newFile);
+            $fileObj->save();
+
+            $inventoryFileObj = new InventoryFile($newFile);
+            $inventoryFileObj->file_id = $fileObj->id;
+
+            $inventoryFilesObjs[] = $inventoryFileObj;
+        }
+
+        return $inventoryFilesObjs;
+    }
+
+    /**
+     * @param array $attributes
+     * @return AttributeValue[]
+     */
+    private function createAttributes(array $attributes): array
+    {
+        $attributeObjs = [];
+
+        foreach ($attributes as $attribute) {
+            $attributeObjs[] = new AttributeValue($attribute);
+        }
+
+        return $attributeObjs;
+    }
+
+    /**
+     * @param array $features
+     * @return InventoryFeature[]
+     */
+    private function createFeatures(array $features): array
+    {
+        $featureObjs = [];
+
+        foreach ($features as $feature) {
+            $featureObjs[] = new InventoryFeature($feature);
+        }
+
+        return $featureObjs;
+    }
+
+    /**
+     * @param array $clapps
+     * @return InventoryClapp[]
+     */
+    private function createClapps(array $clapps): array
+    {
+        $clappObjs = [];
+
+        foreach (array_filter($clapps) as $field => $value) {
+            $clappObjs[] = new InventoryClapp(['field' => $field, 'value' => $value]);
+        }
+
+        return $clappObjs;
+    }
+
+    /**
+     * @param Inventory $item
+     * @param array $images
+     */
+    private function updateImages(Inventory $item, array $images)
+    {
+        foreach ($images as $existingImage) {
+            if (!isset($existingImage['image_id'])) {
+                continue;
+            }
+
+            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($existingImage);
+        }
+    }
+
+    /**
+     * @param Inventory $item
+     * @param array $existingFiles
+     */
+    private function updateFiles(Inventory $item, array $existingFiles)
+    {
+        foreach ($existingFiles ?? [] as $existingFile) {
+            if (!isset($existingFile['file_id'])) {
+                continue;
+            }
+
+            $fileFields = with(new File())->getFillable();
+            $fileParams = array_intersect_key($existingFile, array_combine($fileFields, array_fill(0, count($fileFields), 0)));
+
+            $inventoryFileFields = with(new InventoryFile())->getFillable();
+            $inventoryFileParams = array_intersect_key($existingFile, array_combine($inventoryFileFields, array_fill(0, count($inventoryFileFields), 0)));
+
+            $item->files()->where('file.id', '=', $existingFile['file_id'])->update($fileParams);
+            $item->inventoryFiles()->where('file_id', '=', $existingFile['file_id'])->update($inventoryFileParams);
+        }
     }
 }

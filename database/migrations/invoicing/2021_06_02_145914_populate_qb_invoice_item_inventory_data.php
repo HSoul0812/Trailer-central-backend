@@ -2,20 +2,22 @@
 
 declare(strict_types=1);
 
+use App\Helpers\Inventory\InventoryHelper;
 use App\Models\CRM\Dms\Quickbooks\Item;
 use App\Models\CRM\Dms\ServiceOrder;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class PopulateQbInvoiceItemInventoryData extends Migration
 {
     /** @var InventoryServiceInterface */
-    private $service;
+    private $helper;
 
     public function __construct()
     {
-        $this->service = App::make(InventoryServiceInterface::class);
+        $this->helper = new InventoryHelper();
     }
 
     /**
@@ -81,15 +83,15 @@ class PopulateQbInvoiceItemInventoryData extends Migration
         // if the total cost hasn't been calculated yet through the UI, it will calculate here
         $totalOfCost = $item->total_of_cost > 0 ?
             (float)$item->total_of_cost :
-            $this->service->calculateTotalOfCost($costOfUnit, $costOfShipping, $costOfPrep, $costOfRos)
+            $this->helper->calculateTotalOfCost($costOfUnit, $costOfShipping, $costOfPrep, $costOfRos)
                 ->getAmount()
                 ->toFloat();
 
-        $costOverhead = $this->service->calculateCostOverhead($totalOfCost, $pacAmount, $item->pac_type)
+        $costOverhead = $this->helper->calculateCostOverhead($totalOfCost, $pacAmount, $item->pac_type)
             ->getAmount()
             ->toFloat();
 
-        $trueTotalCost = $this->service->calculateTrueTotalCost($trueCost, $costOfShipping, $costOfPrep, $costOfRos)
+        $trueTotalCost = $this->helper->calculateTrueTotalCost($trueCost, $costOfShipping, $costOfPrep, $costOfRos)
             ->getAmount()
             ->toFloat();
 

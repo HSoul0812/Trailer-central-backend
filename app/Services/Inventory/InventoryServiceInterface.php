@@ -13,9 +13,15 @@ interface InventoryServiceInterface
 {
     /**
      * @param array $params
-     * @return Inventory|null
+     * @return Inventory
      */
-    public function create(array $params): ?Inventory;
+    public function create(array $params): Inventory;
+
+    /**
+     * @param array $params
+     * @return Inventory
+     */
+    public function update(array $params): Inventory;
 
     /**
      * @param int $inventoryId
@@ -28,30 +34,4 @@ interface InventoryServiceInterface
      * @return array
      */
     public function deleteDuplicates(int $dealerId): array;
-
-    /**
-     * @param float $costOfUnit
-     * @param float $costOfShipping
-     * @param float $costOfPrep
-     * @param float $costOfRos
-     * @return Money
-     */
-    public function calculateTotalOfCost(float $costOfUnit, float $costOfShipping, float $costOfPrep, float $costOfRos): Money;
-
-    /**
-     * @param float $trueCost
-     * @param float $costOfShipping
-     * @param float $costOfPrep
-     * @param float $costOfRos
-     * @return Money
-     */
-    public function calculateTrueTotalCost(float $trueCost, float $costOfShipping, float $costOfPrep, float $costOfRos): Money;
-
-    /**
-     * @param float $totalOfCost
-     * @param float $pacAmount
-     * @param string $pacType
-     * @return Money
-     */
-    public function calculateCostOverhead(float $totalOfCost, float $pacAmount, string $pacType): Money;
 }

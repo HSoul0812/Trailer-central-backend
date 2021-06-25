@@ -76,6 +76,7 @@ class SaveInventoryTransformer implements TransformerInterface
 
     private const IMAGES_FIELDS = [
         'new_images',
+        'existing_images',
     ];
 
     private const IMAGE_FIELDS_MAPPING = [
@@ -86,6 +87,7 @@ class SaveInventoryTransformer implements TransformerInterface
     private const FILES_FIELDS = [
         'new_files',
         'hidden_files',
+        'existing_files',
     ];
 
     private const ARRAY_VALUES = [
