@@ -53,12 +53,13 @@ class RegisterController extends RestfulControllerV2
     {
         $request = new PostOpenRegisterRequest($request->all());
 
-        if ($request->validate() && $this->registerService->open($request->all()) ) {
-            return $this->response->array([
-                'status' => true
-            ]);
+        if (!$request->validate() || !($registerMessage = $this->registerService->open($request->all()))) {
+            return $this->response->errorBadRequest();
         }
 
-        return $this->response->errorBadRequest();
+        return $this->response->array([
+            'status' => true,
+            'message' => $registerMessage
+        ]);
     }
 }
