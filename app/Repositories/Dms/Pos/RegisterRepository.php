@@ -55,6 +55,8 @@ class RegisterRepository extends RepositoryAbstract implements RegisterRepositor
             'reason' => 'Opening float',
         ]);
         $cashMovement->save();
+
+        return $register;
     }
 
     /**
