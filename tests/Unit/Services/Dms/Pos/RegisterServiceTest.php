@@ -46,7 +46,7 @@ class RegisterServiceTest extends TestCase
 
         $result = $this->service->open($this->requestPayload);
 
-        $this->assertTrue($result);
+        $this->assertSame('A register is already opened!', $result);
     }
 
     public function testOpenNewRegisterSuccessful()
@@ -75,7 +75,7 @@ class RegisterServiceTest extends TestCase
 
         $result = $this->service->open($this->requestPayload);
 
-        $this->assertTrue($result);
+        $this->assertSame('Register has been opened successfully!', $result);
     }
 
     public function testOpenNewRegisterFailed()
