@@ -57,7 +57,6 @@ class RegisterController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $this->createdResponse();
         return $this->response->array([
             'status' => true,
             'message' => $registerMessage
