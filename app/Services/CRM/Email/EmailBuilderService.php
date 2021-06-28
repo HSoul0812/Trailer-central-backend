@@ -264,16 +264,18 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $template = $this->templates->get(['id' => $id]);
 
         // Get Sales Person
-        if(!empty($fromEmail)) {
-            $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+        if(!empty($fromEmail) || !empty($salesPersonId)) {
+            if(!empty($fromEmail)) {
+                $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+            }
+            if(empty($salesPerson->id)) {
+                $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+            }
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
+            $fromEmail = $salesPerson->smtp_email;
         }
-        if(empty($salesPerson->id)) {
-            $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
-        }
-        if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
-        }
-        $fromEmail = $salesPerson->smtp_email;
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
@@ -284,9 +286,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $id,
             'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
-            'sales_person_id' => $salesPerson->id,
+            'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
-            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
+            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
         // Send Email and Return Response
@@ -442,7 +444,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
                 // Dispatch Send EmailBuilder Job
                 $job = new SendEmailBuilderJob($builder);
-                $this->dispatch($job->onQueue('mails'));
+                $this->dispatch($job->onQueue('campaigns'));
 
                 // Send Notice
                 $sentLeads->push($leadId);
@@ -452,7 +454,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->log->error($ex->getMessage(), $ex->getTrace());
                 $errorLeads->push($leadId);
             }
-            sleep(1); // Only Allow 1 Per Second to Prevent Rate Limiting
         }
 
         // Errors Occurred and No Emails Sent?
@@ -480,7 +481,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
             // Dispatch Send EmailBuilder Job
             $job = new SendEmailBuilderJob($builder);
-            $this->dispatch($job->onQueue('mails'));
+            $this->dispatch($job->onQueue('campaigns'));
 
             // Send Notice
             $this->log->info('Sent Email ' . $builder->type . ' #' .
