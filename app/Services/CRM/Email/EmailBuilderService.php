@@ -444,7 +444,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
                 // Dispatch Send EmailBuilder Job
                 $job = new SendEmailBuilderJob($builder);
-                $this->dispatch($job->onQueue('mails'));
+                $this->dispatch($job->onQueue('campaigns'));
 
                 // Send Notice
                 $sentLeads->push($leadId);
@@ -481,7 +481,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
             // Dispatch Send EmailBuilder Job
             $job = new SendEmailBuilderJob($builder);
-            $this->dispatch($job->onQueue('mails'));
+            $this->dispatch($job->onQueue('campaigns'));
 
             // Send Notice
             $this->log->info('Sent Email ' . $builder->type . ' #' .
