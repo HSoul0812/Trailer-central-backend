@@ -336,6 +336,15 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Get Parsed Email
         $parsedEmail = $config->getParsedEmail($emailId);
 
+        // Already Exists?
+        if(($config->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($config->id, $config->leadId)) ||
+           ($config->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($config->id, $config->leadId))) {
+            $this->log->info('Already Sent Email ' . $config->type . ' #' . $config->id .
+                             ' via ' . $config->getAuthConfig() .
+                             ' to: ' . $parsedEmail->getTo());
+            return $parsedEmail;
+        }
+
         // Get SMTP Config
         if(!empty($config->isAuthTypeGmail())) {
             // Get Access Token
