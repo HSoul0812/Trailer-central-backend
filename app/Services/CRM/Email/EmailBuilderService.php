@@ -264,16 +264,18 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $template = $this->templates->get(['id' => $id]);
 
         // Get Sales Person
-        if(!empty($fromEmail)) {
-            $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+        if(!empty($fromEmail) || !empty($salesPersonId)) {
+            if(!empty($fromEmail)) {
+                $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+            }
+            if(empty($salesPerson->id)) {
+                $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+            }
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
+            $fromEmail = $salesPerson->smtp_email;
         }
-        if(empty($salesPerson->id)) {
-            $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
-        }
-        if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
-        }
-        $fromEmail = $salesPerson->smtp_email;
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
