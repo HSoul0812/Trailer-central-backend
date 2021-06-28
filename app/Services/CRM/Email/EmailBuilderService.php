@@ -286,7 +286,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $id,
             'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
-            'sales_person_id' => $salesPerson->id,
+            'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
             'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
