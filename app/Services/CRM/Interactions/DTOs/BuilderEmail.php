@@ -43,6 +43,12 @@ class BuilderEmail
         '{title_of_unit_of_interest}' => 'titleUnitInterest'
     ];
 
+
+    /**
+     * @var string Unsubscribe Link Variable
+     */
+    const UNSUBSCRIBE_LINK_VAR = '[unsubscribe_link]';
+    
     /**
      * @var string Unsubscribe Link Base URL
      */
@@ -255,7 +261,7 @@ class BuilderEmail
         // Append Unsubscribe?
         if($emailId !== null) {
             // Check for Verlafix
-            if(strpos($filled, "[unsubscribe_link]") !== FALSE) {
+            if(strpos($filled, self::UNSUBSCRIBE_LINK_VAR) !== FALSE) {
                 $filled = str_replace(self::UNSUBSCRIBE_LINK_VAR, self::UNSUBSCRIBE_LINK . $emailId, $filled);
             } else {
                 $filled .= $this->getUnsubscribeHtml($emailId);
