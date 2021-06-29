@@ -412,7 +412,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         ]);
 
         // Return False if Nothing Saved
-        return !empty($email->id);
+        return !empty($email->email_id);
     }
 
 
@@ -452,7 +452,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
                 // Log to Database
                 $email = $this->saveToDb($builder);
-                $builder->setEmailId($email->id);
+                $builder->setEmailId($email->email_id);
                 $this->markSent($builder);
 
                 // Dispatch Send EmailBuilder Job
@@ -494,13 +494,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
             // Log to Database
             $email = $this->saveToDb($builder);
-            $builder->setEmailId($email->id);
+            $builder->setEmailId($email->email_id);
 
             // Send Email Directly
             $finalEmail = $this->sendEmail($builder);
 
             // Mark Email As Sent
-            $this->markSEnt($builder);
+            $this->markSent($builder);
             $this->markEmailSent($finalEmail);
 
             // Send Notice
