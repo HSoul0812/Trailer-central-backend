@@ -348,7 +348,8 @@ class BuilderEmail
         return [
             'lead' => $this->leadId,
             'type' => $this->type,
-            $this->type => $this->id
+            $this->type => $this->id,
+            'email' => $this->emailId
         ];
     }
 
