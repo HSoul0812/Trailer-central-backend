@@ -158,6 +158,9 @@ class BuilderEmail
 
         // Get Title of Unit of Interest
         $this->titleUnitInterest = $lead->inventory_title;
+
+        // Get Unique Message ID
+        $this->messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
     }
 
     /**
@@ -348,7 +351,8 @@ class BuilderEmail
         return [
             'lead' => $this->leadId,
             'type' => $this->type,
-            $this->type => $this->id
+            $this->type => $this->id,
+            'email' => $this->emailId
         ];
     }
 
