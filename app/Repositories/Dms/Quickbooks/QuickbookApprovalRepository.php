@@ -184,7 +184,8 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
             $query = $query->whereNotIn('tb_name', ['qb_items', 'qb_item_category']);
         }
         if (isset($params['search_term'])) {
-            $search_term = $params['search_term'];
+            $search_term = preg_replace('/\s+/', '%',filter_var($params['search_term'], FILTER_SANITIZE_STRING));
+
             $query = $query->where(function ($q) use ($params, $search_term) {
                 $q->where('action_type', 'LIKE', "%$search_term%")
                     ->orWhere('created_at', 'LIKE', "%$search_term%")
