@@ -54,6 +54,37 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     /**
+     * Update Sent Blast
+     * 
+     * @param int $blastId
+     * @param int $leadId
+     * @param string $messageId
+     * @throws \Exception
+     * @return BlastSent
+     */
+    public function updateSent(int $blastId, int $leadId, string $messageId): BlastSent {
+        DB::beginTransaction();
+
+        try {
+            // Get Blast Sent Entry
+            $sent = BlastSent::where('email_blasts_id', $blastId)->where('lead_id', $leadId)->first();
+
+            // Update Message ID
+            $sent->fill(['message_id' => $messageId]);
+
+            // Save Blast Sent
+            $sent->save();
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw new \Exception($ex->getMessage());
+        }
+        
+        return $sent;
+    }
+
+    /**
      * Was Blast Already Sent?
      * 
      * @param int $blastId

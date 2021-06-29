@@ -54,6 +54,37 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     /**
+     * Update Sent Campaign
+     * 
+     * @param int $campaignId
+     * @param int $leadId
+     * @param string $messageId
+     * @throws \Exception
+     * @return CampaignSent
+     */
+    public function updateSent(int $campaignId, int $leadId, string $messageId): CampaignSent {
+        DB::beginTransaction();
+
+        try {
+            // Get Campaign Sent Entry
+            $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
+
+            // Update Message ID
+            $sent->fill(['message_id' => $messageId]);
+
+            // Save Campaign Sent
+            $sent->save();
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw new \Exception($ex->getMessage());
+        }
+        
+        return $sent;
+    }
+
+    /**
      * Was Campaign Already Sent?
      * 
      * @param int $campaignId
@@ -64,7 +95,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
         // Get Campaign Sent Entry
         $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
 
-        // Was Blast Sent?
+        // Was Campaign Sent?
         return !empty($sent->drip_campaigns_id);
     }
 }

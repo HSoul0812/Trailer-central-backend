@@ -49,6 +49,7 @@ class SendEmailBuilderJob extends Job
             $finalEmail = $service->sendEmail($this->config);
 
             // Mark Email as Sent
+            $service->markSentMessageId($this->config, $finalEmail);
             $service->markEmailSent($finalEmail);
             $log->info('Email Builder Mailed Successfully', $this->config->getLogParams());
             return true;
