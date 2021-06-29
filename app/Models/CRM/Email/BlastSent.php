@@ -21,7 +21,7 @@ class BlastSent extends Model
      * 
      * @var array<string>
      */
-    protected $primaryKey = ['drip_campaigns_id', 'lead_id'];
+    protected $primaryKey = ['email_blasts_id', 'lead_id'];
 
     /**
      * The name of the "created at" column.
