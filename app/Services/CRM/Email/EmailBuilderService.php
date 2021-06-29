@@ -462,7 +462,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             try {
                 // Get Lead
                 $lead = $this->leads->get(['id' => $leadId]);
-                if(in_array($lead->email_address, $sentEmails)) {
+                if(in_array($lead->email_address, $sentEmails) || empty($lead->email_address)) {
                     continue;
                 }
                 $sentEmails[] = $lead->email_address;

@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Email;
 
+use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,7 +12,16 @@ use Illuminate\Database\Eloquent\Model;
  */
 class CampaignSent extends Model
 {
+    use CompositePrimaryKeys;
+
     protected $table = 'crm_drip_campaigns_sent';
+
+    /**
+     * Composite Primary Key
+     * 
+     * @var array<string>
+     */
+    protected $primaryKey = ['drip_campaigns_id', 'lead_id'];
 
     /**
      * The name of the "created at" column.
