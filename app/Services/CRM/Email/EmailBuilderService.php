@@ -378,15 +378,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             case "campaign":
                 $sent = $this->campaigns->sent([
                     'drip_campaigns_id' => $config->id,
-                    'lead_id' => $config->leadId,
-                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
+                    'lead_id' => $config->leadId
                 ]);
             break;
             case "blast":
                 $sent = $this->blasts->sent([
                     'email_blasts_id' => $config->id,
-                    'lead_id' => $config->leadId,
-                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
+                    'lead_id' => $config->leadId
                 ]);
             break;
         }
