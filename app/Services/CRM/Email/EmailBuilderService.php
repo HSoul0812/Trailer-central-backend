@@ -394,6 +394,28 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     }
 
     /**
+     * Add Message ID to Sent
+     * 
+     * @param BuilderEmail $config
+     * @param ParsedEmail $parsedEmail
+     * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
+     */
+    public function markSentMessageId(BuilderEmail $config, ParsedEmail $parsedEmail): bool {
+        // Handle Based on Type
+        switch($config->type) {
+            case "campaign":
+                $sent = $this->campaigns->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
+            break;
+            case "blast":
+                $sent = $this->blasts->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
+            break;
+        }
+
+        // Return False if Nothing Saved
+        return !empty($sent->lead_id);
+    }
+
+    /**
      * Mark Email as Sent
      * 
      * @param BuilderEmail $config
