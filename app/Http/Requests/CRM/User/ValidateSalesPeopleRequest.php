@@ -7,10 +7,10 @@ use App\Http\Requests\Request;
 class ValidateSalesPeopleRequest extends Request {
     protected $rules = [
         'type' => 'required|in:smtp,imap',
-        'username' => 'required|email',
-        'password' => 'nullable',
+        'username' => 'nullable|email',
+        'password' => 'nullable|string',
         'security' => 'required|in:tls,ssl',
-        'host' => 'nullable',
+        'host' => 'nullable|string',
         'port' => 'nullable|integer',
     ];
 }
