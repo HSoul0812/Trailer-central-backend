@@ -74,5 +74,10 @@ trait SmtpHelper
             Log::error($e->getMessage());
             return false;
         }
+        catch (\Exception $e) {
+            // Log Standard Error
+            Log::error($e->getMessage());
+            return false;
+        }
     }
 }

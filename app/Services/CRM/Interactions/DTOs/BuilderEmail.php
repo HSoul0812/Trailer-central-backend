@@ -133,6 +133,11 @@ class BuilderEmail
     private $toName;
 
     /**
+     * @var int Email ID of Sent Email
+     */
+    private $emailId;
+
+    /**
      * @var string Title of Primary Unit of Interest
      */
     private $titleUnitInterest;
@@ -165,6 +170,18 @@ class BuilderEmail
     {
         // Set To Email
         $this->toEmail = $toEmail;
+    }
+
+    /**
+     * Set Email ID
+     * 
+     * @param int $emailId
+     * @return void
+     */
+    public function setEmailId(int $emailId): void
+    {
+        // Set Email ID
+        $this->emailId = $emailId;
     }
 
 
