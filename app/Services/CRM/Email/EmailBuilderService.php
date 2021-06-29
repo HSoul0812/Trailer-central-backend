@@ -492,9 +492,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Add To Email to Builder Email
             $builder->setToEmail($toEmail);
 
-            // Dispatch Send EmailBuilder Job
-            $job = new SendEmailBuilderJob($builder);
-            $this->dispatch($job->onQueue('emailbuilder'));
+            // Log to Database
+            $email = $this->saveToDb($builder);
+            $builder->setEmailId($email->id);
+
+            // Send Email Directly
+            $finalEmail = $this->sendEmail($builder);
+
+            // Mark Email As Sent
+            $this->markSEnt($builder);
+            $this->markEmailSent($finalEmail);
 
             // Send Notice
             $this->log->info('Sent Email ' . $builder->type . ' #' .
