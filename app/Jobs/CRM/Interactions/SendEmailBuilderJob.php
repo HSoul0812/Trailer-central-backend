@@ -53,8 +53,6 @@ class SendEmailBuilderJob extends Job
             $log->info('Email Builder Mailed Successfully', $this->config->getLogParams());
             return true;
         } catch (\Exception $e) {
-            // Flag it as sent anyway
-            $service->markSent($this->config);
             $log->error('Email Builder Mail error: ' . $e->getMessage(), $e->getTrace());
             throw new SendEmailBuilderJobFailedException($e);
         }
