@@ -8,9 +8,9 @@ class ValidateSalesPeopleRequest extends Request {
     protected $rules = [
         'type' => 'required|in:smtp,imap',
         'username' => 'required|email',
-        'password' => 'required',
+        'password' => 'nullable',
         'security' => 'required|in:tls,ssl',
-        'host' => 'required',
-        'port' => 'required|integer',
+        'host' => 'nullable',
+        'port' => 'nullable|integer',
     ];
 }
