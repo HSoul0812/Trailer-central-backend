@@ -39,6 +39,7 @@ class ServiceOrderTransformer extends TransformerAbstract
             'paid_amount' => (float) $serviceOrder->paid_amount,
             'status' => $serviceOrder->status,
             'status_name' => ServiceOrder::SERVICE_ORDER_STATUS[$serviceOrder->status],
+            'shipping' => (float) ($serviceOrder->shipping > 0 ? $serviceOrder->shipping : 0.0),
         ];
     }
 
