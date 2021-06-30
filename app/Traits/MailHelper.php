@@ -16,13 +16,13 @@ trait MailHelper
         if (!empty($smtpConfig) && $smtpConfig->host) {
             $config = [
                 'driver'        => 'smtp',
-                'host'          => $smtpConfig->host,
+                'host'          => trim($smtpConfig->host),
                 'port'          => $smtpConfig->port ?? '2525',
-                'username'      => $smtpConfig->username,
-                'password'      => $smtpConfig->password,
+                'username'      => trim($smtpConfig->username),
+                'password'      => trim($smtpConfig->password),
                 'encryption'    => $smtpConfig->security,
                 'from'          => [
-                    'address'   => $smtpConfig->username,
+                    'address'   => trim($smtpConfig->username),
                     'name'      => $smtpConfig->fromName
                 ]
             ];

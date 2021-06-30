@@ -339,7 +339,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Get SMTP Config
-        if(!empty($config->isAuthTypeGmail())) {
+        if($smtpConfig->isAuthTypeGmail()) {
             // Get Access Token
             $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
             $smtpConfig->setAccessToken($accessToken);
@@ -348,17 +348,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
-        elseif(!empty($config->isAuthTypeNtlm())) {
+        elseif($smtpConfig->isAuthTypeNtlm()) {
             // Send NTLM Email
             $finalEmail = $this->ntlm->send($config->dealerId, $smtpConfig, $parsedEmail);
         }
         // Get SMTP Config
         else {
-            if(!empty($smtpConfig)) {
-                $this->setSmtpConfig($smtpConfig);
-            }
-
             // Send Email
+            $this->setSmtpConfig($smtpConfig);
             Mail::to($this->getCleanTo($config->getToEmail()))
                 ->send(new EmailBuilderEmail($parsedEmail));
             $finalEmail = $parsedEmail;
