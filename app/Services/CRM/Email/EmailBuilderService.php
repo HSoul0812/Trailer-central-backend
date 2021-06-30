@@ -333,10 +333,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $parsedEmail = $config->getParsedEmail($config->emailId);
 
         // Get Smtp Config
-        if($config->salesPersonId) {
-            $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
-            $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
-        }
+        $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
+        $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
         // Get SMTP Config
         if($smtpConfig->isAuthTypeGmail()) {
