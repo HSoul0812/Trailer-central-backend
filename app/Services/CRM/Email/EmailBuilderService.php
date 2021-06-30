@@ -186,8 +186,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $blast->newDealerUser->id,
             'user_id' => $blast->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail(),
-            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
+            'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail()
         ]);
 
         // Send Emails and Return Response
@@ -229,8 +228,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $campaign->from_email_address ?: $this->getDefaultFromEmail(),
-            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
+            'from_email' => $campaign->from_email_address ?: $this->getDefaultFromEmail()
         ]);
 
         // Send Emails and Return Response
@@ -288,7 +286,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'user_id' => $template->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
-            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
         // Send Email and Return Response
@@ -335,25 +332,30 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Get Parsed Email
         $parsedEmail = $config->getParsedEmail($config->emailId);
 
+        // Get Smtp Config
+        if($config->salesPersonId) {
+            $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
+            $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
+        }
+
         // Get SMTP Config
-        if(!empty($config->isAuthTypeGmail())) {
+        if($smtpConfig->isAuthTypeGmail()) {
             // Get Access Token
-            $accessToken = $this->refreshAccessToken($config->smtpConfig->accessToken);
-            $config->smtpConfig->setAccessToken($accessToken);
+            $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
+            $smtpConfig->setAccessToken($accessToken);
 
             // Send Gmail Email
-            $finalEmail = $this->gmail->send($config->smtpConfig, $parsedEmail);
+            $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
-        elseif(!empty($config->isAuthTypeNtlm())) {
+        elseif($smtpConfig->isAuthTypeNtlm()) {
             // Send NTLM Email
-            $finalEmail = $this->ntlm->send($config->dealerId, $config->smtpConfig, $parsedEmail);
+            $finalEmail = $this->ntlm->send($config->dealerId, $smtpConfig, $parsedEmail);
         }
         // Get SMTP Config
         else {
-            $this->setSmtpConfig($config->smtpConfig);
-
             // Send Email
+            $this->setSmtpConfig($smtpConfig);
             Mail::to($this->getCleanTo($config->getToEmail()))
                 ->send(new EmailBuilderEmail($parsedEmail));
             $finalEmail = $parsedEmail;
