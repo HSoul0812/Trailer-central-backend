@@ -31,6 +31,8 @@ class ServiceOrderTransformer extends TransformerAbstract
             'closed_by_related_unit_sale' => (boolean) $serviceOrder->closed_by_related_unit_sale,
             'type'      => $serviceOrder->type,
             'total_price' => $serviceOrder->total_price,
+            'labor_discount' => $serviceOrder->labor_discount,
+            'part_discount' => $serviceOrder->part_discount,
             'invoice' => $serviceOrder->invoice,
             'receipts' => $this->getReceipts($serviceOrder),
             'location' => $serviceOrder->dealerLocation ? $serviceOrder->dealerLocation->name : null,
