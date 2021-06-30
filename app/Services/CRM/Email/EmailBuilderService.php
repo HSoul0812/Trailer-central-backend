@@ -333,13 +333,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $parsedEmail = $config->getParsedEmail($config->emailId);
 
         // Get Smtp Config
-        if($config->salesPersonId) {
-            $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
-            $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
-        }
+        $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
+        $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
         // Get SMTP Config
-        if($smtpConfig->isAuthTypeGmail()) {
+        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
             // Get Access Token
             $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
             $smtpConfig->setAccessToken($accessToken);
@@ -348,7 +346,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
         }
         // Get NTLM Config
-        elseif($smtpConfig->isAuthTypeNtlm()) {
+        elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
             // Send NTLM Email
             $finalEmail = $this->ntlm->send($config->dealerId, $smtpConfig, $parsedEmail);
         }
