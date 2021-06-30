@@ -5,6 +5,7 @@ namespace Tests\Unit\Services\Parts;
 use App\Events\Parts\PartQtyUpdated;
 use App\Models\Parts\BinQuantity;
 use App\Models\Parts\Part;
+use App\Repositories\Parts\CostHistoryRepositoryInterface;
 use App\Repositories\Parts\CycleCountRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Services\Parts\PartService;
@@ -20,6 +21,7 @@ class PartServiceTest extends TestCase
         $partsData = [
             'id' => 1253300,
             'title' => 'Sample1',
+            'dealer_cost' => 10.5
         ];
         $bins = [
             ['bin_id' => 2, 'old_quantity' => 10, 'quantity' => 15],
@@ -43,12 +45,27 @@ class PartServiceTest extends TestCase
         });
 
         //
-        $this->mock(PartRepositoryInterface::class, function ($mock) {
+        $this->mock(PartRepositoryInterface::class, function ($mock) use ($partsData) {
             $returnPart = new Part();
             $returnPart->id = 1253300;
+            $returnPart->dealer_cost = 5;
+
+            $updatedPart = new Part($partsData);
+            $updatedPart->id = 1253300;
             $mock->shouldReceive('update')
                 ->once()
-                ->andReturns($returnPart);
+                ->andReturns($updatedPart);
+            $mock->shouldReceive('get')->once()->andReturns($returnPart);
+        });
+
+        $this->mock(CostHistoryRepositoryInterface::class, function ($mock) use ($partsData) {
+            $mock->shouldReceive('create')->once()->withArgs([
+                [
+                    'part_id' => $partsData['id'],
+                    'old_cost' => 5,
+                    'new_cost' => $partsData['dealer_cost']
+                ]
+            ]);
         });
 
         Event::fake();

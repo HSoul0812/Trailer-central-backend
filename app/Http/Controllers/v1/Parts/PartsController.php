@@ -153,6 +153,13 @@ class PartsController extends RestfulController
      *     @OA\Parameter(
      *         name="dealer_cost",
      *         in="query",
+     *         description="Part average cost",
+     *         required=false,
+     *         @OA\Schema(type="numeric")
+     *     ),
+     *     @OA\Parameter(
+     *         name="latest_cost",
+     *         in="query",
      *         description="Part dealer cost",
      *         required=false,
      *         @OA\Schema(type="numeric")
@@ -591,6 +598,13 @@ class PartsController extends RestfulController
      *     ),
      *     @OA\Parameter(
      *         name="dealer_cost",
+     *         in="query",
+     *         description="Part average cost",
+     *         required=false,
+     *         @OA\Schema(type="numeric")
+     *     ),
+     *     @OA\Parameter(
+     *         name="latest_cost",
      *         in="query",
      *         description="Part dealer cost",
      *         required=false,

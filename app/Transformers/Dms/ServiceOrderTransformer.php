@@ -16,7 +16,7 @@ class ServiceOrderTransformer extends TransformerAbstract
         'serviceItems', 'partItems', 'miscPartItems', 'otherItems', 'invoice', 'inventory'
     ];
 
-    public function transform($serviceOrder)
+    public function transform(ServiceOrder $serviceOrder): array
     {
         return [
             'id' => $serviceOrder->id,
@@ -28,8 +28,11 @@ class ServiceOrderTransformer extends TransformerAbstract
             'date_in' => $serviceOrder->date_in,
             'date_out' => $serviceOrder->date_out,
             'closed_at' => $serviceOrder->closed_at,
+            'closed_by_related_unit_sale' => (boolean) $serviceOrder->closed_by_related_unit_sale,
             'type'      => $serviceOrder->type,
             'total_price' => $serviceOrder->total_price,
+            'labor_discount' => $serviceOrder->labor_discount,
+            'part_discount' => $serviceOrder->part_discount,
             'invoice' => $serviceOrder->invoice,
             'receipts' => $this->getReceipts($serviceOrder),
             'location' => $serviceOrder->dealerLocation ? $serviceOrder->dealerLocation->name : null,
@@ -63,17 +66,17 @@ class ServiceOrderTransformer extends TransformerAbstract
     {
         return $this->item($serviceOrder->invoice, new InvoiceTransformer());
     }
-    
+
     private function getReceipts(ServiceOrder $serviceOrder)
     {
         $receipts = [];
-        
+
         if ($serviceOrder->invoice && $serviceOrder->invoice->payments) {
             foreach($serviceOrder->invoice->payments as $payment) {
                 $receipts[] = $payment->receipts;
             }
         }
-        
+
         return $receipts;
     }
 

@@ -43,6 +43,12 @@ class BuilderEmail
         '{title_of_unit_of_interest}' => 'titleUnitInterest'
     ];
 
+
+    /**
+     * @var string Unsubscribe Link Variable
+     */
+    const UNSUBSCRIBE_LINK_VAR = '[unsubscribe_link]';
+    
     /**
      * @var string Unsubscribe Link Base URL
      */
@@ -127,6 +133,11 @@ class BuilderEmail
     private $toName;
 
     /**
+     * @var int Email ID of Sent Email
+     */
+    private $emailId;
+
+    /**
      * @var string Title of Primary Unit of Interest
      */
     private $titleUnitInterest;
@@ -147,6 +158,9 @@ class BuilderEmail
 
         // Get Title of Unit of Interest
         $this->titleUnitInterest = $lead->inventory_title;
+
+        // Get Unique Message ID
+        $this->messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
     }
 
     /**
@@ -159,6 +173,18 @@ class BuilderEmail
     {
         // Set To Email
         $this->toEmail = $toEmail;
+    }
+
+    /**
+     * Set Email ID
+     * 
+     * @param int $emailId
+     * @return void
+     */
+    public function setEmailId(int $emailId): void
+    {
+        // Set Email ID
+        $this->emailId = $emailId;
     }
 
 
@@ -255,7 +281,7 @@ class BuilderEmail
         // Append Unsubscribe?
         if($emailId !== null) {
             // Check for Verlafix
-            if(strpos($filled, "[unsubscribe_link]") !== FALSE) {
+            if(strpos($filled, self::UNSUBSCRIBE_LINK_VAR) !== FALSE) {
                 $filled = str_replace(self::UNSUBSCRIBE_LINK_VAR, self::UNSUBSCRIBE_LINK . $emailId, $filled);
             } else {
                 $filled .= $this->getUnsubscribeHtml($emailId);
@@ -325,7 +351,8 @@ class BuilderEmail
         return [
             'lead' => $this->leadId,
             'type' => $this->type,
-            $this->type => $this->id
+            $this->type => $this->id,
+            'email' => $this->emailId
         ];
     }
 

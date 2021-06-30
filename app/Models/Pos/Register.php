@@ -16,4 +16,8 @@ use Illuminate\Database\Eloquent\Model;
 class Register extends Model
 {
     protected $table = 'crm_pos_register';
+
+    protected $fillable = ['outlet_id', 'floating_amount', 'open_notes'];
+
+    public $timestamps = false;
 }

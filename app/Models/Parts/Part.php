@@ -50,6 +50,7 @@ class Part extends Model
         'sku',
         'price',
         'dealer_cost',
+        'latest_cost',
         'msrp',
         'shipping_fee',
         'use_handling_fee',
@@ -115,7 +116,8 @@ class Part extends Model
     ];
 
     protected $casts = [
-        'dealer_cost' => 'float'
+        'dealer_cost' => 'float',
+        'latest_cost' => 'float'
     ];
 
     public static function boot() {

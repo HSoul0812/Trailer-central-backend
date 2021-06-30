@@ -264,16 +264,18 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $template = $this->templates->get(['id' => $id]);
 
         // Get Sales Person
-        if(!empty($fromEmail)) {
-            $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+        if(!empty($fromEmail) || !empty($salesPersonId)) {
+            if(!empty($fromEmail)) {
+                $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+            }
+            if(empty($salesPerson->id)) {
+                $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+            }
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
+            $fromEmail = $salesPerson->smtp_email;
         }
-        if(empty($salesPerson->id)) {
-            $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
-        }
-        if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
-        }
-        $fromEmail = $salesPerson->smtp_email;
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
@@ -284,9 +286,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $id,
             'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
-            'sales_person_id' => $salesPerson->id,
+            'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
-            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
+            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
         ]);
 
         // Send Email and Return Response
@@ -327,12 +329,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Send Email Via SMTP|Gmail|NTLM
      * 
      * @param BuilderEmail $config
-     * @param int $emailId
      * @return ParsedEmail
      */
-    public function sendEmail(BuilderEmail $config, int $emailId): ParsedEmail {
+    public function sendEmail(BuilderEmail $config): ParsedEmail {
         // Get Parsed Email
-        $parsedEmail = $config->getParsedEmail($emailId);
+        $parsedEmail = $config->getParsedEmail($config->emailId);
 
         // Get SMTP Config
         if(!empty($config->isAuthTypeGmail())) {
@@ -369,40 +370,69 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Mark Email as Sent
      * 
      * @param BuilderEmail $config
-     * @param null|ParsedEmail $finalEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
-    public function markSent(BuilderEmail $config, ?ParsedEmail $finalEmail = null): bool {
-        // Set Date Sent
-        if($finalEmail !== null) {
-            $this->emailhistory->update([
-                'id' => $finalEmail->emailHistoryId,
-                'message_id' => $finalEmail->messageId,
-                'body' => $finalEmail->body,
-                'date_sent' => 1
-            ]);
-        }
-
+    public function markSent(BuilderEmail $config): bool {
         // Handle Based on Type
         switch($config->type) {
             case "campaign":
                 $sent = $this->campaigns->sent([
                     'drip_campaigns_id' => $config->id,
-                    'lead_id' => $config->leadId,
-                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
+                    'lead_id' => $config->leadId
                 ]);
             break;
             case "blast":
                 $sent = $this->blasts->sent([
                     'email_blasts_id' => $config->id,
-                    'lead_id' => $config->leadId,
-                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
+                    'lead_id' => $config->leadId
                 ]);
             break;
         }
 
         // Return False if Nothing Saved
         return !empty($sent->lead_id);
+    }
+
+    /**
+     * Add Message ID to Sent
+     * 
+     * @param BuilderEmail $config
+     * @param ParsedEmail $parsedEmail
+     * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
+     */
+    public function markSentMessageId(BuilderEmail $config, ParsedEmail $parsedEmail): bool {
+        // Handle Based on Type
+        switch($config->type) {
+            case "campaign":
+                $sent = $this->campaigns->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
+            break;
+            case "blast":
+                $sent = $this->blasts->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
+            break;
+        }
+
+        // Return False if Nothing Saved
+        return !empty($sent->lead_id);
+    }
+
+    /**
+     * Mark Email as Sent
+     * 
+     * @param BuilderEmail $config
+     * @param null|ParsedEmail $finalEmail
+     * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
+     */
+    public function markEmailSent(ParsedEmail $finalEmail = null): bool {
+        // Set Date Sent
+        $email = $this->emailhistory->update([
+            'id' => $finalEmail->emailHistoryId,
+            'message_id' => $finalEmail->messageId,
+            'body' => $finalEmail->body,
+            'date_sent' => 1
+        ]);
+
+        // Return False if Nothing Saved
+        return !empty($email->email_id);
     }
 
 
@@ -432,7 +462,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             try {
                 // Get Lead
                 $lead = $this->leads->get(['id' => $leadId]);
-                if(in_array($lead->email_address, $sentEmails)) {
+                if(in_array($lead->email_address, $sentEmails) || empty($lead->email_address)) {
                     continue;
                 }
                 $sentEmails[] = $lead->email_address;
@@ -440,9 +470,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 // Add Lead Config to Builder Email
                 $builder->setLeadConfig($lead);
 
+                // Log to Database
+                $email = $this->saveToDb($builder);
+                $builder->setEmailId($email->email_id);
+                $this->markSent($builder);
+
                 // Dispatch Send EmailBuilder Job
                 $job = new SendEmailBuilderJob($builder);
-                $this->dispatch($job->onQueue('mails'));
+                $this->dispatch($job->onQueue('emailbuilder'));
 
                 // Send Notice
                 $sentLeads->push($leadId);
@@ -452,7 +487,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->log->error($ex->getMessage(), $ex->getTrace());
                 $errorLeads->push($leadId);
             }
-            sleep(1); // Only Allow 1 Per Second to Prevent Rate Limiting
         }
 
         // Errors Occurred and No Emails Sent?
@@ -478,9 +512,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Add To Email to Builder Email
             $builder->setToEmail($toEmail);
 
-            // Dispatch Send EmailBuilder Job
-            $job = new SendEmailBuilderJob($builder);
-            $this->dispatch($job->onQueue('mails'));
+            // Log to Database
+            $email = $this->saveToDb($builder);
+            $builder->setEmailId($email->email_id);
+
+            // Send Email Directly
+            $finalEmail = $this->sendEmail($builder);
+
+            // Mark Email As Sent
+            $this->markSent($builder);
+            $this->markEmailSent($finalEmail);
 
             // Send Notice
             $this->log->info('Sent Email ' . $builder->type . ' #' .

@@ -26,6 +26,7 @@ class CreatePartRequest extends Request {
         'sku' => 'required|string|parts_sku_unique',
         'price' => 'numeric',
         'dealer_cost' => 'nullable|numeric',
+        'latest_cost' => 'nullable|numeric',
         'msrp' => 'nullable|numeric',
         'shipping_fee' => 'nullable|numeric',
         'use_handling_fee' => 'nullable|boolean',
