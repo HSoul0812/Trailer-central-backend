@@ -19,6 +19,7 @@ use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
@@ -88,6 +89,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $tokens;
 
     /**
+     * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
+     */
+    protected $users;
+
+    /**
      * @var App\Services\CRM\Interactions\NtlmEmailServiceInterface
      */
     protected $ntlm;
@@ -116,6 +122,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param SalesPersonRepositoryInterface $salespeople
      * @param EmailHistoryRepositoryInterface $emailhistory
      * @param TokenRepositoryInterface $tokens
+     * @param UserRepositoryInterface $users
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
      * @param Manager $fractal
@@ -129,6 +136,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         InteractionsRepositoryInterface $interactions,
         EmailHistoryRepositoryInterface $emailhistory,
         TokenRepositoryInterface $tokens,
+        UserRepositoryInterface $users,
         NtlmEmailServiceInterface $ntlm,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
@@ -142,6 +150,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $this->interactions = $interactions;
         $this->emailhistory = $emailhistory;
         $this->tokens = $tokens;
+        $this->users = $users;
 
         $this->ntlm = $ntlm;
         $this->google = $google;
@@ -336,32 +345,32 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
         $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
-        // Get SMTP Config
+        // Send Gmail Email
         if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
-            // Get Access Token
+            // Refresh Token
             $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
             $smtpConfig->setAccessToken($accessToken);
-
-            // Send Gmail Email
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
         }
-        // Get NTLM Config
+        // Send NTLM Email
         elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
-            // Send NTLM Email
             $finalEmail = $this->ntlm->send($config->dealerId, $smtpConfig, $parsedEmail);
         }
-        // Get SMTP Config
-        else {
-            // Send Email
+        // Send Custom Email
+        elseif($smtpConfig) {
             $this->sendCustomEmail($smtpConfig, $config->getToEmail(), new EmailBuilderEmail($parsedEmail));
-            $finalEmail = $parsedEmail;
+        }
+        // Send Default Email
+        else {
+            $user = $this->users->get(['dealer_id' => $config->dealerId]);
+            $this->sendDefaultEmail($user, $config->getToEmail(), new EmailBuilderEmail($parsedEmail));
         }
 
         // Return Final Email
         $this->log->info('Sent Email ' . $config->type . ' #' . $config->id .
                          ' via ' . $config->getAuthConfig() .
                          ' to: ' . $finalEmail->getTo());
-        return $finalEmail;
+        return $finalEmail ?? $parsedEmail;
     }
 
     /**

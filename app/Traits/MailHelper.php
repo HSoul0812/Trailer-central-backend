@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Config;
 trait MailHelper
 {
     /**
-     * Sent Custom Email
+     * Send Custom Email
      * 
      * @param SmtpConfig $config
      * @param array{email: string, ?name: string} $to}
@@ -27,6 +27,27 @@ trait MailHelper
             'host'      => $config->getHost(),
             'port'      => $config->getPort(),
             'security'  => $config->getSecurity()
+        ];
+
+        // Create CRM Mailer
+        $mailer = app()->makeWith('crm.mailer', $smtpConfig);
+        $mailer->to($this->getCleanTo($to))->send($email);
+    }
+
+    /**
+     * Send Default Email
+     * 
+     * @param User $user
+     * @param array{email: string, ?name: string} $to}
+     * @param Mailable $email
+     * @return void
+     */
+    public function sendDefaultEmail(User $user, array $to, Mailable $email): void
+    {
+        // Get SMTP Config Array
+        $smtpConfig = [
+            'fromName'   => $user->name,
+            'replyEmail' => $user->email
         ];
 
         // Create CRM Mailer

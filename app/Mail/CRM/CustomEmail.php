@@ -51,18 +51,6 @@ class CustomEmail extends Mailable
      */
     public function build()
     {
-        $from = config('mail.from.address', 'noreply@trailercentral.com');
-        $name = config('mail.from.name', 'Trailer Central');
-        if($this->parsedEmail->fromName) {
-            $name = $this->parsedEmail->fromName;
-        }
-
-        $build = $this->from($from, $name);
-
-        if (! empty($this->data['replyToEmail'])) {
-            $build->replyTo($this->data['replyToEmail'], $this->data['replyToName']);
-        }
-
         // HTML is NOT Null?
         if(self::BLADE_HTML !== null) {
             $build->view(self::BLADE_HTML);
@@ -88,23 +76,33 @@ class CustomEmail extends Mailable
      * Get Custom Mailer
      * 
      * @param Application $app
-     * @param array{fromName: string, fromEmail: string, password: string,
-     *              host: string, port: int, security: string} $config
+     * @param array{fromName: string, fromEmail: string, ?password: string,
+     *              ?host: string, ?port: int, ?security: string} $config
      * @return Mailer
      */
     public static function getCustomMailer(Application $app, array $config): Mailer
     {
+        // Set Defaults
+        $host = $config['host'] ?: config('mail.host');
+        $port = $config['port'] ?: config('mail.port');
+        $fromEmail = $config['fromEmail'] ?: config('mail.username');
+        $fromName = $config['fromName'] ?: config('mail.from.name');
+        $password = $config['password'] ?: config('mail.password');
+        $security = $config['security'] ?: config('mail.encryption');
+
         // Create Smtp Transport
-        $transport = new \Swift_SmtpTransport($config['host'], $config['port']);
-        $transport->setUsername($config['fromEmail']);
-        $transport->setPassword($config['password']);
-        $transport->setEncryption($config['security']);
+        $transport = new \Swift_SmtpTransport($host, $port);
+        $transport->setUsername($fromEmail);
+        $transport->setPassword($password);
+        $transport->setEncryption($security);
 
         // Create Swift Mailer
         $swift_mailer = new \Swift_Mailer($transport);
         $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
-        $mailer->alwaysFrom($config['fromEmail'], $config['fromName']);
-        $mailer->alwaysReplyTo($config['fromEmail'], $config['fromName']);
+        $mailer->alwaysFrom($fromEmail, $fromName);
+        if(!empty($config['replyEmail'])) {
+            $mailer->alwaysReplyTo($config['replyEmail'], $config['fromName']);
+        }
 
         // Return Mailer
         return $mailer;
