@@ -570,7 +570,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     private function markBounced(BuilderEmail $config, string $type): void
     {
         // Create Or Update Bounced Entry in DB
-        $this->emailHistory->update([
+        $this->emailhistory->update([
             'id' => $config->emailId,
             'date_skipped' => 1,
             'date_bounced' => ($type === 'bounce') ? 1 : 0,
