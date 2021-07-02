@@ -51,6 +51,9 @@ class CustomEmail extends Mailable
      */
     public function build()
     {
+        // Initialize Build
+        $build = $this;
+
         // HTML is NOT Null?
         if(self::BLADE_HTML !== null) {
             $build->view(self::BLADE_HTML);
