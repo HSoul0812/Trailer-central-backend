@@ -86,12 +86,12 @@ class CustomEmail extends Mailable
     public static function getCustomMailer(Application $app, array $config): Mailer
     {
         // Set Defaults
-        $host = $config['host'] ?: config('mail.host');
-        $port = $config['port'] ?: config('mail.port');
-        $fromEmail = $config['fromEmail'] ?: config('mail.username');
-        $fromName = $config['fromName'] ?: config('mail.from.name');
-        $password = $config['password'] ?: config('mail.password');
-        $security = $config['security'] ?: config('mail.encryption');
+        $host = $config['host'] ?? config('mail.host');
+        $port = $config['port'] ?? config('mail.port');
+        $fromEmail = $config['fromEmail'] ?? config('mail.username');
+        $fromName = $config['fromName'] ?? config('mail.from.name');
+        $password = $config['password'] ?? config('mail.password');
+        $security = $config['security'] ?? config('mail.encryption');
 
         // Create Smtp Transport
         $transport = new \Swift_SmtpTransport($host, $port);
