@@ -123,7 +123,7 @@ class SmtpConfig
      */
     public function getFromName(): ?string
     {
-        return $this->fromName;
+        return trim($this->fromName);
     }
 
     /**
