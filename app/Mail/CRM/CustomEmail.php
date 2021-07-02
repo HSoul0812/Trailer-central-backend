@@ -21,12 +21,18 @@ class CustomEmail extends Mailable
     protected $data;
 
     /**
+     * @var ParsedEmail
+     */
+    protected $parsedEmail;
+
+    /**
      * Create a new message instance.
      *
      * @param ParsedEmail $email
      */
     public function __construct(ParsedEmail $email)
     {
+        $this->parsedEmail = $email;
         $this->data     = ['body' => $email->body];
         $this->subject  = $email->subject;
 
@@ -47,8 +53,8 @@ class CustomEmail extends Mailable
     {
         $from = config('mail.from.address', 'noreply@trailercentral.com');
         $name = config('mail.from.name', 'Trailer Central');
-        if(!empty($this->data['from_name'])) {
-            $name = $this->data['from_name'];
+        if($this->parsedEmail->fromName) {
+            $name = $this->parsedEmail->fromName;
         }
 
         $build = $this->from($from, $name);
@@ -97,8 +103,8 @@ class CustomEmail extends Mailable
         // Create Swift Mailer
         $swift_mailer = new \Swift_Mailer($transport);
         $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
-        $mailer->alwaysFrom($config['fromName'], $config['fromEmail']);
-        $mailer->alwaysReplyTo($config['fromName'], $config['fromEmail']);
+        $mailer->alwaysFrom($config['fromEmail'], $config['fromName']);
+        $mailer->alwaysReplyTo($config['fromEmail'], $config['fromName']);
 
         // Return Mailer
         return $mailer;
