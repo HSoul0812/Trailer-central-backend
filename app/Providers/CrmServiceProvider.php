@@ -74,7 +74,9 @@ class CrmServiceProvider extends ServiceProvider
         });
 
         // Bind CRM Mailer
-        $this->app->bind('crm.mailer', CustomEmail::getCustomMailer);
+        $this->app->bind('crm.mailer', function($app, $config) {
+            return CustomEmail::getCustomMailer($app, $config);
+        });
     }
 
 }
