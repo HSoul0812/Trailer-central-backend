@@ -478,14 +478,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
             // Try/Send Email!
             try {
-                // Get Lead
-                $lead = $this->leads->get(['id' => $leadId]);
-                if(in_array($lead->email_address, $sentEmails) || empty($lead->email_address)) {
-                    continue;
-                }
-                $sentEmails[] = $lead->email_address;
-
                 // Add Lead Config to Builder Email
+                $lead = $this->leads->get(['id' => $leadId]);
                 $builder->setLeadConfig($lead);
 
                 // Log to Database
@@ -499,6 +493,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                     $bounceEmails->push($lead->email_address);
                     continue;
                 }
+
+                // Duplicate?
+                if(in_array($lead->email_address, $sentEmails) || empty($lead->email_address)) {
+                    $this->markBounced($builder, empty($lead->email_address) ? 'invalid' : 'duplicate');
+                    continue;
+                }
+                $sentEmails[] = $lead->email_address;
 
                 // Dispatch Send EmailBuilder Job
                 $job = new SendEmailBuilderJob($builder);
@@ -577,10 +578,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'id' => $config->emailId,
             'message_id' => $parsedEmail->messageId,
             'body' => $parsedEmail->body,
-            'date_skipped' => 1,
+            'was_skipped' => 1,
             'date_bounced' => ($type === 'bounce') ? 1 : 0,
             'date_complained' => ($type === 'complaint') ? 1 : 0,
-            'date_unsubscribed' => ($type === 'unsubscribe') ? 1 : 0
+            'date_unsubscribed' => ($type === 'unsubscribe') ? 1 : 0,
+            'invalid_email' => ($type === 'invalid') ? 1 : 0
         ]);
 
         // Mark Sent With Message ID
