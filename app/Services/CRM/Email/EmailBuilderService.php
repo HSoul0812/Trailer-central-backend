@@ -569,17 +569,19 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     private function markBounced(BuilderEmail $config, string $type): void
     {
+        // Get Parsed Email
+        $parsedEmail = $config->getParsedEmail($config->emailId);
+
         // Create Or Update Bounced Entry in DB
         $this->emailhistory->update([
             'id' => $config->emailId,
+            'message_id' => $parsedEmail->messageId,
+            'body' => $parsedEmail->body,
             'date_skipped' => 1,
             'date_bounced' => ($type === 'bounce') ? 1 : 0,
             'date_complained' => ($type === 'complaint') ? 1 : 0,
             'date_unsubscribed' => ($type === 'unsubscribe') ? 1 : 0
         ]);
-
-        // Get Parsed Email
-        $parsedEmail = $config->getParsedEmail($config->emailId);
 
         // Mark Sent With Message ID
         $this->markSentMessageId($config, $parsedEmail);
