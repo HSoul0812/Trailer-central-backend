@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Mail\CRM\CustomEmail;
 use App\Models\CRM\Dms\Refund;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
