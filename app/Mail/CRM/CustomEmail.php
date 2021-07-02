@@ -88,7 +88,7 @@ class CustomEmail extends Mailable
         // Set Defaults
         $host = $config['host'] ?? config('mail.host');
         $port = $config['port'] ?? config('mail.port');
-        $fromEmail = $config['fromEmail'] ?? config('mail.address.email');
+        $fromEmail = $config['fromEmail'] ?? config('mail.from.address');
         $fromName = $config['fromName'] ?? config('mail.from.name');
         $username = $config['fromEmail'] ?? config('mail.username');
         $password = $config['password'] ?? config('mail.password');
