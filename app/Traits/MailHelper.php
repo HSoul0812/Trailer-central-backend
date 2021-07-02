@@ -4,10 +4,37 @@ namespace App\Traits;
 
 use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
+use Illuminate\Mail\Mailer;
 use Illuminate\Support\Facades\Config;
 
 trait MailHelper
 {
+    /**
+     * Sent Custom Email
+     * 
+     * @param SmtpConfig $config
+     * @param array{email: string, ?name: string} $to}
+     * @param Mailer $email
+     * @return void
+     */
+    public function sendCustomEmail(SmtpConfig $config, array $to, Mailer $email): void
+    {
+        // Get SMTP Config Array
+        $smtpConfig = [
+            'fromName'  => $config->getFromName(),
+            'fromEmail' => $config->getUsername(),
+            'password'  => $config->getPassword(),
+            'host'      => $config->getHost(),
+            'port'      => $config->getPort(),
+            'security'  => $config->getSecurity()
+        ];
+
+        // Create CRM Mailer
+        $mailer = app()->makeWith('crm.mailer', $smtpConfig);
+        $mailer->to($this->getCleanTo($to))->send($email);
+    }
+
+
     /**
      * @param null|SmtpConfig $smtpConfig
      */

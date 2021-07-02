@@ -83,22 +83,23 @@ class CustomEmail extends Mailable
      * Get Custom Mailer
      * 
      * @param App $app
-     * @param SmtpConfig $config
+     * @param array{fromName: string, fromEmail: string, password: string,
+     *              host: string, port: int, security: string} $config
      * @return Mailer
      */
-    public static function getCustomMailer(App $app, SmtpConfig $config): Mailer
+    public static function getCustomMailer(App $app, array $config): Mailer
     {
         // Create Smtp Transport
-        $transport = new \Swift_SmtpTransport($config->getHost(), $config->getPort());
-        $transport->setUsername($config->getUsername());
-        $transport->setPassword($config->getPassword());
-        $transport->setEncryption($config->getSecurity());
+        $transport = new \Swift_SmtpTransport($config['host'], $config['port']);
+        $transport->setUsername($config['fromEmail']);
+        $transport->setPassword($config['password']);
+        $transport->setEncryption($config['security']);
 
         // Create Swift Mailer
         $swift_mailer = new \Swift_Mailer($transport);
         $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
-        $mailer->alwaysFrom($config->getFromEmail(), $config->getUsername());
-        $mailer->alwaysReplyTo($config->getFromEmail(), $config->getUserName());
+        $mailer->alwaysFrom($config['fromName'], $config['fromEmail']);
+        $mailer->alwaysReplyTo($config['fromName'], $config['fromEmail']);
 
         // Return Mailer
         return $mailer;
