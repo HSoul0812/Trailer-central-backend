@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\CRM\Email\BounceRepository;
+use App\Repositories\CRM\Email\BounceRepositoryInterface;
 use App\Repositories\CRM\Email\BlastRepository as EmailBlastRepository;
 use App\Repositories\CRM\Email\BlastRepositoryInterface as EmailBlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepository as EmailCampaignRepository;
@@ -77,6 +79,7 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(NumberRepositoryInterface::class, NumberRepository::class);
 
         // EmailBuilder Repositories
+        $this->app->bind(BounceRepositoryInterface::class, BounceRepository::class);
         $this->app->bind(EmailTemplateRepositoryInterface::class, EmailTemplateRepository::class);
         $this->app->bind(EmailCampaignRepositoryInterface::class, EmailCampaignRepository::class);
         $this->app->bind(EmailBlastRepositoryInterface::class, EmailBlastRepository::class);

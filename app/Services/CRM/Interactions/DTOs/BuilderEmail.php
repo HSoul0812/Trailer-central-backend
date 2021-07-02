@@ -235,11 +235,11 @@ class BuilderEmail
      */
     public function getToEmail() {
         // Initialize To Array
-        $to = ['email' => $this->toEmail];
+        $to = ['email' => trim($this->toEmail)];
 
         // Append Name
         if($this->toName) {
-            $to['name'] = $this->toName;
+            $to['name'] = trim($this->toName);
         }
 
         // Return To
