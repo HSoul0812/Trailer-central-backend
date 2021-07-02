@@ -12,6 +12,7 @@ use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
+use App\Repositories\CRM\Email\BounceRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
@@ -35,7 +36,6 @@ use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Carbon\Carbon;
 
@@ -62,6 +62,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @var App\Repositories\CRM\Email\TemplateRepositoryInterface
      */
     protected $templates;
+
+    /**
+     * @var App\Repositories\CRM\Email\BounceRepositoryInterface
+     */
+    protected $bounces;
 
     /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
@@ -118,6 +123,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param BlastRepositoryInterface $blasts
      * @param CampaignRepositoryInterface $campaigns
      * @param TemplateRepositoryInterface $templates
+     * @param BounceRepositoryInterface $bounces
      * @param LeadRepositoryInterface $leads
      * @param SalesPersonRepositoryInterface $salespeople
      * @param EmailHistoryRepositoryInterface $emailhistory
@@ -131,6 +137,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         BlastRepositoryInterface $blasts,
         CampaignRepositoryInterface $campaigns,
         TemplateRepositoryInterface $templates,
+        BounceRepositoryInterface $bounces,
         LeadRepositoryInterface $leads,
         SalesPersonRepositoryInterface $salespeople,
         InteractionsRepositoryInterface $interactions,
@@ -145,6 +152,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $this->blasts = $blasts;
         $this->campaigns = $campaigns;
         $this->templates = $templates;
+        $this->bounces = $bounces;
         $this->leads = $leads;
         $this->salespeople = $salespeople;
         $this->interactions = $interactions;
@@ -456,31 +464,42 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $sentEmails = [];
         $sentLeads = new Collection();
         $errorLeads = new Collection();
+        $bounceEmails = new Collection();
 
         // Loop Leads
         foreach($leads as $leadId) {
             // Already Exists?
             if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $leadId)) ||
                ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $leadId))) {
+                $this->log->info('Already Sent Email ' . $builder->type . ' #' .
+                        $builder->id . ' to Lead with ID: ' . $leadId);
                 continue;
             }
 
             // Try/Send Email!
             try {
-                // Get Lead
-                $lead = $this->leads->get(['id' => $leadId]);
-                if(in_array($lead->email_address, $sentEmails) || empty($lead->email_address)) {
-                    continue;
-                }
-                $sentEmails[] = $lead->email_address;
-
                 // Add Lead Config to Builder Email
+                $lead = $this->leads->get(['id' => $leadId]);
                 $builder->setLeadConfig($lead);
 
                 // Log to Database
                 $email = $this->saveToDb($builder);
                 $builder->setEmailId($email->email_id);
                 $this->markSent($builder);
+
+                // Email Bounced!
+                if($type = $this->bounces->wasBounced($lead->email_address)) {
+                    $this->markBounced($builder, $type);
+                    $bounceEmails->push($lead->email_address);
+                    continue;
+                }
+
+                // Duplicate?
+                if(in_array($lead->email_address, $sentEmails) || empty($lead->email_address)) {
+                    $this->markBounced($builder, empty($lead->email_address) ? 'invalid' : 'duplicate');
+                    continue;
+                }
+                $sentEmails[] = $lead->email_address;
 
                 // Dispatch Send EmailBuilder Job
                 $job = new SendEmailBuilderJob($builder);
@@ -540,6 +559,34 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->log->error($ex->getMessage(), $ex->getTrace());
             throw new SendBuilderEmailsFailedException;
         }
+    }
+
+    /**
+     * Mark Email as Bounced
+     * 
+     * @param BuilderEmail $config
+     * @param string $type
+     * @return void
+     */
+    private function markBounced(BuilderEmail $config, string $type): void
+    {
+        // Get Parsed Email
+        $parsedEmail = $config->getParsedEmail($config->emailId);
+
+        // Create Or Update Bounced Entry in DB
+        $this->emailhistory->update([
+            'id' => $config->emailId,
+            'message_id' => $parsedEmail->messageId,
+            'body' => $parsedEmail->body,
+            'was_skipped' => 1,
+            'date_bounced' => ($type === 'bounce') ? 1 : 0,
+            'date_complained' => ($type === 'complaint') ? 1 : 0,
+            'date_unsubscribed' => ($type === 'unsubscribe') ? 1 : 0,
+            'invalid_email' => ($type === 'invalid') ? 1 : 0
+        ]);
+
+        // Mark Sent With Message ID
+        $this->markSentMessageId($config, $parsedEmail);
     }
 
     /**
