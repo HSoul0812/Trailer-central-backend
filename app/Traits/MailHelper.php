@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Models\User\User;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Config;
