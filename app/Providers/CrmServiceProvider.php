@@ -71,6 +71,9 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(RefundRepositoryInterface::class, function () {
             return new RefundRepository(Refund::query());
         });
+
+        // Bind CRM Mailer
+        $this->app->bind('crm.mailer', CustomEmail::getCustomerMailer());
     }
 
 }

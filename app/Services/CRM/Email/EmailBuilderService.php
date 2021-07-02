@@ -353,9 +353,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Get SMTP Config
         else {
             // Send Email
-            $this->setSmtpConfig($smtpConfig);
-            Mail::to($this->getCleanTo($config->getToEmail()))
-                ->send(new EmailBuilderEmail($parsedEmail));
+            $mailer = app()->makeWith('crm.mailer', $smtpConfig);
+            $mailer->to($this->getCleanTo($config->getToEmail()))
+                   ->send(new EmailBuilderEmail($parsedEmail));
             $finalEmail = $parsedEmail;
         }
 
