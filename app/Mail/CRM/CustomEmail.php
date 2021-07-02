@@ -2,9 +2,8 @@
 
 namespace App\Mail\CRM;
 
-use App;
-use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Illuminate\Foundation\Application;
 use Illuminate\Mail\Mailer;
 use Illuminate\Mail\Mailable;
 
@@ -82,12 +81,12 @@ class CustomEmail extends Mailable
     /**
      * Get Custom Mailer
      * 
-     * @param App $app
+     * @param Application $app
      * @param array{fromName: string, fromEmail: string, password: string,
      *              host: string, port: int, security: string} $config
      * @return Mailer
      */
-    public static function getCustomMailer(App $app, array $config): Mailer
+    public static function getCustomMailer(Application $app, array $config): Mailer
     {
         // Create Smtp Transport
         $transport = new \Swift_SmtpTransport($config['host'], $config['port']);
