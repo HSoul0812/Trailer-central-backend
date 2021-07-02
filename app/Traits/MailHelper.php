@@ -4,7 +4,7 @@ namespace App\Traits;
 
 use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
-use Illuminate\Mail\Mailer;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Config;
 
 trait MailHelper
@@ -14,10 +14,10 @@ trait MailHelper
      * 
      * @param SmtpConfig $config
      * @param array{email: string, ?name: string} $to}
-     * @param Mailer $email
+     * @param Mailable $email
      * @return void
      */
-    public function sendCustomEmail(SmtpConfig $config, array $to, Mailer $email): void
+    public function sendCustomEmail(SmtpConfig $config, array $to, Mailable $email): void
     {
         // Get SMTP Config Array
         $smtpConfig = [
