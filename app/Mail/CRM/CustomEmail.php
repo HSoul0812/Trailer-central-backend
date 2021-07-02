@@ -88,14 +88,15 @@ class CustomEmail extends Mailable
         // Set Defaults
         $host = $config['host'] ?? config('mail.host');
         $port = $config['port'] ?? config('mail.port');
-        $fromEmail = $config['fromEmail'] ?? config('mail.username');
+        $fromEmail = $config['fromEmail'] ?? config('mail.address.email');
         $fromName = $config['fromName'] ?? config('mail.from.name');
+        $username = $config['fromEmail'] ?? config('mail.username');
         $password = $config['password'] ?? config('mail.password');
         $security = $config['security'] ?? config('mail.encryption');
 
         // Create Smtp Transport
         $transport = new \Swift_SmtpTransport($host, $port);
-        $transport->setUsername($fromEmail);
+        $transport->setUsername($username);
         $transport->setPassword($password);
         $transport->setEncryption($security);
 
