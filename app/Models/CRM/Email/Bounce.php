@@ -5,11 +5,11 @@ namespace App\Models\CRM\Email;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Email Blast
+ * Class Email Bounce
  *
  * @package App\Models\CRM\Email
  */
-class Blast extends Model
+class Bounce extends Model
 {
     /**
      * The table associated with the model.
