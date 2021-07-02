@@ -369,7 +369,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Return Final Email
         $this->log->info('Sent Email ' . $config->type . ' #' . $config->id .
                          ' via ' . $config->getAuthConfig() .
-                         ' to: ' . $finalEmail->getTo());
+                         ' to: ' . $parsedEmail->getTo());
         return $finalEmail ?? $parsedEmail;
     }
 
