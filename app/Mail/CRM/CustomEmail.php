@@ -47,7 +47,7 @@ class CustomEmail extends Mailable
     /**
      * Build the message.
      *
-     * @return $this
+     * @return CustomEmail
      */
     public function build()
     {

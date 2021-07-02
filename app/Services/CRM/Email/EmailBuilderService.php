@@ -89,7 +89,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $tokens;
 
     /**
-     * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
+     * @var App\Repositories\User\UserRepositoryInterface
      */
     protected $users;
 
