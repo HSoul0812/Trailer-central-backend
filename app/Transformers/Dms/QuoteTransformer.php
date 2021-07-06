@@ -25,6 +25,7 @@ class QuoteTransformer extends TransformerAbstract
             'inventory_id' => $quote->inventory_id,
             'inventory_vin' => $quote->inventory_vin,
             'status' => $quote->status,
+            'location' => "{$quote->location->name} ({$quote->location->city}, {$quote->location->region})",
         ];
     }
 }

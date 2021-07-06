@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Dms;
 
+use App\Models\User\DealerLocation;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
@@ -43,7 +44,7 @@ class UnitSale extends Model implements GenericSaleInterface
     protected $appends = ['paid_amount'];
 
     const UPDATED_AT = null;
-    
+
     public function dealer() : BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
@@ -53,7 +54,12 @@ class UnitSale extends Model implements GenericSaleInterface
     {
         return $this->belongsTo(Customer::class, 'buyer_id', 'id');
     }
-    
+
+    public function location()
+    {
+        return $this->belongsTo(DealerLocation::class, 'sales_location_id', 'dealer_location_id');
+    }
+
     public function coCustomer() : BelongsTo
     {
         return $this->belongsTo(Customer::class, 'cobuyer_id', 'id');
@@ -73,7 +79,7 @@ class UnitSale extends Model implements GenericSaleInterface
     {
         return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id');
     }
-    
+
     public function tradeIn() : HasMany
     {
         return $this->hasMany(TradeIn::class, 'unit_sale_id');
@@ -135,7 +141,7 @@ class UnitSale extends Model implements GenericSaleInterface
             $this->accessory_discount +
             $this->labor_discount;
     }
-    
+
     public function getCostOfPrimaryVehicleAttribute() : float
     {
         $costOfVehicle = 0;
@@ -150,7 +156,7 @@ class UnitSale extends Model implements GenericSaleInterface
         }
         return $costOfVehicle;
     }
-    
+
     public function amountFinanced() : float
     {
         $amountFinanced = 0;
@@ -159,10 +165,10 @@ class UnitSale extends Model implements GenericSaleInterface
                 $amountFinanced += $payment->amount;
             }
         }
-        
+
         return $amountFinanced;
     }
-    
+
     public function isFinanced() : bool
     {
         foreach($this->payments as $payment) {
@@ -170,9 +176,9 @@ class UnitSale extends Model implements GenericSaleInterface
                 return true;
             }
         }
-        
+
         return false;
-    } 
+    }
 
     public function taxTotal() : float
     {
@@ -184,9 +190,9 @@ class UnitSale extends Model implements GenericSaleInterface
                         $taxAmount += $item->itemPrice;
                     }
                 }
-            }            
+            }
         }
-        
+
         return $taxAmount;
     }
 
