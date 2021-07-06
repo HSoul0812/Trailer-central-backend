@@ -17,7 +17,8 @@ class SalesPersonTransformer extends TransformerAbstract
         'allSales',
         'smtp',
         'imap',
-        'folders'
+        'folders',
+        'authTypes'
     ];
 
     public function transform(SalesPerson $salesPerson)
@@ -66,6 +67,13 @@ class SalesPersonTransformer extends TransformerAbstract
                 'security' => $salesPerson->imap_security,
                 'failed' => $salesPerson->imap_validate
             ];
+        });
+    }
+
+    public function includeAuthTypes(SalesPerson $salesPerson)
+    {
+        return $this->item($salesPerson, function($salesPerson) {
+            return $salesPerson->auth_types;
         });
     }
 

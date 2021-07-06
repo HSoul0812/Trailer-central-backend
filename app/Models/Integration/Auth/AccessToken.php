@@ -17,6 +17,7 @@ class AccessToken extends Model
     // Define Token Types
     const TOKEN_TYPES = [
         'google' => 'Google',
+        'office365' => 'Office 365',
         'facebook' => 'Facebook'
     ];
     const TOKEN_GOOGLE = 'google';
@@ -33,7 +34,7 @@ class AccessToken extends Model
     // Define Supported Token Types
     const RELATION_TOKENS = [
         'system_emails' => 'google',
-        'sales_person' => 'google',
+        'sales_person' => ['google', 'office365'],
         'fbapp_page' => 'facebook',
         'fbapp_catalog' => 'facebook'
     ];

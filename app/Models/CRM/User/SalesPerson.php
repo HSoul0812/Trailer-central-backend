@@ -38,13 +38,41 @@ class SalesPerson extends Model implements Filterable
     const TABLE_NAME = 'crm_sales_person';
 
     /**
-     * @array auth type map from key => name
+     * @const array of currently supported auth types for email
      */
     const AUTH_TYPES = [
+        'google' => 'Gmail',
+        'office365' => 'Office 365',
+        'ntlm' => 'MS Exchange',
+        'custom' => 'Custom'
+    ];
+
+    /**
+     * @const array of currently supported auth types for email
+     */
+    const AUTH_TYPE_METHODS = [
+        'google' => 'oauth',
+        'office365' => 'oauth',
+        'ntlm' => 'smtp',
+        'custom' => 'smtp'
+    ];
+    const AUTH_METHOD_NTLM = 'ntlm';
+    const AUTH_METHOD_CUSTOM = 'custom';
+
+    /**
+     * @const array custom smtp auth type map from key => name
+     */
+    const CUSTOM_AUTH = [
         'auto' => 'Auto Detect',
         'PLAIN' => 'PLAIN',
-        'LOGIN' => 'LOGIN',
-        'NTLM'  => 'NTLM',
+        'LOGIN' => 'LOGIN'
+    ];
+
+    /**
+     * @const array ntlm smtp auth type map from key => name
+     */
+    const NTLM_AUTH = [
+        'NTLM' => 'MS Exchange'
     ];
 
     /**
@@ -210,6 +238,39 @@ class SalesPerson extends Model implements Filterable
 
         // Return Default Folders
         return EmailFolder::getDefaultFolders();
+    }
+
+
+    /**
+     * Return Auth Types Array Map
+     * 
+     * @return array<array{label: string, method: string, auth: array}>
+     */
+    public function getAuthTypesAttribute(): array {
+        // Loop Auth Types
+        $authTypes = [];
+        foreach(self::AUTH_TYPES as $type => $label) {
+            // Get Method
+            $method = self::AUTH_TYPE_METHODS[$type];
+
+            // Get Auth Types
+            $auth = [];
+            if($type === self::AUTH_METHOD_NTLM) {
+                $auth = self::NTLM_AUTH;
+            } elseif($type === self::AUTH_METHOD_CUSTOM) {
+                $auth = self::CUSTOM_AUTH;
+            }
+
+            // Append Auth Types
+            $authTypes[$type] = [
+                'label' => $label,
+                'method' => $method,
+                'auth' => $auth
+            ];
+        }
+
+        // Return Auth Types
+        return $authTypes;
     }
 
     /**
