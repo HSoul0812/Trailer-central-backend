@@ -36,7 +36,8 @@ class SalesPersonTransformer extends TransformerAbstract
             'is_financing' => $salesPerson->is_financing,
             'is_trade' => $salesPerson->is_trade,
             'signature' => $salesPerson->signature,
-            'dealer_location_id' => $salesPerson->dealer_location_id
+            'dealer_location_id' => $salesPerson->dealer_location_id,
+            'auth_config' => $salesPerson->auth_config
         ];
     }
 

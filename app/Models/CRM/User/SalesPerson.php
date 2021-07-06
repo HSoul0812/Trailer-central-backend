@@ -184,6 +184,18 @@ class SalesPerson extends Model implements Filterable
     }
 
     /**
+     * Active Access Token
+     * 
+     * @return HasOne
+     */
+    public function activeToken()
+    {
+        return $this->hasOne(AccessToken::class, 'relation_id', 'id')
+                    ->whereRelationType('sales_person')
+                    ->ofMany('issued_at', 'max');
+    }
+
+    /**
      * Google Access Token
      * 
      * @return HasOne
@@ -240,6 +252,26 @@ class SalesPerson extends Model implements Filterable
         return EmailFolder::getDefaultFolders();
     }
 
+
+    /**
+     * Return Auth Config Type
+     * 
+     * @return string
+     */
+    public function getAuthConfigAttribute(): string {
+        // Access Token Exists?
+        if(!empty($this->activeToken)) {
+            return $this->activeToken->token_type;
+        }
+
+        // Return Auth Config
+        if($this->smtp_auth === strtolower(self::AUTH_METHOD_NTLM)) {
+            return self::AUTH_METHOD_NTLM;
+        }
+
+        // Return Custom
+        return self::AUTH_METHOD_CUSTOM;
+    }
 
     /**
      * Return Auth Types Array Map
