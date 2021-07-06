@@ -3,6 +3,8 @@
 namespace App\Repositories\Integration\Auth;
 
 use App\Repositories\Repository;
+use App\Models\Integration\Auth\AccessToken;
+use Illuminate\Database\Eloquent\Collection;
 
 interface TokenRepositoryInterface extends Repository {
     /**
