@@ -21,7 +21,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
         $params['import_source'] = $csvKey;
 
         $bulkUpload = BulkPostUpload::create($params);
-        dispatch((new ProcessBulkUpload($bulkUpload))->onQueue('blog_posts'));
+        dispatch((new ProcessBulkUpload($bulkUpload))->onQueue('blog-posts'));
         return $bulkUpload;
     }
 
