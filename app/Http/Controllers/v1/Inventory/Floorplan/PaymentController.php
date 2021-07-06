@@ -84,7 +84,12 @@ class PaymentController extends RestfulController
         $request = new GetPaymentRequest($request->all());
         
         if ( $request->validate() ) {
-            $payments = $this->payment->getAll($request->all());
+            if ($request->inventory_id) {
+                $payments = $this->payment->getByInventory($request->all());
+            } else {
+                $payments = $this->payment->getAll($request->all());
+            }
+            
             return $this->response->paginator($payments, new PaymentTransformer());
         }
         
