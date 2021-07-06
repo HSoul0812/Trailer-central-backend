@@ -110,9 +110,9 @@ class TokenRepository implements TokenRepositoryInterface {
      * Get Access Token Via Relation
      * 
      * @param array $params
-     * @return AccessToken
+     * @return null|AccessToken
      */
-    public function getRelation(array $params): AccessToken {
+    public function getRelation(array $params): ?AccessToken {
         // Find Token From Relation
         $token = AccessToken::where('relation_type', $params['relation_type'])
                             ->where('relation_id', $params['relation_id']);
