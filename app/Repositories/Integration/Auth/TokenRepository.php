@@ -112,12 +112,36 @@ class TokenRepository implements TokenRepositoryInterface {
      * @param array $params
      * @return AccessToken
      */
-    public function getRelation($params) {
+    public function getRelation(array $params): AccessToken {
         // Find Token From Relation
-        return AccessToken::where('token_type', $params['token_type'])
-                          ->where('relation_type', $params['relation_type'])
-                          ->where('relation_id', $params['relation_id'])
-                          ->first();
+        $token = AccessToken::where('relation_type', $params['relation_type'])
+                            ->where('relation_id', $params['relation_id']);
+
+        // Token Type Exists?
+        if(!empty($params['token_type'])) {
+            $token = $token->where('token_type', $params['token_type']);
+        }
+        // Find MOST RECENT Token Instead!
+        else {
+            $token = $this->addSortQuery($token, 'issued_at');
+        }
+
+        // Return First
+        return $token->first();
+    }
+
+    /**
+     * Get Access Tokens Via Relation
+     * 
+     * @param string $type
+     * @param int $id
+     * @return Collection<AccessToken>
+     */
+    public function getRelations(string $type, int $id): Collection {
+        // Find Token From Relation
+        return AccessToken::where('relation_type', $type)
+                          ->where('relation_id', $id)
+                          ->get();
     }
 
     /**

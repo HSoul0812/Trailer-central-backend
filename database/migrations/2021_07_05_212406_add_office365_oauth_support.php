@@ -12,6 +12,10 @@ class AddOffice365OauthSupport extends Migration
      */
     public function up()
     {
+        Schema::table('integration_token', function (Blueprint $table) {
+            $table->index(['relation_type', 'relation_id']);
+        });
+
         // Update Integration Token Relation Type
         DB::statement("ALTER TABLE integration_token MODIFY COLUMN relation_type ENUM('" . implode("', '", array_keys(AccessToken::RELATION_TYPES)) . "')");
     }
