@@ -267,7 +267,7 @@ class SalesPerson extends Model implements Filterable
         }
 
         // Return Auth Config
-        if($this->smtp_auth === strtolower(self::AUTH_METHOD_NTLM)) {
+        if($this->smtp_auth === strtoupper(self::AUTH_METHOD_NTLM)) {
             return self::AUTH_METHOD_NTLM;
         }
 
