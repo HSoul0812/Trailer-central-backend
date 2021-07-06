@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\User;
 
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\User\CheckDealerLocationRequest;
 use App\Http\Requests\User\DeleteDealerLocationRequest;
 use App\Http\Requests\User\GetDealerLocationQuoteFeeRequest;
 use App\Http\Requests\User\GetDealerLocationRequest;
@@ -108,6 +109,28 @@ class DealerLocationController extends RestfulControllerV2 {
 
         if ($request->validate()) {
             return $this->sendResponseForSingleLocation($id, $request->getInclude());
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * @return Response|void
+     *
+     * @throws ResourceException when there was a failed validation
+     */
+    public function check(string $name, Request $request): Response
+    {
+        $request = new CheckDealerLocationRequest($request->all() + ['name' => $name]);
+
+        if ($request->validate()) {
+            $exists = $this->dealerLocation->existByName(
+                $request->getName(),
+                $request->getDealerId(),
+                $request->getId()
+            );
+
+            return $this->existsResponse($exists);
         }
 
         $this->response->errorBadRequest();
