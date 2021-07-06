@@ -198,6 +198,7 @@ return [
     'interaction_type_valid' => 'Interaction type needs to be: '. implode(',', Interaction::INTERACTION_TYPES),
     'sales_person_valid' => 'Sales person ID must exist or be 0',
     'dealer_location_valid' => 'Dealer Location ID must exist or be 0',
+    'unique_dealer_location_name' => 'Dealer Location must be unique',
     'website_valid' => 'Website ID must exist or be 0',
     'inventory_valid' => 'Inventory ID must exist',
     'stock_type_valid' => 'The selected :attribute is invalid.',

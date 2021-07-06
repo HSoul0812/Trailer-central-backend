@@ -14,7 +14,7 @@ class SaveDealerLocationRequest extends Request
     {
         return [
             'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
-            'name' => 'required|string|min:3,max:255',
+            'name' => 'required|string|min:3,max:255|unique_dealer_location_name:'.$this->getId(),
             'contact' => 'required|string|min:1,max:255',
             'website' => 'nullable|string|min:0,max:255',
             'email' => 'nullable|string|min:0,max:255',

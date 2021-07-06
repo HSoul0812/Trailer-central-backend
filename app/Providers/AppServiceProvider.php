@@ -132,6 +132,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
         \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
+        \Validator::extend('unique_dealer_location_name', 'App\Rules\User\ValidDealerLocationName@passes');
         \Validator::extend('tax_calculator_valid', 'App\Rules\User\ValidTaxCalculator@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('website_exists', 'App\Rules\Website\WebsiteExists@passes');
