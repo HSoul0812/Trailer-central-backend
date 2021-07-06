@@ -184,15 +184,14 @@ class SalesPerson extends Model implements Filterable
     }
 
     /**
-     * Active Access Token
+     * Access Tokens
      * 
-     * @return HasOne
+     * @return HasMany
      */
-    public function activeToken()
+    public function tokens()
     {
-        return $this->hasOne(AccessToken::class, 'relation_id', 'id')
-                    ->whereRelationType('sales_person')
-                    ->ofMany('issued_at', 'max');
+        return $this->hasMany(AccessToken::class, 'relation_id', 'id')
+                    ->whereRelationType('sales_person');
     }
 
     /**
@@ -260,8 +259,11 @@ class SalesPerson extends Model implements Filterable
      */
     public function getAuthConfigAttribute(): string {
         // Access Token Exists?
-        if(!empty($this->activeToken)) {
-            return $this->activeToken->token_type;
+        if(!empty($this->tokens)) {
+            $token = $this->tokens()->orderBy('issued_at', 'desc')->first();
+            if(!empty($token->token_type)) {
+                return $token->token_type;
+            }
         }
 
         // Return Auth Config
