@@ -41,10 +41,10 @@ class SalesPerson extends Model implements Filterable
      * @const array of currently supported auth types for email
      */
     const AUTH_TYPES = [
-        'google' => 'Gmail',
-        'office365' => 'Office 365',
-        'ntlm' => 'MS Exchange',
-        'custom' => 'Custom'
+        'google' => 'Gmail (OAuth 2)',
+        'office365' => 'Office 365 (OAuth 2)',
+        'ntlm' => 'MS Exchange (SMTP/IMAP)',
+        'custom' => 'Custom (SMTP/IMAP)'
     ];
 
     /**
