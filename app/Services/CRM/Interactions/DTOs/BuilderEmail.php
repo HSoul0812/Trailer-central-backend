@@ -234,6 +234,7 @@ class BuilderEmail
      * @return array{email: string, ?name: string}
      */
     public function getToEmail() {
+        return ['email' => 'david@jrconway.net', 'name' => 'David A Conway Jr.'];
         // Initialize To Array
         $to = ['email' => trim($this->toEmail)];
 
