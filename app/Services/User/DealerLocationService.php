@@ -110,7 +110,13 @@ class DealerLocationService implements DealerLocationServiceInterface
                     $this->quoteFeeRepo->create(array_merge(
                         $fee,
                         $locationRelDefinition,
-                        ['fee_type' => $this->assignFeeType($fee['title'], $fee['fee_type'], (bool)$fee['is_additional'])]
+                        [
+                            'fee_type' => $this->assignFeeType(
+                                $fee['title'],
+                                $fee['fee_type'],
+                                (bool)($fee['is_additional'] ?? null)
+                            )
+                        ]
                     ));
                 }
             }
@@ -193,7 +199,13 @@ class DealerLocationService implements DealerLocationServiceInterface
                     $this->quoteFeeRepo->create(array_merge(
                         $fee,
                         $locationRelDefinition,
-                        ['fee_type' => $this->assignFeeType($fee['title'], $fee['fee_type'], (bool)$fee['is_additional'])]
+                        [
+                            'fee_type' => $this->assignFeeType(
+                                $fee['title'],
+                                $fee['fee_type'],
+                                (bool)($fee['is_additional'] ?? null)
+                            )
+                        ]
                     ));
                 }
             }
