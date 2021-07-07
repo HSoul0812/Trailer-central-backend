@@ -2,10 +2,8 @@
 
 namespace App\Services\Import\Blog;
 
-use App\Events\Parts\PartQtyUpdated;
 use App\Services\Import\Blog\CsvImportServiceInterface;
 use App\Repositories\Website\Blog\BulkUploadRepositoryInterface;
-use Elasticsearch\Endpoints\Bulk;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Bulk\Blog\BulkPostUpload;
 use App\Repositories\Website\Blog\PostRepositoryInterface;
@@ -53,38 +51,38 @@ class CsvImportService implements CsvImportServiceInterface
 
     public function __construct(
         BulkUploadRepositoryInterface $bulkUploadRepository,
-        PostRepositoryInterface $postRepository,
+        PostRepositoryInterface $postRepository
     )
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
         $this->blogRepository = $postRepository;
-        $this->log = $this->log::channel('blog');
+        $this->log = Log::channel('blog');
     }
 
-    public function run()
+    public function run(): bool
     {
         echo "Running...".PHP_EOL;
-        $this->log::info('Starting import for bulk upload ID: ' . $this->bulkPostUpload->id);
+        $this->log->info('Starting import for bulk upload ID: ' . $this->bulkPostUpload->id);
         echo "Validating...".PHP_EOL;
         try {
            if (!$this->validate()) {
-                $this->log::info('Invalid bulk upload ID: ' . $this->bulkPostUpload->id . ' setting validation_errors...');
+                $this->log->info('Invalid bulk upload ID: ' . $this->bulkPostUpload->id . ' setting validation_errors...');
                 $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
                 return false;
             }
         } catch (\Exception $ex) {
-             $this->log::info('Invalid bulk upload ID: ' . $this->bulkPostUpload->id . ' setting validation_errors...');
+            $this->log->info('Invalid bulk upload ID: ' . $this->bulkPostUpload->id . ' setting validation_errors...');
             $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
             return false;
         }
 
         echo "Data Valid... Importing...".PHP_EOL;
-        $this->log::info('Validation passed for bulk upload ID: ' . $this->bulkPostUpload->id . ' proceeding with import...');
+        $this->log->info('Validation passed for bulk upload ID: ' . $this->bulkPostUpload->id . ' proceeding with import...');
         $this->import();
         return true;
     }
 
-    public function setBulkPostUpload (BulkPostUpload $bulkPostUpload)
+    public function setBulkPostUpload(BulkPostUpload $bulkPostUpload)
     {
         $this->bulkPostUpload = $bulkPostUpload;
     }
@@ -103,7 +101,7 @@ class CsvImportService implements CsvImportServiceInterface
             }
 
             echo 'Importing bulk uploaded post on bulk upload : ' . $this->bulkPostUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
-            $this->log::info('Importing bulk uploaded post on bulk upload : ' . $this->bulkPostUpload->id . ' with data ' . json_encode($csvData));
+            $this->log->info('Importing bulk uploaded post on bulk upload : ' . $this->bulkPostUpload->id . ' with data ' . json_encode($csvData));
 
             try {
                 // Get Part Data
@@ -114,15 +112,15 @@ class CsvImportService implements CsvImportServiceInterface
                 if (!$post) {
                     $this->validationErrors[] = "Image inaccesible";
                     $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                    $this->log::info('Error found on post for bulk upload : ' . $this->bulkPostUpload->id . ' : ' . $ex->getTraceAsString());
+                    $this->log->info('Error found on post for bulk upload : ' . $this->bulkPostUpload->id . ' : ' . $ex->getTraceAsString());
                     throw new \Exception("Image inaccesible");
                 }
 
             } catch (\Exception $ex) {
                 $this->validationErrors[] = $ex->getTraceAsString();
                 $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                $this->log::info('Error found on blog post for bulk upload : ' . $this->bulkPostUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
-                $this->log::info("Index to header mapping: {$this->indexToheaderMapping}");
+                $this->log->info('Error found on blog post for bulk upload : ' . $this->bulkPostUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
+                $this->log->info("Index to header mapping: {$this->indexToheaderMapping}");
             }
 
         });
@@ -276,7 +274,7 @@ class CsvImportService implements CsvImportServiceInterface
         return false;
     }
 
-    private function outputValidationErrors()
+    public function outputValidationErrors()
     {
         $jsonEncodedValidationErrors = json_encode($this->validationErrors);
         if (strlen($jsonEncodedValidationErrors) > self::MAX_VALIDATION_ERROR_CHAR_COUNT) {
