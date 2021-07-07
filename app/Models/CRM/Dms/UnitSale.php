@@ -55,7 +55,7 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->belongsTo(Customer::class, 'buyer_id', 'id');
     }
 
-    public function location()
+    public function location(): BelongsTo
     {
         return $this->belongsTo(DealerLocation::class, 'sales_location_id', 'dealer_location_id');
     }
