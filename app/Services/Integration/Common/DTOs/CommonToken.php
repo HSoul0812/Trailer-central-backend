@@ -201,7 +201,7 @@ class CommonToken
      */
     public function getExpiresIn(): int
     {
-        return $this->expiresIn;
+        return $this->expiresIn ?? 0;
     }
 
     /**
