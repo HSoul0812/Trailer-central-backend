@@ -4,7 +4,6 @@ namespace App\Http\Controllers\v1\Integration;
 
 use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
-use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Http\Requests\Integration\Auth\GetTokenRequest;
 use App\Http\Requests\Integration\Auth\CreateTokenRequest;
@@ -233,6 +232,7 @@ class AuthController extends RestfulControllerV2
         $request = new ValidateTokenRequest($request->all());
         if ( $request->validate() ) {
             // Get Common Token
+            var_dump($request->all());
             $accessToken = new CommonToken($request->all());
 
             // Return Auth
