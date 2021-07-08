@@ -352,6 +352,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Get Smtp Config
         $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
         $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
+        $this->log->info('Sent Email ' . $config->type . ' #' . $config->id .
+                         ' via ' . $config->getAuthConfig() .
+                         ' to: ' . $parsedEmail->getTo() . ' ' .
+                         ' additional: ' . json_encode($config->getToEmail()));
+        return $parsedEmail;
 
         // Send Gmail Email
         if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
