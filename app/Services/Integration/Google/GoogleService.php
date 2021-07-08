@@ -146,16 +146,8 @@ class GoogleService implements GoogleServiceInterface
             $result['is_expired'] = true;
         }
 
-        // Set Message
-        if(!empty($result['is_valid'])) {
-            if(!empty($result['is_expired'])) {
-                $result['message'] = 'Your Google Authorization has expired! Please try connecting again.';
-            } else {
-                $result['message'] = 'Your Google Authorization has been validated successfully!';
-            }
-        } else {
-            $result['message'] = 'Your Google Authorization failed! Please try connecting again.';
-        }
+        // Get Message
+        $result['message'] = $this->getValidateMessage($result['is_valid'], $result['is_expired']);
 
         // Return Payload Results
         return $result;
@@ -188,7 +180,8 @@ class GoogleService implements GoogleServiceInterface
         $result = [
             'new_token' => [],
             'is_valid' => $this->validateIdToken($accessToken->getIdToken()),
-            'is_expired' => $client->isAccessTokenExpired()
+            'is_expired' => $client->isAccessTokenExpired(),
+            'message' => ''
         ];
 
         // Try to Refesh Access Token!
@@ -201,6 +194,9 @@ class GoogleService implements GoogleServiceInterface
                 $result['new_token'] = $refresh;
             }
         }
+
+        // Get Message
+        $result['message'] = $this->getValidateMessage($result['is_valid'], $result['is_expired']);
 
         // Return Payload Results
         return $result;
@@ -266,5 +262,24 @@ class GoogleService implements GoogleServiceInterface
 
         // Return Result
         return $result;
+    }
+
+    /**
+     * Get Validation Message
+     * 
+     * @param bool $valid
+     * @param bool $expired
+     * @return string
+     */
+    private function getValidateMessage(bool $valid = false, bool $expired = false): string {
+        // Return Validation Message
+        if(!empty($valid)) {
+            if(!empty($expired)) {
+                return 'Your Google Authorization has expired! Please try connecting again.';
+            } else {
+                return 'Your Google Authorization has been validated successfully!';
+            }
+        }
+        return 'Your Google Authorization failed! Please try connecting again.';
     }
 }
