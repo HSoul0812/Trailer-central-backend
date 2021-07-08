@@ -99,7 +99,7 @@ class SaveDealerLocationRequest extends Request
         return sprintf(
             'required|string|min:3,max:255|unique_dealer_location_name:%s,%s',
             $this->getDealerId(),
-            $this->getDealerId()
+            $this->getId()
         );
     }
 }
