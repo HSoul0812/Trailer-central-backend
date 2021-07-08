@@ -217,7 +217,7 @@ class AuthService implements AuthServiceInterface
         ];
 
         // Validate Access Token
-        if(!empty($accessToken->tokenType)) {
+        if($accessToken->tokenType) {
             if($accessToken->tokenType === 'google') {
                 return $this->google->validateCustom($accessToken);
             }
