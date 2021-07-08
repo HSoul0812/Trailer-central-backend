@@ -16,6 +16,16 @@ class CommonToken
     use WithConstructor, WithGetter;
 
     /**
+     * @var int Dealer ID
+     */
+    private $dealerId;
+
+    /**
+     * @var string Token Type
+     */
+    private $tokenType;
+
+    /**
      * @var string Access Token
      */
     private $accessToken;

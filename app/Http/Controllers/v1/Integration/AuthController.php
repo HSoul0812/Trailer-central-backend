@@ -232,7 +232,6 @@ class AuthController extends RestfulControllerV2
         $request = new ValidateTokenRequest($request->all());
         if ( $request->validate() ) {
             // Get Common Token
-            var_dump($request->all());
             $accessToken = new CommonToken($request->all());
 
             // Return Auth
