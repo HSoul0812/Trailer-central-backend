@@ -164,6 +164,9 @@ class Collector extends Resource
                 Text::make('Skip Units By Location', 'skip_locations')->hideFromIndex()->help(
                     'Enter the locations (as they show in the source file) you would like to skip separated by commas. Example: Grand Rapids, New York City, Miami'
                 ),
+                Text::make('Types Affected By the Feed', 'only_types')->hideFromIndex()->help(
+                    'Enter the types of the inventory you want this feed to affect separated by commas. For example if you want this feed to affect only trailers and boats you would enter: 1,5'
+                ),
             ]),
 
             HasMany::make('Specifications', 'specifications', CollectorSpecification::class)
