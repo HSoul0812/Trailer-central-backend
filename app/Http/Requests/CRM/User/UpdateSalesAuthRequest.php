@@ -8,8 +8,8 @@ class UpdateSalesAuthRequest extends Request {
 
     protected $rules = [
         'id' => 'required|integer',
-        'token_type' => 'required|valid_token_type',
-        'access_token' => 'required|string',
+        'token_type' => 'nullable|valid_token_type',
+        'access_token' => 'nullable|string',
         'refresh_token' => 'string',
         'id_token' => 'string',
         'issued_at' => 'date_format:Y-m-d H:i:s',
@@ -43,7 +43,8 @@ class UpdateSalesAuthRequest extends Request {
         'imap.security' => 'nullable|sales_security_type',
         'imap.failed' => 'nullable|boolean',
         'folders' => 'array',
-        'folders.*' => 'string'
+        'folders.id' => 'nullable|int',
+        'folders.name' => 'string'
     ];
 
 }
