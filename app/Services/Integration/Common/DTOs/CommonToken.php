@@ -3,6 +3,8 @@
 namespace App\Services\Integration\Common\DTOs;
 
 use Carbon\Carbon;
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 
 /**
  * Class CommonToken
@@ -11,6 +13,8 @@ use Carbon\Carbon;
  */
 class CommonToken
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @var string Access Token
      */
