@@ -184,7 +184,8 @@ class AuthService implements AuthServiceInterface
         // Initialize Access Token
         $validate = [
             'is_valid' => false,
-            'is_expired' => true
+            'is_expired' => true,
+            'message' => ''
         ];
 
         // Validate Access Token

@@ -126,7 +126,8 @@ class GoogleService implements GoogleServiceInterface
         $result = [
             'new_token' => [],
             'is_valid' => $this->validateIdToken($accessToken->id_token),
-            'is_expired' => $client->isAccessTokenExpired()
+            'is_expired' => $client->isAccessTokenExpired(),
+            'message' => ''
         ];
 
         // Try to Refesh Access Token!
@@ -143,6 +144,17 @@ class GoogleService implements GoogleServiceInterface
         // Not Valid?
         if(empty($result['is_valid'])) {
             $result['is_expired'] = true;
+        }
+
+        // Set Message
+        if(!empty($result['is_valid'])) {
+            if(!empty($result['is_expired'])) {
+                $result['message'] = 'Your Google Authorization has expired! Please try connecting again.';
+            } else {
+                $result['message'] = 'Your Google Authorization has been validated successfully!';
+            }
+        } else {
+            $result['message'] = 'Your Google Authorization failed! Please try connecting again.';
         }
 
         // Return Payload Results
