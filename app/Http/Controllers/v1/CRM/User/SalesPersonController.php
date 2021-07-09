@@ -6,7 +6,7 @@ use App\Http\Controllers\RestfulController;
 use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
 use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
-use App\Services\CRM\User\SalesAuthServiceInterface;
+use App\Services\CRM\User\SalesPersonServiceInterface;
 use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -25,9 +25,9 @@ class SalesPersonController extends RestfulController {
     protected $salesPerson;
 
     /**
-     * @var SalesAuthServiceInterface
+     * @var SalesPersonServiceInterface
      */
-    protected $salesAuth;
+    protected $salesService;
 
     /**
      * @var SalesPersonTransformer
@@ -41,14 +41,14 @@ class SalesPersonController extends RestfulController {
 
     public function __construct(
         SalesPersonRepositoryInterface $salesPersonRepo,
-        SalesAuthServiceInterface $salesAuthService,
+        SalesPersonServiceInterface $salesPersonService,
         SalesPersonTransformer $salesPersonTransformer,
         Manager $fractal
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'salesReport']);
 
         $this->salesPerson = $salesPersonRepo;
-        $this->salesAuth = $salesAuthService;
+        $this->salesService = $salesPersonService;
         $this->salesPersonTransformer = $salesPersonTransformer;
         $this->fractal = $fractal;
 
@@ -95,7 +95,7 @@ class SalesPersonController extends RestfulController {
         if ($request->validate()) {
             // Return Validation
             return $this->response->array([
-                'data' => $this->salesAuth->validate($request->all())
+                'data' => $this->salesService->validate($request->all())
             ]);
         }
         

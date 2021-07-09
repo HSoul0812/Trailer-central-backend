@@ -45,7 +45,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $salesPerson = SalesPerson::findOrFail($params['id']);
 
         DB::transaction(function() use (&$salesPerson, $params) {
-            // Fill Text Details
+            // Fill Sales Person Details
             $salesPerson->fill($params)->save();
         });
 

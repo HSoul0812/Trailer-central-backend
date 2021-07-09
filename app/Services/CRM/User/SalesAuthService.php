@@ -2,10 +2,9 @@
 
 namespace App\Services\CRM\User;
 
-use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Service\CRM\User\SalesPersonServiceInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Traits\SmtpHelper;
 use App\Transformers\CRM\User\SalesPersonTransformer;
@@ -21,6 +20,11 @@ use League\Fractal\Resource\Item;
 class SalesAuthService implements SalesAuthServiceInterface
 {
     use SmtpHelper;
+
+    /**
+     * @var SalesPersonService
+     */
+    protected $salesPersonService;
 
     /**
      * @var SalesPersonRepository
@@ -46,11 +50,13 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Construct Sales Auth Service
      */
     public function __construct(
+        SalesPersonServiceInterface $salesPersonService,
         SalesPersonRepositoryInterface $salesPersonRepo,
         TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
         Manager $fractal
     ) {
+        $this->salesPersonService = $salesPersonService;
         $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
         $this->auth = $auth;
@@ -79,16 +85,18 @@ class SalesAuthService implements SalesAuthServiceInterface
     }
 
     /**
-     * Create Sales Auth
+     * Create Sales Person and Auth
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
     public function create($params) {
+        // Create Sales Person
+        $salesPerson = $this->salesPersonService->create($params);
+
         // Adjust Request
         $params['relation_type'] = 'sales_person';
-        $params['relation_id'] = $params['id'];
-        unset($params['id']);
+        $params['relation_id'] = $salesPerson->id;
 
         // Create Access Token
         $accessToken = $this->tokens->create($params);
@@ -101,12 +109,15 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Update Sales Auth
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
     public function update($params) {
+        // Create Sales Person
+        $salesPerson = $this->salesPersonService->update($params);
+
         // Adjust Request
         $params['relation_type'] = 'sales_person';
-        $params['relation_id'] = $params['id'];
+        $params['relation_id'] = $salesPerson->id;
         unset($params['id']);
 
         // Create Access Token
@@ -114,37 +125,6 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Return Response
         return $this->response($accessToken, $params);
-    }
-
-    /**
-     * Validate SMTP/IMAP Details
-     * 
-     * @param array $params {type: smtp|imap,
-     *                       username: string,
-     *                       password: string,
-     *                       security: string (ssl|tls)
-     *                       host: string
-     *                       port: int}
-     * @return bool
-     */
-    public function validate(array $params): bool {
-        // Get Smtp Config Details
-        if($params['type'] === SalesPerson::TYPE_SMTP) {
-            // Get SMTP Details
-            $config = new SmtpConfig([
-                'username' => $params['username'],
-                'password' => $params['password'],
-                'security' => $params['security'],
-                'host' => $params['host'],
-                'port' => $params['port']
-            ]);
-
-            // Validate SMTP Config
-            return $this->validateSmtp($config);
-        }
-
-        // Return Response
-        return false;
     }
 
 
