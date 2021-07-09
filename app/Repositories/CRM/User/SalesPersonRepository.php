@@ -167,7 +167,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      */
     public function getByEmail(int $userId, string $email, ?int $ignoreId = null): ?SalesPerson {
         // Get SalesPerson By User ID and Email
-        $salesPerson = SalesPerson::where('user_id', $userId)->where('email', $email);
+        $salesPerson = SalesPerson::withTrashed()->where('user_id', $userId)->where('email', $email);
 
         // Ignore ID?
         if($ignoreId !== null) {
