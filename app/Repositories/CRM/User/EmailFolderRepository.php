@@ -142,7 +142,7 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
     {
         // Get All Folders to Delete
         $folders = EmailFolder::where('sales_person_id', $salesPersonId)
-                              ->whereNotIn('id', $excludeIds)
+                              ->whereNotIn('folder_id', $excludeIds)
                               ->get();
 
         // Loop Folders
