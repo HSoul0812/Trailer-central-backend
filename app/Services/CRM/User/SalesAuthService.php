@@ -133,7 +133,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         if(!empty($params['token_type'])) {
             $accessToken = $this->tokens->create($params);
         } else {
-            $this->tokens->deleteIfExists($params);
+            $this->tokens->delete($params);
         }
 
         // Return Response
