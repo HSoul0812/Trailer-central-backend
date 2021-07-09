@@ -42,7 +42,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @return true if deleted, false if doesn't exist
      */
     public function delete($params) {
-        return SalesPerson::withTrashed()->findOrFail($params['id'])->delete();
+        return SalesPerson::findOrFail($params['id'])->delete();
     }
 
     /**
@@ -52,9 +52,12 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @return SalesPerson
      */
     public function update($params) {
-        $salesPerson = SalesPerson::findOrFail($params['id']);
+        $salesPerson = SalesPerson::withTrashed()->findOrFail($params['id']);
 
         DB::transaction(function() use (&$salesPerson, $params) {
+            // Set Deleted At to NULL
+            $params['deleted_at'] = NULL;
+
             // Fill Sales Person Details
             $salesPerson->fill($params)->save();
         });
