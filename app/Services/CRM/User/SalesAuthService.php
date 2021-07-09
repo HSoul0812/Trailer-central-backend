@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\User;
 
+use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\User\SalesPersonServiceInterface;
@@ -81,7 +82,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         $accessToken = $this->tokens->getRelation($params);
 
         // Return Response
-        return $this->response($accessToken, $params);
+        return $this->response($params, $accessToken);
     }
 
     /**
