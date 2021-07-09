@@ -2,6 +2,8 @@
 
 namespace App\Services\CRM\User;
 
+use App\Models\CRM\User\SalesPerson;
+
 interface SalesPersonServiceInterface {
     /**
      * Create Sales Auth
@@ -10,6 +12,7 @@ interface SalesPersonServiceInterface {
      * @return SalesPerson
      */
     public function create(array $rawParams): SalesPerson;
+
     /**
      * Update Sales Auth
      * 

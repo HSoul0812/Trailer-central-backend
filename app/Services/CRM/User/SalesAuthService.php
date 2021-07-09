@@ -90,7 +90,7 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @param array $params
      * @return array
      */
-    public function create($params) {
+    public function create(array $params): array {
         // Create Sales Person
         $salesPerson = $this->salesPersonService->create($params);
 
@@ -99,10 +99,13 @@ class SalesAuthService implements SalesAuthServiceInterface
         $params['relation_id'] = $salesPerson->id;
 
         // Create Access Token
-        $accessToken = $this->tokens->create($params);
+        $accessToken = null;
+        if(!empty($params['token_type'])) {
+            $accessToken = $this->tokens->create($params);
+        }
 
         // Return Response
-        return $this->response($accessToken, $params);
+        return $this->response($params, $accessToken);
     }
 
     /**
@@ -111,7 +114,7 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @param array $params
      * @return array
      */
-    public function update($params) {
+    public function update(array $params): array {
         // Create Sales Person
         $salesPerson = $this->salesPersonService->update($params);
 
@@ -121,21 +124,26 @@ class SalesAuthService implements SalesAuthServiceInterface
         unset($params['id']);
 
         // Create Access Token
-        $accessToken = $this->tokens->create($params);
+        $accessToken = null;
+        if(!empty($params['token_type'])) {
+            $accessToken = $this->tokens->create($params);
+        } else {
+            $this->tokens->deleteIfExists($params);
+        }
 
         // Return Response
-        return $this->response($accessToken, $params);
+        return $this->response($params, $accessToken);
     }
 
 
     /**
      * Return Response
      * 
-     * @param AccessToken $accessToken
      * @param array $params
+     * @param null|AccessToken $accessToken
      * @return array
      */
-    public function response($accessToken, $params) {
+    public function response(array $params, ?AccessToken $accessToken = null) {
         // Get Sales Person
         $salesPerson = $this->salesPerson->get([
             'sales_person_id' => $params['relation_id']
@@ -144,7 +152,18 @@ class SalesAuthService implements SalesAuthServiceInterface
         $this->fractal->parseIncludes('smtp,imap,folders,authTypes');
         $response = $this->fractal->createData($item)->toArray();
 
-        // Return Response
-        return $this->auth->response($accessToken, $response);
+        // Set Defaults
+        $response['data'] = null;
+        $response['validate'] = [
+            'is_valid' => false,
+            'is_expired' => true,
+            'message' => ''
+        ];
+
+        // Return Response With Access Token
+        if($accessToken !== null) {
+            return $this->auth->response($accessToken, $response);
+        }
+        return $response;
     }
 }
