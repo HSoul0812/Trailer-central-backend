@@ -55,7 +55,7 @@ class SalesPersonService implements SalesPersonServiceInterface
         $this->updateFolders($salesPerson, $params['folders']);
 
         // Return Response
-        return $this->salespeople->get(['id' => $salesPerson->id]);
+        return $this->salespeople->get(['sales_person_id' => $salesPerson->id]);
     }
 
     /**
@@ -75,7 +75,7 @@ class SalesPersonService implements SalesPersonServiceInterface
         $this->updateFolders($salesPerson, $params['folders']);
 
         // Return Sales Person
-        return $this->salespeople->get(['id' => $salesPerson->id]);
+        return $this->salespeople->get(['sales_person_id' => $salesPerson->id]);
     }
 
     /**
