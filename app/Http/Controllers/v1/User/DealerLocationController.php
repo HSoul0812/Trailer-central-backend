@@ -50,7 +50,7 @@ class DealerLocationController extends RestfulControllerV2 {
     )
     {
         $this->middleware('setDealerIdOnRequest')->only([
-            'index', 'quoteFees', 'destroy', 'update', 'show', 'create', 'update'
+            'index', 'quoteFees', 'destroy', 'update', 'show', 'create', 'update', 'check'
         ]);
         $this->dealerLocation = $dealerLocationRepo;
         $this->dealerLocationQuoteFee = $dealerLocationRepoFee;
