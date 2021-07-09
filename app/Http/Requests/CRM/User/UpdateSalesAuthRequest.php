@@ -43,9 +43,6 @@ class UpdateSalesAuthRequest extends Request {
         'imap.security' => 'nullable|sales_security_type',
         'imap.failed' => 'nullable|boolean',
         'folders' => 'array',
-        'folders.id' => 'nullable|int',
-        'folders.name' => 'string',
-        'folders' => 'array',
         'folders.*.id' => 'int',
         'folders.*.name' => 'string'
     ];

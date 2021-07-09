@@ -48,6 +48,13 @@ class SalesPersonService implements SalesPersonServiceInterface
         // Merge SMTP/IMAP
         $params = $this->mergeSmtpImap($rawParams);
 
+        // Find Existing Sales Person Email
+        $existing = $this->salespeople->getByEmail($params['user_id'], $params['email']);
+        if(!empty($existing->id)) {
+            $params['id'] = $existing->id;
+            return $this->update($params);
+        }
+
         // Create Access Token
         $salesPerson = $this->salespeople->create($params);
 
