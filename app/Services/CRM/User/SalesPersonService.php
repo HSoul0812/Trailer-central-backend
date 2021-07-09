@@ -5,6 +5,7 @@ namespace App\Services\CRM\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Traits\SmtpHelper;
 use Illuminate\Support\Collection;
 
@@ -101,9 +102,9 @@ class SalesPersonService implements SalesPersonServiceInterface
      *                       security: string (ssl|tls)
      *                       host: string
      *                       port: int}
-     * @return bool
+     * @return ConfigValidate
      */
-    public function validate(array $params): bool {
+    public function validate(array $params): ConfigValidate {
         // Get Smtp Config Details
         if($params['type'] === SalesPerson::TYPE_SMTP) {
             // Get SMTP Details
@@ -120,7 +121,11 @@ class SalesPersonService implements SalesPersonServiceInterface
         }
 
         // Return Response
-        return false;
+        return new ConfigValidate([
+            'type' => $params['type'],
+            'success' => false,
+            'message' => SalesPerson::INVALID_AUTH_TYPE_MESSAGE
+        ]);
     }
 
 
