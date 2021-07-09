@@ -3,6 +3,7 @@
 namespace App\Services\CRM\User;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 
 interface SalesPersonServiceInterface {
     /**
@@ -30,7 +31,7 @@ interface SalesPersonServiceInterface {
      *                       security: string (ssl|tls)
      *                       host: string
      *                       port: int}
-     * @return bool
+     * @return ConfigValidate
      */
-    public function validate(array $params): bool;
+    public function validate(array $params): ConfigValidate;
 }
