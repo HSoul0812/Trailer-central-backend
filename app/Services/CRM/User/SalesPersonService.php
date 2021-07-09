@@ -3,8 +3,10 @@
 namespace App\Services\CRM\User;
 
 use App\Models\CRM\User\SalesPerson;
+use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\SmtpHelper;
+use Illuminate\Support\Collection;
 
 /**
  * Class SalesPersonService
@@ -21,12 +23,19 @@ class SalesPersonService implements SalesPersonServiceInterface
     protected $salespeople;
 
     /**
+     * @var EmailFolderRepository
+     */
+    protected $folders;
+
+    /**
      * Construct Sales Auth Service
      */
     public function __construct(
-        SalesPersonRepositoryInterface $salesPerson
+        SalesPersonRepositoryInterface $salesPerson,
+        EmailFolderRepositoryInterface $folders
     ) {
         $this->salespeople = $salesPerson;
+        $this->folders = $folders;
     }
 
     /**
@@ -43,7 +52,7 @@ class SalesPersonService implements SalesPersonServiceInterface
         $salesPerson = $this->salespeople->create($params);
 
         // Update Folders
-        $this->updateFolders($salesPerson->id, $params['folders']);
+        $this->updateFolders($salesPerson, $params['folders']);
 
         // Return Response
         return $this->salespeople->get(['id' => $salesPerson->id]);
@@ -63,7 +72,7 @@ class SalesPersonService implements SalesPersonServiceInterface
         $salesPerson = $this->salespeople->update($params);
 
         // Update Folders
-        $this->updateFolders($salesPerson->id, $params['folders']);
+        $this->updateFolders($salesPerson, $params['folders']);
 
         // Return Sales Person
         return $this->salespeople->get(['id' => $salesPerson->id]);
@@ -153,5 +162,32 @@ class SalesPersonService implements SalesPersonServiceInterface
 
         // Return Results
         return array_merge($params, $smtp, $imap);
+    }
+
+    /**
+     * Update Folders for Sales Person
+     * 
+     * @param SalesPerson $salesPerson
+     * @param array<{?id: int, name: string}> $folders
+     * @return Collection<int>
+     */
+    private function updateFolders(SalesPerson $salesPerson, array $folders): Collection {
+        // Folders Exist?
+        $folderIds = [];
+        foreach($folders as $folder) {
+            $emailFolder = $this->folders->createOrUpdate([
+                'id' => $folder['id'] ?? 0,
+                'sales_person_id' => $salesPerson->id,
+                'user_id' => $salesPerson->user_id,
+                'name' => $folder['name']
+            ]);
+            $folderIds[] = $emailFolder->folder_id;
+        }
+
+        // Delete All Folders NOT Updated Here!
+        $this->folders->deleteBulk($salesPerson->id, $folderIds);
+
+        // Return Final Folder ID's
+        return collect($folderIds);
     }
 }

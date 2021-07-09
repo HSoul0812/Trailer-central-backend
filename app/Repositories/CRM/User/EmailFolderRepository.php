@@ -130,4 +130,30 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
 
         return $folders->paginate($params['per_page'])->appends($params);
     }
+
+    /**
+     * Delete Multiple Folders for Sales Person
+     * 
+     * @param int $salesPersonId
+     * @param array $excludeIds
+     * @return int Number of successfully deleted folders
+     */
+    public function deleteBulk(int $salesPersonId, array $excludeIds): int
+    {
+        // Get All Folders to Delete
+        $folders = EmailFolder::where('sales_person_id', $salesPersonId)
+                              ->whereNotIn('id', $excludeIds)
+                              ->get();
+
+        // Loop Folders
+        $deleted = 0;
+        foreach($folders as $folder) {
+            if($this->delete($folder->folder_id)) {
+                $deleted++;
+            }
+        }
+
+        // Return Result
+        return $deleted;
+    }
 }
