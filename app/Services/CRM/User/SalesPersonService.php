@@ -75,6 +75,13 @@ class SalesPersonService implements SalesPersonServiceInterface
         // Merge SMTP/IMAP
         $params = $this->mergeSmtpImap($rawParams);
 
+        // Find Existing Sales Person Email On a DIFFERENT Sales Person
+        $existing = $this->salespeople->getByEmail($params['user_id'], $params['email'], $params['id']);
+        if(!empty($existing->id)) {
+            $this->salespeople->delete(['id' => $params['id']]);
+            $params['id'] = $existing->id;
+        }
+
         // Update Sales Person
         $salesPerson = $this->salespeople->update($params);
 

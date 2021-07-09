@@ -36,6 +36,16 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
     }
 
     /**
+     * Delete Sales Person
+     * 
+     * @param array $params
+     * @return true if deleted, false if doesn't exist
+     */
+    public function delete($params) {
+        return Template::findOrFail($params['id'])->delete();
+    }
+
+    /**
      * Update Sales Person
      *
      * @param array $params
@@ -152,11 +162,20 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      *
      * @param int $userId
      * @param string $email
+     * @param null|int $ignoreId
      * @return null|SalesPerson
      */
-    public function getByEmail(int $userId, string $email): ?SalesPerson {
+    public function getByEmail(int $userId, string $email, ?int $ignoreId = null): ?SalesPerson {
         // Get SalesPerson By User ID and Email
-        return SalesPerson::where('user_id', $userId)->where('email', $email)->first();
+        $salesPerson = SalesPerson::where('user_id', $userId)->where('email', $email);
+
+        // Ignore ID?
+        if($ignoreId !== null) {
+            $salesPerson = $salesPerson->where('id', '<>', $ignoreId);
+        }
+
+        // Return First Entry
+        return $salesPerson->first();
     }
 
     /**
