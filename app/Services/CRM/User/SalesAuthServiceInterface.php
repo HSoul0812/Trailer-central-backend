@@ -2,6 +2,8 @@
 
 namespace App\Services\CRM\User;
 
+use App\Models\Integration\Auth\AccessToken;
+
 interface SalesAuthServiceInterface {
     /**
      * Show Sales Auth Response
