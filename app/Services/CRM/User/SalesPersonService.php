@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\User;
 
+use App\Exceptions\CRM\User\DuplicateChangeEmailSalesPersonException;
 use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
@@ -79,8 +80,11 @@ class SalesPersonService implements SalesPersonServiceInterface
         // Find Existing Sales Person Email On a DIFFERENT Sales Person
         $existing = $this->salespeople->getByEmail($params['user_id'], $params['email'], $params['id']);
         if(!empty($existing->id)) {
-            $this->salespeople->delete(['id' => $params['id']]);
-            $params['id'] = $existing->id;
+            // Delete current sales person and update matching one instead
+            //$this->salespeople->delete(['id' => $params['id']]);
+            //$params['id'] = $existing->id;
+            // Throw exception instead!
+            throw new DuplicateChangeEmailSalesPersonException;
         }
 
         // Update Sales Person
