@@ -10,6 +10,7 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\Integration\Auth\AccessToken;
 use App\Utilities\JsonApi\Filterable;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Traits\SmtpHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -326,9 +327,9 @@ class SalesPerson extends Model implements Filterable
     /**
      * Validate SMTP Details Using Swift Transport
      * 
-     * @return bool
+     * @return ConfigValidate
      */
-    public function getSmtpValidateAttribute(): bool {
+    public function getSmtpValidateAttribute(): ConfigValidate {
         return $this->validateSalesPersonSmtp($this);
     }
 
@@ -338,8 +339,11 @@ class SalesPerson extends Model implements Filterable
      * 
      * @return bool
      */
-    public function getImapValidateAttribute(): bool {
-        return $this->imap_failed;
+    public function getImapValidateAttribute(): ConfigValidate {
+        return new ConfigValidate([
+            'type' => 'imap',
+            'success' => !$this->imap_failed
+        ]);
     }
 
     public static function getTableName() {

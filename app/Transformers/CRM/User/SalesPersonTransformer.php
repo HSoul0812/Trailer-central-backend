@@ -51,7 +51,8 @@ class SalesPersonTransformer extends TransformerAbstract
                 'port' => $salesPerson->smtp_port,
                 'security' => $salesPerson->smtp_security,
                 'auth' => $salesPerson->smtp_auth,
-                'failed' => !$salesPerson->smtp_validate,
+                'failed' => !$salesPerson->smtp_validate->success,
+                'message' => $salesPerson->smtp_validate->getMessage(),
                 'error' => $salesPerson->smtp_error
             ];
         });
@@ -66,7 +67,8 @@ class SalesPersonTransformer extends TransformerAbstract
                 'host' => $salesPerson->imap_server,
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
-                'failed' => $salesPerson->imap_validate
+                'failed' => !$salesPerson->imap_validate->success,
+                'message' => $salesPerson->imap_validate->getMessage()
             ];
         });
     }
