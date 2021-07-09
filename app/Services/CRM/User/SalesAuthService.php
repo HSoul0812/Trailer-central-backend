@@ -115,8 +115,12 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return array
      */
     public function update(array $params): array {
-        // Create Sales Person
-        $salesPerson = $this->salesPersonService->update($params);
+        // Update Sales Person If Needed
+        if(isset($params['email'])) {
+            $salesPerson = $this->salesPersonService->update($params);
+        } else {
+            $salesPerson = $this->salesPerson->get(['sales_person_id' => $params['id']]);
+        }
 
         // Adjust Request
         $params['relation_type'] = 'sales_person';
