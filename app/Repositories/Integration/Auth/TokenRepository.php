@@ -96,6 +96,30 @@ class TokenRepository implements TokenRepositoryInterface {
     }
 
     /**
+     * Delete All Access Token
+     * 
+     * @param string $type
+     * @param int $id
+     * @return int
+     */
+    public function deleteAll(string $type, int $id): int
+    {
+        // Get Relations to Delete
+        $relations = $this->getRelations($type, $id);
+
+        // Loop Relations to Delete
+        $deleted = 0;
+        foreach($relations as $relation) {
+            if($this->delete(['id' => $relation->id])) {
+                $deleted++;
+            }
+        }
+
+        // Return Count of Deleted Successfully
+        return $deleted;
+    }
+
+    /**
      * Get Access Token
      * 
      * @param array $params
@@ -105,6 +129,7 @@ class TokenRepository implements TokenRepositoryInterface {
         // Find Token By ID
         return AccessToken::findOrFail($params['id']);
     }
+
 
     /**
      * Get Access Token Via Relation
@@ -189,11 +214,22 @@ class TokenRepository implements TokenRepositoryInterface {
         }
 
         // Relation Exists?
-        if (isset($params['token_type']) && isset($params['relation_type']) && isset($params['relation_id'])) {
-            $accessToken = AccessToken::where('token_type', $params['token_type'])
-                                      ->where('relation_type', $params['relation_type'])
-                                      ->where('relation_id', $params['relation_id'])
-                                      ->first();
+        if (isset($params['relation_type']) && isset($params['relation_id'])) {
+            // Find Token From Relation
+            $token = AccessToken::where('relation_type', $params['relation_type'])
+                                ->where('relation_id', $params['relation_id']);
+
+            // Token Type Exists?
+            if(!empty($params['token_type'])) {
+                $token = $token->where('token_type', $params['token_type']);
+            }
+            // Find MOST RECENT Token Instead!
+            else {
+                $token = $this->addSortQuery($token, 'issued_at');
+            }
+
+            // Get Access Token
+            $accessToken = $token->first();
 
             // Return Access Token
             if(!empty($accessToken->id)) {
