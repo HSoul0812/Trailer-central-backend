@@ -3,6 +3,7 @@
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\User\SalesPerson;
 
 return [
 
@@ -197,11 +198,13 @@ return [
                             Lead::STATUS_WON_CLOSED,
     'interaction_type_valid' => 'Interaction type needs to be: '. implode(',', Interaction::INTERACTION_TYPES),
     'sales_person_valid' => 'Sales person ID must exist or be 0',
+    'sales_auth_type' => 'SMTP auth needs to be: ' . implode(", ", SalesPerson::SMTP_AUTH),
+    'sales_security_type' => 'Security type needs to be: ' . implode(", ", SalesPerson::SECURITY_TYPES),
     'dealer_location_valid' => 'Dealer Location ID must exist or be 0',
     'website_valid' => 'Website ID must exist or be 0',
     'inventory_valid' => 'Inventory ID must exist',
     'stock_type_valid' => 'The selected :attribute is invalid.',
     'inventory_unique_stock' => 'The selected :attribute already exists on another inventory item.',
     'valid_smtp_email' => 'The selected :attribute doesn\'t have any smtp configuration!',
-    'tax_calculator_valid' => 'The selected tax calculator id is invalid'
+    'tax_calculator_valid' => 'The selected tax calculator id is invalid',
 ];

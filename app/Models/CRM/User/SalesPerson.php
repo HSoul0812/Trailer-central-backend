@@ -59,6 +59,21 @@ class SalesPerson extends Model implements Filterable
     const AUTH_METHOD_NTLM = 'ntlm';
     const AUTH_METHOD_CUSTOM = 'custom';
 
+
+    /**
+     * @const array all available security types
+     */
+    const SECURITY_TYPES = [
+        'tls', 'ssl'
+    ];
+
+    /**
+     * @const array all available SMTP auth methods
+     */
+    const SMTP_AUTH = [
+        'auto', 'PLAIN', 'LOGIN', 'NTLM'
+    ];
+
     /**
      * @const array custom smtp auth type map from key => name
      */
