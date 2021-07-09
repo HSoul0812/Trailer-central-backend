@@ -5,7 +5,7 @@ namespace App\Rules\CRM\User;
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\CRM\User\SalesPerson;
 
-class ValidSalesPerson implements Rule
+class ValidAuthType implements Rule
 {
             
     /**
