@@ -44,7 +44,10 @@ class UpdateSalesAuthRequest extends Request {
         'imap.failed' => 'nullable|boolean',
         'folders' => 'array',
         'folders.id' => 'nullable|int',
-        'folders.name' => 'string'
+        'folders.name' => 'string',
+        'folders' => 'array',
+        'folders.*.id' => 'int',
+        'folders.*.name' => 'string'
     ];
 
 }
