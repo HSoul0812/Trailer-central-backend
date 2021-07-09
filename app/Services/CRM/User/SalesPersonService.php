@@ -5,8 +5,6 @@ namespace App\Services\CRM\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\SmtpHelper;
-use App\Transformers\CRM\User\SalesPersonTransformer;
-use League\Fractal\Resource\Item;
 
 /**
  * Class SalesPersonService

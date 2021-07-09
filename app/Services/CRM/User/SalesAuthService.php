@@ -4,7 +4,7 @@ namespace App\Services\CRM\User;
 
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Service\CRM\User\SalesPersonServiceInterface;
+use App\Services\CRM\User\SalesPersonServiceInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Traits\SmtpHelper;
 use App\Transformers\CRM\User\SalesPersonTransformer;
