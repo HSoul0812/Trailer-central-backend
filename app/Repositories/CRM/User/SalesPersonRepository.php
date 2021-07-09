@@ -42,7 +42,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @return true if deleted, false if doesn't exist
      */
     public function delete($params) {
-        return SalesPerson::findOrFail($params['id'])->delete();
+        return SalesPerson::withTrashed()->findOrFail($params['id'])->delete();
     }
 
     /**
