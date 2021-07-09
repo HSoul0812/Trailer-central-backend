@@ -91,10 +91,10 @@ class ConfigValidate
     {
         // Replace Type in Message
         if($this->type) {
-            return str_replace(':type', strtoupper($this->type));
+            return str_replace(':type', strtoupper($this->type), $message);
         }
 
         // Set Type to NULL
-        return str_replace(':type', 'NULL');
+        return str_replace(':type', 'NULL', $message);
     }
 }
