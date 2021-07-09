@@ -7,33 +7,33 @@ interface SalesAuthServiceInterface {
      * Show Sales Auth Response
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
-    public function show($params);
+    public function show(array $params): array;
 
     /**
-     * Create Sales Auth
+     * Create Sales Person and Auth
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
-    public function create($params);
+    public function create(array $params): array;
 
     /**
      * Update Sales Auth
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
-    public function update($params);
+    public function update(array $params): array;
 
 
     /**
      * Return Response
      * 
-     * @param AccessToken $accessToken
      * @param array $params
+     * @param null|AccessToken $accessToken
      * @return array
      */
-    public function response($accessToken, $params);
+    public function response(array $params, ?AccessToken $accessToken = null): array;
 }

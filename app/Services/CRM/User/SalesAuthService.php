@@ -69,9 +69,9 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Show Sales Auth Response
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
-    public function show($params) {
+    public function show(array $params): array {
         // Adjust Request
         $params['relation_type'] = 'sales_person';
         $params['relation_id'] = $params['id'];
@@ -143,7 +143,7 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @param null|AccessToken $accessToken
      * @return array
      */
-    public function response(array $params, ?AccessToken $accessToken = null) {
+    public function response(array $params, ?AccessToken $accessToken = null): array {
         // Get Sales Person
         $salesPerson = $this->salesPerson->get([
             'sales_person_id' => $params['relation_id']
