@@ -92,12 +92,6 @@ class SalesPerson extends Model implements Filterable
 
 
     /**
-     * @const string Message if Auth Type Doesn't Exist
-     */
-    const INVALID_AUTH_TYPE_MESSAGE = 'The Auth Type requested does not exist.';
-
-
-    /**
      * The table associated with the model.
      *
      * @var string

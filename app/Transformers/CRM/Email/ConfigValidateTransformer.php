@@ -22,7 +22,7 @@ class ConfigValidateTransformer extends TransformerAbstract
         return [
             'type' => $validate->type,
             'success' => $validate->success,
-            'message' => $validate->message ?? ''
+            'message' => $validate->getMessage()
         ];
     }
 

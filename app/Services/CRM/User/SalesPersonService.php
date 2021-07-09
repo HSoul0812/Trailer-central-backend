@@ -123,8 +123,7 @@ class SalesPersonService implements SalesPersonServiceInterface
         // Return Response
         return new ConfigValidate([
             'type' => $params['type'],
-            'success' => false,
-            'message' => SalesPerson::INVALID_AUTH_TYPE_MESSAGE
+            'success' => false
         ]);
     }
 
