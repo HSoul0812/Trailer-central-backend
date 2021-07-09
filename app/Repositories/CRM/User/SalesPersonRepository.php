@@ -55,8 +55,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         $salesPerson = SalesPerson::withTrashed()->findOrFail($params['id']);
 
         DB::transaction(function() use (&$salesPerson, $params) {
-            // Set Deleted At to NULL
-            $params['deleted_at'] = NULL;
+            // Restore if Soft Deleted
+            $salesPerson->restore();
 
             // Fill Sales Person Details
             $salesPerson->fill($params)->save();
