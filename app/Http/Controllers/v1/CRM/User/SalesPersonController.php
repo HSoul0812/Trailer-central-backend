@@ -107,4 +107,17 @@ class SalesPersonController extends RestfulController {
         
         return $this->response->errorBadRequest();
     }
+
+    public function config(Request $request): Response
+    {
+        $request = new ConfigSalesPeopleRequest($request->all());
+        if ($request->validate()) {
+            // Return Config
+            return $this->response->array([
+                'data' => $this->salesService->config($request->all())
+            ]);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
 }

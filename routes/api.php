@@ -644,6 +644,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
+                $route->get('config', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@config');
 
                 // Validate SMTP/IMAP
                 $route->put('validate', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@valid');

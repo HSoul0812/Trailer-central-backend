@@ -293,38 +293,6 @@ class SalesPerson extends Model implements Filterable
     }
 
     /**
-     * Return Auth Types Array Map
-     * 
-     * @return array<array{label: string, method: string, auth: array}>
-     */
-    public function getAuthTypesAttribute(): array {
-        // Loop Auth Types
-        $authTypes = [];
-        foreach(self::AUTH_TYPES as $type => $label) {
-            // Get Method
-            $method = self::AUTH_TYPE_METHODS[$type];
-
-            // Get Auth Types
-            $auth = [];
-            if($type === self::AUTH_METHOD_NTLM) {
-                $auth = self::NTLM_AUTH;
-            } elseif($type === self::AUTH_METHOD_CUSTOM) {
-                $auth = self::CUSTOM_AUTH;
-            }
-
-            // Append Auth Types
-            $authTypes[$type] = [
-                'label' => $label,
-                'method' => $method,
-                'auth' => $auth
-            ];
-        }
-
-        // Return Auth Types
-        return $authTypes;
-    }
-
-    /**
      * Validate SMTP Details Using Swift Transport
      * 
      * @return ConfigValidate

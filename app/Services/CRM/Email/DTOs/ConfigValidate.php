@@ -6,7 +6,7 @@ use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
 /**
- * Class ConfigConfig
+ * Class ConfigValidate
  * 
  * @package App\Services\CRM\Email\DTOs
  */
@@ -28,8 +28,8 @@ class ConfigValidate
     /**
      * @const string Message if Validation Failed
      */
-    const FAILURE_MESSAGE = 'Your :type Settings aren\'t working! Please verify :type is enabled  ' .
-                            'on your mail account and your details are filled out correctly.';
+    const FAILURE_MESSAGE = 'Your :type Settings aren\'t working! Please verify :type is enabled ' .
+                                'on your mail account and your details are filled out correctly.';
 
     /**
      * @const string Message if Config Type Doesn't Exist

@@ -6,7 +6,6 @@ use App\Transformers\Dms\GenericSaleTransformer;
 use App\Transformers\Pos\SaleTransformer;
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\User\SalesPerson;
-use App\Models\CRM\User\EmailFolder;
 
 class SalesPersonTransformer extends TransformerAbstract
 {
@@ -17,8 +16,7 @@ class SalesPersonTransformer extends TransformerAbstract
         'allSales',
         'smtp',
         'imap',
-        'folders',
-        'authTypes'
+        'folders'
     ];
 
     public function transform(SalesPerson $salesPerson)
@@ -70,13 +68,6 @@ class SalesPersonTransformer extends TransformerAbstract
                 'failed' => !$salesPerson->imap_validate->success,
                 'message' => $salesPerson->imap_validate->getMessage()
             ];
-        });
-    }
-
-    public function includeAuthTypes(SalesPerson $salesPerson)
-    {
-        return $this->item($salesPerson, function($salesPerson) {
-            return $salesPerson->auth_types;
         });
     }
 
