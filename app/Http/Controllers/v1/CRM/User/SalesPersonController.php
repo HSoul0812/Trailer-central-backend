@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\CRM\User;
 
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\CRM\User\ConfigSalesPeopleRequest;
 use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
 use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
@@ -36,6 +37,11 @@ class SalesPersonController extends RestfulController {
     private $salesPersonTransformer;
 
     /**
+     * @var SalesPersonConfigTransformer
+     */
+    private $salesPersonConfigTransformer;
+
+    /**
      * @var ConfigValidateTransformer
      */
     private $emailConfigTransformer;
@@ -49,6 +55,7 @@ class SalesPersonController extends RestfulController {
         SalesPersonRepositoryInterface $salesPersonRepo,
         SalesPersonServiceInterface $salesPersonService,
         SalesPersonTransformer $salesPersonTransformer,
+        SalesPersonConfigTransformer $salesPersonConfigTransformer,
         ConfigValidateTransformer $emailConfigTransformer,
         Manager $fractal
     ) {
@@ -57,6 +64,7 @@ class SalesPersonController extends RestfulController {
         $this->salesPerson = $salesPersonRepo;
         $this->salesService = $salesPersonService;
         $this->salesPersonTransformer = $salesPersonTransformer;
+        $this->salesPersonConfigTransformer = $salesPersonConfigTransformer;
         $this->emailConfigTransformer = $emailConfigTransformer;
         $this->fractal = $fractal;
 
@@ -113,9 +121,7 @@ class SalesPersonController extends RestfulController {
         $request = new ConfigSalesPeopleRequest($request->all());
         if ($request->validate()) {
             // Return Config
-            return $this->response->array([
-                'data' => $this->salesService->config($request->all())
-            ]);
+            return $this->response->array($this->salesService->config($request->all()), $this->salesPersonConfigTransformer);
         }
         
         return $this->response->errorBadRequest();
