@@ -122,8 +122,10 @@ class SalesPersonController extends RestfulController {
     {
         $request = new ConfigSalesPeopleRequest($request->all());
         if ($request->validate()) {
-            // Return Config
-            return $this->response->item(new SalesPersonConfig(), $this->salesPersonConfigTransformer);
+            // Return Item SalesPersonConfig
+            $data = new Item(new SalesPersonConfig(), $this->salesPersonConfigTransformer, 'data');
+            $response = $this->fractal->createData($data)->toArray();
+            return $this->response->array($response);
         }
 
         return $this->response->errorBadRequest();
