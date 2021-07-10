@@ -18,7 +18,7 @@ class SalesPersonTransformer extends TransformerAbstract
         'smtp',
         'imap',
         'folders',
-        'config'
+        'authTypes'
     ];
 
     public function transform(SalesPerson $salesPerson)
@@ -43,7 +43,6 @@ class SalesPersonTransformer extends TransformerAbstract
             'dealer_location_id' => $salesPerson->dealer_location_id,
             'auth_config' => $salesPerson->auth_config,
             'auth_method' => $salesPerson->auth_method,
-            'auth_types' => $config->authTypes,
             'smtp_types' => $config->smtpTypes
         ];
     }
@@ -63,6 +62,16 @@ class SalesPersonTransformer extends TransformerAbstract
                 'error' => $salesPerson->smtp_error
             ];
         });
+    }
+
+    /**
+     * Transform ImapMailbox Folders
+     * @return array
+     */
+    public function includeAuthTypes(SalesPerson $salesPerson) {
+        // Get SalesPersonConfig
+        $config = new SalesPersonConfig();
+        return $this->collection($config->authTypes, new AuthTypeTransformer());
     }
 
     public function includeImap(SalesPerson $salesPerson)
