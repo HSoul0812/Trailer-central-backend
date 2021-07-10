@@ -287,9 +287,28 @@ class SalesPerson extends Model implements Filterable
         if($this->smtp_auth === strtoupper(self::AUTH_METHOD_NTLM)) {
             return self::AUTH_METHOD_NTLM;
         }
-
         // Return Custom
-        return self::AUTH_METHOD_CUSTOM;
+        else if(!empty($this->smtp_server) || !empty($this->imap_server)) {
+            return self::AUTH_METHOD_CUSTOM;
+        }
+
+        // Return Empty
+        return '';
+    }
+
+    /**
+     * Return Auth Method
+     * 
+     * @return string
+     */
+    public function getAuthMethodAttribute(): string {
+        // Return Auth Method for Auth Config
+        if(!empty($this->auth_config) && isset(self::AUTH_TYPE_METHODS[$this->auth_config])) {
+            return self::AUTH_TYPE_METHODS[$this->auth_config];
+        }
+
+        // Return Empty
+        return '';
     }
 
     /**

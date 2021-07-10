@@ -2,6 +2,7 @@
 
 namespace App\Transformers\CRM\User;
 
+use App\Services\CRM\User\DTOs\SalesPersonConfig;
 use App\Transformers\Dms\GenericSaleTransformer;
 use App\Transformers\Pos\SaleTransformer;
 use League\Fractal\TransformerAbstract;
@@ -16,11 +17,16 @@ class SalesPersonTransformer extends TransformerAbstract
         'allSales',
         'smtp',
         'imap',
-        'folders'
+        'folders',
+        'config'
     ];
 
     public function transform(SalesPerson $salesPerson)
     {
+        // Get SalesPersonConfig
+        $config = new SalesPersonConfig();
+
+        // Return Array
         return [
             'id' => $salesPerson->id,
             'user_id' => $salesPerson->user_id,
@@ -35,7 +41,10 @@ class SalesPersonTransformer extends TransformerAbstract
             'is_trade' => $salesPerson->is_trade,
             'signature' => $salesPerson->signature,
             'dealer_location_id' => $salesPerson->dealer_location_id,
-            'auth_config' => $salesPerson->auth_config
+            'auth_config' => $salesPerson->auth_config,
+            'auth_method' => $salesPerson->auth_method,
+            'auth_types' => $config->authTypes,
+            'smtp_types' => $config->smtpTypes
         ];
     }
 

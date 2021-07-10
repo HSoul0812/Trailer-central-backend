@@ -135,18 +135,6 @@ class SalesPersonService implements SalesPersonServiceInterface
         ]);
     }
 
-    /**
-     * Config for SalesPerson
-     * 
-     * @return array{auth_types: array}
-     */
-    public function config(): array {
-        // Return Response
-        return [
-            'auth_types' => $this->getAuthTypes()
-        ];
-    }
-
 
     /**
      * Merge SMTP/IMAP to Update Sales Person Details

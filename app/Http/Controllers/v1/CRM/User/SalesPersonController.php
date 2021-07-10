@@ -7,9 +7,11 @@ use App\Http\Requests\CRM\User\ConfigSalesPeopleRequest;
 use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
 use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Services\CRM\User\DTOs\SalesPersonConfig;
 use App\Services\CRM\User\SalesPersonServiceInterface;
 use App\Transformers\CRM\Email\ConfigValidateTransformer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
+use App\Transformers\CRM\User\SalesPersonConfigTransformer;
 use App\Transformers\Reports\SalesPerson\SalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
@@ -112,7 +114,7 @@ class SalesPersonController extends RestfulController {
             // Return Validation
             return $this->response->item($this->salesService->validate($request->all()), $this->emailConfigTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
@@ -121,9 +123,9 @@ class SalesPersonController extends RestfulController {
         $request = new ConfigSalesPeopleRequest($request->all());
         if ($request->validate()) {
             // Return Config
-            return $this->response->array($this->salesService->config($request->all()), $this->salesPersonConfigTransformer);
+            return $this->response->item(new SalesPersonConfig(), $this->salesPersonConfigTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 }
