@@ -80,11 +80,14 @@ class SalesPersonService implements SalesPersonServiceInterface
         // Find Existing Sales Person Email On a DIFFERENT Sales Person
         $existing = $this->salespeople->getByEmail($params['user_id'], $params['email'], $params['id']);
         if(!empty($existing->id)) {
-            // Delete current sales person and update matching one instead
-            //$this->salespeople->delete(['id' => $params['id']]);
-            //$params['id'] = $existing->id;
-            // Throw exception instead!
-            throw new DuplicateChangeEmailSalesPersonException;
+            // Delete current sales person and update matching one instead if it is deleted
+            if(!empty($existing->deleted_at)) {
+                $this->salespeople->delete(['id' => $params['id']]);
+                $params['id'] = $existing->id;
+            } else {
+                // Throw exception instead!
+                throw new DuplicateChangeEmailSalesPersonException;
+            }
         }
 
         // Update Sales Person
