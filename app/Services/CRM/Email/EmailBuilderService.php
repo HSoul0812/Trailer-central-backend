@@ -512,6 +512,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
             // Email Bounced!
             if($type = $this->bounces->wasBounced($builder->toEmail) || empty($builder->toEmail)) {
+                if(empty($builder->toEmail)) {
+                    $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
+                                        'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
+                } else {
+                    $this->log->info('The Email Address ' . $builder->toEmail . ' was already marked as ' .
+                                        $type . ', so we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
+                }
                 $this->markBounced($builder, empty($builder->toEmail) ? 'invalid' : $type);
                 return BuilderStats::STATUS_BOUNCED;
             }
