@@ -16,6 +16,7 @@ class GetServiceOrdersRequest extends Request {
         'date_in_or_date_out_gte' => 'date_format:Y-m-d',
         'inventory_ids' => 'array',
         'inventory_ids.*' => 'integer',
+        'location' => 'integer',
     ];
 
 }
