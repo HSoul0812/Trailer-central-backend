@@ -402,7 +402,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 break;
             }
         } catch(\Exception $ex) {
-            $this->log->error('The email ' . $config->type . ' #' . $config->id .
+            $this->log->error('The email ' . $config->type . ' #' . $config->id . ' for Lead #' . $config->leadId .
                                 ' was already marked sent, but we\'ll catch it later.');
         }
 
