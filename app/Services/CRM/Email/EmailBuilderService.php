@@ -7,7 +7,7 @@ use App\Exceptions\CRM\Email\Builder\SendBlastEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendCampaignEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendTemplateEmailFailedException;
 use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
-use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
+use App\Jobs\CRM\Interactions\EmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\Integration\Auth\AccessToken;
@@ -32,7 +32,6 @@ use App\Services\Integration\Google\GmailServiceInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use App\Transformers\CRM\Email\BuilderEmailTransformer;
-use App\Transformers\CRM\Email\BuilderStatsTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
@@ -629,18 +628,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Return Send Emails Response
      * 
      * @param BuilderEmail $builder
-     * @param BuilderStats $stats
+     * @param string $leads
      * @return array response
      */
-    private function response(BuilderEmail $builder, BuilderStats $stats): array {
+    private function response(BuilderEmail $builder, string $leads): array {
         // Convert Builder Email to Fractal
         $data = new Item($builder, new BuilderEmailTransformer(), 'data');
         $response = $this->fractal->createData($data)->toArray();
 
         // Convert Builder Email to Fractal
-        $status = new Item($stats, new BuilderStatsTransformer(), 'data');
-        $result = $this->fractal->createData($status)->toArray();
-        $response['stats'] = $result['data'];
+        $response['leads'] = count(explode(",", $leads));
 
         // Return Response
         return $response;

@@ -4,6 +4,7 @@ namespace App\Services\CRM\Email;
 
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
+use App\Services\CRM\Interactions\DTOs\BuilderStats;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 
 interface EmailBuilderServiceInterface {
@@ -11,23 +12,23 @@ interface EmailBuilderServiceInterface {
      * Send Lead Emails for Blast
      * 
      * @param int $id ID of Blast to Send Emails For
-     * @param array<int> ID's of Leads to Send Emails For Blast
+     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendBlastEmailsFailedException
      * @return array response
      */
-    public function sendBlast(int $id, array $leads): array;
+    public function sendBlast(int $id, string $leads): array;
 
     /**
      * Send Lead Emails for Campaign
      * 
      * @param int $id ID of Campaign to Send Emails For
-     * @param array<int> ID's of Leads to Send Emails For Campaign
+     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendCampaignEmailsFailedException
      * @return array response
      */
-    public function sendCampaign(int $id, array $leads): array;
+    public function sendCampaign(int $id, string $leads): array;
 
     /**
      * Send Email for Template
@@ -42,6 +43,16 @@ interface EmailBuilderServiceInterface {
      * @return array response
      */
     public function sendTemplate(int $id, string $subject, string $toEmail, int $salesPersonId = 0, string $fromEmail = ''): array;
+
+    /**
+     * Send Emails for Builder Config
+     * 
+     * @param BuilderEmail $builder
+     * @param array $leads
+     * @throws SendBuilderEmailsFailedException
+     * @return BuilderStats
+     */
+    public function sendEmails(BuilderEmail $builder, array $leads): BuilderStats;
 
     
     /**
