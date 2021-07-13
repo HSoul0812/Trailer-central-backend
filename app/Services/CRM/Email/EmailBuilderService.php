@@ -422,12 +422,17 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
         // Send Custom Email
         elseif($smtpConfig) {
-            $this->sendCustomEmail($smtpConfig, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
+            $messageId = $this->sendCustomEmail($smtpConfig, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
         }
         // Send Default Email
         else {
             $user = $this->users->get(['dealer_id' => $builder->dealerId]);
-            $this->sendDefaultEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
+            $messageId = $this->sendDefaultEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
+        }
+
+        // Message-ID Override Returned?!
+        if(!empty($messageId)) {
+            $parsedEmail->setMessageId($messageId);
         }
 
         // Return Final Email

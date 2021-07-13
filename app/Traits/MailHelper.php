@@ -16,9 +16,9 @@ trait MailHelper
      * @param SmtpConfig $config
      * @param array{email: string, ?name: string} $to}
      * @param Mailable $email
-     * @return void
+     * @return strings
      */
-    public function sendCustomEmail(SmtpConfig $config, array $to, Mailable $email): void
+    public function sendCustomEmail(SmtpConfig $config, array $to, Mailable $email): string
     {
         // Get SMTP Config Array
         $smtpConfig = [
@@ -31,8 +31,14 @@ trait MailHelper
         ];
 
         // Create CRM Mailer
+        $messageId = '';
         $mailer = app()->makeWith('crm.mailer', $smtpConfig);
-        $mailer->to($this->getCleanTo($to))->send($email);
+        $mailer->to($this->getCleanTo($to))->send($email, array(), function($message) use(&$messageId) {
+            $messageId = $message->getId();
+        });
+
+        // Return Message ID
+        return $messageId;
     }
 
     /**
@@ -41,9 +47,9 @@ trait MailHelper
      * @param User $user
      * @param array{email: string, ?name: string} $to}
      * @param Mailable $email
-     * @return void
+     * @return string
      */
-    public function sendDefaultEmail(User $user, array $to, Mailable $email): void
+    public function sendDefaultEmail(User $user, array $to, Mailable $email): string
     {
         // Get SMTP Config Array
         $smtpConfig = [
@@ -52,8 +58,14 @@ trait MailHelper
         ];
 
         // Create CRM Mailer
+        $messageId = '';
         $mailer = app()->makeWith('crm.mailer', $smtpConfig);
-        $mailer->to($this->getCleanTo($to))->send($email);
+        $mailer->to($this->getCleanTo($to))->send($email, array(), function($message) use(&$messageId) {
+            $messageId = $message->getId();
+        });
+
+        // Return Message ID
+        return $messageId;
     }
 
 
