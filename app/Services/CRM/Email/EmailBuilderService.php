@@ -522,7 +522,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $builder->toEmail))) {
                 $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $builder->toEmail);
                 $this->markBounced($builder);
-                return BuilderStats::STATUS_DUPLICATED;
+                return BuilderStats::STATUS_DUPLICATE;
             }
 
             // Email Bounced!
