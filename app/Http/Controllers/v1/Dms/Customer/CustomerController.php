@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\v1\Dms\Customer;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Dms\DeleteCustomerRequest;
+use App\Models\CRM\User\Customer;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Dingo\Api\Exception\DeleteResourceFailedException;
 use Dingo\Api\Exception\StoreResourceFailedException;
 use Dingo\Api\Exception\UpdateResourceFailedException;
 use Dingo\Api\Http\Request;
@@ -17,7 +20,7 @@ use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
 
-class CustomerController extends RestfulController
+class CustomerController extends RestfulControllerV2
 {
 
     protected $leads;
@@ -42,7 +45,7 @@ class CustomerController extends RestfulController
      */
     public function __construct(CustomerRepositoryInterface $customerRepository, LeadRepositoryInterface $leadRepo, CustomerTransformer $transformer, Manager $fractal)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'search', 'create', 'update']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'search', 'create', 'update','destroy']);
         $this->leads = $leadRepo;
         $this->transformer = new CustomerTransformer;
         $this->fractal = $fractal;
@@ -151,6 +154,43 @@ class CustomerController extends RestfulController
 
             return $this->response->errorBadRequest($e->getMessage());
         }
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/user/customers/{id}",
+     *     description="Delete a customer",
+     *     tags={"Customers"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Customer Id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Confirms customer was deleted",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function destroy(int $id, Request $request) {
+        $customerData = new DeleteCustomerRequest(array_merge($request->all(), ['id' => $id]));
+
+        try {
+            if ($customerData->validate() && $this->customerRepository->delete($customerData->all())) {
+                return $this->response->noContent();
+            }
+        } catch (\Exception $e) {
+            throw new DeleteResourceFailedException($e->getMessage());
+        }
+
+        return $this->response->errorBadRequest();
     }
 
 }
