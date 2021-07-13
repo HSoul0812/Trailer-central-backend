@@ -474,18 +474,21 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $email = $this->saveToDb($builder);
             $builder->setEmailId($email->email_id);
 
+            // Email Bounced!
+            if(empty($lead->email_address)) {
+                $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
+                                    'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
+                $this->markBounced($builder, 'invalid');
+                $stats->updateStats(BuilderStats::STATUS_BOUNCED);
+                continue;
+            }
+
             // Already Exists?
             if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $lead->email_address)) ||
-               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $lead->email_address)) ||
-               empty($lead->email_address)) {
-                if(empty($lead->email_address)) {
-                    $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
-                                        'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
-                } else {
-                    $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $lead->email_address);
-                }
-                $this->markBounced($builder, (empty($lead->email_address) ? 'invalid' : null));
-                $stats->updateStats(empty($lead->email_address) ? BuilderStats::STATUS_BOUNCED : BuilderStats::STATUS_DUPLICATE);
+               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $lead->email_address))) {
+                $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $lead->email_address);
+                $stats->updateStats(BuilderStats::STATUS_DUPLICATE);
+                $this->markBounced($builder);
                 continue;
             }
 
