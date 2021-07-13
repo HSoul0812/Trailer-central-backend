@@ -498,7 +498,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     public function markEmailSent(ParsedEmail $finalEmail): bool {
         // Set Date Sent
-        $this->log->info('Marking email #' . $finalEmail->emailHistoryId>id . ' as sent ' .
+        $this->log->info('Marking email #' . $finalEmail->emailHistoryId . ' as sent ' .
                             ' with Message-ID: ' . $finalEmail->messageId);
         $email = $this->emailhistory->update([
             'id' => $finalEmail->emailHistoryId,
