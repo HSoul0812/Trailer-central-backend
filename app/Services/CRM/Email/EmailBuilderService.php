@@ -390,6 +390,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     public function markSent(BuilderEmail $config): bool {
         // Handle Based on Type
+        $this->log->info('Marking ' . $config->type . ' #' . $config->id . ' as sent for ' .
+                            ' the Lead With ID #' . $config->leadId);
         switch($config->type) {
             case "campaign":
                 $sent = $this->campaigns->sent([
@@ -418,6 +420,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     public function markSentMessageId(BuilderEmail $config, ParsedEmail $parsedEmail): bool {
         // Handle Based on Type
+        $this->log->info('Marking ' . $config->type . ' #' . $config->id . ' as sent for ' .
+                            ' the Lead With ID #' . $config->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
         switch($config->type) {
             case "campaign":
                 $sent = $this->campaigns->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
@@ -435,11 +439,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Mark Email as Sent
      * 
      * @param BuilderEmail $config
-     * @param null|ParsedEmail $finalEmail
+     * @param ParsedEmail $finalEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
-    public function markEmailSent(ParsedEmail $finalEmail = null): bool {
+    public function markEmailSent(ParsedEmail $finalEmail): bool {
         // Set Date Sent
+        $this->log->info('Marking email #' . $finalEmail->emailHistoryId>id . ' as sent ' .
+                            ' with Message-ID: ' . $finalEmail->messageId);
         $email = $this->emailhistory->update([
             'id' => $finalEmail->emailHistoryId,
             'message_id' => $finalEmail->messageId,
@@ -478,8 +484,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             if(empty($lead->email_address)) {
                 $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
                                     'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
-                $this->markBounced($builder, 'invalid');
                 $stats->updateStats(BuilderStats::STATUS_BOUNCED);
+                $this->markBounced($builder, 'invalid');
                 continue;
             }
 
@@ -532,7 +538,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->dispatch($job->onQueue('emailbuilder'));
 
             // Send Notice
-            $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $builder->leadId);
+            $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $builder->toEmail);
             return BuilderStats::STATUS_SUCCESS;
         } catch(\Exception $ex) {
             $this->log->error($ex->getMessage(), $ex->getTrace());
@@ -588,6 +594,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     {
         // Get Parsed Email
         $parsedEmail = $config->getParsedEmail($config->emailId);
+        $this->log->info('Marking ' . $config->type . ' #' . $config->id . ' as ' .
+                            $type . ' for the Message-ID #' . $parsedEmail->messageId);
 
         // Create Or Update Bounced Entry in DB
         $this->emailhistory->update([
