@@ -177,12 +177,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Send Lead Emails for Blast
      * 
      * @param int $id ID of Blast to Send Emails For
-     * @param array<int> ID's of Leads to Send Emails For Blast
+     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendBlastEmailsFailedException
      * @return array response
      */
-    public function sendBlast(int $id, array $leads): array {
+    public function sendBlast(int $id, string $leads): array {
         // Get Blast Details
         $blast = $this->blasts->get(['id' => $id]);
 
@@ -209,7 +209,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Send Emails and Return Response
         try {
-            return $this->sendEmails($builder, $leads);
+            // Dispatch Send EmailBuilder Job
+            $job = new EmailBuilderJob($builder, $leads);
+            $this->dispatch($job->onQueue('emailbuilder'));
+
+            // Return Array of Queued Leads
+            return $this->response($builder, $leads);
         } catch(\Exception $ex) {
             throw new SendBlastEmailsFailedException($ex);
         }
@@ -219,12 +224,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Send Lead Emails for Campaign
      * 
      * @param int $id ID of Campaign to Send Emails For
-     * @param array<int> ID's of Leads to Send Emails For Campaign
+     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendCampaignEmailsFailedException
      * @return array response
      */
-    public function sendCampaign(int $id, array $leads): array {
+    public function sendCampaign(int $id, string $leads): array {
         // Get Campaign Details
         $campaign = $this->campaigns->get(['id' => $id]);
 
@@ -251,7 +256,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Send Emails and Return Response
         try {
-            return $this->sendEmails($builder, $leads);
+            // Dispatch Send EmailBuilder Job
+            $job = new EmailBuilderJob($builder, $leads);
+            $this->dispatch($job->onQueue('emailbuilder'));
+
+            // Return Array of Queued Leads
+            return $this->response($builder, $leads);
         } catch(\Exception $ex) {
             throw new SendCampaignEmailsFailedException($ex);
         }
@@ -314,6 +324,52 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
     }
 
+
+    /**
+     * Send Emails for Builder Config
+     * 
+     * @param BuilderEmail $builder
+     * @param array $leads
+     * @throws SendBuilderEmailsFailedException
+     * @return BuilderStats
+     */
+    public function sendEmails(BuilderEmail $builder, array $leads): BuilderStats
+    {
+        // Initialize Counts
+        $stats = new BuilderStats();
+
+        // Loop Leads
+        foreach($leads as $leadId) {
+            // Add Lead Config to Builder Email
+            $lead = $this->leads->get(['id' => $leadId]);
+            $builder->setLeadConfig($lead);
+
+            // Log to Database
+            $email = $this->saveToDb($builder);
+            $builder->setEmailId($email->email_id);
+
+            // No Email Address!
+            if(empty($lead->email_address)) {
+                $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
+                                    'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
+                $stats->updateStats(BuilderStats::STATUS_BOUNCED);
+                $this->markBounced($builder, 'invalid');
+                continue;
+            }
+
+            // Send Lead Email
+            $status = $this->sendLeadEmail($builder, $leadId);
+            $stats->updateStats($status);
+        }
+
+        // Errors Occurred and No Emails Sent?
+        if($stats->noSent < 1 && $stats->noErrors > 0) {
+            throw new SendBuilderEmailsFailedException;
+        }
+
+        // Return Sent Emails Collection
+        return $stats;
+    }
 
     /**
      * Save Email Information to Database
@@ -458,51 +514,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
 
     /**
-     * Send Emails for Builder Config
-     * 
-     * @param BuilderEmail $builder
-     * @param array $leads
-     * @throws SendBuilderEmailsFailedException
-     * @return array response
-     */
-    private function sendEmails(BuilderEmail $builder, array $leads): array {
-        // Initialize Counts
-        $stats = new BuilderStats();
-
-        // Loop Leads
-        foreach($leads as $leadId) {
-            // Add Lead Config to Builder Email
-            $lead = $this->leads->get(['id' => $leadId]);
-            $builder->setLeadConfig($lead);
-
-            // Log to Database
-            $email = $this->saveToDb($builder);
-            $builder->setEmailId($email->email_id);
-
-            // No Email Address!
-            if(empty($lead->email_address)) {
-                $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
-                                    'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
-                $stats->updateStats(BuilderStats::STATUS_BOUNCED);
-                $this->markBounced($builder, 'invalid');
-                continue;
-            }
-
-            // Send Lead Email
-            $status = $this->sendLeadEmail($builder, $leadId);
-            $stats->updateStats($status);
-        }
-
-        // Errors Occurred and No Emails Sent?
-        if($stats->noSent < 1 && $stats->noErrors > 0) {
-            throw new SendBuilderEmailsFailedException;
-        }
-
-        // Return Sent Emails Collection
-        return $this->response($builder, $stats);
-    }
-
-    /**
      * Send Lead Email and Return Status from BuilderEmail
      * 
      * @param BuilderEmail $builder
@@ -531,9 +542,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 return BuilderStats::STATUS_BOUNCED;
             }
 
-            // Dispatch Send EmailBuilder Job
-            $job = new SendEmailBuilderJob($builder);
-            $this->dispatch($job->onQueue('emailbuilder'));
+            // Send Email Via SMTP, Gmail, or NTLM
+            $finalEmail = $this->sendEmail($this->config);
+
+            // Mark Email as Sent
+            $this->markSentMessageId($this->config, $finalEmail);
+            $this->markEmailSent($finalEmail);
 
             // Send Notice
             $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $builder->toEmail);
@@ -619,14 +633,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @return array response
      */
     private function response(BuilderEmail $builder, BuilderStats $stats): array {
-        // Handle Logging
-        $this->log->info('Queued ' . $stats->noSent . ' Email ' .
-                            $builder->type . '(s) for Dealer #' . $builder->userId);
-        $this->log->info('Skipped ' . $stats->noSkipped . ' Email ' .
-                            $builder->type . '(s) for Dealer #' . $builder->userId);
-        $this->log->info('Errors Occurring Trying to Queue ' . $stats->noErrors . ' Email ' .
-                            $builder->type . '(s) for Dealer #' . $builder->userId);
-
         // Convert Builder Email to Fractal
         $data = new Item($builder, new BuilderEmailTransformer(), 'data');
         $response = $this->fractal->createData($data)->toArray();
