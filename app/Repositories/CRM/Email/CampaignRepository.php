@@ -103,7 +103,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
      */
     public function wasSent(int $campaignId, string $email): bool {
         // Get Campaign Sent Entry
-        $sent = CampaignSent::get(CampaignSent::getTableName().'*')
+        $sent = CampaignSent::select(CampaignSent::getTableName().'.*')
                             ->leftJoin(Lead::getTableName(), Lead::getTableName().'.identifier',  '=', CampaignSent::getTableName().'.lead_id')
                             ->where(CampaignSent::getTableName() . '.drip_campaigns_id', $campaignId)
                             ->where(Lead::getTableName() . '.email_address', $email)->first();
