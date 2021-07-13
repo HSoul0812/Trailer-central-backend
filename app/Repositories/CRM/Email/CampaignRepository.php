@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\Email;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\CampaignSent;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;

@@ -14,7 +14,9 @@ class CampaignSent extends Model
 {
     use CompositePrimaryKeys;
 
-    protected $table = 'crm_drip_campaigns_sent';
+    const TABLE_NAME = 'crm_drip_campaigns_sent';
+
+    protected $table = self::TABLE_NAME;
 
     /**
      * Composite Primary Key
@@ -47,4 +49,8 @@ class CampaignSent extends Model
         'lead_id',
         'message_id'
     ];
+
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }

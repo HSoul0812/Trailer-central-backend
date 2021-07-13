@@ -14,7 +14,9 @@ class BlastSent extends Model
 {
     use CompositePrimaryKeys;
 
-    protected $table = 'crm_email_blasts_sent';
+    const TABLE_NAME = 'crm_email_blasts_sent';
+
+    protected $table = self::TABLE_NAME;
 
     /**
      * Composite Primary Key
@@ -47,4 +49,8 @@ class BlastSent extends Model
         'lead_id',
         'message_id'
     ];
+
+    public static function getTableName() {
+        return self::TABLE_NAME;
+    }
 }

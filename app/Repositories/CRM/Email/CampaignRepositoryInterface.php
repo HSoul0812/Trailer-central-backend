@@ -30,8 +30,8 @@ interface CampaignRepositoryInterface extends Repository {
      * Was Campaign Already Sent?
      * 
      * @param int $campaignId
-     * @param int $leadId
+     * @param string $email
      * @return bool
      */
-    public function wasSent(int $campaignId, int $leadId): bool;
+    public function wasSent(int $campaignId, string $email): bool;
 }

@@ -27,11 +27,11 @@ interface BlastRepositoryInterface extends Repository {
     public function updateSent(int $blastId, int $leadId, string $messageId): BlastSent;
 
     /**
-     * Was Blast Already Sent?
+     * Was Blast Already Sent to Email Address?
      * 
      * @param int $blastId
-     * @param int $leadId
+     * @param string $email
      * @return bool
      */
-    public function wasSent(int $blastId, int $leadId): bool;
+    public function wasSent(int $blastId, string $email): bool;
 }
