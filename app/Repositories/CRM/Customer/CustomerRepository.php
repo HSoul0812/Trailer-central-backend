@@ -8,6 +8,7 @@ use App\Models\CRM\User\Customer;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
@@ -19,6 +20,10 @@ class CustomerRepository implements CustomerRepositoryInterface
         'first_name' => 'first_name.keyword',
         'last_name' => 'last_name.keyword',
         'email' => 'email.keyword',
+        'address' => 'address.keyword',
+        'city' => 'city.keyword',
+        'region' => 'region.keyword',
+        'postal_code' => 'postal_code.keyword',
     ];
 
     public function create($params)
@@ -30,7 +35,19 @@ class CustomerRepository implements CustomerRepositoryInterface
     }
 
     public function delete($params) {
-        throw NotImplementedException;
+
+        if (empty($params['dealer_id'])) {
+            throw new \InvalidArgumentException('Dealer Id is required');
+        }
+
+        if (empty($params['id'])) {
+            throw new \InvalidArgumentException('Customer Id is required');
+        }
+
+        return Customer::where([
+            ['dealer_id', '=', $params['dealer_id']],
+            ['id', '=', $params['id']]
+        ])->firstOrFail()->delete();
     }
 
     public function get($params) {
@@ -134,31 +151,39 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         $search = Customer::boolSearch();
 
+        // filter by dealer first
+        $search->must('match_phrase', ['dealer_id' => $dealerId]);
+
         if ($query['query'] ?? null) { // if a query is specified
-            $search->must('multi_match', [
-                'query' => $query['query'],
-                'fuzziness' => 'AUTO',
-                'fields' => ['display_name^2', 'first_name', 'last_name', 'email', 'company_name', 'home_phone', 'cell_phone', 'work_phone']
+            $search->filterRaw([
+                'bool' => [
+                    'should' => [
+                        'multi_match' => [
+                            'query' => trim($query['query']),
+                            'fuzziness' => 'AUTO',
+                            'fields' => ['display_name^2', 'first_name', 'last_name', 'email', 'company_name', 'home_phone', 'cell_phone', 'work_phone']
+                        ],
+                    ],
+                    'minimum_should_match' => 1,
+                ],
             ]);
         } else if ($options['allowAll'] ?? false) { // if no query supplied but is allowed
             $search->must('match_all', []);
-
         } else {
             throw new \Exception('Query is required');
         }
 
-        // filter by dealer
-        $search->filter('term', ['dealer_id' => $dealerId]);
-
         // sort order
         if ($query['sort'] ?? null) {
-            $sortDir = substr($query['sort'], 0, 1) === '-'? 'asc': 'desc';
+            $sortDir = substr($query['sort'], 0, 1) === '-' ? 'asc' : 'desc';
             $field = str_replace('-', '', $query['sort']);
             if (array_key_exists($field, $this->indexKeywordFields)) {
                 $field = $this->indexKeywordFields[$field];
             }
 
             $search->sort($field, $sortDir);
+        } else {
+            $search->sort("_score", "asc");
         }
 
         // load relations
