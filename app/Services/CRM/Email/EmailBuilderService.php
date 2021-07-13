@@ -518,9 +518,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Try/Send Email!
         try {
             // Already Exists?
-            if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $config->toEmail)) ||
-               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $config->toEmail))) {
-                $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $config->toEmail);
+            if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $builder->toEmail)) ||
+               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $builder->toEmail))) {
+                $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $builder->toEmail);
                 $this->markBounced($builder);
                 return BuilderStats::STATUS_DUPLICATED;
             }
@@ -541,7 +541,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $builder->toEmail);
             return BuilderStats::STATUS_SUCCESS;
         } catch(\Exception $ex) {
-            $this->log->error($ex->getMessage(), $ex->getTrace());
+            $this->log->error($ex->getMessage());
             return BuilderStats::STATUS_ERROR;
         }
     }
