@@ -28,6 +28,7 @@ $factory->define(UnitSale::class, static function (Faker $faker, array $attribut
         'pdf_path' => '',
         'inventory_price' => $faker->numberBetween(100, 250),
         'total_price' => $faker->numberBetween(100, 250),
-        'sales_location_id' => $attributes['location'] ?? TestCase::getTestDealerLocationRandom()
+        'sales_location_id' => $attributes['location'] ?? TestCase::getTestDealerLocationRandom(),
+        'dealer_location_id' => $attributes['location'] ?? TestCase::getTestDealerLocationRandom(),
     ];
 });
