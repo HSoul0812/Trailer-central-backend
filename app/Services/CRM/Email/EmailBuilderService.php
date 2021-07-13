@@ -402,8 +402,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 break;
             }
         } catch(\Exception $ex) {
-            $this->log->error('The email ' . $config->type . ' #' . $config->id . ' for Lead #' . $config->leadId .
-                                ' was already marked sent, but we\'ll catch it later.');
+            $this->log->error('The email ' . $config->type . ' #' . $config->id .
+                                ' for Lead #' . $config->leadId . ' was already marked sent');
         }
 
         // Return False if Nothing Saved
@@ -478,23 +478,18 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Log to Database
             $email = $this->saveToDb($builder);
             $builder->setEmailId($email->email_id);
-            $this->markSent($builder);
 
-            // Email Bounced!
+            // Already Marked Sent?
+            if(!$this->markSent($builder)) {
+                continue;
+            }
+
+            // No Email Address!
             if(empty($lead->email_address)) {
                 $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
                                     'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
                 $stats->updateStats(BuilderStats::STATUS_BOUNCED);
                 $this->markBounced($builder, 'invalid');
-                continue;
-            }
-
-            // Already Exists?
-            if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $lead->email_address)) ||
-               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $lead->email_address))) {
-                $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $lead->email_address);
-                $stats->updateStats(BuilderStats::STATUS_DUPLICATE);
-                $this->markBounced($builder);
                 continue;
             }
 
@@ -522,6 +517,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     {
         // Try/Send Email!
         try {
+            // Already Exists?
+            if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $config->toEmail)) ||
+               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $config->toEmail))) {
+                $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $config->toEmail);
+                $this->markBounced($builder);
+                return BuilderStats::STATUS_DUPLICATED;
+            }
+
             // Email Bounced!
             if($type = $this->bounces->wasBounced($builder->toEmail)) {
                 $this->log->info('The Email Address ' . $builder->toEmail . ' was already marked as ' .
