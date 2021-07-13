@@ -488,7 +488,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Errors Occurred and No Emails Sent?
-        if($stats->noSent < 1 && $stats->errors > 0) {
+        if($stats->noSent < 1 && $stats->noErrors > 0) {
             throw new SendBuilderEmailsFailedException;
         }
 
