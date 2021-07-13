@@ -108,7 +108,7 @@ class BlastRepository implements BlastRepositoryInterface {
                          ->where(Lead::getTableName() . '.email_address', $email)->first();
 
         // Was Blast Sent?
-        echo !empty($sent) ? dd($sent) : 'null';
+        echo !empty($sent) ? print_r($sent) : 'null';
         return !empty($sent->email_blasts_id);
     }
 }
