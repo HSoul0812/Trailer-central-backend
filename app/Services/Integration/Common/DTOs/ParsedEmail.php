@@ -153,10 +153,7 @@ class ParsedEmail
     public function cleanMessageId(): string
     {
         if($this->messageId) {
-            var_dump($this->messageId);
-            $clean = preg_replace("/[<>]/", "", $this->messageId);
-            var_dump($clean);
-            return $clean;
+            return preg_replace("/[<>]/", "", $this->messageId);
         }
         return '';
     }
