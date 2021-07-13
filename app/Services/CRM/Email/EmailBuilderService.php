@@ -472,7 +472,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Log to Database
             $email = $this->saveToDb($builder);
             $builder->setEmailId($email->email_id);
-            $this->markSent($builder);
 
             // Already Exists?
             if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $builder->toEmail)) ||
@@ -507,9 +506,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     {
         // Try/Send Email!
         try {
-            // Log to Database
-            $email = $this->saveToDb($builder);
-            $builder->setEmailId($email->email_id);
+            // Mark as Sent Before Queueing
             $this->markSent($builder);
 
             // Email Bounced!
