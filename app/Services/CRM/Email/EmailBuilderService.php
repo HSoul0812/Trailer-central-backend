@@ -460,68 +460,70 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @return array response
      */
     private function sendEmails(BuilderEmail $builder, array $leads): array {
-        // Initialize Sent Emails Collection
-        $sentEmails = [];
-        $sentLeads = new Collection();
-        $errorLeads = new Collection();
-        $bounceEmails = new Collection();
+        // Initialize Counts
+        $stats = new BuilderStats();
 
         // Loop Leads
         foreach($leads as $leadId) {
+            // Add Lead Config to Builder Email
+            $lead = $this->leads->get(['id' => $leadId]);
+            $builder->setLeadConfig($lead);
+
             // Already Exists?
-            if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $leadId)) ||
-               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $leadId))) {
-                $this->log->info('Already Sent Email ' . $builder->type . ' #' .
-                        $builder->id . ' to Lead with ID: ' . $leadId);
+            if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $builder->toEmail)) ||
+               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $builder->toEmail))) {
+                $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $builder->toEmail);
+                $stats->updateStats(BuilderStats::STATUS_DUPLICATE);
+                $this->markBounced($builder);
                 continue;
             }
 
-            // Try/Send Email!
-            try {
-                // Add Lead Config to Builder Email
-                $lead = $this->leads->get(['id' => $leadId]);
-                $builder->setLeadConfig($lead);
-
-                // Log to Database
-                $email = $this->saveToDb($builder);
-                $builder->setEmailId($email->email_id);
-                $this->markSent($builder);
-
-                // Email Bounced!
-                if($type = $this->bounces->wasBounced($lead->email_address)) {
-                    $this->markBounced($builder, $type);
-                    $bounceEmails->push($lead->email_address);
-                    continue;
-                }
-
-                // Duplicate?
-                if(in_array($lead->email_address, $sentEmails) || empty($lead->email_address)) {
-                    $this->markBounced($builder, empty($lead->email_address) ? 'invalid' : 'duplicate');
-                    continue;
-                }
-                $sentEmails[] = $lead->email_address;
-
-                // Dispatch Send EmailBuilder Job
-                $job = new SendEmailBuilderJob($builder);
-                $this->dispatch($job->onQueue('emailbuilder'));
-
-                // Send Notice
-                $sentLeads->push($leadId);
-                $this->log->info('Sent Email ' . $builder->type . ' #' .
-                        $builder->id . ' to Lead with ID: ' . $leadId);
-            } catch(\Exception $ex) {
-                $this->log->error($ex->getMessage(), $ex->getTrace());
-                $errorLeads->push($leadId);
-            }
+            // Send Lead Email
+            $status = $this->sendLeadEmail($builder, $leadId);
+            $stats->updateStats($status);
         }
 
         // Errors Occurred and No Emails Sent?
-        if($sentLeads->count() < 1 && $errorLeads->count() > 0) {
+        if($stats->noSent < 1 && $stats->errors > 0) {
             throw new SendBuilderEmailsFailedException;
         }
 
         // Return Sent Emails Collection
-        return $this->response($builder, $sentLeads, $errorLeads);
+        return $this->response($builder, $stats);
+    }
+
+    /**
+     * Send Lead Email and Return Status from BuilderEmail
+     * 
+     * @param BuilderEmail $builder
+     * @return string
+     */
+    private function sendLeadEmail(BuilderEmail $builder): string
+    {
+        // Try/Send Email!
+        try {
+            // Log to Database
+            $email = $this->saveToDb($builder);
+            $builder->setEmailId($email->email_id);
+            $this->markSent($builder);
+
+            // Email Bounced!
+            if($type = $this->bounces->wasBounced($builder->toEmail) || empty($builder->toEmail)) {
+                $this->markBounced($builder, empty($builder->toEmail) ? 'invalid' : $type);
+                return BuilderStats::STATUS_BOUNCED;
+            }
+
+            // Dispatch Send EmailBuilder Job
+            $job = new SendEmailBuilderJob($builder);
+            $this->dispatch($job->onQueue('emailbuilder'));
+
+            // Send Notice
+            $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Lead with ID: ' . $builder->leadId);
+            return BuilderStats::STATUS_SUCCESS;
+        } catch(\Exception $ex) {
+            $this->log->error($ex->getMessage(), $ex->getTrace());
+            return BuilderStats::STATUS_ERROR;
+        }
     }
 
     /**
@@ -554,7 +556,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                     $builder->id . ' to Email: ' . $toEmail);
 
             // Return Response Array
-            return $this->response($builder, new Collection([$builder->id]));
+            return $this->response($builder, new BuilderStats(true));
         } catch(\Exception $ex) {
             $this->log->error($ex->getMessage(), $ex->getTrace());
             throw new SendBuilderEmailsFailedException;
@@ -565,10 +567,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Mark Email as Bounced
      * 
      * @param BuilderEmail $config
-     * @param string $type
+     * @param null|string $type
      * @return void
      */
-    private function markBounced(BuilderEmail $config, string $type): void
+    private function markBounced(BuilderEmail $config, ?string $type = null): void
     {
         // Get Parsed Email
         $parsedEmail = $config->getParsedEmail($config->emailId);
@@ -593,33 +595,26 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Return Send Emails Response
      * 
      * @param BuilderEmail $builder
-     * @param null|Collection<int> $sent Lead ID's Successfully Queued to Send
-     * @param null|Collection<int> $errors Lead ID's That Failed to Queue
+     * @param BuilderStats $stats
      * @return array response
      */
-    private function response(BuilderEmail $builder, ?Collection $sent = null, ?Collection $errors = null): array {
+    private function response(BuilderEmail $builder, BuilderStats $stats): array {
         // Handle Logging
-        if($sent !== null) {
-            $this->log->info('Queued ' . $sent->count() . ' Email ' .
-                    $builder->type . '(s) for Dealer #' . $builder->userId);
-        }
-        if($errors !== null && $errors->count() > 0) {
-            $this->log->info('Errors Occurring Trying to Queue ' .
-                    $errors->count() . ' Email ' . $builder->type .
-                    '(s) for Dealer #' . $builder->userId);
-        }
+        $this->log->info('Queued ' . $stats->noSent . ' Email ' .
+                            $builder->type . '(s) for Dealer #' . $builder->userId);
+        $this->log->info('Skipped ' . $stats->noSkipped . ' Email ' .
+                            $builder->type . '(s) for Dealer #' . $builder->userId);
+        $this->log->info('Errors Occurring Trying to Queue ' . $stats->noErrors . ' Email ' .
+                            $builder->type . '(s) for Dealer #' . $builder->userId);
 
         // Convert Builder Email to Fractal
         $data = new Item($builder, new BuilderEmailTransformer(), 'data');
         $response = $this->fractal->createData($data)->toArray();
 
-        // Set Succesfull Emails and Errors
-        if($sent !== null) {
-            $response['sent'] = $sent->toArray();
-        }
-        if($errors !== null) {
-            $response['errors'] = $errors->toArray();
-        }
+        // Convert Builder Email to Fractal
+        $status = new Item($stats, new BuilderStatsTransformer(), 'data');
+        $result = $this->fractal->createData($status)->toArray();
+        $response['stats'] = $result['data'];
 
         // Return Response
         return $response;
