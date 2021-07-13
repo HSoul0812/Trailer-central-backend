@@ -73,8 +73,8 @@ interface EmailBuilderServiceInterface {
      * Mark Email as Sent
      * 
      * @param BuilderEmail $config
-     * @param null|ParsedEmail $finalEmail
+     * @param ParsedEmail $finalEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
-    public function markEmailSent(ParsedEmail $finalEmail = null): bool;
+    public function markEmailSent(ParsedEmail $finalEmail): bool;
 }
