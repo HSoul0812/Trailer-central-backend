@@ -469,6 +469,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $lead = $this->leads->get(['id' => $leadId]);
             $builder->setLeadConfig($lead);
 
+            // Log to Database
+            $email = $this->saveToDb($builder);
+            $builder->setEmailId($email->email_id);
+            $this->markSent($builder);
+
             // Already Exists?
             if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $builder->toEmail)) ||
                ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $builder->toEmail))) {
