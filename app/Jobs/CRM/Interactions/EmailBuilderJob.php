@@ -13,10 +13,10 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Class SendEmailBuilderJob
+ * Class EmailBuilderJob
  * @package App\Jobs\CRM\Interactions
  */
-class SendEmailBuilderJob extends Job
+class EmailBuilderJob extends Job
 { 
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -63,7 +63,7 @@ class SendEmailBuilderJob extends Job
                         $this->config->type . '(s) for Dealer #' . $this->config->userId);
             return true;
         } catch (\Exception $e) {
-            $log->error('Processing Email Builder Mail error: ' . $e->getMessage(), $e->getTrace());
+            $log->error('Processing Email Builder Mail error: ' . $e->getMessage());
             throw new EmailBuilderJobFailedException($e);
         }
     }
