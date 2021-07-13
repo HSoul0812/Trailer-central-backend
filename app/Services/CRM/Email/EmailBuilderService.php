@@ -392,13 +392,18 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Handle Based on Type
         $this->log->info('Marking ' . $config->type . ' #' . $config->id .
                             ' as sent for the Lead #' . $config->leadId);
-        switch($config->type) {
-            case "campaign":
-                $sent = $this->campaigns->sent($config->id, $config->leadId);
-            break;
-            case "blast":
-                $sent = $this->blasts->sent($config->id, $config->leadId);
-            break;
+        try {
+            switch($config->type) {
+                case "campaign":
+                    $sent = $this->campaigns->sent($config->id, $config->leadId);
+                break;
+                case "blast":
+                    $sent = $this->blasts->sent($config->id, $config->leadId);
+                break;
+            }
+        } catch(\Exception $ex) {
+            $this->log->error('The email ' . $config->type . ' #' . $config->id .
+                                ' was already marked sent, but we\'ll catch it later.');
         }
 
         // Return False if Nothing Saved
