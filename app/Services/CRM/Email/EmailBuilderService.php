@@ -542,10 +542,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             }
 
             // Send Email Via SMTP, Gmail, or NTLM
-            $finalEmail = $this->sendEmail($this->config);
+            $finalEmail = $this->sendEmail($builder);
 
             // Mark Email as Sent
-            $this->markSentMessageId($this->config, $finalEmail);
+            $this->markSentMessageId($builder, $finalEmail);
             $this->markEmailSent($finalEmail);
 
             // Send Notice
