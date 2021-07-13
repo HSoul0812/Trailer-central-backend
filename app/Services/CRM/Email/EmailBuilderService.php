@@ -479,11 +479,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $email = $this->saveToDb($builder);
             $builder->setEmailId($email->email_id);
 
-            // Already Marked Sent?
-            if(!$this->markSent($builder)) {
-                continue;
-            }
-
             // No Email Address!
             if(empty($lead->email_address)) {
                 $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
@@ -524,6 +519,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->markBounced($builder);
                 return BuilderStats::STATUS_DUPLICATE;
             }
+
+            // Already Marked Sent?
+            $this->markSent($builder);
 
             // Email Bounced!
             if($type = $this->bounces->wasBounced($builder->toEmail)) {

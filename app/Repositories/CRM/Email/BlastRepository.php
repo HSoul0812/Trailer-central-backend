@@ -70,12 +70,15 @@ class BlastRepository implements BlastRepositoryInterface {
      * @return BlastSent
      */
     public function updateSent(int $blastId, int $leadId, string $messageId): BlastSent {
+        // Get Blast Sent Entry
+        $sent = BlastSent::where('email_blasts_id', $blastId)->where('lead_id', $leadId)->first();
+        if(empty($sent->email_blasts_id)) {
+            return $this->sent($blastId, $leadId, $messageId);
+        }
+
         DB::beginTransaction();
 
         try {
-            // Get Blast Sent Entry
-            $sent = BlastSent::where('email_blasts_id', $blastId)->where('lead_id', $leadId)->first();
-
             // Update Message ID
             $sent->fill(['message_id' => $messageId]);
 
