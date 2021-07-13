@@ -373,40 +373,40 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Save Email Information to Database
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @return EmailHistory
      */
-    public function saveToDb(BuilderEmail $config): EmailHistory {
+    public function saveToDb(BuilderEmail $builder): EmailHistory {
         // Create Interaction
-        if(!empty($config->leadId)) {
+        if(!empty($builder->leadId)) {
             $interaction = $this->interactions->create([
-                'lead_id'           => $config->leadId,
-                'user_id'           => $config->userId,
-                'sales_person_id'   => $config->salesPersonId,
+                'lead_id'           => $builder->leadId,
+                'user_id'           => $builder->userId,
+                'sales_person_id'   => $builder->salesPersonId,
                 'interaction_type'  => 'EMAIL',
-                'interaction_notes' => 'E-Mail Sent: ' . $config->subject,
+                'interaction_notes' => 'E-Mail Sent: ' . $builder->subject,
                 'interaction_time'  => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
-                'from_email'        => $config->fromEmail,
-                'sent_by'           => $config->fromEmail
+                'from_email'        => $builder->fromEmail,
+                'sent_by'           => $builder->fromEmail
             ]);
         }
 
         // Create Email History Entry
-        return $this->emailhistory->create($config->getEmailHistoryParams($interaction->interaction_id ?? 0));
+        return $this->emailhistory->create($builder->getEmailHistoryParams($interaction->interaction_id ?? 0));
     }
 
     /**
      * Send Email Via SMTP|Gmail|NTLM
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @return ParsedEmail
      */
-    public function sendEmail(BuilderEmail $config): ParsedEmail {
+    public function sendEmail(BuilderEmail $builder): ParsedEmail {
         // Get Parsed Email
-        $parsedEmail = $config->getParsedEmail($config->emailId);
+        $parsedEmail = $builder->getParsedEmail($builder->emailId);
 
         // Get Smtp Config
-        $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
+        $salesPerson = $this->salespeople->get(['sales_person_id' => $builder->salesPersonId]);
         $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
         // Send Gmail Email
@@ -418,21 +418,21 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
         // Send NTLM Email
         elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
-            $finalEmail = $this->ntlm->send($config->dealerId, $smtpConfig, $parsedEmail);
+            $finalEmail = $this->ntlm->send($builder->dealerId, $smtpConfig, $parsedEmail);
         }
         // Send Custom Email
         elseif($smtpConfig) {
-            $this->sendCustomEmail($smtpConfig, $config->getToEmail(), new EmailBuilderEmail($parsedEmail));
+            $this->sendCustomEmail($smtpConfig, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
         }
         // Send Default Email
         else {
-            $user = $this->users->get(['dealer_id' => $config->dealerId]);
-            $this->sendDefaultEmail($user, $config->getToEmail(), new EmailBuilderEmail($parsedEmail));
+            $user = $this->users->get(['dealer_id' => $builder->dealerId]);
+            $this->sendDefaultEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
         }
 
         // Return Final Email
-        $this->log->info('Sent Email ' . $config->type . ' #' . $config->id .
-                         ' via ' . $config->getAuthConfig() .
+        $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id .
+                         ' via ' . $builder->getAuthConfig() .
                          ' to: ' . $parsedEmail->getTo());
         return $finalEmail ?? $parsedEmail;
     }
@@ -440,25 +440,25 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Mark Email as Sent
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
-    public function markSent(BuilderEmail $config): bool {
+    public function markSent(BuilderEmail $builder): bool {
         // Handle Based on Type
-        $this->log->info('Marking ' . $config->type . ' #' . $config->id .
-                            ' as sent for the Lead #' . $config->leadId);
+        $this->log->info('Marking ' . $builder->type . ' #' . $builder->id .
+                            ' as sent for the Lead #' . $builder->leadId);
         try {
-            switch($config->type) {
+            switch($builder->type) {
                 case "campaign":
-                    $sent = $this->campaigns->sent($config->id, $config->leadId);
+                    $sent = $this->campaigns->sent($builder->id, $builder->leadId);
                 break;
                 case "blast":
-                    $sent = $this->blasts->sent($config->id, $config->leadId);
+                    $sent = $this->blasts->sent($builder->id, $builder->leadId);
                 break;
             }
         } catch(\Exception $ex) {
-            $this->log->error('The email ' . $config->type . ' #' . $config->id .
-                                ' for Lead #' . $config->leadId . ' was already marked sent');
+            $this->log->error('The email ' . $builder->type . ' #' . $builder->id .
+                                ' for Lead #' . $builder->leadId . ' was already marked sent');
         }
 
         // Return False if Nothing Saved
@@ -468,20 +468,20 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Add Message ID to Sent
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @param ParsedEmail $parsedEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
-    public function markSentMessageId(BuilderEmail $config, ParsedEmail $parsedEmail): bool {
+    public function markSentMessageId(BuilderEmail $builder, ParsedEmail $parsedEmail): bool {
         // Handle Based on Type
-        $this->log->info('Updating ' . $config->type . ' #' . $config->id . ' sent for the Lead #' .
-                            $config->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
-        switch($config->type) {
+        $this->log->info('Updating ' . $builder->type . ' #' . $builder->id . ' sent for the Lead #' .
+                            $builder->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
+        switch($builder->type) {
             case "campaign":
-                $sent = $this->campaigns->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
+                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
             break;
             case "blast":
-                $sent = $this->blasts->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
+                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
             break;
         }
 
@@ -492,7 +492,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Mark Email as Sent
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @param ParsedEmail $finalEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
@@ -597,20 +597,20 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Mark Email as Bounced
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @param null|string $type
      * @return void
      */
-    private function markBounced(BuilderEmail $config, ?string $type = null): void
+    private function markBounced(BuilderEmail $builder, ?string $type = null): void
     {
         // Get Parsed Email
-        $parsedEmail = $config->getParsedEmail($config->emailId);
-        $this->log->info('Marking ' . $config->type . ' #' . $config->id . ' as ' .
+        $parsedEmail = $builder->getParsedEmail($builder->emailId);
+        $this->log->info('Marking ' . $builder->type . ' #' . $builder->id . ' as ' .
                             ($type ?? 'skipped') . ' for the Message-ID ' . $parsedEmail->messageId);
 
         // Create Or Update Bounced Entry in DB
         $this->emailhistory->update([
-            'id' => $config->emailId,
+            'id' => $builder->emailId,
             'message_id' => $parsedEmail->messageId,
             'body' => $parsedEmail->body,
             'was_skipped' => 1,
@@ -621,7 +621,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         ]);
 
         // Mark Sent With Message ID
-        $this->markSentMessageId($config, $parsedEmail);
+        $this->markSentMessageId($builder, $parsedEmail);
     }
 
     /**

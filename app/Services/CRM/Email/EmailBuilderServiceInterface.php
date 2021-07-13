@@ -58,32 +58,32 @@ interface EmailBuilderServiceInterface {
     /**
      * Save Email Information to Database
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @return EmailHistory
      */
-    public function saveToDb(BuilderEmail $config): EmailHistory;
+    public function saveToDb(BuilderEmail $builder): EmailHistory;
 
     /**
      * Send Email Via SMTP|Gmail|NTLM
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @param int $emailId
      * @return ParsedEmail
      */
-    public function sendEmail(BuilderEmail $config): ParsedEmail;
+    public function sendEmail(BuilderEmail $builder): ParsedEmail;
 
     /**
      * Mark Email as Sent
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
-    public function markSent(BuilderEmail $config): bool;
+    public function markSent(BuilderEmail $builder): bool;
 
     /**
      * Mark Email as Sent
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @param ParsedEmail $finalEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
