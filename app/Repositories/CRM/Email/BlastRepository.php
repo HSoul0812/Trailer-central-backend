@@ -104,6 +104,7 @@ class BlastRepository implements BlastRepositoryInterface {
         $sent = BlastSent::leftJoin(Lead::getTableName(), Lead::getTableName().'.identifier',  '=', BlastSent::getTableName().'.lead_id')
                          ->where(BlastSent::getTableName() . '.email_blasts_id', $blastId)
                          ->where(Lead::getTableName() . '.email_address', $email)->first();
+        var_dump($sent);
 
         // Was Blast Sent?
         return !empty($sent->email_blasts_id);
