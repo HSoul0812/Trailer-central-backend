@@ -181,6 +181,11 @@ $api->version('v1', function ($route) {
      * Inventory Attributes
      */
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
+    
+    /**
+     * Inventory Attributes
+     */
+    $route->get('inventory/features', 'App\Http\Controllers\v1\Inventory\FeatureController@index');
 
     /**
      * Inventory transactions history
