@@ -32,6 +32,7 @@ use App\Services\Integration\Google\GmailServiceInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use App\Transformers\CRM\Email\BuilderEmailTransformer;
+use App\Transformers\CRM\Email\BuilderStatsTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
