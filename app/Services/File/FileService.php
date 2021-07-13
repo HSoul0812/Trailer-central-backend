@@ -46,4 +46,29 @@ class FileService extends AbstractFileService
 
         return new FileDto($s3Path, null, $mimeType);
     }
+
+    /**
+     * @param array $data
+     * @return FileDto
+     * @throws FileUploadException
+     */
+    public function uploadLocal(array $data): FileDto
+    {
+        if (!isset($data['file'])) {
+            throw new FileUploadException("file has been missed");
+        }
+
+        $localFilename = $this->uploadLocalByContent($data['file'], $data['dealer_id'] ?? null);
+
+        if ($localFilename) {
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($localFilename);
+        }
+
+        if (!isset($mimeType)) {
+            throw new FileUploadException("Can't get content");
+        }
+
+        return new FileDto($localFilename, null, $mimeType);
+    }
 }

@@ -7,6 +7,7 @@ use App\Helpers\SanitizeHelper;
 use App\Services\File\DTOs\FileDto;
 use App\Traits\CompactHelper;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -85,6 +86,42 @@ abstract class AbstractFileService
     }
 
     /**
+     * @param Filesystem $localDisk
+     * @param int|null $dealerId
+     * @param int|null $identifier
+     * @return string
+     */
+    protected function getLocalFilename(Filesystem $localDisk, ?int $dealerId = null, ?int $identifier = null): string
+    {
+        $dealerId = $dealerId ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
+        $identifier = $identifier ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
+
+        $uploadDirectory = $this->getUploadDirectory(self::UPLOAD_TYPE_IMAGE, [$dealerId, $identifier]);
+
+        $localDisk->makeDirectory($uploadDirectory);
+
+        return sprintf(self::LOCAL_FILENAME_FORMAT, $uploadDirectory, CompactHelper::getRandomString());
+    }
+
+    /**
+     * @param Filesystem $localDisk
+     * @param string $filename
+     * @param string $fileContents
+     * @return string
+     * @throws FileUploadException
+     */
+    protected function saveLocalFile(Filesystem $localDisk, string $filename, string $fileContents): string
+    {
+        $result = $localDisk->put($filename, $fileContents);
+
+        if (!$result) {
+            throw new FileUploadException("Can't upload file. Filename - {$filename}");
+        }
+
+        return $localDisk->path($filename);
+    }
+
+    /**
      * @param string $filename
      * @param array|string $identifiers
      * @return string
@@ -129,14 +166,7 @@ abstract class AbstractFileService
     {
         $localDisk = Storage::disk('local_tmp');
 
-        $dealerId = $dealerId ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
-        $identifier = $identifier ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
-
-        $uploadDirectory = $this->getUploadDirectory(self::UPLOAD_TYPE_IMAGE, [$dealerId, $identifier]);
-
-        $localDisk->makeDirectory($uploadDirectory);
-
-        $filename = sprintf(self::LOCAL_FILENAME_FORMAT, $uploadDirectory, CompactHelper::getRandomString());
+        $filename = $this->getLocalFilename($localDisk, $dealerId, $identifier);
 
         $fileContents = $this->httpClient->get($url, ['http_errors' => false])->getBody()->getContents();
 
@@ -148,13 +178,33 @@ abstract class AbstractFileService
             return null;
         }
 
-        $result = $localDisk->put($filename, $fileContents);
+        return $this->saveLocalFile($localDisk, $filename, $fileContents);
+    }
 
-        if (!$result) {
-            throw new FileUploadException("Can't upload file. Url - {$url}, dealer_id - {$dealerId}, id - $identifier");
+    /**
+     * @param string|resource $content
+     * @param int|null $dealerId
+     * @param int|null $identifier
+     * @param bool $skipNotExisting
+     * @return string|null
+     *
+     * @throws FileUploadException
+     */
+    protected function uploadLocalByContent($fileContents, ?int $dealerId = null, ?int $identifier = null, bool $skipNotExisting = false): ?string
+    {
+        $localDisk = Storage::disk('local_tmp');
+
+        $filename = $this->getLocalFilename($localDisk, $dealerId, $identifier);
+
+        if (!$skipNotExisting && !$fileContents) {
+            throw new FileUploadException("Can't get file contents. dealer_id - {$dealerId}, id - $identifier");
         }
 
-        return $localDisk->path($filename);
+        if ($skipNotExisting && !$fileContents) {
+            return null;
+        }
+
+        return $this->saveLocalFile($localDisk, $filename, $fileContents);
     }
 
     /**
