@@ -69,6 +69,13 @@ class BlastRepository implements BlastRepositoryInterface {
         try {
             // Get Blast Sent Entry
             $sent = BlastSent::where('email_blasts_id', $blastId)->where('lead_id', $leadId)->first();
+            if(empty($sent->email_blasts_id)) {
+                return $this->sent([
+                    'email_blasts_id' => $blastId,
+                    'lead_id' => $leadId,
+                    'message_id' => $messageId
+                ]);
+            }
 
             // Update Message ID
             $sent->fill(['message_id' => $messageId]);

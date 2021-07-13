@@ -69,6 +69,13 @@ class CampaignRepository implements CampaignRepositoryInterface {
         try {
             // Get Campaign Sent Entry
             $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
+            if(empty($sent->drip_campaigns_id)) {
+                return $this->sent([
+                    'email_blasts_id' => $campaignId,
+                    'lead_id' => $leadId,
+                    'message_id' => $messageId
+                ]);
+            }
 
             // Update Message ID
             $sent->fill(['message_id' => $messageId]);
