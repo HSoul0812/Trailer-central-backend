@@ -35,6 +35,7 @@ trait MailHelper
         $mailer = app()->makeWith('crm.mailer', $smtpConfig);
         $mailer->to($this->getCleanTo($to))->send($email, array(), function($message) use(&$messageId) {
             $messageId = $message->getId();
+            var_dump($messageId);
         });
 
         // Return Message ID
