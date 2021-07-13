@@ -390,20 +390,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     public function markSent(BuilderEmail $config): bool {
         // Handle Based on Type
-        $this->log->info('Marking ' . $config->type . ' #' . $config->id . ' as sent for ' .
-                            ' the Lead With ID #' . $config->leadId);
+        $this->log->info('Marking ' . $config->type . ' #' . $config->id .
+                            ' as sent for the Lead #' . $config->leadId);
         switch($config->type) {
             case "campaign":
-                $sent = $this->campaigns->sent([
-                    'drip_campaigns_id' => $config->id,
-                    'lead_id' => $config->leadId
-                ]);
+                $sent = $this->campaigns->sent($config->id, $config->leadId);
             break;
             case "blast":
-                $sent = $this->blasts->sent([
-                    'email_blasts_id' => $config->id,
-                    'lead_id' => $config->leadId
-                ]);
+                $sent = $this->blasts->sent($config->id, $config->leadId);
             break;
         }
 
@@ -420,8 +414,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     public function markSentMessageId(BuilderEmail $config, ParsedEmail $parsedEmail): bool {
         // Handle Based on Type
-        $this->log->info('Marking ' . $config->type . ' #' . $config->id . ' as sent for ' .
-                            ' the Lead With ID #' . $config->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
+        $this->log->info('Updating ' . $config->type . ' #' . $config->id . ' sent for the Lead #' .
+                            $config->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
         switch($config->type) {
             case "campaign":
                 $sent = $this->campaigns->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
@@ -595,7 +589,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Get Parsed Email
         $parsedEmail = $config->getParsedEmail($config->emailId);
         $this->log->info('Marking ' . $config->type . ' #' . $config->id . ' as ' .
-                            $type . ' for the Message-ID #' . $parsedEmail->messageId);
+                            ($type ?? 'skipped') . ' for the Message-ID ' . $parsedEmail->messageId);
 
         // Create Or Update Bounced Entry in DB
         $this->emailhistory->update([

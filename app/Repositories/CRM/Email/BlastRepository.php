@@ -34,16 +34,22 @@ class BlastRepository implements BlastRepositoryInterface {
     /**
      * Mark Blast as Sent
      * 
-     * @param array $params
+     * @param int $blastId
+     * @param int $leadId
+     * @param null|string $messageId = null
      * @throws \Exception
      * @return BlastSent
      */
-    public function sent(array $params): BlastSent {
+    public function sent(int $blastId, int $leadId, ?string $messageId = null): BlastSent {
         DB::beginTransaction();
 
         try {
             // Create Blast Sent
-            $sent = BlastSent::create($params);
+            $sent = BlastSent::create([
+                'email_blasts_id' => $blastId,
+                'lead_id' => $leadId,
+                'message_id' => $messageId ?? ''
+            ]);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -70,11 +76,7 @@ class BlastRepository implements BlastRepositoryInterface {
             // Get Blast Sent Entry
             $sent = BlastSent::where('email_blasts_id', $blastId)->where('lead_id', $leadId)->first();
             if(empty($sent->email_blasts_id)) {
-                return $this->sent([
-                    'email_blasts_id' => $blastId,
-                    'lead_id' => $leadId,
-                    'message_id' => $messageId
-                ]);
+                return $this->sent($blastId, $leadId, $messageId);
             }
 
             // Update Message ID

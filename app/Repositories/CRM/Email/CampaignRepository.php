@@ -34,16 +34,22 @@ class CampaignRepository implements CampaignRepositoryInterface {
     /**
      * Mark Campaign as Sent
      * 
-     * @param array $params
+     * @param int $campaignId
+     * @param int $leadId
+     * @param null|string $messageId = null
      * @throws \Exception
      * @return CampaignSent
      */
-    public function sent(array $params): CampaignSent {
+    public function sent(int $campaignId, int $leadId, ?string $messageId = null): CampaignSent {
         DB::beginTransaction();
 
         try {
             // Create Campaign Sent
-            $sent = CampaignSent::create($params);
+            $sent = CampaignSent::create([
+                'drip_campaigns_id' => $campaignId,
+                'lead_id' => $leadId,
+                'message_id' => $messageId ?? ''
+            ]);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -70,11 +76,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
             // Get Campaign Sent Entry
             $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
             if(empty($sent->drip_campaigns_id)) {
-                return $this->sent([
-                    'email_blasts_id' => $campaignId,
-                    'lead_id' => $leadId,
-                    'message_id' => $messageId
-                ]);
+                return $this->sent($campaignId, $leadId, $messageId);
             }
 
             // Update Message ID

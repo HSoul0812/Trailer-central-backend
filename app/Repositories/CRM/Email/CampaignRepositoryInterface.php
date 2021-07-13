@@ -9,11 +9,13 @@ interface CampaignRepositoryInterface extends Repository {
     /**
      * Mark Campaign as Sent
      * 
-     * @param array $params
+     * @param int $campaignId
+     * @param int $leadId
+     * @param null|string $messageId = null
      * @throws \Exception
      * @return CampaignSent
      */
-    public function sent(array $params): CampaignSent;
+    public function sent(int $campaignId, int $leadId, ?string $messageId = null): CampaignSent;
 
     /**
      * Update Sent Campaign
