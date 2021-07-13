@@ -103,7 +103,8 @@ class BlastRepository implements BlastRepositoryInterface {
      */
     public function wasSent(int $blastId, string $email): bool {
         // Get Blast Sent Entry
-        $sent = BlastSent::join(Lead::getTableName(), Lead::getTableName().'.identifier', '=', BlastSent::getTableName().'.lead_id')
+        $sent = BlastSent::get(BlastSent::getTableName().'*')
+                         ->join(Lead::getTableName(), Lead::getTableName().'.identifier', '=', BlastSent::getTableName().'.lead_id')
                          ->where(BlastSent::getTableName() . '.email_blasts_id', $blastId)
                          ->where(Lead::getTableName() . '.email_address', $email)->first();
 
