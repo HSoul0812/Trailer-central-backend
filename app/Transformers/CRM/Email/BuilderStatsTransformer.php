@@ -18,7 +18,7 @@ class BuilderStatsTransformer extends TransformerAbstract {
         return [
             'sent' => $stats->noSent,
             'bounced' => $stats->noBounced,
-            'skipped' => $stats->skipped,
+            'skipped' => $stats->noSkipped,
             'duplicates' => $stats->noDups,
             'errors' => $stats->noErrors
         ];
