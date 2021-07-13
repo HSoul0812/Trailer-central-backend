@@ -475,11 +475,17 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $builder->setEmailId($email->email_id);
 
             // Already Exists?
-            if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $builder->toEmail)) ||
-               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $builder->toEmail))) {
-                $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $builder->toEmail);
-                $stats->updateStats(BuilderStats::STATUS_DUPLICATE);
-                $this->markBounced($builder);
+            if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $lead->email_address)) ||
+               ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $lead->email_address)) ||
+               empty($lead->email_address)) {
+                if(empty($lead->email_address)) {
+                    $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
+                                        'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
+                } else {
+                    $this->log->info('Already Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $lead->email_address);
+                }
+                $this->markBounced($builder, (empty($lead->email_address) ? 'invalid' : null));
+                $stats->updateStats(empty($lead->email_address) ? BuilderStats::STATUS_BOUNCED : BuilderStats::STATUS_DUPLICATE);
                 continue;
             }
 
@@ -511,15 +517,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->markSent($builder);
 
             // Email Bounced!
-            if($type = $this->bounces->wasBounced($builder->toEmail) || empty($builder->toEmail)) {
-                if(empty($builder->toEmail)) {
-                    $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
-                                        'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
-                } else {
-                    $this->log->info('The Email Address ' . $builder->toEmail . ' was already marked as ' .
-                                        $type . ', so we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
-                }
-                $this->markBounced($builder, empty($builder->toEmail) ? 'invalid' : $type);
+            if($type = $this->bounces->wasBounced($builder->toEmail)) {
+                $this->log->info('The Email Address ' . $builder->toEmail . ' was already marked as ' .
+                                    $type . ', so we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
+                $this->markBounced($builder, $type);
                 return BuilderStats::STATUS_BOUNCED;
             }
 
