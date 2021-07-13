@@ -473,6 +473,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Log to Database
             $email = $this->saveToDb($builder);
             $builder->setEmailId($email->email_id);
+            $this->markSent($builder);
 
             // Email Bounced!
             if(empty($lead->email_address)) {
@@ -516,9 +517,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     {
         // Try/Send Email!
         try {
-            // Mark as Sent Before Queueing
-            $this->markSent($builder);
-
             // Email Bounced!
             if($type = $this->bounces->wasBounced($builder->toEmail)) {
                 $this->log->info('The Email Address ' . $builder->toEmail . ' was already marked as ' .
