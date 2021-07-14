@@ -40,14 +40,14 @@ trait MailHelper
     }
 
     /**
-     * Send Default Email
+     * Send SES Email
      * 
      * @param User $user
      * @param array{email: string, ?name: string} $to}
      * @param Mailable $email
      * @return string
      */
-    public function sendDefaultEmail(User $user, array $to, Mailable $email): string
+    public function sendSesEmail(User $user, array $to, Mailable $email): string
     {
         // Get SMTP Config Array
         $sesConfig = [
@@ -58,6 +58,30 @@ trait MailHelper
         // Create CRM Mailer
         $mailer = app()->makeWith('ses.mailer', $sesConfig);
         $mailer->to($this->getCleanTo($to))->send($email);
+
+        // Return Message ID
+        return $email->messageId;
+    }
+
+    /**
+     * Send Default Email
+     * 
+     * @param User $user
+     * @param array{email: string, ?name: string} $to}
+     * @param Mailable $email
+     * @return string
+     */
+    public function sendDefaultEmail(User $user, array $to, Mailable $email): string
+    {
+        // Set From/Reply-To
+        $email->from(config('mail.from.address'), $user->name);
+        if(!empty($user->email)) {
+            $email->replyTo($user->email, $user->name);
+        }
+
+        // Create CRM Mailer
+        $sent = Mail::to($this->getCleanTo($to))->send($email);
+        var_dump($sent);
 
         // Return Message ID
         return $email->messageId;
