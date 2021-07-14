@@ -13,6 +13,6 @@ class EmailBuilderNotification
 {
     public function handle(MessageSent $event)
     {
-        print_r($event->message->getSwiftMailer()->getTransport());
+        dd($event->message->getHeaders()->get('X-SES-Message-ID')->getValue());
     }
 }
