@@ -539,7 +539,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             }
 
             // Replace in Email History
-            $this->emailhistory->update(['id' => $emailHistoryId, 'message_id' => $messageId]);
+            $this->emailhistory->update(['id' => $emailHistoryId, 'message_id' => $messageId, 'date_sent' => 1]);
         } catch (\Exception $ex) {
             $this->log->error('Failed to Replace Message ID ' . $messageId . ' on ' . $type .
                                 ' #' . $id . ', error returned: ' . $ex->getMessage());
