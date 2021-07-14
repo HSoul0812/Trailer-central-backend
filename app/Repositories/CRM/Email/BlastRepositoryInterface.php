@@ -29,15 +29,6 @@ interface BlastRepositoryInterface extends Repository {
     public function updateSent(int $blastId, int $leadId, string $messageId): BlastSent;
 
     /**
-     * Replace Sent Message ID
-     * 
-     * @param string $messageId
-     * @param string $newMessageId
-     * @return bool
-     */
-    public function replaceSentMessageId(string $messageId, string $newMessageId): bool;
-
-    /**
      * Was Blast Already Sent to Email Address?
      * 
      * @param int $blastId

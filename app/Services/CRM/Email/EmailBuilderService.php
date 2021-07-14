@@ -427,7 +427,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Send SES Email
         else {
             $user = $this->users->get(['dealer_id' => $builder->dealerId]);
-            $this->sendCustomSesEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
+            $this->sendCustomSesEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail, $builder));
         }
 
         // Return Final Email
@@ -478,51 +478,15 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                             $builder->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
         switch($builder->type) {
             case "campaign":
-                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
+                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, true);
             break;
             case "blast":
-                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
+                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, true);
             break;
         }
 
         // Return False if Nothing Saved
         return !empty($sent->lead_id);
-    }
-
-    /**
-     * Replace Message ID in Email History ID and Sent
-     * 
-     * @param int $emailHistoryId
-     * @param string $messageId
-     * @return boolean true if successfully found and replaced
-     */
-    public function replaceMessageId(int $emailHistoryId, string $messageId): bool {
-        // Get Email History Entry
-        try {
-            $email = $this->emailhistory->get(['id' => $emailHistoryId]);
-            $this->log->info('Attempting to Replace Message ID ' . $email->message_id . ' with ' . $messageId);
-            var_dump($email->message_id);
-
-            // Replace in Email History
-            $this->emailhistory->update(['id' => $email->email_id, 'message_id' => $messageId]);
-
-            // Replace Message ID in Sent
-            $wasCampaign = $this->campaigns->replaceSentMessageId($email->message_id, $messageId);
-            $wasBlast = $this->blasts->replaceSentMessageId($email->message_id, $messageId);
-        } catch (\Exception $ex) {
-            $this->log->error('Failed to Replace Message ID ' . $messageId . ' on Email #' .
-                                $emailHistoryId . ', error returned: ' . $ex->getMessage());
-        }
-
-        // Return False if Nothing Updated
-        if($wasCampaign) {
-            $this->log->info('Replaced Message ID ' . $messageId . ' on Campaign Email #' . $emailHistoryId);
-        } elseif($wasBlast) {
-            $this->log->info('Replaced Message ID ' . $messageId . ' on Blast Email #' . $emailHistoryId);
-        } else {
-            $this->log->error('Could Not Replace Message ID ' . $messageId . ' on Non-Existent Email #' . $emailHistoryId);
-        }
-        return $wasCampaign || $wasBlast;
     }
 
     /**
@@ -533,18 +497,67 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
     public function markEmailSent(ParsedEmail $finalEmail): bool {
+        // Get Existing Email
+        $email = $this->emailhistory->get(['id' => $finalEmail->emailHistoryId]);
+
+        // Initialize Update Params
+        $updateParams = [
+            'id' => $finalEmail->emailHistoryId,
+            'body' => $finalEmail->body,
+            'date_sent' => 1
+        ];
+
+        // Message ID Doesn't Exist?
+        if(empty($email->message_id)) {
+            $updateParams['message_id'] = $finalEmail->messageId;
+        }
+
         // Set Date Sent
         $this->log->info('Marking email #' . $finalEmail->emailHistoryId . ' as sent ' .
                             ' with Message-ID: ' . $finalEmail->messageId);
-        $email = $this->emailhistory->update([
-            'id' => $finalEmail->emailHistoryId,
-            'message_id' => $finalEmail->messageId,
-            'body' => $finalEmail->body,
-            'date_sent' => 1
-        ]);
+        $final = $this->emailhistory->update($updateParams);
 
         // Return False if Nothing Saved
-        return !empty($email->email_id);
+        return !empty($final->email_id);
+    }
+
+    /**
+     * Replace Message ID in Email History ID and Sent
+     * 
+     * @param string $type
+     * @param int $id
+     * @param int $lead
+     * @param int $emailHistoryId
+     * @param string $messageId
+     * @return boolean true if successfully found and replaced
+     */
+    public function replaceMessageId(string $type, int $id, int $lead, int $emailHistoryId, string $messageId): bool {
+        // Get Email History Entry
+        try {
+            $this->log->info('Attempting to Replace Message ID ' . $messageId . ' on ' . $type . ' #' . $id);
+            switch($type) {
+                case "campaign":
+                    $sent = $this->campaigns->updateSent($id, $lead, $messageId);
+                break;
+                case "blast":
+                    $sent = $this->blasts->updateSent($id, $lead, $messageId);
+                break;
+            }
+
+            // Replace in Email History
+            $this->emailhistory->update(['id' => $emailHistoryId, 'message_id' => $messageId]);
+        } catch (\Exception $ex) {
+            $this->log->error('Failed to Replace Message ID ' . $messageId . ' on ' . $type .
+                                ' #' . $id . ', error returned: ' . $ex->getMessage());
+        }
+
+        // Return False if Nothing Updated
+        if(!empty($sent)) {
+            $this->log->info('Replaced Message ID ' . $messageId . ' on ' . $type . ' #' . $id);
+        } else {
+            $this->log->error('Could Not Replace Message ID ' . $messageId . ' on Non-Existent ' . $type . ' #' . $id);
+        }
+        return !empty($sent);
     }
 
 

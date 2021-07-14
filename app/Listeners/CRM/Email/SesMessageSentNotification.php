@@ -36,13 +36,18 @@ class SesMessageSentNotification
         if ($event->message) {
             // Check Headers
             $sesMessageId = $event->message->getHeaders()->get('X-SES-Message-ID');
-            $emailHistoryId = $event->message->getHeaders()->get('X-Email-History-ID');
-            if(!empty($sesMessageId) && !empty($emailHistoryId)) {
+            $builderType = $event->message->getHeaders()->get('X-Builder-Email-Type');
+            if(!empty($sesMessageId) && !empty($builderType)) {
                 $messageId = $sesMessageId->getValue();
-                $emailId = $emailHistoryId->getValue();
+
+                // Get Builder Details
+                $type = $builderType->getValue();
+                $id = $event->message->getHeaders()->get('X-Builder-Email-ID')->getValue();
+                $lead = $event->message->getHeaders()->get('X-Builder-Email-Lead')->getValue();
+                $history = $event->message->getHeaders()->get('X-Builder-History-ID')->getValue();
 
                 // Update Message ID on Email History ID
-                //$this->emailbuilder->replaceMessageId($emailId, $messageId);
+                $this->emailbuilder->replaceMessageId($type, $id, $lead, $history, $messageId);
             }
         }
     }

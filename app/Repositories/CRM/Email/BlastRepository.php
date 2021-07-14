@@ -66,14 +66,20 @@ class BlastRepository implements BlastRepositoryInterface {
      * @param int $blastId
      * @param int $leadId
      * @param string $messageId
+     * @param bool $onlyIfMissing
      * @throws \Exception
      * @return BlastSent
      */
-    public function updateSent(int $blastId, int $leadId, string $messageId): BlastSent {
+    public function updateSent(int $blastId, int $leadId, string $messageId, bool $onlyIfMissing = false): BlastSent {
         // Get Blast Sent Entry
         $sent = BlastSent::where('email_blasts_id', $blastId)->where('lead_id', $leadId)->first();
         if(empty($sent->email_blasts_id)) {
             return $this->sent($blastId, $leadId, $messageId);
+        }
+
+        // ONLY If Missing?!
+        if($onlyIfMissing && !empty($sent->message_id)) {
+            return $sent;
         }
 
         DB::beginTransaction();
@@ -92,36 +98,6 @@ class BlastRepository implements BlastRepositoryInterface {
         }
         
         return $sent;
-    }
-
-    /**
-     * Replace Sent Message ID
-     * 
-     * @param string $messageId
-     * @param string $newMessageId
-     * @return bool
-     */
-    public function replaceSentMessageId(string $messageId, string $newMessageId): bool {
-        DB::beginTransaction();
-
-        try {
-            // Get Blast Sent Entry
-            $sent = BlastSent::where('message_id', $messageId)->first();
-
-            // Update Blast Sent Message ID
-            $sent->fill(['message_id' => $newMessageId]);
-
-            // Save
-            $sent->save();
-
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            return false;
-        }
-
-        // BlastSent is Valid!
-        return !empty($sent->email_blasts_id);
     }
 
     /**

@@ -29,15 +29,6 @@ interface CampaignRepositoryInterface extends Repository {
     public function updateSent(int $campaignId, int $leadId, string $messageId): CampaignSent;
 
     /**
-     * Replace Sent Message ID
-     * 
-     * @param string $messageId
-     * @param string $newMessageId
-     * @return bool
-     */
-    public function replaceSentMessageId(string $messageId, string $newMessageId): bool;
-
-    /**
      * Was Campaign Already Sent?
      * 
      * @param int $campaignId

@@ -66,14 +66,20 @@ class CampaignRepository implements CampaignRepositoryInterface {
      * @param int $campaignId
      * @param int $leadId
      * @param string $messageId
+     * @param bool $onlyIfMissing
      * @throws \Exception
      * @return CampaignSent
      */
-    public function updateSent(int $campaignId, int $leadId, string $messageId): CampaignSent {
+    public function updateSent(int $campaignId, int $leadId, string $messageId, bool $onlyIfMissing = false): CampaignSent {
         // Get Campaign Sent Entry
         $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
         if(empty($sent->drip_campaigns_id)) {
             return $this->sent($campaignId, $leadId, $messageId);
+        }
+
+        // ONLY If Missing?!
+        if($onlyIfMissing && !empty($sent->message_id)) {
+            return $sent;
         }
 
         DB::beginTransaction();
@@ -92,36 +98,6 @@ class CampaignRepository implements CampaignRepositoryInterface {
         }
         
         return $sent;
-    }
-
-    /**
-     * Replace Sent Message ID
-     * 
-     * @param string $messageId
-     * @param string $newMessageId
-     * @return bool
-     */
-    public function replaceSentMessageId(string $messageId, string $newMessageId): bool {
-        DB::beginTransaction();
-
-        try {
-            // Get Campaign Sent Entry
-            $sent = CampaignSent::where('message_id', $messageId)->first();
-
-            // Update Campaign Sent Message ID
-            $sent->fill(['message_id' => $newMessageId]);
-
-            // Save
-            $sent->save();
-
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            return false;
-        }
-
-        // CampaignSent is Valid!
-        return !empty($sent->drip_campaigns_id);
     }
 
     /**

@@ -2,12 +2,11 @@
 
 namespace App\Mail\CRM;
 
-use Aws\Ses\SesClient;
+use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Foundation\Application;
 use Illuminate\Mail\Mailer;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Transport\SesTransport;
 use Illuminate\Mail\TransportManager;
 
 class CustomEmail extends Mailable
@@ -32,17 +31,25 @@ class CustomEmail extends Mailable
      * Create a new message instance.
      *
      * @param ParsedEmail $email
+     * @param BuilderEmail $config
      */
-    public function __construct(ParsedEmail $email)
+    public function __construct(ParsedEmail $email, ?BuilderEmail $config = null)
     {
         $this->parsedEmail = $email;
         $this->data     = ['body' => $email->body];
         $this->subject  = $email->subject;
 
         // Override Message-ID?
-        $this->callbacks[] = function ($message) use (&$messageId, $email) {
+        $this->callbacks[] = function ($message) use (&$messageId, $email, $config) {
             $message->getHeaders()->get('Message-ID')->setId($email->cleanMessageId());
-            $message->getHeaders()->addTextHeader('X-Email-History-ID', $email->emailHistoryId);
+
+            // BuilderEmail Config Provided?
+            if(!empty($config)) {
+                $message->getHeaders()->addTextHeader('X-Builder-Email-ID', $config->id);
+                $message->getHeaders()->addTextHeader('X-Builder-Email-Type', $config->type);
+                $message->getHeaders()->addTextHeader('X-Builder-Email-Lead', $config->leadId);
+                $message->getHeaders()->addTextHeader('X-Builder-History-ID', $config->emailHistoryId);
+            }
         };
     }
 
