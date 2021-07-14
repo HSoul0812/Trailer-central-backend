@@ -501,13 +501,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         try {
             $email = $this->emailhistory->get(['id' => $emailHistoryId]);
             $this->log->info('Attempting to Replace Message ID ' . $email->message_id . ' with ' . $messageId);
+            var_dump($email->message_id);
+
+            // Replace in Email History
+            $this->emailhistory->update(['id' => $email->email_id, 'message_id' => $messageId]);
 
             // Replace Message ID in Sent
             $wasCampaign = $this->campaigns->replaceSentMessageId($email->message_id, $messageId);
             $wasBlast = $this->blasts->replaceSentMessageId($email->message_id, $messageId);
-
-            // Replace in Email History
-            $this->emailhistory->update(['id' => $emailHistoryId, 'message_id' => $messageId]);
         } catch (\Exception $ex) {
             $this->log->error('Failed to Replace Message ID ' . $messageId . ' on Email #' .
                                 $emailHistoryId . ', error returned: ' . $ex->getMessage());

@@ -106,10 +106,13 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
         try {
             // Get Campaign Sent Entry
-            $sent = CampaignSent::where('message_id', $messageId);
+            $sent = CampaignSent::where('message_id', $messageId)->first();
 
             // Update Campaign Sent Message ID
-            $sent->update(['message_id' => $newMessageId]);
+            $sent->fill(['message_id' => $newMessageId]);
+
+            // Save
+            $sent->save();
 
             DB::commit();
         } catch (\Exception $ex) {

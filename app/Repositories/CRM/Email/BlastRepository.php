@@ -106,10 +106,13 @@ class BlastRepository implements BlastRepositoryInterface {
 
         try {
             // Get Blast Sent Entry
-            $sent = BlastSent::where('message_id', $messageId);
+            $sent = BlastSent::where('message_id', $messageId)->first();
 
             // Update Blast Sent Message ID
-            $sent->update(['message_id' => $newMessageId]);
+            $sent->fill(['message_id' => $newMessageId]);
+
+            // Save
+            $sent->save();
 
             DB::commit();
         } catch (\Exception $ex) {
