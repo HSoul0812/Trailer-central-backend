@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Mail\Mailer;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Transport\SesTransport;
+use Illuminate\Mail\TransportManager;
 
 class CustomEmail extends Mailable
 {
@@ -140,11 +141,19 @@ class CustomEmail extends Mailable
         $fromEmail = $config['fromEmail'] ?? config('mail.from.address');
         $fromName = $config['fromName'] ?? config('mail.from.name');
 
+        
+
         // Get SES Driver
-        $transport = new SesTransport(new SesClient(), []);
+        /*$transport = new SesTransport(new SesClient(), []);
 
         // Create Swift Mailer
-        $swift_mailer = new \Swift_Mailer($transport);
+        $swift_mailer = new \Swift_Mailer($transport);*/
+        // Get SES Driver
+        $transport = new TransportManager($app);
+        $transport->setDefaultDriver('ses');
+
+        // Create Swift Mailer
+        $swift_mailer = new \Swift_Mailer($transport->driver());
         $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
         $mailer->alwaysFrom($fromEmail, $fromName);
         if(!empty($config['replyEmail'])) {

@@ -25,8 +25,6 @@ return [
     ],
 
     'ses' => [
-        'key' => env('SES_KEY'),
-        'secret' => env('SES_SECRET'),
         'region' => env('SES_REGION', 'us-east-1'),
         'token' => env('SES_TOKEN'),
         'options' => [
