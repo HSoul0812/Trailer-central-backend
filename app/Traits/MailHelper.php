@@ -17,9 +17,9 @@ trait MailHelper
      * @param SmtpConfig $config
      * @param array{email: string, ?name: string} $to}
      * @param Mailable $email
-     * @return strings
+     * @return void
      */
-    public function sendCustomEmail(SmtpConfig $config, array $to, Mailable $email): string
+    public function sendCustomEmail(SmtpConfig $config, array $to, Mailable $email): void
     {
         // Get SMTP Config Array
         $smtpConfig = [
@@ -34,9 +34,6 @@ trait MailHelper
         // Create CRM Mailer
         $mailer = app()->makeWith('crm.mailer', $smtpConfig);
         $mailer->to($this->getCleanTo($to))->send($email);
-
-        // Return Message ID
-        return $email->messageId;
     }
 
     /**
@@ -45,9 +42,9 @@ trait MailHelper
      * @param User $user
      * @param array{email: string, ?name: string} $to}
      * @param Mailable $email
-     * @return string
+     * @return void
      */
-    public function sendCustomSesEmail(User $user, array $to, Mailable $email): string
+    public function sendCustomSesEmail(User $user, array $to, Mailable $email): void
     {
         // Get SMTP Config Array
         $sesConfig = [
@@ -58,9 +55,6 @@ trait MailHelper
         // Create CRM Mailer
         $mailer = app()->makeWith('ses.mailer', $sesConfig);
         $mailer->to($this->getCleanTo($to))->send($email);
-
-        // Return Message ID
-        return $email->messageId;
     }
 
     /**
@@ -69,9 +63,9 @@ trait MailHelper
      * @param User $user
      * @param array{email: string, ?name: string} $to}
      * @param Mailable $email
-     * @return string
+     * @return void
      */
-    public function sendDefaultEmail(User $user, array $to, Mailable $email): string
+    public function sendDefaultEmail(User $user, array $to, Mailable $email): void
     {
         // Set From/Reply-To
         $email->from(config('mail.from.address'), $user->name);
@@ -81,9 +75,6 @@ trait MailHelper
 
         // Create CRM Mailer
         Mail::to($this->getCleanTo($to))->send($email);
-
-        // Return Message ID
-        return $email->messageId;
     }
 
 

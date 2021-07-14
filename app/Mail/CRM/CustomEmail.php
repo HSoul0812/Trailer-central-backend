@@ -19,11 +19,6 @@ class CustomEmail extends Mailable
     const BLADE_PLAIN = 'emails.interactions.interaction-email-plain';
 
     /**
-     * @var string
-     */
-    public $messageId;
-
-    /**
      * @var array
      */
     protected $data;
@@ -45,20 +40,10 @@ class CustomEmail extends Mailable
         $this->subject  = $email->subject;
 
         // Override Message-ID?
-        $messageId = '';
         $this->callbacks[] = function ($message) use (&$messageId, $email) {
             $message->getHeaders()->get('Message-ID')->setId($email->cleanMessageId());
-            print_r($email->emailHistoryId);
-
-            // SES Message ID Exists?!
-            $sesMessageId = $message->getHeaders()->get('X-SES-Message-ID');
-            if(!empty($sesMessageId)) {
-                $messageId = $sesMessageId->getValue();
-            }
+            $message->getHeaders()->addTextHeader('Email-Message-ID', $email->emailHistoryId);
         };
-
-        // Return CustomEmail With Up-To-Date Message Id
-        $this->messageId = $messageId;
     }
 
     /**
