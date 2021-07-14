@@ -499,6 +499,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     public function replaceMessageId(int $emailHistoryId, string $messageId): bool {
         // Get Email History Entry
         try {
+            $this->log->info('Attempting to Replace Message ID ' . $messageId . ' on Email #' . $emailHistoryId);
             $email = $this->emailhistory->get(['id' => $emailHistoryId]);
 
             // Replace Message ID in Sent
@@ -506,15 +507,20 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $wasBlast = $this->blasts->replaceSentMessageId($email->message_id, $messageId);
 
             // Replace in Email History
-            $this->emailhistory->update([
-                'id' => $emailHistoryId,
-                'message_id' => $messageId
-            ]);
+            $this->emailhistory->update(['id' => $emailHistoryId, 'message_id' => $messageId]);
         } catch (\Exception $ex) {
-            return false;
+            $this->log->error('Failed to Replace Message ID ' . $messageId . ' on Email #' .
+                                $emailHistoryId . ', error returned: ' . $ex->getMessage());
         }
 
         // Return False if Nothing Updated
+        if($wasCampaign) {
+            $this->log->error('Replaced Message ID ' . $messageId . ' on Campaign Email #' . $emailHistoryId);
+        } elseif($wasBlast) {
+            $this->log->error('Replaced Message ID ' . $messageId . ' on Blast Email #' . $emailHistoryId);
+        } else {
+            $this->log->error('Could Not Replace Message ID ' . $messageId . ' on Non-Existent Email #' . $emailHistoryId);
+        }
         return $wasCampaign || $wasBlast;
     }
 
