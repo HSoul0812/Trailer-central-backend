@@ -2,11 +2,12 @@
 
 namespace App\Mail\CRM;
 
+use Aws\Ses\SesClient;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Foundation\Application;
 use Illuminate\Mail\Mailer;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\TransportManager;
+use Illuminate\Mail\Transport\SesTransport;
 
 class CustomEmail extends Mailable
 {
@@ -140,11 +141,10 @@ class CustomEmail extends Mailable
         $fromName = $config['fromName'] ?? config('mail.from.name');
 
         // Get SES Driver
-        $transport = new TransportManager($app);
-        $transport->setDefaultDriver('ses');
+        $transport = new SesTransport(new SesClient(), []);
 
         // Create Swift Mailer
-        $swift_mailer = new \Swift_Mailer($transport->driver());
+        $swift_mailer = new \Swift_Mailer($transport);
         $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
         $mailer->alwaysFrom($fromEmail, $fromName);
         if(!empty($config['replyEmail'])) {
