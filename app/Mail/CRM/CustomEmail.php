@@ -50,6 +50,7 @@ class CustomEmail extends Mailable
             $message->getHeaders()->get('Message-ID')->setId($email->cleanMessageId());
 
             // SES Message ID Exists?!
+            print_r($message->getHeaders);
             $sesMessageId = $message->getHeaders()->get('X-SES-Message-ID');
             if(!empty($sesMessageId)) {
                 $messageId = $sesMessageId->getValue();
