@@ -73,15 +73,16 @@ trait MailHelper
      */
     public function sendDefaultEmail(User $user, array $to, Mailable $email): string
     {
-        // Set From/Reply-To
-        $email->from(config('mail.from.address'), $user->name);
-        if(!empty($user->email)) {
-            $email->replyTo($user->email, $user->name);
-        }
+        // Get SMTP Config Array
+        $sesConfig = [
+            'fromName'   => $config->getFromName(),
+            'replyEmail' => $config->getUsername()
+        ];
 
         // Create CRM Mailer
-        $sent = Mail::to($this->getCleanTo($to))->send($email);
-        var_dump($sent);
+        $mailer = app()->makeWith('crm.mailer', $sesConfig);
+        $mailer->to($this->getCleanTo($to))->send($email);
+        var_dump($mailer);
 
         // Return Message ID
         return $email->messageId;
