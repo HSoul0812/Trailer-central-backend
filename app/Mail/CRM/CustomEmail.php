@@ -142,16 +142,9 @@ class CustomEmail extends Mailable
         $fromName = $config['fromName'] ?? config('mail.from.name');
 
         // Get SES Driver
-        $driver = new SesTransport(new SesClient([
-            'region' => config('services.ses.region'),
-            'version' => 'latest',
-            'service' => 'email'
-        ]), []);
-
-        // Get SES Driver
-        /*$transport = new TransportManager($app);
+        $transport = new TransportManager($app);
         $transport->setDefaultDriver('ses');
-        $driver = $transport->driver();*/
+        $driver = $transport->driver();
 
         // Create Swift Mailer
         $swift_mailer = new \Swift_Mailer($driver);
