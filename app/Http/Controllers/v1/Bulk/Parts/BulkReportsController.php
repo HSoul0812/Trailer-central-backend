@@ -43,7 +43,7 @@ class BulkReportsController extends MonitoredJobsController
      * @var BulkReportJobServiceInterface
      */
     protected $service;
-    
+
     /**
      * @var BulkCsvTechnicianReportServiceInterface
      */
@@ -101,6 +101,20 @@ class BulkReportsController extends MonitoredJobsController
      *         name="type_of_stock",
      *         in="path",
      *         description="Type of data, ot could be inventories, parts and mixed",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="from_date",
+     *         in="path",
+     *         description="Initial date using format YYYY-MM-DD",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *      @OA\Parameter(
+     *         name="to_date",
+     *         in="path",
+     *         description="Final date using format YYYY-MM-DD",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
@@ -165,6 +179,20 @@ class BulkReportsController extends MonitoredJobsController
      *         name="type_of_stock",
      *         in="path",
      *         description="Type of data, ot could be inventories, parts and mixed",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="from_date",
+     *         in="path",
+     *         description="Initial date using format YYYY-MM-DD",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *      @OA\Parameter(
+     *         name="to_date",
+     *         in="path",
+     *         description="Final date using format YYYY-MM-DD",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
