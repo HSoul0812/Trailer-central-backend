@@ -424,10 +424,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         elseif($smtpConfig) {
             $messageId = $this->sendCustomEmail($smtpConfig, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
         }
-        // Send Default Email
+        // Send SES Email
         else {
             $user = $this->users->get(['dealer_id' => $builder->dealerId]);
-            $messageId = $this->sendDefaultEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
+            $messageId = $this->sendCustomSesEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
         }
 
         // Message-ID Override Returned?!

@@ -47,7 +47,7 @@ trait MailHelper
      * @param Mailable $email
      * @return string
      */
-    public function sendDefaultEmail(User $user, array $to, Mailable $email): string
+    public function sendCustomSesEmail(User $user, array $to, Mailable $email): string
     {
         // Get SMTP Config Array
         $sesConfig = [
