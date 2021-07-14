@@ -75,8 +75,8 @@ trait MailHelper
     {
         // Get SMTP Config Array
         $sesConfig = [
-            'fromName'   => $config->getFromName(),
-            'replyEmail' => $config->getUsername()
+            'fromName'   => $user->name,
+            'replyEmail' => $user->email
         ];
 
         // Create CRM Mailer
