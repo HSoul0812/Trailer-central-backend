@@ -13,6 +13,6 @@ class EmailBuilderNotification
 {
     public function handle(MessageSent $event)
     {
-        dd($event->message->getHeaders());
+        
     }
 }
