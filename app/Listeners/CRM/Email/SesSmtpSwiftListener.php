@@ -32,6 +32,7 @@ class SesSmtpSwiftListener implements Swift_Events_SendListener
         $messageTags = $message->getHeaders()->get('X-SES-MESSAGE-TAGS');
         if(!empty($messageTags)) {
             $email = $messageTags->getValue();
+            print_r($email);
 
             // Get Result
             $result = $evt->getResult();
