@@ -37,11 +37,16 @@ class CustomEmail extends Mailable
         $this->subject  = $email->subject;
 
         // Override Message-ID?
-        if(!empty($email->messageId)) {
-            $this->callbacks[] = function ($message) use ($email) {
-                $message->getHeaders()->get('Message-ID')->setId($email->cleanMessageId());
-            };
-        }
+        $messageId = '';
+        $this->callbacks[] = function ($message) use (&$messageId, $email) {
+            //$message->getHeaders()->get('Message-ID')->setId($email->cleanMessageId());
+            $messageId = $message->getId();
+            var_dump($messageId);
+            dd($message);
+            $headers = $message->getHeaders();
+            dd($headers);
+        };
+        $this->parsedEmail->setMessageId($messageId);
     }
 
     /**
