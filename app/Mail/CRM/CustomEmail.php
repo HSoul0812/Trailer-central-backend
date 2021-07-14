@@ -141,19 +141,18 @@ class CustomEmail extends Mailable
         $fromEmail = $config['fromEmail'] ?? config('mail.from.address');
         $fromName = $config['fromName'] ?? config('mail.from.name');
 
-        
-
         // Get SES Driver
-        /*$transport = new SesTransport(new SesClient(), []);
+        $driver = new SesTransport(new SesClient(null), []);
 
         // Create Swift Mailer
         $swift_mailer = new \Swift_Mailer($transport);*/
         // Get SES Driver
-        $transport = new TransportManager($app);
+        /*$transport = new TransportManager($app);
         $transport->setDefaultDriver('ses');
+        $driver = $transport->driver();*/
 
         // Create Swift Mailer
-        $swift_mailer = new \Swift_Mailer($transport->driver());
+        $swift_mailer = new \Swift_Mailer($driver);
         $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
         $mailer->alwaysFrom($fromEmail, $fromName);
         if(!empty($config['replyEmail'])) {
