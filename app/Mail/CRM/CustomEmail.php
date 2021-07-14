@@ -3,10 +3,10 @@
 namespace App\Mail\CRM;
 
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use App\Listeners\CRM\Email\SesSmtpSwiftListener;
 use Illuminate\Foundation\Application;
 use Illuminate\Mail\Mailer;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\TransportManager;
 
 class CustomEmail extends Mailable
 {
@@ -137,15 +137,23 @@ class CustomEmail extends Mailable
     public static function getCustomSesMailer(Application $app, array $config = []): Mailer
     {
         // Set Defaults
+        $host = $config['host'] ?? config('mail.host');
+        $port = $config['port'] ?? config('mail.port');
         $fromEmail = $config['fromEmail'] ?? config('mail.from.address');
         $fromName = $config['fromName'] ?? config('mail.from.name');
+        $username = $config['fromEmail'] ?? config('mail.username');
+        $password = $config['password'] ?? config('mail.password');
+        $security = $config['security'] ?? config('mail.encryption');
 
-        // Get SES Driver
-        $transport = new TransportManager($app);
-        $transport->setDefaultDriver('ses');
+        // Create Smtp Transport
+        $transport = new \Swift_SmtpTransport($host, $port);
+        $transport->setUsername($username);
+        $transport->setPassword($password);
+        $transport->setEncryption($security);
 
         // Create Swift Mailer
-        $swift_mailer = new \Swift_Mailer($transport->driver());
+        $swift_mailer = new \Swift_Mailer($transport);
+        $swift_mailer->registerPlugin(new SesSmtpSwiftListener());
         $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
         $mailer->alwaysFrom($fromEmail, $fromName);
         if(!empty($config['replyEmail'])) {

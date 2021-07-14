@@ -83,5 +83,4 @@ class CrmServiceProvider extends ServiceProvider
             return CustomEmail::getCustomSesMailer($app, $config);
         });
     }
-
 }
