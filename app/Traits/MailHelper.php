@@ -36,6 +36,9 @@ trait MailHelper
         $mailer->to($this->getCleanTo($to))->send($email, array(), function($message) use(&$messageId) {
             $messageId = $message->getId();
             var_dump($messageId);
+            dd($message);
+            $headers = $message->getHeaders();
+            dd($headers);
         });
 
         // Return Message ID
@@ -63,6 +66,10 @@ trait MailHelper
         $mailer = app()->makeWith('crm.mailer', $smtpConfig);
         $mailer->to($this->getCleanTo($to))->send($email, array(), function($message) use(&$messageId) {
             $messageId = $message->getId();
+            var_dump($messageId);
+            dd($message);
+            $headers = $message->getHeaders();
+            dd($headers);
         });
 
         // Return Message ID
