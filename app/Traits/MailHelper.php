@@ -53,9 +53,9 @@ trait MailHelper
         $mailer = Mail::to($this->getCleanTo($to));
 
         // Set From/Reply-To
-        $mailer->alwaysFrom(config('mail.from.address'), $user->name);
+        $mailer->from(config('mail.from.address'), $user->name);
         if(!empty($user->email)) {
-            $mailer->alwaysReplyTo($user->email, $user->name);
+            $mailer->replyTo($user->email, $user->name);
         }
 
         // Send Email
