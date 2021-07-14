@@ -36,7 +36,7 @@ trait MailHelper
         $mailer->to($this->getCleanTo($to))->send($email);
 
         // Return Message ID
-        return $mailer->messageId;
+        return $email->messageId;
     }
 
     /**
@@ -56,10 +56,10 @@ trait MailHelper
         }
 
         // Create CRM Mailer
-        $mailer = Mail::to($this->getCleanTo($to))->send($email);
+        Mail::to($this->getCleanTo($to))->send($email);
 
         // Return Message ID
-        return $mailer->messageId;
+        return $email->messageId;
     }
 
 
