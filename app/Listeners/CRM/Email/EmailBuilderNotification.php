@@ -13,6 +13,6 @@ class EmailBuilderNotification
 {
     public function handle(MessageSent $event)
     {
-        print_r($event->message->getResult());
+        print_r($event->message->getSwiftMailer()->getTransport());
     }
 }
