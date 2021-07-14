@@ -428,6 +428,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         else {
             $user = $this->users->get(['dealer_id' => $builder->dealerId]);
             $this->sendCustomSesEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail, $builder));
+            $parsedEmail->setMessageId('');
         }
 
         // Return Final Email
@@ -478,10 +479,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                             $builder->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
         switch($builder->type) {
             case "campaign":
-                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, true);
+                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
             break;
             case "blast":
-                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, true);
+                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
             break;
         }
 
@@ -497,9 +498,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
     public function markEmailSent(ParsedEmail $finalEmail): bool {
-        // Get Existing Email
-        $email = $this->emailhistory->get(['id' => $finalEmail->emailHistoryId]);
-
         // Initialize Update Params
         $updateParams = [
             'id' => $finalEmail->emailHistoryId,
@@ -589,9 +587,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Send Email Via SMTP, Gmail, or NTLM
             $finalEmail = $this->sendEmail($builder);
 
-            // Mark Email as Sent
-            $this->markSentMessageId($builder, $finalEmail);
-            $this->markEmailSent($finalEmail);
+            // Mark Email as Sent Only if Not SES!
+            if($finalEmail->messageId) {
+                $this->markSentMessageId($builder, $finalEmail);
+                $this->markEmailSent($finalEmail);
+            }
 
             // Send Notice
             $this->log->info('Sent Email ' . $builder->type . ' #' . $builder->id . ' to Email Address: ' . $builder->toEmail);
