@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Config;
 
@@ -31,12 +32,11 @@ trait MailHelper
         ];
 
         // Create CRM Mailer
-        $messageId = '';
         $mailer = app()->makeWith('crm.mailer', $smtpConfig);
         $mailer->to($this->getCleanTo($to))->send($email);
 
         // Return Message ID
-        return $messageId;
+        return $mailer->messageId;
     }
 
     /**
@@ -49,19 +49,20 @@ trait MailHelper
      */
     public function sendDefaultEmail(User $user, array $to, Mailable $email): string
     {
-        // Get SMTP Config Array
-        $smtpConfig = [
-            'fromName'   => $user->name,
-            'replyEmail' => $user->email
-        ];
-
         // Create CRM Mailer
-        $messageId = '';
-        $mailer = app()->makeWith('crm.mailer', $smtpConfig);
-        $mailer->to($this->getCleanTo($to))->send($email);
+        $mailer = Mail::to($this->getCleanTo($to));
+
+        // Set From/Reply-To
+        $mailer->alwaysFrom(config('mail.from.address'), $user->name);
+        if(!empty($user->email)) {
+            $mailer->alwaysReplyTo($user->email, $user->name);
+        }
+
+        // Send Email
+        $mailer->send($email);
 
         // Return Message ID
-        return $messageId;
+        return $mailer->messageId;
     }
 
 
