@@ -4,6 +4,9 @@ namespace App\Services\File;
 
 use App\Exceptions\File\FileUploadException;
 use App\Services\File\DTOs\FileDto;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class FileService
@@ -11,6 +14,10 @@ use App\Services\File\DTOs\FileDto;
  */
 class FileService extends AbstractFileService
 {
+    private const EXTENSION_MAPPING = [
+        'application/pdf' => 'pdf',
+    ];
+
     /**
      * @param string $url
      * @param string $title
@@ -50,15 +57,30 @@ class FileService extends AbstractFileService
     /**
      * @param array $data
      * @return FileDto
+     *
      * @throws FileUploadException
+     * @throws FileNotFoundException
      */
     public function uploadLocal(array $data): FileDto
     {
-        if (!isset($data['file'])) {
+        if (!isset($data['file']) || !$data['file'] instanceof UploadedFile) {
             throw new FileUploadException("file has been missed");
         }
 
-        $localFilename = $this->uploadLocalByContent($data['file'], $data['dealer_id'] ?? null);
+        $file = $data['file'];
+
+        if (!in_array($file->getMimeType(), array_keys(self::EXTENSION_MAPPING))) {
+            throw new FileUploadException("Not expected mime type");
+        }
+
+        $content = $file->get();
+
+        $params['dealer_id'] = $data['dealer_id'] ?? null;
+        $params['extension'] = self::EXTENSION_MAPPING[$file->getMimeType()];
+
+        $localDisk = Storage::disk('local_tmp');
+
+        $localFilename = $this->uploadLocalByContent($content, $localDisk, $params);
 
         if ($localFilename) {
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -69,6 +91,8 @@ class FileService extends AbstractFileService
             throw new FileUploadException("Can't get content");
         }
 
-        return new FileDto($localFilename, null, $mimeType);
+        $url = $localDisk->url(str_replace($localDisk->path(''),'', $localFilename));
+
+        return new FileDto($localFilename, null, $mimeType, $url);
     }
 }

@@ -4,7 +4,6 @@ namespace App\Services\File;
 
 use App\Exceptions\File\FileUploadException;
 use App\Helpers\SanitizeHelper;
-use App\Services\File\DTOs\FileDto;
 use App\Traits\CompactHelper;
 use GuzzleHttp\Client;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
  * Class AbstractFileService
  * @package App\Services\File
  */
-abstract class AbstractFileService
+abstract class AbstractFileService implements FileServiceInterface
 {
     const UPLOAD_TYPE_WEBSITE_MEDIA = 'website/media';
     const UPLOAD_TYPE_IMAGE = "media";
@@ -23,7 +22,8 @@ abstract class AbstractFileService
     const UPLOAD_TYPE_CSV = "uploads";
     const UPLOAD_TYPE_UNKNOWN = "uploads/abbandoned";
 
-    private const LOCAL_FILENAME_FORMAT = '%s/%s.tmp';
+    private const LOCAL_FILENAME_FORMAT = '%s/%s.%s';
+    private const LOCAL_FILENAME_DEFAULT_FORMAT = '%s/%s.tmp';
 
     private const RAND_MIN = 1000000000;
     private const RAND_MAX = 1000000000000;
@@ -91,7 +91,7 @@ abstract class AbstractFileService
      * @param int|null $identifier
      * @return string
      */
-    protected function getLocalFilename(Filesystem $localDisk, ?int $dealerId = null, ?int $identifier = null): string
+    protected function getLocalFilename(Filesystem $localDisk, ?int $dealerId = null, ?int $identifier = null, ?string $extension = null): string
     {
         $dealerId = $dealerId ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
         $identifier = $identifier ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
@@ -100,7 +100,11 @@ abstract class AbstractFileService
 
         $localDisk->makeDirectory($uploadDirectory);
 
-        return sprintf(self::LOCAL_FILENAME_FORMAT, $uploadDirectory, CompactHelper::getRandomString());
+        if ($extension) {
+            return sprintf(self::LOCAL_FILENAME_FORMAT, $uploadDirectory, CompactHelper::getRandomString(), $extension);
+        }
+
+        return sprintf(self::LOCAL_FILENAME_DEFAULT_FORMAT, $uploadDirectory, CompactHelper::getRandomString());
     }
 
     /**
@@ -182,27 +186,20 @@ abstract class AbstractFileService
     }
 
     /**
-     * @param string|resource $content
-     * @param int|null $dealerId
-     * @param int|null $identifier
-     * @param bool $skipNotExisting
+     * @param string $fileContents
+     * @param Filesystem $localDisk
+     * @param array $params
      * @return string|null
      *
      * @throws FileUploadException
      */
-    protected function uploadLocalByContent($fileContents, ?int $dealerId = null, ?int $identifier = null, bool $skipNotExisting = false): ?string
+    protected function uploadLocalByContent(string $fileContents, Filesystem $localDisk, array $params): ?string
     {
-        $localDisk = Storage::disk('local_tmp');
+        $dealerId = $params['dealer_id'] ?? null;
+        $identifier = $params['identifier'] ?? null;
+        $extension = $params['extension'] ?? null;
 
-        $filename = $this->getLocalFilename($localDisk, $dealerId, $identifier);
-
-        if (!$skipNotExisting && !$fileContents) {
-            throw new FileUploadException("Can't get file contents. dealer_id - {$dealerId}, id - $identifier");
-        }
-
-        if ($skipNotExisting && !$fileContents) {
-            return null;
-        }
+        $filename = $this->getLocalFilename($localDisk, $dealerId, $identifier, $extension);
 
         return $this->saveLocalFile($localDisk, $filename, $fileContents);
     }
@@ -234,14 +231,4 @@ abstract class AbstractFileService
 
         return $s3Filename;
     }
-
-    /**
-     * @param string $url
-     * @param string $title
-     * @param int|null $dealerId
-     * @param int|null $identifier
-     * @param array $params
-     * @return FileDto|null
-     */
-    abstract public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?FileDto;
 }

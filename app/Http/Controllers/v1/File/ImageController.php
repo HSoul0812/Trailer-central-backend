@@ -5,17 +5,17 @@ namespace App\Http\Controllers\v1\File;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
-use App\Http\Requests\File\UploadFileLocalRequest;
+use App\Http\Requests\File\UploadImageLocalRequest;
 use App\Services\File\FileServiceInterface;
 use App\Transformers\File\FileTransformer;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\Request;
 
 /**
- * Class FileController
+ * Class ImageController
  * @package App\Http\Controllers\v1\File
  */
-class FileController extends RestfulControllerV2
+class ImageController extends RestfulControllerV2
 {
     /**
      * @var FileServiceInterface
@@ -23,7 +23,7 @@ class FileController extends RestfulControllerV2
     private $fileService;
 
     /**
-     * FileController constructor.
+     * ImageController constructor.
      * @param FileServiceInterface $fileService
      */
     public function __construct(FileServiceInterface $fileService)
@@ -35,8 +35,8 @@ class FileController extends RestfulControllerV2
 
     /**
      *  @OA\Post(
-     *     path="/api/files/local",
-     *     description="Upload a file local",
+     *     path="/api/images/local",
+     *     description="Upload an image local",
      *     tags={"Files"},
      *     @OA\Parameter(
      *         name="dealer_id",
@@ -55,7 +55,7 @@ class FileController extends RestfulControllerV2
      *
      *     @OA\Response(
      *         response="200",
-     *         description="Returns a file url",
+     *         description="Returns an image url",
      *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
@@ -72,7 +72,7 @@ class FileController extends RestfulControllerV2
      */
     public function uploadLocal(Request $request): Response
     {
-        $fileRequest = new UploadFileLocalRequest($request->all());
+        $fileRequest = new UploadImageLocalRequest($request->all());
 
         if (!$fileRequest->validate() || !($result = $this->fileService->uploadLocal($fileRequest->all()))) {
             return $this->response->errorBadRequest();

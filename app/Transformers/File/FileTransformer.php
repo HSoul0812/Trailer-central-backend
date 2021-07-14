@@ -18,7 +18,7 @@ class FileTransformer extends TransformerAbstract
     public function transform(FileDto $fileDto): array
     {
         return [
-            'url' => $fileDto->getPath(),
+            'url' => $fileDto->getUrl(),
         ];
     }
 }

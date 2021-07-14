@@ -5,13 +5,13 @@ namespace App\Http\Requests\File;
 use App\Http\Requests\Request;
 
 /**
- * Class UploadFileRequest
- * @package App\Http\Requests\File
+ * Class UploadImageRequest
+ * @package App\Http\Requests\File\
  */
-class UploadFileLocalRequest extends Request
+class UploadImageLocalRequest extends Request
 {
     protected $rules = [
         'dealer_id' => 'required|integer|exists:App\Models\User\User,dealer_id',
-        'file' => 'required|file'
+        'file' => 'required|mimes:jpeg,jpg,png,gif'
     ];
 }
