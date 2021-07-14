@@ -11,8 +11,8 @@ use Illuminate\Mail\Events\MessageSent;
  */
 class EmailBuilderNotification
 {
-    public function handle(MessageSent $message)
+    public function handle(MessageSent $event)
     {
-        dd($message);
+        dd($event->message->getHeaders());
     }
 }
