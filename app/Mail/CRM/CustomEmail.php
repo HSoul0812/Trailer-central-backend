@@ -6,6 +6,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Foundation\Application;
 use Illuminate\Mail\Mailer;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\TransportManager;
 
 class CustomEmail extends Mailable
 {
@@ -116,6 +117,35 @@ class CustomEmail extends Mailable
 
         // Create Swift Mailer
         $swift_mailer = new \Swift_Mailer($transport);
+        $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
+        $mailer->alwaysFrom($fromEmail, $fromName);
+        if(!empty($config['replyEmail'])) {
+            $mailer->alwaysReplyTo($config['replyEmail'], $config['fromName']);
+        }
+
+        // Return Mailer
+        return $mailer;
+    }
+
+    /**
+     * Get Custom SES Mailer
+     * 
+     * @param Application $app
+     * @param array{fromName: string, replyEmail: string} $config
+     * @return Mailer
+     */
+    public static function getCustomSesMailer(Application $app, array $config = []): Mailer
+    {
+        // Set Defaults
+        $fromEmail = $config['fromEmail'] ?? config('mail.from.address');
+        $fromName = $config['fromName'] ?? config('mail.from.name');
+
+        // Get SES Driver
+        $transport = new TransportManager($app);
+        $transport->setDefaultDriver('ses');
+
+        // Create Swift Mailer
+        $swift_mailer = new \Swift_Mailer($transport->driver());
         $mailer = new Mailer($app->get('view'), $swift_mailer, $app->get('events'));
         $mailer->alwaysFrom($fromEmail, $fromName);
         if(!empty($config['replyEmail'])) {
