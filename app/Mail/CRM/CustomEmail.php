@@ -142,7 +142,7 @@ class CustomEmail extends Mailable
         $fromName = $config['fromName'] ?? config('mail.from.name');
 
         // Get SES Driver
-        $driver = new SesTransport(new SesClient(null), []);
+        $driver = new SesTransport(new SesClient([]), []);
 
         // Get SES Driver
         /*$transport = new TransportManager($app);
