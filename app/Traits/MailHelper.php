@@ -54,7 +54,9 @@ trait MailHelper
 
         // Create CRM Mailer
         $mailer = app()->makeWith('ses.mailer', $sesConfig);
-        $mailer->to($this->getCleanTo($to))->send($email);
+        $mailer->to($this->getCleanTo($to))->send($email, [], function($message) {
+            print_r($message->getHeaders());
+        });
     }
 
     /**
