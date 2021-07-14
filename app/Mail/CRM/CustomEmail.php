@@ -48,7 +48,7 @@ class CustomEmail extends Mailable
                 $message->getHeaders()->addTextHeader('X-Builder-Email-ID', $config->id);
                 $message->getHeaders()->addTextHeader('X-Builder-Email-Type', $config->type);
                 $message->getHeaders()->addTextHeader('X-Builder-Email-Lead', $config->leadId);
-                $message->getHeaders()->addTextHeader('X-Builder-History-ID', $config->emailHistoryId);
+                $message->getHeaders()->addTextHeader('X-Builder-History-ID', $config->emailId);
             }
         };
     }
