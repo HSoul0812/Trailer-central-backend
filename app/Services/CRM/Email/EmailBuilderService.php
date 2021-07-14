@@ -499,8 +499,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     public function replaceMessageId(int $emailHistoryId, string $messageId): bool {
         // Get Email History Entry
         try {
-            $this->log->info('Attempting to Replace Message ID ' . $messageId . ' on Email #' . $emailHistoryId);
             $email = $this->emailhistory->get(['id' => $emailHistoryId]);
+            $this->log->info('Attempting to Replace Message ID ' . $email->message_id . ' with ' . $messageId);
 
             // Replace Message ID in Sent
             $wasCampaign = $this->campaigns->replaceSentMessageId($email->message_id, $messageId);
@@ -515,9 +515,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Return False if Nothing Updated
         if($wasCampaign) {
-            $this->log->error('Replaced Message ID ' . $messageId . ' on Campaign Email #' . $emailHistoryId);
+            $this->log->info('Replaced Message ID ' . $messageId . ' on Campaign Email #' . $emailHistoryId);
         } elseif($wasBlast) {
-            $this->log->error('Replaced Message ID ' . $messageId . ' on Blast Email #' . $emailHistoryId);
+            $this->log->info('Replaced Message ID ' . $messageId . ' on Blast Email #' . $emailHistoryId);
         } else {
             $this->log->error('Could Not Replace Message ID ' . $messageId . ' on Non-Existent Email #' . $emailHistoryId);
         }
