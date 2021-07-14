@@ -48,7 +48,7 @@ class CustomEmail extends Mailable
         $messageId = '';
         $this->callbacks[] = function ($message) use (&$messageId, $email) {
             $message->getHeaders()->get('Message-ID')->setId($email->cleanMessageId());
-            print_r($email->emailMessageId);
+            print_r($email->emailHistoryId);
 
             // SES Message ID Exists?!
             $sesMessageId = $message->getHeaders()->get('X-SES-Message-ID');
