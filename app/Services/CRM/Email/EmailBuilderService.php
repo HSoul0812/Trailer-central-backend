@@ -503,14 +503,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Initialize Update Params
         $updateParams = [
             'id' => $finalEmail->emailHistoryId,
+            'message_id' => $finalEmail->messageId,
             'body' => $finalEmail->body,
             'date_sent' => 1
         ];
-
-        // Message ID Doesn't Exist?
-        if(empty($email->message_id)) {
-            $updateParams['message_id'] = $finalEmail->messageId;
-        }
 
         // Set Date Sent
         $this->log->info('Marking email #' . $finalEmail->emailHistoryId . ' as sent ' .
