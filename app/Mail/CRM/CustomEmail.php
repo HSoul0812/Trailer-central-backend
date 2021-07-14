@@ -40,7 +40,7 @@ class CustomEmail extends Mailable
         $messageId = '';
         $this->callbacks[] = function ($message) use (&$messageId, $email) {
             $message->getHeaders()->get('Message-ID')->setId($email->cleanMessageId());
-            $message->getHeaders()->addTextHeader('X-SES-MESSAGE-TAGS', 'emailHistoryId=' . $email->id);
+            $message->getHeaders()->addTextHeader('X-SES-MESSAGE-TAGS', 'emailHistoryId=' . $email->emailHistoryId);
         };
     }
 
