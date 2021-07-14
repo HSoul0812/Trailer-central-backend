@@ -18,6 +18,8 @@ class SesSmtpSwiftListener implements Swift_Events_ResponseListener
     public function responseReceived(Swift_Events_ResponseEvent $evt)
     {
         // Check Event Results
+        $source = $evt->getSource();
+        print_r($source);
         $response = $evt->getResponse();
         print_r($response);
     }
