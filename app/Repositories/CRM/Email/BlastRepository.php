@@ -95,6 +95,33 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     /**
+     * Replace Sent Message ID
+     * 
+     * @param string $messageId
+     * @param string $newMessageId
+     * @return bool
+     */
+    public function replaceSentMessageId(string $messageId, string $newMessageId): bool {
+        DB::beginTransaction();
+
+        try {
+            // Get Blast Sent Entry
+            $sent = BlastSent::where('message_id', $messageId);
+
+            // Update Blast Sent Message ID
+            $sent->update(['message_id' => $newMessageId]);
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return false;
+        }
+
+        // BlastSent is Valid!
+        return !empty($sent->email_blasts_id);
+    }
+
+    /**
      * Was Blast Already Sent to Email Address?
      * 
      * @param int $blastId

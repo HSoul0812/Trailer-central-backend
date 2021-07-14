@@ -95,6 +95,33 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     /**
+     * Replace Sent Message ID
+     * 
+     * @param string $messageId
+     * @param string $newMessageId
+     * @return bool
+     */
+    public function replaceSentMessageId(string $messageId, string $newMessageId): bool {
+        DB::beginTransaction();
+
+        try {
+            // Get Campaign Sent Entry
+            $sent = CampaignSent::where('message_id', $messageId);
+
+            // Update Campaign Sent Message ID
+            $sent->update(['message_id' => $newMessageId]);
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return false;
+        }
+
+        // CampaignSent is Valid!
+        return !empty($sent->drip_campaigns_id);
+    }
+
+    /**
      * Was Campaign Already Sent?
      * 
      * @param int $campaignId

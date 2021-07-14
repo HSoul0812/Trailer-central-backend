@@ -490,6 +490,35 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     }
 
     /**
+     * Replace Message ID in Email History ID and Sent
+     * 
+     * @param int $emailHistoryId
+     * @param string $messageId
+     * @return boolean true if successfully found and replaced
+     */
+    public function replaceMessageId(int $emailHistoryId, string $messageId): bool {
+        // Get Email History Entry
+        try {
+            $email = $this->emailhistory->get(['id' => $emailHistoryId]);
+
+            // Replace Message ID in Sent
+            $wasCampaign = $this->campaigns->replaceSentMessageId($email->message_id, $messageId);
+            $wasBlast = $this->blasts->replaceSentMessageId($email->message_id, $messageId);
+
+            // Replace in Email History
+            $this->emailhistory->update([
+                'id' => $emailHistoryId,
+                'message_id' => $messageId
+            ]);
+        } catch (\Exception $ex) {
+            return false;
+        }
+
+        // Return False if Nothing Updated
+        return $wasCampaign || $wasBlast;
+    }
+
+    /**
      * Mark Email as Sent
      * 
      * @param BuilderEmail $builder
