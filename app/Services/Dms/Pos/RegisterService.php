@@ -23,15 +23,15 @@ class RegisterService implements RegisterServiceInterface
      * Validates and opens register for given outlet
      *
      * @param array $params
-     * @return bool|null
+     * @return string
      * @throws RegisterException
      */
-    public function open(array $params): ?bool
+    public function open(array $params): string
     {
         if ($this->registerRepository->hasOpenRegister((int)$params['outlet_id'])) {
             Log::info('Register already opened for the outlet.', ['params' => $params]);
 
-            return true;
+            return 'A register is already opened!';
         }
 
         try {
@@ -56,6 +56,6 @@ class RegisterService implements RegisterServiceInterface
             throw new RegisterException('Register hasn\'t been opened');
         }
 
-        return true;
+        return 'Register has been opened successfully!';
     }
 }

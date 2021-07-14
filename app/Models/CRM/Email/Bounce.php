@@ -2,26 +2,28 @@
 
 namespace App\Models\CRM\Email;
 
-use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Email Campaign Sent
+ * Class Email Bounce
  *
  * @package App\Models\CRM\Email
  */
-class CampaignSent extends Model
+class Bounce extends Model
 {
-    use CompositePrimaryKeys;
-
-    protected $table = 'crm_drip_campaigns_sent';
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'crm_email_bounces';
 
     /**
-     * Composite Primary Key
-     * 
-     * @var array<string>
+     * The primary key associated with the table.
+     *
+     * @var string
      */
-    protected $primaryKey = ['drip_campaigns_id', 'lead_id'];
+    protected $primaryKey = 'email_bounce_id';
 
     /**
      * The name of the "created at" column.
@@ -43,8 +45,7 @@ class CampaignSent extends Model
      * @var array
      */
     protected $fillable = [
-        'drip_campaigns_id',
-        'lead_id',
-        'message_id'
+        'email_address',
+        'type'
     ];
 }

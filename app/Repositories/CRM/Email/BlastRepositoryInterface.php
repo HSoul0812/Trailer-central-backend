@@ -16,6 +16,17 @@ interface BlastRepositoryInterface extends Repository {
     public function sent(array $params): BlastSent;
 
     /**
+     * Update Sent Blast
+     * 
+     * @param int $blastId
+     * @param int $leadId
+     * @param string $messageId
+     * @throws \Exception
+     * @return BlastSent
+     */
+    public function updateSent(int $blastId, int $leadId, string $messageId): BlastSent;
+
+    /**
      * Was Blast Already Sent?
      * 
      * @param int $blastId

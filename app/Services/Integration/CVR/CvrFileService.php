@@ -13,6 +13,7 @@ use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
 use App\Services\Dms\CVR\DTOs\CVRFileDTO;
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\CRM\Dms\CvrCreds;
 use App\Services\Dms\CVR\CVRGeneratorServiceInterface;
 use GuzzleHttp\Client;
 use Exception;
@@ -109,12 +110,13 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
     public function sendFile(CvrFile $job): void
     {
         $cvrFilePath = $this->buildFile($job)->getFilePath();    
-
+        $cvrCreds = $this->getCvrFileCreds($job);
+        
         $client = new Client();
         $response = $client->request('POST', config('cvr.api_endpoint'), [
             'auth' => [
-                config('cvr.username'), 
-                config('cvr.password')
+                $cvrCreds->cvr_username, 
+                $cvrCreds->cvr_password
             ],
             'body' => file_get_contents($cvrFilePath),
             'headers' => [
@@ -132,5 +134,12 @@ class CvrFileService extends AbstractMonitoredJobService implements CvrFileServi
         $payload = $job->payload->asArray();
         $unitSale = UnitSale::findOrFail($payload['unit_sale_id']);        
         return $this->cvrGeneratorService->generate($unitSale);
+    }
+    
+    private function getCvrFileCreds(CvrFile $job) : CvrCreds
+    {
+        $payload = $job->payload->asArray();
+        $unitSale = UnitSale::findOrFail($payload['unit_sale_id']);   
+        return CvrCreds::where('dealer_id', $unitSale->dealer->dealer_id)->firstOrFail();
     }
 }

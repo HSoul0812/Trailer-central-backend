@@ -12,6 +12,7 @@ use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
+use App\Repositories\CRM\Email\BounceRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
@@ -19,6 +20,7 @@ use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
@@ -34,7 +36,6 @@ use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Carbon\Carbon;
 
@@ -63,6 +64,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $templates;
 
     /**
+     * @var App\Repositories\CRM\Email\BounceRepositoryInterface
+     */
+    protected $bounces;
+
+    /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
     protected $leads;
@@ -86,6 +92,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
      */
     protected $tokens;
+
+    /**
+     * @var App\Repositories\User\UserRepositoryInterface
+     */
+    protected $users;
 
     /**
      * @var App\Services\CRM\Interactions\NtlmEmailServiceInterface
@@ -112,10 +123,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param BlastRepositoryInterface $blasts
      * @param CampaignRepositoryInterface $campaigns
      * @param TemplateRepositoryInterface $templates
+     * @param BounceRepositoryInterface $bounces
      * @param LeadRepositoryInterface $leads
      * @param SalesPersonRepositoryInterface $salespeople
      * @param EmailHistoryRepositoryInterface $emailhistory
      * @param TokenRepositoryInterface $tokens
+     * @param UserRepositoryInterface $users
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
      * @param Manager $fractal
@@ -124,11 +137,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         BlastRepositoryInterface $blasts,
         CampaignRepositoryInterface $campaigns,
         TemplateRepositoryInterface $templates,
+        BounceRepositoryInterface $bounces,
         LeadRepositoryInterface $leads,
         SalesPersonRepositoryInterface $salespeople,
         InteractionsRepositoryInterface $interactions,
         EmailHistoryRepositoryInterface $emailhistory,
         TokenRepositoryInterface $tokens,
+        UserRepositoryInterface $users,
         NtlmEmailServiceInterface $ntlm,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
@@ -137,11 +152,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $this->blasts = $blasts;
         $this->campaigns = $campaigns;
         $this->templates = $templates;
+        $this->bounces = $bounces;
         $this->leads = $leads;
         $this->salespeople = $salespeople;
         $this->interactions = $interactions;
         $this->emailhistory = $emailhistory;
         $this->tokens = $tokens;
+        $this->users = $users;
 
         $this->ntlm = $ntlm;
         $this->google = $google;
@@ -186,8 +203,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $blast->newDealerUser->id,
             'user_id' => $blast->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail(),
-            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
+            'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail()
         ]);
 
         // Send Emails and Return Response
@@ -229,8 +245,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
             'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $campaign->from_email_address ?: $this->getDefaultFromEmail(),
-            'smtp_config' => !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null
+            'from_email' => $campaign->from_email_address ?: $this->getDefaultFromEmail()
         ]);
 
         // Send Emails and Return Response
@@ -264,16 +279,18 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $template = $this->templates->get(['id' => $id]);
 
         // Get Sales Person
-        if(!empty($fromEmail)) {
-            $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+        if(!empty($fromEmail) || !empty($salesPersonId)) {
+            if(!empty($fromEmail)) {
+                $salesPerson = $this->salespeople->getBySmtpEmail($template->user_id, $fromEmail);
+            }
+            if(empty($salesPerson->id)) {
+                $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+            }
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
+            $fromEmail = $salesPerson->smtp_email;
         }
-        if(empty($salesPerson->id)) {
-            $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
-        }
-        if(empty($salesPerson->id)) {
-            throw new FromEmailMissingSmtpConfigException;
-        }
-        $fromEmail = $salesPerson->smtp_email;
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
@@ -284,9 +301,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $id,
             'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
-            'sales_person_id' => $salesPerson->id,
+            'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
-            'smtp_config' => SmtpConfig::fillFromSalesPerson($salesPerson)
         ]);
 
         // Send Email and Return Response
@@ -327,42 +343,91 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Send Email Via SMTP|Gmail|NTLM
      * 
      * @param BuilderEmail $config
-     * @param int $emailId
      * @return ParsedEmail
      */
-    public function sendEmail(BuilderEmail $config, int $emailId): ParsedEmail {
+    public function sendEmail(BuilderEmail $config): ParsedEmail {
         // Get Parsed Email
-        $parsedEmail = $config->getParsedEmail($emailId);
+        $parsedEmail = $config->getParsedEmail($config->emailId);
 
-        // Get SMTP Config
-        if(!empty($config->isAuthTypeGmail())) {
-            // Get Access Token
-            $accessToken = $this->refreshAccessToken($config->smtpConfig->accessToken);
-            $config->smtpConfig->setAccessToken($accessToken);
+        // Get Smtp Config
+        $salesPerson = $this->salespeople->get(['sales_person_id' => $config->salesPersonId]);
+        $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
-            // Send Gmail Email
-            $finalEmail = $this->gmail->send($config->smtpConfig, $parsedEmail);
+        // Send Gmail Email
+        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
+            // Refresh Token
+            $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
+            $smtpConfig->setAccessToken($accessToken);
+            $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
         }
-        // Get NTLM Config
-        elseif(!empty($config->isAuthTypeNtlm())) {
-            // Send NTLM Email
-            $finalEmail = $this->ntlm->send($config->dealerId, $config->smtpConfig, $parsedEmail);
+        // Send NTLM Email
+        elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
+            $finalEmail = $this->ntlm->send($config->dealerId, $smtpConfig, $parsedEmail);
         }
-        // Get SMTP Config
+        // Send Custom Email
+        elseif($smtpConfig) {
+            $this->sendCustomEmail($smtpConfig, $config->getToEmail(), new EmailBuilderEmail($parsedEmail));
+        }
+        // Send Default Email
         else {
-            $this->setSmtpConfig($config->smtpConfig);
-
-            // Send Email
-            Mail::to($this->getCleanTo($config->getToEmail()))
-                ->send(new EmailBuilderEmail($parsedEmail));
-            $finalEmail = $parsedEmail;
+            $user = $this->users->get(['dealer_id' => $config->dealerId]);
+            $this->sendDefaultEmail($user, $config->getToEmail(), new EmailBuilderEmail($parsedEmail));
         }
 
         // Return Final Email
         $this->log->info('Sent Email ' . $config->type . ' #' . $config->id .
                          ' via ' . $config->getAuthConfig() .
-                         ' to: ' . $finalEmail->getTo());
-        return $finalEmail;
+                         ' to: ' . $parsedEmail->getTo());
+        return $finalEmail ?? $parsedEmail;
+    }
+
+    /**
+     * Mark Email as Sent
+     * 
+     * @param BuilderEmail $config
+     * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
+     */
+    public function markSent(BuilderEmail $config): bool {
+        // Handle Based on Type
+        switch($config->type) {
+            case "campaign":
+                $sent = $this->campaigns->sent([
+                    'drip_campaigns_id' => $config->id,
+                    'lead_id' => $config->leadId
+                ]);
+            break;
+            case "blast":
+                $sent = $this->blasts->sent([
+                    'email_blasts_id' => $config->id,
+                    'lead_id' => $config->leadId
+                ]);
+            break;
+        }
+
+        // Return False if Nothing Saved
+        return !empty($sent->lead_id);
+    }
+
+    /**
+     * Add Message ID to Sent
+     * 
+     * @param BuilderEmail $config
+     * @param ParsedEmail $parsedEmail
+     * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
+     */
+    public function markSentMessageId(BuilderEmail $config, ParsedEmail $parsedEmail): bool {
+        // Handle Based on Type
+        switch($config->type) {
+            case "campaign":
+                $sent = $this->campaigns->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
+            break;
+            case "blast":
+                $sent = $this->blasts->updateSent($config->id, $config->leadId, $parsedEmail->messageId);
+            break;
+        }
+
+        // Return False if Nothing Saved
+        return !empty($sent->lead_id);
     }
 
     /**
@@ -372,37 +437,17 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param null|ParsedEmail $finalEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
-    public function markSent(BuilderEmail $config, ?ParsedEmail $finalEmail = null): bool {
+    public function markEmailSent(ParsedEmail $finalEmail = null): bool {
         // Set Date Sent
-        if($finalEmail !== null) {
-            $this->emailhistory->update([
-                'id' => $finalEmail->emailHistoryId,
-                'message_id' => $finalEmail->messageId,
-                'body' => $finalEmail->body,
-                'date_sent' => 1
-            ]);
-        }
-
-        // Handle Based on Type
-        switch($config->type) {
-            case "campaign":
-                $sent = $this->campaigns->sent([
-                    'drip_campaigns_id' => $config->id,
-                    'lead_id' => $config->leadId,
-                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
-                ]);
-            break;
-            case "blast":
-                $sent = $this->blasts->sent([
-                    'email_blasts_id' => $config->id,
-                    'lead_id' => $config->leadId,
-                    'message_id' => $finalEmail !== null ? $finalEmail->messageId : ''
-                ]);
-            break;
-        }
+        $email = $this->emailhistory->update([
+            'id' => $finalEmail->emailHistoryId,
+            'message_id' => $finalEmail->messageId,
+            'body' => $finalEmail->body,
+            'date_sent' => 1
+        ]);
 
         // Return False if Nothing Saved
-        return !empty($sent->lead_id);
+        return !empty($email->email_id);
     }
 
 
@@ -419,30 +464,46 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $sentEmails = [];
         $sentLeads = new Collection();
         $errorLeads = new Collection();
+        $bounceEmails = new Collection();
 
         // Loop Leads
         foreach($leads as $leadId) {
             // Already Exists?
             if(($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasSent($builder->id, $leadId)) ||
                ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasSent($builder->id, $leadId))) {
+                $this->log->info('Already Sent Email ' . $builder->type . ' #' .
+                        $builder->id . ' to Lead with ID: ' . $leadId);
                 continue;
             }
 
             // Try/Send Email!
             try {
-                // Get Lead
+                // Add Lead Config to Builder Email
                 $lead = $this->leads->get(['id' => $leadId]);
-                if(in_array($lead->email_address, $sentEmails)) {
+                $builder->setLeadConfig($lead);
+
+                // Log to Database
+                $email = $this->saveToDb($builder);
+                $builder->setEmailId($email->email_id);
+                $this->markSent($builder);
+
+                // Email Bounced!
+                if($type = $this->bounces->wasBounced($lead->email_address)) {
+                    $this->markBounced($builder, $type);
+                    $bounceEmails->push($lead->email_address);
+                    continue;
+                }
+
+                // Duplicate?
+                if(in_array($lead->email_address, $sentEmails) || empty($lead->email_address)) {
+                    $this->markBounced($builder, empty($lead->email_address) ? 'invalid' : 'duplicate');
                     continue;
                 }
                 $sentEmails[] = $lead->email_address;
 
-                // Add Lead Config to Builder Email
-                $builder->setLeadConfig($lead);
-
                 // Dispatch Send EmailBuilder Job
                 $job = new SendEmailBuilderJob($builder);
-                $this->dispatch($job->onQueue('mails'));
+                $this->dispatch($job->onQueue('emailbuilder'));
 
                 // Send Notice
                 $sentLeads->push($leadId);
@@ -452,7 +513,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->log->error($ex->getMessage(), $ex->getTrace());
                 $errorLeads->push($leadId);
             }
-            sleep(1); // Only Allow 1 Per Second to Prevent Rate Limiting
         }
 
         // Errors Occurred and No Emails Sent?
@@ -478,9 +538,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Add To Email to Builder Email
             $builder->setToEmail($toEmail);
 
-            // Dispatch Send EmailBuilder Job
-            $job = new SendEmailBuilderJob($builder);
-            $this->dispatch($job->onQueue('mails'));
+            // Log to Database
+            $email = $this->saveToDb($builder);
+            $builder->setEmailId($email->email_id);
+
+            // Send Email Directly
+            $finalEmail = $this->sendEmail($builder);
+
+            // Mark Email As Sent
+            $this->markSent($builder);
+            $this->markEmailSent($finalEmail);
 
             // Send Notice
             $this->log->info('Sent Email ' . $builder->type . ' #' .
@@ -492,6 +559,34 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->log->error($ex->getMessage(), $ex->getTrace());
             throw new SendBuilderEmailsFailedException;
         }
+    }
+
+    /**
+     * Mark Email as Bounced
+     * 
+     * @param BuilderEmail $config
+     * @param string $type
+     * @return void
+     */
+    private function markBounced(BuilderEmail $config, string $type): void
+    {
+        // Get Parsed Email
+        $parsedEmail = $config->getParsedEmail($config->emailId);
+
+        // Create Or Update Bounced Entry in DB
+        $this->emailhistory->update([
+            'id' => $config->emailId,
+            'message_id' => $parsedEmail->messageId,
+            'body' => $parsedEmail->body,
+            'was_skipped' => 1,
+            'date_bounced' => ($type === 'bounce') ? 1 : 0,
+            'date_complained' => ($type === 'complaint') ? 1 : 0,
+            'date_unsubscribed' => ($type === 'unsubscribe') ? 1 : 0,
+            'invalid_email' => ($type === 'invalid') ? 1 : 0
+        ]);
+
+        // Mark Sent With Message ID
+        $this->markSentMessageId($config, $parsedEmail);
     }
 
     /**

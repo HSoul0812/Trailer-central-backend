@@ -7,6 +7,7 @@ use App\Models\CRM\Dms\UnitSale;
 use App\Services\Dms\CVR\DTOs\CVRFileDTO;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use App\Models\CRM\Dms\CvrCreds;
 
 class CVRGeneratorService implements CVRGeneratorServiceInterface
 {
@@ -438,7 +439,14 @@ class CVRGeneratorService implements CVRGeneratorServiceInterface
         $writer->endDocument(); 
         $xml = $writer->flush();
         
-        $fileName = "CVR/{$unitSale->id}_{$unitSale->dealer_id}.gen";
+        $mappedDealerId = $unitSale->dealer_id;
+        $cvrCreds = CvrCreds::where('dealer_id', $unitSale->dealer_id)->firs();
+        
+        if ($cvrCreds) {
+            $mappedDealerId = $cvrCreds->cvr_unique_id;
+        }
+        
+        $fileName = "CVR/{$unitSale->id}_{$mappedDealerId}.gen";
         Storage::disk('s3')->put($fileName, $xml, ['visibility' => 'public']);
         return new CVRFileDTO('https://'.env('AWS_BUCKET').'.s3.amazonaws.com/'.$fileName);
     }
@@ -446,7 +454,7 @@ class CVRGeneratorService implements CVRGeneratorServiceInterface
     private function writeDealOnContract(\XMLWriter &$writer, UnitSale $unitSale) : void
     {
         $carbon = new Carbon($unitSale->created_at);        
-        $writer->writeElement('Deal_Date_on_Contract', $carbon->format('Y-m-d'));
+        $writer->writeElement('Deal_Date_on_Contract', $carbon->format('mdY'));
     }
     
 

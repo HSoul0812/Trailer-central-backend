@@ -119,6 +119,11 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
     {
         return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
     }
+    
+    public function getWebsiteAttribute()
+    {
+        return $this->user->website;
+    }
 
     /**
      * Get dealer user permissions

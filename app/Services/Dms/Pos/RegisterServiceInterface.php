@@ -10,8 +10,8 @@ interface RegisterServiceInterface
      * Validates and opens register for given outlet
      *
      * @param array $params
-     * @return bool|null
+     * @return string
      * @throws RegisterException
      */
-    public function open(array $params): ?bool;
+    public function open(array $params): string;
 }
