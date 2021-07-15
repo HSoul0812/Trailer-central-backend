@@ -13,4 +13,3 @@ node_modules
 .vscode/
 .phpunit.result.cache
 .remote-sync.json
-/public/files/tmp
