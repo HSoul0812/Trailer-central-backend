@@ -64,7 +64,7 @@ class EmailBuilderJob extends Job
             return true;
         } catch (\Exception $e) {
             $log->error('Processing Email Builder Mail error: ' . $e->getMessage());
-            throw new EmailBuilderJobFailedException($e);
+            throw new EmailBuilderJobFailedException();
         }
     }
 }
