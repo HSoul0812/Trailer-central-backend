@@ -31,7 +31,7 @@ class CustomEmail extends Mailable
      * Create a new message instance.
      *
      * @param ParsedEmail $email
-     * @param BuilderEmail $config
+     * @param null|BuilderEmail $config
      */
     public function __construct(ParsedEmail $email, ?BuilderEmail $config = null)
     {

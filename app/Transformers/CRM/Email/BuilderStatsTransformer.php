@@ -13,7 +13,7 @@ class BuilderStatsTransformer extends TransformerAbstract {
      * @param BuilderStats
      * @return array
      */
-    public function transform(BuilderStats $stats)
+    public function transform(BuilderStats $stats): array
     {
         return [
             'sent' => $stats->noSent,
