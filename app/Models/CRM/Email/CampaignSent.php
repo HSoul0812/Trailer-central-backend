@@ -50,8 +50,4 @@ class CampaignSent extends Model
         'lead_id',
         'message_id'
     ];
-
-    public static function getTableName() {
-        return self::TABLE_NAME;
-    }
 }
