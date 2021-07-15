@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Email;
 
 use App\Models\Traits\Inventory\CompositePrimaryKeys;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class BlastSent extends Model
 {
-    use CompositePrimaryKeys;
+    use TableAware, CompositePrimaryKeys;
 
     const TABLE_NAME = 'crm_email_blasts_sent';
 
@@ -49,8 +50,4 @@ class BlastSent extends Model
         'lead_id',
         'message_id'
     ];
-
-    public static function getTableName() {
-        return self::TABLE_NAME;
-    }
 }

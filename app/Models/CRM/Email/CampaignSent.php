@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Email;
 
 use App\Models\Traits\Inventory\CompositePrimaryKeys;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class CampaignSent extends Model
 {
-    use CompositePrimaryKeys;
+    use TableAware, CompositePrimaryKeys;
 
     const TABLE_NAME = 'crm_drip_campaigns_sent';
 
