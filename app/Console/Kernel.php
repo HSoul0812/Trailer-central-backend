@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Files\ClearLocalTmpFolder;
 use App\Console\Commands\Website\AddSitemaps;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -36,7 +37,8 @@ class Kernel extends ConsoleKernel
         IncreaseDealerCostCommand::class,
         FixPartVendor::class,
         GenerateCVRDocumentCommand::class,
-        GetCompletedSaleWithNoFullInvoice::class
+        GetCompletedSaleWithNoFullInvoice::class,
+        ClearLocalTmpFolder::class
     ];
 
     /**
@@ -140,6 +142,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:scrape-replies 9000')
                 ->withoutOverlapping()
                 ->runInBackground();
+
+        $schedule->command('files:clear-local-tmp-folder')
+            ->weeklyOn(7, '4:00')
+            ->runInBackground();
 
         // $schedule->command('inspire')
         //          ->hourly();

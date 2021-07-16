@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Contracts\LoggerServiceInterface;
+use App\Helpers\ImageHelper;
+use App\Helpers\SanitizeHelper;
+use App\Http\Controllers\v1\File\FileController;
+use App\Http\Controllers\v1\File\ImageController;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Nova\Observer\DealerIncomingMappingObserver;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
@@ -89,6 +93,9 @@ use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
 use App\Services\Dms\Pos\RegisterService;
 use App\Services\Dms\Pos\RegisterServiceInterface;
+use App\Services\File\FileService;
+use App\Services\File\FileServiceInterface;
+use App\Services\File\ImageService;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use App\Services\User\DealerLocationService;
@@ -114,6 +121,7 @@ use App\Services\Export\DomPdfExporterService;
 use App\Services\Export\DomPdfExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
+use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -306,5 +314,17 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
+
+        $this->app->when(FileController::class)
+            ->needs(FileServiceInterface::class)
+            ->give(function () {
+                return new FileService(app()->make(Client::class), app()->make(SanitizeHelper::class));
+            });
+
+        $this->app->when(ImageController::class)
+            ->needs(FileServiceInterface::class)
+            ->give(function () {
+                return new ImageService(app()->make(Client::class), app()->make(SanitizeHelper::class), app()->make(ImageHelper::class));
+            });
     }
 }
