@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\Website\AddSitemaps;
+use App\Console\Commands\Website\GenerateDealerSpecificSiteUrls;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
@@ -36,7 +37,8 @@ class Kernel extends ConsoleKernel
         IncreaseDealerCostCommand::class,
         FixPartVendor::class,
         GenerateCVRDocumentCommand::class,
-        GetCompletedSaleWithNoFullInvoice::class
+        GetCompletedSaleWithNoFullInvoice::class,
+        GenerateDealerSpecificSiteUrls::class,
     ];
 
     /**
@@ -140,6 +142,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:scrape-replies 9000')
                 ->withoutOverlapping()
                 ->runInBackground();
+
+        $schedule->command('website:generate-dealer-specific-site-urls')
+            ->daily()
+            ->runInBackground();
 
         // $schedule->command('inspire')
         //          ->hourly();
