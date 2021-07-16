@@ -632,7 +632,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                     $builder->id . ' to Email: ' . $toEmail);
 
             // Return Response Array
-            return $this->response($builder, new BuilderStats(true));
+            return $this->response($builder, $toEmail);
         } catch(\Exception $ex) {
             $this->log->error($ex->getMessage(), $ex->getTrace());
             throw new SendBuilderEmailsFailedException;
