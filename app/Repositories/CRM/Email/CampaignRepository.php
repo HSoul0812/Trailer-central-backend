@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\Email;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\CampaignSent;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
@@ -33,16 +34,22 @@ class CampaignRepository implements CampaignRepositoryInterface {
     /**
      * Mark Campaign as Sent
      * 
-     * @param array $params
+     * @param int $campaignId
+     * @param int $leadId
+     * @param null|string $messageId = null
      * @throws \Exception
      * @return CampaignSent
      */
-    public function sent(array $params): CampaignSent {
+    public function sent(int $campaignId, int $leadId, ?string $messageId = null): CampaignSent {
         DB::beginTransaction();
 
         try {
             // Create Campaign Sent
-            $sent = CampaignSent::create($params);
+            $sent = CampaignSent::create([
+                'drip_campaigns_id' => $campaignId,
+                'lead_id' => $leadId,
+                'message_id' => $messageId ?? ''
+            ]);
 
             DB::commit();
         } catch (\Exception $ex) {
@@ -63,12 +70,15 @@ class CampaignRepository implements CampaignRepositoryInterface {
      * @return CampaignSent
      */
     public function updateSent(int $campaignId, int $leadId, string $messageId): CampaignSent {
+        // Get Campaign Sent Entry
+        $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
+        if(empty($sent->drip_campaigns_id)) {
+            return $this->sent($campaignId, $leadId, $messageId);
+        }
+
         DB::beginTransaction();
 
         try {
-            // Get Campaign Sent Entry
-            $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
-
             // Update Message ID
             $sent->fill(['message_id' => $messageId]);
 
@@ -88,12 +98,15 @@ class CampaignRepository implements CampaignRepositoryInterface {
      * Was Campaign Already Sent?
      * 
      * @param int $campaignId
-     * @param int $leadId
+     * @param string $email
      * @return bool
      */
-    public function wasSent(int $campaignId, int $leadId): bool {
+    public function wasSent(int $campaignId, string $email): bool {
         // Get Campaign Sent Entry
-        $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
+        $sent = CampaignSent::select(CampaignSent::getTableName().'.*')
+                            ->leftJoin(Lead::getTableName(), Lead::getTableName().'.identifier',  '=', CampaignSent::getTableName().'.lead_id')
+                            ->where(CampaignSent::getTableName() . '.drip_campaigns_id', $campaignId)
+                            ->where(Lead::getTableName() . '.email_address', $email)->first();
 
         // Was Campaign Sent?
         return !empty($sent->drip_campaigns_id);

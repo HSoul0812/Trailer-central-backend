@@ -13,7 +13,7 @@ class BuilderEmailTransformer extends TransformerAbstract {
      * @param BuilderEmail
      * @return array
      */
-    public function transform(BuilderEmail $email)
+    public function transform(BuilderEmail $email): array
     {
         return [
             'id' => $email->id,
