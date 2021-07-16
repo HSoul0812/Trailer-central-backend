@@ -119,11 +119,7 @@ class BlastRepositoryTest extends TestCase
 
         // When I call create with valid parameters
         /** @var BlastSent $leadBlastToCustomer */
-        $blastSent = $this->getConcreteRepository()->sent([
-            'email_blasts_id' => $sent->email_blasts_id,
-            'lead_id' => $sent->lead_id,
-            'message_id' => $sent->message_id
-        ]);
+        $blastSent = $this->getConcreteRepository()->sent($sent->email_blasts_id, $sent->lead_id, $sent->message_id);
 
         // Then I should get a class which is an instance of LeadBlast
         self::assertInstanceOf(BlastSent::class, $blastSent);
@@ -167,10 +163,7 @@ class BlastRepositoryTest extends TestCase
 
         // When I call create with valid parameters
         /** @var BlastSent $leadBlastToCustomer */
-        $blastSent = $this->getConcreteRepository()->sent([
-            'email_blasts_id' => $properties['email_blasts_id'],
-            'lead_id' => $properties['lead_id']
-        ]);
+        $blastSent = $this->getConcreteRepository()->sent($properties['email_blasts_id'], $properties['lead_id']);
 
         // And I should get a null value
         self::assertNull($blastSent);

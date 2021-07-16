@@ -4,16 +4,16 @@ namespace App\Services\File;
 
 use App\Exceptions\File\FileUploadException;
 use App\Helpers\SanitizeHelper;
-use App\Services\File\DTOs\FileDto;
 use App\Traits\CompactHelper;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * Class AbstractFileService
  * @package App\Services\File
  */
-abstract class AbstractFileService
+abstract class AbstractFileService implements FileServiceInterface
 {
     const UPLOAD_TYPE_WEBSITE_MEDIA = 'website/media';
     const UPLOAD_TYPE_IMAGE = "media";
@@ -22,7 +22,8 @@ abstract class AbstractFileService
     const UPLOAD_TYPE_CSV = "uploads";
     const UPLOAD_TYPE_UNKNOWN = "uploads/abbandoned";
 
-    private const LOCAL_FILENAME_FORMAT = '%s/%s.tmp';
+    private const LOCAL_FILENAME_FORMAT = '%s/%s.%s';
+    private const LOCAL_FILENAME_DEFAULT_FORMAT = '%s/%s.tmp';
 
     private const RAND_MIN = 1000000000;
     private const RAND_MAX = 1000000000000;
@@ -85,6 +86,46 @@ abstract class AbstractFileService
     }
 
     /**
+     * @param Filesystem $localDisk
+     * @param int|null $dealerId
+     * @param int|null $identifier
+     * @return string
+     */
+    protected function getLocalFilename(Filesystem $localDisk, ?int $dealerId = null, ?int $identifier = null, ?string $extension = null): string
+    {
+        $dealerId = $dealerId ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
+        $identifier = $identifier ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
+
+        $uploadDirectory = $this->getUploadDirectory(self::UPLOAD_TYPE_IMAGE, [$dealerId, $identifier]);
+
+        $localDisk->makeDirectory($uploadDirectory);
+
+        if ($extension) {
+            return sprintf(self::LOCAL_FILENAME_FORMAT, $uploadDirectory, CompactHelper::getRandomString(), $extension);
+        }
+
+        return sprintf(self::LOCAL_FILENAME_DEFAULT_FORMAT, $uploadDirectory, CompactHelper::getRandomString());
+    }
+
+    /**
+     * @param Filesystem $localDisk
+     * @param string $filename
+     * @param string $fileContents
+     * @return string
+     * @throws FileUploadException
+     */
+    protected function saveLocalFile(Filesystem $localDisk, string $filename, string $fileContents): string
+    {
+        $result = $localDisk->put($filename, $fileContents);
+
+        if (!$result) {
+            throw new FileUploadException("Can't upload file. Filename - {$filename}");
+        }
+
+        return $localDisk->path($filename);
+    }
+
+    /**
      * @param string $filename
      * @param array|string $identifiers
      * @return string
@@ -129,14 +170,7 @@ abstract class AbstractFileService
     {
         $localDisk = Storage::disk('local_tmp');
 
-        $dealerId = $dealerId ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
-        $identifier = $identifier ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
-
-        $uploadDirectory = $this->getUploadDirectory(self::UPLOAD_TYPE_IMAGE, [$dealerId, $identifier]);
-
-        $localDisk->makeDirectory($uploadDirectory);
-
-        $filename = sprintf(self::LOCAL_FILENAME_FORMAT, $uploadDirectory, CompactHelper::getRandomString());
+        $filename = $this->getLocalFilename($localDisk, $dealerId, $identifier);
 
         $fileContents = $this->httpClient->get($url, ['http_errors' => false])->getBody()->getContents();
 
@@ -148,13 +182,26 @@ abstract class AbstractFileService
             return null;
         }
 
-        $result = $localDisk->put($filename, $fileContents);
+        return $this->saveLocalFile($localDisk, $filename, $fileContents);
+    }
 
-        if (!$result) {
-            throw new FileUploadException("Can't upload file. Url - {$url}, dealer_id - {$dealerId}, id - $identifier");
-        }
+    /**
+     * @param string $fileContents
+     * @param Filesystem $localDisk
+     * @param array $params
+     * @return string|null
+     *
+     * @throws FileUploadException
+     */
+    protected function uploadLocalByContent(string $fileContents, Filesystem $localDisk, array $params): ?string
+    {
+        $dealerId = $params['dealer_id'] ?? null;
+        $identifier = $params['identifier'] ?? null;
+        $extension = $params['extension'] ?? null;
 
-        return $localDisk->path($filename);
+        $filename = $this->getLocalFilename($localDisk, $dealerId, $identifier, $extension);
+
+        return $this->saveLocalFile($localDisk, $filename, $fileContents);
     }
 
     /**
@@ -184,14 +231,4 @@ abstract class AbstractFileService
 
         return $s3Filename;
     }
-
-    /**
-     * @param string $url
-     * @param string $title
-     * @param int|null $dealerId
-     * @param int|null $identifier
-     * @param array $params
-     * @return FileDto|null
-     */
-    abstract public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?FileDto;
 }
