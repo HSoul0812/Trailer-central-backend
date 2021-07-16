@@ -40,7 +40,6 @@ class Kernel extends ConsoleKernel
         GenerateCVRDocumentCommand::class,
         GetCompletedSaleWithNoFullInvoice::class,
         ClearLocalTmpFolder::class,
-        GetCompletedSaleWithNoFullInvoice::class,
         GenerateDealerSpecificSiteUrls::class,
     ];
 
