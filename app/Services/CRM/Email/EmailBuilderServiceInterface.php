@@ -4,6 +4,7 @@ namespace App\Services\CRM\Email;
 
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
+use App\Services\CRM\Interactions\DTOs\BuilderStats;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 
 interface EmailBuilderServiceInterface {
@@ -11,23 +12,23 @@ interface EmailBuilderServiceInterface {
      * Send Lead Emails for Blast
      * 
      * @param int $id ID of Blast to Send Emails For
-     * @param array<int> ID's of Leads to Send Emails For Blast
+     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendBlastEmailsFailedException
      * @return array response
      */
-    public function sendBlast(int $id, array $leads): array;
+    public function sendBlast(int $id, string $leads): array;
 
     /**
      * Send Lead Emails for Campaign
      * 
      * @param int $id ID of Campaign to Send Emails For
-     * @param array<int> ID's of Leads to Send Emails For Campaign
+     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendCampaignEmailsFailedException
      * @return array response
      */
-    public function sendCampaign(int $id, array $leads): array;
+    public function sendCampaign(int $id, string $leads): array;
 
     /**
      * Send Email for Template
@@ -43,30 +44,48 @@ interface EmailBuilderServiceInterface {
      */
     public function sendTemplate(int $id, string $subject, string $toEmail, int $salesPersonId = 0, string $fromEmail = ''): array;
 
+    /**
+     * Send Emails for Builder Config
+     * 
+     * @param BuilderEmail $builder
+     * @param array $leads
+     * @throws SendBuilderEmailsFailedException
+     * @return BuilderStats
+     */
+    public function sendEmails(BuilderEmail $builder, array $leads): BuilderStats;
+
     
     /**
      * Save Email Information to Database
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @return EmailHistory
      */
-    public function saveToDb(BuilderEmail $config): EmailHistory;
+    public function saveToDb(BuilderEmail $builder): EmailHistory;
 
     /**
      * Send Email Via SMTP|Gmail|NTLM
      * 
-     * @param BuilderEmail $config
+     * @param BuilderEmail $builder
      * @param int $emailId
      * @return ParsedEmail
      */
-    public function sendEmail(BuilderEmail $config, int $emailId): ParsedEmail;
+    public function sendEmail(BuilderEmail $builder): ParsedEmail;
 
     /**
      * Mark Email as Sent
      * 
-     * @param BuilderEmail $config
-     * @param null|ParsedEmail $finalEmail
+     * @param BuilderEmail $builder
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
-    public function markSent(BuilderEmail $config, ?ParsedEmail $finalEmail = null): bool;
+    public function markSent(BuilderEmail $builder): bool;
+
+    /**
+     * Mark Email as Sent
+     * 
+     * @param BuilderEmail $builder
+     * @param ParsedEmail $finalEmail
+     * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
+     */
+    public function markEmailSent(ParsedEmail $finalEmail): bool;
 }

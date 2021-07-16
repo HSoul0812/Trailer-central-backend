@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\v1\Inventory;
 
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
-use App\Http\Controllers\RestfulController;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
@@ -26,7 +28,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  * Class InventoryController
  * @package App\Http\Controllers\v1\Inventory
  */
-class InventoryController extends RestfulController
+class InventoryController extends RestfulControllerV2
 {
     /**
      * @var InventoryServiceInterface
@@ -56,8 +58,8 @@ class InventoryController extends RestfulController
         InventoryHistoryRepositoryInterface $inventoryHistoryRepository
     )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'destroy', 'exists']);
-        $this->middleware('inventory.create.permission')->only(['create']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'destroy', 'exists']);
+        $this->middleware('inventory.create.permission')->only(['create', 'update']);
 
         $this->inventoryService = $inventoryService;
         $this->inventoryRepository = $inventoryRepository;
@@ -144,7 +146,7 @@ class InventoryController extends RestfulController
      *
      * @param Request $request
      * @return Response
-     * @throws NoObjectIdValueSetException
+     * @throws NoObjectIdValueSetException|NoObjectTypeSetException
      */
     public function exists(Request $request): Response
     {
@@ -195,6 +197,7 @@ class InventoryController extends RestfulController
      *
      * @throws NoObjectIdValueSetException
      * @throws BindingResolutionException
+     * @throws NoObjectTypeSetException
      */
     public function create(Request $request): Response
     {
@@ -208,6 +211,29 @@ class InventoryController extends RestfulController
         }
 
         return $this->createdResponse($inventory->inventory_id);
+    }
+
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return Response
+     *
+     * @throws BindingResolutionException
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function update(int $id, Request $request): Response
+    {
+        $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
+
+        $transformer = app()->make(SaveInventoryTransformer::class);
+        $inventoryRequest->setTransformer($transformer);
+
+        if (!$inventoryRequest->validate() || !($inventory = $this->inventoryService->update($inventoryRequest->all()))) {
+            return $this->response->errorBadRequest();
+        }
+
+        return $this->updatedResponse($inventory->inventory_id);
     }
 
     /**
@@ -234,9 +260,12 @@ class InventoryController extends RestfulController
      * )
      *
      * @param int $id
-     * @return \Dingo\Api\Http\Response|void
+     * @return Response
+     *
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
      */
-    public function destroy(int $id)
+    public function destroy(int $id): Response
     {
         $request = new DeleteInventoryRequest(['id' => $id]);
 

@@ -82,7 +82,6 @@ class UnitSaleLaborRepository extends RepositoryAbstract implements UnitSaleLabo
                     inventory.notes as inventory_notes
 
                 FROM dms_unit_sale us
-                LEFT JOIN dms_unit_sale_accessory usa ON usa.unit_sale_id=us.id
                 LEFT JOIN dms_customer c ON us.buyer_id=c.id
                 LEFT JOIN qb_invoices i ON i.unit_sale_id=us.id
                 LEFT JOIN inventory ON inventory.inventory_id = us.inventory_id

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\v1\Dms\Pos;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Dms\Pos\GetRegistersRequest;
+use App\Http\Requests\Dms\Pos\PostOpenRegisterRequest;
 use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
+use App\Services\Dms\Pos\RegisterServiceInterface;
 use Dingo\Api\Http\Request;
 
 class RegisterController extends RestfulControllerV2
@@ -14,10 +16,19 @@ class RegisterController extends RestfulControllerV2
      */
     protected $registerRepository;
 
-    public function __construct(RegisterRepositoryInterface $registerRepository)
+    /**
+     * @var RegisterServiceInterface
+     */
+    private $registerService;
+
+    public function __construct(
+        RegisterRepositoryInterface $registerRepository,
+        RegisterServiceInterface $registerService
+    )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create']);
         $this->registerRepository = $registerRepository;
+        $this->registerService = $registerService;
     }
 
     /**
@@ -36,5 +47,19 @@ class RegisterController extends RestfulControllerV2
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    public function create(Request $request)
+    {
+        $request = new PostOpenRegisterRequest($request->all());
+
+        if (!$request->validate() || !($registerMessage = $this->registerService->open($request->all()))) {
+            return $this->response->errorBadRequest();
+        }
+
+        return $this->response->array([
+            'status' => true,
+            'message' => $registerMessage
+        ]);
     }
 }

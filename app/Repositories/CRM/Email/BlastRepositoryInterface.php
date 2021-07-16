@@ -9,18 +9,31 @@ interface BlastRepositoryInterface extends Repository {
     /**
      * Mark Blast as Sent
      * 
-     * @param array $params
+     * @param int $blastId
+     * @param int $leadId
+     * @param null|string $messageId = null
      * @throws \Exception
      * @return BlastSent
      */
-    public function sent(array $params): BlastSent;
+    public function sent(int $blastId, int $leadId, ?string $messageId = null): BlastSent;
 
     /**
-     * Was Blast Already Sent?
+     * Update Sent Blast
      * 
      * @param int $blastId
      * @param int $leadId
+     * @param string $messageId
+     * @throws \Exception
+     * @return BlastSent
+     */
+    public function updateSent(int $blastId, int $leadId, string $messageId): BlastSent;
+
+    /**
+     * Was Blast Already Sent to Email Address?
+     * 
+     * @param int $blastId
+     * @param string $email
      * @return bool
      */
-    public function wasSent(int $blastId, int $leadId): bool;
+    public function wasSent(int $blastId, string $email): bool;
 }

@@ -462,7 +462,6 @@ class PartRepository implements PartRepositoryInterface {
                     }
                 }
             }
-
         });
 
         return $part;

@@ -2,6 +2,8 @@
 
 namespace App\Models\CRM\Email;
 
+use App\Models\Traits\Inventory\CompositePrimaryKeys;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,7 +13,18 @@ use Illuminate\Database\Eloquent\Model;
  */
 class BlastSent extends Model
 {
-    protected $table = 'crm_email_blasts_sent';
+    use TableAware, CompositePrimaryKeys;
+
+    const TABLE_NAME = 'crm_email_blasts_sent';
+
+    protected $table = self::TABLE_NAME;
+
+    /**
+     * Composite Primary Key
+     * 
+     * @var array<string>
+     */
+    protected $primaryKey = ['email_blasts_id', 'lead_id'];
 
     /**
      * The name of the "created at" column.

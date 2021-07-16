@@ -27,6 +27,7 @@ class Expense extends Model
     const TABLE_REPAIR_ORDER = 'dms_repair_order';
     const TABLE_FLOORPLAN_PAYMENT = 'inventory_floor_plan_payment';
     const TABLE_POS_REGISTER = 'crm_pos_register';
+    const TABLE_PARTS_COST_HISTORY = 'parts_cost_history';
 
     const RELATED_TABLES = [
         self::TABLE_INVOICE,
@@ -34,6 +35,7 @@ class Expense extends Model
         self::TABLE_REPAIR_ORDER,
         self::TABLE_FLOORPLAN_PAYMENT,
         self::TABLE_POS_REGISTER,
+        self::TABLE_PARTS_COST_HISTORY,
     ];
 
     protected $table = 'qb_expenses';

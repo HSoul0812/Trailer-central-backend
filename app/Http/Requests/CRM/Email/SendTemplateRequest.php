@@ -15,7 +15,7 @@ class SendTemplateRequest extends Request {
         'user_id' => 'required|integer',
         'subject' => 'required|string',
         'to_email' => 'required|email',
-        'sales_person_id' => 'required_without_all:from_email|integer|sales_person_valid',
-        'from_email' => 'required_without_all:sales_person_id|email|valid_smtp_email'
+        'sales_person_id' => 'nullable|integer|sales_person_valid',
+        'from_email' => 'nullable|email|valid_smtp_email'
     ];
 }

@@ -11,6 +11,8 @@ use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
+use App\Repositories\Parts\CostHistoryRepository;
+use App\Repositories\Parts\CostHistoryRepositoryInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportService;
 use App\Repositories\Common\MonitoredJobRepository\TechnicianReportRepository;
@@ -80,6 +82,7 @@ class PartsServiceProvider extends ServiceProvider
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind(PartServiceInterface::class, PartService::class);
         $this->app->bind(AuditLogRepositoryInterface::class, AuditLogRepository::class);
+        $this->app->bind(CostHistoryRepositoryInterface::class, CostHistoryRepository::class);
 
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);

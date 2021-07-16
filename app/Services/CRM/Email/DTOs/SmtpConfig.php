@@ -51,7 +51,7 @@ class SmtpConfig
     /**
      * @const int SMTP Timeout
      */
-    const DEFAULT_TIMEOUT = 1;
+    const DEFAULT_TIMEOUT = 2;
 
 
     /**
@@ -123,7 +123,7 @@ class SmtpConfig
      */
     public function getFromName(): ?string
     {
-        return $this->fromName;
+        return trim($this->fromName);
     }
 
     /**

@@ -16,8 +16,10 @@ class StockRepository implements StockRepositoryInterface
     private $financialReportHelpers = [
         'partBoundParams' => [],
         'inventoryBoundParams' => [],
-        'partsWhere' => '',
-        'inventoryWhere' => '',
+        'searchWhereForParts' => '',
+        'searchWhereForInventories' => '',
+        'dateRangeWhereForParts' => '',
+        'dateRangeWhereForInventories' => '',
         'type_of_stock' => self::STOCK_TYPE_MIXED
     ];
 
@@ -46,7 +48,9 @@ class StockRepository implements StockRepositoryInterface
         FROM dms_settings_part_bin pb
                  LEFT JOIN part_bin_qty bq ON (pb.id = bq.bin_id AND bq.qty > 0)
                  LEFT JOIN parts_v1 p ON bq.part_id = p.id
-        WHERE p.dealer_id = :dealer_id_parts AND p.id IS NOT NULL {$this->financialReportHelpers['partsWhere']}
+        WHERE p.dealer_id = :dealer_id_parts AND p.id IS NOT NULL
+              {$this->financialReportHelpers['dateRangeWhereForParts']}
+              {$this->financialReportHelpers['searchWhereForParts']}
 SQL;
 
         $sqlInventories = <<<SQL
@@ -61,10 +65,14 @@ SQL;
                    i.price - CAST(i.cost_of_unit AS DECIMAL(10, 2)) AS profit,
                    'inventories'                                    AS source
             FROM inventory i
-            WHERE i.dealer_id = :dealer_id_inventories AND i.inventory_id IS NOT NULL {$this->financialReportHelpers['inventoryWhere']}
+                LEFT JOIN dms_unit_sale us ON (i.inventory_id = us.inventory_id)
+            WHERE i.dealer_id = :dealer_id_inventories AND i.inventory_id IS NOT NULL
+                  {$this->financialReportHelpers['dateRangeWhereForInventories']}
+                  {$this->financialReportHelpers['searchWhereForInventories']}
 SQL;
 
         $sql = "$sqlParts \nUNION\n $sqlInventories";
+
         $dbParams = array_merge(
             $this->financialReportHelpers['partBoundParams'],
             $this->financialReportHelpers['inventoryBoundParams']
@@ -105,6 +113,22 @@ SQL;
         $this->financialReportHelpers['partBoundParams'] = ['dealer_id_parts' => $params['dealer_id']];
         $this->financialReportHelpers['inventoryBoundParams'] = ['dealer_id_inventories' => $params['dealer_id']];
 
+        if (!empty($params['from_date']) && !empty($params['to_date'])) {
+            // `from_date` always should have a companion parameter `to_date`
+            $this->financialReportHelpers['partBoundParams'] += [
+                'from_date_parts' => $params['from_date'],
+                'to_date_parts' => $params['to_date'] . ' 23:59:59'
+            ];
+
+            $this->financialReportHelpers['inventoryBoundParams'] += [
+                'from_date_inventories' => $params['from_date'],
+                'to_date_inventories' => $params['to_date'] . ' 23:59:59'
+            ];
+
+            $this->financialReportHelpers['dateRangeWhereForParts'] = " AND (bq.created_at >= :from_date_parts AND bq.created_at <= :to_date_parts)";
+            $this->financialReportHelpers['dateRangeWhereForInventories'] = " AND (us.created_at >= :from_date_inventories AND us.created_at <= :to_date_inventories)";
+        }
+
         if (!empty($params['search_term'])) {
             $searchTerm = "%{$params['search_term']}%";
 
@@ -115,8 +139,8 @@ SQL;
             $this->financialReportHelpers['inventoryBoundParams']['title_inventories'] = $searchTerm;
             $this->financialReportHelpers['inventoryBoundParams']['stock'] = $searchTerm;
 
-            $this->financialReportHelpers['partsWhere'] = " AND (p.title LIKE :title_parts OR p.sku LIKE :sku OR pb.bin_name LIKE :bin)";
-            $this->financialReportHelpers['inventoryWhere'] = " AND (i.title LIKE :title_inventories OR i.stock LIKE :stock)";
+            $this->financialReportHelpers['searchWhereForParts'] = " AND (p.title LIKE :title_parts OR p.sku LIKE :sku OR pb.bin_name LIKE :bin)";
+            $this->financialReportHelpers['searchWhereForInventories'] = " AND (i.title LIKE :title_inventories OR i.stock LIKE :stock)";
         }
     }
 

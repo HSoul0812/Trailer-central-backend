@@ -8,6 +8,7 @@ use App\Helpers\ImageHelper;
 use App\Helpers\SanitizeHelper;
 use App\Services\File\DTOs\FileDto;
 use App\Services\File\ImageService;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Mockery\LegacyMockInterface;
@@ -298,6 +299,63 @@ class ImageServiceTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    /**
+     * @covers ::uploadLocal
+     */
+    public function testUploadLocal()
+    {
+        $fileService = app()->make(ImageService::class);
+        $file = UploadedFile::fake()->image('test.png');
+
+        $result = $fileService->uploadLocal(['file' => $file]);
+
+        $this->assertInstanceOf(FileDto::class, $result);
+
+        $this->assertNotNull($result->getPath());
+        $this->assertNotNull($result->getHash());
+        $this->assertNotNull($result->getUrl());
+
+        $path = str_replace(Storage::disk('local_tmp')->path(''),'', $result->getPath());
+
+        Storage::disk('local_tmp')->assertExists($path);
+    }
+
+    /**
+     * @covers ::uploadLocal
+     */
+    public function testUploadLocalWrongMimeType()
+    {
+        $this->expectException(FileUploadException::class);
+
+        $fileService = app()->make(ImageService::class);
+        $file = UploadedFile::fake()->create('test.php', '1000', 'application/x-httpd-php');
+
+        $fileService->uploadLocal(['file' => $file]);
+    }
+
+    /**
+     * @covers ::uploadLocal
+     */
+    public function testUploadLocalWithoutFile()
+    {
+        $this->expectException(FileUploadException::class);
+
+        $fileService = app()->make(ImageService::class);
+        $fileService->uploadLocal([]);
+    }
+
+    /**
+     * @covers ::uploadLocal
+     */
+    public function testUploadLocalWrongFile()
+    {
+        $this->expectException(FileUploadException::class);
+
+        $fileService = app()->make(ImageService::class);
+        $fileService->uploadLocal(['file' => 'wrong_file']);
+    }
+
 
     /**
      * @return array[]

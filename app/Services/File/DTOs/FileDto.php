@@ -24,16 +24,22 @@ class FileDto
     private $mimeType;
 
     /**
+     * @var string|null
+     */
+    private $url;
+
+    /**
      * FileDto constructor.
      * @param string $path
      * @param string|null $hash
      * @param string|null $mimeType
      */
-    public function __construct(string $path, ?string $hash = null, ?string $mimeType = null)
+    public function __construct(string $path, ?string $hash = null, ?string $mimeType = null, ?string $url = null)
     {
         $this->path = $path;
         $this->hash = $hash;
         $this->mimeType = $mimeType;
+        $this->url = $url;
     }
 
     /**
@@ -45,7 +51,7 @@ class FileDto
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getHash(): ?string
     {
@@ -53,10 +59,18 @@ class FileDto
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getMimeType(): ?string
     {
         return $this->mimeType;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUrl(): ?string
+    {
+        return $this->url;
     }
 }
