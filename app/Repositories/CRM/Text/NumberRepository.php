@@ -146,11 +146,11 @@ class NumberRepository implements NumberRepositoryInterface {
      * Find All Expired Numbers (Chunked)
      * 
      * @param Closure $callable
-     * @param string $toDate
+     * @param int $toDate
      * @param int $chunkSize
      * @return void
      */
-    public function getAllExpiredChunked(\Closure $callable, string $toDate, int $chunkSize = 500): void {
+    public function getAllExpiredChunked(\Closure $callable, int $toDate, int $chunkSize = 500): void {
         NumberTwilio::select(NumberTwilio::getTableName() . '.phone_number')
                 ->join(Number::getTableName(), NumberTwilio::getTableName() . '.phone_number', '=', Number::getTableName() . '.twilio_number')
                 ->where(Number::getTableName() . '.expiration_time', '<', $toDate)
