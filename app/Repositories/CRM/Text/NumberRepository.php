@@ -2,13 +2,13 @@
 
 namespace App\Repositories\CRM\Text;
 
-use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
 use App\Services\CRM\Text\TextServiceInterface;
+use Carbon\Carbon;
 
 class NumberRepository implements NumberRepositoryInterface {
 
@@ -78,6 +78,19 @@ class NumberRepository implements NumberRepositoryInterface {
     }
 
     /**
+     * Twilio Number Exists?
+     * 
+     * @param string $phoneNumber
+     * @return bool
+     */
+    public function existsTwilioNumber(string $phoneNumber): bool {
+        $number = NumberTwilio::where('phone_number', $phoneNumber)->first();
+
+        // Successful?
+        return !empty($number->phone_number);
+    }
+
+    /**
      * Create Twilio Number
      * 
      * @param string $phoneNumber
@@ -113,5 +126,36 @@ class NumberRepository implements NumberRepositoryInterface {
         return Number::where('dealer_number', $dealerNo)
                      ->orWhere('customer_number', $customerNo)
                      ->all();
+    }
+
+    /**
+     * Delete Twilio Number
+     * 
+     * @param string $phone
+     * @return bool
+     */
+    public function deleteTwilioNumber(string $phone): bool {
+        // Return Numbers
+        $deleted = NumberTwilio::where('phone_number', $phone)->delete();
+
+        // Successfully Deleted?
+        return !empty($deleted);
+    }
+
+    /**
+     * Find All Expired Numbers (Chunked)
+     * 
+     * @param Closure $callable
+     * @param string $toDate
+     * @param int $chunkSize
+     * @return void
+     */
+    public function getAllExpiredChunked(\Closure $callable, string $toDate, int $chunkSize = 500): void {
+        NumberTwilio::select(NumberTwilio::getTableName() . '.phone_number')
+                ->join(Number::getTableName(), NumberTwilio::getTableName() . '.phone_number', '=', Number::getTableName() . '.twilio_number')
+                ->where(Number::getTableName() . '.expiration_time', '<', $toDate)
+                ->whereNull(Number::getTableName() . '.expiration_time')
+                ->groupBy(NumberTwilio::getTableName() . '.phone_number')
+                ->chunk($chunkSize, $callable);
     }
 }

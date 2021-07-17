@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Text;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,7 +12,14 @@ use Illuminate\Database\Eloquent\Model;
  */
 class NumberTwilio extends Model
 {
-    protected $table = 'twilio_numbers';
+    use TableAware;
+
+    /**
+     * @var string
+     */
+    const TABLE_NAME = 'twilio_numbers';
+
+    protected $table = self::TABLE_NAME;
 
     /**
      * The attributes that are mass assignable.

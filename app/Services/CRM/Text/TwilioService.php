@@ -11,6 +11,7 @@ use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\NumberTwilio;
 use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TwilioService
@@ -28,6 +29,12 @@ class TwilioService implements TextServiceInterface
      * @var NumberRepositoryInterface
      */
     private $textNumber;
+
+    /**
+     * @var Log
+     */
+    private $log;
+
 
     /**
      * @var int
@@ -53,6 +60,9 @@ class TwilioService implements TextServiceInterface
 
         // Initialize Number Repository
         $this->textNumber = $numberRepo;
+
+        // Initialize Logger
+        $this->log = Log::channel('texts');
     }
 
     /**
@@ -74,6 +84,80 @@ class TwilioService implements TextServiceInterface
         // Send Internal Number
         return $this->sendInternal($from_number, $to_number, $textMessage, $fullName);
     }
+
+    /**
+     * Get All Twilio Phone Numbers on Account
+     * 
+     * @return array<string>
+     */
+    public function numbers(): array {
+        $list = [];
+        try {
+            // Get All Incoming Phone Numbers Matching Provided Number
+            $numbers = $this->twilio->incomingPhoneNumbers->read([], 20);
+            foreach ($numbers as $record) {
+                $list[] = $record->phone_number;
+            }
+
+            // Retrieved Phone Numbers!
+            $this->log->info('Found ' . count($list) . ' Phone Numbers from Twilio');
+        } catch (Exception $ex) {
+            $this->log->error('Failed to get Twilio Numbers');
+        }
+
+        // Delete Number From DB
+        return $list;
+    }
+
+    /**
+     * Get Twilio Numbers Missing From DB
+     * 
+     * @return array<string>
+     */
+    public function missing(): array {
+        // Get All Numbers
+        $list = [];
+        $numbers = $this->numbers();
+        foreach($numbers as $number) {
+            if(!$this->textNumber->existsTwilioNumber($number)) {
+                $list[] = $number;
+            }
+        }
+
+        // Return List of Phone Numbers
+        $this->log->info('Found ' . count($list) . ' Phone Numbers from Twilio Missing in DB');
+        return $list;
+    }
+
+    /**
+     * Release Twilio Number
+     * 
+     * @param string $number
+     * @return bool | true if successfully deleted from Twilio OR DB; false if failed to delete from both
+     */
+    public function delete(string $number): bool {
+        try {
+            // Get All Incoming Phone Numbers Matching Provided Number
+            $success = true;
+            $numbers = $this->twilio->incomingPhoneNumbers->read(["phoneNumber" => $number], 20);
+            foreach ($numbers as $record) {
+                $this->twilio->incomingPhoneNumbers($record->sid)->delete();
+            }
+
+            // Delete From Twilio
+            $this->log->info('Deleted Phone Number ' . $number . ' from Twilio');
+        } catch (Exception $ex) {
+            $this->log->error('Phone Number ' . $number . ' does not exist on Twilio, removing from DB!');
+            $success = false;
+        }
+
+        // Delete Number From DB
+        if($this->textNumber->deleteTwilioNumber($number)) {
+            return true;
+        }
+        return $success;
+    }
+
 
     /**
      * Send Internal Text

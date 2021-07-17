@@ -41,4 +41,14 @@ interface NumberRepositoryInterface extends Repository {
      * @return array Number
      */
     public function findAllTwilioNumbers($dealerNo, $customerNo);
+
+    /**
+     * Find All Expired Numbers (Chunked)
+     * 
+     * @param Closure $callable
+     * @param string $toDate
+     * @param int $chunkSize
+     * @return void
+     */
+    public function getAllExpiredChunked(\Closure $callable, string $toDate, int $chunkSize = 500): void;
 }
