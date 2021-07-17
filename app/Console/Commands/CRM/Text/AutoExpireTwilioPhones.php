@@ -5,6 +5,7 @@ namespace App\Console\Commands\CRM\Text;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use Illuminate\Console\Command;
+use Carbon\Carbon;
 
 class AutoExpireTwilioPhones extends Command
 {
