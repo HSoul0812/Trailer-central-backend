@@ -25,9 +25,19 @@ class DeliverBlast extends Command
     protected $description = 'Process sending texts to all leads on all active blasts.';
 
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var App\Services\CRM\Text\CampaignServiceInterface
      */
     protected $service;
+
+    /**
+     * @var App\Repositories\CRM\Text\TextRepository
+     */
+    protected $texts;
+
+    /**
+     * @var App\Repositories\CRM\Text\BlastRepository
+     */
+    protected $blasts;
 
     /**
      * @var datetime
@@ -39,11 +49,15 @@ class DeliverBlast extends Command
      *
      * @return void
      */
-    public function __construct(TextServiceInterface $service)
+    public function __construct(BlastServiceInterface $service,
+                                TextRepositoryInterface $textRepo,
+                                BlastRepositoryInterface $blastRepo)
     {
         parent::__construct();
 
         $this->service = $service;
+        $this->texts = $textRepo;
+        $this->blasts = $blastRepo;
     }
 
     /**
