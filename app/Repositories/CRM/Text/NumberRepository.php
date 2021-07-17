@@ -152,7 +152,7 @@ class NumberRepository implements NumberRepositoryInterface {
      */
     public function getAllExpiredChunked(\Closure $callable, int $toDate, int $chunkSize = 500): void {
         NumberTwilio::select(NumberTwilio::getTableName() . '.phone_number')
-                ->join(Number::getTableName(), NumberTwilio::getTableName() . '.phone_number', '=', Number::getTableName() . '.twilio_number')
+                ->leftJoin(Number::getTableName(), NumberTwilio::getTableName() . '.phone_number', '=', Number::getTableName() . '.twilio_number')
                 ->whereNull(Number::getTableName() . '.expiration_time')
                 ->orWhere(Number::getTableName() . '.expiration_time', '<', $toDate)
                 ->groupBy(NumberTwilio::getTableName() . '.phone_number')
