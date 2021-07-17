@@ -1,6 +1,8 @@
 <?php
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Models\User\Location\QboLocationMapping;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -21,6 +23,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property $qb_id
  * @property $error_result
  *
+ *  @method static \Illuminate\Database\Query\Builder select($columns = ['*'])
+ * @method static \Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \Illuminate\Database\Query\Builder whereIn($column, $values, $boolean = 'and', $not = false)
+ * @method static QuickbookApproval findOrFail($id, array $columns = ['*'])
+ * @method static QuickbookApproval|Collection|static[]|static|null find($id, $columns = ['*'])
  */
 class QuickbookApproval extends Model
 {
@@ -29,6 +36,11 @@ class QuickbookApproval extends Model
     const SENT = 'sent';
     const FAILED = 'failed';
     const REMOVED = 'removed';
+
+    public const ACTION_UPDATE = 'update';
+    public const ACTION_ADD = 'add';
+
+    public const PRIORITY_DEALER_LOCATION = 40;
 
     const TABLE_NAME_MAPPER = [
         'qb_accounts' => 'Account',
