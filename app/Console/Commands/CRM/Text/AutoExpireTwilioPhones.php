@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\CRM\Text;
 
 use App\Repositories\CRM\Text\NumberServiceInterface;
 use App\Services\CRM\Text\TextServiceInterface;
