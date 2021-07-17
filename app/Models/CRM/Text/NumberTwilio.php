@@ -22,6 +22,13 @@ class NumberTwilio extends Model
     protected $table = self::TABLE_NAME;
 
     /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'phone_number';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
