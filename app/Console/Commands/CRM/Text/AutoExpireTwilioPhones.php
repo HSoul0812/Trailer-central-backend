@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\CRM\Text;
 
-use App\Repositories\CRM\Text\NumberServiceInterface;
+use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use Illuminate\Console\Command;
 
@@ -28,7 +28,7 @@ class AutoExpireTwilioPhones extends Command
     protected $service;
 
     /**
-     * @var App\Repositories\CRM\Text\NumberServiceInterface
+     * @var App\Repositories\CRM\Text\NumberRepositoryInterface
      */
     protected $numbers;
 
@@ -42,7 +42,7 @@ class AutoExpireTwilioPhones extends Command
      *
      * @return void
      */
-    public function __construct(TextServiceInterface $service, NumberServiceInterface $numbers)
+    public function __construct(TextServiceInterface $service, NumberRepositoryInterface $numbers)
     {
         parent::__construct();
 
