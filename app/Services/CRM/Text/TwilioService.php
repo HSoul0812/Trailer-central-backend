@@ -96,7 +96,7 @@ class TwilioService implements TextServiceInterface
             // Get All Incoming Phone Numbers Matching Provided Number
             $numbers = $this->twilio->incomingPhoneNumbers->read([], 20);
             foreach ($numbers as $record) {
-                $list[] = $record->phone_number;
+                $list[] = $record->phoneNumber;
             }
 
             // Retrieved Phone Numbers!
