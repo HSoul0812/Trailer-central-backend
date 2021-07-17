@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property $qb_id
  * @property $error_result
  *
- *  @method static \Illuminate\Database\Query\Builder select($columns = ['*'])
+ * @method static \Illuminate\Database\Query\Builder select($columns = ['*'])
  * @method static \Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
  * @method static \Illuminate\Database\Query\Builder whereIn($column, $values, $boolean = 'and', $not = false)
  * @method static QuickbookApproval findOrFail($id, array $columns = ['*'])
