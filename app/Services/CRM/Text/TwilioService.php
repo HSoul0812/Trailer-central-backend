@@ -147,6 +147,8 @@ class TwilioService implements TextServiceInterface
             // Get All Incoming Phone Numbers Matching Provided Number
             $success = true;
             $numbers = $this->twilio->incomingPhoneNumbers->read(["phoneNumber" => $number], 20);
+            var_dump($numbers);
+            die;
             foreach ($numbers as $record) {
                 $this->log->info('Found Twilio Phone Number ' . $record->phoneNumber . ' to Delete');
                 $this->twilio->incomingPhoneNumbers($record->sid)->delete();
