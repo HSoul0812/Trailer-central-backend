@@ -48,7 +48,9 @@ class SesMessageSentNotification
                 $lead = $builderLead->getValue();
 
                 // Update Message ID on Email History ID
-                $this->emailbuilder->replaceMessageId($type, $id, $lead, $history, $messageId);
+                if(!empty($lead)) {
+                    $this->emailbuilder->replaceMessageId($type, $id, $lead, $history, $messageId);
+                }
             }
         }
     }
