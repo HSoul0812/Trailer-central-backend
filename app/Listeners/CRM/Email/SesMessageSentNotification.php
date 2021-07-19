@@ -38,7 +38,7 @@ class SesMessageSentNotification
             $sesMessageId = $event->message->getHeaders()->get('X-SES-Message-ID');
             $builderType = $event->message->getHeaders()->get('X-Builder-Email-Type');
             $builderLead = $event->message->getHeaders()->get('X-Builder-Email-Lead');
-            if(!empty($sesMessageId) && !empty($builderType) && !empty($lead)) {
+            if(!empty($sesMessageId) && !empty($builderType) && !empty($builderLead)) {
                 $messageId = $sesMessageId->getValue();
 
                 // Get Builder Details
