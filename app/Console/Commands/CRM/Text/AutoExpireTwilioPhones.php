@@ -63,12 +63,12 @@ class AutoExpireTwilioPhones extends Command
         $this->info("Delete phone numbers expired/unused from twilio...");
 
         // Get All Expired Twilio Numbers From DB
-        /*$this->numbers->getAllExpiredChunked(function($numbers) {
+        $this->numbers->getAllExpiredChunked(function($numbers) {
             foreach($numbers as $number) {
                 $this->info("Processing expired number {$number->phone_number}");
                 $this->service->delete($number->phone_number);
             }
-        }, $numbersExpiredToDate, 20);*/
+        }, $numbersExpiredToDate, 500);
 
         // Get All Numbers From Twilio Missing in Our DB
         $numbers = $this->service->missing(500);
