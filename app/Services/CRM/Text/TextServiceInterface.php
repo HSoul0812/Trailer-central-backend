@@ -17,16 +17,18 @@ interface TextServiceInterface {
     /**
      * Get All Twilio Phone Numbers on Account
      * 
+     * @param int $max number of results to return
      * @return array<string>
      */
-    public function numbers(): array;
+    public function numbers(int $max = 20): array;
 
     /**
      * Get Twilio Numbers Missing From DB
      * 
+     * @param int $max number of results to return
      * @return array<string>
      */
-    public function missing(): array;
+    public function missing(int $max = 20): array;
 
     /**
      * Release Twilio Number

@@ -69,10 +69,10 @@ class AutoExpireTwilioPhones extends Command
                 //$this->service->delete($number->phone_number);
             }
             die;
-        }, $numbersExpiredToDate);
+        }, $numbersExpiredToDate, 20);
 
         // Get All Numbers From Twilio Missing in Our DB
-        $numbers = $this->service->missing();
+        $numbers = $this->service->missing(500);
         foreach($numbers as $number) {
             $this->info("Processing number {$number} missing from DB");
             //$this->service->delete($number);
