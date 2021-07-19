@@ -139,10 +139,16 @@ class TwilioService implements TextServiceInterface
      */
     public function delete(string $number): bool {
         try {
+            // Prepend + to Phone
+            if(strpos($number, '+') === false) {
+                $number = '+' . $number;
+            }
+
             // Get All Incoming Phone Numbers Matching Provided Number
             $success = true;
             $numbers = $this->twilio->incomingPhoneNumbers->read(["phoneNumber" => $number], 20);
             foreach ($numbers as $record) {
+                $this->log->info('Found Twilio Phone Number ' . $record->phoneNumber . ' to Delete');
                 $this->twilio->incomingPhoneNumbers($record->sid)->delete();
             }
 
