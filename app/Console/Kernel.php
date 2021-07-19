@@ -114,6 +114,11 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
 
+        $schedule->command('text:auto-expire-phones')
+                ->weeklyOn(7, '4:00')
+                ->runInBackground();
+        
+
 
         /**
          * Scrape Replies
