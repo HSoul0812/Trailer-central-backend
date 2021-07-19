@@ -326,4 +326,28 @@ END;
             ''
         ), $filename);
     }
+
+    /**
+     * A simple slugify routine
+     *
+     * @param array $pieces
+     * @return array
+     */
+    public function sanitizePieces(array $pieces) : array
+    {
+        $result = [];
+        foreach($pieces as $inputStr) {
+            $inputStr = str_replace(
+                ' ', '-',
+                preg_replace(
+                    "/[^A-Za-z0-9 ]/", '',
+                    strtolower($inputStr)
+                )
+            );
+
+            $result[] = $inputStr;
+        }
+
+        return $result;
+    }
 }

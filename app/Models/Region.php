@@ -6,6 +6,13 @@ use App\Models\CRM\Dms\Printer\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Class Region
+ * @package App\Models
+ *
+ * @property string $region_code
+ * @property string $region_name
+ */
 class Region extends Model
 {
     public const TABLE_NAME = 'region';
@@ -28,14 +35,14 @@ class Region extends Model
 
     /**
      * Primary Key Doesn't Auto Increment
-     * 
+     *
      * @var bool
      */
     public $incrementing = false;
 
     /**
      * Set String Primary Key
-     * 
+     *
      * @var string
      */
     protected $keyType = 'string';
@@ -53,7 +60,7 @@ class Region extends Model
 
     /**
      * Printer Forms
-     * 
+     *
      * @return HasMany
      */
     public function printerForms(): HasMany {
@@ -63,7 +70,7 @@ class Region extends Model
 
     /**
      * Get Table Name
-     * 
+     *
      * @return const string
      */
     public static function getTableName(): string {
