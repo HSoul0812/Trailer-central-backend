@@ -146,6 +146,19 @@ class ParsedEmail
     }
 
     /**
+     * Return Clean Message ID
+     * 
+     * @return string $this->messageId
+     */
+    public function cleanMessageId(): string
+    {
+        if($this->messageId) {
+            return preg_replace("/[<>]/", "", $this->messageId);
+        }
+        return '';
+    }
+
+    /**
      * Set Message ID
      * 
      * @param string $messageId

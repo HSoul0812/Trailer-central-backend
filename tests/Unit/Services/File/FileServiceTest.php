@@ -8,6 +8,7 @@ use App\Helpers\SanitizeHelper;
 use App\Services\File\DTOs\FileDto;
 use App\Services\File\FileService;
 use GuzzleHttp\Client;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Mockery\LegacyMockInterface;
@@ -193,6 +194,62 @@ class FileServiceTest extends TestCase
         $result = $imageService->upload($url, $title, $dealerId, null, $params);
 
         $this->assertNull($result);
+    }
+
+    /**
+     * @covers ::uploadLocal
+     */
+    public function testUploadLocal()
+    {
+        $fileService = app()->make(FileService::class);
+        $file = UploadedFile::fake()->create('test.pdf', '1000', 'application/pdf');
+
+        $result = $fileService->uploadLocal(['file' => $file]);
+
+        $this->assertInstanceOf(FileDto::class, $result);
+
+        $this->assertNotNull($result->getMimeType());
+        $this->assertNotNull($result->getPath());
+        $this->assertNotNull($result->getUrl());
+
+        $path = str_replace(Storage::disk('local_tmp')->path(''),'', $result->getPath());
+
+        Storage::disk('local_tmp')->assertExists($path);
+    }
+
+    /**
+     * @covers ::uploadLocal
+     */
+    public function testUploadLocalWrongMimeType()
+    {
+        $this->expectException(FileUploadException::class);
+
+        $fileService = app()->make(FileService::class);
+        $file = UploadedFile::fake()->create('test.php', '1000', 'application/x-httpd-php');
+
+        $fileService->uploadLocal(['file' => $file]);
+    }
+
+    /**
+     * @covers ::uploadLocal
+     */
+    public function testUploadLocalWithoutFile()
+    {
+        $this->expectException(FileUploadException::class);
+
+        $fileService = app()->make(FileService::class);
+        $fileService->uploadLocal([]);
+    }
+
+    /**
+     * @covers ::uploadLocal
+     */
+    public function testUploadLocalWrongFile()
+    {
+        $this->expectException(FileUploadException::class);
+
+        $fileService = app()->make(FileService::class);
+        $fileService->uploadLocal(['file' => 'wrong_file']);
     }
 
     /**

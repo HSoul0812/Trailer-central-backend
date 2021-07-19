@@ -84,7 +84,7 @@ class ServiceItemTechnicianController extends RestfulControllerV2
 
         $data->setPaginator(new IlluminatePaginatorAdapter($this->serviceItemTechnicians->getPaginator()));
 
-        return $this->response->array(['data' => $technicians->toArray()]);
+        return $this->response->array($this->fractal->createData($data)->toArray());
     }
 
     public function serviceReport(Request $request)
