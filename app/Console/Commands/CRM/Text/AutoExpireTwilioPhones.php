@@ -74,7 +74,7 @@ class AutoExpireTwilioPhones extends Command
         $numbers = $this->service->missing(500);
         foreach($numbers as $number) {
             $this->info("Processing number {$number} missing from DB");
-            //$this->service->delete($number);
+            $this->service->delete($number);
         }
     }
 }
