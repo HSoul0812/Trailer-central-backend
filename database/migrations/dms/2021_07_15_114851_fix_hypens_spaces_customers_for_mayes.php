@@ -53,7 +53,7 @@ class FixHypensSpacesCustomersForMayes extends Migration
             trim(last_name)
         END
     WHERE
-        `display_name` LIKE '-%' OR `first_name` LIKE '-%';");
+        dealer_id = 1108 AND (`display_name` LIKE '-%' OR `first_name` LIKE '-%');");
 
     }
 
