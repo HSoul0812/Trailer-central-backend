@@ -370,7 +370,7 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
         $route->post('user/check-admin-password', 'App\Http\Controllers\v1\User\SignInController@checkAdminPassword');
-        
+
         $route->get('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@index');
         $route->post('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@create');
         $route->put('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@updateBulk');
@@ -985,4 +985,15 @@ $api->version('v1', function ($route) {
     */
     $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
     $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Files
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
+    $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
 });

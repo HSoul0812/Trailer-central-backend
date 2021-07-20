@@ -119,11 +119,7 @@ class CampaignRepositoryTest extends TestCase
 
         // When I call create with valid parameters
         /** @var CampaignSent $leadCampaignToCustomer */
-        $campaignSent = $this->getConcreteRepository()->sent([
-            'drip_campaigns_id' => $sent->drip_campaigns_id,
-            'lead_id' => $sent->lead_id,
-            'message_id' => $sent->message_id
-        ]);
+        $campaignSent = $this->getConcreteRepository()->sent($sent->drip_campaigns_id, $sent->lead_id, $sent->message_id);
 
         // Then I should get a class which is an instance of LeadCampaign
         self::assertInstanceOf(CampaignSent::class, $campaignSent);
@@ -167,10 +163,7 @@ class CampaignRepositoryTest extends TestCase
 
         // When I call create with valid parameters
         /** @var CampaignSent $leadCampaignToCustomer */
-        $campaignSent = $this->getConcreteRepository()->sent([
-            'drip_campaigns_id' => $properties['drip_campaigns_id'],
-            'lead_id' => $properties['lead_id']
-        ]);
+        $campaignSent = $this->getConcreteRepository()->sent($properties['drip_campaigns_id'], $properties['lead_id']);
 
         // And I should get a null value
         self::assertNull($campaignSent);

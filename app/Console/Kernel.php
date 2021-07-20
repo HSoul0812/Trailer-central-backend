@@ -2,7 +2,9 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Files\ClearLocalTmpFolder;
 use App\Console\Commands\Website\AddSitemaps;
+use App\Console\Commands\Website\GenerateDealerSpecificSiteUrls;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
@@ -36,7 +38,9 @@ class Kernel extends ConsoleKernel
         IncreaseDealerCostCommand::class,
         FixPartVendor::class,
         GenerateCVRDocumentCommand::class,
-        GetCompletedSaleWithNoFullInvoice::class
+        GetCompletedSaleWithNoFullInvoice::class,
+        ClearLocalTmpFolder::class,
+        GenerateDealerSpecificSiteUrls::class,
     ];
 
     /**
@@ -112,6 +116,11 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
 
+        $schedule->command('text:auto-expire-phones')
+                ->weeklyOn(7, '4:00')
+                ->runInBackground();
+        
+
 
         /**
          * Scrape Replies
@@ -140,6 +149,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:scrape-replies 9000')
                 ->withoutOverlapping()
                 ->runInBackground();
+
+        $schedule->command('files:clear-local-tmp-folder')
+            ->weeklyOn(7, '4:00')
+            ->runInBackground();
+
+        $schedule->command('website:generate-dealer-specific-site-urls')
+            ->daily()
+            ->runInBackground();
 
         // $schedule->command('inspire')
         //          ->hourly();

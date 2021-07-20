@@ -137,8 +137,12 @@ class PartService implements PartServiceInterface
                 }
             }
 
-            // If a dealer_cost (an average cost of an part) is changed, create a new parts_cost_history record
-            if (isset($partData['dealer_cost']) && $partBeforeUpdate->dealer_cost != $part->dealer_cost) {
+            // If a dealer_cost (an average cost of an part) is changed and total bin qty is greater than 0, create a new parts_cost_history record
+            if (
+                isset($partData['dealer_cost']) &&
+                $partBeforeUpdate->dealer_cost != $part->dealer_cost &&
+                $part->total_qty > 0
+            ) {
                 $this->costHistoryRepository->create([
                     'part_id' => $part->id,
                     'old_cost' => $partBeforeUpdate->dealer_cost,
