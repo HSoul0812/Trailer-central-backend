@@ -34,6 +34,11 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $customer;
     }
 
+    /**
+     * @param array DeleteCustomerRequest
+     * @throws \InvalidArgumentException when the dealer id `dealer_id` is not provided
+     * @throws \InvalidArgumentException when the customer id `id` is not provided
+     */
     public function delete($params) {
 
         if (empty($params['dealer_id'])) {
