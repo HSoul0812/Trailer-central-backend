@@ -832,6 +832,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('refunds', 'App\Http\Controllers\v1\Dms\RefundController@index');
+        $route->get('refunds/{id}', 'App\Http\Controllers\v1\Dms\RefundController@show');
 
         /*
         |--------------------------------------------------------------------------
