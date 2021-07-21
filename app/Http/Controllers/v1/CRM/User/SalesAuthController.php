@@ -79,4 +79,22 @@ class SalesAuthController extends RestfulControllerV2 {
         
         return $this->response->errorBadRequest();
     }
+
+    /**
+     * Create Sales Person and Get Login URL
+     * 
+     * @param Request $request
+     * @return type
+     */
+    public function login(Request $request)
+    {
+        // Handle Auth Sales People Request
+        $request = new LoginSalesAuthRequest($request->all());
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->array($this->service->login($request->all()));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
 }

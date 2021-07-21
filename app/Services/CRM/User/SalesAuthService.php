@@ -140,6 +140,34 @@ class SalesAuthService implements SalesAuthServiceInterface
         return $this->response($params, $accessToken);
     }
 
+    /**
+     * Create Sales Person and Login
+     * 
+     * @param array $params
+     * @return array
+     */
+    public function login(array $params): array {
+        // Create Sales Person
+        if(!empty($params['id'])) {
+            $salesPerson = $this->salesPersonService->update($params);
+        } else {
+            $salesPerson = $this->salesPersonService->create($params);
+        }
+
+        // Adjust Request
+        $params['relation_type'] = 'sales_person';
+        $params['relation_id'] = $salesPerson->id;
+
+        // Get Sales Person Response
+        $response = $this->salesResponse($salesPerson->id);
+
+        // Create Login URL
+        $response['login'] = $this->auth->login($params);
+
+        // Return Response
+        return $response;
+    }
+
 
     /**
      * Return Response
@@ -149,13 +177,8 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return array
      */
     public function response(array $params, ?AccessToken $accessToken = null): array {
-        // Get Sales Person
-        $salesPerson = $this->salesPerson->get([
-            'sales_person_id' => $params['relation_id']
-        ]);
-        $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
-        $this->fractal->parseIncludes('smtp,imap,folders,authTypes');
-        $response = $this->fractal->createData($item)->toArray();
+        // Get Sales Person Fractal
+        $response = $this->salesResponse($params['relation_id']);
 
         // Set Defaults
         $response['data'] = null;
@@ -170,5 +193,22 @@ class SalesAuthService implements SalesAuthServiceInterface
             return $this->auth->response($accessToken, $response);
         }
         return $response;
+    }
+
+
+    /**
+     * Get Sales Response
+     * 
+     * @param int $salesPersonId
+     * @return array
+     */
+    private function salesResponse(int $salesPersonId): array {
+        // Get Sales Person
+        $salesPerson = $this->salesPerson->get([
+            'sales_person_id' => $salesPersonId
+        ]);
+        $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
+        $this->fractal->parseIncludes('smtp,imap,folders,authTypes');
+        return $this->fractal->createData($item)->toArray();
     }
 }

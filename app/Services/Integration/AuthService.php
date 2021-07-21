@@ -137,14 +137,25 @@ class AuthService implements AuthServiceInterface
         $auth = ['url' => null];
 
         // Get Login URL
-        if($params['token_type'] === 'google') {
-            // Auth Code Exists?!
-            if(!empty($params['auth_code'])) {
-                $auth = $this->gmail->auth($params['redirect_uri'], $params['auth_code']);
-            } else {
-                $login = $this->google->login($params['redirect_uri'], $params['scopes']);
-                $auth = ['url' => $login];
-            }
+        switch($params['token_type']) {
+            case 'google':
+                // Auth Code Exists?!
+                if(!empty($params['auth_code'])) {
+                    $auth = $this->gmail->auth($params['redirect_uri'], $params['auth_code']);
+                } else {
+                    $login = $this->google->login($params['redirect_uri'], $params['scopes']);
+                    $auth = ['url' => $login];
+                }
+            break;
+            case 'office365':
+                // Auth Code Exists?!
+                if(!empty($params['auth_code'])) {
+                    $auth = $this->azure->auth($params['redirect_uri'], $params['auth_code']);
+                } else {
+                    $login = $this->azure->login($params['redirect_uri'], $params['scopes']);
+                    $auth = ['url' => $login];
+                }
+            break;
         }
 
         // Return Refresh Token

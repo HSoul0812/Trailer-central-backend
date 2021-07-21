@@ -650,6 +650,7 @@ $api->version('v1', function ($route) {
                 $route->put('validate', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@valid');
 
                 // Sales People w/Auth
+                $route->put('login', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@login');
                 $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
                 $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');
                 $route->post('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@update')->where('id', '[0-9]+');

@@ -28,6 +28,8 @@ use App\Services\Integration\Facebook\CatalogService;
 use App\Services\Integration\Facebook\CatalogServiceInterface;
 use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
+use App\Services\Integration\Microsoft\AzureService;
+use App\Services\Integration\Microsoft\AzureServiceInterface;
 use App\Repositories\Integration\CVR\CvrFileRepository;
 use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Services\Integration\CVR\CvrFileService;
@@ -48,6 +50,7 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->bind(GoogleServiceInterface::class, GoogleService::class);
         $this->app->bind(GmailServiceInterface::class, GmailService::class);
+        $this->app->bind(AzureServiceInterface::class, AzureService::class);
         $this->app->bind(CatalogServiceInterface::class, CatalogService::class);
         $this->app->bind(BusinessServiceInterface::class, BusinessService::class);
         
