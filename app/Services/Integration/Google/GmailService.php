@@ -4,6 +4,7 @@ namespace App\Services\Integration\Google;
 
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
+use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
 use App\Exceptions\Integration\Google\MissingGmailLabelsException;
 use App\Exceptions\Integration\Google\MissingGmailLabelException;

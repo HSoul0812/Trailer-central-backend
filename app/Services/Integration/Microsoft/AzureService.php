@@ -3,7 +3,7 @@
 namespace App\Services\Integration\Microsoft;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
-use App\Exceptions\Integration\Microsoft\MissingGapiIdTokenException;
+use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use Microsoft_Client;
 use Illuminate\Support\Facades\Log;
 use League\OAuth2\Client\Provider\GenericProvider;
@@ -82,7 +82,7 @@ class AzureService implements AzureServiceInterface
     public function validate($accessToken) {
         // ID Token Exists?
         if(empty($accessToken->id_token)) {
-            throw new MissingGapiIdTokenException;
+            throw new MissingAzureIdTokenException;
         }
 
         // Configure Client
@@ -136,7 +136,7 @@ class AzureService implements AzureServiceInterface
     public function validateCustom(CommonToken $accessToken) {
         // ID Token Exists?
         if(empty($accessToken->getIdToken())) {
-            throw new MissingGapiIdTokenException;
+            throw new MissingAzureIdTokenException;
         }
 
         // Configure Client
