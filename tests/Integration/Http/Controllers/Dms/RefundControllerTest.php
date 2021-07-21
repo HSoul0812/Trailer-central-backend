@@ -50,10 +50,46 @@ class RefundControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
+    public function testShow()
+    {
+        $seeder = new RefundSeeder(['withRefund' => true]);
+        $seeder->seed();
+
+        $response = $this->json('GET', '/api/dms/refunds/' . $seeder->refund->id, [], ['access-token' => $seeder->authToken->access_token]);
+
+        $response->assertStatus(200);
+
+        $responseJson = json_decode($response->getContent(), true);
+
+        $this->assertNotEmpty($responseJson['data']);
+
+        $currentItem = $responseJson['data'];
+
+        $this->assertArrayHasKey('id', $currentItem);
+        $this->assertArrayHasKey('tb_name', $currentItem);
+        $this->assertArrayHasKey('tb_primary_id', $currentItem);
+        $this->assertArrayHasKey('amount', $currentItem);
+        $this->assertArrayHasKey('created_at', $currentItem);
+        $this->assertArrayHasKey('updated_at', $currentItem);
+
+        $this->assertSame($seeder->refund->id, $currentItem['id']);
+
+        $seeder->cleanUp();
+    }
+
     /**
      * @covers ::index
      */
-    public function testIndexAccessToken()
+    public function testIndexWithoutAccessToken()
+    {
+        $response = $this->json('GET', '/api/dms/refunds');
+        $response->assertStatus(403);
+    }
+
+    /**
+     * @covers ::show
+     */
+    public function testShowWithoutAccessToken()
     {
         $response = $this->json('GET', '/api/dms/refunds');
         $response->assertStatus(403);
