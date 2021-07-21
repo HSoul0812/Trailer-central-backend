@@ -50,6 +50,9 @@ class RefundControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
+    /**
+     * @covers ::show
+     */
     public function testShow()
     {
         $seeder = new RefundSeeder(['withRefund' => true]);
