@@ -8,6 +8,7 @@ use App\Models\CRM\User\Customer;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Exception\DeleteResourceFailedException;
+use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Exception\StoreResourceFailedException;
 use Dingo\Api\Exception\UpdateResourceFailedException;
 use Dingo\Api\Http\Request;
@@ -169,13 +170,9 @@ class CustomerController extends RestfulControllerV2
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
-     *         response="200",
+     *         response="204",
      *         description="Confirms customer was deleted",
      *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
      *     ),
      * )
      */
@@ -186,8 +183,8 @@ class CustomerController extends RestfulControllerV2
             if ($customerData->validate() && $this->customerRepository->delete($customerData->all())) {
                 return $this->response->noContent();
             }
-        } catch (\Exception $e) {
-            throw new DeleteResourceFailedException($e->getMessage());
+        } catch (ResourceException $e) {
+            throw new DeleteResourceFailedException($e->getMessage(), $e->getErrors());
         }
 
         return $this->response->errorBadRequest();
