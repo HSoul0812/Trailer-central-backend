@@ -4,7 +4,6 @@ namespace App\Services\Integration\Microsoft;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
-use Microsoft_Client;
 use Illuminate\Support\Facades\Log;
 use League\OAuth2\Client\Provider\GenericProvider;
 

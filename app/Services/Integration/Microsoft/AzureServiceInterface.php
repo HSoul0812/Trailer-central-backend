@@ -3,26 +3,16 @@
 namespace App\Services\Integration\Google;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
-use Google_Client;
 
-interface GoogleServiceInterface {
-    /**
-     * Get Fresh Client
-     * 
-     * @throws MissingGapiClientIdException
-     * @throws FailedConnectGapiClientException
-     * @return Google_Client
-     */
-    public function getClient(): Google_Client;
-
+interface AzureServiceInterface {
     /**
      * Get Login URL
-     * 
-     * @param string $redirectUrl url to redirect auth back to again
-     * @param array $scopes scopes requested by login
-     * @return login url with offline access support
+     *
+     * @param null|string $redirectUrl url to redirect auth back to again
+     * @param null|array $scopes scopes requested by login
+     * @return array{url: string, state: object}
      */
-    public function login($redirectUrl, $scopes);
+    public function login(?string $redirectUrl = null, ?array $scopes = null): array;
 
     /**
      * Get Refresh Token

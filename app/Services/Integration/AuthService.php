@@ -8,6 +8,7 @@ use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Microsoft\AzureServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use League\Fractal\Manager;
@@ -41,6 +42,11 @@ class AuthService implements AuthServiceInterface
     protected $facebook;
 
     /**
+     * @var AzureServiceInterface
+     */
+    protected $azure;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -53,12 +59,14 @@ class AuthService implements AuthServiceInterface
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
         BusinessServiceInterface $facebook,
+        AzureServiceInterface $azure,
         Manager $fractal
     ) {
         $this->tokens = $tokens;
         $this->google = $google;
         $this->gmail = $gmail;
         $this->facebook = $facebook;
+        $this->azure = $azure;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
