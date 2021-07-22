@@ -158,7 +158,7 @@ class AuthService implements AuthServiceInterface
             case 'office365':
                 // Auth Code Exists?!
                 if(!empty($params['auth_code'])) {
-                    $auth = $this->azure->auth($params['redirect_uri'], $params['auth_code']);
+                    $auth = $this->azure->auth($params['auth_code'], $params['redirect_uri'], $params['scopes']);
                 } else {
                     $auth = $this->azure->login($params['redirect_uri'], $params['scopes']);
                 }

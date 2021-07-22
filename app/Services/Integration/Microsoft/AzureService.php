@@ -10,6 +10,8 @@ use App\Transformers\Integration\Auth\EmailTokenTransformer;
 use Illuminate\Support\Facades\Log;
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Microsoft\Graph\Graph;
+use Microsoft\Graph\Model;
 
 /**
  * Class AzureService
@@ -19,7 +21,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 class AzureService implements AzureServiceInterface
 {
     /**
-     * Create Microsoft Log
+     * Create Microsoft Azure Log
      */
     public function __construct()
     {
