@@ -9,7 +9,7 @@ namespace App\Exceptions\Integration\Microsoft;
  *
  * @package App\Exceptions\Integration\Microsoft
  */
-class InvalidMicrosoftAuthCodeException extends \Exception
+class InvalidAzureAuthCodeException extends \Exception
 {
     
     protected $message = 'Invalid auth code while trying to get Microsoft Azure access token!';
