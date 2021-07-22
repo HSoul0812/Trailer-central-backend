@@ -134,10 +134,9 @@ class AzureService implements AzureServiceInterface
             $user = $graph->createRequest('GET', '/me?$select=mail')
                 ->setReturnType(Model\User::class)
                 ->execute();
-            var_dump($user);
 
             // Append Profile
-            $emailToken->setEmailAddress($user->getMail());
+            $emailToken->setEmailAddress($user->getUserPrincipalName());
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
