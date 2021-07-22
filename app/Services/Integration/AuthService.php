@@ -160,8 +160,7 @@ class AuthService implements AuthServiceInterface
                 if(!empty($params['auth_code'])) {
                     $auth = $this->azure->auth($params['redirect_uri'], $params['auth_code']);
                 } else {
-                    $login = $this->azure->login($params['redirect_uri'], $params['scopes']);
-                    $auth = ['url' => $login];
+                    $auth = $this->azure->login($params['redirect_uri'], $params['scopes']);
                 }
             break;
         }
