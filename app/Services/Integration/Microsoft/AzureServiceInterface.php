@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Integration\Google;
+namespace App\Services\Integration\Microsoft;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
 
