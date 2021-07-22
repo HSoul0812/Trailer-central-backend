@@ -8,6 +8,7 @@ use App\Exceptions\Integration\Microsoft\InvalidAzureAuthCodeException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Transformers\Integration\Auth\EmailTokenTransformer;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Resource\Item;
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Microsoft\Graph\Graph;
