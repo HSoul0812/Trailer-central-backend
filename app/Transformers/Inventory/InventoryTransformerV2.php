@@ -37,7 +37,7 @@ class InventoryTransformerV2 extends TransformerAbstract
             'description' => $inventory->description,
             'entity_type_id' => $inventory->entity_type_id,
             'fp_balance' => $inventory->fp_balance,
-            'fp_interest_paid' => $inventory->fp_interest_paid,
+            'fp_interest_paid' => $inventory->interest_paid,
             'fp_committed' => $inventory->fp_committed,
             'gvwr' => $inventory->gvwr,
             'height' => $inventory->height,

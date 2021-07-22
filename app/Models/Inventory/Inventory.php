@@ -99,7 +99,7 @@ use Laravel\Scout\Searchable;
  * @property int $fp_vendor,
  * @property double $fp_balance,
  * @property bool $fp_paid,
- * @property double $fp_interest_paid,
+ * @property double $fp_interest_paid, PRTBND-985 We won't use this field anymore. Will remove it soon.
  * @property string $l_holder,
  * @property string $l_attn,
  * @property string $l_name_on_account,
@@ -480,6 +480,22 @@ class Inventory extends Model
     public function getStatusLabelAttribute()
     {
         return isset(self::STATUS_MAPPING[$this->status]) ? self::STATUS_MAPPING[$this->status] : null;
+    }
+
+    /**
+     * Instead of using fp_interest_paid field from inventory table, calculate this amount from payment history table
+     * 
+     * @return float An amount of interest paid
+     */
+    public function getInterestPaidAttribute(): float
+    {
+        $interest_paid = self::select('SUM(inventory_floor_plan_payment.amount) AS interest_paid')
+                    ->join('inventory_floor_plan_payment', 'inventory.inventory_id', '=', 'inventory_floor_plan_payment.inventory_id')
+                    ->where('inventory.inventory_id', $this->inventory_id)
+                    ->where('inventory_floor_plan_payment.type', Payment::PAYMENT_CATEGORIES['Interest'])
+                    ->sum('inventory_floor_plan_payment.amount');
+
+        return $interest_paid;
     }
 
     public function __toString() {
