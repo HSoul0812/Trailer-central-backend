@@ -116,7 +116,7 @@ class CommonToken
 
         // Fill From League Scope
         if(!empty($values['scope'])) {
-            $this->scopes = $values['scope'];
+            $this->setScopes($values['scope']);
         }
 
         // Fill From Expires In
