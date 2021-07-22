@@ -5,6 +5,7 @@ namespace App\Services\Integration\Common\DTOs;
 use Carbon\Carbon;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use League\OAuth2\Client\Token\AccessToken as LeagueToken;
 
 /**
  * Class CommonToken
@@ -93,6 +94,41 @@ class CommonToken
 
         // Fill Expires At
         $this->calcExpiresAt($this->getIssuedAt(), $this->getExpiresIn());
+    }
+
+    /**
+     * Fill Access Token From Array
+     * 
+     * @param LeagueToken $accessToken
+     */
+    public function fillFromLeague(LeagueToken $accessToken) {
+        // Fill From League Access Token
+        $this->accessToken = $accessToken->getToken();
+
+        // Fill From League Refresh Token
+        $this->refreshToken = $accessToken->getRefreshToken();
+
+        // Fill From League ID Token
+        $values = $accessToken->getValues();
+        if(!empty($values['id_token'])) {
+            $this->idToken = $values['id_token'];
+        }
+
+        // Fill From League Scope
+        if(!empty($values['scope'])) {
+            $this->scopes = $values['scope'];
+        }
+
+        // Fill From Expires In
+        if(!empty($values['ext_expires_in'])) {
+            $this->expiresIn = $values['ext_expires_in'];
+        }
+
+        // Calculate Issued At
+        $this->calcIssuedAt($accessToken->getTimeNow());
+
+        // Fill From League Refresh Token
+        $this->expiresAt = Carbon::createFromTimestamp($accessToken->getExpires())->toDateTimeString();
     }
 
 

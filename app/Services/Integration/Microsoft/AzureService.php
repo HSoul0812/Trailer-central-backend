@@ -99,10 +99,8 @@ class AzureService implements AzureServiceInterface
         }
 
         // Return Formatted Auth Token
-        print_r($authToken);
-        die;
         $emailToken = new EmailToken();
-        $emailToken->fillFromArray($authToken);
+        $emailToken->fillFromLeague($authToken);
 
         // Get Profile
         $this->profile($emailToken);
@@ -110,6 +108,35 @@ class AzureService implements AzureServiceInterface
         // Return Transformed Data
         $data = new Item($emailToken, new EmailTokenTransformer());
         return $this->fractal->createData($data)->toArray();
+    }
+
+    /**
+     * Get Azure Profile Email
+     *
+     * @param EmailToken $emailToken
+     * @return EmailToken
+     */
+    public function profile(EmailToken $emailToken): EmailToken {
+        // Insert Gmail
+        try {
+            // Initialize Microsoft Graph
+            $graph = new Graph();
+            $graph->setAccessToken($emailToken->accessToken);
+
+            // Get Details From Microsoft Account
+            $user = $graph->createRequest('GET', '/me?$select=displayName,mail,mailboxSettings,userPrincipalName')
+                ->setReturnType(Model\User::class)
+                ->execute();
+
+            // Append Profile
+            $emailToken->setEmailAddress($user->getMail());
+        } catch (\Exception $e) {
+            // Log Error
+            $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+
+        // Return Azure Token
+        return $emailToken;
     }
 
     /**
