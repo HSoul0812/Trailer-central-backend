@@ -7,7 +7,9 @@ use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Exceptions\Integration\Microsoft\InvalidAzureAuthCodeException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Transformers\Integration\Auth\EmailTokenTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -24,8 +26,12 @@ class AzureService implements AzureServiceInterface
     /**
      * Create Microsoft Azure Log
      */
-    public function __construct()
+    public function __construct(Manager $fractal)
     {
+        // Initialize Services
+        $this->fractal = $fractal;
+        $this->fractal->setSerializer(new NoDataArraySerializer());
+
         // Initialize Logger
         $this->log = Log::channel('azure');
     }
