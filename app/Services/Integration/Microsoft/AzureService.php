@@ -3,9 +3,13 @@
 namespace App\Services\Integration\Microsoft;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Exceptions\Integration\Microsoft\InvalidAzureAuthCodeException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
+use App\Transformers\Integration\Auth\EmailTokenTransformer;
 use Illuminate\Support\Facades\Log;
 use League\OAuth2\Client\Provider\GenericProvider;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
 /**
  * Class AzureService
@@ -25,15 +29,15 @@ class AzureService implements AzureServiceInterface
 
 
     /**
-     * Get Login URL
+     * Get Client
      *
      * @param null|string $redirectUrl url to redirect auth back to again
      * @param null|array $scopes scopes requested by login
-     * @return array{url: string, state: object}
+     * @return GenericProvider
      */
-    public function login(?string $redirectUrl = null, ?array $scopes = null): array {
-        // Initialize the OAuth client
-        $oauthClient = new GenericProvider([
+    public function getClient(?string $redirectUrl = null, ?array $scopes = null): GenericProvider {
+        // Initialize the OAuth Client
+        $authClient = new GenericProvider([
             'clientId'                => config('azure.app.id'),
             'clientSecret'            => config('azure.app.secret'),
             'redirectUri'             => $redirectUrl ?? config('azure.redirectUri'),
@@ -43,11 +47,63 @@ class AzureService implements AzureServiceInterface
             'scopes'                  => $scopes ?? config('azure.scopes')
         ]);
 
+        // Return Auth Client
+        return $authClient;
+    }
+
+    /**
+     * Get Login URL
+     *
+     * @param null|string $redirectUrl url to redirect auth back to again
+     * @param null|array $scopes scopes requested by login
+     * @return array{url: string, state: object}
+     */
+    public function login(?string $redirectUrl = null, ?array $scopes = null): array {
+        // Initialize the OAuth client
+        $client = $this->getClient($redirectUrl, $scopes);
+
         // Return Array of Results
         return [
-            'url' => $oauthClient->getAuthorizationUrl(),
-            'state' => $oauthClient->getState()
+            'url' => $client->getAuthorizationUrl(),
+            'state' => $client->getState()
         ];
+    }
+
+    /**
+     * Use Authorize Code to Get Tokens
+     *
+     * @param string $authCode
+     * @param null|string $redirectUrl url to redirect auth back to again
+     * @param null|array $scopes scopes requested by login
+     * @return array created from EmailTokenTransformer
+     */
+    public function auth(string $authCode, ?string $redirectUrl = null, ?array $scopes = []): array {
+        // Initialize the OAuth client
+        $client = $this->getClient($redirectUrl, $scopes);
+
+        try {
+            // Make the token request
+            $authToken = $client->getAccessToken('authorization_code', [
+                'code' => $authCode
+            ]);
+        } catch (IdentityProviderException $e) {
+            throw new InvalidAzureAuthCodeException;
+        } catch (\Exception $e) {
+            throw new InvalidAzureAuthCodeException;
+        }
+
+        // Return Formatted Auth Token
+        print_r($authToken);
+        die;
+        $emailToken = new EmailToken();
+        $emailToken->fillFromArray($authToken);
+
+        // Get Profile
+        $this->profile($emailToken);
+
+        // Return Transformed Data
+        $data = new Item($emailToken, new EmailTokenTransformer());
+        return $this->fractal->createData($data)->toArray();
     }
 
     /**
