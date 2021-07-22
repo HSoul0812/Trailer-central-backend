@@ -87,8 +87,10 @@ class AzureService implements AzureServiceInterface
                 'code' => $authCode
             ]);
         } catch (IdentityProviderException $e) {
+            $this->log->error("IdentityProviderException returned on AzureService: " . $e->getMessage());
             throw new InvalidAzureAuthCodeException;
         } catch (\Exception $e) {
+            $this->log->error("Unknown Exception returned on AzureService: " . $e->getMessage());
             throw new InvalidAzureAuthCodeException;
         }
 
