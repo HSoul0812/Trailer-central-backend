@@ -96,6 +96,13 @@ return [
             'days' => 3,
         ],
 
+        'azure' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/azure.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

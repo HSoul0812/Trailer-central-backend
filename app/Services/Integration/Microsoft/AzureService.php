@@ -24,7 +24,7 @@ class AzureService implements AzureServiceInterface
     public function __construct()
     {
         // Initialize Logger
-        $this->log = Log::channel('microsoft');
+        $this->log = Log::channel('azure');
     }
 
 
