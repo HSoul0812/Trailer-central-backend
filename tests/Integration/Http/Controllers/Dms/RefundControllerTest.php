@@ -81,6 +81,25 @@ class RefundControllerTest extends TestCase
     }
 
     /**
+     * @covers ::show
+     */
+    public function testShowWrongId()
+    {
+        $seeder1 = new RefundSeeder(['withRefund' => true]);
+        $seeder1->seed();
+
+        $seeder2 = new RefundSeeder(['withRefund' => true]);
+        $seeder2->seed();
+
+        $response = $this->json('GET', '/api/dms/refunds/' . $seeder2->refund->id, [], ['access-token' => $seeder1->authToken->access_token]);
+
+        $response->assertStatus(400);
+
+        $seeder1->cleanUp();
+        $seeder2->cleanUp();
+    }
+
+    /**
      * @covers ::index
      */
     public function testIndexWithoutAccessToken()
