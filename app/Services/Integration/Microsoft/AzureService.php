@@ -124,11 +124,12 @@ class AzureService implements AzureServiceInterface
      * @return EmailToken
      */
     public function profile(EmailToken $emailToken): EmailToken {
-        // Insert Gmail
+        // Get Graph
         try {
             // Initialize Microsoft Graph
             $graph = new Graph();
             $graph->setAccessToken($emailToken->accessToken);
+            print_r($emailToken);
 
             // Get Details From Microsoft Account
             $user = $graph->createRequest('GET', '/me?$select=displayName,mail,mailboxSettings,userPrincipalName')
