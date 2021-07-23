@@ -25,7 +25,7 @@ class AddOffice365OauthSupport extends Migration
         DB::statement("ALTER TABLE integration_token MODIFY COLUMN expires_at TIMESTAMP NULL");
 
         // Update Integration Token Relation Type
-        DB::statement("ALTER TABLE integration_token MODIFY COLUMN relation_type ENUM('" . implode("', '", array_keys(AccessToken::RELATION_TYPES)) . "')");
+        DB::statement("ALTER TABLE integration_token MODIFY COLUMN token_type ENUM('" . implode("', '", array_keys(AccessToken::TOKEN_TYPES)) . "')");
     }
 
     /**
