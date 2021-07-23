@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Google;
 
+use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use Google_Client;

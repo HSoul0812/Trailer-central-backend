@@ -2,8 +2,10 @@
 
 namespace App\Services\Integration\Microsoft;
 
+use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Services\Integration\Common\DTOs\ValidateToken;
 use League\OAuth2\Client\Provider\GenericProvider;
 
 interface AzureServiceInterface {
@@ -52,18 +54,18 @@ interface AzureServiceInterface {
     public function refresh(AccessToken $accessToken): EmailToken;
 
     /**
-     * Validate Google API Access Token Exists
-     * 
+     * Validate Microsoft Azure Access Token Exists and Refresh if Possible
+     *
      * @param AccessToken $accessToken
-     * @return array of validation info
+     * @return ValidateToken
      */
-    public function validate($accessToken);
+    public function validate(AccessToken $accessToken): ValidateToken;
 
     /**
      * Validate Google API Access Token Exists and Refresh if Possible
      * 
      * @param CommonToken $accessToken
-     * @return array of validation info
+     * @return ValidateToken
      */
-    public function validateCustom(CommonToken $accessToken);
+    public function validateCustom(CommonToken $accessToken): ValidateToken;
 }

@@ -6,11 +6,10 @@ use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Exceptions\Integration\Microsoft\InvalidAzureAuthCodeException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
-use App\Transformers\Integration\Auth\EmailTokenTransformer;
+use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
-use League\Fractal\Resource\Item;
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Microsoft\Graph\Graph;
@@ -171,7 +170,7 @@ class AzureService implements AzureServiceInterface
      * Validate Microsoft Azure Access Token Exists and Refresh if Possible
      *
      * @param AccessToken $accessToken
-     * @return array of validation info
+     * @return ValidateToken
      */
     public function validate(AccessToken $accessToken): ValidateToken {
         // ID Token Exists?
@@ -219,9 +218,9 @@ class AzureService implements AzureServiceInterface
      * Validate Microsoft Azure Access Token Exists and Refresh if Possible
      *
      * @param CommonToken $accessToken
-     * @return array of validation info
+     * @return ValidateToken
      */
-    public function validateCustom(CommonToken $accessToken) {
+    public function validateCustom(CommonToken $accessToken): ValidateToken {
         // ID Token Exists?
         if(empty($accessToken->getIdToken())) {
             throw new MissingAzureIdTokenException;

@@ -19,12 +19,10 @@ use App\Services\Integration\Google\DTOs\GmailHeaders;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
-use App\Transformers\Integration\Auth\EmailTokenTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Google_Service_Gmail;
 use Google_Service_Gmail_MessagePart;
 use League\Fractal\Manager;
-use League\Fractal\Resource\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
