@@ -144,7 +144,8 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Create Sales Person and Login
      * 
      * @param array $params
-     * @return array
+     * @return array{data: array<LoginTokenTransformer>,
+     *               sales_person: array<SalesPersonTransformer>}
      */
     public function login(array $params): array {
         // Create Sales Person
@@ -162,20 +163,20 @@ class SalesAuthService implements SalesAuthServiceInterface
         $response = $this->salesResponse($salesPerson->id);
 
         // Create Login URL
-        $response['login'] = $this->auth->login($params);
+        $login = $this->auth->login($params['token_type'], $params['scopes'], $params['redirect_uri']);
 
         // Save State in Access Token Entry Temporarily
-        if(!empty($response['login']['state'])) {
+        if(!empty($login['state'])) {
             $this->tokens->create([
                 'token_type' => $params['token_type'],
                 'relation_type' => $params['relation_type'],
                 'relation_id' => $params['relation_id'],
-                'access_token' => $response['login']['state']
+                'access_token' => $login['state']
             ]);
         }
 
         // Return Response
-        return $response;
+        return array_merge($response, $login);
     }
 
     /**
@@ -184,24 +185,23 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @param string $tokenType
      * @param string $authCode
      * @param string $state
-     * @return AccessToken
+     * @param null|string $redirectUri
+     * @param null|array $scopes
+     * @return array{data: array<TokenTransformer>,
+     *               sales_person: array<SalesPersonTransformer>}
      */
-    public function authorize(string $tokenType, string $authCode, string $state): AccessToken {
+    public function authorize(string $tokenType, string $authCode, string $state, ?string $redirectUri = null, ?string $scopes = null): array {
         // Find Sales Person By State
         $stateToken = $this->tokens->getByToken($state);
 
-        // Adjust Request
-        $params['relation_type'] = $stateToken->relation_type;
-        $params['relation_id'] = $stateToken->relation_id;
-
         // Create Login URL
-        $emailToken = $this->auth->authorize($tokenType, $authCode);
+        $emailToken = $this->auth->authorize($tokenType, $authCode, $redirectUri, $scopes);
 
         // Fill Correct Access Token Details
-        $accessToken = $this->tokens->update($emailToken->toArray($state->id));
+        $response = $this->tokens->update($emailToken->toArray($stateToken->id));
 
         // Return Response
-        return $this->response($params, $accessToken);
+        return array_merge($response, $this->salesResponse($stateToken->relation_id));
     }
 
 

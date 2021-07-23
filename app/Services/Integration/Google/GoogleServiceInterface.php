@@ -5,6 +5,7 @@ namespace App\Services\Integration\Google;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
+use App\Services\Integration\Common\DTOs\LoginUrlToken;
 use Google_Client;
 
 interface GoogleServiceInterface {
@@ -22,9 +23,9 @@ interface GoogleServiceInterface {
      *
      * @param string $redirectUrl url to redirect auth back to again
      * @param array $scopes scopes requested by login
-     * @return string login url with offline access support
+     * @return LoginUrlToken
      */
-    public function login(string $redirectUrl, array $scopes): string;
+    public function login(string $redirectUrl, array $scopes): LoginUrlToken;
 
     /**
      * Get Refresh Token

@@ -242,8 +242,8 @@ class AuthController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Post(
-     *     path="/api/integration/auth",
+     * @OA\Put(
+     *     path="/api/integration/login",
      *     description="Initialize login process",
      
      *     tags={"Get"},
@@ -270,7 +270,42 @@ class AuthController extends RestfulControllerV2
         $request = new LoginTokenRequest($request->all());
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->auth->login($request->all()));
+            return $this->response->array($this->auth->login($request->token_type, $request->scopes, $request->redirect_uri));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/integration/auth",
+     *     description="Initialize login process",
+     
+     *     tags={"Get"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="Post ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a post",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function authorize(Request $request) {
+        // Start Authorize Token Request
+        $request = new AuthorizeTokenRequest($request->all());
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->array($this->auth->authorize($request->token_type, $request->auth_code, $request->state, $request->scopes, $request->redirect_uri));
         }
         
         return $this->response->errorBadRequest();

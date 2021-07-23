@@ -138,38 +138,67 @@ class AuthService implements AuthServiceInterface
      * @throws InvalidAuthLoginTokenTypeException
      * @return array{url: string, ?state: string}
      */
-    public function login(string $tokenType, array $scopes, ?string $redirectUri = null) {
-        // Get Login URL
+    public function login(string $tokenType, array $scopes, ?string $redirectUri = null): array {
+        // Get Login URL's
         switch($tokenType) {
             case 'google':
                 $login = $this->google->login($redirectUri, $scopes);
-                return ['url' => $login];
+            break;
             case 'office365':
-                return $this->azure->login($redirectUri, $scopes);
+                $login = $this->azure->login($redirectUri, $scopes);
+            break;
         }
 
-        // Invalid Token Type
-        throw new InvalidAuthLoginTokenTypeException;
+        // Invalid Login URL Details
+        if(empty($login)) {
+            throw new InvalidAuthLoginTokenTypeException;
+        }
+
+        // Return Login Details
+        $data = new Item($login, new LoginUrlTransformer(), 'data');
+        return $this->fractal->createData($data)->toArray();
     }
 
     /**
      * Authorize Login and Retrieve Tokens
      * 
-     * @param array $params
+     * @param string $tokenType
+     * @param string $code
+     * @param string $state
+     * @param null|string $redirectUri
+     * @param null|array $scopes
      * @throws InvalidAuthCodeTokenTypeException
-     * @return EmailToken
+     * @return array<TokenTransformer>
      */
-    public function authorize(string $tokenType, string $code, ?string $redirectUri = null, ?string $scopes = null): EmailToken {
+    public function authorize(string $tokenType, string $code, string $state, ?string $redirectUri = null, ?string $scopes = null): array {
+        // Find Sales Person By State
+        $stateToken = $this->tokens->getByToken($state);
+
+        // Adjust Request
+        $params['relation_type'] = $stateToken->relation_type;
+        $params['relation_id'] = $stateToken->relation_id;
+
         // Get Access Token
         switch($tokenType) {
             case 'google':
-                return $this->gmail->auth($redirectUri, $code);
+                $emailToken = $this->gmail->auth($redirectUri, $code);
+            break;
             case 'office365':
-                return $this->azure->auth($code, $redirectUri, $scopes);
+                $emailToken = $this->azure->auth($code, $redirectUri, $scopes);
+            break;
         }
 
-        // Invalid Token Type
-        throw new InvalidAuthCodeTokenTypeException;
+        // Email Token Empty?
+        if(empty($emailToken)) {
+            // Invalid Token Type
+            throw new InvalidAuthCodeTokenTypeException;
+        }
+
+        // Fill Correct Access Token Details
+        $accessToken = $this->tokens->update($emailToken->toArray($stateToken->id));
+
+        // Return Response
+        return $this->response($accessToken);
     }
 
     /**
@@ -255,7 +284,7 @@ class AuthService implements AuthServiceInterface
      * @param array $response
      * @return array
      */
-    public function response($accessToken, $response = []) {
+    public function response(AccessToken $accessToken, array $response = []): array {
         // Set Validate
         $validate = $this->validate($accessToken);
         if(!empty($validate['new_token'])) {

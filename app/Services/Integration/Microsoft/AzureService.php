@@ -8,6 +8,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
+use App\Services\Integration\Common\DTOs\LoginUrlToken;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
@@ -65,17 +66,17 @@ class AzureService implements AzureServiceInterface
      *
      * @param null|string $redirectUrl url to redirect auth back to again
      * @param null|array $scopes scopes requested by login
-     * @return array{url: string, state: object}
+     * @return LoginUrlToken
      */
-    public function login(?string $redirectUrl = null, ?array $scopes = null): array {
+    public function login(?string $redirectUrl = null, ?array $scopes = null): LoginUrlToken {
         // Initialize the OAuth client
         $client = $this->getClient($redirectUrl, $scopes);
 
-        // Return Array of Results
-        return [
+        // Return LoginUrlToken
+        return new LoginUrlToken([
             'url' => $client->getAuthorizationUrl(),
             'state' => $client->getState()
-        ];
+        ]);
     }
 
     /**

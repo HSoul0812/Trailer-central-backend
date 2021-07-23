@@ -5,6 +5,7 @@ namespace App\Services\Integration\Google;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\LoginUrlToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGapiClientIdException;
@@ -68,15 +69,20 @@ class GoogleService implements GoogleServiceInterface
      *
      * @param string $redirectUrl url to redirect auth back to again
      * @param array $scopes scopes requested by login
-     * @return string login url with offline access support
+     * @return LoginUrlToken
      */
-    public function login(string $redirectUrl, array $scopes): string {
+    public function login(string $redirectUrl, array $scopes): LoginUrlToken {
         // Set Redirect URL
         $client = $this->getClient();
         $client->setRedirectUri($redirectUrl);
 
         // Return Auth URL for Login
-        return $client->createAuthUrl($scopes);
+        $url = $client->createAuthUrl($scopes);
+
+        // Return LoginUrlToken
+        return new LoginUrlToken([
+            'url' => $url
+        ]);
     }
 
     /**

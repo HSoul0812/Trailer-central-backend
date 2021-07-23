@@ -6,6 +6,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
+use App\Services\Integration\Common\DTOs\LoginUrlToken;
 use League\OAuth2\Client\Provider\GenericProvider;
 
 interface AzureServiceInterface {
@@ -23,9 +24,9 @@ interface AzureServiceInterface {
      *
      * @param null|string $redirectUrl url to redirect auth back to again
      * @param null|array $scopes scopes requested by login
-     * @return array{url: string, state: object}
+     * @return LoginUrlToken
      */
-    public function login(?string $redirectUrl = null, ?array $scopes = null): array;
+    public function login(?string $redirectUrl = null, ?array $scopes = null): LoginUrlToken;
 
     /**
      * Use Authorize Code to Get Tokens
