@@ -4,6 +4,7 @@ namespace App\Services\Integration\Google;
 
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGapiClientIdException;
 use App\Exceptions\Integration\Google\FailedConnectGapiClientException;
@@ -66,9 +67,9 @@ class GoogleService implements GoogleServiceInterface
      *
      * @param string $redirectUrl url to redirect auth back to again
      * @param array $scopes scopes requested by login
-     * @return login url with offline access support
+     * @return string login url with offline access support
      */
-    public function login($redirectUrl, $scopes) {
+    public function login(string $redirectUrl, array $scopes): string {
         // Set Redirect URL
         $client = $this->getClient();
         $client->setRedirectUri($redirectUrl);
@@ -83,7 +84,7 @@ class GoogleService implements GoogleServiceInterface
      * @param AccessToken $accessToken
      * @return array of validation info
      */
-    public function refresh($accessToken) {
+    public function refresh(AccessToken $accessToken): array {
         // Configure Client
         $client = $this->getClient();
         $client->setAccessToken([
@@ -103,9 +104,9 @@ class GoogleService implements GoogleServiceInterface
      * Validate Google API Access Token Exists and Refresh if Possible
      *
      * @param AccessToken $accessToken
-     * @return array of validation info
+     * @return ValidateToken
      */
-    public function validate($accessToken) {
+    public function validate(AccessToken $accessToken): ValidateToken {
         // ID Token Exists?
         if(empty($accessToken->id_token)) {
             throw new MissingGapiIdTokenException;
@@ -122,44 +123,38 @@ class GoogleService implements GoogleServiceInterface
         ]);
         $client->setScopes($accessToken->scope);
 
-        // Initialize Vars
-        $result = [
-            'new_token' => [],
-            'is_valid' => $this->validateIdToken($accessToken->id_token),
-            'is_expired' => $client->isAccessTokenExpired(),
-            'message' => ''
-        ];
+        // Valid/Expired
+        $isValid = $this->validateIdToken($accessToken->id_token);
+        $isExpired = $client->isAccessTokenExpired();
 
-        // Try to Refesh Access Token!
-        if(!empty($accessToken->refresh_token) && (!$result['is_valid'] || $result['is_expired'])) {
+        // Try to Refresh Access Token!
+        if(!empty($accessToken->refresh_token) && (!$isValid || $isExpired)) {
             $refresh = $this->refreshAccessToken($client);
-            $result['is_expired'] = $refresh['expired'];
-            if(!empty($refresh['access_token'])) {
-                unset($refresh['expired']);
-                $result['is_valid'] = $this->validateIdToken($refresh['id_token']);
-                $result['new_token'] = $refresh;
+            if($refresh->exists()) {
+                $isValid = $this->validateIdToken($refresh->idToken);
+                $isExpired = false;
             }
         }
-
-        // Not Valid?
-        if(empty($result['is_valid'])) {
-            $result['is_expired'] = true;
+        if(!$isValid) {
+            $isExpired = true;
         }
 
-        // Get Message
-        $result['message'] = $this->getValidateMessage($result['is_valid'], $result['is_expired']);
-
         // Return Payload Results
-        return $result;
+        return new ValidateToken([
+            'new_token' => $refresh,
+            'is_valid' => $isValid,
+            'is_expired' => $isExpired,
+            'message' => $this->getValidateMessage($isValid, $isExpired)
+        ]);
     }
 
     /**
      * Validate Google API Access Token Exists and Refresh if Possible
      *
      * @param CommonToken $accessToken
-     * @return array of validation info
+     * @return ValidateToken
      */
-    public function validateCustom(CommonToken $accessToken) {
+    public function validateCustom(CommonToken $accessToken): ValidateToken {
         // ID Token Exists?
         if(empty($accessToken->getIdToken())) {
             throw new MissingGapiIdTokenException;
@@ -176,30 +171,29 @@ class GoogleService implements GoogleServiceInterface
         ]);
         $client->setScopes($accessToken->getScope());
 
-        // Initialize Vars
-        $result = [
-            'new_token' => [],
-            'is_valid' => $this->validateIdToken($accessToken->getIdToken()),
-            'is_expired' => $client->isAccessTokenExpired(),
-            'message' => ''
-        ];
+        // Valid/Expired
+        $isValid = $this->validateIdToken($accessToken->getIdToken());
+        $isExpired = $client->isAccessTokenExpired();
 
-        // Try to Refesh Access Token!
-        if(!empty($accessToken->getRefreshToken()) && (!$result['is_valid'] || $result['is_expired'])) {
+        // Try to Refresh Access Token!
+        if(!empty($accessToken->getRefreshToken()) && (!$isValid || $isExpired)) {
             $refresh = $this->refreshAccessToken($client);
-            $result['is_expired'] = $refresh['expired'];
-            if(!empty($refresh['access_token'])) {
-                unset($refresh['expired']);
-                $result['is_valid'] = $this->validateIdToken($refresh['id_token']);
-                $result['new_token'] = $refresh;
+            if($refresh->exists()) {
+                $isValid = $this->validateIdToken($refresh->idToken);
+                $isExpired = false;
             }
         }
-
-        // Get Message
-        $result['message'] = $this->getValidateMessage($result['is_valid'], $result['is_expired']);
+        if(!$isValid) {
+            $isExpired = true;
+        }
 
         // Return Payload Results
-        return $result;
+        return new ValidateToken([
+            'new_token' => $refresh,
+            'is_valid' => $isValid,
+            'is_expired' => $isExpired,
+            'message' => $this->getValidateMessage($isValid, $isExpired)
+        ]);
     }
 
 
@@ -209,7 +203,7 @@ class GoogleService implements GoogleServiceInterface
      * @param string $idToken
      * @return boolean
      */
-    private function validateIdToken($idToken) {
+    private function validateIdToken(string $idToken) {
         // Invalid
         $validate = false;
 

@@ -190,33 +190,29 @@ class AzureService implements AzureServiceInterface
         ]);
         $client->setScopes($accessToken->scope);
 
-        // Initialize Vars
-        $result = [
-            'new_token' => new EmailToken(),
-            'is_valid' => $this->validateIdToken($accessToken->id_token),
-            'is_expired' => $client->isAccessTokenExpired(),
-            'message' => ''
-        ];
+        // Valid/Expired
+        $isValid = $this->validateIdToken($accessToken->id_token);
+        $isExpired = $client->isAccessTokenExpired();
 
-        // Try to Refesh Access Token!
-        if(!empty($accessToken->refresh_token) && (!$result['is_valid'] || $result['is_expired'])) {
+        // Try to Refresh Access Token!
+        if(!empty($accessToken->refresh_token) && (!$isValid || $isExpired)) {
             $refresh = $this->refreshAccessToken($client);
             if($refresh->exists()) {
-                $result['is_valid'] = $this->validateIdToken($refresh->idToken);
-                $result['new_token'] = $refresh;
+                $isValid = $this->validateIdToken($refresh->idToken);
+                $isExpired = false;
             }
         }
-
-        // Not Valid?
-        if(empty($result['is_valid'])) {
-            $result['is_expired'] = true;
+        if(!$isValid) {
+            $isExpired = true;
         }
 
-        // Get Message
-        $result['message'] = $this->getValidateMessage($result['is_valid'], $result['is_expired']);
-
         // Return Payload Results
-        return new ValidateToken($result);
+        return new ValidateToken([
+            'new_token' => $refresh,
+            'is_valid' => $isValid,
+            'is_expired' => $isExpired,
+            'message' => $this->getValidateMessage($isValid, $isExpired)
+        ]);
     }
 
     /**
@@ -242,28 +238,29 @@ class AzureService implements AzureServiceInterface
         ]);
         $client->setScopes($accessToken->getScope());
 
-        // Initialize Vars
-        $result = [
-            'new_token' => new EmailToken(),
-            'is_valid' => $this->validateIdToken($accessToken->getIdToken()),
-            'is_expired' => $client->isAccessTokenExpired(),
-            'message' => ''
-        ];
+        // Valid/Expired
+        $isValid = $this->validateIdToken($accessToken->getIdToken());
+        $isExpired = $client->isAccessTokenExpired();
 
-        // Try to Refesh Access Token!
-        if(!empty($accessToken->getRefreshToken()) && (!$result['is_valid'] || $result['is_expired'])) {
+        // Try to Refresh Access Token!
+        if(!empty($accessToken->getRefreshToken()) && (!$isValid || $isExpired)) {
             $refresh = $this->refreshAccessToken($client);
             if($refresh->exists()) {
-                $result['is_valid'] = $this->validateIdToken($refresh->idToken);
-                $result['new_token'] = $refresh;
+                $isValid = $this->validateIdToken($refresh->idToken);
+                $isExpired = false;
             }
         }
-
-        // Get Message
-        $result['message'] = $this->getValidateMessage($result['is_valid'], $result['is_expired']);
+        if(!$isValid) {
+            $isExpired = true;
+        }
 
         // Return Payload Results
-        return new ValidateToken($result);
+        return new ValidateToken([
+            'new_token' => $refresh,
+            'is_valid' => $isValid,
+            'is_expired' => $isExpired,
+            'message' => $this->getValidateMessage($isValid, $isExpired)
+        ]);
     }
 
 
