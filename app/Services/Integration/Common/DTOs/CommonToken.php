@@ -329,4 +329,28 @@ class CommonToken
         // Calculate Issued At
         $this->issuedAt = Carbon::createFromTimestamp($issuedAt)->toDateTimeString();
     }
+
+
+    /**
+     * Convert to Array for AccessToken
+     * 
+     * @param int $id
+     * @return array{access_token: string,
+     *               refresh_token: string,
+     *               id_token: string,
+     *               expires_in: int,
+     *               expires_at: string,
+     *               issued_at: string}
+     */
+    public function toArray($id): array {
+        return [
+            'id' => $id,
+            'access_token' => $this->accessToken,
+            'refresh_token' => $this->refreshToken,
+            'id_token' => $this->idToken,
+            'expires_in' => $this->expiresIn,
+            'expires_at' => $this->expiresAt,
+            'issued_at' => $this->issuedAt
+        ];
+    }
 }

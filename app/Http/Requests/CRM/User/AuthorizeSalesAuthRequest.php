@@ -4,10 +4,10 @@ namespace App\Http\Requests\CRM\User;
 
 use App\Http\Requests\Request;
 
-class LoginSalesAuthRequest extends Request {
+class AuthorizeSalesAuthRequest extends Request {
 
     protected $rules = [
-        'token_type' => 'required|valid_token_type',
+        'auth_code' => 'required|string',
         'sales_person_id' => 'nullable|integer',
         'first_name' => 'nullable|string',
         'last_name' => 'nullable|string',

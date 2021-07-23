@@ -15,6 +15,9 @@ class SalesAuthController extends RestfulControllerV2 {
      */
     private $service;
 
+    /**
+     * @param SalesAuthServiceInterface $service
+     */
     public function __construct(SalesAuthServiceInterface $service) {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
         $this->middleware('setUserIdOnRequest')->only(['create', 'update']);
@@ -93,6 +96,24 @@ class SalesAuthController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Return Auth
             return $this->response->array($this->service->login($request->all()));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Authorize OAuth With Code
+     * 
+     * @param Request $request
+     * @return type
+     */
+    public function authorize(Request $request)
+    {
+        // Handle Authorize Sales People Request
+        $request = new AuthorizeSalesAuthRequest($request->all());
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->array($this->service->authorize($request->all()));
         }
         
         return $this->response->errorBadRequest();

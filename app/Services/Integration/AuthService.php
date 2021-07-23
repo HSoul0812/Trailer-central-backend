@@ -132,41 +132,44 @@ class AuthService implements AuthServiceInterface
     /**
      * Get Login URL
      * 
-     * @param array $params
-     * @return refresh token
+     * @param string $tokenType
+     * @param array $scopes
+     * @param null|string $redirectUri
+     * @throws InvalidAuthLoginTokenTypeException
+     * @return array{url: string, ?state: string}
      */
-    public function login($params) {
-        // Token Type and Scopes Required
-        if(empty($params['token_type']) || empty($params['scopes'])) {
-            throw new MissingAuthLoginTokenTypeScopesException;
-        }
-
-        // Initialize Login URL
-        $auth = ['url' => null];
-
+    public function login(string $tokenType, array $scopes, ?string $redirectUri = null) {
         // Get Login URL
-        switch($params['token_type']) {
+        switch($tokenType) {
             case 'google':
-                // Auth Code Exists?!
-                if(!empty($params['auth_code'])) {
-                    $auth = $this->gmail->auth($params['redirect_uri'], $params['auth_code']);
-                } else {
-                    $login = $this->google->login($params['redirect_uri'], $params['scopes']);
-                    $auth = ['url' => $login];
-                }
-            break;
+                $login = $this->google->login($redirectUri, $scopes);
+                return ['url' => $login];
             case 'office365':
-                // Auth Code Exists?!
-                if(!empty($params['auth_code'])) {
-                    $auth = $this->azure->auth($params['auth_code'], $params['redirect_uri'], $params['scopes']);
-                } else {
-                    $auth = $this->azure->login($params['redirect_uri'], $params['scopes']);
-                }
-            break;
+                return $this->azure->login($redirectUri, $scopes);
         }
 
-        // Return Refresh Token
-        return $auth;
+        // Invalid Token Type
+        throw new InvalidAuthLoginTokenTypeException;
+    }
+
+    /**
+     * Authorize Login and Retrieve Tokens
+     * 
+     * @param array $params
+     * @throws InvalidAuthCodeTokenTypeException
+     * @return EmailToken
+     */
+    public function authorize(string $tokenType, string $code, ?string $redirectUri = null, ?string $scopes = null): EmailToken {
+        // Get Access Token
+        switch($tokenType) {
+            case 'google':
+                return $this->gmail->auth($redirectUri, $code);
+            case 'office365':
+                return $this->azure->auth($code, $redirectUri, $scopes);
+        }
+
+        // Invalid Token Type
+        throw new InvalidAuthCodeTokenTypeException;
     }
 
     /**

@@ -170,13 +170,38 @@ class SalesAuthService implements SalesAuthServiceInterface
                 'token_type' => $params['token_type'],
                 'relation_type' => $params['relation_type'],
                 'relation_id' => $params['relation_id'],
-                'access_token' => $response['login']['state'],
-                ''
+                'access_token' => $response['login']['state']
             ]);
         }
 
         // Return Response
         return $response;
+    }
+
+    /**
+     * Authorize Login With Code to Return Access Token
+     * 
+     * @param string $tokenType
+     * @param string $authCode
+     * @param string $state
+     * @return AccessToken
+     */
+    public function authorize(string $tokenType, string $authCode, string $state): AccessToken {
+        // Find Sales Person By State
+        $stateToken = $this->tokens->getByToken($state);
+
+        // Adjust Request
+        $params['relation_type'] = $stateToken->relation_type;
+        $params['relation_id'] = $stateToken->relation_id;
+
+        // Create Login URL
+        $emailToken = $this->auth->authorize($tokenType, $authCode);
+
+        // Fill Correct Access Token Details
+        $accessToken = $this->tokens->update($emailToken->toArray($state->id));
+
+        // Return Response
+        return $this->response($params, $accessToken);
     }
 
 

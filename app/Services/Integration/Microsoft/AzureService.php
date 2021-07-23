@@ -84,9 +84,9 @@ class AzureService implements AzureServiceInterface
      * @param string $authCode
      * @param null|string $redirectUrl url to redirect auth back to again
      * @param null|array $scopes scopes requested by login
-     * @return array created from EmailTokenTransformer
+     * @return EmailToken
      */
-    public function auth(string $authCode, ?string $redirectUrl = null, ?array $scopes = []): array {
+    public function auth(string $authCode, ?string $redirectUrl = null, ?array $scopes = []): EmailToken {
         // Initialize the OAuth client
         $client = $this->getClient($redirectUrl, $scopes);
 
@@ -112,9 +112,8 @@ class AzureService implements AzureServiceInterface
         // Get Profile
         $this->profile($emailToken);
 
-        // Return Transformed Data
-        $data = new Item($emailToken, new EmailTokenTransformer());
-        return $this->fractal->createData($data)->toArray();
+        // Return Email Token
+        return $emailToken;
     }
 
     /**

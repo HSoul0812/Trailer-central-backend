@@ -81,9 +81,9 @@ class GmailService implements GmailServiceInterface
      *
      * @param string $redirectUrl url to redirect auth back to again
      * @param string $authCode auth code to get full credentials with
-     * @return array created from EmailTokenTransformer
+     * @return EmailToken
      */
-    public function auth($redirectUrl, $authCode): array {
+    public function auth(string $redirectUrl, string $authCode): EmailToken {
         // Set Redirect URL
         $client = $this->google->getClient();
         $client->setRedirectUri($redirectUrl);
@@ -101,9 +101,8 @@ class GmailService implements GmailServiceInterface
         // Get Profile
         $this->profile($emailToken);
 
-        // Return Transformed Data
-        $data = new Item($emailToken, new EmailTokenTransformer());
-        return $this->fractal->createData($data)->toArray();
+        // Return Email Token
+        return $emailToken;
     }
 
     /**

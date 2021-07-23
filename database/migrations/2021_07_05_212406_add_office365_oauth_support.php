@@ -14,9 +14,9 @@ class AddOffice365OauthSupport extends Migration
     {
         Schema::table('integration_token', function (Blueprint $table) {
             // Set Nullable on Additional Fields
-            $table->text('expires_in')->nullable()->change();
-            $table->text('expires_at')->nullable()->change();
-            $table->text('issued_at')->nullable()->change();
+            $table->integer('expires_in')->nullable()->change();
+            $table->timestamp('expires_at')->nullable()->change();
+            $table->timestamp('issued_at')->nullable()->change();
 
             // Add New Indexes
             $table->index(['relation_type', 'relation_id']);
