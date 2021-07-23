@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Requests\CRM\Refund;
 
 use App\Http\Requests\Request;

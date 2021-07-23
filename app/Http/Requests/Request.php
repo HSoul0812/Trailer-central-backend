@@ -64,7 +64,7 @@ class Request extends BaseRequest {
 
         return true;
     }
-    
+
     /**
      * @return mixed
      */
@@ -72,11 +72,17 @@ class Request extends BaseRequest {
         return false;
     }
 
+    /**
+     * @return mixed
+     */
     protected function getObjectIdValue()
     {
         return false;
     }
 
+    /**
+     * @return mixed
+     */
     protected function validateObjectBelongsToUser(): bool
     {
         return false;
