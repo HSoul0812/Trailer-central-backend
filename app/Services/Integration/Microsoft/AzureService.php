@@ -149,9 +149,9 @@ class AzureService implements AzureServiceInterface
      * Get Refresh Token
      *
      * @param AccessToken $accessToken
-     * @return array of validation info
+     * @return EmailToken
      */
-    public function refresh($accessToken) {
+    public function refresh(AccessToken $accessToken): EmailToken {
         // Configure Client
         $client = $this->getClient();
         $client->setAccessToken([
@@ -168,12 +168,12 @@ class AzureService implements AzureServiceInterface
     }
 
     /**
-     * Validate Microsoft API Access Token Exists and Refresh if Possible
+     * Validate Microsoft Azure Access Token Exists and Refresh if Possible
      *
      * @param AccessToken $accessToken
      * @return array of validation info
      */
-    public function validate($accessToken) {
+    public function validate(AccessToken $accessToken): ValidateToken {
         // ID Token Exists?
         if(empty($accessToken->id_token)) {
             throw new MissingAzureIdTokenException;
@@ -192,7 +192,7 @@ class AzureService implements AzureServiceInterface
 
         // Initialize Vars
         $result = [
-            'new_token' => [],
+            'new_token' => new EmailToken(),
             'is_valid' => $this->validateIdToken($accessToken->id_token),
             'is_expired' => $client->isAccessTokenExpired(),
             'message' => ''
@@ -201,10 +201,8 @@ class AzureService implements AzureServiceInterface
         // Try to Refesh Access Token!
         if(!empty($accessToken->refresh_token) && (!$result['is_valid'] || $result['is_expired'])) {
             $refresh = $this->refreshAccessToken($client);
-            $result['is_expired'] = $refresh['expired'];
-            if(!empty($refresh['access_token'])) {
-                unset($refresh['expired']);
-                $result['is_valid'] = $this->validateIdToken($refresh['id_token']);
+            if($refresh->exists()) {
+                $result['is_valid'] = $this->validateIdToken($refresh->idToken);
                 $result['new_token'] = $refresh;
             }
         }
@@ -218,11 +216,11 @@ class AzureService implements AzureServiceInterface
         $result['message'] = $this->getValidateMessage($result['is_valid'], $result['is_expired']);
 
         // Return Payload Results
-        return $result;
+        return new ValidateToken($result);
     }
 
     /**
-     * Validate Microsoft API Access Token Exists and Refresh if Possible
+     * Validate Microsoft Azure Access Token Exists and Refresh if Possible
      *
      * @param CommonToken $accessToken
      * @return array of validation info
@@ -246,7 +244,7 @@ class AzureService implements AzureServiceInterface
 
         // Initialize Vars
         $result = [
-            'new_token' => [],
+            'new_token' => new EmailToken(),
             'is_valid' => $this->validateIdToken($accessToken->getIdToken()),
             'is_expired' => $client->isAccessTokenExpired(),
             'message' => ''
@@ -255,10 +253,8 @@ class AzureService implements AzureServiceInterface
         // Try to Refesh Access Token!
         if(!empty($accessToken->getRefreshToken()) && (!$result['is_valid'] || $result['is_expired'])) {
             $refresh = $this->refreshAccessToken($client);
-            $result['is_expired'] = $refresh['expired'];
-            if(!empty($refresh['access_token'])) {
-                unset($refresh['expired']);
-                $result['is_valid'] = $this->validateIdToken($refresh['id_token']);
+            if($refresh->exists()) {
+                $result['is_valid'] = $this->validateIdToken($refresh->idToken);
                 $result['new_token'] = $refresh;
             }
         }
@@ -267,7 +263,7 @@ class AzureService implements AzureServiceInterface
         $result['message'] = $this->getValidateMessage($result['is_valid'], $result['is_expired']);
 
         // Return Payload Results
-        return $result;
+        return new ValidateToken($result);
     }
 
 
@@ -277,7 +273,7 @@ class AzureService implements AzureServiceInterface
      * @param string $idToken
      * @return boolean
      */
-    private function validateIdToken($idToken) {
+    private function validateIdToken(string $idToken): bool {
         // Invalid
         $validate = false;
 
@@ -304,14 +300,11 @@ class AzureService implements AzureServiceInterface
      * Refresh Access Token
      *
      * @param Microsoft_Client $client
-     * @return array of expired status, also return new token if available
+     * @return EmailToken
      */
-    private function refreshAccessToken(Microsoft_Client $client) {
-        // Set Expired
-        $result = [
-            'new_token' => [],
-            'expired' => true
-        ];
+    private function refreshAccessToken(Microsoft_Client $client): EmailToken {
+        // Initialize Result
+        $result = [];
 
         // Validate If Expired
         try {
@@ -319,7 +312,6 @@ class AzureService implements AzureServiceInterface
             if ($refreshToken = $client->getRefreshToken()) {
                 if($newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken)) {
                     $result = $newToken;
-                    $result['expired'] = false;
                 }
             }
         } catch (\Exception $e) {
@@ -329,7 +321,7 @@ class AzureService implements AzureServiceInterface
         }
 
         // Return Result
-        return $result;
+        return new EmailToken($result);
     }
 
     /**

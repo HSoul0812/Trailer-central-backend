@@ -3,6 +3,7 @@
 namespace App\Services\Integration\Microsoft;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
 use League\OAuth2\Client\Provider\GenericProvider;
 
 interface AzureServiceInterface {
@@ -30,17 +31,25 @@ interface AzureServiceInterface {
      * @param string $authCode
      * @param null|string $redirectUrl url to redirect auth back to again
      * @param null|array $scopes scopes requested by login
-     * @return array created from EmailTokenTransformer
+     * @return EmailToken
      */
-    public function auth(string $authCode, ?string $redirectUrl = null, ?array $scopes = []): array;
+    public function auth(string $authCode, ?string $redirectUrl = null, ?array $scopes = []): EmailToken;
+
+    /**
+     * Get Azure Profile Email
+     *
+     * @param EmailToken $emailToken
+     * @return EmailToken
+     */
+    public function profile(EmailToken $emailToken): EmailToken;
 
     /**
      * Get Refresh Token
-     * 
-     * @param array $accessToken
-     * @return array of validation info
+     *
+     * @param AccessToken $accessToken
+     * @return EmailToken
      */
-    public function refresh($accessToken);
+    public function refresh(AccessToken $accessToken): EmailToken;
 
     /**
      * Validate Google API Access Token Exists

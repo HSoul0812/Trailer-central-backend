@@ -15,7 +15,7 @@ interface GmailServiceInterface {
      * @param string $authCode auth code to get full credentials with
      * @return array created from GoogleTokenTransformer
      */
-    public function auth($redirectUrl, $authCode): array;
+    public function auth($redirectUrl, $authCode): EmailToken;
 
     /**
      * Get Gmail Profile Email
