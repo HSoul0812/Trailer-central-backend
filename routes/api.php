@@ -247,6 +247,7 @@ $api->version('v1', function ($route) {
     $route->get('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@show')->where('id', '[0-9]+');
     $route->post('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@update')->where('id', '[0-9]+');
     $route->delete('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@destroy')->where('id', '[0-9]+');
+    $route->post('website/blog/bulk', 'App\Http\Controllers\v1\Website\Blog\BulkController@create');
 
     /**
      * Website Payment Calculator Settings

@@ -149,10 +149,16 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
-        
+
         'showroom-imports' => [
             'path' => storage_path('logs/showroom-imports.log'),
-        ]
+        ],
+        'blog' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/blog.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
     ],
 
 ];
