@@ -2,6 +2,7 @@
 
 use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class AddOffice365OauthSupport extends Migration
 {
