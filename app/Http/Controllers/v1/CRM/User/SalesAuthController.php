@@ -102,12 +102,12 @@ class SalesAuthController extends RestfulControllerV2 {
     }
 
     /**
-     * Authorize OAuth With Code
+     * Authorize OAuth With Code and Return Sales Person
      * 
      * @param Request $request
      * @return type
      */
-    public function authorize(Request $request)
+    public function code(Request $request)
     {
         // Handle Authorize Sales People Request
         $request = new AuthorizeSalesAuthRequest($request->all());

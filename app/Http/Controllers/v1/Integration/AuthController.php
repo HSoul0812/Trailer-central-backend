@@ -243,7 +243,7 @@ class AuthController extends RestfulControllerV2
 
     /**
      * @OA\Put(
-     *     path="/api/integration/login",
+     *     path="/api/integration/auth/login",
      *     description="Initialize login process",
      
      *     tags={"Get"},
@@ -278,8 +278,8 @@ class AuthController extends RestfulControllerV2
 
     /**
      * @OA\Put(
-     *     path="/api/integration/auth",
-     *     description="Initialize login process",
+     *     path="/api/integration/auth/code",
+     *     description="Initialize auth code process",
      
      *     tags={"Get"},
      *     @OA\Parameter(
@@ -300,7 +300,7 @@ class AuthController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function authorize(Request $request) {
+    public function code(Request $request) {
         // Start Authorize Token Request
         $request = new AuthorizeTokenRequest($request->all());
         if ($request->validate()) {

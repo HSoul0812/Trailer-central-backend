@@ -561,6 +561,7 @@ $api->version('v1', function ($route) {
                 $route->put('/', 'App\Http\Controllers\v1\Integration\AuthController@create');
                 $route->post('/', 'App\Http\Controllers\v1\Integration\AuthController@valid');
                 $route->put('login', 'App\Http\Controllers\v1\Integration\AuthController@login');
+                $route->put('code', 'App\Http\Controllers\v1\Integration\AuthController@code');
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\AuthController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\AuthController@update')->where('id', '[0-9]+');
             });
@@ -651,7 +652,7 @@ $api->version('v1', function ($route) {
 
                 // Sales People w/Auth
                 $route->put('login', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@login');
-                $route->put('code', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@authorize');
+                $route->put('code', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@code');
                 $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
                 $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');
                 $route->post('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@update')->where('id', '[0-9]+');
