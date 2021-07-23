@@ -34,24 +34,25 @@ interface AuthServiceInterface {
      * Validate Access Token
      * 
      * @param AccessToken $accessToken
-     * @return array of validation
+     * @return array{validate: <ValidateTokenTransformer>}
      */
-    public function validate($accessToken);
+    public function validate(AccessToken $accessToken): array;
 
     /**
      * Validate Custom Access Token
      * 
      * @param CommonToken $accessToken general access token filled with data from request
-     * @return array of validation
+     * @return array{validate: <ValidateTokenTransformer>}
      */
-    public function validateCustom(CommonToken $accessToken);
+    public function validateCustom(CommonToken $accessToken): array;
 
     /**
      * Return Response
      * 
      * @param AccessToken $accessToken
-     * @param array $validate
-     * @return array
+     * @param array $response
+     * @return array{data: array<TokenTransformer>,
+     *               validate: array<ValidateTokenTransformer>}
      */
-    public function response($accessToken, $validate);
+    public function response(AccessToken $accessToken, array $response = []): array;
 }

@@ -228,53 +228,52 @@ class AuthService implements AuthServiceInterface
      * Validate Access Token
      * 
      * @param AccessToken $accessToken
-     * @return array of validation
+     * @return array{validate: <ValidateTokenTransformer>}
      */
-    public function validate($accessToken) {
-        // Initialize Access Token
-        $validate = [
-            'is_valid' => false,
-            'is_expired' => true,
-            'message' => ''
-        ];
+    public function validate(AccessToken $accessToken): array {
+        // Initialize Validate Token
+        $validate = new ValidateToken();
 
         // Validate Access Token
-        if(!empty($accessToken->token_type)) {
-            if($accessToken->token_type === 'google') {
+        switch($accessToken->token_type) {
+            case 'google':
                 $validate = $this->google->validate($accessToken);
-            } elseif($accessToken->token_type === 'facebook') {
+            break;
+            case 'office365':
+                $validate = $this->azure->validate($accessToken);
+            break;
+            case 'facebook':
                 $validate = $this->facebook->validate($accessToken);
                 unset($validate['refresh_token']);
-            }
+                return ['validate' => $validate];
         }
 
         // Return Validation
-        return $validate;
+        $data = new Item($validate, new ValidateTokenTransformer(), 'validate');
+        return $this->fractal->createData($data)->toArray();
     }
 
     /**
      * Validate Custom Access Token
      * 
      * @param CommonToken $accessToken general access token filled with data from request
-     * @return array of validation
+     * @return array{validate: <ValidateTokenTransformer>}
      */
-    public function validateCustom(CommonToken $accessToken) {
-        // Initialize Access Token
-        $validate = [
-            'is_valid' => false,
-            'is_expired' => true,
-            'message' => ''
-        ];
+    public function validateCustom(CommonToken $accessToken): array {
+        // Initialize Validate Token
+        $validate = new ValidateToken();
 
         // Validate Access Token
-        if($accessToken->tokenType) {
-            if($accessToken->tokenType === 'google') {
-                return $this->google->validateCustom($accessToken);
-            }
+        switch($accessToken->tokenType) {
+            case 'google':
+                $validate = $this->google->validateCustom($accessToken);
+            case 'office365':
+                $validate = $this->azure->validateCustom($accessToken);
         }
 
         // Return Validation
-        return $validate;
+        $data = new Item($validate, new ValidateTokenTransformer(), 'validate');
+        return $this->fractal->createData($data)->toArray();
     }
 
     /**
@@ -282,29 +281,26 @@ class AuthService implements AuthServiceInterface
      * 
      * @param AccessToken $accessToken
      * @param array $response
-     * @return array
+     * @return array{data: array<TokenTransformer>,
+     *               validate: array<ValidateTokenTransformer>}
      */
     public function response(AccessToken $accessToken, array $response = []): array {
         // Set Validate
         $validate = $this->validate($accessToken);
-        if(!empty($validate['new_token'])) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
+        if(!empty($validate['validate']['new_token'])) {
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate['validate']['new_token']);
         }
+        unset($validate['validate']['new_token']);
 
         // Convert Token to Array
         if(!empty($accessToken)) {
             $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $token = $this->fractal->createData($data)->toArray();
-            $response['data'] = $token['data'];
+            $response = $this->fractal->createData($data)->toArray();
         } else {
-            $response['data'] = null;
+            $response = ['data' => null];
         }
 
-        // Set Validate
-        unset($validate['new_token']);
-        $response['validate'] = $validate;
-
         // Return Response
-        return $response;
+        return array($response, $validate);
     }
 }
