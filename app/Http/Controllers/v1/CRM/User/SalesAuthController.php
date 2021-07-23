@@ -7,6 +7,8 @@ use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\User\ShowSalesAuthRequest;
 use App\Http\Requests\CRM\User\CreateSalesAuthRequest;
 use App\Http\Requests\CRM\User\UpdateSalesAuthRequest;
+use App\Http\Requests\CRM\User\LoginSalesAuthRequest;
+use App\Http\Requests\CRM\User\AuthorizeSalesAuthRequest;
 use App\Services\CRM\User\SalesAuthServiceInterface;
 
 class SalesAuthController extends RestfulControllerV2 {

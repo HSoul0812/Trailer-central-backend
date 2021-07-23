@@ -11,6 +11,7 @@ use App\Http\Requests\Integration\Auth\ShowTokenRequest;
 use App\Http\Requests\Integration\Auth\UpdateTokenRequest;
 use App\Http\Requests\Integration\Auth\ValidateTokenRequest;
 use App\Http\Requests\Integration\Auth\LoginTokenRequest;
+use App\Http\Requests\Integration\Auth\AuthorizeTokenRequest;
 use App\Services\Integration\AuthServiceInterface;
 
 class AuthController extends RestfulControllerV2
