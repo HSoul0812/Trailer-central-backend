@@ -170,7 +170,7 @@ class AuthService implements AuthServiceInterface
      * @throws InvalidAuthCodeTokenTypeException
      * @return array<TokenTransformer>
      */
-    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null, ?string $scopes = null): array {
+    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null, ?array $scopes = null): array {
         // Find Saved State of Token
         if(!empty($state)) {
             $stateToken = $this->tokens->getByToken($state);

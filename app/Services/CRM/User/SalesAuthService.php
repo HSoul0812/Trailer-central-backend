@@ -190,7 +190,7 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return array{data: array<TokenTransformer>,
      *               sales_person: array<SalesPersonTransformer>}
      */
-    public function authorize(string $tokenType, string $authCode, ?string $state = null, ?string $redirectUri = null, ?string $scopes = null): array {
+    public function authorize(string $tokenType, string $authCode, ?string $state = null, ?string $redirectUri = null, ?array $scopes = null): array {
         // Find Sales Person By State
         if(!empty($state)) {
             $stateToken = $this->tokens->getByToken($state);
