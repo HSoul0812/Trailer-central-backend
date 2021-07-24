@@ -172,11 +172,9 @@ class AuthService implements AuthServiceInterface
      */
     public function authorize(string $tokenType, string $code, string $state, ?string $redirectUri = null, ?string $scopes = null): array {
         // Find Sales Person By State
-        $stateToken = $this->tokens->getByToken($state);
-
-        // Adjust Request
-        $params['relation_type'] = $stateToken->relation_type;
-        $params['relation_id'] = $stateToken->relation_id;
+        if(!empty($state)) {
+            $stateToken = $this->tokens->getByToken($state);
+        }   
 
         // Get Access Token
         switch($tokenType) {
@@ -194,8 +192,8 @@ class AuthService implements AuthServiceInterface
             throw new InvalidAuthCodeTokenTypeException;
         }
 
-        // Fill Correct Access Token Details
-        $accessToken = $this->tokens->update($emailToken->toArray($stateToken->id));
+        // Create/Update Correct Access Token Details
+        $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null));
 
         // Return Response
         return $this->response($accessToken);
