@@ -184,21 +184,23 @@ class SalesAuthService implements SalesAuthServiceInterface
      * 
      * @param string $tokenType
      * @param string $authCode
-     * @param string $state
+     * @param null|string $state
      * @param null|string $redirectUri
      * @param null|array $scopes
      * @return array{data: array<TokenTransformer>,
      *               sales_person: array<SalesPersonTransformer>}
      */
-    public function authorize(string $tokenType, string $authCode, string $state, ?string $redirectUri = null, ?string $scopes = null): array {
+    public function authorize(string $tokenType, string $authCode, ?string $state = null, ?string $redirectUri = null, ?string $scopes = null): array {
         // Find Sales Person By State
-        $stateToken = $this->tokens->getByToken($state);
+        if(!empty($state)) {
+            $stateToken = $this->tokens->getByToken($state);
+        }
 
         // Create Login URL
         $emailToken = $this->auth->authorize($tokenType, $authCode, $redirectUri, $scopes);
 
         // Fill Correct Access Token Details
-        $response = $this->tokens->update($emailToken->toArray($stateToken->id));
+        $response = $this->tokens->create($emailToken->toArray($stateToken->id ?? null));
 
         // Return Response
         return array_merge($response, $this->salesResponse($stateToken->relation_id));
