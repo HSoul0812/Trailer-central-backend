@@ -306,7 +306,7 @@ class AuthController extends RestfulControllerV2
         $request = new AuthorizeTokenRequest($request->all());
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->auth->authorize($request->token_type, $request->auth_code, $request->state, $request->scopes, $request->redirect_uri));
+            return $this->response->array($this->auth->authorize($request->token_type, $request->auth_code, $request->state, $request->redirect_uri, $request->scopes));
         }
         
         return $this->response->errorBadRequest();
