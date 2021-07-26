@@ -11,6 +11,8 @@ use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Microsoft\AzureServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
+use App\Transformers\Integration\Auth\LoginUrlTransformer;
+use App\Http\Requests\Integration\Auth\ValidateTokenRequest;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
