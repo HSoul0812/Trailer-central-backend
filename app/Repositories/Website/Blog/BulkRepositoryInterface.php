@@ -4,14 +4,13 @@ namespace App\Repositories\Website\Blog;
 
 use App\Models\Bulk\Parts\BulkUpload;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Http\UploadedFile;
 
 /**
  * Describe the API for the repository of bulk download jobs
  *
  * @author Eczek
  */
-interface BulkUploadRepositoryInterface
+interface BulkRepositoryInterface
 {
     /**
      * Gets a single record by provided params

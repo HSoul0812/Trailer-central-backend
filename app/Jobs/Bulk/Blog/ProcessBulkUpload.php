@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Blog;
+namespace App\Jobs\Bulk\Blog;
 
 use App\Jobs\Job;
 use App\Models\Bulk\Blog\BulkPostUpload;
@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Log;
 class ProcessBulkUpload extends Job {
 
     /**
+     * @var int
+     */
+    protected $bulk_id;
+
+    /**
      * @var BulkPostUpload
      */
     protected $bulk;
@@ -27,13 +32,11 @@ class ProcessBulkUpload extends Job {
     /**
      * Create a new job instance.
      *
-     * @param BulkPostUpload $bulk
+     * @param int $bulk_id
      */
-    public function __construct(BulkPostUpload $bulk)
+    public function __construct(int $bulk_id)
     {
-        $this->bulk = $bulk;
-        $this->csvImportService = app('App\Services\Import\Blog\CsvImportServiceInterface');
-        $this->csvImportService->setBulkPostUpload($bulk);
+        $this->bulk_id = $bulk_id;
     }
 
     /**
@@ -45,6 +48,9 @@ class ProcessBulkUpload extends Job {
     {
         Log::info('Starting bulk upload');
         try {
+            $this->bulk = BulkPostUpload::find($this->bulk_id);
+            $this->csvImportService = app('App\Services\Import\Blog\CsvImportServiceInterface');
+            $this->csvImportService->setBulkPostUpload($this->bulk);
             $this->csvImportService->run();
         } catch (\Exception $ex) {
             Log::info($ex->getMessage());

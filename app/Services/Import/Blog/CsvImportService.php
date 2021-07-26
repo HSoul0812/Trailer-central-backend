@@ -2,8 +2,7 @@
 
 namespace App\Services\Import\Blog;
 
-use App\Services\Import\Blog\CsvImportServiceInterface;
-use App\Repositories\Website\Blog\BulkUploadRepositoryInterface;
+use App\Repositories\Website\Blog\BulkRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Bulk\Blog\BulkPostUpload;
 use App\Repositories\Website\Blog\PostRepositoryInterface;
@@ -50,7 +49,7 @@ class CsvImportService implements CsvImportServiceInterface
     private $log;
 
     public function __construct(
-        BulkUploadRepositoryInterface $bulkUploadRepository,
+        BulkRepositoryInterface $bulkUploadRepository,
         PostRepositoryInterface $postRepository
     )
     {
@@ -67,12 +66,12 @@ class CsvImportService implements CsvImportServiceInterface
         try {
            if (!$this->validate()) {
                 $this->log->info('Invalid bulk upload ID: ' . $this->bulkPostUpload->id . ' setting validation_errors...');
-                $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
+                $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR]);
                 return false;
             }
         } catch (\Exception $ex) {
             $this->log->info('Invalid bulk upload ID: ' . $this->bulkPostUpload->id . ' setting validation_errors...');
-            $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
+            $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR]);
             return false;
         }
 
@@ -111,14 +110,14 @@ class CsvImportService implements CsvImportServiceInterface
                 $post = $this->blogRepository->create($postData);
                 if (!$post) {
                     $this->validationErrors[] = "Image inaccesible";
-                    $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+                    $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR]);
                     $this->log->info('Error found on post for bulk upload : ' . $this->bulkPostUpload->id . ' : ' . $ex->getTraceAsString());
                     throw new \Exception("Image inaccesible");
                 }
 
             } catch (\Exception $ex) {
                 $this->validationErrors[] = $ex->getTraceAsString();
-                $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+                $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::VALIDATION_ERROR]);
                 $this->log->info('Error found on blog post for bulk upload : ' . $this->bulkPostUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
                 $this->log->info("Index to header mapping: {$this->indexToheaderMapping}");
             }
@@ -128,7 +127,7 @@ class CsvImportService implements CsvImportServiceInterface
         if (empty($this->validationErrors)) {
             $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::COMPLETE]);
         } else {
-             $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::COMPLETE, 'validation_errors' => json_encode($this->validationErrors)]);
+             $this->bulkUploadRepository->update(['id' => $this->bulkPostUpload->id, 'status' => BulkPostUpload::COMPLETE]);
         }
 
     }
@@ -154,12 +153,6 @@ class CsvImportService implements CsvImportServiceInterface
                     } else {
                         $this->allowedHeaderValues[$value] = 'allowed';
                         $this->indexToheaderMapping[$index] = $value;
-                    }
-
-                // for lines > 1
-                } else {
-                    if ($errorMessage = $this->isDataInvalid($this->indexToheaderMapping[$index], $value)) {
-                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, $errorMessage);
                     }
                 }
             }

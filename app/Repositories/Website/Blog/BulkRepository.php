@@ -2,17 +2,16 @@
 
 namespace App\Repositories\Website\Blog;
 
-use App\Repositories\Website\Blog\BulkUploadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Bulk\Blog\BulkPostUpload;
 use Illuminate\Support\Facades\Storage;
-use App\Jobs\ProcessBulkUpload;
+use App\Jobs\Bulk\Blog\ProcessBulkUpload;
 
 /**
  *
  * @author Eczek
  */
-class BulkUploadRepository implements BulkUploadRepositoryInterface {
+class BulkRepository implements BulkRepositoryInterface {
 
     public function create($params) {
         $csvKey = $this->storeCsv($params['csv_file']);
@@ -21,7 +20,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
         $params['import_source'] = $csvKey;
 
         $bulkUpload = BulkPostUpload::create($params);
-        dispatch((new ProcessBulkUpload($bulkUpload))->onQueue('blog-posts'));
+        dispatch((new ProcessBulkUpload($bulkUpload->id))->onQueue('blog-posts'));
         return $bulkUpload;
     }
 

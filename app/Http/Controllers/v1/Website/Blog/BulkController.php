@@ -20,13 +20,12 @@ class BulkController extends RestfulController
     public function __construct()
     {
         $this->middleware('setDealerIdOnRequest')->only(['create']);
-        $this->bulkUploads = \app('App\Repositories\Website\Blog\BulkUploadRepository');
+        $this->bulkUploads = \app('App\Repositories\Website\Blog\BulkRepositoryInterface');
     }
 
     public function create(Request $request)
     {
         $request = new CreateBulkUploadRequest($request->all());
-
         if ($request->validate()) {
             return $this->response->item($this->bulkUploads->create($request->all()), new BulkUploadTransformer);
         }

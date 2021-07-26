@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Import\Blog\CsvImportService;
 
-use App\Repositories\Website\Blog\BulkUploadRepository;
+use App\Repositories\Website\Blog\BulkRepository;
 use App\Repositories\Website\Blog\PostRepository;
 use Mockery\LegacyMockInterface;
 use Mockery\MockInterface;
@@ -12,7 +12,7 @@ use Mockery;
 
 class CsvImportServiceDependencies
 {   /**
-     * @var BulkUploadRepository|LegacyMockInterface|MockInterface
+     * @var BulkRepository|LegacyMockInterface|MockInterface
      */
     public $bulkUploadRepository;
 
@@ -24,7 +24,7 @@ class CsvImportServiceDependencies
 
     public function __construct()
     {
-        $this->bulkUploadRepository = Mockery::mock(BulkUploadRepository::class);
+        $this->bulkUploadRepository = Mockery::mock(BulkRepository::class);
         $this->postRepository = Mockery::mock(PostRepository::class);
     }
 
