@@ -13,10 +13,20 @@ class AddMileageToInventoryFilterTable extends Migration
     public function up()
     {
         DB::table('inventory_filter')->insert([
-            'attribute' => 'mileage',
-            'label' => 'Mileage',
+            'attribute' => 'mileage_miles',
+            'label' => 'Mileage (mi)',
             'type' => 'slider',
-            'position' => 600,
+            'position' => 170,
+            'step' => 100,
+            'is_eav' => 0,
+            'dependancy' => 'inventory/filters/toggle_miles_kilometres'
+        ]);
+
+        DB::table('inventory_filter')->insert([
+            'attribute' => 'mileage_kilometres',
+            'label' => 'Mileage (km)',
+            'type' => 'slider',
+            'position' => 170,
             'step' => 100,
             'is_eav' => 0,
         ]);
@@ -29,6 +39,7 @@ class AddMileageToInventoryFilterTable extends Migration
      */
     public function down()
     {
-        DB::table('inventory_filter')->where('attribute', '=', 'mileage')->delete();
+        DB::table('inventory_filter')->where('attribute', '=', 'mileage_miles')->delete();
+        DB::table('inventory_filter')->where('attribute', '=', 'mileage_kilometres')->delete();
     }
 }
