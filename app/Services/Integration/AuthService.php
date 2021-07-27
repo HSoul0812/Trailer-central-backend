@@ -136,11 +136,13 @@ class AuthService implements AuthServiceInterface
      * 
      * @param string $tokenType
      * @param array $scopes
+     * @param string $relationType
+     * @param int $relationId
      * @param null|string $redirectUri
      * @throws InvalidAuthLoginTokenTypeException
      * @return array{url: string, ?state: string}
      */
-    public function login(string $tokenType, array $scopes, ?string $redirectUri = null): array {
+    public function login(string $tokenType, array $scopes, string $relationType, int $relationId, ?string $redirectUri = null): array {
         // Get Login URL's
         switch($tokenType) {
             case 'google':
@@ -149,6 +151,16 @@ class AuthService implements AuthServiceInterface
             case 'office365':
                 $login = $this->azure->login($redirectUri, $scopes);
             break;
+        }
+
+        // Save State in Access Token Entry Temporarily
+        if($login->authState) {
+            $this->tokens->create([
+                'token_type' => $tokenType,
+                'relation_type' => $relationType,
+                'relation_id' => $relationId,
+                'access_token' => $login->authState
+            ]);
         }
 
         // Invalid Login URL Details
@@ -169,10 +181,13 @@ class AuthService implements AuthServiceInterface
      * @param null|string $state
      * @param null|string $redirectUri
      * @param null|array $scopes
+     * @param null|string $relationType
+     * @param null|int $relationId
      * @throws InvalidAuthCodeTokenTypeException
      * @return array<TokenTransformer>
      */
-    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null, ?array $scopes = null): array {
+    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null,
+                                ?array $scopes = null, ?string $relationType = null, ?int $relationId = null): array {
         // Find Saved State of Token
         if(!empty($state)) {
             $stateToken = $this->tokens->getByToken($state);
@@ -195,9 +210,7 @@ class AuthService implements AuthServiceInterface
         }
 
         // Create/Update Correct Access Token Details
-        $params = $emailToken->toArray($stateToken->id ?? null);
-        var_dump($params);
-        $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null));
+        $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null, $relationType, $relationId));
 
         // Return Response
         return $this->response($accessToken);

@@ -163,17 +163,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         $response = $this->salesResponse($salesPerson->id);
 
         // Create Login URL
-        $login = $this->auth->login($params['token_type'], $params['scopes'], $params['redirect_uri']);
-
-        // Save State in Access Token Entry Temporarily
-        if(!empty($login['state'])) {
-            $this->tokens->create([
-                'token_type' => $params['token_type'],
-                'relation_type' => $params['relation_type'],
-                'relation_id' => $params['relation_id'],
-                'access_token' => $login['state']
-            ]);
-        }
+        $login = $this->auth->login($params['token_type'], $params['scopes'], $params['relation_type'], $params['relation_id'], $params['redirect_uri']);
 
         // Return Response
         return array_merge($response, $login);
