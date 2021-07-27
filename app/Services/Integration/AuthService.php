@@ -195,6 +195,8 @@ class AuthService implements AuthServiceInterface
         }
 
         // Create/Update Correct Access Token Details
+        $params = $emailToken->toArray($stateToken->id ?? null);
+        var_dump($params);
         $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null));
 
         // Return Response
