@@ -303,6 +303,16 @@ class CommonToken
         $this->expiresAt = Carbon::parse($issuedAt)->addSeconds($expiresIn)->toDateTimeString();
     }
 
+    /**
+     * Is Expired Now?
+     * 
+     * @return bool
+     */
+    public function isExpired(): bool
+    {
+        return (Carbon::parse($this->expiredAt)->timestamp > time());
+    }
+
 
     /**
      * Return Issued At
@@ -386,5 +396,18 @@ class CommonToken
 
         // Return Result Array
         return $result;
+    }
+
+    /**
+     * Token Exists?
+     * 
+     * @return bool
+     */
+    public function exists(): bool {
+        // Access Token?
+        if($this->accessToken) {
+            return true;
+        }
+        return false;
     }
 }

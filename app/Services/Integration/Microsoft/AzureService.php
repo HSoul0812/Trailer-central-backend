@@ -157,9 +157,14 @@ class AzureService implements AzureServiceInterface
         $client = $this->getClient();
 
         // Get New Token
-        return $client->getAccessToken('refresh_token', [
+        $newToken = $client->getAccessToken('refresh_token', [
             'refresh_token' => $accessToken->refresh_token
         ]);
+
+        // Return Updated EmailToken
+        $emailToken = new EmailToken();
+        $emailToken->fillFromLeague($newToken);
+        return $emailToken;
     }
 
     /**
@@ -194,13 +199,14 @@ class AzureService implements AzureServiceInterface
 
         // Valid/Expired
         $isValid = ($profile->emailAddress ? true : false);
-        $isExpired = strtotime($accessToken->expiresAt) > time();
+        $isExpired = $profile->isExpired();
 
         // Try to Refresh Access Token!
         if(!empty($accessToken->refreshToken) && (!$isValid || $isExpired)) {
             $refresh = $this->refresh($accessToken);
             if($refresh->exists()) {
-                $isValid = $this->validateIdToken($refresh->idToken);
+                $profile = $this->profile($refresh);
+                $isValid = ($profile->emailAddress ? true : false);
                 $isExpired = false;
             }
         }
@@ -217,63 +223,6 @@ class AzureService implements AzureServiceInterface
         ]);
     }
 
-
-    /**
-     * Validate ID Token
-     *
-     * @param string $idToken
-     * @return boolean
-     */
-    private function validateIdToken(string $idToken): bool {
-        // Invalid
-        $validate = false;
-
-        // Validate ID Token
-        try {
-            // Verify ID Token is Valid
-            $client = $this->getClient();
-            $payload = $client->verifyIdToken($idToken);
-            if ($payload) {
-                $validate = true;
-            }
-        }
-        catch (\Exception $e) {
-            // We actually just want to verify this is true or false
-            // If it throws an exception, that means its false, the token isn't valid
-            $this->log->error('Exception returned for Microsoft Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
-        }
-
-        // Return Validate
-        return $validate;
-    }
-
-    /**
-     * Refresh Access Token
-     *
-     * @param Microsoft_Client $client
-     * @return EmailToken
-     */
-    private function refreshAccessToken(Microsoft_Client $client): EmailToken {
-        // Initialize Result
-        $result = [];
-
-        // Validate If Expired
-        try {
-            // Refresh the token if possible, else fetch a new one.
-            if ($refreshToken = $client->getRefreshToken()) {
-                if($newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken)) {
-                    $result = $newToken;
-                }
-            }
-        } catch (\Exception $e) {
-            // We actually just want to verify this is true or false
-            // If it throws an exception, that means its false, the token isn't valid
-            $this->log->error('Exception returned for Microsoft Refresh Access Token: ' . $e->getMessage() . ': ' . $e->getTraceAsString());
-        }
-
-        // Return Result
-        return new EmailToken($result);
-    }
 
     /**
      * Get Validation Message
