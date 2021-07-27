@@ -155,17 +155,11 @@ class AzureService implements AzureServiceInterface
     public function refresh(AccessToken $accessToken): EmailToken {
         // Configure Client
         $client = $this->getClient();
-        $client->setAccessToken([
-            'access_token' => $accessToken->access_token,
-            'refresh_token' => $accessToken->refresh_token,
-            'id_token' => $accessToken->id_token,
-            'expires_in' => $accessToken->expires_in,
-            'created' => strtotime($accessToken->issued_at)
-        ]);
-        $client->setScopes($accessToken->scope);
 
         // Get New Token
-        return $client->fetchAccessTokenWithRefreshToken($accessToken->refresh_token);
+        return $client->getAccessToken('refresh_token', [
+            'refresh_token' => $accessToken->refresh_token
+        ]);
     }
 
     /**
@@ -180,40 +174,12 @@ class AzureService implements AzureServiceInterface
             throw new MissingAzureIdTokenException;
         }
 
-        // Configure Client
-        $client = $this->getClient();
-        $client->setAccessToken([
-            'access_token' => $accessToken->access_token,
-            'refresh_token' => $accessToken->refresh_token,
-            'id_token' => $accessToken->id_token,
-            'expires_in' => $accessToken->expires_in,
-            'created' => strtotime($accessToken->issued_at)
-        ]);
-        $client->setScopes($accessToken->scope);
+        // Initialize Email Token
+        $emailToken = new EmailToken();
+        $emailToken->fillFromToken($accessToken);
 
-        // Valid/Expired
-        $isValid = $this->validateIdToken($accessToken->id_token);
-        $isExpired = $client->isAccessTokenExpired();
-
-        // Try to Refresh Access Token!
-        if(!empty($accessToken->refresh_token) && (!$isValid || $isExpired)) {
-            $refresh = $this->refreshAccessToken($client);
-            if($refresh->exists()) {
-                $isValid = $this->validateIdToken($refresh->idToken);
-                $isExpired = false;
-            }
-        }
-        if(!$isValid) {
-            $isExpired = true;
-        }
-
-        // Return Payload Results
-        return new ValidateToken([
-            'new_token' => $refresh,
-            'is_valid' => $isValid,
-            'is_expired' => $isExpired,
-            'message' => $this->getValidateMessage($isValid, $isExpired)
-        ]);
+        // Validate By Custom Now
+        return $this->validateCustom($emailToken);
     }
 
     /**
@@ -223,29 +189,16 @@ class AzureService implements AzureServiceInterface
      * @return ValidateToken
      */
     public function validateCustom(CommonToken $accessToken): ValidateToken {
-        // ID Token Exists?
-        if(empty($accessToken->getIdToken())) {
-            throw new MissingAzureIdTokenException;
-        }
-
         // Configure Client
-        $client = $this->getClient();
-        $client->setAccessToken([
-            'access_token' => $accessToken->getAccessToken(),
-            'refresh_token' => $accessToken->getRefreshToken(),
-            'id_token' => $accessToken->getIdToken(),
-            'expires_in' => $accessToken->getExpiresIn(),
-            'created' => $accessToken->getIssuedUnix()
-        ]);
-        $client->setScopes($accessToken->getScope());
+        $profile = $this->profile($accessToken);
 
         // Valid/Expired
-        $isValid = $this->validateIdToken($accessToken->getIdToken());
-        $isExpired = $client->isAccessTokenExpired();
+        $isValid = ($profile->emailAddress ? true : false);
+        $isExpired = strtotime($accessToken->expiresAt) > time();
 
         // Try to Refresh Access Token!
-        if(!empty($accessToken->getRefreshToken()) && (!$isValid || $isExpired)) {
-            $refresh = $this->refreshAccessToken($client);
+        if(!empty($accessToken->refreshToken) && (!$isValid || $isExpired)) {
+            $refresh = $this->refresh($accessToken);
             if($refresh->exists()) {
                 $isValid = $this->validateIdToken($refresh->idToken);
                 $isExpired = false;

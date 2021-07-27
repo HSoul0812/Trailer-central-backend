@@ -3,6 +3,7 @@
 namespace App\Services\Integration\Common\DTOs;
 
 use Carbon\Carbon;
+use App\Models\Integration\Auth\AccessToken;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use League\OAuth2\Client\Token\AccessToken as LeagueToken;
@@ -129,6 +130,22 @@ class CommonToken
 
         // Fill From League Refresh Token
         $this->expiresAt = Carbon::createFromTimestamp($accessToken->getExpires())->toDateTimeString();
+    }
+
+    /**
+     * Fill CommonToken From Access Token
+     * 
+     * @param AccessToken $accessToken
+     * @return CommonToken
+     */
+    public function fillFromToken(AccessToken $accessToken) {
+        return self ([
+            'access_token' => $accessToken->access_token,
+            'refresh_token' => $accessToken->refresh_token,
+            'id_token' => $accessToken->id_token,
+            'expires_in' => $accessToken->expires_in,
+            'created' => strtotime($accessToken->issued_at)
+        ]);
     }
 
 
