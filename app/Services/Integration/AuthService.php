@@ -2,7 +2,9 @@
 
 namespace App\Services\Integration;
 
-use App\Exceptions\Integration\Auth\MissingAuthLoginTokenTypeScopesException;
+use App\Exceptions\Integration\Auth\InvalidAuthLoginTokenTypeException;
+use App\Exceptions\Integration\Auth\InvalidAuthCodeTokenTypeException;
+use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
@@ -12,7 +14,7 @@ use App\Services\Integration\Microsoft\AzureServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use App\Transformers\Integration\Auth\LoginUrlTransformer;
-use App\Http\Requests\Integration\Auth\ValidateTokenRequest;
+use App\Transformers\Integration\Auth\ValidateTokenTransformer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
