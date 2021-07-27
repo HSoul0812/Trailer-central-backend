@@ -20,47 +20,47 @@ class CommonToken
     /**
      * @var int Dealer ID
      */
-    private $dealerId;
+    protected $dealerId;
 
     /**
      * @var string Token Type
      */
-    private $tokenType;
+    protected $tokenType;
 
     /**
      * @var string Access Token
      */
-    private $accessToken;
+    protected $accessToken;
 
     /**
      * @var string Refresh Token
      */
-    private $refreshToken;
+    protected $refreshToken;
 
     /**
      * @var string ID Token
      */
-    private $idToken;
+    protected $idToken;
 
     /**
      * @var array All Scopes Approved
      */
-    private $scopes;
+    protected $scopes;
 
     /**
      * @var int Expires In Seconds
      */
-    private $expiresIn;
+    protected $expiresIn;
 
     /**
      * @var string Expires At Date/Time
      */
-    private $expiresAt;
+    protected $expiresAt;
 
     /**
      * @var string Issued At Date/Time
      */
-    private $issuedAt;
+    protected $issuedAt;
 
 
     /**
