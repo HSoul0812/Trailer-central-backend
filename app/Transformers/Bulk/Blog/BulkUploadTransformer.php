@@ -9,11 +9,13 @@ class BulkUploadTransformer extends TransformerAbstract
 {
     public function transform(BulkPostUpload $bulkPostUpload): array
     {
+
         return [
             'id' => $bulkPostUpload->id,
             'status' => $bulkPostUpload->status,
             'source_file' => $bulkPostUpload->source_file,
-            'validation_errors' => $bulkPostUpload->validation_errors
+            'website_id' => $bulkPostUpload->website_id,
+            'validation_errors' => $bulkPostUpload->validation_errors,
         ];
     }
 }

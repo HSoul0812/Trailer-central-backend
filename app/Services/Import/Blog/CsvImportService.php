@@ -93,7 +93,7 @@ class CsvImportService implements CsvImportServiceInterface
      */
     protected function import()
     {
-        echo "Importing.... 123".PHP_EOL;
+        echo "Importing....".PHP_EOL;
         $this->streamCsv(function($csvData, $lineNumber) {
             if ($lineNumber === 1) {
                 return;
@@ -241,6 +241,7 @@ class CsvImportService implements CsvImportServiceInterface
         $post['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
         $post['url_path'] = $csvData[$keyToIndexMapping[self::URL]];
         $post['post_content'] = $csvData[$keyToIndexMapping[self::CONTENT]];
+        $post['website_id'] = $this->bulkPostUpload->website_id;
 
 
         // Return Post Data

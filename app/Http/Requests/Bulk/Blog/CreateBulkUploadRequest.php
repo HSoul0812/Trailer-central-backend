@@ -12,6 +12,7 @@ use App\Http\Requests\Request;
 class CreateBulkUploadRequest extends Request {
 
     protected $rules = [
+        'website_id' => 'required|integer',
         'dealer_id' => 'required|integer',
         'csv_file' => 'required|file',
         'token' => 'uuid'
