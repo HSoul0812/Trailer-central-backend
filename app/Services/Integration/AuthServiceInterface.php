@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration;
 
+use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
 
 interface AuthServiceInterface {
