@@ -15,8 +15,7 @@ class CreateBulkReportRequest extends Request
             'token' => 'uuid',
             'search_term' => 'string|nullable',
             'type_of_stock' => 'nullable|stock_type_valid',
-            'from_date' => 'required_with:to_date|date_format:Y-m-d',
-            'to_date' => 'required_with:from_date|date_format:Y-m-d|after_or_equal:from_date'
+            'to_date' => 'nullable|date_format:Y-m-d|before_or_equal:' . date('Y-m-d')
         ];
     }
 }

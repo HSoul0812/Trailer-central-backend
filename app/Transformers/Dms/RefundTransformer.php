@@ -18,6 +18,7 @@ class RefundTransformer extends TransformerAbstract
         'items',
         'invoice',
         'receipt',
+        'customer',
     ];
 
     /**
@@ -69,5 +70,18 @@ class RefundTransformer extends TransformerAbstract
         }
 
         return $this->item($refund->receipt, new DealerSalesReceiptTransformer());
+    }
+
+    /**
+     * @param Refund $refund
+     * @return Item|null
+     */
+    public function includeCustomer(Refund $refund): ?Item
+    {
+        if (!$refund->invoice || !$refund->invoice->customer) {
+            return null;
+        }
+
+        return $this->item($refund->invoice->customer, new CustomerTransformer());
     }
 }

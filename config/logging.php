@@ -89,6 +89,13 @@ return [
             'days' => 3,
         ],
 
+        'texts' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/texts.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
@@ -142,10 +149,16 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
-        
+
         'showroom-imports' => [
             'path' => storage_path('logs/showroom-imports.log'),
-        ]
+        ],
+        'blog' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/blog.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
     ],
 
 ];

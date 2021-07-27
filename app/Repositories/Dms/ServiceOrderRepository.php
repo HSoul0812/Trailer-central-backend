@@ -97,6 +97,9 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
                     ->orWhere('type', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhereHas('customer', function($q) use($params) {
                         $q->where('display_name', 'LIKE', '%' . $params['search_term'] . '%');
+                    })
+                    ->orWhereHas('inventory', function($q) use($params) {
+                        $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
                     });
             });
         }
