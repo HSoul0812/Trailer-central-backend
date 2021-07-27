@@ -310,7 +310,7 @@ class CommonToken
      */
     public function isExpired(): bool
     {
-        return (Carbon::parse($this->expiredAt)->timestamp > time());
+        return (Carbon::parse($this->expiresAt)->timestamp > time());
     }
 
 
