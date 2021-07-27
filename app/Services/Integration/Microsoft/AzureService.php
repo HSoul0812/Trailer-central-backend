@@ -74,8 +74,8 @@ class AzureService implements AzureServiceInterface
 
         // Return LoginUrlToken
         return new LoginUrlToken([
-            'url' => $client->getAuthorizationUrl(),
-            'state' => $client->getState()
+            'loginUrl' => $client->getAuthorizationUrl(),
+            'authState' => $client->getState()
         ]);
     }
 

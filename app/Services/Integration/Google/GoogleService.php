@@ -81,7 +81,7 @@ class GoogleService implements GoogleServiceInterface
 
         // Return LoginUrlToken
         return new LoginUrlToken([
-            'url' => $url
+            'loginUrl' => $url
         ]);
     }
 
