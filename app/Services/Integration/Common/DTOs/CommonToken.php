@@ -334,17 +334,18 @@ class CommonToken
     /**
      * Convert to Array for AccessToken
      * 
-     * @param int $id
-     * @return array{access_token: string,
+     * @param null|int $id
+     * @return array{?id: null|int,
+     *               access_token: string,
      *               refresh_token: string,
      *               id_token: string,
      *               expires_in: int,
      *               expires_at: string,
      *               issued_at: string}
      */
-    public function toArray($id): array {
-        return [
-            'id' => $id,
+    public function toArray(?int $id = null): array {
+        // Initialize Common Token Array
+        $result = [
             'access_token' => $this->accessToken,
             'refresh_token' => $this->refreshToken,
             'id_token' => $this->idToken,
@@ -352,5 +353,13 @@ class CommonToken
             'expires_at' => $this->expiresAt,
             'issued_at' => $this->issuedAt
         ];
+
+        // Append ID
+        if(!empty($id)) {
+            $result['id'] = $id;
+        }
+
+        // Return Result Array
+        return $result;
     }
 }
