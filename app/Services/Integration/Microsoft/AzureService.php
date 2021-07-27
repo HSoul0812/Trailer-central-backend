@@ -210,7 +210,7 @@ class AzureService implements AzureServiceInterface
 
         // Return Payload Results
         return new ValidateToken([
-            'new_token' => $refresh,
+            'new_token' => $refresh ?? null,
             'is_valid' => $isValid,
             'is_expired' => $isExpired,
             'message' => $this->getValidateMessage($isValid, $isExpired)
