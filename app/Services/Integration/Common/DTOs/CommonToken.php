@@ -139,7 +139,7 @@ class CommonToken
      * @return CommonToken
      */
     public function fillFromToken(AccessToken $accessToken) {
-        return self ([
+        return new self([
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
             'id_token' => $accessToken->id_token,
