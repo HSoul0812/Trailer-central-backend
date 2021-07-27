@@ -2,6 +2,9 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
+
 /**
  * Class LoginUrlToken
  * 
@@ -9,6 +12,8 @@ namespace App\Services\Integration\Common\DTOs;
  */
 class LoginUrlToken
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @var string Get Login URL
      */
