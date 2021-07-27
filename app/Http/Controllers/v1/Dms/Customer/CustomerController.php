@@ -77,6 +77,10 @@ class CustomerController extends RestfulController
             throw new StoreResourceFailedException('Unable to create customer: ' . $e->getMessage());
         }
     }
+    
+//    public function show(int $id) {
+//        $this->response->item($this->customerRepository->get(['id' => $id]), $this->transformer);
+//    }
 
     public function update($id, Request $request)
     {

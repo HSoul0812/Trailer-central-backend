@@ -529,7 +529,7 @@ class PartRepository implements PartRepositoryInterface {
         } else {
             throw new \Exception('Query is required');
         }
-
+        
         // vendor id
         if ($query['vendor_id'] ?? null) {
             $search->filter('term', ['vendor_id' => $query['vendor_id']]);

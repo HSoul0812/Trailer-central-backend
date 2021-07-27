@@ -34,7 +34,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     }
 
     public function get($params) {
-        throw NotImplementedException;
+        return Customer::findOrFail($params['id']);
     }
 
     public function getAll($params) {
