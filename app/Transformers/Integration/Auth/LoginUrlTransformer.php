@@ -10,8 +10,8 @@ class LoginUrlTransformer extends TransformerAbstract
     public function transform(LoginUrlToken $login)
     {
         return [
-            'url' => $login->url,
-            'state' => $login->state
+            'url' => $login->loginUrl,
+            'state' => $login->authState
         ];
     }
 }
