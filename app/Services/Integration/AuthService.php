@@ -7,6 +7,7 @@ use App\Exceptions\Integration\Auth\InvalidAuthCodeTokenTypeException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
