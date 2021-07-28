@@ -43,9 +43,9 @@ interface AzureServiceInterface {
      * Get Azure Profile Email
      *
      * @param CommonToken $accessToken
-     * @return EmailToken
+     * @return null|EmailToken
      */
-    public function profile(CommonToken $accessToken): EmailToken;
+    public function profile(CommonToken $accessToken): ?EmailToken;
 
     /**
      * Get Refresh Token
