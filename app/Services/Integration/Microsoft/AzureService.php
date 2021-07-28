@@ -134,7 +134,8 @@ class AzureService implements AzureServiceInterface
             $user = $graph->createRequest('GET', '/me?$select=mail')
                 ->setReturnType(Model\User::class)
                 ->execute();
-            print_r($user);
+            $email = $user->getUserPrincipalName();
+            var_dump($email);
 
             // Append Profile
             $emailToken->setEmailAddress($user->getUserPrincipalName());
