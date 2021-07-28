@@ -15,9 +15,9 @@ class AuthorizeTokenRequest extends Request {
         'token_type' => 'required|valid_token_type',
         'relation_type' => 'nullable|valid_relation_type',
         'relation_id' => 'nullable|integer',
-        'redirect_uri' => 'required|string',
-        'scopes' => 'required|array',
-        'scopes.*' => 'required|string|max:80',
+        'redirect_uri' => 'nullable|string',
+        'scopes' => 'nullable|array',
+        'scopes.*' => 'nullable|string|max:80',
         'auth_code' => 'required|string',
         'state' => 'nullable|string'
     ];
