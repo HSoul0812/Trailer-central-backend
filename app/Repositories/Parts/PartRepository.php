@@ -85,11 +85,11 @@ class PartRepository implements PartRepositoryInterface {
             'direction' => 'ASC'
         ],
         'stock' => [
-            'field' => 'stock',
+            'field' => 'sku',
             'direction' => 'DESC'
         ],
         '-stock' => [
-            'field' => 'stock',
+            'field' => 'sku',
             'direction' => 'ASC'
         ]
     ];
