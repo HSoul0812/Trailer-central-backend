@@ -85,6 +85,7 @@ class AzureService implements AzureServiceInterface
      * @param string $authCode
      * @param null|string $redirectUrl url to redirect auth back to again
      * @param null|array $scopes scopes requested by login
+     * @throws InvalidAzureAuthCodeException
      * @return EmailToken
      */
     public function auth(string $authCode, ?string $redirectUrl = null, ?array $scopes = []): EmailToken {
@@ -134,8 +135,6 @@ class AzureService implements AzureServiceInterface
             $user = $graph->createRequest('GET', '/me?$select=mail')
                 ->setReturnType(Model\User::class)
                 ->execute();
-            $email = $user->getUserPrincipalName();
-            var_dump($email);
 
             // Append Profile
             $emailToken->setEmailAddress($user->getUserPrincipalName());
@@ -200,6 +199,7 @@ class AzureService implements AzureServiceInterface
         $profile = $this->profile($accessToken);
 
         // Valid/Expired
+        print_r($profile);
         $isValid = ($profile->emailAddress ? true : false);
         $isExpired = $profile->isExpired();
 
