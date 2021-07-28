@@ -126,7 +126,7 @@ class CommonToken
         }
 
         // Calculate Issued At
-        $issuedAt = Carbon::createFromTimestamp($accessToken->getTimeNow())->setTimezone('UTC')->toDateTimeString();
+        $issuedAt = Carbon::createFromTimestamp($accessToken->getTimeNow())->setTimezone('UTC')->timestamp;
         $this->calcIssuedAt($issuedAt);
 
         // Fill From League Refresh Token
