@@ -34,6 +34,7 @@ interface AzureServiceInterface {
      * @param string $authCode
      * @param null|string $redirectUrl url to redirect auth back to again
      * @param null|array $scopes scopes requested by login
+     * @throws InvalidAzureAuthCodeException
      * @return EmailToken
      */
     public function auth(string $authCode, ?string $redirectUrl = null, ?array $scopes = []): EmailToken;
@@ -41,10 +42,10 @@ interface AzureServiceInterface {
     /**
      * Get Azure Profile Email
      *
-     * @param EmailToken $emailToken
+     * @param CommonToken $accessToken
      * @return EmailToken
      */
-    public function profile(EmailToken $emailToken): EmailToken;
+    public function profile(CommonToken $accessToken): EmailToken;
 
     /**
      * Get Refresh Token
@@ -58,6 +59,7 @@ interface AzureServiceInterface {
      * Validate Microsoft Azure Access Token Exists and Refresh if Possible
      *
      * @param AccessToken $accessToken
+     * @throws MissingAzureIdTokenException
      * @return ValidateToken
      */
     public function validate(AccessToken $accessToken): ValidateToken;
