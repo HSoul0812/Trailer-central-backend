@@ -51,7 +51,7 @@ class StockRepository implements StockRepositoryInterface
                p.price - p.dealer_cost AS profit,
                'parts'                 AS source
         FROM dms_settings_part_bin pb
-                 LEFT JOIN part_bin_qty bq ON pb.id = bq.bin_id
+                 LEFT JOIN part_bin_qty bq ON pb.id = bq.bin_id AND bq.qty > 0
                  LEFT JOIN parts_v1 p ON bq.part_id = p.id
         WHERE p.dealer_id = :dealer_id_parts AND p.id IS NOT NULL
               {$this->financialReportHelpers['searchWhereForParts']}
