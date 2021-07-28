@@ -134,6 +134,7 @@ class AzureService implements AzureServiceInterface
             $user = $graph->createRequest('GET', '/me?$select=mail')
                 ->setReturnType(Model\User::class)
                 ->execute();
+            print_r($user);
 
             // Append Profile
             $emailToken->setEmailAddress($user->getUserPrincipalName());
@@ -200,7 +201,6 @@ class AzureService implements AzureServiceInterface
         // Valid/Expired
         $isValid = ($profile->emailAddress ? true : false);
         $isExpired = $profile->isExpired();
-        var_dump($profile->emailAddress);
 
         // Try to Refresh Access Token!
         if($accessToken->refreshToken && (!$isValid || $isExpired)) {
