@@ -17,6 +17,8 @@ use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\CRM\User\TimeClockRepository;
+use App\Repositories\CRM\User\TimeClockRepositoryInterface;
 use App\Repositories\Dms\Pos\RegisterRepository;
 use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
@@ -326,5 +328,7 @@ class AppServiceProvider extends ServiceProvider
             ->give(function () {
                 return new ImageService(app()->make(Client::class), app()->make(SanitizeHelper::class), app()->make(ImageHelper::class));
             });
+
+        $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
     }
 }

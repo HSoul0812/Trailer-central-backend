@@ -397,6 +397,10 @@ $api->version('v1', function ($route) {
 
         $route->put('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@updateBulk');
         $route->get('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@index');
+
+        $route->get('user/time-clock/status', 'App\Http\Controllers\v1\User\TimeClockController@status');
+        $route->post('user/time-clock/punch-in', 'App\Http\Controllers\v1\User\TimeClockController@punchIn');
+        $route->post('user/time-clock/punch-out', 'App\Http\Controllers\v1\User\TimeClockController@punchOut');
     });
 
     /*
