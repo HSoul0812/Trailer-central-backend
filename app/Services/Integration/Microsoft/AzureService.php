@@ -121,23 +121,27 @@ class AzureService implements AzureServiceInterface
     /**
      * Get Azure Profile Email
      *
-     * @param EmailToken $emailToken
+     * @param CommonToken $accessToken
      * @return EmailToken
      */
-    public function profile(EmailToken $emailToken): EmailToken {
+    public function profile(CommonToken $accessToken): EmailToken {
         // Get Graph
         try {
             // Initialize Microsoft Graph
             $graph = new Graph();
-            $graph->setAccessToken($emailToken->accessToken);
+            $graph->setAccessToken($accessToken->accessToken);
 
             // Get Details From Microsoft Account
             $user = $graph->createRequest('GET', '/me?$select=mail')
                 ->setReturnType(Model\User::class)
                 ->execute();
 
-            // Append Profile
-            $emailToken->setEmailAddress($user->getUserPrincipalName());
+            // Add Email Address From Profile
+            $params = $accessToken->toArray();
+            $params['email_address'] = $user->getUserPrincipalName();
+
+            // Return Token With Email Address
+            $emailToken = new EmailToken($params);
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
@@ -172,6 +176,7 @@ class AzureService implements AzureServiceInterface
      * Validate Microsoft Azure Access Token Exists and Refresh if Possible
      *
      * @param AccessToken $accessToken
+     * @throws MissingAzureIdTokenException
      * @return ValidateToken
      */
     public function validate(AccessToken $accessToken): ValidateToken {
@@ -183,6 +188,8 @@ class AzureService implements AzureServiceInterface
         // Initialize Email Token
         $emailToken = new EmailToken();
         $emailToken->fillFromToken($accessToken);
+        print_r($accessToken);
+        print_r($emailToken);
 
         // Validate By Custom Now
         return $this->validateCustom($emailToken);

@@ -3,6 +3,7 @@
 namespace App\Services\Integration\Common\DTOs;
 
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
 /**
@@ -12,7 +13,7 @@ use App\Traits\WithGetter;
  */
 class EmailToken extends CommonToken
 {
-    use WithGetter;
+    use WithConstructor, WithGetter;
 
     /**
      * @var string Email Address Approved For
