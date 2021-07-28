@@ -126,10 +126,11 @@ class CommonToken
         }
 
         // Calculate Issued At
-        $this->calcIssuedAt($accessToken->getTimeNow());
+        $issuedAt = Carbon::createFromTimestamp($accessToken->getTimeNow())->setTimezone('UTC')->toDateTimeString();
+        $this->calcIssuedAt($issuedAt);
 
         // Fill From League Refresh Token
-        $this->expiresAt = Carbon::createFromTimestamp($accessToken->getExpires())->toDateTimeString();
+        $this->expiresAt = Carbon::createFromTimestamp($accessToken->getExpires())->setTimezone('UTC')->toDateTimeString();
     }
 
     /**
@@ -310,7 +311,7 @@ class CommonToken
      */
     public function isExpired(): bool
     {
-        return (Carbon::parse($this->expiresAt)->timestamp > time());
+        return (Carbon::parse($this->expiresAt)->timestamp > Carbon::now()->setTimezone('UTC')->timestamp);
     }
 
 
