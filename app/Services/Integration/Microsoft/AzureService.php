@@ -122,9 +122,9 @@ class AzureService implements AzureServiceInterface
      * Get Azure Profile Email
      *
      * @param CommonToken $accessToken
-     * @return EmailToken
+     * @return null|EmailToken
      */
-    public function profile(CommonToken $accessToken): EmailToken {
+    public function profile(CommonToken $accessToken): ?EmailToken {
         // Get Graph
         try {
             // Initialize Microsoft Graph
@@ -148,7 +148,7 @@ class AzureService implements AzureServiceInterface
         }
 
         // Return Azure Token
-        return $emailToken;
+        return $emailToken ?? null;
     }
 
     /**
@@ -206,16 +206,15 @@ class AzureService implements AzureServiceInterface
         $profile = $this->profile($accessToken);
 
         // Valid/Expired
-        print_r($profile);
-        $isValid = ($profile->emailAddress ? true : false);
-        $isExpired = $profile->isExpired();
+        $isValid = (!empty($profile) ? true : false);
+        $isExpired = !empty($profile) && $profile->isExpired();
 
         // Try to Refresh Access Token!
         if($accessToken->refreshToken && (!$isValid || $isExpired)) {
             $refresh = $this->refresh($accessToken);
             if($refresh->exists()) {
-                $profile = $this->profile($refresh);
-                $isValid = ($profile->emailAddress ? true : false);
+                $newProfile = $this->profile($refresh);
+                $isValid = ($newProfile->emailAddress ? true : false);
                 $isExpired = false;
             }
         }
