@@ -159,10 +159,13 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Adjust Request
         $params['relation_type'] = 'sales_person';
-        $params['relation_id'] = $salesPerson->id;
+        $params['relation_id'] = $salesPerson->id ?? 0;
 
         // Get Sales Person Response
-        $response = $this->salesResponse($salesPerson->id);
+        $response = [];
+        if(!empty($params['relation_id'])) {
+            $response = $this->salesResponse($params['relation_id']);
+        }
 
         // Create Login URL
         $login = $this->auth->login($params['token_type'], $params['scopes'], $params['relation_type'], $params['relation_id'], $params['redirect_uri']);
