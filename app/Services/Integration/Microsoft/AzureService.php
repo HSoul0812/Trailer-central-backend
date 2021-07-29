@@ -188,7 +188,6 @@ class AzureService implements AzureServiceInterface
         // Initialize Email Token
         $emailToken = new EmailToken();
         $emailToken->fillFromToken($accessToken);
-        var_dump($emailToken->toArray());
 
         // Validate By Custom Now
         return $this->validateCustom($emailToken);
@@ -203,6 +202,7 @@ class AzureService implements AzureServiceInterface
     public function validateCustom(CommonToken $accessToken): ValidateToken {
         // Configure Client
         $profile = $this->profile($accessToken);
+        $profile->toArray();
 
         // Valid/Expired
         $isValid = (!empty($profile) ? true : false);

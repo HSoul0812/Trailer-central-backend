@@ -394,6 +394,7 @@ class CommonToken
             $result['relation_type'] = $relationType;
             $result['relation_id'] = $relationId;
         }
+        var_dump($result);
 
         // Return Result Array
         return $result;
