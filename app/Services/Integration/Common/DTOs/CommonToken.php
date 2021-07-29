@@ -365,13 +365,16 @@ class CommonToken
      * @param null|int $id
      * @param null|string $relationType
      * @param null|int $relationId
-     * @return array{?id: null|int,
-     *               access_token: string,
+     * @return array{access_token: string,
      *               refresh_token: string,
      *               id_token: string,
      *               expires_in: int,
      *               expires_at: string,
-     *               issued_at: string}
+     *               issued_at: string,
+     *               scopes: array,
+     *               ?id: null|int,
+     *               ?relation_type: null|string,
+     *               ?relation_id: null|int}
      */
     public function toArray(?int $id = null, ?string $relationType = null, ?int $relationId = null): array {
         // Initialize Common Token Array
@@ -381,7 +384,8 @@ class CommonToken
             'id_token' => $this->idToken,
             'expires_in' => $this->expiresIn,
             'expires_at' => $this->expiresAt,
-            'issued_at' => $this->issuedAt
+            'issued_at' => $this->issuedAt,
+            'scopes' => $this->scopes
         ];
 
         // Append ID
