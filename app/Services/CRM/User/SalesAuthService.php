@@ -148,10 +148,12 @@ class SalesAuthService implements SalesAuthServiceInterface
      *               sales_person: array<SalesPersonTransformer>}
      */
     public function login(array $params): array {
-        // Create Sales Person
+        // Update Sales Person
         if(!empty($params['id'])) {
             $salesPerson = $this->salesPersonService->update($params);
-        } else {
+        }
+        // Create Sales Person Only If Fields Exist
+        elseif(!empty($params['first_name']) && !empty($params['last_name']) && !empty($params['email'])) { {
             $salesPerson = $this->salesPersonService->create($params);
         }
 

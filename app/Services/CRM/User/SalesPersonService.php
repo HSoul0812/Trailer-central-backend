@@ -72,6 +72,7 @@ class SalesPersonService implements SalesPersonServiceInterface
      * Update Sales Auth
      * 
      * @param array $rawParams
+     * @throws DuplicateChangeEmailSalesPersonException
      * @return SalesPerson
      */
     public function update(array $rawParams): SalesPerson {
