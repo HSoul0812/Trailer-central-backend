@@ -363,6 +363,7 @@ class CommonToken
      * Convert to Array for AccessToken
      * 
      * @param null|int $id
+     * @param null|string $tokenType
      * @param null|string $relationType
      * @param null|int $relationId
      * @return array{access_token: string,
@@ -373,10 +374,11 @@ class CommonToken
      *               issued_at: string,
      *               scopes: array,
      *               ?id: null|int,
+     *               ?token_type: null|string,
      *               ?relation_type: null|string,
      *               ?relation_id: null|int}
      */
-    public function toArray(?int $id = null, ?string $relationType = null, ?int $relationId = null): array {
+    public function toArray(?int $id = null, ?string $tokenType = null, ?string $relationType = null, ?int $relationId = null): array {
         // Initialize Common Token Array
         $result = [
             'access_token' => $this->accessToken,
@@ -391,6 +393,11 @@ class CommonToken
         // Append ID
         if(!empty($id)) {
             $result['id'] = $id;
+        }
+
+        // Append Token Type
+        if(!empty($tokenType)) {
+            $result['token_type'] = $tokenType;
         }
 
         // Append Relation

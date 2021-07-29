@@ -213,7 +213,7 @@ class AuthService implements AuthServiceInterface
         }
 
         // Create/Update Correct Access Token Details
-        $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null, $relationType, $relationId));
+        $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null, $tokenType, $relationType, $relationId));
 
         // Return Response
         return $this->response($accessToken);
