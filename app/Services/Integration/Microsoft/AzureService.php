@@ -188,8 +188,7 @@ class AzureService implements AzureServiceInterface
         // Initialize Email Token
         $emailToken = new EmailToken();
         $emailToken->fillFromToken($accessToken);
-        print_r($accessToken);
-        print_r($emailToken);
+        var_dump($emailToken->toArray());
 
         // Validate By Custom Now
         return $this->validateCustom($emailToken);
