@@ -131,6 +131,7 @@ class CommonToken
 
         // Fill From League Refresh Token
         $this->expiresAt = Carbon::createFromTimestamp($accessToken->getExpires())->setTimezone('UTC')->toDateTimeString();
+        print_r($this);
     }
 
     /**

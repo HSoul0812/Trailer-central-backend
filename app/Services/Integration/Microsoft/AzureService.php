@@ -106,7 +106,6 @@ class AzureService implements AzureServiceInterface
             $this->log->error('Unknown Exception returned on AzureService: ' . $e->getMessage());
             throw new InvalidAzureAuthCodeException;
         }
-        var_dump($authToken);
 
         // Return Formatted Auth Token
         $emailToken = new EmailToken();
