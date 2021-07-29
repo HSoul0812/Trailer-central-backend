@@ -2,7 +2,6 @@
 
 namespace App\Services\Dms\CVR;
 
-use App\Services\Dms\CVR\CVRGeneratorServiceInterface;
 use App\Models\CRM\Dms\UnitSale;
 use App\Services\Dms\CVR\DTOs\CVRFileDTO;
 use Carbon\Carbon;
@@ -440,7 +439,7 @@ class CVRGeneratorService implements CVRGeneratorServiceInterface
         $xml = $writer->flush();
         
         $mappedDealerId = $unitSale->dealer_id;
-        $cvrCreds = CvrCreds::where('dealer_id', $unitSale->dealer_id)->firs();
+        $cvrCreds = CvrCreds::where('dealer_id', $unitSale->dealer_id)->first();
         
         if ($cvrCreds) {
             $mappedDealerId = $cvrCreds->cvr_unique_id;
@@ -456,6 +455,4 @@ class CVRGeneratorService implements CVRGeneratorServiceInterface
         $carbon = new Carbon($unitSale->created_at);        
         $writer->writeElement('Deal_Date_on_Contract', $carbon->format('mdY'));
     }
-    
-
 }
