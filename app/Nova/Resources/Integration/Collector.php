@@ -134,6 +134,9 @@ class Collector extends Resource
                 Text::make('Fields To Additional Description', 'fields_to_description')->rules('max:254')->hideFromIndex()->help(
                     'The fields that will be added in description. (a list of fields should be separated with a comma)'
                 ),
+                Text::make('Linebreak Characters', 'linebreak_characters')->hideFromIndex()->help(
+                    'Enter the characters that you want to act as linebreak in the description separated by commas. For example if you want this feed to use * and | as line breaks you would enter: *,|'
+                ),
             ]),
 
             new Panel('Measures', [
@@ -166,7 +169,7 @@ class Collector extends Resource
                 ),
                 Text::make('Types Affected By the Feed', 'only_types')->hideFromIndex()->help(
                     'Enter the types of the inventory you want this feed to affect separated by commas. For example if you want this feed to affect only trailers and boats you would enter: 1,5'
-                ),
+                ),                
             ]),
 
             HasMany::make('Specifications', 'specifications', CollectorSpecification::class)
