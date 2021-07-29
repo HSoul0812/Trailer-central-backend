@@ -153,7 +153,7 @@ class SalesAuthService implements SalesAuthServiceInterface
             $salesPerson = $this->salesPersonService->update($params);
         }
         // Create Sales Person Only If Fields Exist
-        elseif(!empty($params['first_name']) && !empty($params['last_name']) && !empty($params['email'])) { {
+        elseif(!empty($params['first_name']) && !empty($params['last_name']) && !empty($params['email'])) {
             $salesPerson = $this->salesPersonService->create($params);
         }
 
