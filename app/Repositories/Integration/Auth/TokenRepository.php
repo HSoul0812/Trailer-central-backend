@@ -61,6 +61,7 @@ class TokenRepository implements TokenRepositoryInterface {
         $token = $this->find($params);
 
         // Access Token Found?
+        var_dump($params);
         if(!empty($token->id)) {
             return $this->update($params);
         }
@@ -74,7 +75,7 @@ class TokenRepository implements TokenRepositoryInterface {
         }
 
         // Return Access Token
-        return $this->find($params);
+        return $this->find(['id' => $accessToken->id]);
     }
 
     /**
