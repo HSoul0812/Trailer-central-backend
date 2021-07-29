@@ -168,7 +168,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         }
 
         // Create Login URL
-        $login = $this->auth->login($params['token_type'], $params['scopes'], $params['relation_type'], $params['relation_id'], $params['redirect_uri']);
+        $login = $this->auth->login($params['token_type'], $params['scopes'], $params['relation_type'], $params['relation_id'], $params['redirect_uri'] ?? null);
 
         // Return Response
         return array_merge($response, $login);

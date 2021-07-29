@@ -160,7 +160,7 @@ class AzureService implements AzureServiceInterface
      */
     public function refresh(AccessToken $accessToken): EmailToken {
         // Configure Client
-        $client = $this->getClient();
+        $client = $this->getClient(null, $accessToken->scopes);
 
         // Get New Token
         $newToken = $client->getAccessToken('refresh_token', [
