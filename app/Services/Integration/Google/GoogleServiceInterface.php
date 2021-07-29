@@ -21,11 +21,11 @@ interface GoogleServiceInterface {
     /**
      * Get Login URL
      *
-     * @param string $redirectUrl url to redirect auth back to again
-     * @param array $scopes scopes requested by login
+     * @param null|string $redirectUrl url to redirect auth back to again
+     * @param null|array $scopes scopes requested by login
      * @return LoginUrlToken
      */
-    public function login(string $redirectUrl, array $scopes): LoginUrlToken;
+    public function login(?string $redirectUrl = null, ?array $scopes = null): LoginUrlToken;
 
     /**
      * Get Refresh Token

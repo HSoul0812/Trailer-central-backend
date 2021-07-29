@@ -67,16 +67,19 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Get Login URL
      *
-     * @param string $redirectUrl url to redirect auth back to again
-     * @param array $scopes scopes requested by login
+     * @param null|string $redirectUrl url to redirect auth back to again
+     * @param null|array $scopes scopes requested by login
      * @return LoginUrlToken
      */
-    public function login(string $redirectUrl, array $scopes): LoginUrlToken {
+    public function login(?string $redirectUrl = null, ?array $scopes = null): LoginUrlToken {
         // Set Redirect URL
         $client = $this->getClient();
-        $client->setRedirectUri($redirectUrl);
+        $client->setRedirectUri($redirectUrl ?? env('GOOGLE_OAUTH_REDIRECT_URI'));
 
         // Return Auth URL for Login
+        if(empty($scopes)) {
+            $scopes = explode(" ", env('GOOGLE_OAUTH_SCOPES'));
+        }
         $url = $client->createAuthUrl($scopes);
 
         // Return LoginUrlToken
