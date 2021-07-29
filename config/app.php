@@ -198,7 +198,7 @@ return [
         ElasticScoutDriverPlus\ServiceProvider::class,
         ElasticMigrations\ServiceProvider::class,
         App\Providers\SpatialServiceProvider::class,
-        Barryvdh\DomPDF\ServiceProvider::class,
+        Barryvdh\Snappy\ServiceProvider::class,
 
         /*
          * Nova stuff
