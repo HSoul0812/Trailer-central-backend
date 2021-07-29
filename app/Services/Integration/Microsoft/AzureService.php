@@ -202,7 +202,6 @@ class AzureService implements AzureServiceInterface
     public function validateCustom(CommonToken $accessToken): ValidateToken {
         // Configure Client
         $profile = $this->profile($accessToken);
-        $email = $profile->emailAddress;
 
         // Valid/Expired
         $isValid = (!empty($profile) ? true : false);
@@ -210,7 +209,6 @@ class AzureService implements AzureServiceInterface
         print_r($profile);
         var_dump($isValid);
         var_dump($isExpired);
-        var_dump($email);
 
         // Try to Refresh Access Token!
         if($accessToken->refreshToken && (!$isValid || $isExpired)) {
