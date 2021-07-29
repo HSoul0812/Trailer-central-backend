@@ -62,7 +62,9 @@ class SalesPersonService implements SalesPersonServiceInterface
         $salesPerson = $this->salespeople->create($params);
 
         // Update Folders
-        $this->updateFolders($salesPerson, $params['folders']);
+        if(!empty($params['folders'])) {
+            $this->updateFolders($salesPerson, $params['folders']);
+        }
 
         // Return Response
         return $this->salespeople->get(['sales_person_id' => $salesPerson->id]);
@@ -96,7 +98,9 @@ class SalesPersonService implements SalesPersonServiceInterface
         $salesPerson = $this->salespeople->update($params);
 
         // Update Folders
-        $this->updateFolders($salesPerson, $params['folders']);
+        if(!empty($params['folders'])) {
+            $this->updateFolders($salesPerson, $params['folders']);
+        }
 
         // Return Sales Person
         return $this->salespeople->get(['sales_person_id' => $salesPerson->id]);
