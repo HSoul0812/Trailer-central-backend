@@ -143,7 +143,7 @@ class AzureService implements AzureServiceInterface
             $params['first_name'] = $user->getGivenName();
             $params['last_name'] = $user->getSurname();
             $params['email_address'] = $user->getUserPrincipalName();
-            var_dump($params);
+            $this->log->info(print_r($params, true));
             $emailToken = new EmailToken($params);
         } catch (\Exception $e) {
             // Log Error
