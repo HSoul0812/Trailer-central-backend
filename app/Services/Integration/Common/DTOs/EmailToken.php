@@ -83,7 +83,7 @@ class EmailToken extends CommonToken
         return array_merge($array, [
             'first_name' => $this->firstName,
             'last_name' => $this->lastName,
-            'email_address' => $this->email_address,
+            'email_address' => $this->emailAddress,
         ]);
     }
 }
