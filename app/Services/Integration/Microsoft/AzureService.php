@@ -110,6 +110,7 @@ class AzureService implements AzureServiceInterface
         // Return Formatted Auth Token
         $emailToken = new EmailToken();
         $emailToken->fillFromLeague($authToken);
+        echo $emailToken->accessToken . PHP_EOL . PHP_EOL;
 
         // Get Profile
         $this->profile($emailToken);
