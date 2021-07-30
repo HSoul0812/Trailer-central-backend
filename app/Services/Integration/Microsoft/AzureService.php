@@ -110,7 +110,6 @@ class AzureService implements AzureServiceInterface
         // Return Formatted Auth Token
         $emailToken = new EmailToken();
         $emailToken->fillFromLeague($authToken);
-        var_dump($emailToken->toArray());
 
         // Get Profile
         $this->profile($emailToken);
@@ -202,6 +201,7 @@ class AzureService implements AzureServiceInterface
      */
     public function validateCustom(CommonToken $accessToken): ValidateToken {
         // Configure Client
+        var_dump($accessToken->toArray());
         $profile = $this->profile($accessToken);
 
         // Valid/Expired
