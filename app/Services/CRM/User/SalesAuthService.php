@@ -13,6 +13,7 @@ use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class SalesAuthService
@@ -209,6 +210,8 @@ class SalesAuthService implements SalesAuthServiceInterface
             'smtp_email' => $emailToken->emailAddress,
             'imap_email' => $emailToken->emailAddress
         ];
+        Log::info(print_r($params, true));
+        Log::info(print_r($emailToken->toArray(), true));
 
         // Create or Update Sales Person
         if(!empty($stateToken->relation_id) || !empty($request->sales_person_id)) {
