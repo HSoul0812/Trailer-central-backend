@@ -108,11 +108,11 @@ class AzureService implements AzureServiceInterface
         }
 
         // Return Formatted Auth Token
-        $emailToken = new EmailToken();
-        $emailToken->fillFromLeague($authToken);
+        $accessToken = new EmailToken();
+        $accessToken->fillFromLeague($authToken);
 
         // Get Profile
-        $this->profile($emailToken);
+        $emailToken = $this->profile($accessToken);
 
         // Return Email Token
         return $emailToken;
