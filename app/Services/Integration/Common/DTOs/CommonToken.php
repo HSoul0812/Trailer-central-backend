@@ -70,15 +70,15 @@ class CommonToken
      */
     public function fillFromArray(array $authToken) {
         // Fill Access Token
-        $this->setAccessToken($authToken['access_token']);
+        $this->accessToken = $authToken['access_token'];
 
         // Fill Refresh Token
         if(isset($authToken['refresh_token'])) {
-            $this->setRefreshToken($authToken['refresh_token']);
+            $this->refreshToken = $authToken['refresh_token'];
         }
 
         // Fill ID Token
-        $this->setIdToken($authToken['id_token']);
+        $this->idToken = $authToken['id_token'];
 
         // Fill Scopes
         $this->setScopes($authToken['scope']);
@@ -87,14 +87,19 @@ class CommonToken
         if(isset($authToken['created'])) {
             $this->calcIssuedAt($authToken['created']);
         } else {
-            $this->setIssuedAt($authToken['issued_at']);
+            $this->issuedAt = $authToken['issued_at'];
         }
 
         // Fill Expires In
         $this->setExpiresIn($authToken['expires_in']);
 
         // Fill Expires At
-        $this->calcExpiresAt($this->getIssuedAt(), $this->getExpiresIn());
+        if(isset($authToken['expires_at'])) {
+            $this->expiresAt = $authToken['expires_at'];
+        } else {
+            // Calculate Expires At Instead
+            $this->calcExpiresAt($this->getIssuedAt(), $this->getExpiresIn());
+        }
     }
 
     /**
@@ -140,12 +145,14 @@ class CommonToken
      * @return CommonToken
      */
     public function fillFromToken(AccessToken $accessToken) {
-        return new self([
+        $this->fillFromArray([
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
             'id_token' => $accessToken->id_token,
-            'expires_in' => $accessToken->expires_in,
-            'created' => strtotime($accessToken->issued_at)
+            'scoped' => $accessToken->scope,
+            'issued_at' => $accessToken->issued_at,
+            'expires_at' => $accessToken->expired_at,
+            'expires_in' => $accessToken->expires_in
         ]);
     }
 
