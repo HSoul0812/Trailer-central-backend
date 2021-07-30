@@ -204,22 +204,19 @@ class AzureService implements AzureServiceInterface
         $profile = $this->profile($accessToken);
 
         // Valid/Expired
-        $isValid = (!empty($profile) ? true : false);
-        $isExpired = !empty($profile) && $profile->isExpired();
-        print_r($profile);
-        var_dump($isValid);
-        var_dump($isExpired);
+        $isValid = ($profile !== null ? true : false);
+        $isExpired = ($profile !== null ? $profile->isExpired() : true);
 
         // Try to Refresh Access Token!
-        if($accessToken->refreshToken && (!$isValid || $isExpired)) {
-            $refresh = $this->refresh($accessToken);
+        if($profile !== null && $profile->refreshToken && (!$isValid || $isExpired)) {
+            $refresh = $this->refresh($profile);
             if($refresh->exists()) {
                 $newProfile = $this->profile($refresh);
-                $isValid = ($newProfile->emailAddress ? true : false);
+                $isValid = ($newProfile !== null ? true : false);
                 $isExpired = false;
             }
         }
-        if(!$isValid) {
+        if(empty($isValid)) {
             $isExpired = true;
         }
 
