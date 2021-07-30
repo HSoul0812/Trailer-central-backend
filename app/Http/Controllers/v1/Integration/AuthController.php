@@ -22,7 +22,8 @@ class AuthController extends RestfulControllerV2
     protected $auth;
 
     public function __construct(AuthServiceInterface $authService) {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'valid']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'valid', 'login', 'code']);
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'valid', 'login', 'code']);
 
         $this->auth = $authService;
     }

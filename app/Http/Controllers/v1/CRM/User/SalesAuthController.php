@@ -21,8 +21,8 @@ class SalesAuthController extends RestfulControllerV2 {
      * @param SalesAuthServiceInterface $service
      */
     public function __construct(SalesAuthServiceInterface $service) {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'login']);
-        $this->middleware('setUserIdOnRequest')->only(['create', 'update', 'login']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'login', 'code']);
+        $this->middleware('setUserIdOnRequest')->only(['create', 'update', 'login', 'code']);
 
         $this->service = $service;
     }
