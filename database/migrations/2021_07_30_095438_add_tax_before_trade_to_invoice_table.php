@@ -14,7 +14,6 @@ class AddTaxBeforeTradeToInvoiceTable extends Migration
     public function up()
     {
         Schema::table('qb_invoices', function (Blueprint $table) {
-            //
             $table->tinyInteger('tax_before_trade')->nullable();
         });
     }
@@ -27,7 +26,6 @@ class AddTaxBeforeTradeToInvoiceTable extends Migration
     public function down()
     {
         Schema::table('qb_invoices', function (Blueprint $table) {
-            //
             $table->dropColumn('tax_before_trade');
         });
     }
