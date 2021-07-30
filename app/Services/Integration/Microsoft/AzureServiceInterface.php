@@ -56,6 +56,14 @@ interface AzureServiceInterface {
     public function refresh(AccessToken $accessToken): EmailToken;
 
     /**
+     * Refresh Access Token Using Custom Config
+     *
+     * @param CommonToken $accessToken
+     * @return EmailToken
+     */
+    public function refreshCustom(CommonToken $accessToken): EmailToken;
+
+    /**
      * Validate Microsoft Azure Access Token Exists and Refresh if Possible
      *
      * @param AccessToken $accessToken

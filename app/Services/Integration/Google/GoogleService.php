@@ -89,7 +89,7 @@ class GoogleService implements GoogleServiceInterface
     }
 
     /**
-     * Get Refresh Token
+     * Refresh Access Token
      *
      * @param AccessToken $accessToken
      * @return array of validation info

@@ -110,7 +110,6 @@ class AzureService implements AzureServiceInterface
         // Return Formatted Auth Token
         $emailToken = new EmailToken();
         $emailToken->fillFromLeague($authToken);
-        echo $emailToken->accessToken . PHP_EOL . PHP_EOL;
 
         // Get Profile
         $this->profile($emailToken);
@@ -153,18 +152,33 @@ class AzureService implements AzureServiceInterface
     }
 
     /**
-     * Get Refresh Token
+     * Refresh Access Token
      *
      * @param AccessToken $accessToken
      * @return EmailToken
      */
     public function refresh(AccessToken $accessToken): EmailToken {
+        // Initialize Email Token
+        $emailToken = new EmailToken();
+        $emailToken->fillFromToken($accessToken);
+
+        // Refresh By Custom Now
+        return $this->refreshCustom($emailToken);
+    }
+
+    /**
+     * Refresh Access Token Using Custom Config
+     *
+     * @param CommonToken $accessToken
+     * @return EmailToken
+     */
+    public function refreshCustom(CommonToken $accessToken): EmailToken {
         // Configure Client
         $client = $this->getClient(null, $accessToken->scopes);
 
         // Get New Token
         $newToken = $client->getAccessToken('refresh_token', [
-            'refresh_token' => $accessToken->refresh_token
+            'refresh_token' => $accessToken->refreshToken
         ]);
 
         // Return Updated EmailToken
@@ -202,7 +216,6 @@ class AzureService implements AzureServiceInterface
      */
     public function validateCustom(CommonToken $accessToken): ValidateToken {
         // Configure Client
-        echo $accessToken->getAccessToken() . PHP_EOL . PHP_EOL;
         $profile = $this->profile($accessToken);
 
         // Valid/Expired
@@ -214,7 +227,7 @@ class AzureService implements AzureServiceInterface
 
         // Try to Refresh Access Token!
         if($profile !== null && $profile->refreshToken && (!$isValid || $isExpired)) {
-            $refresh = $this->refresh($profile);
+            $refresh = $this->refreshCustom($profile);
             if($refresh->exists()) {
                 $newProfile = $this->profile($refresh);
                 $isValid = ($newProfile !== null ? true : false);
