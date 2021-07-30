@@ -149,7 +149,7 @@ class CommonToken
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
             'id_token' => $accessToken->id_token,
-            'scope' => $accessToken->scope,
+            'scope' => implode(" ", $accessToken->scope),
             'issued_at' => $accessToken->issued_at,
             'expires_at' => $accessToken->expired_at,
             'expires_in' => $accessToken->expires_in
