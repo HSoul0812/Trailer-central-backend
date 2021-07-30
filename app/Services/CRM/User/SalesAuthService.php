@@ -179,6 +179,7 @@ class SalesAuthService implements SalesAuthServiceInterface
      * 
      * @param string $tokenType
      * @param string $code
+     * @param int $userId
      * @param null|string $state
      * @param null|string $redirectUri
      * @param null|array $scopes
@@ -186,8 +187,8 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return array{data: array<TokenTransformer>,
      *               sales_person: array<SalesPersonTransformer>}
      */
-    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null,
-                                ?array $scopes = null, ?int $salesPersonId = null): array {
+    public function authorize(string $tokenType, string $code, int $userId, ?string $state = null,
+            ?string $redirectUri = null, ?array $scopes = null, ?int $salesPersonId = null): array {
         // Find Sales Person By State
         if(!empty($state)) {
             $stateToken = $this->tokens->getByState($state);
@@ -198,6 +199,7 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Initialize Params for Sales Person
         $params = [
+            'user_id'    => $userId,
             'first_name' => $emailToken->firstName,
             'last_name'  => $emailToken->lastName,
             'email'      => $emailToken->emailAddress,
