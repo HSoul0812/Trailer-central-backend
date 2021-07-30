@@ -15,14 +15,14 @@ class AddOffice365OauthSupport extends Migration
     {
         Schema::table('integration_token', function (Blueprint $table) {
             // Append Access Token
-            $table->string('state')->index();
+            $table->string('state')->after('relation_id')->nullable()->index();
 
             // Add New Indexes
             $table->index(['relation_type', 'relation_id']);
         });
 
         // Update Integration Token Expires In/Expires At/Issued At
-        DB::statement("ALTER TABLE integration_token MODIFY COLUMN access_token TEXT");
+        DB::statement("ALTER TABLE integration_token MODIFY COLUMN access_token TEXT NULL");
         DB::statement("ALTER TABLE integration_token MODIFY COLUMN expires_in INT(11) NULL");
         DB::statement("ALTER TABLE integration_token MODIFY COLUMN expires_at TIMESTAMP NULL");
         DB::statement("ALTER TABLE integration_token MODIFY COLUMN expires_at TIMESTAMP NULL");

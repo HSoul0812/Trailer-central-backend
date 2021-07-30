@@ -162,7 +162,7 @@ class AuthService implements AuthServiceInterface
                 'token_type' => $tokenType,
                 'relation_type' => $relationType,
                 'relation_id' => $relationId,
-                'access_token' => $login->authState
+                'state' => $login->authState
             ]);
         }
 
@@ -193,7 +193,7 @@ class AuthService implements AuthServiceInterface
                                 ?array $scopes = null, ?string $relationType = null, ?int $relationId = null): array {
         // Find Saved State of Token
         if(!empty($state)) {
-            $stateToken = $this->tokens->getByToken($state);
+            $stateToken = $this->tokens->getByState($state);
         }   
 
         // Get Access Token

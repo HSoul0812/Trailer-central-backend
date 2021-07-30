@@ -242,14 +242,14 @@ class TokenRepository implements TokenRepositoryInterface {
     }
 
     /**
-     * Get By Token
+     * Get By State
      * 
-     * @param string $accessToken
+     * @param string $state
      * @return null|AccessToken
      */
-    public function getByToken(string $accessToken): ?AccessToken {
-        // Get Access Token Entry By Actual Token
-        return AccessToken::where('access_token', $accessToken)->first();
+    public function getByState(string $state): ?AccessToken {
+        // Get Access Token Entry By State
+        return AccessToken::where('state', $state)->first();
     }
 
     /**

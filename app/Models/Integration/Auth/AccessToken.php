@@ -59,6 +59,7 @@ class AccessToken extends Model
         'token_type',
         'relation_type',
         'relation_id',
+        'state',
         'access_token',
         'refresh_token',
         'id_token',
