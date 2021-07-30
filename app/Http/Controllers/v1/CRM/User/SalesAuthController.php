@@ -116,6 +116,7 @@ class SalesAuthController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Return Auth
             var_dump($request);
+            die;
             return $this->response->array(
                 $this->service->authorize($request->token_type, $request->auth_code,
                         $request->user_id, $request->state, $request->redirect_uri,
