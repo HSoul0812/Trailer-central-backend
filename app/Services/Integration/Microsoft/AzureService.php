@@ -135,11 +135,13 @@ class AzureService implements AzureServiceInterface
             $params = $accessToken->toArray();
 
             // Get Details From Microsoft Account
-            $user = $graph->createRequest('GET', '/me?$select=mail')
+            $user = $graph->createRequest('GET', '/me')
                 ->setReturnType(Model\User::class)
                 ->execute();
 
             // Return Token With Email Address
+            $params['first_name'] = $user->getGivenName();
+            $params['last_name'] = $user->getSurname();
             $params['email_address'] = $user->getUserPrincipalName();
             $emailToken = new EmailToken($params);
         } catch (\Exception $e) {

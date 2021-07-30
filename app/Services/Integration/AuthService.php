@@ -177,6 +177,37 @@ class AuthService implements AuthServiceInterface
     }
 
     /**
+     * Handle Auth Code
+     * 
+     * @param string $tokenType
+     * @param string $code
+     * @param null|string $redirectUri
+     * @param null|array $scopes
+     * @throws InvalidAuthLoginTokenTypeException
+     * @return EmailToken
+     */
+    public function code(string $tokenType, string $code, ?string $redirectUri = null, ?array $scopes = null): EmailToken {
+        // Get Access Token
+        switch($tokenType) {
+            case 'google':
+                $emailToken = $this->gmail->auth($redirectUri, $code);
+            break;
+            case 'office365':
+                $emailToken = $this->azure->auth($code, $redirectUri, $scopes);
+            break;
+        }
+
+        // Email Token Empty?
+        if(empty($emailToken)) {
+            // Invalid Token Type
+            throw new InvalidAuthCodeTokenTypeException;
+        }
+
+        // Return Email Token
+        return $emailToken;
+    }
+
+    /**
      * Authorize Login and Retrieve Tokens
      * 
      * @param string $tokenType
@@ -194,26 +225,14 @@ class AuthService implements AuthServiceInterface
         // Find Saved State of Token
         if(!empty($state)) {
             $stateToken = $this->tokens->getByState($state);
-        }   
-
-        // Get Access Token
-        switch($tokenType) {
-            case 'google':
-                $emailToken = $this->gmail->auth($redirectUri, $code);
-            break;
-            case 'office365':
-                $emailToken = $this->azure->auth($code, $redirectUri, $scopes);
-            break;
         }
 
-        // Email Token Empty?
-        if(empty($emailToken)) {
-            // Invalid Token Type
-            throw new InvalidAuthCodeTokenTypeException;
-        }
+        // Get Email Token
+        $emailToken = $this->code($tokenType, $code, $redirectUri, $scopes);
 
         // Create/Update Correct Access Token Details
-        $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null, $tokenType, $relationType, $relationId));
+        $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null,
+                                                $tokenType, $relationType, $relationId));
 
         // Return Response
         return $this->response($accessToken);

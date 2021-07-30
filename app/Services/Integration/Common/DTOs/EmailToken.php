@@ -16,6 +16,16 @@ class EmailToken extends CommonToken
     use WithConstructor, WithGetter;
 
     /**
+     * @var string First Name From Profile
+     */
+    private $firstName;
+
+    /**
+     * @var string Last Name From Profile
+     */
+    private $lastName;
+
+    /**
      * @var string Email Address Approved For
      */
     private $emailAddress;

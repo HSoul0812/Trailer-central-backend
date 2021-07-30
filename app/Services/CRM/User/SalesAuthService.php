@@ -178,27 +178,47 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Authorize Login With Code to Return Access Token
      * 
      * @param string $tokenType
-     * @param string $authCode
+     * @param string $code
      * @param null|string $state
      * @param null|string $redirectUri
      * @param null|array $scopes
+     * @param null|int $salesPersonId
      * @return array{data: array<TokenTransformer>,
      *               sales_person: array<SalesPersonTransformer>}
      */
-    public function authorize(string $tokenType, string $authCode, ?string $state = null, ?string $redirectUri = null, ?array $scopes = null): array {
+    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null,
+                                ?array $scopes = null, ?int $salesPersonId = null): array {
         // Find Sales Person By State
         if(!empty($state)) {
-            $stateToken = $this->tokens->getByToken($state);
+            $stateToken = $this->tokens->getByState($state);
         }
 
-        // Create Login URL
-        $emailToken = $this->auth->authorize($tokenType, $authCode, $redirectUri, $scopes);
+        // Get Email Token
+        $emailToken = $this->auth->code($tokenType, $code, $redirectUri, $scopes);
+
+        // Initialize Params for Sales Person
+        $params = [
+            'first_name' => $emailToken->firstName,
+            'last_name'  => $emailToken->lastName,
+            'email'      => $emailToken->emailAddress,
+            'smtp_email' => $emailToken->emailAddress,
+            'imap_email' => $emailToken->emailAddress
+        ];
+
+        // Create or Update Sales Person
+        if(!empty($stateToken->relation_id) || !empty($salesPersonId)) {
+            $params['id'] = $salesPersonId ?? $stateToken->relation_id;
+            $salesPerson = $this->salesPersonService->update($params);
+        } else {
+            $salesPerson = $this->salesPersonService->create($params);
+        }
 
         // Fill Correct Access Token Details
-        $response = $this->tokens->create($emailToken->toArray($stateToken->id ?? null));
+        $accessToken = $this->tokens->update($emailToken->toArray($stateToken->id ?? null,
+                                                $tokenType, 'sales_person', $salesPerson->id));
 
         // Return Response
-        return array_merge($response, $this->salesResponse($stateToken->relation_id));
+        return $this->response(['relation_id' => $salesPerson->id], $accessToken);
     }
 
 
