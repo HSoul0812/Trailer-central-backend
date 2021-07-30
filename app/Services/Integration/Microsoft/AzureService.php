@@ -129,7 +129,7 @@ class AzureService implements AzureServiceInterface
         try {
             // Initialize Microsoft Graph
             $graph = new Graph();
-            $graph->setAccessToken($accessToken->accessToken);
+            $graph->setAccessToken($accessToken->getAccessToken());
 
             // Add Email Address From Profile
             $params = $accessToken->toArray();
