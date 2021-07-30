@@ -81,7 +81,7 @@ class SaveDealerLocationRequest extends Request
             'fees' => 'nullable|array',
             'fees.*.title' => 'required_with:fees|min:1,max:50',
             'fees.*.fee_type' => 'required_with:fees|min:1,max:50',
-            'fees.*.amount' => 'required_with:fees|numeric|min:0|regex:/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,2})?$/',
+            'fees.*.amount' => ['required_with:fees', 'numeric', 'min:0', 'regex:/^(?:[1-9]\d+|\d)(?:\.\d\d)?$/'],
             'fees.*.cost_amount' => 'required_if:fees.*.fee_charged_type,combined|numeric|min:0',
             'fees.*.cost_handler' => 'required|in:set_default_cost,set_amount',
             'fees.*.is_additional' => 'checkbox|in:0,1',
