@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\User;
 
+use App\Http\Requests\CRM\User\AuthorizeSalesAuthRequest;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
@@ -177,6 +178,7 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * Authorize Login With Code to Return Access Token
      * 
+     * AuthorizeSalesAuthRequest $request
      * @param string $tokenType
      * @param string $code
      * @param int $userId
@@ -187,19 +189,20 @@ class SalesAuthService implements SalesAuthServiceInterface
      * @return array{data: array<TokenTransformer>,
      *               sales_person: array<SalesPersonTransformer>}
      */
-    public function authorize(string $tokenType, string $code, int $userId, ?string $state = null,
-            ?string $redirectUri = null, ?array $scopes = null, ?int $salesPersonId = null): array {
+    public function authorize(AuthorizeSalesAuthRequest $request) {
+    //public function authorize(string $tokenType, string $code, int $userId, ?string $state = null,
+    //        ?string $redirectUri = null, ?array $scopes = null, ?int $salesPersonId = null): array {
         // Find Sales Person By State
-        if(!empty($state)) {
-            $stateToken = $this->tokens->getByState($state);
+        if(!empty($request->state)) {
+            $stateToken = $this->tokens->getByState($request->state);
         }
 
         // Get Email Token
-        $emailToken = $this->auth->code($tokenType, $code, $redirectUri, $scopes);
+        $emailToken = $this->auth->code($request->token_type, $request->code, $request->redirect_uri, $request->scopes);
 
         // Initialize Params for Sales Person
         $params = [
-            'user_id'    => $userId,
+            'user_id'    => $request->user_id,
             'first_name' => $emailToken->firstName,
             'last_name'  => $emailToken->lastName,
             'email'      => $emailToken->emailAddress,
@@ -208,8 +211,8 @@ class SalesAuthService implements SalesAuthServiceInterface
         ];
 
         // Create or Update Sales Person
-        if(!empty($stateToken->relation_id) || !empty($salesPersonId)) {
-            $params['id'] = $salesPersonId ?? $stateToken->relation_id;
+        if(!empty($stateToken->relation_id) || !empty($request->sales_person_id)) {
+            $params['id'] = $request->sales_person_id ?? $stateToken->relation_id;
             $salesPerson = $this->salesPersonService->update($params);
         } else {
             $salesPerson = $this->salesPersonService->create($params);
@@ -217,7 +220,7 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Fill Correct Access Token Details
         $accessToken = $this->tokens->update($emailToken->toArray($stateToken->id ?? null,
-                                                $tokenType, 'sales_person', $salesPerson->id));
+                                                $request->token_type, 'sales_person', $salesPerson->id));
 
         // Return Response
         return $this->response(['relation_id' => $salesPerson->id], $accessToken);
