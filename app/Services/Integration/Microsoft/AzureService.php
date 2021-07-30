@@ -201,13 +201,13 @@ class AzureService implements AzureServiceInterface
      */
     public function validateCustom(CommonToken $accessToken): ValidateToken {
         // Configure Client
-        var_dump($accessToken->toArray());
+        echo $accessToken->getAccessToken() . PHP_EOL . PHP_EOL;
         $profile = $this->profile($accessToken);
 
         // Valid/Expired
         $isValid = ($profile !== null ? true : false);
         $isExpired = ($profile !== null ? $profile->isExpired() : true);
-        print_r($profile);
+        var_dump($profile);
         var_dump($isValid);
         var_dump($isExpired);
 
