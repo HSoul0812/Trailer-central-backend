@@ -7,6 +7,7 @@ use App\Exceptions\Integration\Auth\InvalidAuthCodeTokenTypeException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
@@ -241,20 +242,24 @@ class AuthService implements AuthServiceInterface
     /**
      * Get Refresh Token
      * 
-     * @param array $params
-     * @return refresh token
+     * @param AccessToken $accessToken
+     * @return null|CommonToken
      */
-    public function refresh($params) {
+    public function refresh(AccessToken $accessToken): ?CommonToken {
         // Initialize Refresh Token
         $refresh = null;
 
-        // Find Refresh Token
-        if(!empty($params['token_type'])) {
-            if($params['token_type'] === 'google') {
-                $refresh = $this->google->refresh($params);
-            } elseif($params['token_type'] === 'facebook') {
-                $refresh = $this->facebook->refresh($params);
-            }
+        // Validate Access Token
+        switch($params['token_type']) {
+            case 'google':
+                $refresh = $this->google->refresh($accessToken);
+            break;
+            case 'office365':
+                $refresh = $this->azure->refresh($accessToken);
+            break;
+            case 'facebook':
+                $refresh = $this->facebook->refresh($accessToken);
+            break;
         }
 
         // Return Refresh Token

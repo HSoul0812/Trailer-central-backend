@@ -119,7 +119,7 @@ class CatalogService implements CatalogServiceInterface
         $params['relation_id'] = $catalog->id;
 
         // Find Refresh Token
-        $refresh = $this->auth->refresh($params);
+        $refresh = $this->sdk->refresh($params);
         if(!empty($refresh)) {
             $params['refresh_token'] = $refresh['access_token'];
             if(isset($refresh['expires_in'])) {
@@ -139,7 +139,7 @@ class CatalogService implements CatalogServiceInterface
             $params['relation_id'] = $page->id;
 
             // Get Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh;
             } else {
@@ -178,7 +178,7 @@ class CatalogService implements CatalogServiceInterface
         // Access Token is Set?
         if(isset($params['access_token']) && empty($params['refresh_token'])) {
             // Find Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh['access_token'];
                 if(isset($refresh['expires_in'])) {
@@ -202,7 +202,7 @@ class CatalogService implements CatalogServiceInterface
             $params['relation_id'] = $page->id;
 
             // Get Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh;
             } else {

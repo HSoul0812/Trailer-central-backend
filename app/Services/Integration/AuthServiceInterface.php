@@ -4,6 +4,7 @@ namespace App\Services\Integration;
 
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
 
 interface AuthServiceInterface {
     /**
@@ -30,7 +31,56 @@ interface AuthServiceInterface {
      */
     public function update($params);
 
-    
+    /**
+     * Get Login URL
+     * 
+     * @param string $tokenType
+     * @param array $scopes
+     * @param string $relationType
+     * @param int $relationId
+     * @param null|string $redirectUri
+     * @throws InvalidAuthLoginTokenTypeException
+     * @return array{url: string, ?state: string}
+     */
+    public function login(string $tokenType, array $scopes, string $relationType, int $relationId, ?string $redirectUri = null): array;
+
+    /**
+     * Handle Auth Code
+     * 
+     * @param string $tokenType
+     * @param string $code
+     * @param null|string $redirectUri
+     * @param null|array $scopes
+     * @throws InvalidAuthLoginTokenTypeException
+     * @return EmailToken
+     */
+    public function code(string $tokenType, string $code, ?string $redirectUri = null, ?array $scopes = null): EmailToken;
+
+    /**
+     * Authorize Login and Retrieve Tokens
+     * 
+     * @param string $tokenType
+     * @param string $code
+     * @param null|string $state
+     * @param null|string $redirectUri
+     * @param null|array $scopes
+     * @param null|string $relationType
+     * @param null|int $relationId
+     * @throws InvalidAuthCodeTokenTypeException
+     * @return array<TokenTransformer>
+     */
+    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null,
+                                ?array $scopes = null, ?string $relationType = null, ?int $relationId = null): array;
+
+    /**
+     * Get Refresh Token
+     * 
+     * @param AccessToken $accessToken
+     * @return null|CommonToken
+     */
+    public function refresh(AccessToken $accessToken): ?CommonToken;
+
+
     /**
      * Validate Access Token
      * 
