@@ -51,9 +51,11 @@ interface SalesAuthServiceInterface {
     /**
      * Return Response
      * 
-     * @param array $params
+     * @param int $salesPersonId
      * @param null|AccessToken $accessToken
-     * @return array
+     * @return array{sales_person: array<SalesPersonTransformer>,
+     *               data: ?array<AccessToken>,
+     *               validate: array<ValidateTokenTransformer>}
      */
-    public function response(array $params, ?AccessToken $accessToken = null): array;
+    public function response(int $salesPersonId, ?AccessToken $accessToken = null): array;
 }
