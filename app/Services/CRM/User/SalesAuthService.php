@@ -191,8 +191,6 @@ class SalesAuthService implements SalesAuthServiceInterface
      *               sales_person: array<SalesPersonTransformer>}
      */
     public function authorize(AuthorizeSalesAuthRequest $request) {
-    //public function authorize(string $tokenType, string $code, int $userId, ?string $state = null,
-    //        ?string $redirectUri = null, ?array $scopes = null, ?int $salesPersonId = null): array {
         // Find Sales Person By State
         if(!empty($request->state)) {
             $stateToken = $this->tokens->getByState($request->state);
@@ -221,7 +219,10 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Fill Correct Access Token Details
         $accessToken = $this->tokens->update($emailToken->toArray($stateToken->id ?? null,
-                                                $request->token_type, 'sales_person', $salesPerson->id));
+                $request->token_type, 'sales_person', $salesPerson->id, $request->state));
+        if($accessToken->id !== $stateToken->id) {
+            $this->tokens->delete(['id' => $stateToken->id]);
+        }
 
         // Return Response
         return $this->response($salesPerson->id, $accessToken);

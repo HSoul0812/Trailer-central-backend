@@ -373,6 +373,7 @@ class CommonToken
      * @param null|string $tokenType
      * @param null|string $relationType
      * @param null|int $relationId
+     * @param null|string $state
      * @return array{access_token: string,
      *               refresh_token: string,
      *               id_token: string,
@@ -383,9 +384,11 @@ class CommonToken
      *               ?id: null|int,
      *               ?token_type: null|string,
      *               ?relation_type: null|string,
-     *               ?relation_id: null|int}
+     *               ?relation_id: null|int,
+     *               ?state: null|string}
      */
-    public function toArray(?int $id = null, ?string $tokenType = null, ?string $relationType = null, ?int $relationId = null): array {
+    public function toArray(?int $id = null, ?string $tokenType = null, ?string $relationType = null,
+            ?int $relationId = null, ?string $state = null): array {
         // Initialize Common Token Array
         $result = [
             'access_token' => $this->accessToken,
@@ -411,6 +414,11 @@ class CommonToken
         if(!empty($relationType) && !empty($relationId)) {
             $result['relation_type'] = $relationType;
             $result['relation_id'] = $relationId;
+        }
+
+        // Append State
+        if(!empty($state)) {
+            $result['state'] = $state;
         }
 
         // Return Result Array

@@ -60,6 +60,7 @@ class EmailToken extends CommonToken
      * @param null|string $tokenType
      * @param null|string $relationType
      * @param null|int $relationId
+     * @param null|string $state
      * @return array{access_token: string,
      *               refresh_token: string,
      *               id_token: string,
@@ -73,11 +74,13 @@ class EmailToken extends CommonToken
      *               ?id: null|int,
      *               ?token_type: null|string,
      *               ?relation_type: null|string,
-     *               ?relation_id: null|int}
+     *               ?relation_id: null|int,
+     *               ?state: null|string}
      */
-    public function toArray(?int $id = null, ?string $tokenType = null, ?string $relationType = null, ?int $relationId = null): array {
+    public function toArray(?int $id = null, ?string $tokenType = null, ?string $relationType = null,
+            ?int $relationId = null, ?string $state = null): array {
         // Initialize Array
-        $array = parent::toArray($id, $tokenType, $relationType, $relationId);
+        $array = parent::toArray($id, $tokenType, $relationType, $relationId, $state);
 
         // Return Merged Array With Name and Email
         return array_merge($array, [

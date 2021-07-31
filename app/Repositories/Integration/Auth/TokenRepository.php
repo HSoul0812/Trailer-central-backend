@@ -208,11 +208,6 @@ class TokenRepository implements TokenRepositoryInterface {
      * @return QueryBuilder
      */
     public function find($params) {
-        // Token ID Exists?
-        if (isset($params['id'])) {
-            return AccessToken::findOrFail($params['id']);
-        }
-
         // Relation Exists?
         if (isset($params['relation_type']) && isset($params['relation_id'])) {
             // Find Token From Relation
@@ -235,6 +230,11 @@ class TokenRepository implements TokenRepositoryInterface {
             if(!empty($accessToken->id)) {
                 return $accessToken;
             }
+        }
+
+        // Token ID Exists?
+        if (isset($params['id'])) {
+            return AccessToken::findOrFail($params['id']);
         }
 
         // Return Empty
