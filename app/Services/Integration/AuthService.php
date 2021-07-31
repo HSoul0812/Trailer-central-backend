@@ -341,6 +341,7 @@ class AuthService implements AuthServiceInterface
         } else {
             $token = ['data' => null];
         }
+        var_dump($response);
 
         // Return Response
         return array_merge($response, $token, $validate);
