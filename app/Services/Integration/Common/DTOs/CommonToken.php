@@ -391,6 +391,7 @@ class CommonToken
             ?int $relationId = null, ?string $state = null): array {
         // Initialize Common Token Array
         $result = [
+            'dealer_id' => $this->dealerId,
             'access_token' => $this->accessToken,
             'refresh_token' => $this->refreshToken,
             'id_token' => $this->idToken,

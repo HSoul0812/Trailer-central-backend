@@ -217,9 +217,13 @@ class SalesAuthService implements SalesAuthServiceInterface
             $salesPerson = $this->salesPersonService->create($params);
         }
 
+        // Create Token Params
+        $token = $emailToken->toArray($stateToken->id ?? null, $request->token_type,
+                'sales_person', $salesPerson->id, $request->state);
+        $token['dealer_id'] = $request->dealer_id;
+
         // Fill Correct Access Token Details
-        $accessToken = $this->tokens->update($emailToken->toArray($stateToken->id ?? null,
-                $request->token_type, 'sales_person', $salesPerson->id, $request->state));
+        $accessToken = $this->tokens->update($token);
         if($accessToken->id !== $stateToken->id) {
             $this->tokens->delete(['id' => $stateToken->id]);
         }
