@@ -343,6 +343,6 @@ class AuthService implements AuthServiceInterface
         }
 
         // Return Response
-        return array($response, $validate);
+        return array_merge($response, $validate);
     }
 }

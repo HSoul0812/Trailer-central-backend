@@ -224,20 +224,22 @@ class SalesAuthService implements SalesAuthServiceInterface
                                                 $request->token_type, 'sales_person', $salesPerson->id));
 
         // Return Response
-        return $this->response(['relation_id' => $salesPerson->id], $accessToken);
+        return $this->response($salesPerson->id, $accessToken);
     }
 
 
     /**
      * Return Response
      * 
-     * @param array $params
+     * @param int $salesPersonId
      * @param null|AccessToken $accessToken
-     * @return array
+     * @return array{sales_person: array<SalesPersonTransformer>,
+     *               data: ?array<AccessToken>,
+     *               validate: array<ValidateTokenTransformer>}
      */
-    public function response(array $params, ?AccessToken $accessToken = null): array {
+    public function response(int $salesPersonId, ?AccessToken $accessToken = null): array {
         // Get Sales Person Fractal
-        $response = $this->salesResponse($params['relation_id']);
+        $response = $this->salesResponse($salesPersonId);
 
         // Set Defaults
         $response['data'] = null;
