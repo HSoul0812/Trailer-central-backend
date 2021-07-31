@@ -84,7 +84,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         $accessToken = $this->tokens->getRelation($params);
 
         // Return Response
-        return $this->response($params, $accessToken);
+        return $this->response($params['relation_id'], $accessToken);
     }
 
     /**
@@ -108,7 +108,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         }
 
         // Return Response
-        return $this->response($params, $accessToken);
+        return $this->response($params['relation_id'], $accessToken);
     }
 
     /**
@@ -139,7 +139,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         }
 
         // Return Response
-        return $this->response($params, $accessToken);
+        return $this->response($params['relation_id'], $accessToken);
     }
 
     /**
