@@ -337,12 +337,12 @@ class AuthService implements AuthServiceInterface
         // Convert Token to Array
         if(!empty($accessToken)) {
             $data = new Item($accessToken, new TokenTransformer(), 'data');
-            $response = $this->fractal->createData($data)->toArray();
+            $token = $this->fractal->createData($data)->toArray();
         } else {
-            $response = ['data' => null];
+            $token = ['data' => null];
         }
 
         // Return Response
-        return array_merge($response, $validate);
+        return array_merge($response, $token, $validate);
     }
 }
