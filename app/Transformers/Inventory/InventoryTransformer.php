@@ -2,6 +2,7 @@
 
 namespace App\Transformers\Inventory;
 
+use App\Transformers\Dms\ServiceOrderTransformer;
 use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
@@ -22,16 +23,19 @@ class InventoryTransformer extends TransformerAbstract
 
     protected $imageTransformer;
 
+    protected $serviceOrderTransformer;
+
     public function __construct()
     {
         $this->userTransformer = new UserTransformer();
         $this->dealerLocationTransformer = new DealerLocationTransformer();
         $this->imageTransformer = new ImageTransformer();
+        $this->serviceOrderTransformer = new ServiceOrderTransformer();
     }
 
     public function transform(Inventory $inventory)
     {
-	 return [
+        return [
              'id' => $inventory->inventory_id,
              'active' => $inventory->active,
              'archived_at' => $inventory->archived_at,
@@ -40,7 +44,7 @@ class InventoryTransformer extends TransformerAbstract
              'brand' => $inventory->brand,
              'category' => $inventory->category,
              'category_label' => $inventory->category_label,
-             'condition' => $inventory->condition,             
+             'condition' => $inventory->condition,
              'dealer' => $this->userTransformer->transform($inventory->user),
              'dealer_location_id' => $inventory->dealer_location_id,
              'dealer_location' => $inventory->dealerLocation ? $this->dealerLocationTransformer->transform($inventory->dealerLocation) : null,
@@ -82,7 +86,8 @@ class InventoryTransformer extends TransformerAbstract
              'url' => $inventory->getUrl(),
              'floorplan_vendor' => $inventory->floorplanVendor,
              'created_at' => $inventory->created_at,
-             'updated_at' => $inventory->updated_at
+             'updated_at' => $inventory->updated_at,
+             'repair_orders' => $this->transformRepairOrders($inventory->repairOrders),
          ];
     }
 
@@ -98,5 +103,15 @@ class InventoryTransformer extends TransformerAbstract
             $ret[] = $this->imageTransformer->transform($img);
         }
         return $ret;
+    }
+
+    private function transformRepairOrders(Collection $repairOrders)
+    {
+        $ros = [];
+        foreach($repairOrders as $repairOrder) {
+            $ros[] = $this->serviceOrderTransformer->transform($repairOrder);
+        }
+
+        return $ros;
     }
 }
