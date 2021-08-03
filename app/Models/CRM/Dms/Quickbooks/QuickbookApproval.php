@@ -48,6 +48,7 @@ class QuickbookApproval extends Model
         'qb_items_new' => 'Item (New)',
         'inventory_floor_plan_payment' => 'Floorplan Payment',
         'dealer_refunds' => 'Refunds Receipt',
+        'dealer_location' => 'Dealer location',
     ];
 
     protected $table = 'quickbook_approval';

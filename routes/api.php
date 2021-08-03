@@ -460,6 +460,7 @@ $api->version('v1', function ($route) {
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
         $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
         $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
         $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
