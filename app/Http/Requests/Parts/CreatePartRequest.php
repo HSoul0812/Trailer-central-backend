@@ -13,7 +13,7 @@ class CreatePartRequest extends Request {
 
     protected $rules = [
         'dealer_id' => 'integer|required',
-        'vendor_id' => 'required|integer',
+        'vendor_id' => 'nullable|integer',
         'vehicle_specific_id' => 'nullable|integer',
         'manufacturer_id' => 'integer',
         'brand_id' => 'required|integer',

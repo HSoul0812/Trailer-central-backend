@@ -8,6 +8,7 @@ use App\Models\User\DealerLocation;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class DealerLocationRepository implements DealerLocationRepositoryInterface
@@ -66,6 +67,10 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
     public function getAll($params): LengthAwarePaginator
     {
         $query = $this->getQueryBuilder($params);
+
+        if (isset($params['search_term'])) {
+            $query = $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
+        }
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
@@ -268,5 +273,26 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         }
 
         return $query;
+    }
+
+    /**
+     * @param string $name
+     * @param int $dealerId
+     * @param int|null $dealerLocationId
+     * @return bool true if exists
+     */
+    public function existByName(string $name, int $dealerId, ?int $dealerLocationId): bool
+    {
+        $query = DealerLocation::select('*');
+
+        $query->where('dealer_id', '=', $dealerId);
+
+        if ($dealerLocationId) {
+            $query->where('dealer_location_id', '!=', $dealerLocationId);
+        }
+
+        $query->whereRaw('LOWER(name) = ?', ['name' => Str::lower($name)]);
+
+        return $query->exists();
     }
 }

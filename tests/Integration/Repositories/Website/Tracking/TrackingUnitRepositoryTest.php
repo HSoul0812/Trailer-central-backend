@@ -9,7 +9,7 @@ use App\Repositories\Website\Tracking\TrackingUnitRepository;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use Tests\database\seeds\Website\Tracking\TrackingUnitSeeder;
 use Tests\TestCase;
-use Tests\Unit\WithMySqlConstraintViolationsParser;
+use Tests\Integration\WithMySqlConstraintViolationsParser;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Collection;
 

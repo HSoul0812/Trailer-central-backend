@@ -12,6 +12,8 @@ use Illuminate\Support\Carbon;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
+    protected $model;
+    
     /**
      * list if ES index fields that have a 'keyword' field
      */
@@ -25,6 +27,10 @@ class CustomerRepository implements CustomerRepositoryInterface
         'region' => 'region.keyword',
         'postal_code' => 'postal_code.keyword',
     ];
+    
+    public function __construct(Customer $customer) {
+        $this->model = $customer;
+    }
 
     public function create($params)
     {
@@ -56,7 +62,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     }
 
     public function get($params) {
-        return Customer::findOrFail($params['id']);
+        return $this->model->findOrFail($params['id']);
     }
 
     public function getAll($params) {
@@ -166,7 +172,7 @@ class CustomerRepository implements CustomerRepositoryInterface
                         'multi_match' => [
                             'query' => trim($query['query']),
                             'fuzziness' => 'AUTO',
-                            'fields' => ['display_name^2', 'first_name', 'last_name', 'email', 'company_name', 'home_phone', 'cell_phone', 'work_phone']
+                            'fields' => ['display_name^3', 'first_name^2', 'last_name^2', 'email^0.5', 'company_name^0.5', 'home_phone', 'cell_phone', 'work_phone']
                         ],
                     ],
                     'minimum_should_match' => 1,

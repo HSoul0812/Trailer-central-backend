@@ -12,6 +12,7 @@ use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Collection;
 
 class InteractionsRepository implements InteractionsRepositoryInterface {
     
@@ -104,6 +105,34 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $query = $this->addSortQuery($query, $params['sort']);
         
         return $query->paginate($params['per_page'])->appends($params);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function getFirst10(array $params) : Collection {
+        // Get User ID
+        $query = Interaction::select(
+                ['interaction_id', 
+                 'lead_product_id', 
+                 'tc_lead_id', 
+                 'user_id', 
+                 'interaction_type',
+                 'interaction_notes',
+                 'interaction_time',
+                 'sent_by',
+                 'from_email',
+                  DB::raw('"" AS to_no')])->where('tc_lead_id', $params['lead_id']);
+
+        $query->limit(10);
+
+        if (!isset($params['include_texts']) || !empty($params['include_texts'])) {
+            $query = $this->addTextUnion($query, $params);
+        }
+
+        $query = $this->addSortQuery($query, 'created_at');
+        
+        return $query->get();
     }
 
     public function update($params) {
