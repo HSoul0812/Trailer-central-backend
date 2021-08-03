@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
 use App\Models\User\User as Dealer;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Collection;
+use App\Repositories\Dms\Customer\InventoryRepositoryInterface;
+use App\Models\CRM\Leads\Lead;
 use Carbon\Carbon;
 
 /**
@@ -209,5 +213,16 @@ class Customer extends Model
             return $this->region;
         }
         return $this->regionName->region_code ?? '';
+    }
+    
+    public function getOwnedUnitsAttribute() : Collection
+    {
+        $inventoryRepo = app(InventoryRepositoryInterface::class);
+        return $inventoryRepo->getAll(['customer_id' => $this->id], false);
+    }
+    
+    public function lead() : HasOne
+    {
+        return $this->hasOne(Lead::class, 'identifier', 'website_lead_id');
     }
 }

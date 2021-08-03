@@ -16,6 +16,7 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Http\Requests\Dms\GetCustomersRequest;
 use App\Http\Requests\Dms\CreateCustomerRequest;
 use App\Transformers\Dms\CustomerTransformer;
+use App\Transformers\Dms\Customer\CustomerDetailTransformer;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
@@ -82,9 +83,21 @@ class CustomerController extends RestfulControllerV2
         }
     }
     
-//    public function show(int $id) {
-//        $this->response->item($this->customerRepository->get(['id' => $id]), $this->transformer);
-//    }
+    public function show(int $id) {
+        $customer = $this->customerRepository->get(['id' => $id]);
+        
+        $response = $this->response
+                ->item($customer, new CustomerDetailTransformer())
+                ->addMeta('major_units_link', config('app.new_design_crm_url'))
+                ->addMeta('service_link', config('app.new_design_crm_url'))
+                ->addMeta('parts_link', config('app.new_design_crm_url'));
+        
+        if ($customer->lead) {
+            $response = $response->addMeta('see_more_interactions', config('app.url') . "/api/leads/{$customer->lead->identifier}/interactions");
+        }
+        
+        return $response;
+    }
 
     public function update($id, Request $request)
     {

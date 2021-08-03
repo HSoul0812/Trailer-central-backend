@@ -4,6 +4,7 @@ namespace App\Models\Website\Tracking;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Inventory\Inventory;
 
 /**
  * Class Website Tracking Unit
