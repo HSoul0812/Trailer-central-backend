@@ -302,7 +302,8 @@ class Inventory extends Model
         'utc_integration_updated_at',
         'has_stock_images',
         'qb_sync_processed',
-        'changed_fields_in_dashboard'
+        'changed_fields_in_dashboard',
+        'is_archived',
     ];
 
     protected $casts = [
@@ -484,7 +485,7 @@ class Inventory extends Model
 
     /**
      * Instead of using fp_interest_paid field from inventory table, calculate this amount from payment history table
-     * 
+     *
      * @return float An amount of interest paid
      */
     public function getInterestPaidAttribute(): float

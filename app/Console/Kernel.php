@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\Files\ClearLocalTmpFolder;
+use App\Console\Commands\Inventory\AutoArchiveSoldItems;
 use App\Console\Commands\Website\AddSitemaps;
 use App\Console\Commands\Website\GenerateDealerSpecificSiteUrls;
 use Illuminate\Console\Scheduling\Schedule;
@@ -41,6 +42,7 @@ class Kernel extends ConsoleKernel
         GetCompletedSaleWithNoFullInvoice::class,
         ClearLocalTmpFolder::class,
         GenerateDealerSpecificSiteUrls::class,
+        AutoArchiveSoldItems::class,
     ];
 
     /**
@@ -119,7 +121,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('text:auto-expire-phones')
                 ->weeklyOn(7, '4:00')
                 ->runInBackground();
-        
+
 
 
         /**
@@ -155,6 +157,10 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule->command('website:generate-dealer-specific-site-urls')
+            ->daily()
+            ->runInBackground();
+
+        $schedule->command('inventory:auto-archive-sold-items')
             ->daily()
             ->runInBackground();
 

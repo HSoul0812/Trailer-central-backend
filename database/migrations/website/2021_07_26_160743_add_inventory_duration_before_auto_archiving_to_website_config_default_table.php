@@ -12,9 +12,9 @@ class AddInventoryDurationBeforeAutoArchivingToWebsiteConfigDefaultTable extends
         'label' => 'Duration of Sold Unit Before Auto-Archiving',
         'note' => null,
         'grouping' => 'Inventory Display',
-        'values' => '{"-1":"Manually","0":"Immediately","1":"24 Hours","2":"48 Hours","7":"7 Days","14":"2 Weeks","21":"3 Weeks","28":"4 Weeks"}',
-        'default_label' => 'Manually',
-        'default_value' => '-1',
+        'values' => '{"0":"Auto Archive (immediately)","24":"24 Hours","48":"48 Hours","168":"7 Days","336":"2 Weeks","504":"3 Weeks","672":"4 Weeks"}',
+        'default_label' => 'Auto Archive (immediately)',
+        'default_value' => '0',
         'sort_order' => 1040,
     ];
 
