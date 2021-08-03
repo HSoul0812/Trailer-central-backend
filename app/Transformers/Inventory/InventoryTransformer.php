@@ -14,7 +14,11 @@ use App\Transformers\Website\WebsiteTransformer;
 class InventoryTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'website'
+        'website',
+    ];
+
+    protected $defaultIncludes = [
+        'repairOrders',
     ];
 
     protected $userTransformer;
@@ -23,14 +27,11 @@ class InventoryTransformer extends TransformerAbstract
 
     protected $imageTransformer;
 
-    protected $serviceOrderTransformer;
-
     public function __construct()
     {
         $this->userTransformer = new UserTransformer();
         $this->dealerLocationTransformer = new DealerLocationTransformer();
         $this->imageTransformer = new ImageTransformer();
-        $this->serviceOrderTransformer = new ServiceOrderTransformer();
     }
 
     public function transform(Inventory $inventory)
@@ -87,13 +88,20 @@ class InventoryTransformer extends TransformerAbstract
              'floorplan_vendor' => $inventory->floorplanVendor,
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
-             'repair_orders' => $this->transformRepairOrders($inventory->repairOrders),
          ];
     }
 
     public function includeWebsite($inventory)
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
+    }
+
+    public function includeRepairOrders($inventory) {
+        if (empty($inventory->repairOrders)) {
+            return [];
+        }
+
+        return $this->collection($inventory->repairOrders, new ServiceOrderTransformer());
     }
 
     private function transformImages(Collection $images)
@@ -103,15 +111,5 @@ class InventoryTransformer extends TransformerAbstract
             $ret[] = $this->imageTransformer->transform($img);
         }
         return $ret;
-    }
-
-    private function transformRepairOrders(Collection $repairOrders)
-    {
-        $ros = [];
-        foreach($repairOrders as $repairOrder) {
-            $ros[] = $this->serviceOrderTransformer->transform($repairOrder);
-        }
-
-        return $ros;
     }
 }
