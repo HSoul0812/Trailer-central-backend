@@ -183,6 +183,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
 
     /**
+     * Inventory Attributes
+     */
+    $route->get('inventory/features', 'App\Http\Controllers\v1\Inventory\FeatureController@index');
+
+    /**
      * Inventory transactions history
      */
     $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
@@ -247,6 +252,7 @@ $api->version('v1', function ($route) {
     $route->get('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@show')->where('id', '[0-9]+');
     $route->post('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@update')->where('id', '[0-9]+');
     $route->delete('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@destroy')->where('id', '[0-9]+');
+    $route->post('website/blog/bulk', 'App\Http\Controllers\v1\Website\Blog\BulkController@create');
 
     /**
      * Website Payment Calculator Settings
@@ -467,11 +473,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
-        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
-        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
-        $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
-        $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        
         /**
          * Inventory for customers
          */
@@ -479,6 +481,15 @@ $api->version('v1', function ($route) {
         $route->get('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@getAllByCustomer')->where('customer_id', '[0-9]+');
         $route->delete('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@bulkDestroy')->where('customer_id', '[0-9]+');
         $route->post('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@attach')->where('customer_id', '[0-9]+');
+        
+        
+        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');        
+        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
+        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
+        $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
+        $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        $route->delete('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@destroy');
+        $route->get('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@show');
 
         /*
         |--------------------------------------------------------------------------
@@ -833,6 +844,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('refunds', 'App\Http\Controllers\v1\Dms\RefundController@index');
+        $route->get('refunds/{id}', 'App\Http\Controllers\v1\Dms\RefundController@show');
 
         /*
         |--------------------------------------------------------------------------
@@ -985,4 +997,15 @@ $api->version('v1', function ($route) {
     */
     $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
     $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Files
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
+    $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
 });

@@ -9,6 +9,9 @@ use App\Helpers\SanitizeHelper;
 use App\Services\File\DTOs\FileDto;
 use App\Traits\CompactHelper;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class ImageService
@@ -22,9 +25,9 @@ class ImageService extends AbstractFileService
     private $imageHelper;
 
     private const EXTENSION_MAPPING = [
-        "image/gif" => ".gif",
-        "image/jpeg" => ".jpg",
-        "image/png" => ".png",
+        "image/gif" => "gif",
+        "image/jpeg" => "jpg",
+        "image/png" => "png",
     ];
 
     public function __construct(Client $httpClient, SanitizeHelper $sanitizeHelper, ImageHelper $imageHelper)
@@ -81,5 +84,41 @@ class ImageService extends AbstractFileService
         unlink($localFilename);
 
         return new FileDto($s3Path, $hash);
+    }
+
+    /**
+     * @param array $data
+     * @return FileDto
+     *
+     * @throws ImageUploadException
+     * @throws FileUploadException
+     * @throws FileNotFoundException
+     */
+    public function uploadLocal(array $data): FileDto
+    {
+        if (!isset($data['file']) || !$data['file'] instanceof UploadedFile) {
+            throw new ImageUploadException("file has been missed");
+        }
+
+        $file = $data['file'];
+
+        if (!in_array($file->getMimeType(), array_keys(self::EXTENSION_MAPPING))) {
+            throw new ImageUploadException("Not expected mime type");
+        }
+
+        $content = $file->get();
+
+        $params['dealer_id'] = $data['dealer_id'] ?? null;
+        $params['extension'] = self::EXTENSION_MAPPING[$file->getMimeType()];
+
+        $localDisk = Storage::disk('local_tmp');
+
+        $localFilename = $this->uploadLocalByContent($content, $localDisk, $params);
+
+        $hash = sha1_file($localFilename);
+
+        $url = $localDisk->url(str_replace($localDisk->path(''),'', $localFilename));
+
+        return new FileDto($localFilename, $hash, null, $url);
     }
 }

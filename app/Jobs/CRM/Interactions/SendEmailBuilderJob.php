@@ -55,7 +55,7 @@ class SendEmailBuilderJob extends Job
             return true;
         } catch (\Exception $e) {
             $log->error('Email Builder Mail error: ' . $e->getMessage(), $e->getTrace());
-            throw new SendEmailBuilderJobFailedException($e);
+            throw new SendEmailBuilderJobFailedException();
         }
     }
 }

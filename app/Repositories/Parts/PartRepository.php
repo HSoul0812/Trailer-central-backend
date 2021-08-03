@@ -85,11 +85,11 @@ class PartRepository implements PartRepositoryInterface {
             'direction' => 'ASC'
         ],
         'stock' => [
-            'field' => 'stock',
+            'field' => 'sku',
             'direction' => 'DESC'
         ],
         '-stock' => [
-            'field' => 'stock',
+            'field' => 'sku',
             'direction' => 'ASC'
         ]
     ];
@@ -529,7 +529,7 @@ class PartRepository implements PartRepositoryInterface {
         } else {
             throw new \Exception('Query is required');
         }
-
+        
         // vendor id
         if ($query['vendor_id'] ?? null) {
             $search->filter('term', ['vendor_id' => $query['vendor_id']]);

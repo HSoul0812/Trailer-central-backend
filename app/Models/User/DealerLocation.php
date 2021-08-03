@@ -4,12 +4,14 @@ namespace App\Models\User;
 
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
+use App\Models\Region;
 use App\Models\Observers\User\DealerLocationObserver;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
 use App\Models\User\Location\QboLocationMapping;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -52,6 +54,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read DealerLocationSalesTax $salesTax
  * @property-read QboLocationMapping $qboMapping
+ * @property Region $locationRegion
+ * @property NewDealerUser $dealer
+ * @property User $user
  *
  * @method static \Illuminate\Database\Query\Builder select($columns = ['*'])
  * @method static \Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
@@ -133,11 +138,19 @@ class DealerLocation extends Model
     ];
 
     /**
-     * @return type
+     * @return BelongsTo
      */
-    public function dealer()
+    public function dealer(): BelongsTo
     {
         return $this->belongsTo(NewDealerUser::class, 'dealer_id', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 
     /**
@@ -191,9 +204,20 @@ class DealerLocation extends Model
         return $this->belongsTo(Number::class, 'sms_phone', 'dealer_number');
     }
 
+    /**
+     * @return HasMany
+     */
     public function fees(): HasMany
     {
         return $this->hasMany(DealerLocationQuoteFee::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function locationRegion(): BelongsTo
+    {
+        return $this->belongsTo(Region::class, 'region', 'region_code');
     }
 
     public function hasRelatedRecords(): bool

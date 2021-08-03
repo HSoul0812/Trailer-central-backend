@@ -68,6 +68,10 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
     {
         $query = $this->getQueryBuilder($params);
 
+        if (isset($params['search_term'])) {
+            $query = $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
+        }
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }

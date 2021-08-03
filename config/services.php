@@ -25,11 +25,16 @@ return [
     ],
 
     'ses' => [
-        'key' => env('MAIL_USERNAME'),
-        'secret' => env('MAIL_PASSWORD'),
-        'region' => env('MAIL_DEFAULT_REGION', 'us-east-1'),
+        'key' => env('SES_KEY'),
+        'secret' => env('SES_SECRET'),
+        'region' => env('SES_REGION', 'us-east-1'),
+        'token' => env('SES_TOKEN'),
         'options' => [
-            'ConfigurationSetName' => env('MAIL_CONFIG_SET'),
+            'ConfigurationSetName' => env('SES_CONFIG_SET'),
+        ],
+        'from' => [
+            'address' => env('SES_FROM_ADDRESS', env('MAIL_FROM_ADDRESS', 'noreply@operatebeyond.com')),
+            'name' => env('SES_FROM_NAME', env('MAIL_FROM_NAME', 'OperateBeyond')),
         ]
     ],
 

@@ -6,14 +6,15 @@ use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
 use App\Models\CRM\Dms\Payment\DealerSalesReceipt;
 use App\Models\Pos\Sale;
+use App\Models\Traits\TableAware;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Arr;
-//use Znck\Eloquent\Relations\BelongsToThrough;
-//use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
+use Znck\Eloquent\Relations\BelongsToThrough;
+use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
 
 /**
  * Class Refund
@@ -39,7 +40,7 @@ use Illuminate\Support\Arr;
  */
 class Refund extends Model implements Filterable
 {
-//    use BelongsToThroughTrait;
+    use BelongsToThroughTrait, TableAware;
 
     protected $table = "dealer_refunds";
 

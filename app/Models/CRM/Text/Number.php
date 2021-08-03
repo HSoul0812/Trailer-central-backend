@@ -2,8 +2,9 @@
 
 namespace App\Models\CRM\Text;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dealer\DealerLocation;
+use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Text Number
@@ -12,7 +13,17 @@ use App\Models\CRM\Dealer\DealerLocation;
  */
 class Number extends Model
 {
-    protected $table = 'dealer_texts';
+    use TableAware;
+
+    // Expiration time set to 120 hours
+    const EXPIRATION_TIME = 120;
+
+    /**
+     * @var string
+     */
+    const TABLE_NAME = 'dealer_texts';
+
+    protected $table = self::TABLE_NAME;
 
     /**
      * The attributes that are mass assignable.
@@ -29,9 +40,6 @@ class Number extends Model
 
     // No Timestamps
     public $timestamps = false;
-
-    // Expiration time set to 120 hours
-    const EXPIRATION_TIME = 120;
 
     /**
      * @return type

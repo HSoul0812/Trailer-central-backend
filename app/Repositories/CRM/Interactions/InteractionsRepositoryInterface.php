@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\Interactions;
 
 use App\Repositories\Repository;
+use Illuminate\Database\Eloquent\Collection;
 
 interface InteractionsRepositoryInterface extends Repository {
 
@@ -20,5 +21,13 @@ interface InteractionsRepositoryInterface extends Repository {
      * @return array
      */
     public function getTasksSortFields();
+    
+    /**
+     * Returns first 10 interactions (text logs, emails, drafts)
+     * 
+     * @param array $params
+     * @return Collection
+     */
+    public function getFirst10(array $params) : Collection;
     
 }
