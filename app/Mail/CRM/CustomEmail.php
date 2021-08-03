@@ -131,8 +131,8 @@ class CustomEmail extends Mailable
     public static function getCustomSesMailer(Application $app, array $config = []): Mailer
     {
         // Set Defaults
-        $fromEmail = $config['fromEmail'] ?? config('mail.from.address');
-        $fromName = $config['fromName'] ?? config('mail.from.name');
+        $fromEmail = $config['fromEmail'] ?? config('services.ses.from.address');
+        $fromName = $config['fromName'] ?? config('services.ses.from.name');
 
         // Get SES Driver
         $transport = new TransportManager($app);
