@@ -31,6 +31,10 @@ return [
         'token' => env('SES_TOKEN'),
         'options' => [
             'ConfigurationSetName' => env('SES_CONFIG_SET'),
+        ],
+        'from' => [
+            'address' => env('SES_FROM_ADDRESS', env('MAIL_FROM_ADDRESS', 'noreply@operatebeyond.com')),
+            'name' => env('SES_FROM_NAME', env('MAIL_FROM_NAME', 'OperateBeyond')),
         ]
     ],
 
