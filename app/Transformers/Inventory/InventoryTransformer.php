@@ -15,9 +15,6 @@ class InventoryTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
         'website',
-    ];
-
-    protected $defaultIncludes = [
         'repairOrders',
     ];
 
