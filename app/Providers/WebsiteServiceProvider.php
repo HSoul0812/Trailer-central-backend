@@ -34,6 +34,10 @@ class WebsiteServiceProvider extends ServiceProvider
 
         // Services
         $this->app->bind(WebsiteDealerUrlServiceInterface::class, WebsiteDealerUrlService::class);
+
+        // Blog
+        $this->app->bind('App\Repositories\Website\Blog\BulkRepositoryInterface', 'App\Repositories\Website\Blog\BulkRepository');
+        $this->app->bind('App\Services\Import\Blog\CsvImportServiceInterface', 'App\Services\Import\Blog\CsvImportService');
     }
 
 }

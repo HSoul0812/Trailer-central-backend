@@ -110,19 +110,9 @@ class PaymentService implements PaymentServiceInterface
                     'amount' => $payment['amount'],
                     'description' => 'VIN: ' . $inventory->vin . ', Stock: ' . $inventory->stock
                 ];
-                // Adjust balance
-                if ($isBalancePayment) {
-                    $this->inventoryRepository->update([
-                        'inventory_id' => $payment['inventory_id'],
-                        'fp_balance' => (float) $inventory->fp_balance - (float) $payment['amount']
-                    ]);
-                } else {
-                    $this->inventoryRepository->update([
-                        'inventory_id' => $payment['inventory_id'],
-                        'fp_interest_paid' => (float) $inventory->fp_interest_paid + (float) $payment['amount']
-                    ]);
-                }
             }
+            // Add payment history
+            $this->payment->createBulk($params['payments']);
 
             $expense = $this->expenseRepo->create([
                 'dealer_id' => $params['dealer_id'],

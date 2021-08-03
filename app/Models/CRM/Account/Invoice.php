@@ -3,8 +3,12 @@
 namespace App\Models\CRM\Account;
 
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\CRM\User\Customer;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class Invoice
@@ -15,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property UnitSale $unitSale
  * @property Payment[] $payments
  * @property InvoiceItem[] $items
+ * @property Customer $customer
  */
 class Invoice extends Model implements Filterable
 {
@@ -27,19 +32,36 @@ class Invoice extends Model implements Filterable
 
     public $timestamps = false;
 
-    public function unitSale()
+    /**
+     * @return HasOne
+     */
+    public function unitSale(): HasOne
     {
         return $this->hasOne(UnitSale::class, 'id', 'unit_sale_id');
     }
 
-    public function payments()
+    /**
+     * @return HasMany
+     */
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
-    public function items()
+    /**
+     * @return HasMany
+     */
+    public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function jsonApiFilterableColumns(): ?array

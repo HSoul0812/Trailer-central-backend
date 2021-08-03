@@ -183,6 +183,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
 
     /**
+     * Inventory Attributes
+     */
+    $route->get('inventory/features', 'App\Http\Controllers\v1\Inventory\FeatureController@index');
+
+    /**
      * Inventory transactions history
      */
     $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
@@ -247,6 +252,7 @@ $api->version('v1', function ($route) {
     $route->get('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@show')->where('id', '[0-9]+');
     $route->post('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@update')->where('id', '[0-9]+');
     $route->delete('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@destroy')->where('id', '[0-9]+');
+    $route->post('website/blog/bulk', 'App\Http\Controllers\v1\Website\Blog\BulkController@create');
 
     /**
      * Website Payment Calculator Settings
@@ -471,6 +477,7 @@ $api->version('v1', function ($route) {
         $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
         $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
         $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        $route->delete('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@destroy');
         /**
          * Inventory for customers
          */
@@ -836,6 +843,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('refunds', 'App\Http\Controllers\v1\Dms\RefundController@index');
+        $route->get('refunds/{id}', 'App\Http\Controllers\v1\Dms\RefundController@show');
 
         /*
         |--------------------------------------------------------------------------

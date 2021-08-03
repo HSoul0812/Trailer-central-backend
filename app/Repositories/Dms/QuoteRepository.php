@@ -74,6 +74,9 @@ class QuoteRepository implements QuoteRepositoryInterface {
                     // also search extra inventory
                     ->orWhereHas('extraInventory', function($q) use($params) {
                         $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
+                    })
+                    ->orWhereHas('inventory', function($q) use($params) {
+                        $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
                     });
             });
         }
@@ -136,6 +139,9 @@ class QuoteRepository implements QuoteRepositoryInterface {
                     ->orWhere('total_price', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhereHas('customer', function($q) use($params) {
                         $q->where('display_name', 'LIKE', '%' . $params['search_term'] . '%');
+                    })
+                    ->orWhereHas('inventory', function($q) use($params) {
+                        $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
                     });
             });
         }
