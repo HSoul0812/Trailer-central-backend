@@ -224,7 +224,7 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Fill Correct Access Token Details
         $accessToken = $this->tokens->update($token);
-        if($accessToken->id !== $stateToken->id) {
+        if(!empty($stateToken->id) && $accessToken->id !== $stateToken->id) {
             $this->tokens->delete(['id' => $stateToken->id]);
         }
 
