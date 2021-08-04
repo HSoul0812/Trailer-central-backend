@@ -21,10 +21,7 @@ class LoginSalesAuthRequest extends Request {
         'is_financing' => 'boolean',
         'is_trade' => 'boolean',
         'signature' => 'nullable|string',
-        'dealer_location_id' => 'nullable|dealer_location_valid',
-        'folders' => 'array',
-        'folders.*.id' => 'int',
-        'folders.*.name' => 'string'
+        'dealer_location_id' => 'nullable|dealer_location_valid'
     ];
 
 }

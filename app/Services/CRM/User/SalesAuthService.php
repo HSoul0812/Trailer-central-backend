@@ -200,18 +200,17 @@ class SalesAuthService implements SalesAuthServiceInterface
         $emailToken = $this->auth->code($request->token_type, $request->auth_code, $request->redirect_uri, $request->scopes);
 
         // Initialize Params for Sales Person
-        $params = [
-            'user_id'    => $request->user_id,
-            'first_name' => $emailToken->firstName,
-            'last_name'  => $emailToken->lastName,
-            'email'      => $emailToken->emailAddress,
-            'smtp_email' => $emailToken->emailAddress,
-            'imap_email' => $emailToken->emailAddress
-        ];
+        $params = $request->all();
+        $params['first_name'] = !empty($params['first_name']) ? $params['first_name'] : $emailToken->firstName;
+        $params['last_name']  = !empty($params['last_name']) ? $params['last_name'] : $emailToken->lastName;
+        $params['email']      = !empty($params['email']) ? $params['email'] : $emailToken->emailAddress;
+        $params['smtp_email'] = !empty($params['smtp_email']) ? $params['email'] : $emailToken->emailAddress;
+        $params['imap_email'] = !empty($params['imap_email']) ? $params['email'] : $emailToken->emailAddress;
 
         // Create or Update Sales Person
         if(!empty($stateToken->relation_id) || !empty($request->sales_person_id)) {
             $params['id'] = $request->sales_person_id ?? $stateToken->relation_id;
+            unset($params['sales_person_id']);
             $salesPerson = $this->salesPersonService->update($params);
         } else {
             $salesPerson = $this->salesPersonService->create($params);

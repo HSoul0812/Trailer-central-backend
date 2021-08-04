@@ -14,6 +14,16 @@ class AuthorizeSalesAuthRequest extends Request {
         'redirect_uri' => 'nullable|string',
         'scopes' => 'nullable|array',
         'scopes.*' => 'string|max:80',
+        'first_name' => 'nullable|string',
+        'last_name' => 'nullable|string',
+        'email' => 'nullable|email',
+        'perms' => 'in:admin,user',
+        'is_default' => 'boolean',
+        'is_inventory' => 'boolean',
+        'is_financing' => 'boolean',
+        'is_trade' => 'boolean',
+        'signature' => 'nullable|string',
+        'dealer_location_id' => 'nullable|dealer_location_valid'
     ];
 
 }
