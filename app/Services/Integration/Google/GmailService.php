@@ -77,11 +77,11 @@ class GmailService implements GmailServiceInterface
     /**
      * Get Auth URL
      *
-     * @param string $redirectUrl url to redirect auth back to again
      * @param string $authCode auth code to get full credentials with
+     * @param null|string $redirectUrl url to redirect auth back to again
      * @return EmailToken
      */
-    public function auth(string $redirectUrl, string $authCode): EmailToken {
+    public function auth(string $authCode, ?string $redirectUrl = null): EmailToken {
         // Set Redirect URL
         $client = $this->google->getClient();
         $client->setRedirectUri($redirectUrl);

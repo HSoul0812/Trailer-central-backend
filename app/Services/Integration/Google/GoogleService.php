@@ -44,15 +44,15 @@ class GoogleService implements GoogleServiceInterface
      */
     public function getClient(): Google_Client {
         // No Client ID?!
-        if(empty(env('GOOGLE_OAUTH_CLIENT_ID'))) {
+        if(empty(config('google.app.id'))) {
             throw new MissingGapiClientIdException;
         }
 
         // Initialize Client
         $client = new Google_Client();
-        $client->setApplicationName(env('GOOGLE_OAUTH_APP_NAME'));
-        $client->setClientId(env('GOOGLE_OAUTH_CLIENT_ID'));
-        $client->setClientSecret(env('GOOGLE_OAUTH_CLIENT_SECRET'));
+        $client->setApplicationName(config('google.app.name'));
+        $client->setClientId(config('google.app.id'));
+        $client->setClientSecret(config('google.app.secret'));
         if(empty($client)) {
             throw new FailedConnectGapiClientException;
         }
@@ -74,11 +74,11 @@ class GoogleService implements GoogleServiceInterface
     public function login(?string $redirectUrl = null, ?array $scopes = null): LoginUrlToken {
         // Set Redirect URL
         $client = $this->getClient();
-        $client->setRedirectUri($redirectUrl ?? env('GOOGLE_OAUTH_REDIRECT_URI'));
+        $client->setRedirectUri($redirectUrl ?? config('google.redirectUri'));
 
         // Return Auth URL for Login
         if(empty($scopes)) {
-            $scopes = explode(" ", env('GOOGLE_OAUTH_SCOPES'));
+            $scopes = explode(" ", config('google.scopes'));
         }
         $url = $client->createAuthUrl($scopes);
 

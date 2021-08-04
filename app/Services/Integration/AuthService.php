@@ -191,7 +191,7 @@ class AuthService implements AuthServiceInterface
         // Get Access Token
         switch($tokenType) {
             case 'google':
-                $emailToken = $this->gmail->auth($redirectUri, $code);
+                $emailToken = $this->gmail->auth($code, $redirectUri);
             break;
             case 'office365':
                 $emailToken = $this->azure->auth($code, $redirectUri, $scopes);
