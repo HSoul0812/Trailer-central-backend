@@ -188,6 +188,7 @@ return [
         App\Providers\WebsiteServiceProvider::class,
         App\Providers\JobServiceProvider::class,
         App\Providers\UserServiceProvider::class,
+        App\Providers\QuickbooksServiceProvider::class,
         /*
          * 3rd party stuff
          */
