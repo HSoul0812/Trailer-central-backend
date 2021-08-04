@@ -95,41 +95,42 @@ class GmailService implements GmailServiceInterface
         }
 
         // Return Formatted Auth Token
-        $emailToken = new EmailToken();
-        $emailToken->fillFromArray($authToken);
+        $accessToken = new EmailToken();
+        $accessToken->fillFromArray($authToken);
 
         // Get Profile
-        $this->profile($emailToken);
+        $emailToken = $this->profile($accessToken);
 
         // Return Email Token
-        return $emailToken;
+        return $emailToken ?? $accessToken;
     }
 
     /**
      * Get Gmail Profile Email
      *
-     * @param EmailToken $emailToken
-     * @return EmailToken
+     * @param EmailToken $accessToken
+     * @return null|EmailToken
      */
-    public function profile(EmailToken $emailToken): EmailToken {
+    public function profile(EmailToken $accessToken): ?EmailToken {
         // Get Profile Details
-        $this->setEmailToken($emailToken);
+        $this->setEmailToken($accessToken);
 
         // Insert Gmail
         try {
             // Get Gmail Profile
             $profile = $this->gmail->users->getProfile('me');
-            $this->log->info('Returned Profile Details from Gmail: ' . print_r($profile, true));
 
-            // Append Profile
-            $emailToken->setEmailAddress($profile->getEmailAddress());
+            // Add Email Address From Profile
+            $params = $accessToken->toArray();
+            $params['email_address'] = $profile->getEmailAddress();
+            $emailToken = new EmailToken($params);
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting gmail profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Google Token
-        return $emailToken;
+        return $emailToken ?? null;
     }
 
     /**
@@ -349,7 +350,7 @@ class GmailService implements GmailServiceInterface
      * @param EmailToken $emailToken
      * @return void
      */
-    private function setEmailToken(EmailToken $emailToken) {
+    private function setEmailToken(CommonToken $emailToken) {
         // ID Token Exists?
         if(empty($emailToken->getIdToken())) {
             throw new MissingGapiIdTokenException;

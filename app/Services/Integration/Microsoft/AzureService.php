@@ -115,7 +115,7 @@ class AzureService implements AzureServiceInterface
         $emailToken = $this->profile($accessToken);
 
         // Return Email Token
-        return $emailToken;
+        return $emailToken ?? $accessToken;
     }
 
     /**
@@ -143,7 +143,6 @@ class AzureService implements AzureServiceInterface
             $params['first_name'] = $user->getGivenName();
             $params['last_name'] = $user->getSurname();
             $params['email_address'] = $user->getUserPrincipalName();
-            $this->log->info(print_r($params, true));
             $emailToken = new EmailToken($params);
         } catch (\Exception $e) {
             // Log Error
