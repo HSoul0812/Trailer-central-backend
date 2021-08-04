@@ -19,11 +19,11 @@ interface GmailServiceInterface {
 
     /**
      * Get Gmail Profile Email
-     * 
-     * @param EmailToken $emailToken
-     * @return EmailToken
+     *
+     * @param EmailToken $accessToken
+     * @return null|EmailToken
      */
-    public function profile(EmailToken $emailToken): EmailToken;
+    public function profile(EmailToken $accessToken): ?EmailToken;
 
     /**
      * Send Gmail Email
