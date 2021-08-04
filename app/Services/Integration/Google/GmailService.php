@@ -350,7 +350,7 @@ class GmailService implements GmailServiceInterface
      * @param EmailToken $emailToken
      * @return void
      */
-    private function setEmailToken(CommonToken $emailToken) {
+    private function setEmailToken(EmailToken $emailToken) {
         // ID Token Exists?
         if(empty($emailToken->getIdToken())) {
             throw new MissingGapiIdTokenException;
