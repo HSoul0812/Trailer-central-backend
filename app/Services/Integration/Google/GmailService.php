@@ -85,6 +85,7 @@ class GmailService implements GmailServiceInterface
         // Set Redirect URL
         $client = $this->google->getClient();
         $client->setRedirectUri($redirectUrl);
+        $this->log->info('Set Redirect URI ' . $redirectUrl . ' to get Access Token Using Auth Code');
 
         // Return Auth URL for Login
         $authToken = $client->fetchAccessTokenWithAuthCode($authCode);
