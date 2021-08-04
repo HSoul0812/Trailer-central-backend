@@ -119,6 +119,7 @@ class GmailService implements GmailServiceInterface
         try {
             // Get Gmail Profile
             $profile = $this->gmail->users->getProfile('me');
+            $this->log->info('Returned Profile Details from Gmail: ' . print_r($profile, true));
 
             // Append Profile
             $emailToken->setEmailAddress($profile->getEmailAddress());
