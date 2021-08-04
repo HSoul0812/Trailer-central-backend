@@ -89,7 +89,7 @@ class GmailService implements GmailServiceInterface
 
         // Return Auth URL for Login
         $authToken = $client->fetchAccessTokenWithAuthCode($authCode);
-        $this->log->info('Used Auth Code "' . $authCode . '" to get token: ' . print_r($authToken));
+        $this->log->info('Used Auth Code "' . $authCode . '" to get token: ' . print_r($authToken, true));
         if(empty($authToken['access_token'])) {
             throw new InvalidGoogleAuthCodeException;
         }
