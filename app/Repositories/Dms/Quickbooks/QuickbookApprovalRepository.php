@@ -94,21 +94,33 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
      * @note code lifted from crm
      * @param $params
      * @return mixed|void
-     * @throws \Exception
+     * @throws \Exception when the `dealer_id` param was not provided
+     * @throws \InvalidArgumentException when the `tb_primary_id` param was not provided
+     * @throws \InvalidArgumentException when the `tb_name` param was not provided
+     * @throws \InvalidArgumentException when the `qb_info` param was not provided
      */
     public function create($params)
     {
         if (empty($params['dealer_id'])) {
             throw new \Exception('Cannot create QB approval object: customer dealer id empty');
         }
+
+        if (empty($params['tb_name'])) {
+            throw new \InvalidArgumentException('Cannot create QB approval object: `tb_name` empty');
+        }
+
+        if (empty($params['tb_primary_id'])) {
+            throw new \InvalidArgumentException('Cannot create QB approval object: `tb_primary_id` empty');
+        }
+
+        if (empty($params['qb_info'])) {
+            throw new \InvalidArgumentException('Cannot create QB approval object: `qb_info` empty');
+        }
+
         $dealerId = $params['dealer_id'];
 
         // Remove existing approval object
-        $this->delete([
-            'dealer_id' => $dealerId,
-            'tb_name' => $params['tb_name'],
-            'tb_primary_id' => $params['tb_primary_id']
-        ]);
+        $this->deleteByTbPrimaryId($params['tb_primary_id'], $params['tb_name']);
 
         // not sure what this is for yet; just copied from original
         if (empty($params['qb_id']) && isset($params['qb_info']['Active']) && !$params['qb_info']['Active']) return;
@@ -122,16 +134,27 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
             $qbApproval->sort_order = $params['sort_order'];
         }
         if (!empty($params['qb_id'])) {
-            $qbApproval->action_type = 'update';
+            $qbApproval->action_type = QuickbookApproval::ACTION_UPDATE;
             $qbApproval->qb_id = $params['qb_id'];
         }
 
         $qbApproval->save();
+
         return $qbApproval;
     }
 
+    /**
+     * @param array $params
+     * @return QuickbookApproval
+     * @throws \Exception when some goes wrong in the data base
+     * @throws \InvalidArgumentException when the `id` param was not provided
+     */
     public function delete($params): QuickbookApproval
     {
+        if (empty($params['id'])) {
+            throw new \InvalidArgumentException('The `id` param is required to delete a `QuickbookApproval`');
+        }
+
         $quickBookApproval = QuickbookApproval::find($params['id']);
 
         if ($quickBookApproval) {
@@ -247,17 +270,20 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
 
     /**
      * @param int $tbPrimaryId
+     * @param string $tableName
      * @return bool
      * @throws \Exception
      */
-    public function deleteByTbPrimaryId(int $tbPrimaryId)
+    public function deleteByTbPrimaryId(int $tbPrimaryId, string $tableName)
     {
-        $quickbookApproval = QuickbookApproval::where('tb_primary_id', '=', $tbPrimaryId)->first();
+        $quickbookApproval = QuickbookApproval::where('tb_primary_id', '=', $tbPrimaryId)
+            ->where('tb_name', '=', $tableName)
+            ->first();
 
         if ($quickbookApproval instanceof QuickbookApproval) {
             return $quickbookApproval->delete();
-        } else {
-            return false;
         }
+
+        return false;
     }
 }

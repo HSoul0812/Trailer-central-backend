@@ -10,7 +10,7 @@ use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tests\database\seeds\Website\Tracking\TrackingSeeder;
 use Tests\TestCase;
-use Tests\Unit\WithMySqlConstraintViolationsParser;
+use Tests\Integration\WithMySqlConstraintViolationsParser;
 
 class TrackingRepositoryTest extends TestCase
 {

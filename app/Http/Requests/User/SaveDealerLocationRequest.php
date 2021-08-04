@@ -14,7 +14,7 @@ class SaveDealerLocationRequest extends Request
     {
         return [
             'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
-            'name' => 'required|string|min:3,max:255',
+            'name' => $this->validLocationName(),
             'contact' => 'required|string|min:1,max:255',
             'website' => 'nullable|string|min:0,max:255',
             'email' => 'nullable|string|min:0,max:255',
@@ -83,7 +83,7 @@ class SaveDealerLocationRequest extends Request
             'fees.*.fee_type' => 'required_with:fees|min:1,max:50',
             'fees.*.amount' => ['required_with:fees', 'numeric', 'min:0', 'regex:/^(?:[1-9]\d+|\d)(?:\.\d\d)?$/'],
             'fees.*.cost_amount' => 'required_if:fees.*.fee_charged_type,combined|numeric|min:0',
-            'fees.*.cost_handler' => 'required|in:set_default_cost,set_amount',
+            // 'fees.*.cost_handler' => 'required|in:set_default_cost,set_amount',
             'fees.*.is_additional' => 'checkbox|in:0,1',
             'fees.*.is_state_taxed' => 'checkbox|in:0,1',
             'fees.*.is_county_taxed' => 'checkbox|in:0,1',
@@ -92,5 +92,14 @@ class SaveDealerLocationRequest extends Request
             'fees.*.accounting_class' => 'required_with:fees|in:Adt Default Fees,Taxes & Fees Group 1,Taxes & Fees Group 2,Taxes & Fees Group 3',
             'fees.*.fee_charged_type' => 'nullable|in:income,liability,combined'
         ];
+    }
+
+    private function validLocationName(): string
+    {
+        return sprintf(
+            'required|string|min:3,max:255|unique_dealer_location_name:%s,%s',
+            $this->getDealerId(),
+            $this->getId()
+        );
     }
 }
