@@ -15,11 +15,11 @@ class LoginSalesAuthRequest extends Request {
         'first_name' => 'nullable|string',
         'last_name' => 'nullable|string',
         'email' => 'nullable|email',
-        'perms' => 'in:admin,user',
-        'is_default' => 'boolean',
-        'is_inventory' => 'boolean',
-        'is_financing' => 'boolean',
-        'is_trade' => 'boolean',
+        'perms' => 'nullable|in:admin,user',
+        'is_default' => 'nullable|boolean',
+        'is_inventory' => 'nullable|boolean',
+        'is_financing' => 'nullable|boolean',
+        'is_trade' => 'nullable|boolean',
         'signature' => 'nullable|string',
         'dealer_location_id' => 'nullable|dealer_location_valid'
     ];
