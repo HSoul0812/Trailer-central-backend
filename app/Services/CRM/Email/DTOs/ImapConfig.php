@@ -24,6 +24,26 @@ class IMAPConfig
     const TLS = 'tls';
 
     /**
+     * @const string Auth Gmail
+     */
+    const AUTH_GMAIL = 'GMAIL';
+
+    /**
+     * @const string Auth Outlook
+     */
+    const AUTH_OFFICE = 'OFFICE';
+
+    /**
+     * @const string Auth NTLM
+     */
+    const AUTH_NTLM = 'NTLM';
+
+    /**
+     * @const string Auth IMAP
+     */
+    const AUTH_IMAP = 'IMAP';
+
+    /**
      * @const default charset
      */
     const CHARSET_DEFAULT = 'UTF-8';
@@ -42,6 +62,14 @@ class IMAPConfig
      * @const No Valid Certificates
      */
     const NO_CERT_HOSTS = ['imap.gmail.com'];
+
+    /**
+     * @const Default Hosts By Auth Config
+     */
+    const DEFAULT_HOSTS = [
+        'google' => 'imap.google.com',
+        'office365' => 'outlook.office365.com'
+    ];
 
 
     /**
@@ -73,6 +101,11 @@ class IMAPConfig
      * @var string Auth Type for IMAP Connection
      */
     private $authType;
+
+    /**
+     * @var string Auth Config for IMAP Connection
+     */
+    private $authConfig;
 
     /**
      * @var string Charset for IMAP Connection
@@ -175,7 +208,13 @@ class IMAPConfig
      */
     public function getHost(): string
     {
-        return $this->host;
+        // Host Exists?
+        if($this->host) {
+            return $this->host;
+        }
+
+        // Return Default!
+        return self::DEFAULT_HOSTS[$this->authType] ?? '';
     }
 
     /**
@@ -197,7 +236,7 @@ class IMAPConfig
      */
     public function getPort(): int
     {
-        return $this->port;
+        return $this->port ?? self::DEFAULT_PORT;
     }
 
     /**
@@ -262,6 +301,17 @@ class IMAPConfig
     public function setAuthType(string $authType): void
     {
         $this->authType = $authType;
+    }
+
+
+    /**
+     * Return Auth Configuration Type
+     * 
+     * @return string $this->authConfig
+     */
+    public function getAuthConfig(): string
+    {
+        return $this->authConfig ?? self::AUTH_IMAP;
     }
 
 
@@ -353,5 +403,31 @@ class IMAPConfig
     public function isNoCert(): bool {
         // Validate if Host is No Certificate
         return (!empty($this->host) && in_array($this->host, self::NO_CERT_HOSTS));
+    }
+
+
+    /**
+     * Get Credentials for IMAP From Config
+     * 
+     * @return array{host: string,
+     *               port: int,
+     *               encryption: string,
+     *               validate_cert: bool,
+     *               username: string,
+     *               password: string,
+     *               protocol: string,
+     *               ?authentication: null|string}
+     */
+    public function getCredentials(): array {
+        // Initialize Credentials
+        return [
+            'host'          => $this->getHost(),
+            'port'          => 993,
+            'encryption'    => 'ssl',
+            'validate_cert' => true,
+            'username'      => 'username',
+            'password'      => 'password',
+            'protocol'      => 'imap'
+        ];
     }
 }

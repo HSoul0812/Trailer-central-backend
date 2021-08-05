@@ -38,6 +38,11 @@ class SmtpConfig
     const AUTH_GMAIL = 'GMAIL';
 
     /**
+     * @const string Auth Outlook
+     */
+    const AUTH_OFFICE = 'OFFICE';
+
+    /**
      * @const string Auth NTLM
      */
     const AUTH_NTLM = 'NTLM';
@@ -88,6 +93,11 @@ class SmtpConfig
      * @var string Auth Type for SMTP Connection
      */
     private $authType;
+
+    /**
+     * @var string Auth Config for IMAP Connection
+     */
+    private $authConfig;
 
     /**
      * @var string Access Token
@@ -266,11 +276,7 @@ class SmtpConfig
      */
     public function getAuthConfig(): string
     {
-        if($this->getAuthType() === self::AUTH_GMAIL ||
-           $this->getAuthType() === self::AUTH_NTLM) {
-            return $this->authType;
-        }
-        return self::AUTH_SMTP;
+        return $this->authConfig ?? self::AUTH_SMTP;
     }
 
     /**
@@ -285,23 +291,23 @@ class SmtpConfig
     }
 
     /**
-     * Is Auth Type Gmail?
+     * Is Auth Config Gmail?
      * 
-     * @return bool $this->getAuthType() === self::AUTH_GMAIL
+     * @return bool $this->getAuthConfig() === self::AUTH_GMAIL
      */
     public function isAuthTypeGmail(): bool
     {
-        return $this->getAuthType() === self::AUTH_GMAIL;
+        return $this->getAuthConfig() === self::AUTH_GMAIL;
     }
 
     /**
-     * Is Auth Type NTLM?
+     * Is Auth Config NTLM?
      * 
-     * @return bool $this->getAuthType === self::AUTH_NTLM
+     * @return bool $this->getAuthConfig() === self::AUTH_NTLM
      */
     public function isAuthTypeNtlm(): bool
     {
-        return $this->getAuthType() === self::AUTH_NTLM;
+        return $this->getAuthConfig() === self::AUTH_NTLM;
     }
 
 

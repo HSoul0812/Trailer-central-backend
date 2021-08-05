@@ -9,8 +9,7 @@ use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use Illuminate\Support\Facades\Log;
-use PhpImap\Mailbox;
-use PhpImap\Exceptions\ConnectionException;
+use Webklex\IMAP\Client;
 use Carbon\Carbon;
 
 /**
@@ -60,6 +59,15 @@ class ImapService implements ImapServiceInterface
      */
     public function messages(ImapConfig $imapConfig) {
         // Get IMAP
+        $imap = new Client($imapConfig->get());/*[
+            'host'          => 'somehost.com',
+            'port'          => 993,
+            'encryption'    => 'ssl',
+            'validate_cert' => true,
+            'username'      => 'username',
+            'password'      => 'password',
+            'protocol'      => 'imap'
+        ]);*/
         $imap = $this->connectIMAP($imapConfig->getFolderName(), [
             'email'    => $imapConfig->getUsername(),
             'password' => $imapConfig->getPassword(),

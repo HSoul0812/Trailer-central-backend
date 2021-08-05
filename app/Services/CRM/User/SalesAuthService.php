@@ -222,7 +222,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         $token['dealer_id'] = $request->dealer_id;
 
         // Fill Correct Access Token Details
-        $accessToken = $this->tokens->update($token);
+        $accessToken = $this->tokens->create($token);
         if(!empty($stateToken->id) && $accessToken->id !== $stateToken->id) {
             $this->tokens->delete(['id' => $stateToken->id]);
         }

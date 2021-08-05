@@ -250,7 +250,7 @@ class AuthService implements AuthServiceInterface
         $refresh = null;
 
         // Validate Access Token
-        switch($params['token_type']) {
+        switch($accessToken->token_type) {
             case 'google':
                 $refresh = $this->google->refresh($accessToken);
             break;

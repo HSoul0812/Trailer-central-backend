@@ -270,6 +270,24 @@ class SalesPerson extends Model implements Filterable
 
 
     /**
+     * Return Active Access Token
+     * 
+     * @return null|AccessToken
+     */
+    public function getActiveTokenAttribute(): ?AccessToken {
+        // Access Token Exists?
+        if(!empty($this->tokens)) {
+            $token = $this->tokens()->orderBy('issued_at', 'desc')->first();
+            if(!empty($token->token_type)) {
+                return $token->token_type;
+            }
+        }
+
+        // Return Empty
+        return '';
+    }
+
+    /**
      * Return Auth Config Type
      * 
      * @return string
