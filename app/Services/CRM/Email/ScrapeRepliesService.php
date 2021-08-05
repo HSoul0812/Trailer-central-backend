@@ -283,7 +283,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
         // Get Emails From IMAP
-        $imapConfig = $this->getImapConfig($salesperson, $emailFolder);
+        $imapConfig = ImapConfig::fillFromSalesPerson($salesperson, $emailFolder);
         $messages = $this->imap->messages($imapConfig);
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
@@ -555,38 +555,5 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Return Total
         return $deleted;
-    }
-
-    /**
-     * Get IMAP Config From Sales Person and Folder
-     * 
-     * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
-     */
-    private function getImapConfig(SalesPerson $salesperson, EmailFolder $folder) {
-        // Initialize
-        $imapConfig = new ImapConfig();
-
-        // Set Username/Password
-        $imapConfig->setUsername($salesperson->imap_email);
-        $imapConfig->setPassword($salesperson->imap_password);
-
-        // Set Host/Post
-        $imapConfig->setHost($salesperson->imap_server);
-        $imapConfig->setPort($salesperson->imap_port);
-        $imapConfig->setSecurity($salesperson->imap_security ?: '');
-        $imapConfig->setAuthType($salesperson->smtp_auth ?: '');
-        $imapConfig->calcCharset();
-
-        // Set Folder Config
-        $imapConfig->setFolderName($folder->name);
-        if(!empty($folder->date_imported)) {
-            $imapConfig->setStartDate($folder->date_imported);
-        } else {
-            $imapConfig->setStartDate(Carbon::now()->sub(1, 'month'));
-        }
-
-        // Return IMAP Config
-        return $imapConfig;
     }
 }

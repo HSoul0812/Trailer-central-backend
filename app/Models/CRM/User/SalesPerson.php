@@ -284,7 +284,7 @@ class SalesPerson extends Model implements Filterable
         }
 
         // Return Empty
-        return '';
+        return null;
     }
 
     /**

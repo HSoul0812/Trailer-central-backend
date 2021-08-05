@@ -59,23 +59,7 @@ class ImapService implements ImapServiceInterface
      */
     public function messages(ImapConfig $imapConfig) {
         // Get IMAP
-        $imap = new Client($imapConfig->get());/*[
-            'host'          => 'somehost.com',
-            'port'          => 993,
-            'encryption'    => 'ssl',
-            'validate_cert' => true,
-            'username'      => 'username',
-            'password'      => 'password',
-            'protocol'      => 'imap'
-        ]);*/
-        $imap = $this->connectIMAP($imapConfig->getFolderName(), [
-            'email'    => $imapConfig->getUsername(),
-            'password' => $imapConfig->getPassword(),
-            'host'     => $imapConfig->getHost(),
-            'port'     => $imapConfig->getPort(),
-            'security' => $imapConfig->getSecurity(),
-            'charset'  => $imapConfig->getCharset()
-        ]);
+        $imap = new Client($imapConfig->getCredentials());
 
         // Error Occurred
         if($imap === null) {

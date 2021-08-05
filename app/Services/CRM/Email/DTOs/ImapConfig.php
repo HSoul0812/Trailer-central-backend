@@ -108,6 +108,11 @@ class IMAPConfig
     private $authConfig;
 
     /**
+     * @var string Access Token
+     */
+    private $accessToken;
+
+    /**
      * @var string Charset for IMAP Connection
      */
     private $charset;
@@ -129,28 +134,32 @@ class IMAPConfig
      * @param SalesPerson $salesperson
      * @return ImapConfig
      */
-    public static function fillFromSalesPerson(SalesPerson $salesperson, EmailFolder $folder): ImapConfig {
-        // Initialize
-        $imapConfig = new self();
+    public static function fillFromSalesPerson(SalesPerson $salesperson, EmailFolder $folder): ImapConfig
+    {
+        // Get Start Date
+        $startDate = Carbon::now()->sub(1, 'month');
+        if(!empty($folder->date_imported)) {
+            $startDate = $folder->date_imported;
+        }
 
-        // Set Username/Password
-        $imapConfig->setUsername($salesperson->imap_email);
-        $imapConfig->setPassword($salesperson->imap_password);
+        // Return SmtpConfig
+        $imapConfig = new self([
+            'username' => $salesperson->imap_email,
+            'password' => $salesperson->imap_password,
+            'host' => $salesperson->imap_server,
+            'port' => $salesperson->imap_port,
+            'security' => $salesperson->imap_security,
+            'auth_type' => $salesperson->smtp_auth,
+            'access_token' => $salesperson->active_token,
+            'folder_name' => !empty($folder->name) ? $folder->name : 'INBOX',
+            'start_date' => $startDate
+        ]);
 
-        // Set Host/Post
-        $imapConfig->setHost($salesperson->imap_server);
-        $imapConfig->setPort((int) $salesperson->imap_port ?? 0);
-        $imapConfig->setSecurity($salesperson->imap_security ?: '');
-        $imapConfig->setAuthType($salesperson->smtp_auth ?: '');
+        // Calc Charset
         $imapConfig->calcCharset();
 
-        // Set Folder Config
-        $imapConfig->setFolderName($folder->name);
-        if(!empty($folder->date_imported)) {
-            $imapConfig->setStartDate($folder->date_imported);
-        } else {
-            $imapConfig->setStartDate(Carbon::now()->sub(1, 'month'));
-        }
+        // Calc Auth Config From Access Token
+        $imapConfig->calcAuthConfig();
 
         // Return IMAP Config
         return $imapConfig;
@@ -182,11 +191,19 @@ class IMAPConfig
     /**
      * Return Password
      * 
-     * @return string $this->password
+     * @return string XOAuth password || $this->password
      */
     public function getPassword(): string
     {
-        return $this->password;
+        // Are We OAuth?!
+        if($this->isAuthConfigOauth()) {
+            // Return XOAauth Password Instead!
+            return base64_encode('user=' . $this->username . "^A" .
+                                 'auth=Bearer ' . $this->accessToken->access_token . "^A^A");
+        }
+
+        // Return Standard Password
+        return !empty($this->password) ? trim($this->password) : '';
     }
 
     /**
@@ -293,6 +310,36 @@ class IMAPConfig
     }
 
     /**
+     * Is Auth Config Gmail?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_GMAIL
+     */
+    public function isAuthTypeGmail(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_GMAIL;
+    }
+
+    /**
+     * Is Auth Config Office 365?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_OFFICE
+     */
+    public function isAuthTypeOffice(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_OFFICE;
+    }
+
+    /**
+     * Is Auth Config NTLM?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_NTLM
+     */
+    public function isAuthTypeNtlm(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_NTLM;
+    }
+
+    /**
      * Set Auth Type
      * 
      * @param string $authType
@@ -312,6 +359,45 @@ class IMAPConfig
     public function getAuthConfig(): string
     {
         return $this->authConfig ?? self::AUTH_IMAP;
+    }
+
+    /**
+     * Return Auth Configuration Type
+     * 
+     * @return bool Access Token Exists
+     */
+    public function isAuthConfigOauth(): bool
+    {
+        if($this->accessToken) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Determine Auth Config From Access Token
+     * 
+     * @return void
+     */
+    public function calcAuthConfig(): void
+    {
+        // Auth Type is NTLM?
+        if($this->authType === self::AUTH_NTLM) {
+            $this->authConfig = self::AUTH_NTLM;
+        } else {
+            // Token Type
+            switch($this->accessToken->token_type) {
+                case AccessToken::TOKEN_GOOGLE:
+                    $this->authConfig = self::AUTH_GMAIL;
+                break;
+                case AccessToken::TOKEN_OFFICE:
+                    $this->authConfig = self::AUTH_OFFICE;
+                break;
+                default:
+                    $this->authConfig = self::AUTH_IMAP;
+                break;
+            }
+        }
     }
 
 
@@ -416,18 +502,19 @@ class IMAPConfig
      *               username: string,
      *               password: string,
      *               protocol: string,
-     *               ?authentication: null|string}
+     *               authentication: null|string}
      */
     public function getCredentials(): array {
         // Initialize Credentials
         return [
-            'host'          => $this->getHost(),
-            'port'          => 993,
-            'encryption'    => 'ssl',
-            'validate_cert' => true,
-            'username'      => 'username',
-            'password'      => 'password',
-            'protocol'      => 'imap'
+            'host'           => $this->getHost(),
+            'port'           => $this->getPort(),
+            'encryption'     => $this->getSecurity(),
+            'validate_cert'  => true,
+            'username'       => $this->getUsername(),
+            'password'       => $this->getPassword(),
+            'protocol'       => 'imap',
+            'authentication' => $this->isAuthConfigOauth() ? 'oauth' : null
         ];
     }
 }

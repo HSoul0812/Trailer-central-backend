@@ -111,18 +111,25 @@ class SmtpConfig
      * @param SalesPerson $salesperson
      * @return SmtpConfig
      */
-    public static function fillFromSalesPerson(SalesPerson $salesperson): SmtpConfig {
+    public static function fillFromSalesPerson(SalesPerson $salesperson): SmtpConfig
+    {
         // Return SmtpConfig
-        return new self([
+        $smtpConfig = new self([
             'from_name' => $salesperson->full_name,
             'username' => $salesperson->smtp_email,
             'password' => $salesperson->smtp_password,
             'host' => $salesperson->smtp_server,
             'port' => $salesperson->smtp_port,
             'security' => $salesperson->smtp_security,
-            'auth_type' => !empty($salesperson->googleToken) ? self::AUTH_GMAIL : $salesperson->smtp_auth,
-            'access_token' => $salesperson->googleToken
+            'auth_type' => $salesperson->smtp_auth,
+            'access_token' => $salesperson->active_token
         ]);
+
+        // Calc Auth Config From Access Token
+        $smtpConfig->calcAuthConfig();
+
+        // Return IMAP Config
+        return $smtpConfig;
     }
 
 
@@ -177,6 +184,14 @@ class SmtpConfig
      */
     public function getPassword(): string
     {
+        // Are We OAuth?!
+        if($this->isAuthConfigOauth()) {
+            // Return XOAauth Password Instead!
+            return base64_encode('user=' . $this->username . "^A" .
+                                 'auth=Bearer ' . $this->accessToken->access_token . "^A^A");
+        }
+
+        // Return Standard Password
         return !empty($this->password) ? trim($this->password) : '';
     }
 
@@ -270,13 +285,33 @@ class SmtpConfig
     }
 
     /**
-     * Return Auth Configuration Type
+     * Is Auth Config Gmail?
      * 
-     * @return string $this->authType
+     * @return bool $this->getAuthConfig() === self::AUTH_GMAIL
      */
-    public function getAuthConfig(): string
+    public function isAuthTypeGmail(): bool
     {
-        return $this->authConfig ?? self::AUTH_SMTP;
+        return $this->getAuthConfig() === self::AUTH_GMAIL;
+    }
+
+    /**
+     * Is Auth Config Office 365?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_OFFICE
+     */
+    public function isAuthTypeOffice(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_OFFICE;
+    }
+
+    /**
+     * Is Auth Config NTLM?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_NTLM
+     */
+    public function isAuthTypeNtlm(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_NTLM;
     }
 
     /**
@@ -290,24 +325,41 @@ class SmtpConfig
         $this->authType = $authType;
     }
 
+
     /**
-     * Is Auth Config Gmail?
+     * Return Auth Configuration Type
      * 
-     * @return bool $this->getAuthConfig() === self::AUTH_GMAIL
+     * @return string $this->authType
      */
-    public function isAuthTypeGmail(): bool
+    public function getAuthConfig(): string
     {
-        return $this->getAuthConfig() === self::AUTH_GMAIL;
+        return $this->authConfig ?? self::AUTH_SMTP;
     }
 
     /**
-     * Is Auth Config NTLM?
+     * Determine Auth Config From Access Token
      * 
-     * @return bool $this->getAuthConfig() === self::AUTH_NTLM
+     * @return void
      */
-    public function isAuthTypeNtlm(): bool
+    public function calcAuthConfig(): void
     {
-        return $this->getAuthConfig() === self::AUTH_NTLM;
+        // Auth Type is NTLM?
+        if($this->authType === self::AUTH_NTLM) {
+            $this->authConfig = self::AUTH_NTLM;
+        } else {
+            // Token Type
+            switch($this->accessToken->token_type) {
+                case AccessToken::TOKEN_GOOGLE:
+                    $this->authConfig = self::AUTH_GMAIL;
+                break;
+                case AccessToken::TOKEN_OFFICE:
+                    $this->authConfig = self::AUTH_OFFICE;
+                break;
+                default:
+                    $this->authConfig = self::AUTH_IMAP;
+                break;
+            }
+        }
     }
 
 

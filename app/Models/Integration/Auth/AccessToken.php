@@ -21,6 +21,7 @@ class AccessToken extends Model
         'facebook' => 'Facebook'
     ];
     const TOKEN_GOOGLE = 'google';
+    const TOKEN_OFFICE = 'office365';
     const TOKEN_FB = 'facebook';
 
     // Define Relation Types
