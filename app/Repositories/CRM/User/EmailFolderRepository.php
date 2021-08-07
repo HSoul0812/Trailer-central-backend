@@ -104,6 +104,19 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
     }
 
     /**
+     * Mark Imported as Current Time
+     * 
+     * @param int $folderId
+     * @return EmailFolder
+     */
+    public function markImported(int $folderId): EmailFolder {
+        return $this->update([
+            'id' => $folderId,
+            'date_imported' => Carbon::now()
+        ]);
+    }
+
+    /**
      * find records; similar to findBy()
      * @param array $params
      * @return Collection<EmailFolder>

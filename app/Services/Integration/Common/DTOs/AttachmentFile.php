@@ -2,7 +2,10 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 use Illuminate\Http\UploadedFile;
+use Webklex\IMAP\Attachment;
 
 /**
  * Class AttachmentFile
@@ -11,6 +14,8 @@ use Illuminate\Http\UploadedFile;
  */
 class AttachmentFile
 {
+    use WithConstructor, WithGetter;
+
     const IMAGE_TYPES = [
         'gif',
         'png',
@@ -48,6 +53,24 @@ class AttachmentFile
      */
     private $contents;
 
+    /**
+     * @var string
+     */
+    private $attachmentDir;
+
+    /**
+     * @param \stdClass|array $properties
+     * @return void
+     * @throws PropertyDoesNotExists when the desired property does not exists
+     */
+    public function __construct(array $properties = []): void
+    {
+        // Set Attachments Directory
+        $this->attachmentDir = env('MAIL_ATTACHMENT_DIR');
+
+        // Handle Parent Constructor
+        parent::__construct($properties);
+    }
 
     /**
      * Initialize From Laravel UploadedFile
@@ -107,6 +130,25 @@ class AttachmentFile
         $attachment->setMimeType($mime);
         $attachment->setFileSize($size);
         return $attachment;
+    }
+
+    /**
+     * Get AttachmentFile By Webklex IMAP Attachment
+     * 
+     * @param Attachment $attachment
+     * @return AttachmentFile
+     */
+    public static function getByImapAttachment(Attachment $attachment): AttachmentFile {
+        // Save Attachment to Directory
+        $attachment->save($this->attachmentDir);
+
+        // Return Attachment File
+        return new self([
+            'tmp_name' => $this->attachmentDir . $attachment->getName(),
+            'file_name' => $attachment->getName(),
+            'mime_type' => $attachment->getMimeType(),
+            'file_size' => $attachment->get('size')
+        ]);
     }
 
 
