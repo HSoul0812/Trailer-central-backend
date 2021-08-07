@@ -198,8 +198,7 @@ class IMAPConfig
         // Are We OAuth?!
         if($this->isAuthConfigOauth()) {
             // Return XOAauth Password Instead!
-            return base64_encode('user=' . $this->username . "^A" .
-                                 'auth=Bearer ' . $this->accessToken->access_token . "^A^A");
+            return $this->accessToken->access_token;
         }
 
         // Return Standard Password
