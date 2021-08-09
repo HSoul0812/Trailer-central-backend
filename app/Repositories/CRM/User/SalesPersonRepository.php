@@ -145,7 +145,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         return SalesPerson::select(SalesPerson::getTableName().'.*')
                                 ->leftJoin(AccessToken::getTableName(), function($join) {
             $join->on(AccessToken::getTableName().'.relation_id', '=', SalesPerson::getTableName().'.id')
-                 ->whereTokenType('google')
                  ->whereRelationType('sales_person');
         })->where('user_id', $userId)->where(function($query) {
             $query->whereNotNull(AccessToken::getTableName().'.id')
