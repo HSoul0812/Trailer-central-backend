@@ -124,28 +124,30 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param User $dealer
      * @return int total number of imported emails
      */
-    public function dealer(NewDealerUser $dealer) {
+    public function dealer(NewDealerUser $dealer): int {
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
-        if(count($salespeople) < 1) {
+        $this->log->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
+                            ' Active Salespeople with IMAP Credentials to Process');
+        if($salespeople->count() < 1) {
             return false;
         }
 
         // Loop Campaigns for Current Dealer
         $imported = 0;
-        $this->log->info("Dealer #{$dealer->id} Found " . count($salespeople) . " Active Salespeople with IMAP Credentials to Process");
         foreach($salespeople as $salesperson) {
             // Try Catching Error for Sales Person
             try {
                 // Import Emails
-                $this->log->info("Importing Emails on Sales Person #{$salesperson->id} for Dealer #{$dealer->id}");
+                $this->log->info('Importing Emails on Sales Person #' . $salesperson->id .
+                                    ' for Dealer #' . $dealer->id);
                 $imports = $this->salesperson($dealer, $salesperson);
 
                 // Adjust Total Import Counts
-                $this->log->info("Imported {$imports} Emails on Sales Person #{$salesperson->id}");
+                $this->log->info('Imported ' . $imports . ' Emails on Sales Person #' . $salesperson->id);
                 $imported += $imports;
             } catch(\Exception $e) {
-                $this->log->error("Exception returned on Sales Person #{$salesperson->id} {$e->getMessage()}: {$e->getTraceAsString()}");
+                $this->log->error('Exception returned on Sales Person #' . $salesperson->id . ': ' . $e->getMessage());
             }
         }
 

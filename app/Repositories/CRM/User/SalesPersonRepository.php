@@ -141,9 +141,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * @param int $userId
      * @return Collection of SalesPerson
      */
-    public function getAllImap($userId) {
+    public function getAllImap(int $userId): Collection {
         return SalesPerson::select(SalesPerson::getTableName().'.*')
-                                ->leftJoin(AccessToken::getTableName(), function($join) {
+                          ->leftJoin(AccessToken::getTableName(), function($join) {
             $join->on(AccessToken::getTableName().'.relation_id', '=', SalesPerson::getTableName().'.id')
                  ->whereRelationType('sales_person');
         })->where('user_id', $userId)->where(function($query) {
