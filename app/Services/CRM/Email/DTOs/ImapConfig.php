@@ -4,6 +4,7 @@ namespace App\Services\CRM\Email\DTOs;
 
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
+use Carbon\Carbon;
 
 
 /**
