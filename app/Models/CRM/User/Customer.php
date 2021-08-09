@@ -2,12 +2,14 @@
 
 namespace App\Models\CRM\User;
 
+use App\Models\Inventory\Inventory;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\Region;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Scout\Searchable;
 use App\Models\User\User as Dealer;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -107,6 +109,16 @@ class Customer extends Model
         return $this->hasMany(UnitSale::class, 'buyer_id', 'id');
     }
 
+    public function inventories()
+    {
+        return $this->belongsToMany(
+            Inventory::class,
+            'dms_customer_inventory',
+            'customer_id',
+            'inventory_id'
+        );
+    }
+
     public function openQuotes()
     {
         return $this->quotes()->where('is_archived', 0)
@@ -128,7 +140,7 @@ class Customer extends Model
 
     /**
      * Region Name
-     * 
+     *
      * @return BelongsTo
      */
     public function regionName(): BelongsTo {
@@ -137,7 +149,7 @@ class Customer extends Model
 
     /**
      * Region Code
-     * 
+     *
      * @return BelongsTo
      */
     public function regionCode(): BelongsTo
@@ -164,7 +176,7 @@ class Customer extends Model
 
     /**
      * Returns the customer full name
-     * 
+     *
      * @return string
      */
     public function getFullNameAttribute(): string
@@ -174,7 +186,7 @@ class Customer extends Model
 
     /**
      * Returns the customer display or full name
-     * 
+     *
      * @return string
      */
     public function getDisplayFullNameAttribute(): string
@@ -184,17 +196,17 @@ class Customer extends Model
 
     /**
      * Returns the customer age in years
-     * 
+     *
      * @return int
      */
     public function getAgeAttribute() : int
     {
         return (int)Carbon::parse($this->dob)->diff(Carbon::now())->format('%y');
     }
-    
+
     /**
      * Returns the customer birth month name
-     * 
+     *
      * @return string
      */
     public function getBirthMonthAttribute() : string
@@ -204,7 +216,7 @@ class Customer extends Model
 
     /**
      * Returns the region code for the customer address
-     * 
+     *
      * @return string
      */
     public function getRegionCodeAttribute() : string
@@ -214,13 +226,13 @@ class Customer extends Model
         }
         return $this->regionName->region_code ?? '';
     }
-    
+
     public function getOwnedUnitsAttribute() : Collection
     {
         $inventoryRepo = app(InventoryRepositoryInterface::class);
         return $inventoryRepo->getAll(['customer_id' => $this->id], false);
     }
-    
+
     public function lead() : HasOne
     {
         return $this->hasOne(Lead::class, 'identifier', 'website_lead_id');

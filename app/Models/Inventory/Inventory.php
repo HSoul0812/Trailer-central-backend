@@ -3,6 +3,7 @@ namespace App\Models\Inventory;
 
 use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
+use App\Models\CRM\User\Customer;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\Inventory\Floorplan\Payment;
 use App\Models\User\DealerLocation;
@@ -405,6 +406,15 @@ class Inventory extends Model
         return $this->belongsTo(Vendor::class, 'fp_vendor');
     }
 
+    public function customers() {
+        return $this->belongsToMany(
+            Customer::class,
+            'dms_customer_inventory',
+            'inventory_id',
+            'customer_id'
+        );
+    }
+
     public function customerInventories(): HasMany
     {
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
@@ -484,7 +494,7 @@ class Inventory extends Model
 
     /**
      * Instead of using fp_interest_paid field from inventory table, calculate this amount from payment history table
-     * 
+     *
      * @return float An amount of interest paid
      */
     public function getInterestPaidAttribute(): float

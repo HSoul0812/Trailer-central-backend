@@ -403,6 +403,17 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * @param string $vin
+     * @param string $dealer_id
+     * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
+     */
+    public function findOneByVinAndDealerId(string $vin, string $dealer_id) {
+        return Inventory::where('vin', 'LIKE', '%'.$vin.'%')
+            ->where('dealer_id', $dealer_id)
+            ->first();
+    }
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }
