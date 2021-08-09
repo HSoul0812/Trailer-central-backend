@@ -61,10 +61,10 @@ class InteractionService implements InteractionServiceInterface
      * @param int $leadId
      * @param array $params
      * @param array $attachments
-     * @return Interaction || error
+     * @return Interaction
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function email($leadId, $params, $attachments = array()) {
+    public function email(int $leadId, array $params, array $attachments = array()): Interaction {
         // Get User
         $user = User::find($params['dealer_id']);
         $lead = Lead::findOrFail($leadId);
@@ -178,17 +178,10 @@ class InteractionService implements InteractionServiceInterface
             // Get SMTP Config
             $smtpConfig = SmtpConfig::fillFromSalesPerson($user->sales_person);
 
-            // Get Sales Person Auth
-            $accessToken = $this->tokens->getRelation([
-                'token_type' => 'google',
-                'relation_type' => 'sales_person',
-                'relation_id' => $user->sales_person->id
-            ]);
-
             // Set Access Token on SMTP Config
-            if(!empty($accessToken->id)) {
-                $smtpConfig->setAuthType(SmtpConfig::AUTH_GMAIL);
-                $smtpConfig->setAccessToken($this->refreshToken($accessToken));
+            if($smtpConfig->isAuthConfigOauth()) {
+                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
+                $smtpConfig->calcAuthConfig();
             }
 
             // Return SMTP Config

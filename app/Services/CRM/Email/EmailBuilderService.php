@@ -409,23 +409,24 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $salesPerson = $this->salespeople->get(['sales_person_id' => $builder->salesPersonId]);
         $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
+        // Refresh Access Token if Exists
+        if($smtpConfig->isAuthConfigOauth()) {
+            $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
+            $smtpConfig->setAccessToken($accessToken);
+        }
+
         // Send Gmail Email
         if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
             // Refresh Token
-            $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
-            $smtpConfig->setAccessToken($accessToken);
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        }
-        // Send NTLM Email
-        elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
+        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
+            // Send NTLM Email
             $finalEmail = $this->ntlm->send($builder->dealerId, $smtpConfig, $parsedEmail);
-        }
-        // Send Custom Email
-        elseif($smtpConfig) {
+        } elseif($smtpConfig) {
+            // Send Custom Email
             $this->sendCustomEmail($smtpConfig, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
-        }
-        // Send SES Email
-        else {
+        } else {
+            // Send SES Email
             $user = $this->users->get(['dealer_id' => $builder->dealerId]);
             $this->sendCustomSesEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail, $builder));
             $parsedEmail->setMessageId('');
