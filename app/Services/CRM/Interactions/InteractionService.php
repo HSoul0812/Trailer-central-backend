@@ -202,9 +202,10 @@ class InteractionService implements InteractionServiceInterface
      * @param int $userId
      * @param ParsedEmail $parsedEmail
      * @param null|SalesPerson $salesPerson
+     * @param null|bool $interactionEmail
      * @return Interaction
      */
-    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail): Interaction {
+    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail = null): Interaction {
         // Initialize Transaction
         DB::transaction(function() use (&$parsedEmail, $leadId, $userId, $salesPerson, $interactionEmail) {
             // Create or Update
@@ -229,10 +230,10 @@ class InteractionService implements InteractionServiceInterface
 
             // Create Interaction Email
             if ($interactionEmail) {
-              $this->interactions->createInteractionEmail([
-                'interaction_id'  => $interaction->interaction_id,
-                'message_id'      => $emailHistory->message_id
-              ]);
+                $this->interactions->createInteractionEmail([
+                    'interaction_id' => $interaction->interaction_id,
+                    'message_id'     => $emailHistory->message_id
+                ]);
             }
 
         });
