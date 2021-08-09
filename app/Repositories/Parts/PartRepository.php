@@ -501,6 +501,9 @@ class PartRepository implements PartRepositoryInterface {
 
     public function createPart($params)
     {
+        if (empty($params['latest_cost'])) {
+            $params['latest_cost'] = $params['dealer_cost'];
+        }
         return Part::create($params);
     }
 
