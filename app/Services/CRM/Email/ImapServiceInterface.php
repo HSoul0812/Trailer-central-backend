@@ -4,32 +4,35 @@ namespace App\Services\CRM\Email;
 
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Webklex\IMAP\Message;
+use Webklex\IMAP\Support\MessageCollection;
 
 interface ImapServiceInterface {
     /**
      * Import Email Replies
-     * 
+     *
      * @param ImapConfig $imapConfig
      * @throws App\Exceptions\CRM\Email\ImapConnectionFailedException
      * @throws App\Exceptions\CRM\Email\ImapFolderConnectionFailedException
      * @throws App\Exceptions\CRM\Email\ImapFolderUnknownErrorException
-     * @return array of emails
+     * @return MessageCollection
      */
-    public function messages(ImapConfig $imapConfig);
+    public function messages(ImapConfig $imapConfig): MessageCollection;
 
     /**
      * Get Basic Overview
-     * 
-     * @param string $mailId
-     * @return array of parsed data
+     *
+     * @param Message $overview
+     * @return ParsedEmail
      */
-    public function overview(string $mailId);
+    public function overview(Message $overview): ParsedEmail;
 
     /**
      * Full Reply Details to Clean Up Result
-     * 
+     *
+     * @param Message $message
      * @param ParsedEmail $email
      * @return ParsedEmail updated with additional details
      */
-    public function full(ParsedEmail $email);
+    public function full(Message $message, ParsedEmail $email);
 }
