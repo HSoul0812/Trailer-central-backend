@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Repositories\CRM\Customer\CustomerRepository;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
+use App\Repositories\Dms\Customer\InventoryRepository as CustomerInventoryRepository;
+use App\Repositories\Dms\Customer\InventoryRepositoryInterface as CustomerInventoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Traits\StreamCSVTrait;
@@ -38,19 +40,27 @@ class ImportCustomers extends Command
     private $inventoryRepository;
 
     /**
+     * @var CustomerInventoryRepository
+     */
+    private $customerInventoryRepository;
+
+    /**
      * Create a new command instance.
      *
      * @param CustomerRepositoryInterface $customerRepository
      * @param InventoryRepositoryInterface $inventoryRepository
+     * @param CustomerInventoryRepositoryInterface $customerInventoryRepository
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
-        InventoryRepositoryInterface $inventoryRepository
+        InventoryRepositoryInterface $inventoryRepository,
+        CustomerInventoryRepositoryInterface $customerInventoryRepository
     )
     {
         parent::__construct();
         $this->customerRepository = $customerRepository;
         $this->inventoryRepository = $inventoryRepository;
+        $this->customerInventoryRepository = $customerInventoryRepository;
     }
 
     /**
@@ -81,8 +91,6 @@ class ImportCustomers extends Command
         } else {
             $category = '';
         }
-
-        $inventories = [];
 
         $active_nur = null;
         $active_customer = null;
@@ -157,7 +165,7 @@ class ImportCustomers extends Command
 
             $inventory = $this->inventoryRepository->findOneByVinAndDealerId($unit_serial, $dealer_id);
             if(!$inventory) {
-                $this->inventoryRepository->create([
+                $inventory = $this->inventoryRepository->create([
                     'year' => $unit_year,
                     'manufacturer' => $unit_make,
                     'model' => $unit_model,
@@ -165,9 +173,16 @@ class ImportCustomers extends Command
                     'entity_type_id' => $popular_type,
                     'title' => "$unit_year $unit_make $unit_model",
                     'category' => $category,
-                    'length' => $length
+                    'length' => $length,
+                    'attributes' => [
+                        ['attribute_id' => 11, 'value' => $color]
+                    ]
                 ]);
             }
+            $this->customerInventoryRepository->create([
+                'inventory_id' => $inventory->inventory_id,
+                'customer_id' => $active_customer->id,
+            ]);
         });
     }
 }
