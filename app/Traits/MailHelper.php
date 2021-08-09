@@ -28,7 +28,8 @@ trait MailHelper
             'password'  => $config->getPassword(),
             'host'      => $config->getHost(),
             'port'      => $config->getPort(),
-            'security'  => $config->getSecurity()
+            'security'  => $config->getSecurity(),
+            'authMode'  => $config->getAuthMode()
         ];
 
         // Create CRM Mailer

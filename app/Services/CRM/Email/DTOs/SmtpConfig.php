@@ -52,6 +52,11 @@ class SmtpConfig
      */
     const AUTH_SMTP = 'SMTP';
 
+    /**
+     * @const string Auth Mode for XOAUTH (Gmail/Office 365)
+     */
+    const MODE_OAUTH = 'XOAUTH2';
+
 
     /**
      * @const int SMTP Timeout
@@ -187,8 +192,7 @@ class SmtpConfig
         // Are We OAuth?!
         if($this->isAuthConfigOauth()) {
             // Return XOAauth Password Instead!
-            return base64_encode('user=' . $this->username . "^A" .
-                                 'auth=Bearer ' . $this->accessToken->access_token . "^A^A");
+            return $this->accessToken->access_token;
         }
 
         // Return Standard Password
@@ -285,6 +289,23 @@ class SmtpConfig
     }
 
     /**
+     * Return Auth Mode
+     * 
+     * @return string self::MODE_OAUTH || $this->getAuthType
+     */
+    public function getAuthMode(): string
+    {
+        // Are We OAuth?!
+        if($this->isAuthConfigOauth()) {
+            // Return XOAauth Password Instead!
+            return self::MODE_OAUTH;
+        }
+
+        // Return Current Auth Type
+        return $this->getAuthType();
+    }
+
+    /**
      * Is Auth Config Gmail?
      * 
      * @return bool $this->getAuthConfig() === self::AUTH_GMAIL
@@ -334,6 +355,19 @@ class SmtpConfig
     public function getAuthConfig(): string
     {
         return $this->authConfig ?? self::AUTH_SMTP;
+    }
+
+    /**
+     * Return Auth Configuration Type
+     * 
+     * @return bool Access Token Exists
+     */
+    public function isAuthConfigOauth(): bool
+    {
+        if($this->accessToken) {
+            return true;
+        }
+        return false;
     }
 
     /**
