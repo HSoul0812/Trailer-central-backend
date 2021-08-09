@@ -11,7 +11,6 @@ class GetInventoryRequest extends Request {
         'per_page' => 'integer',
         'sort' => 'in:title,-title,vin,-vin,manufacturer,-manufacturer,fp_balance,-fp_balance,fp_interest_paid,-fp_interest_paid,true_cost,-true_cost,fp_committed,-fp_committed,fp_vendor,-fp_vendor,status,-status',
         'search_term' => 'string',
-        'dealer_id' => 'array',
         'dealer_id.*' => 'integer',
         'dealer_id' => 'integer',
         'only_floorplanned' => 'boolean',
@@ -22,7 +21,7 @@ class GetInventoryRequest extends Request {
         'dealer_location_id' => 'dealer_location_valid',
         'status' => 'integer',
         'inventory_ids' => 'array',
-        'inventory_ids.*' => 'integer'
+        'inventory_ids.*' => 'integer',
     ];
 
     public function __construct(array $query = [], array $request = [], array $attributes = [], array $cookies = [], array $files = [], array $server = [], $content = null) {
