@@ -279,7 +279,7 @@ class SalesPerson extends Model implements Filterable
         if(!empty($this->tokens)) {
             $token = $this->tokens()->orderBy('issued_at', 'desc')->first();
             if(!empty($token->token_type)) {
-                return $token->token_type;
+                return $token;
             }
         }
 
