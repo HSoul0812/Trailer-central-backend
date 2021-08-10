@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\CRM\Dms;
 
 use App\Repositories\CRM\Customer\CustomerRepository;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
@@ -83,7 +83,7 @@ class ImportCustomers extends Command
 
         $popular_type = 1;
         if($entity_type) {
-            $popular_type = $entity_type['entity_type_id'];
+            $popular_type = $entity_type->entity_type_id;
         }
 
         if($popular_type === 1) {
@@ -142,7 +142,9 @@ class ImportCustomers extends Command
 
             if($active_nur !== $customer_nur) {
                 $active_nur = $customer_nur;
-                $customers = $this->customerRepository->search("first_name:$first_name AND last_name:$last_name", $dealer_id);
+                $customers = $this->customerRepository->search(
+                    ['query' => 'first_name:$first_name AND last_name:$last_name'], $dealer_id
+                );
                 if($customers->isEmpty()) {
                     $active_customer = $this->customerRepository->create(
                         [
