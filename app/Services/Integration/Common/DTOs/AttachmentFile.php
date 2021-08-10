@@ -58,19 +58,6 @@ class AttachmentFile
      */
     private $attachmentDir;
 
-    /**
-     * @param \stdClass|array $properties
-     * @return void
-     * @throws PropertyDoesNotExists when the desired property does not exists
-     */
-    public function __construct(array $properties = [])
-    {
-        // Set Attachments Directory
-        $this->attachmentDir = env('MAIL_ATTACHMENT_DIR');
-
-        // Handle Parent Constructor
-        parent::__construct($properties);
-    }
 
     /**
      * Initialize From Laravel UploadedFile
@@ -140,11 +127,11 @@ class AttachmentFile
      */
     public static function getByImapAttachment(Attachment $attachment): AttachmentFile {
         // Save Attachment to Directory
-        $attachment->save($this->attachmentDir);
+        $attachment->save($this->getAttachmentDir());
 
         // Return Attachment File
         return new self([
-            'tmp_name' => $this->attachmentDir . $attachment->getName(),
+            'tmp_name' => $this->getAttachmentDir() . $attachment->getName(),
             'file_name' => $attachment->getName(),
             'mime_type' => $attachment->getMimeType(),
             'file_size' => $attachment->get('size')
@@ -368,5 +355,15 @@ class AttachmentFile
             'filename' => $this->filePath,
             'original_filename' => $this->fileName
         ];
+    }
+
+
+    /**
+     * Get Attachments Directory
+     * 
+     * @return string
+     */
+    private function getAttachmentDir(): string {
+        return env('MAIL_ATTACHMENT_DIR');
     }
 }
