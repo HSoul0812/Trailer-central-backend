@@ -380,7 +380,7 @@ class SmtpConfig
         // Auth Type is NTLM?
         if($this->authType === self::AUTH_NTLM) {
             $this->authConfig = self::AUTH_NTLM;
-        } else {
+        } elseif($this->accessToken) {
             // Token Type
             switch($this->accessToken->token_type) {
                 case AccessToken::TOKEN_GOOGLE:
@@ -393,6 +393,8 @@ class SmtpConfig
                     $this->authConfig = self::AUTH_IMAP;
                 break;
             }
+        } else {
+            $this->authConfig = self::AUTH_IMAP;
         }
     }
 
