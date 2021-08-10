@@ -72,8 +72,8 @@ class IMAPConfig
      * @const Default Hosts By Auth Config
      */
     const DEFAULT_HOSTS = [
-        'google' => 'imap.google.com',
-        'office365' => 'outlook.office365.com'
+        'GMAIL' => 'imap.google.com',
+        'OFFICE' => 'outlook.office365.com'
     ];
 
 
@@ -235,7 +235,7 @@ class IMAPConfig
         }
 
         // Return Default!
-        return self::DEFAULT_HOSTS[$this->authType] ?? '';
+        return self::DEFAULT_HOSTS[$this->authConfig] ?? '';
     }
 
     /**
