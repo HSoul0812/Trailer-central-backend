@@ -5,15 +5,16 @@ namespace App\Models\User;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Region;
+use App\Models\Observers\User\DealerLocationObserver;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
+use App\Models\User\Location\QboLocationMapping;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Class DealerLocation
@@ -51,10 +52,11 @@ use Illuminate\Database\Eloquent\Builder;
  * @property float $longitude
  * @property string $location_id
  *
+ * @property-read DealerLocationSalesTax $salesTax
+ * @property-read QboLocationMapping $qboMapping
  * @property Region $locationRegion
  * @property NewDealerUser $dealer
  * @property User $user
- * @property-read DealerLocationSalesTax $salesTax
  *
  * @method static \Illuminate\Database\Query\Builder select($columns = ['*'])
  * @method static \Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
@@ -233,6 +235,13 @@ class DealerLocation extends Model
         return $numberOfInventories || $numberOfReferences;
     }
 
+    /**
+     * @return HasOne
+     */
+    public function qboMapping(): HasOne
+    {
+        return $this->hasOne(QboLocationMapping::class, 'dealer_location_id', 'dealer_location_id');
+    }
 
     /**
      * Return Whatever License Number We Can Find
@@ -260,5 +269,15 @@ class DealerLocation extends Model
 
         // Return License Number
         return $licenseNo ?: '';
+    }
+
+    /**
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public static function boot(): void
+    {
+        parent::boot();
+
+        self::observe(app()->make(DealerLocationObserver::class));
     }
 }

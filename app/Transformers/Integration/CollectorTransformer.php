@@ -59,8 +59,8 @@ class CollectorTransformer extends TransformerAbstract
             'use_factory_mapping' => $collector->use_factory_mapping,
             'xml_url' => $collector->xml_url,
             'zero_msrp_on_used' => $collector->zero_msrp,
-
-            'specifications' => $collector->specifications
+            'specifications' => $collector->specifications,
+            'linebreak_characters' => $collector->linebreak_characters
         ];
     }
 }

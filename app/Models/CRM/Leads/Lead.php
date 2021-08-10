@@ -14,8 +14,11 @@ use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
 use App\Models\User\CrmUser;
 use App\Models\Inventory\Inventory;
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\Traits\TableAware;
 use App\Models\Website\Website;
+use App\Models\Website\Tracking\Tracking;
+use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -151,7 +154,16 @@ class Lead extends Model
     {
         return $this->hasMany(EmailHistory::class, 'lead_id', 'identifier');
     }
-
+    
+    public function getAllInteractions() : Collection
+    {
+        $interactionsRepo = app(InteractionsRepositoryInterface::class);
+        return $interactionsRepo->getFirst10([
+            'include_texts' => true,
+            'lead_id' => $this->identifier
+        ]);
+    }
+    
     /**
      * Get the email history for the lead.
      */
@@ -182,6 +194,11 @@ class Lead extends Model
     public function units()
     {
         return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id', 'identifier');
+    }
+    
+    public function websiteTracking()
+    {
+        return $this->hasMany(Tracking::class, 'lead_id', 'identifier');
     }
 
     /**

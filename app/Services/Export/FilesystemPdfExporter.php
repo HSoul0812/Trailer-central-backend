@@ -6,7 +6,7 @@ namespace App\Services\Export;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\View\View;
-use Barryvdh\DomPDF\PDF;
+use Barryvdh\Snappy\PdfWrapper;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -26,7 +26,7 @@ class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
     protected $filename;
 
     /**
-     * @var PDF
+     * @var PdfWrapper
      */
     protected $engine;
 
@@ -41,7 +41,7 @@ class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
 
         $this->filesystem = $filesystem;
         $this->filename = $filename;
-        $this->engine = app('dompdf.wrapper');
+        $this->engine = app('snappy.pdf.wrapper');
     }
 
     /**

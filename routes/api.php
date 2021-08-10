@@ -464,6 +464,7 @@ $api->version('v1', function ($route) {
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
         $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
         $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
         $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
@@ -476,12 +477,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
-        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
-        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
-        $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
-        $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
-        $route->delete('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@destroy');
+        
         /**
          * Inventory for customers
          */
@@ -489,6 +485,15 @@ $api->version('v1', function ($route) {
         $route->get('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@getAllByCustomer')->where('customer_id', '[0-9]+');
         $route->delete('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@bulkDestroy')->where('customer_id', '[0-9]+');
         $route->post('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@attach')->where('customer_id', '[0-9]+');
+        
+        
+        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');        
+        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
+        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
+        $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
+        $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        $route->delete('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@destroy');
+        $route->get('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@show');
 
         /*
         |--------------------------------------------------------------------------
