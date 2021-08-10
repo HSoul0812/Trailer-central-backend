@@ -9,9 +9,9 @@ use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use Illuminate\Support\Facades\Log;
-use Webklex\IMAP\Client;
-use Webklex\IMAP\Message;
-use Webklex\IMAP\Support\MessageCollection;
+use Webklex\PHPIMAP\Client;
+use Webklex\PHPIMAP\Message;
+use Webklex\PHPIMAP\Support\MessageCollection;
 use Carbon\Carbon;
 
 /**

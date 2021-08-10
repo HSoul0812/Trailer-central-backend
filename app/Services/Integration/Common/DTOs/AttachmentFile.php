@@ -5,7 +5,7 @@ namespace App\Services\Integration\Common\DTOs;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use Illuminate\Http\UploadedFile;
-use Webklex\IMAP\Attachment;
+use Webklex\PHPIMAP\Attachment;
 
 /**
  * Class AttachmentFile

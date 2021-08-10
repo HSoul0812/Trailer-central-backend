@@ -4,8 +4,8 @@ namespace App\Services\CRM\Email;
 
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
-use Webklex\IMAP\Message;
-use Webklex\IMAP\Support\MessageCollection;
+use Webklex\PHPIMAP\Message;
+use Webklex\PHPIMAP\Support\MessageCollection;
 
 interface ImapServiceInterface {
     /**
