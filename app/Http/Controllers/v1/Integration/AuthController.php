@@ -13,6 +13,7 @@ use App\Http\Requests\Integration\Auth\ValidateTokenRequest;
 use App\Http\Requests\Integration\Auth\LoginTokenRequest;
 use App\Http\Requests\Integration\Auth\AuthorizeTokenRequest;
 use App\Services\Integration\AuthServiceInterface;
+use App\Transformers\Integration\Auth\ValidateTokenTransformer;
 
 class AuthController extends RestfulControllerV2
 {
@@ -237,7 +238,7 @@ class AuthController extends RestfulControllerV2
             $accessToken = new CommonToken($request->all());
 
             // Return Auth
-            return $this->response->array($this->auth->validateCustom($accessToken));
+            return $this->response->item($this->auth->validateCustom($accessToken), new ValidateTokenTransformer());
         }
         
         return $this->response->errorBadRequest();

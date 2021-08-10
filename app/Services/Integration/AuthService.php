@@ -272,9 +272,9 @@ class AuthService implements AuthServiceInterface
      * Validate Access Token
      * 
      * @param AccessToken $accessToken
-     * @return array{validate: <ValidateTokenTransformer>}
+     * @return ValidateToken
      */
-    public function validate(AccessToken $accessToken): array {
+    public function validate(AccessToken $accessToken): ValidateToken {
         // Initialize Validate Token
         $validate = new ValidateToken();
 
@@ -286,10 +286,6 @@ class AuthService implements AuthServiceInterface
             case 'office365':
                 $validate = $this->azure->validate($accessToken);
             break;
-            case 'facebook':
-                $validate = $this->facebook->validate($accessToken);
-                unset($validate['refresh_token']);
-                return ['validate' => $validate];
         }
 
         // Update Refresh Token
@@ -298,17 +294,16 @@ class AuthService implements AuthServiceInterface
         }
 
         // Return Validation
-        $data = new Item($validate, new ValidateTokenTransformer(), 'validate');
-        return $this->fractal->createData($data)->toArray();
+        return $validate;
     }
 
     /**
      * Validate Custom Access Token
      * 
      * @param CommonToken $accessToken general access token filled with data from request
-     * @return array{validate: <ValidateTokenTransformer>}
+     * @return ValidateToken
      */
-    public function validateCustom(CommonToken $accessToken): array {
+    public function validateCustom(CommonToken $accessToken): ValidateToken {
         // Initialize Validate Token
         $validate = new ValidateToken();
 
@@ -328,8 +323,7 @@ class AuthService implements AuthServiceInterface
         }
 
         // Return Validation
-        $data = new Item($validate, new ValidateTokenTransformer(), 'validate');
-        return $this->fractal->createData($data)->toArray();
+        return $validate;
     }
 
     /**
@@ -342,7 +336,8 @@ class AuthService implements AuthServiceInterface
      */
     public function response(AccessToken $accessToken, array $response = []): array {
         // Set Validate
-        $validate = $this->validate($accessToken);
+        $validation = $this->validate($accessToken);
+        $validate = new Item($validation, new ValidateTokenTransformer(), 'validate');
 
         // Convert Token to Array
         if(!empty($accessToken)) {
