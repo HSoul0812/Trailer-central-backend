@@ -85,17 +85,17 @@ interface AuthServiceInterface {
      * Validate Access Token
      * 
      * @param AccessToken $accessToken
-     * @return array{validate: <ValidateTokenTransformer>}
+     * @return ValidateToken
      */
-    public function validate(AccessToken $accessToken): array;
+    public function validate(AccessToken $accessToken): ValidateToken;
 
     /**
      * Validate Custom Access Token
      * 
      * @param CommonToken $accessToken general access token filled with data from request
-     * @return array{validate: <ValidateTokenTransformer>}
+     * @return ValidateToken
      */
-    public function validateCustom(CommonToken $accessToken): array;
+    public function validateCustom(CommonToken $accessToken): ValidateToken;
 
     /**
      * Return Response
