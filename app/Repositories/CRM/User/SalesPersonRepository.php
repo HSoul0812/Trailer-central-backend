@@ -156,7 +156,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                           ->whereNotNull('imap_port')
                           ->where('imap_port', '<>', '');
             });
-        })->get();
+        })->groupBy(SalesPerson::getTableName().'.id')->get();
     }
 
     /**

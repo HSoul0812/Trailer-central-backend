@@ -316,8 +316,10 @@ class AuthService implements AuthServiceInterface
         switch($accessToken->tokenType) {
             case 'google':
                 $validate = $this->google->validateCustom($accessToken);
+            break;
             case 'office365':
                 $validate = $this->azure->validateCustom($accessToken);
+            break;
         }
 
         // Update Refresh Token

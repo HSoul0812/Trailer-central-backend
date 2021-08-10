@@ -186,6 +186,7 @@ class AzureService implements AzureServiceInterface
         // Return Updated EmailToken
         $emailToken = new EmailToken();
         $emailToken->fillFromLeague($newToken);
+        $this->info->log('Got access token: ', print_r($emailToken->toArray(), true));
         return $emailToken;
     }
 

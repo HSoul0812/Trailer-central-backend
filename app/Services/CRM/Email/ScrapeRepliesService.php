@@ -171,7 +171,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->tokens->refresh($salesperson->active_token->id, $validate->newToken);
             }
         }
-        
+
         // Process Messages
         $this->log->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
         foreach($salesperson->email_folders as $folder) {
