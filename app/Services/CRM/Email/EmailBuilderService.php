@@ -690,16 +690,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     }
 
     /**
-     * Refresh Gmail Access Token
+     * Refresh Access Token
      * 
      * @param AccessToken $accessToken
      * @return AccessToken
      */
     private function refreshAccessToken(AccessToken $accessToken): AccessToken {
         // Refresh Token
-        $validate = $this->google->validate($accessToken);
-        if(!empty($validate['new_token'])) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
+        $validate = $this->auth->validate($accessToken);
+        if($validate->newToken) {
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
         }
 
         // Return New Token

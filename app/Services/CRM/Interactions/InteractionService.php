@@ -250,11 +250,11 @@ class InteractionService implements InteractionServiceInterface
      * @param AccessToken $accessToken
      * @return AccessToken
      */
-    private function refreshToken($accessToken) {
+    private function refreshToken(AccessToken $accessToken): AccessToken {
         // Validate Token
-        $validate = $this->google->validate($accessToken);
-        if(!empty($validate['new_token'])) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
+        $validate = $this->auth->validate($accessToken);
+        if(!empty($validate->new_token)) {
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
         }
 
         // Return Access Token

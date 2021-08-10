@@ -167,7 +167,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         if(!empty($salesperson->active_token)) {
             // Refresh Token
             $validate = $this->auth->validate($salesperson->active_token);
-            if(!empty($validate->newToken)) {
+            if($validate->newToken->exists()) {
                 $this->tokens->refresh($salesperson->active_token->id, $validate->newToken);
             }
         }

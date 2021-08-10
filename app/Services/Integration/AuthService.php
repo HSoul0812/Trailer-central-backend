@@ -247,7 +247,7 @@ class AuthService implements AuthServiceInterface
      */
     public function refresh(AccessToken $accessToken): ?CommonToken {
         // Initialize Refresh Token
-        $refresh = null;
+        $refresh = new CommonToken();
 
         // Validate Access Token
         switch($accessToken->token_type) {
@@ -257,9 +257,11 @@ class AuthService implements AuthServiceInterface
             case 'office365':
                 $refresh = $this->azure->refresh($accessToken);
             break;
-            case 'facebook':
-                $refresh = $this->facebook->refresh($accessToken);
-            break;
+        }
+
+        // Update Refresh Token
+        if($refresh->exists()) {
+            $this->tokens->refresh($accessToken->id, $refresh);
         }
 
         // Return Refresh Token
@@ -290,6 +292,11 @@ class AuthService implements AuthServiceInterface
                 return ['validate' => $validate];
         }
 
+        // Update Refresh Token
+        if($validate->newToken && $validate->newToken->exists()) {
+            $this->tokens->refresh($accessToken->id, $validate->newToken);
+        }
+
         // Return Validation
         $data = new Item($validate, new ValidateTokenTransformer(), 'validate');
         return $this->fractal->createData($data)->toArray();
@@ -313,6 +320,11 @@ class AuthService implements AuthServiceInterface
                 $validate = $this->azure->validateCustom($accessToken);
         }
 
+        // Update Refresh Token
+        if($validate->newToken && $validate->newToken->exists()) {
+            $this->tokens->refresh($accessToken->id, $validate->newToken);
+        }
+
         // Return Validation
         $data = new Item($validate, new ValidateTokenTransformer(), 'validate');
         return $this->fractal->createData($data)->toArray();
@@ -329,10 +341,6 @@ class AuthService implements AuthServiceInterface
     public function response(AccessToken $accessToken, array $response = []): array {
         // Set Validate
         $validate = $this->validate($accessToken);
-        if(!empty($validate['validate']['new_token'])) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate['validate']['new_token']);
-        }
-        unset($validate['validate']['new_token']);
 
         // Convert Token to Array
         if(!empty($accessToken)) {

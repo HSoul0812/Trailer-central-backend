@@ -92,9 +92,9 @@ class GoogleService implements GoogleServiceInterface
      * Refresh Access Token
      *
      * @param AccessToken $accessToken
-     * @return array of validation info
+     * @return EmailToken
      */
-    public function refresh(AccessToken $accessToken): array {
+    public function refresh(AccessToken $accessToken): EmailToken {
         // Configure Client
         $client = $this->getClient();
         $client->setAccessToken([
@@ -107,7 +107,14 @@ class GoogleService implements GoogleServiceInterface
         $client->setScopes($accessToken->scope);
 
         // Get New Token
-        return $client->fetchAccessTokenWithRefreshToken($accessToken->refresh_token);
+        $newToken = $client->fetchAccessTokenWithRefreshToken($accessToken->refresh_token);
+        $commonToken = new EmailToken();
+        if(!empty($newToken)) {
+            $commonToken->fillFromArray($newToken);
+        }
+
+        // Return New Common Token
+        return $commonToken;
     }
 
     /**
@@ -240,23 +247,19 @@ class GoogleService implements GoogleServiceInterface
      * Refresh Access Token
      *
      * @param Google_Client $client
-     * @return array of expired status, also return new token if available
+     * @return EmailToken
      */
-    private function refreshAccessToken(Google_Client $client) {
-        // Set Expired
-        $result = [
-            'new_token' => [],
-            'expired' => true
-        ];
+    private function refreshAccessToken(Google_Client $client): EmailToken {
+        // Initialize Email Token
+        $emailToken = new EmailToken();
 
         // Validate If Expired
         try {
             // Refresh the token if possible, else fetch a new one.
-            if ($refreshToken = $client->getRefreshToken()) {
-                if($newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken)) {
-                    $result = $newToken;
-                    $result['expired'] = false;
-                }
+            $refreshToken = $client->getRefreshToken();
+            $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+            if(!empty($newToken)) {
+                $emailToken->fillFromArray($newToken);
             }
         } catch (\Exception $e) {
             // We actually just want to verify this is true or false
@@ -264,8 +267,8 @@ class GoogleService implements GoogleServiceInterface
             $this->log->error('Exception returned for Google Refresh Access Token: ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
-        // Return Result
-        return $result;
+        // Return Token
+        return $emailToken;
     }
 
     /**

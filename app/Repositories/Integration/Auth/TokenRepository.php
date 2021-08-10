@@ -5,9 +5,9 @@ namespace App\Repositories\Integration\Auth;
 use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Auth\Scope;
+use App\Services\Integration\Common\DTOs\CommonToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
-use Carbon\CarbonImmutable;
 
 class TokenRepository implements TokenRepositoryInterface {
     /**
@@ -259,17 +259,16 @@ class TokenRepository implements TokenRepositoryInterface {
      * @param array $newToken
      * @return AccessToken
      */
-    public function refresh($tokenId, $newToken) {
+    public function refresh(int $tokenId, CommonToken $newToken) {
         // Refresh Access Token
-        $time = CarbonImmutable::now();
         return $this->update([
             'id' => $tokenId,
-            'access_token' => $newToken['access_token'],
-            'refresh_token' => $newToken['refresh_token'],
-            'id_token' => $newToken['id_token'],
-            'expires_in' => $newToken['expires_in'],
-            'expires_at' => $time->addSeconds($newToken['expires_in'])->toDateTimeString(),
-            'issued_at' => $time->toDateTimeString()
+            'access_token' => $newToken->accessToken,
+            'refresh_token' => $newToken->refreshToken,
+            'id_token' => $newToken->idToken,
+            'expires_in' => $newToken->expiresIn,
+            'expires_at' => $newToken->expiresAt,
+            'issued_at' => $newToken->issuedAt
         ]);
     }
 

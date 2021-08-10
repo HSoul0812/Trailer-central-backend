@@ -86,8 +86,10 @@ class CommonToken
         // Fill Issued At
         if(isset($authToken['created'])) {
             $this->calcIssuedAt($authToken['created']);
-        } else {
+        } elseif(!empty($authToken['issued_at'])) {
             $this->issuedAt = $authToken['issued_at'];
+        } else {
+            $this->issuedAt = CarbonImmutable::now();
         }
 
         // Fill Expires In
