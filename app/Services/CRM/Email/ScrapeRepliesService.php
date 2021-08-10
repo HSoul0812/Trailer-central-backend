@@ -14,9 +14,9 @@ use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\CRM\Email\DTOs\ImapConfig;
+use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GmailServiceInterface;
-use App\Services\Integration\Google\GoogleServiceInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -38,14 +38,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     const IMPORT_SKIPPED = -1;
 
     /**
-     * @var App\Services\Integration\Google\GoogleServiceInterface
-     */
-    protected $google;
-
-    /**
      * @var App\Services\Integration\Google\GmailServiceInterface
      */
     protected $gmail;
+
+    /**
+     * @var App\Services\Integration\Google\AuthServiceInterface
+     */
+    protected $auth;
 
     /**
      * @var App\Services\CRM\Email\ImapServiceInterface
@@ -90,8 +90,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * ScrapeRepliesService constructor.
      */
-    public function __construct(GoogleServiceInterface $google,
-                                GmailServiceInterface $gmail,
+    public function __construct(GmailServiceInterface $gmail,
+                                AuthServiceInterface $auth,
                                 ImapServiceInterface $imap,
                                 InteractionsRepositoryInterface $interactions,
                                 EmailHistoryRepositoryInterface $emails,
@@ -101,8 +101,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                                 LeadRepositoryInterface $leads)
     {
         // Initialize Services
-        $this->google = $google;
         $this->gmail = $gmail;
+        $this->auth = $auth;
         $this->imap = $imap;
 
         // Initialize Repositories
@@ -168,7 +168,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Refresh Token
             $validate = $this->auth->validate($salesperson->active_token);
             if(!empty($validate->newToken)) {
-                $this->tokens->refresh($salesperson->googleToken->id, $validate['new_token']);
+                $this->tokens->refresh($salesperson->active_token->id, $validate->newToken);
             }
         }
         
@@ -335,7 +335,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Lead ID Exists?
         if(!empty($email->getLeadId())) {
             // Only on IMAP
-            if(empty($salesperson->googleToken)) {
+            if(empty($salesperson->active_token)) {
                 $this->imap->full($email);
             }
             if(empty($email->getSubject()) || empty($email->getToEmail())) {
