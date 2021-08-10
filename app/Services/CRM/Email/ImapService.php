@@ -9,7 +9,7 @@ use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use Illuminate\Support\Facades\Log;
-use Webklex\PHPIMAP\Client;
+use Webklex\PHPIMAP\ClientManager;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Support\MessageCollection;
 use Carbon\Carbon;
@@ -149,9 +149,9 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Connect to IMAP Server
-            $this->log->info('Connecting to IMAP host: ' . $imapConfig->host .
+            $this->log->info('Connecting to IMAP host: ' . $imapConfig->getHost() .
                                 ' with email: ' . $imapConfig->username);
-            $imap = new Client($imapConfig->getCredentials());
+            $imap = new ClientManager($imapConfig->getCredentials());
             $imap->connect();
             $this->log->info('Connected to IMAP for email address: ' . $imapConfig->username);
         } catch (\Exception $e) {
