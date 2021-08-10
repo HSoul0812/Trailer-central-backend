@@ -151,7 +151,8 @@ class ImapService implements ImapServiceInterface
             // Connect to IMAP Server
             $this->log->info('Connecting to IMAP host: ' . $imapConfig->getHost() .
                                 ' with email: ' . $imapConfig->username);
-            $imap = new ClientManager($imapConfig->getCredentials());
+            $client = new ClientManager();
+            $imap = $client->make($imapConfig->getCredentials());
             $imap->connect();
             $this->log->info('Connected to IMAP for email address: ' . $imapConfig->username);
         } catch (\Exception $e) {
