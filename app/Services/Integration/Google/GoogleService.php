@@ -5,6 +5,7 @@ namespace App\Services\Integration\Google;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\LoginUrlToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
