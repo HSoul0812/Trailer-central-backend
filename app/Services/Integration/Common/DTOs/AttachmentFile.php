@@ -63,7 +63,7 @@ class AttachmentFile
      * @return void
      * @throws PropertyDoesNotExists when the desired property does not exists
      */
-    public function __construct(array $properties = []): void
+    public function __construct(array $properties = [])
     {
         // Set Attachments Directory
         $this->attachmentDir = env('MAIL_ATTACHMENT_DIR');
