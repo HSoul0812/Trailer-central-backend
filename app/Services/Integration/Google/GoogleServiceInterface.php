@@ -4,6 +4,7 @@ namespace App\Services\Integration\Google;
 
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Common\DTOs\LoginUrlToken;
 use Google_Client;
@@ -28,12 +29,12 @@ interface GoogleServiceInterface {
     public function login(?string $redirectUrl = null, ?array $scopes = null): LoginUrlToken;
 
     /**
-     * Get Refresh Token
+     * Refresh Access Token
      *
      * @param AccessToken $accessToken
-     * @return array of validation info
+     * @return EmailToken
      */
-    public function refresh(AccessToken $accessToken): array;
+    public function refresh(AccessToken $accessToken): EmailToken;
 
     /**
      * Validate Google API Access Token Exists and Refresh if Possible
