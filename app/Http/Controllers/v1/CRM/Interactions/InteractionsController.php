@@ -209,7 +209,7 @@ class InteractionsController extends RestfulControllerV2
         if ( $request->validate()) {
             // Get Results
             $result = $this->service->email($leadId, $params, $request->allFiles());
-
+            
             // Send Email Response
             return $this->response->item($result, new InteractionTransformer());
         }
