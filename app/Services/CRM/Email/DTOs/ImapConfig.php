@@ -390,6 +390,10 @@ class IMAPConfig
             $this->authConfig = self::AUTH_NTLM;
         } elseif($this->accessToken) {
             // Token Type
+            var_dump($this->accessToken);
+            if(!empty($this->accessToken->token_type)) {
+                var_dump($this->accessToken->token_type);
+            }
             switch($this->accessToken->token_type) {
                 case AccessToken::TOKEN_GOOGLE:
                     $this->authConfig = self::AUTH_GMAIL;
