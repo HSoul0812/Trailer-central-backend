@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Webklex\PHPIMAP\ClientManager;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Support\MessageCollection;
+use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
 use Carbon\Carbon;
 
 /**
