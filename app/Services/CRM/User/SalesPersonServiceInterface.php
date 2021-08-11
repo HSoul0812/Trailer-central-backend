@@ -23,7 +23,7 @@ interface SalesPersonServiceInterface {
     public function update(array $rawParams): SalesPerson;
 
     /**
-     * Validate SMTP/IMAP Details
+     * Validate SMTP/IMAP
      * 
      * @param array $params {type: smtp|imap,
      *                       username: string,

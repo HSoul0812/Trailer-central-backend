@@ -7,9 +7,6 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\User\SalesPersonServiceInterface;
-use App\Services\CRM\Email\DTOs\ConfigValidate;
-use App\Services\CRM\Email\DTOs\SmtpConfig;
-use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Traits\SmtpHelper;
@@ -265,48 +262,6 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Return Response
         return $this->response($salesPerson->id, $accessToken);
-    }
-
-
-    /**
-     * Validate Sales Person Custom Config
-     * 
-     * @param array $params {type: smtp|imap,
-     *                       username: string,
-     *                       password: string,
-     *                       security: string (ssl|tls)
-     *                       host: string
-     *                       port: int}
-     * @return ConfigValidate
-     */
-    public function validate(array $params): ConfigValidate {
-        // Initialize Config Params
-        $config = [
-            'username' => $params['username'],
-            'password' => $params['password'],
-            'security' => $params['security'],
-            'host' => $params['host'],
-            'port' => $params['port']
-        ];
-
-        // Get Smtp Config Details
-        if($params['type'] === SalesPerson::TYPE_SMTP) {
-            // Validate SMTP Config
-            return $this->validateSmtp(new SmtpConfig($config));
-        }
-        // Get Imap Config Details
-        elseif($params['type'] === SalesPerson::TYPE_IMAP) {
-            // Validate IMAP Config
-            $imapConfig = new ImapConfig($config);
-            $imapConfig->calcCharset();
-            return $this->imap->validate($imapConfig);
-        }
-
-        // Return Response
-        return new ConfigValidate([
-            'type' => $params['type'],
-            'success' => false
-        ]);
     }
 
 

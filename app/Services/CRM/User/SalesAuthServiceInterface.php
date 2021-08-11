@@ -50,19 +50,6 @@ interface SalesAuthServiceInterface {
     public function authorize(AuthorizeSalesAuthRequest $request);
 
     /**
-     * Validate SMTP/IMAP
-     * 
-     * @param array $params {type: smtp|imap,
-     *                       username: string,
-     *                       password: string,
-     *                       security: string (ssl|tls)
-     *                       host: string
-     *                       port: int}
-     * @return ConfigValidate
-     */
-    public function validate(array $params): ConfigValidate;
-
-    /**
      * Return Response
      * 
      * @param int $salesPersonId

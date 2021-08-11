@@ -6,8 +6,9 @@ use App\Exceptions\CRM\User\DuplicateChangeEmailSalesPersonException;
 use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
-use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\DTOs\ConfigValidate;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Traits\SmtpHelper;
 use Illuminate\Support\Collection;
 
@@ -31,14 +32,21 @@ class SalesPersonService implements SalesPersonServiceInterface
     protected $folders;
 
     /**
+     * @var ImapServiceInterface
+     */
+    protected $imap;
+
+    /**
      * Construct Sales Auth Service
      */
     public function __construct(
         SalesPersonRepositoryInterface $salesPerson,
-        EmailFolderRepositoryInterface $folders
+        EmailFolderRepositoryInterface $folders,
+        ImapServiceInterface $imap
     ) {
         $this->salespeople = $salesPerson;
         $this->folders = $folders;
+        $this->imap = $imap;
     }
 
     /**
@@ -118,19 +126,26 @@ class SalesPersonService implements SalesPersonServiceInterface
      * @return ConfigValidate
      */
     public function validate(array $params): ConfigValidate {
+        // Initialize Config Params
+        $config = [
+            'username' => $params['username'],
+            'password' => $params['password'],
+            'security' => $params['security'],
+            'host' => $params['host'],
+            'port' => $params['port']
+        ];
+
         // Get Smtp Config Details
         if($params['type'] === SalesPerson::TYPE_SMTP) {
-            // Get SMTP Details
-            $config = new SmtpConfig([
-                'username' => $params['username'],
-                'password' => $params['password'],
-                'security' => $params['security'],
-                'host' => $params['host'],
-                'port' => $params['port']
-            ]);
-
             // Validate SMTP Config
-            return $this->validateSmtp($config);
+            return $this->validateSmtp(new SmtpConfig($config));
+        }
+        // Get Imap Config Details
+        elseif($params['type'] === SalesPerson::TYPE_IMAP) {
+            // Validate IMAP Config
+            $imapConfig = new ImapConfig($config);
+            $imapConfig->calcCharset();
+            return $this->imap->validate($imapConfig);
         }
 
         // Return Response
