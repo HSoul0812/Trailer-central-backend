@@ -226,8 +226,8 @@ class AzureService implements AzureServiceInterface
         $isExpired = ($profile !== null ? $profile->isExpired() : true);
 
         // Try to Refresh Access Token!
-        if($profile !== null && $profile->refreshToken && (!$isValid || $isExpired)) {
-            $refresh = $this->refreshCustom($profile);
+        if($accessToken->refreshToken && (!$isValid || $isExpired)) {
+            $refresh = $this->refreshCustom($accessToken);
             if($refresh->exists()) {
                 $newProfile = $this->profile($refresh);
                 $isValid = ($newProfile !== null ? true : false);

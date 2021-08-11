@@ -169,11 +169,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Refresh Token
             $this->log->info('Validating token #' . $salesperson->active_token->id);
             $validate = $this->auth->validate($salesperson->active_token);
-            if($validate->newToken && $validate->newToken->exists()) {
-                $this->log->info('Refreshed token #' . $salesperson->active_token->id .
-                                    ' with replacement ' . print_r($validate->newToken->toArray(), true));
-                $this->tokens->refresh($salesperson->active_token->id, $validate->newToken);
-            }
         }
 
         // Process Messages
