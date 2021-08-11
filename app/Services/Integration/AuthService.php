@@ -344,8 +344,8 @@ class AuthService implements AuthServiceInterface
      */
     public function response(AccessToken $accessToken, array $response = []): array {
         // Set Validate
-        $validation = $this->validate($accessToken);
-        $validate = new Item($validation, new ValidateTokenTransformer(), 'validate');
+        $validation = new Item($this->validate($accessToken), new ValidateTokenTransformer(), 'validate');
+        $validate = $this->fractal->createData($validation)->toArray();
 
         // Convert Token to Array
         if(!empty($accessToken)) {
