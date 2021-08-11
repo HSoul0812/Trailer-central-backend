@@ -68,6 +68,13 @@ return [
             'days' => 3,
         ],
 
+        'auth' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/auth.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'google' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/google.log'),

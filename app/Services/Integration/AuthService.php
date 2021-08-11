@@ -17,6 +17,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use App\Transformers\Integration\Auth\LoginUrlTransformer;
 use App\Transformers\Integration\Auth\ValidateTokenTransformer;
+use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
@@ -73,9 +74,13 @@ class AuthService implements AuthServiceInterface
         $this->gmail = $gmail;
         $this->facebook = $facebook;
         $this->azure = $azure;
-        $this->fractal = $fractal;
 
+        // Fractal
+        $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('auth');
     }
 
     /**
@@ -321,6 +326,8 @@ class AuthService implements AuthServiceInterface
 
         // Update Refresh Token
         if($validate->newToken && $validate->newToken->exists()) {
+            $this->log->info('Refreshed token #' . $accessToken->id . ' with replacement ' .
+                                print_r($validate->newToken->toArray(), true));
             $this->tokens->refresh($accessToken->id, $validate->newToken);
         }
 
