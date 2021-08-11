@@ -69,6 +69,12 @@ interface DealerLocationRepositoryInterface extends Repository
      */
     public function findAll(array $params): \Illuminate\Database\Eloquent\Collection;
 
+    /**
+     * @param int $dealerId
+     * @return DealerLocation|null
+     */
+    public function findFirstByDealerId(int $dealerId);
+
     public function dealerHasLocationWithId(int $dealerId, int $locationId): bool;
 
     /**

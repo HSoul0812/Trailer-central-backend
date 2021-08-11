@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Dms\Customer;
 
+use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Repositories\Repository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -37,4 +38,10 @@ interface InventoryRepositoryInterface extends Repository
      * @return bool
      */
     public function bulkDestroy(array $uuids): bool;
+
+    /**
+     * @param int $customer_id
+     * @param int $inventory_id
+     */
+    public function findFirstByCustomerAndInventory(int $customer_id, int $inventory_id);
 }

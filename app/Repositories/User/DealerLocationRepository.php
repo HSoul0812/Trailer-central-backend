@@ -295,4 +295,9 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
 
         return $query->exists();
     }
+
+    public function findFirstByDealerId(int $dealerId)
+    {
+        return DealerLocation::where('dealer_id', '=', $dealerId)->firstOrFail();
+    }
 }
