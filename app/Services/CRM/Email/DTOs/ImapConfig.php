@@ -60,6 +60,12 @@ class IMAPConfig
     const CHARSET_NTLM = 'US-ASCII';
 
     /**
+     * @const string Auth Mode for XOAUTH (Gmail/Office 365)
+     */
+    const MODE_OAUTH = 'oauth';
+
+
+    /**
      * @const No Certificate Suffix
      */
     const NO_CERT_SUFFIX = 'novalidate-cert';
@@ -78,9 +84,9 @@ class IMAPConfig
     ];
 
     /**
-     * @const string Auth Mode for XOAUTH (Gmail/Office 365)
+     * @const int Default Port
      */
-    const MODE_OAUTH = 'oauth';
+    const DEFAULT_PORT = 993;
 
 
     /**
