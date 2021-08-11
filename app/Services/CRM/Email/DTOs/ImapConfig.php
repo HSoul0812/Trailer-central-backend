@@ -86,7 +86,10 @@ class IMAPConfig
     /**
      * @const int Default Port
      */
-    const DEFAULT_PORT = 993;
+    const DEFAULT_PORTS = [
+        'ssl' => 993,
+        'tls' => 143
+    ];
 
 
     /**
@@ -275,10 +278,14 @@ class IMAPConfig
      */
     public function getPort(): int
     {
+        // Return Set Port
         if($this->port) {
             return $this->port;
         }
-        return self::DEFAULT_PORT;
+
+        // Return Default Port for Security
+        $security = $this->getSecurity();
+        return self::DEFAULT_PORTS[$security];
     }
 
     /**
