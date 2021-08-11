@@ -77,7 +77,7 @@ class InteractionService implements InteractionServiceInterface
         // Merge Attachments if Necessary
         if(isset($params['attachments'])) {
             $attachments = array_merge($attachments, $params['attachments']);
-        } else {
+        } else { 
             $params['attachments'] = $attachments;
         }
         
