@@ -159,8 +159,11 @@ class ImapService implements ImapServiceInterface
         } catch (\Exception $e) {
             // Logged Exceptions
             $this->imap = null;
+            var_dump($e);
+            die;
             $this->log->error('Cannot connect to ' . $imapConfig->username . ' via IMAP, ' .
-                                'exception returned: ' . $e->getMessage() . '; ' . $e->getTraceAsString());
+                                'exception returned: ' . $e->getMessage() . PHP_EOL . PHP_EOL .
+                                'Trace: ' . $e->getTraceAsString());
         }
 
         // Return IMAP Details
