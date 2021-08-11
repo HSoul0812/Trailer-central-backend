@@ -7,6 +7,10 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\User\SalesPersonServiceInterface;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\CRM\Email\DTOs\ImapConfig;
+use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Traits\SmtpHelper;
 use App\Transformers\CRM\User\SalesPersonTransformer;
@@ -45,6 +49,16 @@ class SalesAuthService implements SalesAuthServiceInterface
     protected $auth;
 
     /**
+     * @var ImapServiceInterface
+     */
+    protected $imap;
+
+    /**
+     * @var SalesPersonTransformer
+     */
+    protected $salesTransformer;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -57,12 +71,17 @@ class SalesAuthService implements SalesAuthServiceInterface
         SalesPersonRepositoryInterface $salesPersonRepo,
         TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
+        ImapServiceInterface $imap,
+        SalesPersonTransformer $salesTransformer,
         Manager $fractal
     ) {
         $this->salesPersonService = $salesPersonService;
         $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
         $this->auth = $auth;
+        $this->imap = $imap;
+        $this->salesTransformer = $salesTransformer;
+        $this->fractal = $fractal;
 
         // Fractal
         $this->fractal = $fractal;
@@ -190,7 +209,7 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * Authorize Login With Code to Return Access Token
      * 
-     * AuthorizeSalesAuthRequest $request
+     * @param AuthorizeSalesAuthRequest $request
      * @param string $tokenType
      * @param string $code
      * @param int $userId
@@ -250,6 +269,48 @@ class SalesAuthService implements SalesAuthServiceInterface
 
 
     /**
+     * Validate Sales Person Custom Config
+     * 
+     * @param array $params {type: smtp|imap,
+     *                       username: string,
+     *                       password: string,
+     *                       security: string (ssl|tls)
+     *                       host: string
+     *                       port: int}
+     * @return ConfigValidate
+     */
+    public function validate(array $params): ConfigValidate {
+        // Initialize Config Params
+        $config = [
+            'username' => $params['username'],
+            'password' => $params['password'],
+            'security' => $params['security'],
+            'host' => $params['host'],
+            'port' => $params['port']
+        ];
+
+        // Get Smtp Config Details
+        if($params['type'] === SalesPerson::TYPE_SMTP) {
+            // Validate SMTP Config
+            return $this->validateSmtp(new SmtpConfig($config));
+        }
+        // Get Imap Config Details
+        elseif($params['type'] === SalesPerson::TYPE_IMAP) {
+            // Validate IMAP Config
+            $imapConfig = new ImapConfig($config);
+            $imapConfig->calcCharset();
+            return $this->imap->validate($imapConfig);
+        }
+
+        // Return Response
+        return new ConfigValidate([
+            'type' => $params['type'],
+            'success' => false
+        ]);
+    }
+
+
+    /**
      * Return Response
      * 
      * @param int $salesPersonId
@@ -289,8 +350,12 @@ class SalesAuthService implements SalesAuthServiceInterface
         $salesPerson = $this->salesPerson->get([
             'sales_person_id' => $salesPersonId
         ]);
-        $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
+
+        $item = new Item($salesPerson, $this->salesTransformer, 'sales_person');
         $this->fractal->parseIncludes('smtp,imap,folders,authTypes');
-        return $this->fractal->createData($item)->toArray();
+        $response = $this->fractal->createData($item)->toArray();
+
+        // Return Response
+        return $this->auth->response($accessToken, $response);
     }
 }

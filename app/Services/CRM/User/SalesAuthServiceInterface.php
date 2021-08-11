@@ -4,6 +4,7 @@ namespace App\Services\CRM\User;
 
 use App\Http\Requests\CRM\User\AuthorizeSalesAuthRequest;
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 
 interface SalesAuthServiceInterface {
     /**
@@ -47,6 +48,19 @@ interface SalesAuthServiceInterface {
      *               sales_person: array<SalesPersonTransformer>}
      */
     public function authorize(AuthorizeSalesAuthRequest $request);
+
+    /**
+     * Validate SMTP/IMAP
+     * 
+     * @param array $params {type: smtp|imap,
+     *                       username: string,
+     *                       password: string,
+     *                       security: string (ssl|tls)
+     *                       host: string
+     *                       port: int}
+     * @return ConfigValidate
+     */
+    public function validate(array $params): ConfigValidate;
 
     /**
      * Return Response

@@ -2,14 +2,20 @@
 
 namespace App\Transformers\CRM\User;
 
+use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\User\DTOs\SalesPersonConfig;
+use App\Services\CRM\Email\ImapServiceInterface;
 use App\Transformers\Dms\GenericSaleTransformer;
 use App\Transformers\Pos\SaleTransformer;
 use League\Fractal\TransformerAbstract;
-use App\Models\CRM\User\SalesPerson;
 
 class SalesPersonTransformer extends TransformerAbstract
 {
+    /**
+     * @var ImapServiceInterface
+     */
+    private $imapService;
+
     protected $defaultIncludes = [];
 
     protected $availableIncludes = [
@@ -20,6 +26,16 @@ class SalesPersonTransformer extends TransformerAbstract
         'folders',
         'authTypes'
     ];
+
+    /**
+     * SalesPersonTransformer constructor.
+     * @param ImapServiceInterface $imapService
+     */
+    public function __construct(
+        ?ImapServiceInterface $imapService = null
+    ) {
+        $this->imapService = $imapService;
+    }
 
     public function transform(SalesPerson $salesPerson)
     {
@@ -64,29 +80,42 @@ class SalesPersonTransformer extends TransformerAbstract
         });
     }
 
-    /**
-     * Transform ImapMailbox Folders
-     * @return array
-     */
-    public function includeAuthTypes(SalesPerson $salesPerson) {
-        // Get SalesPersonConfig
-        $config = new SalesPersonConfig();
-        return $this->collection($config->authTypes, new AuthTypeTransformer());
-    }
-
     public function includeImap(SalesPerson $salesPerson)
     {
         return $this->item($salesPerson, function($salesPerson) {
+            // Get Validate
+            // TO DO: Replace every instance of new SalesPersonTransformer()
+            //        with construct loaded version of the transformer
+            //        This is out of scope of this task for now, so we're only
+            //        forcing it in SalesAuthService for now
+            $success = $salesPerson->imap_validate->success;
+            if(!empty($this->imapService)) {
+                $validate = $this->imapService->validate($salesPerson->imap_config);
+                $success = $validate->success;
+            }
+
+            // Return Results
             return [
                 'email' => !empty($salesPerson->imap_email) ? $salesPerson->imap_email : $salesPerson->email,
                 'password' => $salesPerson->imap_password,
                 'host' => $salesPerson->imap_server,
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
-                'failed' => !$salesPerson->imap_validate->success,
+                'failed' => !$success,
                 'message' => $salesPerson->imap_validate->getMessage()
             ];
         });
+    }
+
+    /**
+     * Transform Auth Types for Config
+     * 
+     * @return array
+     */
+    public function includeAuthTypes(SalesPerson $salesPerson) {
+        // Get SalesPersonConfig
+        $config = new SalesPersonConfig();
+        return $this->collection($config->authTypes, new AuthTypeTransformer());
     }
 
     public function includeFolders(SalesPerson $salesPerson)

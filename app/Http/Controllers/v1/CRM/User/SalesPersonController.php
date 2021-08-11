@@ -9,6 +9,7 @@ use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\User\DTOs\SalesPersonConfig;
 use App\Services\CRM\User\SalesPersonServiceInterface;
+use App\Services\CRM\User\SalesAuthServiceInterface;
 use App\Transformers\CRM\Email\ConfigValidateTransformer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\CRM\User\SalesPersonConfigTransformer;
@@ -112,6 +113,7 @@ class SalesPersonController extends RestfulController {
         $request = new ValidateSalesPeopleRequest($request->all());
         if ($request->validate()) {
             // Return Validation
+            //$data = new Item($this->salesAuth->validate($request->all()), $this->emailConfigTransformer, 'data');
             return $this->response->item($this->salesService->validate($request->all()), $this->emailConfigTransformer);
         }
 

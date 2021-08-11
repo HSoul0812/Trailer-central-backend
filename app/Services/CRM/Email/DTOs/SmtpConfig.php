@@ -27,6 +27,7 @@ class SmtpConfig
      */
     const TLS = 'tls';
 
+
     /**
      * @const string Auth Auto
      */

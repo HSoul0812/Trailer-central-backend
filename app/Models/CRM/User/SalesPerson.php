@@ -11,6 +11,7 @@ use App\Models\User\NewDealerUser;
 use App\Models\Integration\Auth\AccessToken;
 use App\Utilities\JsonApi\Filterable;
 use App\Services\CRM\Email\DTOs\ConfigValidate;
+use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Traits\SmtpHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -339,15 +340,29 @@ class SalesPerson extends Model implements Filterable
     }
 
     /**
-     * Validate IMAP Details
-     * TO DO: Validate from here like SMTP above!
+     * Get Imap Validation
      * 
-     * @return bool
+     * @return ConfigValidate
      */
     public function getImapValidateAttribute(): ConfigValidate {
         return new ConfigValidate([
             'type' => 'imap',
             'success' => !$this->imap_failed
+        ]);
+    }
+
+    /**
+     * Get Imap Config
+     * 
+     * @return ImapConfig
+     */
+    public function getImapConfigAttribute(): ImapConfig {
+        return new ImapConfig([
+            'username' => $this->imap_email,
+            'password' => $this->imap_password,
+            'security' => $this->imap_security,
+            'host' => $this->imap_server,
+            'port' => $this->imap_port
         ]);
     }
 

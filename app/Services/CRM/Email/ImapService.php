@@ -6,9 +6,15 @@ use App\Exceptions\CRM\Email\MissingImapFolderException;
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
+use App\Exceptions\CRM\Email\ImapMailboxesMissingException;
+use App\Exceptions\CRM\Email\ImapMailboxesErrorException;
+use App\Models\CRM\User\SalesPerson;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\ImapConfig;
+use App\Services\CRM\Email\DTOs\ImapMailbox;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Webklex\PHPIMAP\ClientManager;
 use Webklex\PHPIMAP\Message;
@@ -53,6 +59,47 @@ class ImapService implements ImapServiceInterface
     }
 
     /**
+     * Validate Imap
+     *
+     * @param ImapConfig $imapConfig
+     * @return ConfigValidate
+     */
+    public function validate(ImapConfig $imapConfig): ConfigValidate {
+        // Get Mailboxes
+        try {
+            $mailboxes = $this->mailboxes($imapConfig);
+            return new ConfigValidate([
+                'type' => SalesPerson::TYPE_IMAP,
+                'success' => true,
+                'folders' => $mailboxes
+            ]);
+        } catch (\Exception $e) {
+            $this->log->error($e->getMessage());
+        }
+
+        // Verify We Can Get Messages Without Errors Instead
+        try {
+            // No Mailboxes Returned?
+            $imapConfig->setFolderName(ImapConfig::FOLDER_INBOX);
+            $this->messages($imapConfig);
+
+            // Return ConfigValidate
+            return new ConfigValidate([
+                'type' => SalesPerson::TYPE_IMAP,
+                'success' => true
+            ]);
+        } catch (\Exception $e) {
+            $this->log->error($e->getMessage());
+        }
+
+        // Return ConfigValidate
+        return new ConfigValidate([
+            'type' => SalesPerson::TYPE_IMAP,
+            'success' => false
+        ]);
+    }
+
+    /**
      * Import Email Replies
      *
      * @param ImapConfig $imapConfig
@@ -78,6 +125,35 @@ class ImapService implements ImapServiceInterface
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
             throw new ImapFolderUnknownErrorException($e->getMessage());
+        }
+    }
+
+    /**
+     * Import Mailboxes
+     *
+     * @param ImapConfig $imapConfig
+     * @throws App\Exceptions\CRM\Email\ImapConnectionFailedException
+     * @throws App\Exceptions\CRM\Email\ImapFolderConnectionFailedException
+     * @throws App\Exceptions\CRM\Email\ImapFolderUnknownErrorException
+     * @return Collection<ImapMailbox>
+     */
+    public function mailboxes(ImapConfig $imapConfig): Collection {
+        // Get IMAP
+        $imap = $this->connectIMAP($imapConfig);
+
+        // Error Occurred
+        if($imap === null) {
+            throw new ImapConnectionFailedException;
+        }
+
+        // Return Mailbox
+        try {
+            // Get Messages
+            return $this->getMailboxes();
+        } catch (ConnectionException $e) {
+            throw new ImapMailboxesMissingException($e->getMessage());
+        } catch (\Exception $e) {
+            throw new ImapMailboxesErrorException($e->getMessage());
         }
     }
 
@@ -211,6 +287,30 @@ class ImapService implements ImapServiceInterface
             $this->log->info('Found ' . $messages->count() . ' Messages to Process');
         }
         return $messages;
+    }
+
+    /**
+     * Get Mailboxes From IMAP Config
+     * 
+     * @return Collection<ImapMailbox>
+     */
+    private function getMailboxes(): Collection {
+        // Get Mailboxes
+        $folders = $this->imap->getFolders(false);
+
+        // Create Imap Mailboxes
+        $mailboxes = new Collection();
+        foreach($folders as $folder) {
+            $mailboxes->push(new ImapMailbox([
+                'full' => $folder->path,
+                'delimiter' => $folder->delimiter,
+                'name' => $folder->name
+            ]));
+        }
+
+        // Return Mailboxes
+        $this->log->info("Found " . $mailboxes->count() . " mailboxes from IMAP");
+        return $mailboxes;
     }
 
     /**

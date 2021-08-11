@@ -2,12 +2,22 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Support\MessageCollection;
+use Illuminate\Support\Collection;
 
 interface ImapServiceInterface {
+    /**
+     * Validate Imap
+     *
+     * @param ImapConfig $imapConfig
+     * @return ConfigValidate
+     */
+    public function validate(ImapConfig $imapConfig): ConfigValidate;
+
     /**
      * Import Email Replies
      *
@@ -18,6 +28,17 @@ interface ImapServiceInterface {
      * @return MessageCollection
      */
     public function messages(ImapConfig $imapConfig): MessageCollection;
+
+    /**
+     * Import Mailboxes
+     *
+     * @param ImapConfig $imapConfig
+     * @throws App\Exceptions\CRM\Email\ImapConnectionFailedException
+     * @throws App\Exceptions\CRM\Email\ImapFolderConnectionFailedException
+     * @throws App\Exceptions\CRM\Email\ImapFolderUnknownErrorException
+     * @return Collection<ImapMailbox>
+     */
+    public function mailboxes(ImapConfig $imapConfig): Collection;
 
     /**
      * Get Basic Overview

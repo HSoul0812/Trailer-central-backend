@@ -37,4 +37,3 @@ class ConfigValidateTransformer extends TransformerAbstract
         return $this->null();
     }
 }
-

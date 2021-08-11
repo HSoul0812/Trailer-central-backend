@@ -15,7 +15,7 @@ use Carbon\Carbon;
  * 
  * @package App\Services\CRM\Email\DTOs
  */
-class IMAPConfig
+class ImapConfig
 {
     use WithConstructor, WithGetter;
 
@@ -28,6 +28,7 @@ class IMAPConfig
      * @const string TLS
      */
     const TLS = 'tls';
+
 
     /**
      * @const string Auth Gmail
@@ -59,6 +60,7 @@ class IMAPConfig
      */
     const CHARSET_NTLM = 'US-ASCII';
 
+
     /**
      * @const string Auth Mode for XOAUTH (Gmail/Office 365)
      */
@@ -74,6 +76,11 @@ class IMAPConfig
      * @const No Valid Certificates
      */
     const NO_CERT_HOSTS = ['imap.gmail.com'];
+
+    /**
+     * @const No SSL By Default on These Ports
+     */
+    const NO_SSL_PORTS = [143];
 
     /**
      * @const Default Hosts By Auth Config
@@ -96,6 +103,11 @@ class IMAPConfig
      * @const int IMAP Timeout
      */
     const DEFAULT_TIMEOUT = 2;
+
+    /**
+     * @const Folder Inbox
+     */
+    const FOLDER_INBOX = 'INBOX';
 
 
     /**
@@ -307,6 +319,11 @@ class IMAPConfig
      */
     public function getSecurity(): string
     {
+        // If No Security, Return Empty
+        if($this->isNoSecurity()) {
+            return '';
+        }
+
         // Set Security Default
         $security = $this->security ?: self::SSL;
 
@@ -472,6 +489,20 @@ class IMAPConfig
         }
     }
 
+    /**
+     * Toggle Charset From One to the Other
+     * 
+     * @return void
+     */
+    public function toggleCharset(): void
+    {
+        if($this->charset === self::CHARSET_NTLM) {
+            $this->setCharset(self::CHARSET_DEFAULT);
+        } else {
+            $this->setCharset(self::CHARSET_NTLM);
+        }
+    }
+
 
     /**
      * Return Folder Name
@@ -502,7 +533,7 @@ class IMAPConfig
      */
     public function getStartDate(): string
     {
-        return $this->startDate;
+        return $this->startDate ?? 'days';
     }
 
     /**
@@ -527,7 +558,6 @@ class IMAPConfig
         return (!empty($this->host) && in_array($this->host, self::NO_CERT_HOSTS));
     }
 
-
     /**
      * Get Credentials for IMAP From Config
      * 
@@ -551,7 +581,17 @@ class IMAPConfig
             'password'       => $this->getPassword(),
             'protocol'       => 'imap',
             'authentication' => $this->isAuthConfigOauth() ? self::MODE_OAUTH : null,
-            //'timeout'        => self::DEFAULT_TIMEOUT
+            'timeout'        => self::DEFAULT_TIMEOUT
         ];
+    }
+
+    /**
+     * Current IMAP Config Doesn't Append Any Security Settings?
+     * 
+     * @return bool
+     */
+    public function isNoSecurity(): bool {
+        // Validate if Port is No Security
+        return (!empty($this->port) && in_array($this->port, self::NO_SSL_PORTS));
     }
 }

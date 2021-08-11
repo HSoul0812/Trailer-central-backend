@@ -43,7 +43,7 @@ class InteractionTransformer extends TransformerAbstract
     public function includeSalesPerson(Interaction $interaction)
     {
         if ($interaction->leadStatus && $interaction->leadStatus->salesPerson) {
-            return $this->item($interaction->leadStatus->salesPerson, new SalesPersonTransformer());
+            return $this->item($interaction->leadStatus->salesPerson, new SalesPersonTransformer);
         } else {
             return $this->null();
         }
