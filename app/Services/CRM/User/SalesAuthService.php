@@ -63,9 +63,13 @@ class SalesAuthService implements SalesAuthServiceInterface
         $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
         $this->auth = $auth;
-        $this->fractal = $fractal;
 
+        // Fractal
+        $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('auth');
     }
 
     /**
@@ -104,7 +108,10 @@ class SalesAuthService implements SalesAuthServiceInterface
         // Create Access Token
         $accessToken = null;
         if(!empty($params['token_type'])) {
+            $this->log->info('Created sales person #' . $salesPerson->id . ' and updated ' . $params['token_type'] . ' token');
             $accessToken = $this->tokens->create($params);
+        } else {
+            $this->log->info('Created sales person #' . $salesPerson->id . ' and updated');
         }
 
         // Return Response
@@ -133,8 +140,10 @@ class SalesAuthService implements SalesAuthServiceInterface
         // Create Access Token
         $accessToken = null;
         if(!empty($params['token_type'])) {
+            $this->log->info('Updated sales person #' . $salesPerson->id . ' and updated ' . $params['token_type'] . ' token');
             $accessToken = $this->tokens->create($params);
         } else {
+            $this->log->info('Updated sales person #' . $salesPerson->id . ' and deleted existing tokens');
             $this->tokens->deleteAll($params['relation_type'], $params['relation_id']);
         }
 
@@ -153,10 +162,12 @@ class SalesAuthService implements SalesAuthServiceInterface
         // Update Sales Person
         if(!empty($params['id'])) {
             $salesPerson = $this->salesPersonService->update($params);
+            $this->log->info('Updated sales person #' . $salesPerson->id . ' and return ' . $params['token_type'] . ' login url');
         }
         // Create Sales Person Only If Fields Exist
         elseif(!empty($params['first_name']) && !empty($params['last_name']) && !empty($params['email'])) {
             $salesPerson = $this->salesPersonService->create($params);
+            $this->log->info('Created sales person #' . $salesPerson->id . ' and return ' . $params['token_type'] . ' login url');
         }
 
         // Adjust Request
@@ -211,9 +222,11 @@ class SalesAuthService implements SalesAuthServiceInterface
         if(!empty($stateToken->relation_id) || !empty($request->sales_person_id)) {
             $params['id'] = $request->sales_person_id ?? $stateToken->relation_id;
             unset($params['sales_person_id']);
+            $this->log->info('Authorized token and updated sales person #' . $params['id']);
             $salesPerson = $this->salesPersonService->update($params);
         } else {
             $salesPerson = $this->salesPersonService->create($params);
+            $this->log->info('Authorized token and created sales person #' . $salesPerson->id);
         }
 
         // Create Token Params
