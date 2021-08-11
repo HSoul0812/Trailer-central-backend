@@ -13,8 +13,7 @@ class SendBlastRequest extends Request {
 
     protected $rules = [
         'user_id' => 'required|integer',
-        'sales_person_id' => 'integer|sales_person_valid',
-        'leads' => 'required|array',
-        'leads.*' => 'integer|exists:website_lead,identifier'
+        'sales_person_id' => 'nullable|integer|sales_person_valid',
+        'leads' => 'required|string'
     ];
 }

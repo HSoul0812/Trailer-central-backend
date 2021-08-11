@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Response;
 use Dingo\Api\Routing\Helpers;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
+use League\Fractal\TransformerAbstract;
 
 /**
  * Class RestfulControllerV2
@@ -66,5 +72,46 @@ class RestfulControllerV2 extends Controller
     protected function deletedResponse(): Response
     {
         return $this->response->noContent();
+    }
+
+    /**
+     * @param bool $isExists
+     * @return Response
+     */
+    protected function existsResponse(bool $isExists): Response
+    {
+        return $this->response->array([
+            'response' => [
+                'status' => 'success',
+                'data' => $isExists
+            ]
+        ]);
+    }
+
+    /**
+     * @param mixed $data
+     * @param TransformerAbstract $transformer
+     * @param LengthAwarePaginator $paginator
+     * @return Response
+     */
+    protected function collectionResponse($data, TransformerAbstract $transformer, LengthAwarePaginator $paginator): Response
+    {
+        $fractal = new Manager();
+        $fractal->setSerializer(new NoDataArraySerializer());
+
+        $fractal->parseIncludes(request()->query('with', ''));
+
+        $collection = new Collection($data, $transformer);
+        $collection->setPaginator(new IlluminatePaginatorAdapter($paginator));
+
+        $responseData = $fractal->createData($collection)->toArray();
+
+        $meta = $responseData['meta'];
+        unset($responseData['meta']);
+
+        return $this->response->array([
+            'data' => $responseData,
+            'meta' => $meta,
+        ]);
     }
 }

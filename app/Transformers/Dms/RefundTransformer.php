@@ -1,19 +1,31 @@
 <?php
 
-
 namespace App\Transformers\Dms;
 
-
 use App\Models\CRM\Dms\Refund;
+use App\Transformers\Dms\Payment\DealerSalesReceiptTransformer;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
 
+/**
+ * Class RefundTransformer
+ * @package App\Transformers\Dms
+ */
 class RefundTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'items'
+        'items',
+        'invoice',
+        'receipt',
+        'customer',
     ];
 
-    public function transform(Refund $refund)
+    /**
+     * @param Refund $refund
+     * @return array
+     */
+    public function transform(Refund $refund): array
     {
         return [
             'id' => (int)$refund->id,
@@ -25,8 +37,51 @@ class RefundTransformer extends TransformerAbstract
         ];
     }
 
-    public function includeItems(Refund $refund)
+    /**
+     * @param Refund $refund
+     * @return Collection
+     */
+    public function includeItems(Refund $refund): Collection
     {
         return $this->collection($refund->items, new RefundItemTransformer());
+    }
+
+    /**
+     * @param Refund $refund
+     * @return Item|null
+     */
+    public function includeInvoice(Refund $refund): ?Item
+    {
+        if (!$refund->invoice) {
+            return null;
+        }
+
+        return $this->item($refund->invoice, new InvoiceTransformer());
+    }
+
+    /**
+     * @param Refund $refund
+     * @return Item|null
+     */
+    public function includeReceipt(Refund $refund): ?Item
+    {
+        if (!$refund->receipt) {
+            return null;
+        }
+
+        return $this->item($refund->receipt, new DealerSalesReceiptTransformer());
+    }
+
+    /**
+     * @param Refund $refund
+     * @return Item|null
+     */
+    public function includeCustomer(Refund $refund): ?Item
+    {
+        if (!$refund->invoice || !$refund->invoice->customer) {
+            return null;
+        }
+
+        return $this->item($refund->invoice->customer, new CustomerTransformer());
     }
 }

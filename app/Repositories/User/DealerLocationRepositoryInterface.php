@@ -106,4 +106,12 @@ interface DealerLocationRepositoryInterface extends Repository
     public function commitTransaction(): void;
 
     public function rollbackTransaction(): void;
+
+    /**
+     * @param string $name
+     * @param int $dealerId
+     * @param int|null $dealerLocationId
+     * @return bool true if exists
+     */
+    public function existByName(string $name, int $dealerId, ?int $dealerLocationId): bool;
 }

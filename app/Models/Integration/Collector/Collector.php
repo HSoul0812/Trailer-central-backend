@@ -54,7 +54,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $ids_default_location
  * @property string|null $xml_url
  * @property string|null $zero_msrp
- *
+ * @property string|null $only_types
+ * @property string|null $linebreak_characters
+ * 
  * @property Collection<CollectorSpecification> $specifications
  * @property User $dealers
  * @property DealerLocation $dealerLocation
@@ -134,7 +136,9 @@ class Collector extends Model implements Filterable
         'use_factory_mapping',
         'skip_categories',
         'skip_locations',
-        'zero_msrp'
+        'zero_msrp',
+        'only_types',
+        'linebreak_characters'
     ];
 
     public function dealers(): BelongsTo

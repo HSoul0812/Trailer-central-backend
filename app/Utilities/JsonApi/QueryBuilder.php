@@ -220,13 +220,28 @@ class QueryBuilder implements QueryBuilderInterface
             foreach ($operators as $operator => $value) {
                 $operatorFunction = $this->operatorFunction($operator);
 
-                if (strpos($column, '.') === false) {
-                    $operatorFunction($column, $value, $this->query); // this is my column
-                } else {
+                /**
+                 * @deprecated It doesn't seem to work. There is no way to ask the developer who implemented this,
+                 * so I'll leave it as it is, so that nothing breaks.
+                 * Anyway, for queries related to relations, please use ":" as a separator
+                 */
+                if (strpos($column, '.') !== false) {
                     $pos = strrpos($column, '.');
                     $myRelation = substr($column, 0, $pos);
                     $myColumn = substr($column, $pos + 1);
                     $operatorFunction($myColumn, $value, $this->query->getRelation($myRelation)->getQuery()); // dot means this is a relation
+
+                } elseif (strpos($column, ':') !== false) {
+                    $pos = strrpos($column, ':');
+                    $myRelation = substr($column, 0, $pos);
+                    $myColumn = substr($column, $pos + 1);
+
+                    $this->query->whereHas($myRelation, function ($query) use ($operatorFunction, $myColumn, $value) {
+                        $operatorFunction($myColumn, $value, $query);
+                    });
+
+                } else {
+                    $operatorFunction($column, $value, $this->query); // this is my column
                 }
             }
         }
@@ -270,7 +285,8 @@ class QueryBuilder implements QueryBuilderInterface
                             'function' => $this->operatorFunction($operator, $condition),
                             'column' => $column,
                             'value' => $value,
-                            'isRelation' => strpos($column, '.') !== false
+                            'isRelation' => strpos($column, '.') !== false,
+                            'isRelation2' => strpos($column, ':') !== false,
                         ];
                     }
                 }
@@ -278,11 +294,27 @@ class QueryBuilder implements QueryBuilderInterface
 
             $this->query = $this->query->where(function($q) use ($operatorFunctions) {
                 foreach ($operatorFunctions as $operatorFunction) {
+
+                    /**
+                     * @deprecated It doesn't seem to work. There is no way to ask the developer who implemented this,
+                     * so I'll leave it as it is, so that nothing breaks.
+                     * Anyway, for queries related to relations, please use ":" as a separator
+                     */
                     if ($operatorFunction['isRelation']) {
                         $pos = strrpos($operatorFunction['column'], '.');
                         $myRelation = substr($operatorFunction['column'], 0, $pos);
                         $myColumn = substr($operatorFunction['column'], $pos + 1);
                         $operatorFunction['function']($myColumn, $operatorFunction['value'], $q->getRelation($myRelation)->getQuery()); // dot means this is a relation
+
+                    } elseif ($operatorFunction['isRelation2']) {
+                        $pos = strrpos($operatorFunction['column'], '.');
+                        $myRelation = substr($operatorFunction['column'], 0, $pos);
+                        $myColumn = substr($operatorFunction['column'], $pos + 1);
+
+                        $q->whereHas($myRelation, function ($query) use ($operatorFunction, $myColumn) {
+                            $operatorFunction['function']($myColumn, $operatorFunction['value'], $query);
+                        });
+
                     } else {
                         $operatorFunction['function']($operatorFunction['column'], $operatorFunction['value'], $q); // this is my column
                     }
@@ -371,7 +403,7 @@ class QueryBuilder implements QueryBuilderInterface
                 return function ($column, $value, Builder $query) use ($where) {
                     list($valueFrom, $valueTo) = explode(',', $value);
                     $whereBetween = $where . 'Between';
-                    $query->{$whereBetween}($column, $valueFrom, $valueTo);
+                    $query->{$whereBetween}($column, [$valueFrom, $valueTo]);
                 };
             case 'contains':
                 return function ($column, $value, Builder $query) use ($where) {

@@ -37,5 +37,6 @@ class Bill extends Model
         'received_date',
         'due_date',
         'memo',
+        'dealer_location_id'
     ];
 }

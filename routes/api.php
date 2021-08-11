@@ -183,6 +183,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
 
     /**
+     * Inventory Attributes
+     */
+    $route->get('inventory/features', 'App\Http\Controllers\v1\Inventory\FeatureController@index');
+
+    /**
      * Inventory transactions history
      */
     $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
@@ -247,6 +252,7 @@ $api->version('v1', function ($route) {
     $route->get('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@show')->where('id', '[0-9]+');
     $route->post('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@update')->where('id', '[0-9]+');
     $route->delete('website/blog/posts/{id}', 'App\Http\Controllers\v1\Website\Blog\PostController@destroy')->where('id', '[0-9]+');
+    $route->post('website/blog/bulk', 'App\Http\Controllers\v1\Website\Blog\BulkController@create');
 
     /**
      * Website Payment Calculator Settings
@@ -369,25 +375,26 @@ $api->version('v1', function ($route) {
 
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
-        
+        $route->post('user/check-admin-password', 'App\Http\Controllers\v1\User\SignInController@checkAdminPassword');
+
         $route->get('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@index');
         $route->post('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@create');
         $route->put('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@updateBulk');
-        
+
         $route->put('user/password/update', 'App\Http\Controllers\v1\User\SignInController@updatePassword');
-        
+
         $route->get('user/auto-import/settings', 'App\Http\Controllers\v1\User\AutoImportController@index');
         $route->put('user/auto-import/settings', 'App\Http\Controllers\v1\User\AutoImportController@updateSettings');
 
         $route->get('user/overlay/settings', 'App\Http\Controllers\v1\User\OverlaySettingsController@index');
         $route->post('user/overlay/settings', 'App\Http\Controllers\v1\User\OverlaySettingsController@updateSettings');
-        
+
         $route->put('user/newsletter', 'App\Http\Controllers\v1\User\SettingsController@updateNewsletter');
         $route->get('user/newsletter', 'App\Http\Controllers\v1\User\SettingsController@getNewsletter');
-        
+
         $route->put('user/xml-export', 'App\Http\Controllers\v1\User\SettingsController@updateXmlExport');
         $route->get('user/xml-export', 'App\Http\Controllers\v1\User\SettingsController@getXmlExport');
-        
+
         $route->put('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@updateBulk');
         $route->get('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@index');
     });
@@ -453,6 +460,7 @@ $api->version('v1', function ($route) {
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
         $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
         $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
         $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
@@ -465,11 +473,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
-        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
-        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
-        $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
-        $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        
         /**
          * Inventory for customers
          */
@@ -477,6 +481,15 @@ $api->version('v1', function ($route) {
         $route->get('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@getAllByCustomer')->where('customer_id', '[0-9]+');
         $route->delete('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@bulkDestroy')->where('customer_id', '[0-9]+');
         $route->post('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@attach')->where('customer_id', '[0-9]+');
+        
+        
+        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');        
+        $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
+        $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
+        $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');
+        $route->get('user/customers/search', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@search');
+        $route->delete('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@destroy');
+        $route->get('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@show');
 
         /*
         |--------------------------------------------------------------------------
@@ -799,6 +812,7 @@ $api->version('v1', function ($route) {
         $route->get('pos/sales', 'App\Http\Controllers\v1\Pos\SalesController@index');
         $route->get('pos/sales/{id}', 'App\Http\Controllers\v1\Pos\SalesController@show');
         $route->get('pos/registers', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@index');
+        $route->post('pos/registers', 'App\Http\Controllers\v1\Dms\Pos\RegisterController@create');
 
         /*
         |--------------------------------------------------------------------------
@@ -820,6 +834,17 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('payments/{id}', 'App\Http\Controllers\v1\Dms\PaymentController@show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Refunds
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('refunds', 'App\Http\Controllers\v1\Dms\RefundController@index');
+        $route->get('refunds/{id}', 'App\Http\Controllers\v1\Dms\RefundController@show');
 
         /*
         |--------------------------------------------------------------------------
@@ -972,4 +997,15 @@ $api->version('v1', function ($route) {
     */
     $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
     $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Files
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
+    $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
 });

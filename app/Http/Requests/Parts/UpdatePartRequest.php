@@ -24,6 +24,7 @@ class UpdatePartRequest extends Request {
         'alternative_part_number' => 'nullable|string',        
         'price' => 'numeric',
         'dealer_cost' => 'nullable|numeric',
+        'latest_cost' => 'nullable|numeric',
         'msrp' => 'nullable|numeric',
         'shipping_fee' => 'nullable|numeric',
         'use_handling_fee' => 'nullable|boolean',

@@ -2,9 +2,10 @@
 namespace App\Models\Inventory;
 
 use App\Helpers\SanitizeHelper;
-use App\Helpers\StringHelper;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
+use App\Models\CRM\Dms\ServiceOrder;
 use App\Models\Integration\LotVantage\DealerInventory;
+use App\Models\Inventory\Floorplan\Payment;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
@@ -13,6 +14,7 @@ use App\Traits\GeospatialHelper;
 use ElasticScoutDriverPlus\CustomSearch;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
@@ -23,7 +25,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 use Laravel\Scout\Searchable;
-use App\Models\Inventory\Category;
 
 /**
  * Class Inventory
@@ -99,7 +100,7 @@ use App\Models\Inventory\Category;
  * @property int $fp_vendor,
  * @property double $fp_balance,
  * @property bool $fp_paid,
- * @property double $fp_interest_paid,
+ * @property double $fp_interest_paid, PRTBND-985 We won't use this field anymore. Will remove it soon.
  * @property string $l_holder,
  * @property string $l_attn,
  * @property string $l_name_on_account,
@@ -122,7 +123,24 @@ use App\Models\Inventory\Category;
  * @property \DateTimeInterface $utc_integration_updated_at,
  * @property bool $has_stock_images,
  * @property bool $qb_sync_processed,
- * @property string $changed_fields_in_dashboard
+ * @property array|null $changed_fields_in_dashboard
+ *
+ * @property User $user
+ * @property Lead $lead
+ * @property Collection<Attribute>  $attribute
+ * @property DealerLocation $dealerLocation
+ * @property Collection<Payment> $floorplanPayments
+ * @property Collection<InventoryImage> $inventoryImages
+ * @property Collection<Image> $images
+ * @property Collection<InventoryFile> $inventoryFiles
+ * @property Collection<File> $files
+ * @property Collection<InventoryFeature> $inventoryFeatures
+ * @property Collection<InventoryClapp> $clapps
+ * @property Collection<ServiceOrder> $repairOrders
+ * @property Collection<AttributeValue> $attributeValues
+ * @property Collection<CustomerInventory> $customerInventory
+ * @property DealerInventory $lotVantageInventory
+ * @property Vendor $floorplanVendor
  *
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
@@ -302,7 +320,8 @@ class Inventory extends Model
         'price' => 'float',
         'msrp' => 'float',
         'gvwr' => 'float',
-        'fp_balance' => 'float'
+        'fp_balance' => 'float',
+        'changed_fields_in_dashboard' => 'array'
     ];
 
     protected $hidden = [
@@ -335,7 +354,7 @@ class Inventory extends Model
 
     public function floorplanPayments(): HasMany
     {
-        return $this->hasMany('App\Models\Inventory\Floorplan\Payment', 'inventory_id', 'inventory_id');
+        return $this->hasMany(Payment::class, 'inventory_id', 'inventory_id');
     }
 
     public function inventoryImages(): HasMany
@@ -350,7 +369,12 @@ class Inventory extends Model
 
     public function inventoryFiles(): HasMany
     {
-        return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
+        return $this->hasMany(InventoryFile::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function repairOrders(): HasMany
+    {
+        return $this->hasMany(ServiceOrder::class, 'inventory_id', 'inventory_id');
     }
 
     public function files(): HasManyThrough
@@ -392,15 +416,15 @@ class Inventory extends Model
     {
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
-    
+
     public function getCategoryLabelAttribute()
     {
         $category = Category::where('legacy_category', $this->category)->first();
-        
+
         if (empty($category)) {
             return null;
         }
-        
+
         return $category->label;
     }
 
@@ -420,7 +444,7 @@ class Inventory extends Model
 
     /**
      * Get Construction
-     * 
+     *
      * @return string
      */
     public function getConstructionAttribute(): ?string
@@ -434,7 +458,7 @@ class Inventory extends Model
 
     /**
      * Get Fuel Type
-     * 
+     *
      * @return string
      */
     public function getFuelTypeAttribute(): ?string
@@ -448,7 +472,7 @@ class Inventory extends Model
 
     /**
      * Get Mileage
-     * 
+     *
      * @return string
      */
     public function getMileageAttribute(): ?string
@@ -463,6 +487,22 @@ class Inventory extends Model
     public function getStatusLabelAttribute()
     {
         return isset(self::STATUS_MAPPING[$this->status]) ? self::STATUS_MAPPING[$this->status] : null;
+    }
+
+    /**
+     * Instead of using fp_interest_paid field from inventory table, calculate this amount from payment history table
+     *
+     * @return float An amount of interest paid
+     */
+    public function getInterestPaidAttribute(): float
+    {
+        $interest_paid = self::select('SUM(inventory_floor_plan_payment.amount) AS interest_paid')
+                    ->join('inventory_floor_plan_payment', 'inventory.inventory_id', '=', 'inventory_floor_plan_payment.inventory_id')
+                    ->where('inventory.inventory_id', $this->inventory_id)
+                    ->where('inventory_floor_plan_payment.type', Payment::PAYMENT_CATEGORIES['Interest'])
+                    ->sum('inventory_floor_plan_payment.amount');
+
+        return $interest_paid;
     }
 
     public function __toString() {

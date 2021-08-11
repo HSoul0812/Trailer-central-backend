@@ -168,7 +168,8 @@ class CreateTest extends AbstractDealerLocationController
         return [                                          // array $params, string $expectedException, string $expectedExceptionMessage, string|array $firstExpectedErrorMessage
             'No dealer'                                   => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
             'Non existent dealer'                         => [['dealer_id' => $this->faker->numberBetween(700000, 800000)], ResourceException::class, 'Validation Failed', 'The selected dealer id is invalid.'],
-            'No others required parameters'               => [['dealer_id' => $this->getSeededData(0,'dealerId')], ResourceException::class, 'Validation Failed', ['name', 'contact', 'address', 'city', 'county', 'region', 'country', 'postalcode', 'phone', 'tax_calculator_id']],
+            "Dealer location isn't unique"                => [['dealer_id' => $this->getSeededData(0,'dealerId'), 'name' => $this->getSeededData(0,'firstLocationName')], ResourceException::class, 'Validation Failed', 'Dealer Location must be unique'],
+            'No others required parameters'               => [['dealer_id' => $this->getSeededData(0,'dealerId')], ResourceException::class, 'Validation Failed', ['name', 'contact', 'address', 'city', 'county', 'region', 'country', 'postalcode', 'phone']],
             '"sales_tax_items" and "fees" are not arrays' => [['dealer_id' => $this->getSeededData(0,'dealerId'), 'sales_tax_items' => true, 'fees' => 'back_fee'], ResourceException::class, 'Validation Failed', $otherAssertions['"sales_tax_items" and "fees" errors have a specific message']],
             // @todo since there are plenty of possible errors we should add more test cases, but right now I'm not sure about theirs business value, so this is what it is
         ];

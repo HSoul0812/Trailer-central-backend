@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\database\seeds\Part;
 
 use App\Models\Parts\Part;
+use App\Models\Parts\CacheStoreTime;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Traits\WithGetter;
@@ -37,7 +38,11 @@ class PartSeeder extends Seeder
         $faker = Faker::create();
 
         foreach (range(0, $faker->numberBetween(10, 20)) as $number) {
-            factory(Part::class)->create(['dealer_id' => $dealerId]);
+            factory(Part::class)->create([
+                'dealer_id' => $dealerId,
+                'dealer_cost' => $faker->randomFloat(2, 0, 50),
+                'latest_cost' => $faker->randomFloat(2, 0, 50)
+            ]);
         }
     }
 
@@ -47,6 +52,7 @@ class PartSeeder extends Seeder
         // Database clean up
         Part::where('dealer_id', $dealerId)->delete();
         Vendor::where('dealer_id', $dealerId)->delete();
+        CacheStoreTime::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);
     }
 

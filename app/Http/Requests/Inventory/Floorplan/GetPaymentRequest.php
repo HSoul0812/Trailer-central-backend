@@ -15,6 +15,7 @@ class GetPaymentRequest extends Request {
         'sort' => 'in:type,-type,amount,-amount,payment_type,-payment_type,created_at,-created_at',
         'dealer_id' => 'array',
         'dealer_id.*' => 'integer',
+        'inventory_id' => 'integer'
     ];
 
 }

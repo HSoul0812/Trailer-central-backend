@@ -23,6 +23,7 @@ interface PermissionsInterface
     const POS = 'pos';
     const SERVICE = 'service';
     const BACK_OFFICE = 'back_office';
+    const TIME_CLOCK = 'time_clock';
 
     const FEATURES = [
         self::INVENTORY,
@@ -35,6 +36,7 @@ interface PermissionsInterface
         self::POS,
         self::SERVICE,
         self::BACK_OFFICE,
+        self::TIME_CLOCK
     ];
 
     /**
@@ -58,10 +60,10 @@ interface PermissionsInterface
      * @return Collection
      */
     public function getPermissions(): Collection;
-    
+
     /**
      * Returns permissions allowed for a given user
-     * 
+     *
      * @return Collection
      */
     public function getPermissionsAllowed(): Collection;

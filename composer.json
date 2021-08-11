@@ -16,7 +16,7 @@
         "babenkoivan/elastic-migrations": "^1.2",
         "babenkoivan/elastic-scout-driver": "^1.2",
         "babenkoivan/elastic-scout-driver-plus": "^1.11",
-        "barryvdh/laravel-dompdf": "^0.9.0",
+        "barryvdh/laravel-snappy": "^0.4.8",
         "darkaonline/l5-swagger": "^6.0",
         "darkaonline/swagger-lume": "6.*",
         "dingo/api": "^2.4",
@@ -51,7 +51,8 @@
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
-        "twilio/sdk": "^5.31"
+        "twilio/sdk": "^5.31",
+        "staudenmeir/belongs-to-through": "^2.5"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

@@ -5,7 +5,9 @@ namespace App\Providers;
 
 
 use App\Models\CRM\Account\Invoice;
+use App\Models\CRM\Account\Payment;
 use App\Models\CRM\Dms\FinancingCompany;
+use App\Models\CRM\Dms\Refund;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
@@ -64,6 +66,7 @@ use App\Services\Dms\Printer\InstructionsServiceInterface;
 use App\Services\Dms\Printer\ZPL\InstructionsService;
 use App\Services\Dms\Printer\FormServiceInterface as PrinterFormServiceInterface;
 use App\Services\Dms\Printer\ESCP\FormService as PrinterFormService;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class DmsServiceProvider extends ServiceProvider
@@ -126,5 +129,11 @@ class DmsServiceProvider extends ServiceProvider
     public function boot()
     {
         \Validator::extend('document_template_exists', 'App\Rules\Dms\Docupilot\DocumentTemplateExists@passes');
+
+        Relation::morphMap([
+            'qb_payment' => Payment::class,
+            'crm_pos_sales' => Sale::class,
+            'dealer_refunds' => Refund::class,
+        ]);
     }
 }
