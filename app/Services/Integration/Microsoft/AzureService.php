@@ -54,7 +54,7 @@ class AzureService implements AzureServiceInterface
             'urlAuthorize'            => config('azure.authority.root').config('azure.authority.authorize'),
             'urlAccessToken'          => config('azure.authority.root').config('azure.authority.token'),
             'urlResourceOwnerDetails' => '',
-            'scopes'                  => $scopes ?? config('azure.scopes')
+            'scopes'                  => $scopes ? implode(" ", $scopes) : config('azure.scopes')
         ]);
 
         // Return Auth Client
