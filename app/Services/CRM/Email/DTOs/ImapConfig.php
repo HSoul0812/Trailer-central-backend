@@ -77,6 +77,17 @@ class IMAPConfig
         'OFFICE' => 'outlook.office365.com'
     ];
 
+    /**
+     * @const string Auth Mode for XOAUTH (Gmail/Office 365)
+     */
+    const MODE_OAUTH = 'oauth';
+
+
+    /**
+     * @const int IMAP Timeout
+     */
+    const DEFAULT_TIMEOUT = 2;
+
 
     /**
      * @var string Username for IMAP
@@ -523,7 +534,8 @@ class IMAPConfig
             'username'       => $this->getUsername(),
             'password'       => $this->getPassword(),
             'protocol'       => 'imap',
-            'authentication' => $this->isAuthConfigOauth() ? 'oauth' : null
+            'authentication' => $this->isAuthConfigOauth() ? self::MODE_OAUTH : null,
+            'timeout'        => self::DEFAULT_TIMEOUT
         ];
     }
 }

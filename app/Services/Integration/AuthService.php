@@ -266,6 +266,7 @@ class AuthService implements AuthServiceInterface
 
         // Update Refresh Token
         if($refresh->exists()) {
+            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
             $this->tokens->refresh($accessToken->id, $refresh);
         }
 
@@ -295,8 +296,7 @@ class AuthService implements AuthServiceInterface
 
         // Update Refresh Token
         if($validate->newToken && $validate->newToken->exists()) {
-            $this->log->info('Refreshed token #' . $accessToken->id . ' with replacement ' .
-                                print_r($validate->newToken->toArray(), true));
+            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
             $this->tokens->refresh($accessToken->id, $validate->newToken);
         }
 
@@ -326,8 +326,7 @@ class AuthService implements AuthServiceInterface
 
         // Update Refresh Token
         if($validate->newToken && $validate->newToken->exists()) {
-            $this->log->info('Refreshed token #' . $accessToken->id . ' with replacement ' .
-                                print_r($validate->newToken->toArray(), true));
+            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
             $this->tokens->refresh($accessToken->id, $validate->newToken);
         }
 
