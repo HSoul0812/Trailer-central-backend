@@ -192,7 +192,9 @@ class ImapService implements ImapServiceInterface
         }
 
         // Get Folder
-        $folder = $this->imap->getFolder($folderName)->query();
+        var_dump($folderName);
+        $folder = $this->imap->getFolder($folderName);
+        var_dump($folder);
 
         // Append Since
         if(!empty($since)) {
