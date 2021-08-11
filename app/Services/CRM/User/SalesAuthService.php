@@ -205,10 +205,12 @@ class SalesAuthService implements SalesAuthServiceInterface
         // Find Sales Person By State
         if(!empty($request->state)) {
             $stateToken = $this->tokens->getByState($request->state);
+            $this->log->info('Authorizing token for sales person #' . $stateToken->relation_id);
         }
 
         // Get Email Token
         $emailToken = $this->auth->code($request->token_type, $request->auth_code, $request->redirect_uri, $request->scopes);
+        $this->log->info('Authorized token for email address ' . $emailToken->emailAddress);
 
         // Initialize Params for Sales Person
         $params = $request->all();
