@@ -60,7 +60,11 @@ class GmailService implements GmailServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct(InteractionEmailServiceInterface $interactionEmail, GoogleServiceInterface $google, Manager $fractal) {
+    public function __construct(
+        InteractionEmailServiceInterface $interactionEmail,
+        GoogleServiceInterface $google,
+        Manager $fractal
+    ) {
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
         $this->google = $google;
@@ -296,11 +300,8 @@ class GmailService implements GmailServiceInterface
         $labels = [];
         foreach($results->getLabels() as $label) {
             // Search for Label Exists?
-            if(!empty($search)) {
-                // Skip If Label Doesn't Match!
-                if(!in_array($label->getName(), $search)) {
-                    continue;
-                }
+            if(!empty($search) && !in_array($label->getName(), $search)) {
+                continue;
             }
 
             // Add Label to Array

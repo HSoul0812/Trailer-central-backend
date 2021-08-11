@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Exceptions\Integration\Google\MissingGmailLabelException;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\User\SalesPerson;
@@ -214,13 +215,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Return Total
             return $total;
+        } catch (MissingGmailLabelException $e) {
+            $this->folders->delete($folder->folder_id);
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
-            $this->log->error('Failed to Connect to Sales Person #' . $salesperson->id .
-                        ' Folder ' . $folder->name . '; exception returned: ' .
-                        $e->getMessage() . ': ' . $e->getTraceAsString());
-            return 0;
         }
+
+        // Return Nothing
+        $this->log->error('Failed to Connect to Sales Person #' . $salesperson->id .
+                    ' Folder ' . $folder->name . '; exception returned: ' . $e->getMessage());
+        return 0;
     }
 
 
