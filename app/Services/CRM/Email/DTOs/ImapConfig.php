@@ -269,7 +269,10 @@ class IMAPConfig
      */
     public function getPort(): int
     {
-        return $this->port ?? self::DEFAULT_PORT;
+        if($this->port) {
+            return $this->port;
+        }
+        return self::DEFAULT_PORT;
     }
 
     /**
