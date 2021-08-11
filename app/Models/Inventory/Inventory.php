@@ -3,7 +3,7 @@ namespace App\Models\Inventory;
 
 use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
-use App\Models\CRM\User\Customer;
+use App\Models\CRM\Dms\ServiceOrder;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\Inventory\Floorplan\Payment;
 use App\Models\User\DealerLocation;
@@ -136,6 +136,7 @@ use Laravel\Scout\Searchable;
  * @property Collection<File> $files
  * @property Collection<InventoryFeature> $inventoryFeatures
  * @property Collection<InventoryClapp> $clapps
+ * @property Collection<ServiceOrder> $repairOrders
  * @property Collection<AttributeValue> $attributeValues
  * @property Collection<CustomerInventory> $customerInventory
  * @property DealerInventory $lotVantageInventory
@@ -371,6 +372,11 @@ class Inventory extends Model
         return $this->hasMany(InventoryFile::class, 'inventory_id', 'inventory_id');
     }
 
+    public function repairOrders(): HasMany
+    {
+        return $this->hasMany(ServiceOrder::class, 'inventory_id', 'inventory_id');
+    }
+
     public function files(): HasManyThrough
     {
         return $this->hasManyThrough(File::class, InventoryFile::class, 'inventory_id', 'id', 'inventory_id', 'file_id');
@@ -404,15 +410,6 @@ class Inventory extends Model
     public function floorplanVendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class, 'fp_vendor');
-    }
-
-    public function customers() {
-        return $this->belongsToMany(
-            Customer::class,
-            'dms_customer_inventory',
-            'inventory_id',
-            'customer_id'
-        );
     }
 
     public function customerInventories(): HasMany

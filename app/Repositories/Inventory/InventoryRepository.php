@@ -429,6 +429,10 @@ class InventoryRepository implements InventoryRepositoryInterface
         /** @var Builder $query */
         $query = Inventory::where('inventory.inventory_id', '>', 0);
 
+        if (isset($params['include']) && is_string($params['include'])) {
+            $query = $query->with(explode(',', $params['include']));
+        }
+
         if ($withDefault) {
             $query->where('status', '<>', Inventory::STATUS_QUOTE);
         }

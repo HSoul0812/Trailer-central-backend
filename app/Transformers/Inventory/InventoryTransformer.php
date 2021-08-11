@@ -2,6 +2,7 @@
 
 namespace App\Transformers\Inventory;
 
+use App\Transformers\Dms\ServiceOrderTransformer;
 use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
@@ -13,7 +14,8 @@ use App\Transformers\Website\WebsiteTransformer;
 class InventoryTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'website'
+        'website',
+        'repairOrders',
     ];
 
     protected $userTransformer;
@@ -31,7 +33,7 @@ class InventoryTransformer extends TransformerAbstract
 
     public function transform(Inventory $inventory)
     {
-	 return [
+        return [
              'id' => $inventory->inventory_id,
              'active' => $inventory->active,
              'archived_at' => $inventory->archived_at,
@@ -40,7 +42,7 @@ class InventoryTransformer extends TransformerAbstract
              'brand' => $inventory->brand,
              'category' => $inventory->category,
              'category_label' => $inventory->category_label,
-             'condition' => $inventory->condition,             
+             'condition' => $inventory->condition,
              'dealer' => $this->userTransformer->transform($inventory->user),
              'dealer_location_id' => $inventory->dealer_location_id,
              'dealer_location' => $inventory->dealerLocation ? $this->dealerLocationTransformer->transform($inventory->dealerLocation) : null,
@@ -82,13 +84,21 @@ class InventoryTransformer extends TransformerAbstract
              'url' => $inventory->getUrl(),
              'floorplan_vendor' => $inventory->floorplanVendor,
              'created_at' => $inventory->created_at,
-             'updated_at' => $inventory->updated_at
+             'updated_at' => $inventory->updated_at,
          ];
     }
 
     public function includeWebsite($inventory)
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
+    }
+
+    public function includeRepairOrders($inventory) {
+        if (empty($inventory->repairOrders)) {
+            return [];
+        }
+
+        return $this->collection($inventory->repairOrders, new ServiceOrderTransformer());
     }
 
     private function transformImages(Collection $images)
