@@ -164,10 +164,6 @@ class IMAPConfig
         $imapConfig->calcCharset();
 
         // Calc Auth Config From Access Token
-        var_dump($salesperson->active_token);
-        if(!empty($salesperson->active_token->token_type)) {
-            var_dump($salesperson->active_token->token_type);
-        }
         $imapConfig->calcAuthConfig();
 
         // Return IMAP Config
@@ -390,6 +386,11 @@ class IMAPConfig
     public function calcAuthConfig(): void
     {
         // Auth Type is NTLM?
+        var_dump($this->authType);
+        var_dump($this->accessToken);
+        if(!empty($this->accessToken->token_type)) {
+            var_dump($this->accessToken->token_type);
+        }
         if($this->authType === self::AUTH_NTLM) {
             $this->authConfig = self::AUTH_NTLM;
         } elseif($this->accessToken) {
