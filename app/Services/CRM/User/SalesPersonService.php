@@ -6,6 +6,7 @@ use App\Exceptions\CRM\User\DuplicateChangeEmailSalesPersonException;
 use App\Models\CRM\User\SalesPerson;
 use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\DTOs\ImapConfig;
