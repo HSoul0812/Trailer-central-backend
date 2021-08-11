@@ -192,7 +192,8 @@ class ImapService implements ImapServiceInterface
         }
 
         // Get Folder
-        var_dump($folderName);
+        $folders = $this->imap->getFolders();
+        var_dump($folders);
         $folder = $this->imap->getFolder($folderName);
         var_dump($folder);
 
