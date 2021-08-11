@@ -385,15 +385,8 @@ class IMAPConfig
      */
     public function calcAuthConfig(): void
     {
-        // Auth Type is NTLM?
-        var_dump($this->authType);
-        var_dump($this->accessToken);
-        if(!empty($this->accessToken->token_type)) {
-            var_dump($this->accessToken->token_type);
-        }
-        if($this->authType === self::AUTH_NTLM) {
-            $this->authConfig = self::AUTH_NTLM;
-        } elseif($this->accessToken) {
+        // Is Auth Type oAuth?!
+        if($this->accessToken) {
             // Token Type
             switch($this->accessToken->token_type) {
                 case AccessToken::TOKEN_GOOGLE:
@@ -406,7 +399,11 @@ class IMAPConfig
                     $this->authConfig = self::AUTH_IMAP;
                 break;
             }
+        } elseif($this->authType === self::AUTH_NTLM) {
+            // Auth Type is NTLM?
+            $this->authConfig = self::AUTH_NTLM;
         } else {
+            // Standard IMAP!
             $this->authConfig = self::AUTH_IMAP;
         }
     }
