@@ -551,7 +551,7 @@ class IMAPConfig
             'password'       => $this->getPassword(),
             'protocol'       => 'imap',
             'authentication' => $this->isAuthConfigOauth() ? self::MODE_OAUTH : null,
-            'timeout'        => self::DEFAULT_TIMEOUT
+            //'timeout'        => self::DEFAULT_TIMEOUT
         ];
     }
 }
