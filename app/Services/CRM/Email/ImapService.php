@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Exceptions\CRM\Email\MissingImapFolderException;
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
@@ -192,19 +193,20 @@ class ImapService implements ImapServiceInterface
         }
 
         // Get Folder
-        $folders = $this->imap->getFolders();
-        var_dump($folders);
         $folder = $this->imap->getFolder($folderName);
-        var_dump($folder);
+        if($folder === null) {
+            throw new MissingImapFolderException;
+        }
 
         // Append Since
+        $query = $folder->query()->leaveUnread()->fetchOrderAsc();
         if(!empty($since)) {
             $this->log->info('Getting Messages From IMAP Since: "' . $since->toDateTimeString() . '"');
-            $folder = $folder->since($since);
+            $query = $query->since($since);
         }
 
         // Return Messages in Time Frame
-        $messages = $folder->leaveUnread()->fetchOrderAsc()->get();
+        $messages = $query->get();
         if($messages->count() > 0) {
             $this->log->info('Found ' . $messages->count() . ' Messages to Process');
         }

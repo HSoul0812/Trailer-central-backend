@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Exceptions\CRM\Email\MissingImapFolderException;
 use App\Exceptions\Integration\Google\MissingGmailLabelException;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Attachment;
@@ -214,6 +215,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Return Total
             return $total;
         } catch (MissingGmailLabelException $e) {
+            $this->folders->delete($folder->folder_id);
+        } catch (MissingImapFolderException $e) {
             $this->folders->delete($folder->folder_id);
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
