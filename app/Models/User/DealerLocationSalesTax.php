@@ -45,6 +45,7 @@ class DealerLocationSalesTax extends Model
         'env_fee_cap',
         'is_sublet_taxed',
         'is_shop_supplies_taxed',
+        'is_env_fee_taxed',
         'is_parts_on_service_taxed',
         'is_labor_on_service_taxed',
         'tax_calculator_id',
