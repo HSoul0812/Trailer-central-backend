@@ -298,7 +298,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             if(empty($email)) { continue; }
 
             // Import Message
-            $result = $this->importMessage($dealerId, $salesperson, $email);
+            $result = $this->importMessage($dealerId, $salesperson, $email, $message);
             if($result === self::IMPORT_SUCCESS) {
                 $total = ($total ?? 0) + 1;
             } elseif($result === self::IMPORT_PROCESSED) {
@@ -324,9 +324,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param ParsedEmail $email
+     * @param null|Message $message
      * @return int self::IMPORT_SKIPPED | self::IMPORT_PROCESSED | self::IMPORT_SUCCESS
      */
-    private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email): int {
+    private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email, ?Message $message = null): int {
         // Check if Exists
         if(empty($email->getMessageId()) ||
            $this->emails->findMessageId($salesperson->user_id, $email->getMessageId())) {
@@ -339,9 +340,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Lead ID Exists?
         if(!empty($email->getLeadId())) {
-            // Only on IMAP
-            if(empty($salesperson->active_token)) {
-                $this->imap->full($email);
+            // Only Using IMAP
+            if(!empty($message)) {
+                $this->imap->full($message, $email);
             }
             if(empty($email->getSubject()) || empty($email->getToEmail())) {
                 $this->deleteAttachments($email->getAttachments());
