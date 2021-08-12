@@ -307,7 +307,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Process Skipped Message ID's
-        if($skipped > 0) {
+        if(!empty($skipped)) {
             $this->log->info('Processed ' . $skipped . ' emails that were skipped and not imported.');
         }
 
