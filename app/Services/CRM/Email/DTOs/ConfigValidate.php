@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Email\DTOs;
 
+use Illuminate\Support\Collection;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -78,6 +79,24 @@ class ConfigValidate
         } else {
             return $this->fillType(self::FAILURE_MESSAGE);
         }
+    }
+
+    /**
+     * Get Default Folders!
+     * 
+     * @return Collection<ImapMailbox>
+     */
+    public function getDefaultFolders() {
+        // Loop Folders
+        $mailboxes = new Collection();
+        foreach($this->folders as $folder) {
+            if(preg_match(ImapMailbox::DEFAULT_FOLDER_REGEX, $folder->name)) {
+                $mailboxes->push($folder);
+            }
+        }
+
+        // Return Mailboxes
+        return $mailboxes;
     }
 
 

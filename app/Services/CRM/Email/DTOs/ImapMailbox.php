@@ -15,6 +15,11 @@ class ImapMailbox
     use WithConstructor, WithGetter;
 
     /**
+     * @const string Regex to Find Default Folders (Inbox/Sent)
+     */
+    const DEFAULT_FOLDER_REGEX = '/(inbox|sent)/i';
+
+    /**
      * @const Default Folder Delimiter
      */
     const DELIMITER = '/';
