@@ -312,7 +312,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Updated Successful
-        $this->folders->imported($folder->folder_id);
+        $this->folders->markImported($folder->folder_id);
 
         // Return Result Messages That Match
         return $total ?? 0;
