@@ -13,9 +13,9 @@ use App\Utilities\JsonApi\Filterable;
 use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Traits\SmtpHelper;
-use League\Fractal\Resource\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 /**
  * Class SalesPerson
