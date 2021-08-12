@@ -251,7 +251,7 @@ class SalesPerson extends Model implements Filterable
     /**
      * Get Email Folders Including Defaults
      * 
-     * @return Collection of EmailFolder
+     * @return Collection<EmailFolder>
      */
     public function getEmailFoldersAttribute() {
         // Get Email Folders Based on Existing Data
@@ -267,6 +267,33 @@ class SalesPerson extends Model implements Filterable
 
         // Return Default Folders
         return EmailFolder::getDefaultFolders();
+    }
+
+    /**
+     * Get Default Folders Via Mailbox Folders
+     * 
+     * @return Collection<ImapMailbox>
+     */
+    public function getDefaultFoldersAttribute(): Collection {
+        // Google Token Exists?
+        if(!empty($this->googleToken)) {
+            // Get Google Defaults
+            $folders = EmailFolder::getDefaultGmailFolders();
+        } else {
+            // Get Default Folders
+            $folders = EmailFolder::getDefaultFolders();
+        }
+
+        // Initialize Mailboxes
+        $mailboxes = new Collection();
+        foreach($folders as $folder) {
+            $mailboxes->push(new ImapMailbox([
+                'full' => $folder->name,
+                'name' => $folder->name,
+                'delimiter' => ImapMailbox::DELIMITER
+            ]));
+        }
+        return $mailboxes;
     }
 
 

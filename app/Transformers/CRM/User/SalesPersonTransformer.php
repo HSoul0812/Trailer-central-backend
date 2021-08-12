@@ -5,6 +5,7 @@ namespace App\Transformers\CRM\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\User\DTOs\SalesPersonConfig;
 use App\Services\CRM\Email\ImapServiceInterface;
+use App\Transformers\CRM\Email\ImapMailboxTransformer;
 use App\Transformers\Dms\GenericSaleTransformer;
 use App\Transformers\Pos\SaleTransformer;
 use League\Fractal\TransformerAbstract;
@@ -89,9 +90,11 @@ class SalesPersonTransformer extends TransformerAbstract
             //        This is out of scope of this task for now, so we're only
             //        forcing it in SalesAuthService for now
             $success = $salesPerson->imap_validate->success;
+            $folders = $salesPerson->default_folders;
             if(!empty($this->imapService)) {
                 $validate = $this->imapService->validate($salesPerson->imap_config);
                 $success = $validate->success;
+                $folders = $validate->folders;
             }
 
             // Return Results
@@ -102,7 +105,8 @@ class SalesPersonTransformer extends TransformerAbstract
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
                 'failed' => !$success,
-                'message' => $salesPerson->imap_validate->getMessage()
+                'message' => $salesPerson->imap_validate->getMessage(),
+                'folders' => $this->collection($folders, new ImapMailboxTransformer())
             ];
         });
     }

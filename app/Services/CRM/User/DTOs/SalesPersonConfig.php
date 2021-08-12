@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\User\DTOs;
 
+use App\Models\CRM\User\EmailFolder;
 use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\User\DTOs\AuthType;
 use App\Traits\WithGetter;
@@ -22,9 +23,14 @@ class SalesPersonConfig
     private $smtpTypes;
 
     /**
-     * @var array<AuthType> Map of Auth Types Select
+     * @var Collection<AuthType> Map of Auth Types Select
      */
     private $authTypes;
+
+    /**
+     * @var Collection<ImapMailbox> Imap Mailboxes of Default Folders
+     */
+    private $folders;
 
 
     /**
@@ -36,6 +42,9 @@ class SalesPersonConfig
 
         // Fill Auth Types
         $this->authTypes = $this->fillAuthTypes();
+
+        // Fill Default Folders
+        $this->folders = $this->fillDefaultFolders();
     }
 
 
@@ -71,5 +80,27 @@ class SalesPersonConfig
 
         // Return Auth Types
         return collect($authTypes);
+    }
+
+    /**
+     * Fill Default Folders $this->folders
+     * 
+     * @return Collection<ImapMailbox>
+     */
+    private function fillDefaultFolders(): Collection
+    {
+        // Loop Default Folders
+        $folders = [];
+        foreach(EmailFolder::getDefaultFolders() as $folder) {
+            // Append Imap Mailbox
+            $folders[] = new ImapMailbox([
+                'full' => $folder->name,
+                'name' => $folder->name,
+                'delimiter' => ImapMailbox::DELIMITER
+            ]);
+        }
+
+        // Return Folders
+        return collect($folders);
     }
 }

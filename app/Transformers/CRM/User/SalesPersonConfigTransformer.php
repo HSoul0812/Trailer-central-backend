@@ -9,7 +9,8 @@ use League\Fractal\TransformerAbstract;
 class SalesPersonConfigTransformer extends TransformerAbstract
 {
     protected $defaultIncludes = [
-        'authTypes'
+        'authTypes',
+        'folders'
     ];
 
     /**
@@ -26,12 +27,25 @@ class SalesPersonConfigTransformer extends TransformerAbstract
     }
 
     /**
-     * Transform ImapMailbox Folders
+     * Transform Auth Types
+     * 
      * @return array
      */
     public function includeAuthTypes(SalesPersonConfig $config) {
         if($config->authTypes) {
             return $this->collection($config->authTypes, new AuthTypeTransformer());
+        }
+        return $this->null();
+    }
+
+    /**
+     * Transform Default Folders
+     * 
+     * @return array
+     */
+    public function includeFolders(SalesPersonConfig $config) {
+        if($config->folders) {
+            return $this->collection($config->folders, new ImapMailboxTransformer());
         }
         return $this->null();
     }
