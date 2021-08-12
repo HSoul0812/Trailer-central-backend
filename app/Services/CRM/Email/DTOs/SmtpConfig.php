@@ -60,6 +60,15 @@ class SmtpConfig
 
 
     /**
+     * @const Default Hosts By Auth Config
+     */
+    const DEFAULT_HOSTS = [
+        'GMAIL' => 'smtp.google.com',
+        'OFFICE' => 'outlook.office365.com'
+    ];
+
+
+    /**
      * @const int SMTP Timeout
      */
     const DEFAULT_TIMEOUT = 2;
@@ -219,7 +228,13 @@ class SmtpConfig
      */
     public function getHost(): string
     {
-        return !empty($this->host) ? trim($this->host) : '';
+        // Host Exists?
+        if($this->host) {
+            return $this->host;
+        }
+
+        // Return Default!
+        return self::DEFAULT_HOSTS[$this->authConfig] ?? '';
     }
 
     /**
