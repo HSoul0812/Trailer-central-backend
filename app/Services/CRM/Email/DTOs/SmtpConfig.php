@@ -391,11 +391,11 @@ class SmtpConfig
                     $this->authConfig = self::AUTH_OFFICE;
                 break;
                 default:
-                    $this->authConfig = self::AUTH_IMAP;
+                    $this->authConfig = self::AUTH_SMTP;
                 break;
             }
         } else {
-            $this->authConfig = self::AUTH_IMAP;
+            $this->authConfig = self::AUTH_SMTP;
         }
     }
 
