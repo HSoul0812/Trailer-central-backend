@@ -212,7 +212,7 @@ class ImapConfig
      */
     public function getUsername(): string
     {
-        return $this->username;
+        return $this->username ? trim($this->username) : '';
     }
 
     /**
@@ -241,7 +241,7 @@ class ImapConfig
         }
 
         // Return Standard Password
-        return !empty($this->password) ? trim($this->password) : '';
+        return $this->password ? trim($this->password) : '';
     }
 
     /**
