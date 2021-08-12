@@ -67,6 +67,14 @@ class SmtpConfig
         'OFFICE' => 'outlook.office365.com'
     ];
 
+    /**
+     * @const int Default Port
+     */
+    const DEFAULT_PORTS = [
+        'ssl' => 587,
+        'tls' => 587
+    ];
+
 
     /**
      * @const int SMTP Timeout
@@ -254,9 +262,16 @@ class SmtpConfig
      * 
      * @return int $this->port
      */
-    public function getPort(): ?int
+    public function getPort(): int
     {
-        return $this->port;
+        // Return Set Port
+        if($this->port) {
+            return $this->port;
+        }
+
+        // Return Default Port for Security
+        $security = $this->getSecurity();
+        return self::DEFAULT_PORTS[$security];
     }
 
     /**
