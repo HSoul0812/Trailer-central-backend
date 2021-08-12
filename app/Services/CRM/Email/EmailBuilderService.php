@@ -26,6 +26,7 @@ use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\CRM\Interactions\DTOs\BuilderStats;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
@@ -104,6 +105,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $ntlm;
 
     /**
+     * @var App\Services\Integration\AuthServiceInterface
+     */
+    protected $auth;
+
+    /**
      * @var App\Services\Integration\Google\GoogleServiceInterface
      */
     protected $google;
@@ -129,6 +135,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param EmailHistoryRepositoryInterface $emailhistory
      * @param TokenRepositoryInterface $tokens
      * @param UserRepositoryInterface $users
+     * @param AuthServiceInterface $auth
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
      * @param Manager $fractal
@@ -145,6 +152,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         TokenRepositoryInterface $tokens,
         UserRepositoryInterface $users,
         NtlmEmailServiceInterface $ntlm,
+        AuthServiceInterface $auth,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
         Manager $fractal
@@ -161,6 +169,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $this->users = $users;
 
         $this->ntlm = $ntlm;
+        $this->auth = $auth;
         $this->google = $google;
         $this->gmail = $gmail;
 
