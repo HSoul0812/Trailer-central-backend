@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 class CustomerRepository implements CustomerRepositoryInterface
 {
     protected $model;
-    
+
     /**
      * list if ES index fields that have a 'keyword' field
      */
@@ -27,7 +27,7 @@ class CustomerRepository implements CustomerRepositoryInterface
         'region' => 'region.keyword',
         'postal_code' => 'postal_code.keyword',
     ];
-    
+
     public function __construct(Customer $customer) {
         $this->model = $customer;
     }
@@ -231,4 +231,10 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $search->execute()->models();
     }
 
+    public function firstByNameAndDealer($first_name, $last_name, $dealer_id) {
+        return Customer::where('first_name', 'like', $first_name)
+            ->where('last_name', 'like', $last_name)
+            ->where('dealer_id', $dealer_id)
+            ->first();
+    }
 }

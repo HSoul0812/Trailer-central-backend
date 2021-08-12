@@ -99,21 +99,21 @@ class CustomerService implements CustomerServiceInterface
             $trailer_serial,
             ) = $csvData;
 
-        print_r($customer_nur);
         if($active_nur !== $customer_nur) {
             $active_nur = $customer_nur;
-            $customers = $this->customerRepository->search(
-                ['query' => "first_name:\"Alberto\" AND last_name:\"Carillo\""], $dealer_id
+            $customer = $this->customerRepository->firstByNameAndDealer(
+                $first_name, $last_name, $dealer_id
             );
-            print_r("first_name:\"$first_name\" AND last_name:\"$last_name\"");
-            if($customers->isEmpty()) {
+            if(!$customer) {
                 $active_customer = $this->customerRepository->create(
                     [
                         'first_name' => $first_name,
                         'last_name' => $last_name,
+                        'display_name' => "$first_name $last_name",
                         'email' => $email,
                         'address' => $address,
                         'city' => $city,
+                        'dealer_id' => $dealer_id,
                         'region' => $state,
                         'postal_code' => $zip,
                         'home_phone' => $phone1,
@@ -122,10 +122,8 @@ class CustomerService implements CustomerServiceInterface
                     ]
                 );
             } else {
-                $active_customer = $customers[0];
+                $active_customer = $customer;
             }
-            print_r('first_name' . $active_customer->first_name);
-            print_r('last_name' . $active_customer->last_name);
         }
 
         $inventory = $this->inventoryRepository->findOneByVinAndDealerId($unit_serial, $dealer_id);
@@ -141,12 +139,12 @@ class CustomerService implements CustomerServiceInterface
                 'title' => "$unit_year $unit_make $unit_model",
                 'category' => $category,
                 'length' => $length,
+                'vin' => $unit_serial,
                 'attributes' => [
                     ['attribute_id' => 11, 'value' => $color]
                 ]
             ]);
         }
-
         $customer_id = $active_customer->id;
         $inventory_id = $inventory->inventory_id;
 
