@@ -15,6 +15,12 @@ class ImapMailbox
     use WithConstructor, WithGetter;
 
     /**
+     * @const Default Folder Delimiter
+     */
+    const DELIMITER = '/';
+
+
+    /**
      * @var string Full Path to Folder
      */
     private $full;
