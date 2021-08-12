@@ -4,6 +4,7 @@ namespace App\Services\CRM\User\DTOs;
 
 use App\Models\CRM\User\EmailFolder;
 use App\Models\CRM\User\SalesPerson;
+use App\Services\CRM\Email\DTOs\ImapMailbox;
 use App\Services\CRM\User\DTOs\AuthType;
 use App\Traits\WithGetter;
 use Illuminate\Support\Collection;
