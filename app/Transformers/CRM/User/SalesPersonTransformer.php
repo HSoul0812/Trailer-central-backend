@@ -25,6 +25,7 @@ class SalesPersonTransformer extends TransformerAbstract
         'smtp',
         'imap',
         'folders',
+        'defaultFolders',
         'authTypes'
     ];
 
@@ -90,11 +91,9 @@ class SalesPersonTransformer extends TransformerAbstract
             //        This is out of scope of this task for now, so we're only
             //        forcing it in SalesAuthService for now
             $success = $salesPerson->imap_validate->success;
-            $folders = $salesPerson->default_folders;
             if(!empty($this->imapService)) {
                 $validate = $this->imapService->validate($salesPerson->imap_config);
                 $success = $validate->success;
-                $folders = $validate->getDefaultFolders();
             }
 
             // Return Results
@@ -105,8 +104,7 @@ class SalesPersonTransformer extends TransformerAbstract
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
                 'failed' => !$success,
-                'message' => $salesPerson->imap_validate->getMessage(),
-                'folders' => $this->collection($folders, new ImapMailboxTransformer())
+                'message' => $salesPerson->imap_validate->getMessage()
             ];
         });
     }
@@ -125,6 +123,16 @@ class SalesPersonTransformer extends TransformerAbstract
     public function includeFolders(SalesPerson $salesPerson)
     {
         return $this->collection($salesPerson->folders, new EmailFolderTransformer());
+    }
+
+    public function includeDefaultFolders(SalesPerson $salesPerson)
+    {
+        $folders = $salesPerson->default_folders;
+        if(!empty($this->imapService)) {
+            $validate = $this->imapService->validate($salesPerson->imap_config);
+            $folders = $validate->getDefaultFolders();
+        }
+        return $this->collection($folders, new ImapMailboxTransformer());
     }
 
     public function includePosSales(SalesPerson $salesPerson)
