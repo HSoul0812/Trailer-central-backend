@@ -98,7 +98,6 @@ class CustomerService implements CustomerServiceInterface
             $trailer_make,
             $trailer_serial,
             ) = $csvData;
-
         if($active_nur !== $customer_nur) {
             $active_nur = $customer_nur;
             $customer = $this->customerRepository->firstByNameAndDealer(
@@ -145,14 +144,14 @@ class CustomerService implements CustomerServiceInterface
                 ]
             ]);
         }
-        $customer_id = $active_customer->id;
-        $inventory_id = $inventory->inventory_id;
+        $customer_id = $active_customer->getKey();
+        $inventory_id = $inventory->getKey();
 
         $customer_inventory = $this->customerInventoryRepository->findFirstByCustomerAndInventory($customer_id, $inventory_id);
         if(!$customer_inventory) {
             $this->customerInventoryRepository->create([
-                'inventory_id' => $inventory->inventory_id,
-                'customer_id' => $active_customer->id,
+                'inventory_id' => $inventory->getKey(),
+                'customer_id' => $active_customer->getKey()
             ]);
         }
     }

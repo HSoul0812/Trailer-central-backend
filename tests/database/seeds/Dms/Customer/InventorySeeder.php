@@ -7,6 +7,7 @@ namespace Tests\database\seeds\Dms\Customer;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
+use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use App\Traits\WithGetter;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ use Tests\database\seeds\Seeder;
 /**
  * @property-read Customer $customer
  * @property-read User $dealer
+ * @property-read DealerLocation $dealerLocation
  * @property-read array<Inventory> $customerRelatedInventories
  * @property-read array<Inventory> $unrelatedInventories
  * @property-read string[] $customerInventoryIds
@@ -28,6 +30,11 @@ class InventorySeeder extends Seeder
      * @var User
      */
     private $dealer;
+
+    /**
+     * @var DealerLocation
+     */
+    private $dealerLocation;
 
     /**
      * @var Customer
@@ -56,6 +63,7 @@ class InventorySeeder extends Seeder
     {
         $this->customer = factory(Customer::class)->create();
         $this->dealer = $this->customer->dealer;
+        $this->dealerLocation = factory(DealerLocation::class)->create(['dealer_id' => $this->dealer->getKey()]);
     }
 
     public function seed(): void
@@ -77,7 +85,7 @@ class InventorySeeder extends Seeder
             $inventory = factory(Inventory::class)->create([
                 'dealer_id' => $this->dealer->getKey(),
                 'title' => $seed['title'],
-                'vin' => $seed['vin'] ?? Str::random(18)
+                'vin' => $seed['vin'] ?? Str::random(17)
             ]);
 
             $inventoryId = $inventory->getKey();
@@ -103,5 +111,6 @@ class InventorySeeder extends Seeder
         Inventory::where('dealer_id', $dealerId)->delete();
         Customer::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);
+        DealerLocation::where('dealer_id', $dealerId)->delete();
     }
 }

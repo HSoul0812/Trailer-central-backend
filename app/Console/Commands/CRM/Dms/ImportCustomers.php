@@ -60,7 +60,8 @@ class ImportCustomers extends Command
         $dealer_id = $this->argument('dealer_id');
         $this->s3Bucket = $this->argument('s3_bucket');
         $this->s3Key = $this->argument('s3_key');
-        $dealer_location_id = $this->dealerLocationRepository->findFirstByDealerId($dealer_id)->dealer_location_id;
+
+        $dealer_location_id = $this->dealerLocationRepository->findFirstByDealerId($dealer_id)->getKey();
         $entity_type = DB::table('inventory')
             ->select(DB::raw('count(*) as type_count, entity_type_id'))
             ->where('dealer_id', $dealer_id)
@@ -72,15 +73,12 @@ class ImportCustomers extends Command
         if($entity_type) {
             $popular_type = $entity_type->entity_type_id;
         }
-        $this->info('Inventory Type: ' . $popular_type);
-        if($popular_type === 1) {
-            $category = 'atv';
-        } else {
-            $category = '';
-        }
-        $this->info('Inventory Category: ' . $category);
+        $category = $popular_type === 1 ? 'atv': '';
         $active_nur = null;
         $active_customer = null;
+
+        $this->info('Inventory Type: ' . $popular_type);
+        $this->info('Inventory Category: ' . $category);
 
         $this->streamCsv(function ($csvData, $lineNumber) use (&$active_nur, &$active_customer, $dealer_id, $dealer_location_id, $popular_type, $category) {
             $this->info('Importing line number: ' . $lineNumber);

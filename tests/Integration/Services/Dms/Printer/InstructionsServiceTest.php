@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Dms\Printer;
+namespace Tests\Integration\Services\Dms\Printer;
 
 use App\Services\Dms\Printer\InstructionsServiceInterface;
 use App\Services\Dms\Printer\ZPL\InstructionsService;
@@ -16,26 +16,26 @@ use Tests\TestCase;
  * @coversDefaultClass App\Services\Dms\Printer\ZPL\InstructionsService
  */
 class InstructionsServiceTest extends TestCase
-{    
+{
     /**
      * @var SettingsSeeder
      */
     private $seeder;
-    
+
     public function setUp(): void
     {
         parent::setUp();
 
         $this->seeder = new SettingsSeeder();
     }
-    
+
     public function tearDown(): void
     {
         $this->seeder->cleanUp();
 
         parent::tearDown();
     }
-    
+
     /**
      * Test that SUT is properly bound by the application
      *
@@ -47,31 +47,31 @@ class InstructionsServiceTest extends TestCase
         $concreteService = $this->getConcreteService();
 
         self::assertInstanceOf(InstructionsService::class, $concreteService);
-    } 
-    
+    }
+
     /**
      * @covers ::getPrintInstruction
      */
-    public function testGetPrintInstructionFails(): void 
+    public function testGetPrintInstructionFails(): void
     {
         $this->expectException(ModelNotFoundException::class);
         $this->seeder->seed();
         $concreteService = $this->getConcreteService();
         $concreteService->getPrintInstruction(-1, 'test', 'test');
     }
-    
+
     /**
      * @covers ::getPrintInstruction
      */
-    public function testGetPrintInstructionReturnsArray(): void 
+    public function testGetPrintInstructionReturnsArray(): void
     {
         $this->seeder->seed();
         $concreteService = $this->getConcreteService();
         $printData = $concreteService->getPrintInstruction($this->seeder->getDealerId(), 'test', 'test');
         $this->assertIsArray($printData);
     }
-    
-    
+
+
     /**
      * @return InstructionsServiceInterface
      *
