@@ -308,7 +308,7 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Return Sales Person Response Array
         $item = new Item($salesPerson, $this->salesTransformer, 'sales_person');
-        $this->fractal->parseIncludes('smtp,imap,folders,authTypes');
+        $this->fractal->parseIncludes('smtp,imap,folders,defaultFolders,authTypes');
         return $this->fractal->createData($item)->toArray();
     }
 }
