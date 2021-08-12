@@ -292,18 +292,16 @@ class SmtpConfig
     /**
      * Return Auth Mode
      * 
-     * @return string self::MODE_OAUTH || $this->getAuthType
+     * @return null|string self::MODE_OAUTH
      */
-    public function getAuthMode(): string
+    public function getAuthMode(): ?string
     {
         // Are We OAuth?!
         if($this->isAuthConfigOauth()) {
             // Return XOAauth Password Instead!
             return self::MODE_OAUTH;
         }
-
-        // Return Current Auth Type
-        return $this->getAuthType();
+        return null;
     }
 
     /**
