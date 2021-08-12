@@ -298,7 +298,7 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Get Sales Response
      * 
      * @param int $salesPersonId
-     * @return array
+     * @return array{sales_person: array<SalesPersonTransformer>}
      */
     private function salesResponse(int $salesPersonId): array {
         // Get Sales Person
@@ -306,11 +306,9 @@ class SalesAuthService implements SalesAuthServiceInterface
             'sales_person_id' => $salesPersonId
         ]);
 
+        // Return Sales Person Response Array
         $item = new Item($salesPerson, $this->salesTransformer, 'sales_person');
         $this->fractal->parseIncludes('smtp,imap,folders,authTypes');
-        $response = $this->fractal->createData($item)->toArray();
-
-        // Return Response
-        return $this->auth->response($accessToken, $response);
+        return $this->fractal->createData($item)->toArray();
     }
 }
