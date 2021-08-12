@@ -89,9 +89,11 @@ class ConfigValidate
     public function getDefaultFolders() {
         // Loop Folders
         $mailboxes = new Collection();
-        foreach($this->folders as $folder) {
-            if(preg_match(ImapMailbox::DEFAULT_FOLDER_REGEX, $folder->name)) {
-                $mailboxes->push($folder);
+        if($this->folders) {
+            foreach($this->folders as $folder) {
+                if(preg_match(ImapMailbox::DEFAULT_FOLDER_REGEX, $folder->name)) {
+                    $mailboxes->push($folder);
+                }
             }
         }
 
