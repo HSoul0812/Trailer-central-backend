@@ -294,7 +294,7 @@ class SmtpConfig
     public function getSecurity(): string
     {
         // Get Security Default
-        return $this->security ?: self::SSL;
+        return $this->security ?: self::TLS;
     }
 
     /**
