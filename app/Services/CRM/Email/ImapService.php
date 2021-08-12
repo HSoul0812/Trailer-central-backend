@@ -178,8 +178,8 @@ class ImapService implements ImapServiceInterface
         }
 
         // Return Parsed Array
-        $parsed = ParsedEmail([
-            'uid' => $overview->getUid(),
+        $parsed = new ParsedEmail([
+            'uid' => $overview->getSequenceId(),
             'message_id' => $overview->getMessageId(),
             'subject' => $overview->getSubject(),
             'is_html' => $overview->hasHTMLBody(),
