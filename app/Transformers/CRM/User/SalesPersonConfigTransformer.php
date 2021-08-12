@@ -3,6 +3,7 @@
 namespace App\Transformers\CRM\User;
 
 use App\Services\CRM\User\DTOs\SalesPersonConfig;
+use App\Transformers\CRM\Email\ImapMailboxTransformer;
 use App\Transformers\CRM\User\AuthTypeTransformer;
 use League\Fractal\TransformerAbstract;
 
