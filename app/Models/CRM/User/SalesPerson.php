@@ -386,13 +386,7 @@ class SalesPerson extends Model implements Filterable
      * @return ImapConfig
      */
     public function getImapConfigAttribute(): ImapConfig {
-        return new ImapConfig([
-            'username' => $this->imap_email,
-            'password' => $this->imap_password,
-            'security' => $this->imap_security,
-            'host' => $this->imap_server,
-            'port' => $this->imap_port
-        ]);
+        return ImapConfig::fillFromSalesPerson($this);
     }
 
     public static function getTableName() {
