@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\User;
 
 use App\Models\CRM\User\EmailFolder;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class EmailFolderRepository implements EmailFolderRepositoryInterface
