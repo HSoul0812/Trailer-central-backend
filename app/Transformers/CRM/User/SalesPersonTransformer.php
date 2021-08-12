@@ -94,7 +94,7 @@ class SalesPersonTransformer extends TransformerAbstract
             if(!empty($this->imapService)) {
                 $validate = $this->imapService->validate($salesPerson->imap_config);
                 $success = $validate->success;
-                $folders = $validate->folders;
+                $folders = $validate->getDefaultFolders();
             }
 
             // Return Results
