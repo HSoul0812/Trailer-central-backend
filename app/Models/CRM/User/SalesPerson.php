@@ -12,6 +12,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Utilities\JsonApi\Filterable;
 use App\Services\CRM\Email\DTOs\ConfigValidate;
 use App\Services\CRM\Email\DTOs\ImapConfig;
+use App\Services\CRM\Email\DTOs\ImapMailbox;
 use App\Traits\SmtpHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
