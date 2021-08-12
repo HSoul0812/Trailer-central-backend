@@ -170,9 +170,10 @@ class ImapConfig
      * Get Smtp Config From Sales Person
      * 
      * @param SalesPerson $salesperson
+     * @param null|EmailFolder $folder
      * @return ImapConfig
      */
-    public static function fillFromSalesPerson(SalesPerson $salesperson, EmailFolder $folder): ImapConfig
+    public static function fillFromSalesPerson(SalesPerson $salesperson, ?EmailFolder $folder = null): ImapConfig
     {
         // Get Start Date
         $startDate = Carbon::now()->sub(1, 'month');
