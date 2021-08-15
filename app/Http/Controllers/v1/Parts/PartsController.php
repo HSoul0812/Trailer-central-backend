@@ -289,9 +289,16 @@ class PartsController extends RestfulController
      * )
      */
     public function create(Request $request) {
-        $request = new CreatePartRequest($request->all());
         $requestData = $request->all();
-
+        if(isset($requestData['bins']) && count($requestData['bins']) > 0) {
+            foreach ($requestData['bins'] as $key => $value) {
+                //Quantity == null (NaN) set quantity = 0.
+                if (isset($value['quantity']) && $value['quantity'] == 'NaN') {
+                    $requestData['bins'][$key]['quantity'] = 0;
+                }
+            }
+        }
+        $request = new CreatePartRequest($requestData);
         if ( $request->validate() ) {
             return $this->response->item(
                 $this->partService->create($requestData, !empty($requestData['bins'])
