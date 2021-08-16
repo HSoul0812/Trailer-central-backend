@@ -124,6 +124,7 @@ use Laravel\Scout\Searchable;
  * @property bool $has_stock_images,
  * @property bool $qb_sync_processed,
  * @property array|null $changed_fields_in_dashboard
+ * @property string $identifier
  *
  * @property User $user
  * @property Lead $lead
@@ -454,6 +455,11 @@ class Inventory extends Model
 
         // Return Value
         return $attribute->value ?? '';
+    }
+    
+    public function getIdentifierAttribute(): string
+    {
+        return CompactHelper::shorten($this->inventory_id);
     }
 
     /**

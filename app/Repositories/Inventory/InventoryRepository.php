@@ -453,6 +453,11 @@ class InventoryRepository implements InventoryRepositoryInterface
                 $query = $query->where('true_cost', 0);
             }
         }
+        
+        if (isset($params['is_archived'])) {
+            $withDefault = false;
+            $query = $query->where('inventory.is_archived', $params['is_archived']);
+        }
 
         if ($withDefault) {
             $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
@@ -460,10 +465,6 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
-        }
-
-        if (isset($params['is_archived'])) {
-            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         if (isset($params[self::CONDITION_AND_WHERE_IN]) && is_array($params[self::CONDITION_AND_WHERE_IN])) {

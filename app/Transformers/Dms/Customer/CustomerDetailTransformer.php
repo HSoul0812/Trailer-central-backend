@@ -30,14 +30,18 @@ class CustomerDetailTransformer extends CustomerTransformer
     public function includeUnitsViewed(Customer $customer)
     {
         if (empty($customer->lead) || empty($customer->lead->websiteTracking)) {
-            return new Collection();
-        }
+            return $this->collection(new Collection(), new TrackingTransformer());
+        } 
         
         return $this->collection($customer->lead->websiteTracking, new TrackingTransformer());
     }
     
     public function includeInteractions(Customer $customer)
     {
-        return $this->collection($customer->lead->getAllInteractions(), new InteractionTransformer());
+        if ($customer->lead) {
+            return $this->collection($customer->lead->getAllInteractions(), new InteractionTransformer());
+        }
+        
+        return $this->collection(new Collection(), new TrackingTransformer());
     }
 }
