@@ -25,9 +25,9 @@ use Microsoft\Graph\Model;
 class AzureService implements AzureServiceInterface
 {
     /**
-     * @const Outlook Scope Domain
+     * @const Get Default Scopes
      */
-    const SCOPE_OUTLOOK = 'https://outlook.office365.com/';
+    const DEFAULT_SCOPES = ['openid', 'profile', 'offline_access', 'email'];
 
 
     /**
@@ -60,7 +60,7 @@ class AzureService implements AzureServiceInterface
             'urlAuthorize'            => config('azure.authority.root').config('azure.authority.authorize'),
             'urlAccessToken'          => config('azure.authority.root').config('azure.authority.token'),
             'urlResourceOwnerDetails' => '',
-            'scopes'                  => $this->getOutlookScopes($scopes)
+            'scopes'                  => $this->getCleanScopes($scopes)
         ]);
 
         // Return Auth Client
@@ -146,6 +146,7 @@ class AzureService implements AzureServiceInterface
                 ->execute();
 
             // Return Token With Email Address
+            $this->log->info('Got response from graph: ' . print_r($user, true));
             $params['first_name'] = $user->getGivenName();
             $params['last_name'] = $user->getSurname();
             $params['email_address'] = $user->getUserPrincipalName();
@@ -255,25 +256,19 @@ class AzureService implements AzureServiceInterface
 
 
     /**
-     * Get Scopes for Outlook Rather Than Graph
+     * Get Cleaned Scopes Including Defaults
      * 
      * @param null|array $scopes
      * @return string
      */
-    private function getOutlookScopes(?array $scopes = null): string {
+    private function getCleanScopes(?array $scopes = null): string {
         // Get Default Scopes
         if(empty($scopes)) {
             $scopes = explode(" ", config('azure.scopes'));
         }
 
-        // Prepend Outlook
-        $final = [];
-        foreach($scopes as $scope) {
-            $final[] = self::SCOPE_OUTLOOK . $scope;
-        }
-
         // Return Final Scopes
-        return implode(" ", $final);
+        return implode(" ", array_merge(self::DEFAULT_SCOPES, $scopes));
     }
 
     /**
