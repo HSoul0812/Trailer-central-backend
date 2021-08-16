@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\Request;
+use App\Services\User\DealerLocationServiceInterface;
 
 class SaveDealerLocationRequest extends Request
 {
@@ -64,7 +65,7 @@ class SaveDealerLocationRequest extends Request
             'is_env_fee_taxed' => 'checkbox|in:0,1',
             // sales tax items
             'sales_tax_items' => 'nullable|array',
-            'sales_tax_items.*.entity_type_id' => 'required_with:sales_tax_items|integer',
+            'sales_tax_items.*.entity_type_id' => $this->validTaxCatoegory(),
             'sales_tax_items.*.item_type' => 'required_with:sales_tax_items|in:state,county,city,district1,district2,district3,district4,dmv,registration',
             'sales_tax_items.*.tax_pct' => 'nullable|numeric|min:0',
             'sales_tax_items.*.tax_cap' => 'nullable|numeric|min:0',
@@ -100,6 +101,14 @@ class SaveDealerLocationRequest extends Request
             'required|string|min:3,max:255|unique_dealer_location_name:%s,%s',
             $this->getDealerId(),
             $this->getId()
+        );
+    }
+
+    private function validTaxCatoegory(): string
+    {
+        return sprintf(
+            'required_with:sales_tax_items|integer|in:%s',
+            implode(',', array_keys(DealerLocationServiceInterface::AVAILABLE_TAX_CATEGORIES))
         );
     }
 }
