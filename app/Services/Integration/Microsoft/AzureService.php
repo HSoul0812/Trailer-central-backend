@@ -25,6 +25,12 @@ use Microsoft\Graph\Model;
 class AzureService implements AzureServiceInterface
 {
     /**
+     * @const Outlook Scope Domain
+     */
+    const SCOPE_OUTLOOK = 'https://outlook.office365.com/';
+
+
+    /**
      * Create Microsoft Azure Log
      */
     public function __construct(Manager $fractal)
@@ -54,7 +60,7 @@ class AzureService implements AzureServiceInterface
             'urlAuthorize'            => config('azure.authority.root').config('azure.authority.authorize'),
             'urlAccessToken'          => config('azure.authority.root').config('azure.authority.token'),
             'urlResourceOwnerDetails' => '',
-            'scopes'                  => $scopes ? implode(" ", $scopes) : config('azure.scopes')
+            'scopes'                  => $this->getOutlookScopes($scopes)
         ]);
 
         // Return Auth Client
@@ -247,6 +253,28 @@ class AzureService implements AzureServiceInterface
         ]);
     }
 
+
+    /**
+     * Get Scopes for Outlook Rather Than Graph
+     * 
+     * @param null|array $scopes
+     * @return string
+     */
+    private function getOutlookScopes(?array $scopes = null): string {
+        // Get Default Scopes
+        if(empty($scopes)) {
+            $scopes = explode(" ", config('azure.scopes'));
+        }
+
+        // Prepend Outlook
+        $final = [];
+        foreach($scopes as $scope) {
+            $final[] = self::SCOPE_OUTLOOK . $scope;
+        }
+
+        // Return Final Scopes
+        return implode(" ", $final);
+    }
 
     /**
      * Get Validation Message
