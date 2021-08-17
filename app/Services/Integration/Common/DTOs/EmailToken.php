@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use App\Services\CRM\Email\DTOs\ImapMailbox;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
