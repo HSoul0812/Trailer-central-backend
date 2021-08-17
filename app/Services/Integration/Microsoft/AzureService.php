@@ -271,7 +271,7 @@ class AzureService implements AzureServiceInterface
         if(!empty($scopes)) {
             $scopes = array_merge(self::DEFAULT_SCOPES, $scopes);
         } else {
-            $scopes = config('azure.app.scopes');
+            $scopes = explode(" ", config('azure.app.scopes'));
         }
 
         // Loop Defaults and Prepend Outlook
