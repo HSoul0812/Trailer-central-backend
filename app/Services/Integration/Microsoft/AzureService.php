@@ -27,7 +27,7 @@ class AzureService implements AzureServiceInterface
     /**
      * @const Get Default Scopes
      */
-    const DEFAULT_SCOPES = ['openid', 'profile', 'email', 'offline_access'];
+    const DEFAULT_SCOPES = ['offline_access'];
 
     /**
      * @const Get Outlook Scope Prefix
