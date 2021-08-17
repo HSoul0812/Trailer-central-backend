@@ -38,29 +38,21 @@ class CustomerService implements CustomerServiceInterface
     private $customerInventoryRepository;
 
     /**
-     * @var DealerLocationRepository
-     */
-    private $dealerLocationRepository;
-
-    /**
      * Create a new command instance.
      *
      * @param CustomerRepositoryInterface $customerRepository
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param CustomerInventoryRepositoryInterface $customerInventoryRepository
-     * @param DealerLocationRepositoryInterface $dealerLocationRepository
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         InventoryRepositoryInterface $inventoryRepository,
-        CustomerInventoryRepositoryInterface $customerInventoryRepository,
-        DealerLocationRepositoryInterface $dealerLocationRepository
+        CustomerInventoryRepositoryInterface $customerInventoryRepository
     )
     {
         $this->customerRepository = $customerRepository;
         $this->inventoryRepository = $inventoryRepository;
         $this->customerInventoryRepository = $customerInventoryRepository;
-        $this->dealerLocationRepository = $dealerLocationRepository;
     }
 
 

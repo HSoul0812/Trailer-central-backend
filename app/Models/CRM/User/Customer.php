@@ -2,14 +2,12 @@
 
 namespace App\Models\CRM\User;
 
-use App\Models\Inventory\Inventory;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\Region;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
-use Laravel\Nova\Fields\HasMany;
 use Laravel\Scout\Searchable;
 use App\Models\User\User as Dealer;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -107,16 +105,6 @@ class Customer extends Model
     public function quotes()
     {
         return $this->hasMany(UnitSale::class, 'buyer_id', 'id');
-    }
-
-    public function inventories()
-    {
-        return $this->belongsToMany(
-            Inventory::class,
-            'dms_customer_inventory',
-            'customer_id',
-            'inventory_id'
-        );
     }
 
     public function openQuotes()

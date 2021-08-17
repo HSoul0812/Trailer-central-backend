@@ -160,7 +160,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param array $params
      * @return mixed|void
      */
-    public function get($params): CustomerInventory
+    public function get($params): ?CustomerInventory
     {
         $query = CustomerInventory::select('*');
         if(isset($params['customer_id'])) {
