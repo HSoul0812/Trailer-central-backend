@@ -108,6 +108,7 @@ class AzureService implements AzureServiceInterface
             $authToken = $client->getAccessToken('authorization_code', [
                 'code' => $authCode
             ]);
+            $this->log->info('Returned auth token from code: ' . print_r($authToken, true));
         } catch (IdentityProviderException $e) {
             $response = $e->getResponseBody();
             $this->log->error('IdentityProviderException returned ' . $e->getMessage() .
