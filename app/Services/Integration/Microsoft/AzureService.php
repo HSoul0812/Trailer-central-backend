@@ -27,7 +27,7 @@ class AzureService implements AzureServiceInterface
     /**
      * @const Get Default Scopes
      */
-    const DEFAULT_SCOPES = ['openid', 'email', 'profile', 'offline_access', 'https://graph.microsoft.com/User.Read'];
+    const DEFAULT_SCOPES = ['openid', 'email', 'profile', 'offline_access'];
 
     /**
      * @const Get Outlook Scope Prefix
@@ -113,8 +113,7 @@ class AzureService implements AzureServiceInterface
         } catch (IdentityProviderException $e) {
             $response = $e->getResponseBody();
             $this->log->error('IdentityProviderException returned ' . $e->getMessage() .
-                                ' on AzureService: ' . ($response['error_description'] ?? 'unavailable') .
-                                ' full response: ' . print_r($response, true));
+                                ' on AzureService: ' . ($response['error_description'] ?? 'unavailable'));
             throw new InvalidAzureAuthCodeException;
         } catch (\Exception $e) {
             $this->log->error('Unknown Exception returned on AzureService: ' . $e->getMessage());
