@@ -36,14 +36,15 @@ interface AuthServiceInterface {
      * Get Login URL
      * 
      * @param string $tokenType
-     * @param array $scopes
      * @param string $relationType
      * @param int $relationId
+     * @param null|array $scopes
      * @param null|string $redirectUri
      * @throws InvalidAuthLoginTokenTypeException
      * @return array{url: string, ?state: string}
      */
-    public function login(string $tokenType, array $scopes, string $relationType, int $relationId, ?string $redirectUri = null): array;
+    public function login(string $tokenType, string $relationType, int $relationId,
+                          ?array $scopes = null, ?string $redirectUri = null): array;
 
     /**
      * Handle Auth Code
