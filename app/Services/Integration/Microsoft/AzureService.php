@@ -5,6 +5,7 @@ namespace App\Services\Integration\Microsoft;
 use App\Exceptions\Integration\Microsoft\InvalidAzureAuthCodeException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\CRM\Email\DTOs\ImapMailbox;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
