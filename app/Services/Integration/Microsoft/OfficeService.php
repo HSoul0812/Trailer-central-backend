@@ -21,7 +21,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
     /**
      * @const Get Office Scope Prefix
      */
-    const SCOPE_OFFICE = 'https://outlook.office.com';
+    const SCOPE_OFFICE = 'https://outlook.office.com/';
 
 
     /**
