@@ -95,6 +95,56 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         ]);
     }
 
+    /**
+     * Send Gmail Email
+     *
+     * @param SmtpConfig $smtpConfig
+     * @param ParsedEmail $parsedEmail
+     * @throws App\Exceptions\Integration\Google\InvalidToEmailAddressException
+     * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
+     * @throws App\Exceptions\Integration\Google\FailedInitializeGmailMessageException
+     * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
+     * @return array of validation info
+     */
+    public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
+        
+    }
+
+    /**
+     * Get All Messages With Label
+     * 
+     * @param AccessToken $accessToken
+     * @param string $folder folder name to get messages from; defaults to inbox
+     * @param array $params
+     * @return whether the email was sent successfully or not
+     */
+    public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []) {
+        
+    }
+
+    /**
+     * Get and Parse Individual Message
+     * 
+     * @param string $mailId
+     * @return parsed message details
+     */
+    public function message(string $mailId) {
+        
+    }
+
+    /**
+     * Get All Folders for User
+     * 
+     * @param AccessToken $accessToken
+     * @param array $search
+     * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
+     * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
+     * @return array of labels
+     */
+    public function folders(CommonToken $accessToken, array $search = []) {
+        
+    }
+
 
     /**
      * Get Outlook Scopes Including Defaults
@@ -102,7 +152,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * @param null|array $scopes
      * @return string
      */
-    protected function getScopes(?array $scopes = null): string {
+    /*protected function getScopes(?array $scopes = null): string {
         // Get Scopes
         if(empty($scopes)) {
             if(!empty(config('azure.scopes'))) {
@@ -121,7 +171,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
         // Return Final Scopes
         return implode(" ", array_merge(self::DEFAULT_SCOPES, $final));
-    }
+    }*/
 
     /**
      * Get Validation Message

@@ -19,6 +19,7 @@ use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Microsoft\OfficeServiceInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +45,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @var App\Services\Integration\Google\GmailServiceInterface
      */
     protected $gmail;
+
+    /**
+     * @var App\Services\Integration\Microsoft\OfficeServiceInterface
+     */
+    protected $office;
 
     /**
      * @var App\Services\Integration\Google\AuthServiceInterface
@@ -94,6 +100,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * ScrapeRepliesService constructor.
      */
     public function __construct(GmailServiceInterface $gmail,
+                                OfficeServiceInterface $office,
                                 AuthServiceInterface $auth,
                                 ImapServiceInterface $imap,
                                 InteractionsRepositoryInterface $interactions,
@@ -105,6 +112,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     {
         // Initialize Services
         $this->gmail = $gmail;
+        $this->office = $office;
         $this->auth = $auth;
         $this->imap = $imap;
 
@@ -208,6 +216,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Get From Google?
             if(!empty($salesperson->active_token) && $salesperson->active_token->token_type === 'google') {
                 $total = $this->importGmail($dealer->id, $salesperson, $folder);
+            } elseif(!empty($salesperson->active_token) && $salesperson->active_token->token_type === 'office365') {
+                // Get From Office 365?
+                $total = $this->importOffice($dealer->id, $salesperson, $folder);
             } else {
                 // Get From IMAP Instead
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
@@ -252,6 +263,54 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         foreach($messages as $mailId) {
             // Get Parsed Message
             $email = $this->gmail->message($mailId);
+
+            // Import Message
+            $result = $this->importMessage($dealerId, $salesperson, $email);
+            if($result === 1) {
+                $total++;
+            } elseif($result === 0) {
+                $skipped++;
+            }
+            $this->deleteAttachments($email->getAttachments());
+        }
+
+        // Process Skipped Message ID's
+        if($skipped > 0) {
+            $this->log->info("Processed " . $skipped . " emails that were skipped and not imported.");
+        }
+
+        // Updated Successful
+        $this->folders->update([
+            'id' => $folder->folder_id,
+            'date_imported' => Carbon::now()
+        ]);
+
+        // Return Result Messages That Match
+        return $total;
+    }
+
+    /**
+     * Import Office 365
+     * 
+     * @param int $dealerId
+     * @param SalesPerson $salesperson
+     * @param EmailFolder $emailFolder
+     * @return false || array of email results
+     */
+    private function importOffice(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
+        // Get Emails From Gmail
+        $this->log->info("Connecting to Office 365 with email: " . $salesperson->smtp_email);
+        $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
+            'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
+        ]);
+        $folder = $this->updateFolder($salesperson, $emailFolder);
+
+        // Loop Messages
+        $total = 0;
+        $skipped = 0;
+        foreach($messages as $mailId) {
+            // Get Parsed Message
+            $email = $this->office->message($mailId);
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
