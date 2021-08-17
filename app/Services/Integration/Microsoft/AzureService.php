@@ -114,7 +114,7 @@ class AzureService implements AzureServiceInterface
             $response = $e->getResponseBody();
             $this->log->error('IdentityProviderException returned ' . $e->getMessage() .
                                 ' on AzureService: ' . ($response['error_description'] ?? 'unavailable') .
-                                ' full response: ', print_r($response, true));
+                                ' full response: ' . print_r($response, true));
             throw new InvalidAzureAuthCodeException;
         } catch (\Exception $e) {
             $this->log->error('Unknown Exception returned on AzureService: ' . $e->getMessage());
