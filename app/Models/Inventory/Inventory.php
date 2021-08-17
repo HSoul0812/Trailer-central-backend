@@ -170,7 +170,13 @@ class Inventory extends Model
     const STATUS_ON_ORDER_LABEL = 'On Order';
     const STATUS_PENDING_SALE_LABEL = 'Pending Sale';
     const STATUS_SPECIAL_ORDER_LABEL = 'Special Order';
+    
+    const IS_FLOORPLANNED = 1;
+    const IS_NOT_FLOORPLANNED = 0;
 
+    const IS_ARCHIVED = 1;
+    const IS_NOT_ARCHIVED = 0;
+    
     const STATUS_MAPPING = [
         self::STATUS_QUOTE          => self::STATUS_QUOTE_LABEL,
         self::STATUS_AVAILABLE      => self::STATUS_AVAILABLE_LABEL,
