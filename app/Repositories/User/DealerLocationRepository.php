@@ -53,7 +53,11 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
      */
     public function get($params): DealerLocation
     {
-        return DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
+        if(isset($params['dealer_id'])) {
+            return DealerLocation::where('dealer_id', $params['dealer_id'])->firstOrFail();
+        } else {
+            return DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
+        }
     }
 
     public function getDefaultByDealerId(int $dealerId): ?DealerLocation
@@ -294,10 +298,5 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         $query->whereRaw('LOWER(name) = ?', ['name' => Str::lower($name)]);
 
         return $query->exists();
-    }
-
-    public function findFirstByDealerId(int $dealerId)
-    {
-        return DealerLocation::where('dealer_id', '=', $dealerId)->firstOrFail();
     }
 }

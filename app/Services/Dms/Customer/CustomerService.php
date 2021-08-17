@@ -13,6 +13,16 @@ use App\Repositories\User\DealerLocationRepositoryInterface;
 class CustomerService implements CustomerServiceInterface
 {
     /**
+     * @var string $active_nur
+     */
+    private $active_nur;
+
+    /**
+     * @var object $active_customer
+     */
+    private $active_customer;
+
+    /**
      * @var CustomerRepository
      */
     private $customerRepository;
@@ -54,7 +64,7 @@ class CustomerService implements CustomerServiceInterface
     }
 
 
-    public function importCSV(array $csvData, int $lineNumber, ?string &$active_nur, &$active_customer, int $dealer_id, int $dealer_location_id, int $popular_type, string $category) {
+    public function importCSV(array $csvData, int $lineNumber, int $dealer_id, int $dealer_location_id, int $popular_type, string $category) {
         if ($lineNumber === 1) {
             return;
         }
@@ -98,13 +108,13 @@ class CustomerService implements CustomerServiceInterface
             $trailer_make,
             $trailer_serial,
             ) = $csvData;
-        if($active_nur !== $customer_nur) {
-            $active_nur = $customer_nur;
+        if($this->active_nur !== $customer_nur) {
+            $this->active_nur = $customer_nur;
             $customer = $this->customerRepository->firstByNameAndDealer(
                 $first_name, $last_name, $dealer_id
             );
             if(!$customer) {
-                $active_customer = $this->customerRepository->create(
+                $this->active_customer = $this->customerRepository->create(
                     [
                         'first_name' => $first_name,
                         'last_name' => $last_name,
@@ -121,7 +131,7 @@ class CustomerService implements CustomerServiceInterface
                     ]
                 );
             } else {
-                $active_customer = $customer;
+                $this->active_customer = $customer;
             }
         }
 
@@ -144,14 +154,17 @@ class CustomerService implements CustomerServiceInterface
                 ]
             ]);
         }
-        $customer_id = $active_customer->getKey();
+        $customer_id = $this->active_customer->getKey();
         $inventory_id = $inventory->getKey();
 
-        $customer_inventory = $this->customerInventoryRepository->findFirstByCustomerAndInventory($customer_id, $inventory_id);
+        $customer_inventory = $this->customerInventoryRepository->get([
+            'customer_id' => $customer_id,
+            'inventory_id' => $inventory_id
+        ]);
         if(!$customer_inventory) {
             $this->customerInventoryRepository->create([
                 'inventory_id' => $inventory->getKey(),
-                'customer_id' => $active_customer->getKey()
+                'customer_id' => $this->active_customer->getKey()
             ]);
         }
     }

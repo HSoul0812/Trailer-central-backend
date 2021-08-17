@@ -7,7 +7,6 @@ namespace App\Repositories\Dms\Customer;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\Inventory\Inventory;
-use App\Nova\Resources\Inventory\InventoryCategory;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\JoinClause;
@@ -163,7 +162,13 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function get($params): CustomerInventory
     {
-        throw new NotImplementedException('Not implemented yet.');
+        $query = CustomerInventory::select('*');
+        if(isset($params['customer_id'])) {
+            $query->where('customer_id', $params['customer_id']);
+        } else if(isset($params['inventory_id'])){
+            $query->where('inventory_id', $params['inventory_id']);
+        };
+        return $query->first();
     }
 
     /**
@@ -178,16 +183,5 @@ class InventoryRepository implements InventoryRepositoryInterface
     protected function getSortOrders(): array
     {
         return $this->sortOrders;
-    }
-
-    /**
-     * @param int $customer_id
-     * @param int $inventory_id
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Query\Builder|object|null
-     */
-    public function findFirstByCustomerAndInventory(int $customer_id, int $inventory_id) {
-       return CustomerInventory::where('customer_id', $customer_id)
-       ->where('inventory_id',  $inventory_id)
-       ->first();
     }
 }

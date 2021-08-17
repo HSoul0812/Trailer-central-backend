@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands\CRM\Dms;
 
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\Dms\Customer\CustomerServiceInterface;
 use App\Traits\StreamCSVTrait;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class ImportCustomers extends Command
 {
@@ -36,18 +36,26 @@ class ImportCustomers extends Command
     private $dealerLocationRepository;
 
     /**
+     * @var InventoryRepositoryInterface $inventoryRepository
+     */
+    private $inventoryRepository;
+
+    /**
      * Create a new command instance.
+     * @param InventoryRepositoryInterface $inventoryRepository
      * @param CustomerServiceInterface $customerService
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      */
     public function __construct(
         DealerLocationRepositoryInterface  $dealerLocationRepository,
-        CustomerServiceInterface $customerService
+        CustomerServiceInterface $customerService,
+        InventoryRepositoryInterface $inventoryRepository
     )
     {
         parent::__construct();
         $this->dealerLocationRepository = $dealerLocationRepository;
         $this->customerService = $customerService;
+        $this->inventoryRepository = $inventoryRepository;
     }
 
     /**
@@ -61,28 +69,21 @@ class ImportCustomers extends Command
         $this->s3Bucket = $this->argument('s3_bucket');
         $this->s3Key = $this->argument('s3_key');
 
-        $dealer_location_id = $this->dealerLocationRepository->findFirstByDealerId($dealer_id)->getKey();
-        $entity_type = DB::table('inventory')
-            ->select(DB::raw('count(*) as type_count, entity_type_id'))
-            ->where('dealer_id', $dealer_id)
-            ->groupBy('entity_type_id')
-            ->orderBy('type_count', 'desc')
-            ->first();
+        $dealer_location_id = $this->dealerLocationRepository->get(['dealer_id' => $dealer_id])->getKey();
+        $popularInventory = $this->inventoryRepository->getPopularInventory($dealer_id);
 
-        $popular_type = 1;
-        if($entity_type) {
-            $popular_type = $entity_type->entity_type_id;
+        $popularType = 1;
+        if($popularInventory) {
+            $popularType = $popularInventory->entity_type_id;
         }
-        $category = $popular_type === 1 ? 'atv': '';
-        $active_nur = null;
-        $active_customer = null;
+        $popularCategory = $popularInventory->category;
 
-        $this->info('Inventory Type: ' . $popular_type);
-        $this->info('Inventory Category: ' . $category);
+        $this->info('Inventory Type: ' . $popularType);
+        $this->info('Inventory Category: ' . $popularCategory);
 
-        $this->streamCsv(function ($csvData, $lineNumber) use (&$active_nur, &$active_customer, $dealer_id, $dealer_location_id, $popular_type, $category) {
+        $this->streamCsv(function ($csvData, $lineNumber) use ($dealer_id, $dealer_location_id, $popularType, $popularCategory) {
             $this->info('Importing line number: ' . $lineNumber);
-            $this->customerService->importCSV($csvData, $lineNumber, $active_nur, $active_customer, $dealer_id, $dealer_location_id, $popular_type, $category);
+            $this->customerService->importCSV($csvData, $lineNumber, $dealer_id, $dealer_location_id, $popularType, $popularCategory);
             $this->info('Imported line number: ' . $lineNumber);
         });
         return 0;

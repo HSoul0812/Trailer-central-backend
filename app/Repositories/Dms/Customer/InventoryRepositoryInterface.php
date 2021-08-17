@@ -38,10 +38,4 @@ interface InventoryRepositoryInterface extends Repository
      * @return bool
      */
     public function bulkDestroy(array $uuids): bool;
-
-    /**
-     * @param int $customer_id
-     * @param int $inventory_id
-     */
-    public function findFirstByCustomerAndInventory(int $customer_id, int $inventory_id);
 }
