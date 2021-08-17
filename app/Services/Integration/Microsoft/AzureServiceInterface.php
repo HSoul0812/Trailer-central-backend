@@ -48,6 +48,15 @@ interface AzureServiceInterface {
     public function profile(CommonToken $accessToken): ?EmailToken;
 
     /**
+     * Get All Folders for User
+     * 
+     * @param CommonToken $accessToken
+     * @param array $search
+     * @return Collection<ImapMailbox>
+     */
+    public function folders(CommonToken $accessToken, array $search = []): Collection;
+
+    /**
      * Get Refresh Token
      *
      * @param AccessToken $accessToken

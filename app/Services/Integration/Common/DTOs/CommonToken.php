@@ -62,6 +62,11 @@ class CommonToken
      */
     protected $issuedAt;
 
+    /**
+     * @var Collection<ImapMailbox>
+     */
+    protected $folders;
+
 
     /**
      * Fill Access Token From Array

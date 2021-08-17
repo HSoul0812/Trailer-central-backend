@@ -153,6 +153,7 @@ class AzureService implements AzureServiceInterface
             $params['first_name'] = $user->getGivenName();
             $params['last_name'] = $user->getSurname();
             $params['email_address'] = $user->getUserPrincipalName();
+            $params['folders'] = $this->folders($accessToken);
             $emailToken = new EmailToken($params);
         } catch (\Exception $e) {
             // Log Error
@@ -161,6 +162,39 @@ class AzureService implements AzureServiceInterface
 
         // Return Azure Token
         return $emailToken ?? null;
+    }
+
+    /**
+     * Get All Folders for User
+     * 
+     * @param CommonToken $accessToken
+     * @param array $search
+     * @return Collection<ImapMailbox>
+     */
+    public function folders(CommonToken $accessToken, array $search = []): Collection {
+        // Initialize Folders Collection
+        $folders = new Collection();
+
+        // Get Graph
+        try {
+            // Initialize Microsoft Graph
+            $graph = new Graph();
+            $graph->setAccessToken($accessToken->getAccessToken());
+
+            // Get Details From Microsoft Account
+            $folders = $graph->createRequest('GET', '/me/mailFolders')
+                ->setReturnType(Model\MailFolder::class)
+                ->execute();
+
+            // Return Email Folders
+            $this->log->info('Got mail folders from graph: ' . print_r($folders, true));
+        } catch (\Exception $e) {
+            // Log Error
+            $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+
+        // Return Collection of ImapMailbox
+        return $folders;
     }
 
     /**
@@ -255,6 +289,40 @@ class AzureService implements AzureServiceInterface
             'is_expired' => $isExpired,
             'message' => $this->getValidateMessage($isValid, $isExpired)
         ]);
+    }
+
+
+    /**
+     * Get All Folders for User
+     * 
+     * @param CommonToken $accessToken
+     * @param array $search
+     * @return Collection<ImapMailbox>
+     */
+    public function folders(CommonToken $accessToken, array $search = []): Collection {
+        // Initialize Folders Collection
+        $folders = new Collection();
+
+        // Get Graph
+        try {
+            // Initialize Microsoft Graph
+            $graph = new Graph();
+            $graph->setAccessToken($accessToken->getAccessToken());
+
+            // Get Details From Microsoft Account
+            $folders = $graph->createRequest('GET', '/me/mailFolders')
+                ->setReturnType(Model\MailFolder::class)
+                ->execute();
+
+            // Return Email Folders
+            $this->log->info('Got mail folders from graph: ' . print_r($folders, true));
+        } catch (\Exception $e) {
+            // Log Error
+            $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+
+        // Return Collection of ImapMailbox
+        return $folders;
     }
 
 

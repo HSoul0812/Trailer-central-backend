@@ -7,6 +7,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\ValidateToken;
+use Illuminate\Support\Collection;
 
 interface OfficeServiceInterface extends AzureServiceInterface {
     /**
@@ -56,15 +57,4 @@ interface OfficeServiceInterface extends AzureServiceInterface {
      * @return parsed message details
      */
     public function message(string $mailId);
-
-    /**
-     * Get All Folders for User
-     * 
-     * @param AccessToken $accessToken
-     * @param array $search
-     * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
-     * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
-     * @return array of labels
-     */
-    public function folders(CommonToken $accessToken, array $search = []);
 }

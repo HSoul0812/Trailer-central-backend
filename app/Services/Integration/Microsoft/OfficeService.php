@@ -10,6 +10,7 @@ use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 
@@ -131,19 +132,6 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * @return parsed message details
      */
     public function message(string $mailId) {
-        
-    }
-
-    /**
-     * Get All Folders for User
-     * 
-     * @param AccessToken $accessToken
-     * @param array $search
-     * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
-     * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
-     * @return array of labels
-     */
-    public function folders(CommonToken $accessToken, array $search = []) {
         
     }
 
