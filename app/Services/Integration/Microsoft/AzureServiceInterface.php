@@ -7,6 +7,7 @@ use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Common\DTOs\LoginUrlToken;
+use Illuminate\Support\Collection;
 use League\OAuth2\Client\Provider\GenericProvider;
 
 interface AzureServiceInterface {

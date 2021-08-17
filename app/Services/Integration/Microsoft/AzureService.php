@@ -10,6 +10,7 @@ use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Common\DTOs\LoginUrlToken;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\OAuth2\Client\Provider\GenericProvider;
