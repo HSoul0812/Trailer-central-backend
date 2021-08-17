@@ -99,7 +99,7 @@ class EmailToken extends CommonToken
     /**
      * Get Default Folders Using $this->folders
      * 
-     * @return array<string>
+     * @return array<array{name: string}>
      */
     public function getDefaultFolders(): array
     {
@@ -108,7 +108,7 @@ class EmailToken extends CommonToken
         if($this->folders) {
             foreach($this->folders as $folder) {
                 if(preg_match(ImapMailbox::DEFAULT_FOLDER_REGEX, $folder->name)) {
-                    $mailboxes[] = $folder->name;
+                    $mailboxes[] = ['name' => $folder->name];
                 }
             }
         }
