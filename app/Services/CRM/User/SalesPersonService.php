@@ -61,10 +61,12 @@ class SalesPersonService implements SalesPersonServiceInterface
         $params = $this->mergeSmtpImap($rawParams);
 
         // Find Existing Sales Person Email
-        $existing = $this->salespeople->getByEmail($params['user_id'], $params['email']);
-        if(!empty($existing->id)) {
-            $params['id'] = $existing->id;
-            return $this->update($params);
+        if(!empty($params['email'])) {
+            $existing = $this->salespeople->getByEmail($params['user_id'], $params['email']);
+            if(!empty($existing->id)) {
+                $params['id'] = $existing->id;
+                return $this->update($params);
+            }
         }
 
         // Create Access Token
@@ -91,15 +93,17 @@ class SalesPersonService implements SalesPersonServiceInterface
         $params = $this->mergeSmtpImap($rawParams);
 
         // Find Existing Sales Person Email On a DIFFERENT Sales Person
-        $existing = $this->salespeople->getByEmail($params['user_id'], $params['email'], $params['id']);
-        if(!empty($existing->id)) {
-            // Delete current sales person and update matching one instead if it is deleted
-            if(!empty($existing->deleted_at)) {
-                $this->salespeople->delete(['id' => $params['id']]);
-                $params['id'] = $existing->id;
-            } else {
-                // Throw exception instead!
-                throw new DuplicateChangeEmailSalesPersonException;
+        if(!empty($params['email'])) {
+            $existing = $this->salespeople->getByEmail($params['user_id'], $params['email'], $params['id']);
+            if(!empty($existing->id)) {
+                // Delete current sales person and update matching one instead if it is deleted
+                if(!empty($existing->deleted_at)) {
+                    $this->salespeople->delete(['id' => $params['id']]);
+                    $params['id'] = $existing->id;
+                } else {
+                    // Throw exception instead!
+                    throw new DuplicateChangeEmailSalesPersonException;
+                }
             }
         }
 
