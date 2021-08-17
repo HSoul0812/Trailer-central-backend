@@ -293,40 +293,6 @@ class AzureService implements AzureServiceInterface
 
 
     /**
-     * Get All Folders for User
-     * 
-     * @param CommonToken $accessToken
-     * @param array $search
-     * @return Collection<ImapMailbox>
-     */
-    public function folders(CommonToken $accessToken, array $search = []): Collection {
-        // Initialize Folders Collection
-        $folders = new Collection();
-
-        // Get Graph
-        try {
-            // Initialize Microsoft Graph
-            $graph = new Graph();
-            $graph->setAccessToken($accessToken->getAccessToken());
-
-            // Get Details From Microsoft Account
-            $folders = $graph->createRequest('GET', '/me/mailFolders')
-                ->setReturnType(Model\MailFolder::class)
-                ->execute();
-
-            // Return Email Folders
-            $this->log->info('Got mail folders from graph: ' . print_r($folders, true));
-        } catch (\Exception $e) {
-            // Log Error
-            $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
-        }
-
-        // Return Collection of ImapMailbox
-        return $folders;
-    }
-
-
-    /**
      * Get Outlook Scopes Including Defaults
      * 
      * @param null|array $scopes
