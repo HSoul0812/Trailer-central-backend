@@ -105,6 +105,7 @@ class AzureService implements AzureServiceInterface
 
         try {
             // Make the token request
+            var_dump($client->getScopes());
             $authToken = $client->getAccessToken('authorization_code', [
                 'code' => $authCode
             ]);
@@ -112,7 +113,8 @@ class AzureService implements AzureServiceInterface
         } catch (IdentityProviderException $e) {
             $response = $e->getResponseBody();
             $this->log->error('IdentityProviderException returned ' . $e->getMessage() .
-                                ' on AzureService: ' . ($response['error_description'] ?? 'unavailable'));
+                                ' on AzureService: ' . ($response['error_description'] ?? 'unavailable') .
+                                ' full response: ', print_r($response, true));
             throw new InvalidAzureAuthCodeException;
         } catch (\Exception $e) {
             $this->log->error('Unknown Exception returned on AzureService: ' . $e->getMessage());
