@@ -105,7 +105,7 @@ class AzureService implements AzureServiceInterface
 
         try {
             // Make the token request
-            var_dump($client->getScopes());
+            var_dump($client->getDefaultScopes());
             $authToken = $client->getAccessToken('authorization_code', [
                 'code' => $authCode
             ]);
