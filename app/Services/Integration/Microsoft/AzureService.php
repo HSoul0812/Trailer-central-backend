@@ -183,11 +183,18 @@ class AzureService implements AzureServiceInterface
             $graph->setAccessToken($accessToken->getAccessToken());
 
             // Get Details From Microsoft Account
-            $folders = $graph->createRequest('GET', '/me/mailFolders')
+            $mailboxes = $graph->createRequest('GET', '/me/mailFolders?top=1000')
                 ->setReturnType(Model\MailFolder::class)
                 ->execute();
 
-            // Return Email Folders
+            // Get Full Collection
+            foreach($mailboxes as $mailbox) {
+                $folders->push(new ImapMailbox([
+                    'full' => $mailbox->getDisplayName(),
+                    'name' => $mailbox->getDisplayName(),
+                    'delimiter' => ImapMailbox::DELIMITER
+                ]));
+            }
             $this->log->info('Got mail folders from graph: ' . print_r($folders, true));
         } catch (\Exception $e) {
             // Log Error

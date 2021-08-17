@@ -30,6 +30,11 @@ class EmailToken extends CommonToken
      */
     private $emailAddress;
 
+    /**
+     * @var Collection<ImapMailbox>
+     */
+    private $folders;
+
 
     /**
      * Return Email Address
@@ -88,5 +93,27 @@ class EmailToken extends CommonToken
             'last_name' => $this->lastName,
             'email_address' => $this->emailAddress,
         ]);
+    }
+
+
+    /**
+     * Get Default Folders Using $this->folders
+     * 
+     * @return array<string>
+     */
+    public function getDefaultFolders(): array
+    {
+        // Loop Folders
+        $mailboxes = [];
+        if($this->folders) {
+            foreach($this->folders as $folder) {
+                if(preg_match(ImapMailbox::DEFAULT_FOLDER_REGEX, $folder->name)) {
+                    $mailboxes[] = $folder->name;
+                }
+            }
+        }
+
+        // Return Folders
+        return $mailboxes;
     }
 }
