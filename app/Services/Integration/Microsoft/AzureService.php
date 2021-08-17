@@ -27,7 +27,7 @@ class AzureService implements AzureServiceInterface
     /**
      * @const Get Default Scopes
      */
-    const DEFAULT_SCOPES = ['user.read'];
+    const DEFAULT_SCOPES = ['openid', 'profile', 'email', 'offline_access'];
 
     /**
      * @const Get Outlook Scope Prefix
@@ -269,9 +269,7 @@ class AzureService implements AzureServiceInterface
      */
     private function getOutlookScopes(?array $scopes = null): string {
         // Get Scopes
-        if(!empty($scopes)) {
-            $scopes = array_merge(self::DEFAULT_SCOPES, $scopes);
-        } else {
+        if(empty($scopes)) {
             $scopes = explode(" ", config('azure.scopes'));
         }
 
@@ -282,7 +280,7 @@ class AzureService implements AzureServiceInterface
         }
 
         // Return Final Scopes
-        return implode(" ", $final);
+        return implode(" ", array_merge(self::DEFAULT_SCOPES, $final));
     }
 
     /**
