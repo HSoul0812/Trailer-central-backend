@@ -121,6 +121,7 @@ class AzureService implements AzureServiceInterface
         // Return Formatted Auth Token
         $accessToken = new EmailToken();
         $accessToken->fillFromLeague($authToken);
+        $this->log->info('Got authorized access token: ' . print_r($accessToken->toArray(), true));
 
         // Get Profile
         $emailToken = $this->profile($accessToken);
