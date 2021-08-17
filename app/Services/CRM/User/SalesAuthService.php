@@ -7,6 +7,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\User\SalesPersonServiceInterface;
+use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Traits\SmtpHelper;
@@ -263,6 +264,10 @@ class SalesAuthService implements SalesAuthServiceInterface
         if(!empty($stateToken->id) && $accessToken->id !== $stateToken->id) {
             $this->tokens->delete(['id' => $stateToken->id]);
         }
+
+        // Get Mailboxes
+        $folders = $this->imap->mailboxes(ImapConfig::fillFromSalesPerson($salesPerson));
+        $this->log->info('Get folders from mailboxes: ' . print_r($folders, true));
 
         // Return Response
         return $this->response($salesPerson->id, $accessToken);
