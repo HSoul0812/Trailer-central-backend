@@ -6,15 +6,18 @@ use App\Exceptions\Inventory\InventoryException;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
+use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -48,6 +51,10 @@ class InventoryService implements InventoryServiceInterface
      * @var QuickbookApprovalRepositoryInterface
      */
     private $quickbookApprovalRepository;
+    /**
+     * @var WebsiteConfigRepositoryInterface
+     */
+    private $websiteConfigRepository;
 
     /**
      * @var ImageService
@@ -74,6 +81,7 @@ class InventoryService implements InventoryServiceInterface
         FileRepositoryInterface $fileRepository,
         BillRepositoryInterface $billRepository,
         QuickbookApprovalRepositoryInterface $quickbookApprovalRepository,
+        WebsiteConfigRepositoryInterface $websiteConfigRepository,
         ImageService $imageService,
         FileService $fileService
     ) {
@@ -82,6 +90,7 @@ class InventoryService implements InventoryServiceInterface
         $this->fileRepository = $fileRepository;
         $this->billRepository = $billRepository;
         $this->quickbookApprovalRepository = $quickbookApprovalRepository;
+        $this->websiteConfigRepository = $websiteConfigRepository;
 
         $this->imageService = $imageService;
         $this->fileService = $fileService;
@@ -358,6 +367,48 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return compact(['deletedDuplicates', 'couldNotDeleteDuplicates']);
+    }
+
+    /**
+     * @return array
+     */
+    public function archiveSoldItems(): array
+    {
+        $result = [];
+
+        /** @var Collection $configs */
+        $configs = $this->websiteConfigRepository->getAll([
+            'key' => WebsiteConfig::DURATION_BEFORE_AUTO_ARCHIVING_KEY,
+            'value_gt' => 0,
+            'with' => ['website'],
+        ]);
+
+        $dealerIds = $configs->mapWithKeys(function ($config) {
+            return [$config->website->dealer_id => $config->value];
+        });
+
+        foreach ($dealerIds as $dealerId => $hours) {
+            /** @var Inventory[] $inventories */
+            $inventories = $this->inventoryRepository->getAll([
+                'dealer_id' => $dealerId,
+                'status' => Inventory::STATUS_SOLD,
+                'sold_at_lt' => Carbon::now()->subHours($hours),
+                'is_archived' => 0,
+                'integration_item_hash' => 'not_null',
+            ]);
+
+            foreach ($inventories as $inventory) {
+                $this->inventoryRepository->update([
+                    'inventory_id' => $inventory->inventory_id,
+                    'is_archived' => 1,
+                    'archived_at' => Carbon::now()
+                ]);
+
+                $result[] = $inventory->inventory_id;
+            }
+        }
+
+        return $result;
     }
 
     /**

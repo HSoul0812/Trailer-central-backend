@@ -34,4 +34,9 @@ interface InventoryServiceInterface
      * @return array
      */
     public function deleteDuplicates(int $dealerId): array;
+
+    /**
+     * @return array
+     */
+    public function archiveSoldItems(): array;
 }

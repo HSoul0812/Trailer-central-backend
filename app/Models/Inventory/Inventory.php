@@ -305,7 +305,8 @@ class Inventory extends Model
         'utc_integration_updated_at',
         'has_stock_images',
         'qb_sync_processed',
-        'changed_fields_in_dashboard'
+        'changed_fields_in_dashboard',
+        'is_archived',
     ];
 
     protected $casts = [
