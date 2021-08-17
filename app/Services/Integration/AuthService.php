@@ -204,7 +204,7 @@ class AuthService implements AuthServiceInterface
         }
 
         // Email Token Empty?
-        if(empty($emailToken) || empty($emailToken->emailAddress)) {
+        if(empty($emailToken)) {
             // Invalid Token Type
             throw new InvalidAuthCodeTokenTypeException;
         }

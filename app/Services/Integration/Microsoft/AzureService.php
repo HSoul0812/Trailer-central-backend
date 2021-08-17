@@ -29,6 +29,11 @@ class AzureService implements AzureServiceInterface
      */
     const DEFAULT_SCOPES = ['openid', 'profile', 'offline_access', 'email'];
 
+    /**
+     * @const Get Outlook Scope Prefix
+     */
+    const OUTLOOK_SCOPE = 'https://outlook.office.com/';
+
 
     /**
      * Create Microsoft Azure Log
@@ -60,7 +65,7 @@ class AzureService implements AzureServiceInterface
             'urlAuthorize'            => config('azure.authority.root').config('azure.authority.authorize'),
             'urlAccessToken'          => config('azure.authority.root').config('azure.authority.token'),
             'urlResourceOwnerDetails' => '',
-            'scopes'                  => $this->getCleanScopes($scopes)
+            'scopes'                  => $this->getOutlookScopes($scopes)
         ]);
 
         // Return Auth Client
@@ -256,19 +261,27 @@ class AzureService implements AzureServiceInterface
 
 
     /**
-     * Get Cleaned Scopes Including Defaults
+     * Get Outlook Scopes Including Defaults
      * 
      * @param null|array $scopes
      * @return string
      */
-    private function getCleanScopes(?array $scopes = null): string {
-        // Get Default Scopes
-        if(empty($scopes)) {
-            $scopes = explode(" ", config('azure.scopes'));
+    private function getOutlookScopes(?array $scopes = null): string {
+        // Get Scopes
+        if(!empty($scopes)) {
+            $scopes = array_merge(self::DEFAULT_SCOPES, $scopes);
+        } else {
+            $scopes = config('azure.app.scopes');
+        }
+
+        // Loop Defaults and Prepend Outlook
+        $final = [];
+        foreach($scopes as $scope) {
+            $final[] = self::OUTLOOK_SCOPE . $scope;
         }
 
         // Return Final Scopes
-        return implode(" ", array_merge(self::DEFAULT_SCOPES, $scopes));
+        return implode(" ", $final);
     }
 
     /**
