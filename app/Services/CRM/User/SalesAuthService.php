@@ -234,11 +234,13 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Initialize Params for Sales Person
         $params = $request->all();
-        $params['first_name'] = !empty($params['first_name']) ? $params['first_name'] : $emailToken->firstName;
-        $params['last_name']  = !empty($params['last_name']) ? $params['last_name'] : $emailToken->lastName;
-        $params['email']      = !empty($params['email']) ? $params['email'] : $emailToken->emailAddress;
-        $params['smtp']       = ['email' => $emailToken->emailAddress, 'failed' => 0];
-        $params['imap']       = ['email' => $emailToken->emailAddress, 'failed' => 0];
+        if($emailToken->emailAddress) {
+            $params['first_name'] = !empty($params['first_name']) ? $params['first_name'] : $emailToken->firstName;
+            $params['last_name']  = !empty($params['last_name']) ? $params['last_name'] : $emailToken->lastName;
+            $params['email']      = !empty($params['email']) ? $params['email'] : $emailToken->emailAddress;
+            $params['smtp']       = ['email' => $emailToken->emailAddress, 'failed' => 0];
+            $params['imap']       = ['email' => $emailToken->emailAddress, 'failed' => 0];
+        }
 
         // Create or Update Sales Person
         if(!empty($stateToken->relation_id) || !empty($request->sales_person_id)) {

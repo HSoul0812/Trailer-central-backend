@@ -13,6 +13,7 @@ use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Microsoft\AzureServiceInterface;
+use App\Services\Integration\Microsoft\OfficeServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
 use App\Transformers\Integration\Auth\LoginUrlTransformer;
@@ -54,6 +55,11 @@ class AuthService implements AuthServiceInterface
     protected $azure;
 
     /**
+     * @var OfficeServiceInterface
+     */
+    protected $office;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -67,6 +73,7 @@ class AuthService implements AuthServiceInterface
         GmailServiceInterface $gmail,
         BusinessServiceInterface $facebook,
         AzureServiceInterface $azure,
+        OfficeServiceInterface $office,
         Manager $fractal
     ) {
         $this->tokens = $tokens;
@@ -74,6 +81,7 @@ class AuthService implements AuthServiceInterface
         $this->gmail = $gmail;
         $this->facebook = $facebook;
         $this->azure = $azure;
+        $this->office = $office;
 
         // Fractal
         $this->fractal = $fractal;
@@ -159,7 +167,7 @@ class AuthService implements AuthServiceInterface
                 $login = $this->google->login($redirectUri, $scopes);
             break;
             case 'office365':
-                $login = $this->azure->login($redirectUri, $scopes);
+                $login = $this->office->login($redirectUri, $scopes);
             break;
         }
 
@@ -200,7 +208,7 @@ class AuthService implements AuthServiceInterface
                 $emailToken = $this->gmail->auth($code, $redirectUri);
             break;
             case 'office365':
-                $emailToken = $this->azure->auth($code, $redirectUri, $scopes);
+                $emailToken = $this->office->auth($code, $redirectUri, $scopes);
             break;
         }
 
@@ -261,7 +269,7 @@ class AuthService implements AuthServiceInterface
                 $refresh = $this->google->refresh($accessToken);
             break;
             case 'office365':
-                $refresh = $this->azure->refresh($accessToken);
+                $refresh = $this->office->refresh($accessToken);
             break;
         }
 
@@ -291,7 +299,7 @@ class AuthService implements AuthServiceInterface
                 $validate = $this->google->validate($accessToken);
             break;
             case 'office365':
-                $validate = $this->azure->validate($accessToken);
+                $validate = $this->office->validate($accessToken);
             break;
         }
 
@@ -321,7 +329,7 @@ class AuthService implements AuthServiceInterface
                 $validate = $this->google->validateCustom($accessToken);
             break;
             case 'office365':
-                $validate = $this->azure->validateCustom($accessToken);
+                $validate = $this->office->validateCustom($accessToken);
             break;
         }
 
