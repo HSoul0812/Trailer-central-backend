@@ -14,6 +14,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use Microsoft\Graph\Graph;
+use Microsoft\Graph\Model\MailFolder;
 use Microsoft\Graph\Model\Message;
 
 /**
@@ -231,7 +232,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             // Get Details From Microsoft Account
             $mailboxes = $graph->createRequest('GET', '/me/mailFolders?$filter=' .
                                                     "displayName eq '" . $name . "'")
-                ->setReturnType(Model\MailFolder::class)
+                ->setReturnType(MailFolder::class)
                 ->execute();
 
             // Get Full Collection

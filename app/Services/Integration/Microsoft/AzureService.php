@@ -17,7 +17,8 @@ use League\Fractal\Manager;
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Microsoft\Graph\Graph;
-use Microsoft\Graph\Model;
+use Microsoft\Graph\Model\User;
+use Microsoft\Graph\Model\MailFolder;
 
 /**
  * Class AzureService
@@ -147,7 +148,7 @@ class AzureService implements AzureServiceInterface
 
             // Get Details From Microsoft Account
             $user = $graph->createRequest('GET', '/me')
-                ->setReturnType(Model\User::class)
+                ->setReturnType(User::class)
                 ->execute();
 
             // Return Token With Email Address
@@ -185,7 +186,7 @@ class AzureService implements AzureServiceInterface
 
             // Get Details From Microsoft Account
             $mailboxes = $graph->createRequest('GET', '/me/mailFolders?top=1000')
-                ->setReturnType(Model\MailFolder::class)
+                ->setReturnType(MailFolder::class)
                 ->execute();
 
             // Get Full Collection
