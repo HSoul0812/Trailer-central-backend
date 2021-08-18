@@ -7,8 +7,10 @@ use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
 use App\Repositories\CRM\Customer\CustomerRepository;
+use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Dms\Customer\InventoryRepository as CustomerInventoryRepository;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Dms\Customer\CustomerService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
@@ -100,14 +102,12 @@ class CustomerServiceTest extends TestCase
 
     public function testNonExistingImport() {
         $this->customerRepository
-            ->shouldReceive('firstByNameAndDealer')
+            ->shouldReceive('get')
             ->once()
-            ->with('John', 'Doe', $this->dealer_id)
             ->andReturn(null);
         $this->inventoryRepository
-            ->shouldReceive('findOneByVinAndDealerId')
+            ->shouldReceive('get')
             ->once()
-            ->with($this->unit_serial, $this->dealer_id)
             ->andReturn(null);
         $this->customerRepository->shouldReceive('create')
             ->once()
@@ -133,14 +133,12 @@ class CustomerServiceTest extends TestCase
 
     public function testExistingCustomerImport() {
         $this->customerRepository
-            ->shouldReceive('firstByNameAndDealer')
+            ->shouldReceive('get')
             ->once()
-            ->with('John', 'Doe', $this->dealer_id)
             ->andReturn($this->customer);
         $this->inventoryRepository
-            ->shouldReceive('findOneByVinAndDealerId')
+            ->shouldReceive('get')
             ->once()
-            ->with($this->unit_serial, $this->dealer_id)
             ->andReturn(null);
 
         $this->inventoryRepository->shouldReceive('create')
@@ -165,9 +163,8 @@ class CustomerServiceTest extends TestCase
 
     public function testExistingInventoryImport() {
         $this->customerRepository
-            ->shouldReceive('firstByNameAndDealer')
+            ->shouldReceive('get')
             ->once()
-            ->with('John', 'Doe', $this->dealer_id)
             ->andReturn($this->customer);
         $this->inventoryRepository
             ->shouldReceive('get')
@@ -192,9 +189,8 @@ class CustomerServiceTest extends TestCase
 
     public function testExistingCustomerInventoryImport() {
         $this->customerRepository
-            ->shouldReceive('firstByNameAndDealer')
+            ->shouldReceive('get')
             ->once()
-            ->with('John', 'Doe', $this->dealer_id)
             ->andReturn($this->customer);
         $this->inventoryRepository
             ->shouldReceive('get')
