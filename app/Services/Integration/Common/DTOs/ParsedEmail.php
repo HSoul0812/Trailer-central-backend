@@ -20,6 +20,17 @@ class ParsedEmail
     use WithConstructor, WithGetter;
 
     /**
+     * Body HTML
+     */
+    const BODY_HTML = 'html';
+
+    /**
+     * Body Plain
+     */
+    const BODY_PLAIN = 'text';
+
+
+    /**
      * @var string ID of Email from Source
      */
     private $id = '';
@@ -440,6 +451,16 @@ class ParsedEmail
         }
     }
 
+    /**
+     * Return Body Type
+     * 
+     * @return string self::BODY_HTML | self::BODY_PLAIN
+     */
+    public function getBodyType(): string
+    {
+        return $this->getIsHtml() ? self::BODY_HTML : self::BODY_PLAIN;
+    }
+
 
     /**
      * Return Is HTML
@@ -448,7 +469,7 @@ class ParsedEmail
      */
     public function getIsHtml(): bool
     {
-        return $this->isHtml;
+        return $this->isHtml ?? false;
     }
 
     /**

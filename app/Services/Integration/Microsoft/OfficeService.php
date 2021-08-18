@@ -141,7 +141,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         // Create Message
         $message = new Message();
         $message->setSubject($parsedEmail->subject);
-        $message->setBody($parsedEmail->body);
+        $message->setBody(['content' => $parsedEmail->body, 'contentType' => $parsedEmail->getBodyType()]);
         $message->setToRecipients([
             ['emailAddress' => ['name' => $parsedEmail->toName, 'address' => $parsedEmail->to]]
         ]);
