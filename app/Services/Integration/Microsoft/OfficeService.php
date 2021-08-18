@@ -249,11 +249,13 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
         // Get Messages From Microsoft Account
         $messages = $graph->createRequest('GET', $query)->setReturnType(Message::class)->execute();
-        if(count($messages) > 0) {
-            foreach($messages as $message) {
-                $emails->push($message);
-            }
+        $current = $emails->count();
+        foreach($messages as $message) {
+            $emails->push($message);
+        }
 
+        // New Emails Were Added?!
+        if($current < $emails->count()) {
             // Get Next Batch of Messages if More Pages Exist
             $params['$skip'] = isset($params['$skip']) ? $params['$skip'] += self::PER_PAGE : self::PER_PAGE;
             return $this->getMessages($graph, $emails, $folderId, $filters, $params);
