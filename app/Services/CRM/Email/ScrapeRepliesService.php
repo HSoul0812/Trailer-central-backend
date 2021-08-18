@@ -2,8 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
-use App\Exceptions\CRM\Email\MissingImapFolderException;
-use App\Exceptions\Integration\Google\MissingGmailLabelException;
+use App\Exceptions\CRM\Email\MissingFolderException;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\User\SalesPerson;
@@ -299,9 +298,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
-        foreach($messages as $mailId) {
+        foreach($messages as $message) {
             // Get Parsed Message
-            $email = $this->office->message($mailId);
+            $email = $this->office->message($message);
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
@@ -310,7 +309,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             } elseif($result === self::IMPORT_PROCESSED) {
                 $skipped = ($skipped ?? 0) + 1;
             }
-            $this->deleteAttachments($email->getAttachments());
         }
 
         // Process Skipped Message ID's
@@ -388,10 +386,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Lead ID Exists?
         if(!empty($email->getLeadId())) {
-            // Only Using IMAP
-            if(!empty($message)) {
-                $this->imap->full($message, $email);
-            }
+            // Import Additional Details (Attachments and/or Body)
+            $this->importFull($salesperson, $email, $message);
             if(empty($email->getSubject()) || empty($email->getToEmail())) {
                 $this->deleteAttachments($email->getAttachments());
                 return self::IMPORT_SKIPPED;
@@ -409,6 +405,27 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->emails->createProcessed($salesperson->user_id, $email->getMessageId());
         $this->deleteAttachments($email->getAttachments());
         return self::IMPORT_PROCESSED;
+    }
+
+    /**
+     * Import Full Details (Attachments/Body) That Weren't Already Imported
+     * 
+     * @param SalesPerson $salesperson
+     * @param ParsedEmail $email
+     * @param null|Message $message
+     * @return ParsedEmail
+     */
+    private function importFull(SalesPerson $salesperson, ParsedEmail $email, ?Message $message = null): ParsedEmail {
+        // Get From Office 365?
+        if(!empty($salesperson->active_token) && $salesperson->active_token->token_type === 'office365') {
+            $email = $this->office->full($salesperson->active_token, $email);
+        } elseif(empty($salesperson->active_token)) {
+            // Get From IMAP Instead
+            $email = $this->imap->full($message, $email);
+        }
+
+        // Return Updated ParsedEmail
+        return $email;
     }
 
     /**

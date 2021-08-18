@@ -77,6 +77,11 @@ class ParsedEmail
     private $isHtml = false;
 
     /**
+     * @var bool $hasAttachments
+     */
+    private $hasAttachments = false;
+
+    /**
      * @var Collection<AttachmentFile> Attachments Sent With Email
      */
     private $attachments;
@@ -483,6 +488,7 @@ class ParsedEmail
     public function setAttachments(Collection $attachments): void
     {
         $this->attachments = $attachments;
+        $this->hasAttachments = true;
     }
 
     /**

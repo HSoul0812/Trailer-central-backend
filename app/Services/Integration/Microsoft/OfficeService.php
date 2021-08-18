@@ -14,6 +14,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use Microsoft\Graph\Graph;
+use Microsoft\Graph\Model\Attachment;
+use Microsoft\Graph\Model\BodyType;
 use Microsoft\Graph\Model\MailFolder;
 use Microsoft\Graph\Model\Message;
 
@@ -137,9 +139,10 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
      * @param array<string> $filters
-     * @return whether the email was sent successfully or not
+     * @return Collection<Message>
      */
-    public function messages(AccessToken $accessToken, string $folder = 'Inbox', array $filters = []): Collection {
+    public function messages(AccessToken $accessToken, string $folder = 'Inbox',
+                                array $filters = []): Collection {
         // Get Graph
         try {
             // Initialize Microsoft Graph
@@ -158,18 +161,63 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             $this->log->error('Exception returned on getting office 365 messages; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
-        // Return Empty Collection of ParsedEmail
+        // Return Empty Collection of Message
         return new Collection();
     }
 
     /**
      * Get and Parse Individual Message
      * 
-     * @param string $mailId
-     * @return parsed message details
+     * @param Message $message
+     * @return ParsedEmail
      */
-    public function message(string $mailId): ParsedEmail {
-        
+    public function message(Message $message): ParsedEmail {
+        // Get Headers/Body/Attachments
+        $body = $message->getBody();
+
+        // Get From/To
+        $from = $message->getFrom();
+        $fromEmail = !empty($from) ? $from->getEmailAddress() : null;
+        $to = $message->getTo();
+        $toEmail = !empty($to) ? $to->getEmailAddress() : null;
+
+        // Parse Data
+        return new ParsedEmail([
+            'id' => $message->getId(),
+            'message_id' => $message->getInternetMessageId(),
+            'root_message_id' => $message->getInternetMessageId(),
+            'from_email' => !empty($fromEmail) ? $fromEmail->getAddress() : '',
+            'from_name' => !empty($fromEmail) ? $fromEmail->getName() : '',
+            'to_email' => !empty($toEmail) ? $toEmail->getAddress() : '',
+            'to_name' => !empty($toEmail) ? $toEmail->getName() : '',
+            'subject' => $body->getSubject(),
+            'body' => $body->getContent(),
+            'is_html' => ($body->getContentType() === BodyType::HTML),
+            'date' => $body->getSentDateTime(),
+            'has_attachments' => $message->getHasAttachments()
+        ]);
+    }
+
+    /**
+     * Parse Full Message Details
+     * 
+     * @param AccessToken $accessToken
+     * @param ParsedEmail $email
+     * @return ParsedEmail
+     */
+    public function full(AccessToken $accessToken, ParsedEmail $email): ParsedEmail {
+        // Get Attachments for Message
+        $attachments = new Collection();
+        if($email->hasAttachments) {
+            $attachments = $this->getAttachments($accessToken->access_token, $email->id);
+            if($attachments->count() > 0) {
+                $this->log->info('Found ' . count($attachments) . ' total attachments on Message ' . $headers->messageId);
+            }
+        }
+        $email->setAttachments($attachments);
+
+        // Return Updated ParsedEmail
+        return $email;
     }
 
 
@@ -181,7 +229,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * @param string $folderId
      * @param array $filters
      * @param array $params
-     * @return Collection
+     * @return Collection<Message>
      */
     private function getMessages(Graph $graph, Collection $emails, string $folderId,
                                     array $filters = [], array $params = []): Collection {
@@ -203,7 +251,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $messages = $graph->createRequest('GET', $query)->setReturnType(Message::class)->execute();
         if(count($messages) > 0) {
             foreach($messages as $message) {
-                $emails->push($this->getParsedEmail($message));
+                $emails->push($message);
             }
 
             // Get Next Batch of Messages if More Pages Exist
@@ -213,6 +261,40 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
         // Return Collection of Emails
         return $emails;
+    }
+
+    /**
+     * Get Attachments
+     * 
+     * @param string $accessToken
+     * @param string $emailId
+     * @return Collection<AttachmentFile>
+     */
+    private function getAttachments(string $accessToken, string $emailId): Collection {
+        // Initialize Microsoft Graph
+        $graph = new Graph();
+        $graph->setAccessToken($accessToken);
+
+        // Get Query for Message Attachments
+        $query = '/me/messages/' . $emailId . '/attachments?$top=100';
+
+        // Get Messages From Microsoft Account
+        $attachments = new Collection();
+        $files = $graph->createRequest('GET', $query)->setReturnType(Message::class)->execute();
+        if(count($files) > 0) {
+            foreach($files as $file) {
+                $attachments->push(new AttachmentFile([
+                    'file_path' => $file->getName(),
+                    'file_name' => $file->getName(),
+                    'mime_type' => $file->getContentType(),
+                    'file_size' => $file->getSize(),
+                    'contents'  => $file->getContentBytes()
+                ]));
+            }
+        }
+
+        // Return Collection of Emails
+        return $attachments;
     }
 
     /**
@@ -232,8 +314,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             // Get Details From Microsoft Account
             $mailboxes = $graph->createRequest('GET', '/me/mailFolders?$filter=' .
                                                     "displayName eq '" . $name . "'")
-                ->setReturnType(MailFolder::class)
-                ->execute();
+                ->setReturnType(MailFolder::class)->execute();
 
             // Get Full Collection
             $folderId = '';
