@@ -19,6 +19,7 @@ use App\Console\Commands\Parts\IncreaseDealerCostCommand;
 use App\Console\Commands\Parts\FixPartVendor;
 use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
 use App\Console\Commands\CRM\Dms\GetCompletedSaleWithNoFullInvoice;
+use App\Console\Commands\Inventory\FixFloorplanBillStatus;
 
 class Kernel extends ConsoleKernel
 {
@@ -43,6 +44,7 @@ class Kernel extends ConsoleKernel
         ClearLocalTmpFolder::class,
         GenerateDealerSpecificSiteUrls::class,
         AutoArchiveSoldItems::class,
+        FixFloorplanBillStatus::class
     ];
 
     /**
@@ -162,6 +164,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('inventory:auto-archive-sold-items')
             ->daily()
+            ->runInBackground();
+        
+        $schedule->command('inventory:fix-floorplan-bill-status')
+            ->hourly()
             ->runInBackground();
 
         // $schedule->command('inspire')
