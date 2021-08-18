@@ -296,15 +296,12 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             foreach($files as $file) {
                 // Get Attachments
                 $properties = $file->getProperties();
-                $this->log->info('Got all properties for attachments: ' . print_r($properties, true));
-
-                // Append Attachment
                 $attachments->push(new AttachmentFile([
                     'file_path' => $file->getName(),
                     'file_name' => $file->getName(),
                     'mime_type' => $file->getContentType(),
                     'file_size' => $file->getSize(),
-                    'contents'  => $file->getContentBytes()
+                    'contents'  => $properties['contentBytes']
                 ]));
             }
         }
