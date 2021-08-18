@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use Microsoft\Graph\Graph;
+use Microsoft\Graph\Model\Attachment;
 use Microsoft\Graph\Model\BodyType;
 use Microsoft\Graph\Model\MailFolder;
 use Microsoft\Graph\Model\Message;
@@ -290,7 +291,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
         // Get Messages From Microsoft Account
         $attachments = new Collection();
-        $files = $graph->createRequest('GET', $query)->setReturnType(Message::class)->execute();
+        $files = $graph->createRequest('GET', $query)->setReturnType(Attachment::class)->execute();
         if(count($files) > 0) {
             foreach($files as $file) {
                 $attachments->push(new AttachmentFile([
