@@ -186,7 +186,6 @@ class OfficeService extends AzureService implements OfficeServiceInterface
     public function message(Message $message): ParsedEmail {
         // Get Headers/Body/Attachments
         $body = $message->getBody();
-        $this->log->info('Got message details: ' . print_r($message, true));
 
         // Get From/To
         $from = $message->getFrom();
