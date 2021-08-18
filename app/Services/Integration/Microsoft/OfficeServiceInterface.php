@@ -7,7 +7,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\ValidateToken;
-use Illuminate\Support\Collection;
+use Microsoft\Graph\Model\Message;
 
 interface OfficeServiceInterface extends AzureServiceInterface {
     /**
@@ -53,8 +53,17 @@ interface OfficeServiceInterface extends AzureServiceInterface {
     /**
      * Get and Parse Individual Message
      * 
-     * @param string $mailId
-     * @return parsed message details
+     * @param Message $message
+     * @return ParsedEmail
      */
-    public function message(string $mailId);
+    public function message(Message $message): ParsedEmail;
+
+    /**
+     * Parse Full Message Details
+     * 
+     * @param AccessToken $accessToken
+     * @param ParsedEmail $email
+     * @return ParsedEmail
+     */
+    public function full(AccessToken $accessToken, ParsedEmail $email): ParsedEmail;
 }
