@@ -127,18 +127,40 @@ class OfficeService extends AzureService implements OfficeServiceInterface
     }
 
     /**
-     * Send Gmail Email
+     * Send Office 365 Email
      *
      * @param SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
-     * @throws App\Exceptions\Integration\Google\InvalidToEmailAddressException
-     * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
-     * @throws App\Exceptions\Integration\Google\FailedInitializeGmailMessageException
-     * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
-     * @return array of validation info
+     * @return ParsedEmail
      */
     public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
-        
+        // Initialize Microsoft Graph
+        $graph = new Graph();
+        $graph->setAccessToken($smtpConfig->accessToken);
+
+        // Create Message
+        $message = new Message();
+        $message->setSubject($parsedEmail->subject);
+        $message->setBody($parsedEmail->body);
+        $message->setToRecipients([
+            ['emailAddress' => ['name' => $parsedEmail->toName, 'address' => $parsedEmail->address]]
+        ]);
+        $message->setFrom(['emailAddress' => [
+            'name' => $parsedEmail->froName, 'address' => $parsedEmail->address
+        ]]);
+
+        // Get Attachments
+        $message->setHasAttachments($parsedEmail->hasAttachments);
+        if($parsedEmail->hasAttachments) {
+            $message->setAttachments($this->fillAttachments($parsedEmail->attachments));
+        }
+
+        // Get Messages From Microsoft Account
+        $email = $graph->createRequest('POST', '/me/sendEmail')->attachBody($message)
+                       ->setReturnType(Message::class)->execute();
+
+        // Return Email
+        return $email;
     }
 
     /**
@@ -320,6 +342,33 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
         // Return Collection of Emails
         return $attachments;
+    }
+
+    /**
+     * Get Array of Office 365 Attachments
+     * 
+     * @param Collection $attachments
+     * @return array<array{contentType: string,
+     *                     name: string,
+     *                     size: int,
+     *                     contents: string}>
+     */
+    private function fillAttachments(Collection $attachments): array {
+        // Initialize Attachments
+        $files = array();
+
+        // Loop Existing Attachments
+        foreach($attachments as $attachment) {
+            $files[] = [
+                'contentType' => $attachment->mimeType,
+                'name' => $attachment->fileName,
+                'size' => $attachment->fileSize,
+                'contentBytes' => $attachment->contents
+            ];
+        }
+
+        // Return Final Array
+        return $files;
     }
 
     /**

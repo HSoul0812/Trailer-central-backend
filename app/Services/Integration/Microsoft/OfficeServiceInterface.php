@@ -28,15 +28,11 @@ interface OfficeServiceInterface extends AzureServiceInterface {
     public function validateCustom(CommonToken $accessToken): ValidateToken;
 
     /**
-     * Send Gmail Email
+     * Send Office 365 Email
      *
      * @param SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
-     * @throws App\Exceptions\Integration\Google\InvalidToEmailAddressException
-     * @throws App\Exceptions\Integration\Google\FailedSendGmailMessageException
-     * @throws App\Exceptions\Integration\Google\FailedInitializeGmailMessageException
-     * @throws App\Exceptions\Integration\Google\InvalidGmailAuthMessageException
-     * @return array of validation info
+     * @return ParsedEmail
      */
     public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail;
 
@@ -45,10 +41,11 @@ interface OfficeServiceInterface extends AzureServiceInterface {
      * 
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
-     * @param array $params
-     * @return whether the email was sent successfully or not
+     * @param array<string> $filters
+     * @return Collection<Message>
      */
-    public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []);
+    public function messages(AccessToken $accessToken, string $folder = 'Inbox',
+                                array $filters = []): Collection;
 
     /**
      * Get and Parse Individual Message
