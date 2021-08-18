@@ -157,8 +157,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $this->log->info("Sending Email Message: " . print_r($message, true));
 
         // Get Messages From Microsoft Account
-        $email = $graph->createRequest('POST', '/me/sendMail')->attachBody(['Message' => $message])
-                       ->setReturnType(Message::class)->execute();
+        $email = $graph->createRequest('POST', '/me/sendMail')->attachBody(['Message' => $message])->execute();
         $this->log->info('Check Send Email Response: ' . print_r($email, true));
 
         // Return Email
