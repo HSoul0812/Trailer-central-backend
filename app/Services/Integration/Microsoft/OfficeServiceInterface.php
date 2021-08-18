@@ -7,6 +7,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\ValidateToken;
+use Illuminate\Support\Collection;
 use Microsoft\Graph\Model\Message;
 
 interface OfficeServiceInterface extends AzureServiceInterface {
