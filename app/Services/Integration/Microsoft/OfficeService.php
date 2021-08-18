@@ -294,6 +294,11 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $files = $graph->createRequest('GET', $query)->setReturnType(Attachment::class)->execute();
         if(count($files) > 0) {
             foreach($files as $file) {
+                // Get Attachments
+                $properties = $file->getProperties();
+                $this->log->info("Got all properties for attachments: ", print_r($properties, true));
+
+                // Append Attachment
                 $attachments->push(new AttachmentFile([
                     'file_path' => $file->getName(),
                     'file_name' => $file->getName(),
