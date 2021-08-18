@@ -12,6 +12,7 @@ use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
