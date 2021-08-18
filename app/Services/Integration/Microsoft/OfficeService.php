@@ -42,6 +42,11 @@ class OfficeService extends AzureService implements OfficeServiceInterface
     const PER_PAGE = 10;
 
     /**
+     * @const Max Emails
+     */
+    const MAX_EMAILS = 10000;
+
+    /**
      * @const Emails Order By
      */
     const ORDER_BY = 'SentDateTime';
@@ -241,7 +246,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             '$orderby' => self::ORDER_BY
         ];
         if(!empty($filters)) {
-            $queryParams['$filters'] = implode(' and ', $filters);
+            $queryParams['$filter'] = implode(' and ', $filters);
         }
 
         // Append query parameters to the '/me/mailFolders/{id}/messages' url
@@ -258,7 +263,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         }
 
         // New Emails Were Added?!
-        if($current < $emails->count()) {
+        if($current < $emails->count() || $emails->count() > self::MAX_EMAILS) {
             // Get Next Batch of Messages if More Pages Exist
             $params['$skip'] = isset($params['$skip']) ? $params['$skip'] += self::PER_PAGE : self::PER_PAGE;
             return $this->getMessages($graph, $emails, $folderId, $filters, $params);
