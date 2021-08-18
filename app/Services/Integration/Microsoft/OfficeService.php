@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Microsoft;
 
+use App\Exceptions\CRM\Email\MissingFolderException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
@@ -157,6 +158,9 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
             // Get All Messages!
             $folderId = $this->getFolderId($accessToken->access_token, $folder);
+            if(empty($folderId)) {
+                throw new MissingFolderException;
+            }
             $emails = $this->getMessages($graph, new Collection(), $folderId, $filters);
 
             // Return Collection of ParsedEmail
