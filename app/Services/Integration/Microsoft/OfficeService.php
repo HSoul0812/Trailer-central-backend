@@ -184,8 +184,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $from = $message->getFrom();
         $fromEmail = !empty($from) ? $from->getEmailAddress() : null;
         $to = $message->getToRecipients();
-        $this->log->info("Got to recipients: " . print_r($to, true));
-        $toEmail = !empty($to) ? $to[0]->getEmailAddress() : null;
+        $toEmail = !empty($to) ? $to[0]->emailAddress : null;
 
         // Parse Data
         return new ParsedEmail([
@@ -194,8 +193,8 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             'root_message_id' => $message->getInternetMessageId(),
             'from_email' => !empty($fromEmail) ? $fromEmail->getAddress() : '',
             'from_name' => !empty($fromEmail) ? $fromEmail->getName() : '',
-            'to_email' => !empty($toEmail) ? $toEmail->getAddress() : '',
-            'to_name' => !empty($toEmail) ? $toEmail->getName() : '',
+            'to_email' => !empty($toEmail) ? $toEmail->address : '',
+            'to_name' => !empty($toEmail) ? $toEmail->name : '',
             'subject' => $body->getSubject(),
             'body' => $body->getContent(),
             'is_html' => ($body->getContentType() === BodyType::HTML),
