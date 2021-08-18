@@ -14,8 +14,9 @@ interface InteractionEmailServiceInterface {
      * @param SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
+     * @return ParsedEmail
      */
-    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail);
+    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail;
 
     /**
      * Store Uploaded Attachments

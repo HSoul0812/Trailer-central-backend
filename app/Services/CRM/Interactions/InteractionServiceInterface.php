@@ -2,6 +2,8 @@
 
 namespace App\Services\CRM\Interactions;
 
+use App\Models\CRM\Interactions\Interaction;
+
 interface InteractionServiceInterface {
     /**
      * Send Email to Lead
@@ -9,7 +11,8 @@ interface InteractionServiceInterface {
      * @param int $leadId
      * @param array $params
      * @param array $attachments
-     * @return Interaction || error
+     * @return Interaction
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function email($leadId, $params, $attachments = array());
+    public function email(int $leadId, array $params, array $attachments = array()): Interaction;
 }
