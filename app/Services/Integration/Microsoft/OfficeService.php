@@ -136,7 +136,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
     public function send(SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Initialize Microsoft Graph
         $graph = new Graph();
-        $graph->setAccessToken($smtpConfig->accessToken);
+        $graph->setAccessToken($smtpConfig->accessToken->access_token);
 
         // Create Message
         $message = new Message();
