@@ -226,9 +226,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Return Total
             return $total;
-        } catch (MissingGmailLabelException $e) {
-            $this->folders->delete($folder->folder_id);
-        } catch (MissingImapFolderException $e) {
+        } catch (MissingFolderException $e) {
             $this->folders->delete($folder->folder_id);
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
@@ -258,35 +256,30 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
-        $total = 0;
-        $skipped = 0;
         foreach($messages as $mailId) {
             // Get Parsed Message
             $email = $this->gmail->message($mailId);
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
-            if($result === 1) {
-                $total++;
-            } elseif($result === 0) {
-                $skipped++;
+            if($result === self::IMPORT_SUCCESS) {
+                $total = ($total ?? 0) + 1;
+            } elseif($result === self::IMPORT_PROCESSED) {
+                $skipped = ($skipped ?? 0) + 1;
             }
             $this->deleteAttachments($email->getAttachments());
         }
 
         // Process Skipped Message ID's
-        if($skipped > 0) {
+        if(!empty($skipped)) {
             $this->log->info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
         // Updated Successful
-        $this->folders->update([
-            'id' => $folder->folder_id,
-            'date_imported' => Carbon::now()
-        ]);
+        $this->folders->markImported($folder->folder_id);
 
         // Return Result Messages That Match
-        return $total;
+        return $total ?? 0;
     }
 
     /**
@@ -301,40 +294,35 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Get Emails From Gmail
         $this->log->info("Connecting to Office 365 with email: " . $salesperson->smtp_email);
         $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
-            'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
+            'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY-MM-DD')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
-        $total = 0;
-        $skipped = 0;
         foreach($messages as $mailId) {
             // Get Parsed Message
             $email = $this->office->message($mailId);
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
-            if($result === 1) {
-                $total++;
-            } elseif($result === 0) {
-                $skipped++;
+            if($result === self::IMPORT_SUCCESS) {
+                $total = ($total ?? 0) + 1;
+            } elseif($result === self::IMPORT_PROCESSED) {
+                $skipped = ($skipped ?? 0) + 1;
             }
             $this->deleteAttachments($email->getAttachments());
         }
 
         // Process Skipped Message ID's
-        if($skipped > 0) {
+        if(!empty($skipped)) {
             $this->log->info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
         // Updated Successful
-        $this->folders->update([
-            'id' => $folder->folder_id,
-            'date_imported' => Carbon::now()
-        ]);
+        $this->folders->markImported($folder->folder_id);
 
         // Return Result Messages That Match
-        return $total;
+        return $total ?? 0;
     }
 
     /**

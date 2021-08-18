@@ -13,6 +13,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
+use Microsoft\Graph\Model\Message;
 
 /**
  * Class OfficeService
@@ -25,6 +26,21 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * @const Get Office Scope Prefix
      */
     const SCOPE_OFFICE = 'https://outlook.office.com/';
+
+    /**
+     * @const Default Folder Name
+     */
+    const DEFAULT_FOLDER = 'Inbox';
+
+    /**
+     * @const Emails Per Page
+     */
+    const PER_PAGE = 10;
+
+    /**
+     * @const Emails Order By
+     */
+    const ORDER_BY = 'SentDateTime';
 
 
     /**
@@ -118,11 +134,30 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * 
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
-     * @param array $params
+     * @param array<string> $filters
      * @return whether the email was sent successfully or not
      */
-    public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []) {
-        
+    public function messages(AccessToken $accessToken, string $folder = 'Inbox', array $filters = []): Collection {
+        // Get Graph
+        try {
+            // Initialize Microsoft Graph
+            $graph = new Graph();
+            $graph->setAccessToken($accessToken->getAccessToken());
+
+            // Get All Messages!
+            $folderId = $this->getFolderId($accessToken, $folder);
+            $emails = $this->getMessages($graph, new Collection(), $folderId, $filters);
+
+            // Return Collection of ParsedEmail
+            $this->log->info('Got ' . $emails->count() . ' email messages from graph folder ' . $folder);
+            return $emails;
+        } catch (\Exception $e) {
+            // Log Error
+            $this->log->error('Exception returned on getting office 365 messages; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+        }
+
+        // Return Empty Collection of ParsedEmail
+        return new Collection();
     }
 
     /**
@@ -131,37 +166,86 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * @param string $mailId
      * @return parsed message details
      */
-    public function message(string $mailId) {
+    public function message(string $mailId): ParsedEmail {
         
     }
 
 
     /**
-     * Get Outlook Scopes Including Defaults
+     * Get Messages Page-By-Page
      * 
-     * @param null|array $scopes
+     * @param Graph $graph
+     * @param Collection $emails
+     * @param string $folderId
+     * @param array $filters
+     * @param array $params
+     * @return Collection
+     */
+    private function getMessages(Graph $graph, Collection $emails, string $folderId,
+                                    array $filters = [], array $params = []): Collection {
+        // Get Query Params
+        $queryParams = [
+            '$top' => $params['$top'] ?? self::PER_PAGE,
+            '$skip' => $params['$skip'] ?? 0,
+            '$count' => true,
+            '$orderby' => self::ORDER_BY
+        ];
+        if(!empty($filters)) {
+            $queryParams['$filters'] = implode(' and ', $filters);
+        }
+
+        // Append query parameters to the '/me/mailFolders/{id}/messages' url
+        $query = '/me/mailFolders/' . $folderId . '/messages?' . http_build_query($queryParams);
+
+        // Get Messages From Microsoft Account
+        $messages = $graph->createRequest('GET', $query)->setReturnType(Message::class)->execute();
+        if(count($messages) > 0) {
+            foreach($messages as $message) {
+                $emails->push($this->getParsedEmail($message));
+            }
+
+            // Get Next Batch of Messages if More Pages Exist
+            $params['$skip'] = isset($params['$skip']) ? $params['$skip'] += self::PER_PAGE : self::PER_PAGE;
+            return $this->getMessages($graph, $emails, $folderId, $filters, $params);
+        }
+
+        // Return Collection of Emails
+        return $emails;
+    }
+
+    /**
+     * Get Folder ID For Specific Folder Name
+     * 
+     * @param string $accessToken
+     * @param string $name
      * @return string
      */
-    /*protected function getScopes(?array $scopes = null): string {
-        // Get Scopes
-        if(empty($scopes)) {
-            if(!empty(config('azure.scopes'))) {
-                $scopes = explode(" ", config('azure.scopes'));
+    private function getFolderId(string $accessToken, string $name): string {
+        // Get Graph
+        try {
+            // Initialize Microsoft Graph
+            $graph = new Graph();
+            $graph->setAccessToken($accessToken);
+
+            // Get Details From Microsoft Account
+            $mailboxes = $graph->createRequest('GET', '/me/mailFolders?$filter=' .
+                                                    "displayName eq '" . $name . "'")
+                ->setReturnType(Model\MailFolder::class)
+                ->execute();
+
+            // Get Full Collection
+            $folderId = '';
+            foreach($mailboxes as $mailbox) {
+                $folderId = $mailbox->getId();
             }
+            $this->log->info('Got folder ID from graph: ' . $folderId . ' for folder name: ' . $name);
+            return $folderId;
+        } catch (\Exception $e) {
+            // Log Error
+            $this->log->error('Exception returned on getting office 365 folder ID; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            return self::DEFAULT_FOLDER;
         }
-        if(empty($scopes)) {
-            $scopes = [];
-        }
-
-        // Prepend Outlook Scopes
-        $final = [];
-        foreach($scopes as $scope) {
-            $final[] = self::SCOPE_OFFICE . $scope;
-        }
-
-        // Return Final Scopes
-        return implode(" ", array_merge(self::DEFAULT_SCOPES, $final));
-    }*/
+    }
 
     /**
      * Get Validation Message
