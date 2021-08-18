@@ -197,7 +197,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             'subject' => $message->getSubject(),
             'body' => $body->getContent(),
             'is_html' => ($body->getContentType() === BodyType::HTML),
-            'date' => $body->getSentDateTime(),
+            'date' => $message->getSentDateTime(),
             'has_attachments' => $message->getHasAttachments()
         ]);
     }
