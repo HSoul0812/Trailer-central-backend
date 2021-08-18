@@ -24,8 +24,6 @@ interface InventoryRepositoryInterface extends Repository
 
     public function getPopularInventory(int $dealer_id);
 
-    public function findOneByVinAndDealerId(string $vin, string $dealer_id);
-
     public function update($params, array $options = []): Inventory;
 
     public function beginTransaction(): void;

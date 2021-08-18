@@ -102,9 +102,14 @@ class CustomerService implements CustomerServiceInterface
             ) = $csvData;
         if($this->active_nur !== $customer_nur) {
             $this->active_nur = $customer_nur;
-            $customer = $this->customerRepository->firstByNameAndDealer(
-                $first_name, $last_name, $dealer_id
-            );
+            $customer = $this->customerRepository->get([
+                CustomerRepositoryInterface::CONDITION_AND_WHERE => [
+                    ['first_name', 'like', $first_name],
+                    ['last_name', 'like', $last_name],
+                ],
+                'dealer_id' => $dealer_id
+            ]);
+
             if(!$customer) {
                 $this->active_customer = $this->customerRepository->create(
                     [
@@ -127,7 +132,12 @@ class CustomerService implements CustomerServiceInterface
             }
         }
 
-        $inventory = $this->inventoryRepository->findOneByVinAndDealerId($unit_serial, $dealer_id);
+        $inventory = $this->inventoryRepository->get([
+            InventoryRepositoryInterface::CONDITION_AND_WHERE => [
+              ['vin', 'LIKE', '%'.$unit_serial.'%']
+            ],
+            'dealer_id' => $dealer_id,
+        ]);
         if(!$inventory) {
             $inventory = $this->inventoryRepository->create([
                 'dealer_id' => $dealer_id,

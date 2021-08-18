@@ -170,9 +170,8 @@ class CustomerServiceTest extends TestCase
             ->with('John', 'Doe', $this->dealer_id)
             ->andReturn($this->customer);
         $this->inventoryRepository
-            ->shouldReceive('findOneByVinAndDealerId')
+            ->shouldReceive('get')
             ->once()
-            ->with($this->unit_serial, $this->dealer_id)
             ->andReturn($this->inventory);
 
 
@@ -198,11 +197,9 @@ class CustomerServiceTest extends TestCase
             ->with('John', 'Doe', $this->dealer_id)
             ->andReturn($this->customer);
         $this->inventoryRepository
-            ->shouldReceive('findOneByVinAndDealerId')
+            ->shouldReceive('get')
             ->once()
-            ->with($this->unit_serial, $this->dealer_id)
             ->andReturn($this->inventory);
-
 
         $this->customerInventoryRepository->shouldReceive('get')
             ->once()

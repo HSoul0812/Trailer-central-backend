@@ -62,7 +62,18 @@ class CustomerRepository implements CustomerRepositoryInterface
     }
 
     public function get($params) {
-        return $this->model->findOrFail($params['id']);
+        if(isset($params['id'])) {
+            return $this->model->findOrFail($params['id']);
+        }
+
+        $query = Customer::select('*');
+        if(isset($params['dealer_id'])) {
+            $query->where('dealer_id', $params['dealer_id']);
+        }
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+        return $query->firstOrFail();
     }
 
     public function getAll($params) {
@@ -229,12 +240,5 @@ class CustomerRepository implements CustomerRepositoryInterface
         $search->size($size);
 
         return $search->execute()->models();
-    }
-
-    public function firstByNameAndDealer($first_name, $last_name, $dealer_id) {
-        return Customer::where('first_name', 'like', $first_name)
-            ->where('last_name', 'like', $last_name)
-            ->where('dealer_id', $dealer_id)
-            ->first();
     }
 }

@@ -244,7 +244,18 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function get($params)
     {
-        return Inventory::findOrFail($params['id']);
+        if(isset($params['id'])) {
+            return Inventory::findOrFail($params['id']);
+        }
+
+        $query = Inventory::select('*');
+        if(isset($params['dealer_id'])) {
+            $query->where('dealer_id', $params['dealer_id']);
+        }
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+        return $query->firstOrFail();
     }
 
     /**
@@ -401,17 +412,6 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         return $query->paginate($params['per_page'])->appends($params);
-    }
-
-    /**
-     * @param string $vin
-     * @param string $dealer_id
-     * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
-     */
-    public function findOneByVinAndDealerId(string $vin, string $dealer_id) {
-        return Inventory::where('vin', 'LIKE', '%'.$vin.'%')
-            ->where('dealer_id', $dealer_id)
-            ->first();
     }
 
     /**
