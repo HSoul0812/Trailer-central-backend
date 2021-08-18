@@ -217,7 +217,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         if($email->hasAttachments) {
             $attachments = $this->getAttachments($accessToken->access_token, $email->id);
             if($attachments->count() > 0) {
-                $this->log->info('Found ' . count($attachments) . ' total attachments on Message ' . $headers->messageId);
+                $this->log->info('Found ' . count($attachments) . ' total attachments on Message ' . $email->messageId);
             }
         }
         $email->setAttachments($attachments);
