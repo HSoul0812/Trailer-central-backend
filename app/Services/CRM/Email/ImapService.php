@@ -2,7 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
-use App\Exceptions\CRM\Email\MissingImapFolderException;
+use App\Exceptions\CRM\Email\MissingFolderException;
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;
@@ -272,7 +272,7 @@ class ImapService implements ImapServiceInterface
         // Get Folder
         $folder = $this->imap->getFolder($folderName);
         if($folder === null) {
-            throw new MissingImapFolderException;
+            throw new MissingFolderException;
         }
 
         // Append Since

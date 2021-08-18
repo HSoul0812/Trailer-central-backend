@@ -2,12 +2,12 @@
 
 namespace App\Services\Integration\Google;
 
+use App\Exceptions\CRM\Email\MissingFolderException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
 use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
 use App\Exceptions\Integration\Google\MissingGmailLabelsException;
-use App\Exceptions\Integration\Google\MissingGmailLabelException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
@@ -283,7 +283,7 @@ class GmailService implements GmailServiceInterface
      * @param string $search
      * @param bool $single
      * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
-     * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
+     * @throws App\Exceptions\Integration\Google\MissingFolderException
      * @return array of labels
      */
     public function labels(AccessToken $accessToken, array $search = []) {
@@ -310,7 +310,7 @@ class GmailService implements GmailServiceInterface
 
         // None Exist?!
         if(count($labels) < 1) {
-            throw new MissingGmailLabelException;
+            throw new MissingFolderException;
         }
 
         // Return Labels

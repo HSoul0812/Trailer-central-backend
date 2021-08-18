@@ -14,7 +14,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use Microsoft\Graph\Graph;
-use Microsoft\Graph\Model\Attachment;
 use Microsoft\Graph\Model\BodyType;
 use Microsoft\Graph\Model\MailFolder;
 use Microsoft\Graph\Model\Message;
@@ -39,7 +38,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
     /**
      * @const Emails Per Page
      */
-    const PER_PAGE = 10;
+    const PER_PAGE = 100;
 
     /**
      * @const Max Emails
@@ -184,7 +183,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $from = $message->getFrom();
         $fromEmail = !empty($from) ? $from->getEmailAddress() : null;
         $to = $message->getToRecipients();
-        $toEmail = !empty($to) ? $to[0]->emailAddress : null;
+        $toEmail = !empty($to) ? $to[0]['emailAddress'] : null;
 
         // Parse Data
         return new ParsedEmail([
@@ -193,8 +192,8 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             'root_message_id' => $message->getInternetMessageId(),
             'from_email' => !empty($fromEmail) ? $fromEmail->getAddress() : '',
             'from_name' => !empty($fromEmail) ? $fromEmail->getName() : '',
-            'to_email' => !empty($toEmail) ? $toEmail->address : '',
-            'to_name' => !empty($toEmail) ? $toEmail->name : '',
+            'to_email' => !empty($toEmail) ? $toEmail['address'] : '',
+            'to_name' => !empty($toEmail) ? $toEmail['name'] : '',
             'subject' => $body->getSubject(),
             'body' => $body->getContent(),
             'is_html' => ($body->getContentType() === BodyType::HTML),
