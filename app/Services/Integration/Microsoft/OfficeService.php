@@ -194,7 +194,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             'from_name' => !empty($fromEmail) ? $fromEmail->getName() : '',
             'to_email' => !empty($toEmail) ? $toEmail['address'] : '',
             'to_name' => !empty($toEmail) ? $toEmail['name'] : '',
-            'subject' => $body->getSubject(),
+            'subject' => $message->getSubject(),
             'body' => $body->getContent(),
             'is_html' => ($body->getContentType() === BodyType::HTML),
             'date' => $body->getSentDateTime(),
