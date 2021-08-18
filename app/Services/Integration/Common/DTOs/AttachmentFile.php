@@ -291,6 +291,17 @@ class AttachmentFile
     }
 
     /**
+     * Return Base64 Encoded Contents
+     * 
+     * @return string base64_encode($this->getContents())
+     */
+    public function getContentsEncoded(): string
+    {
+        // Get Encoded Contents
+        return base64_encode($this->getContents());
+    }
+
+    /**
      * Set File Path
      * 
      * @param string $contents

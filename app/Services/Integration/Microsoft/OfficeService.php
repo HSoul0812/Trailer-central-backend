@@ -359,12 +359,12 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
         // Loop Existing Attachments
         foreach($attachments as $attachment) {
-            $files[] = [
+            $files[] = new FileAttachment([
                 'contentType' => $attachment->mimeType,
                 'name' => $attachment->fileName,
                 'size' => $attachment->fileSize,
-                'contentBytes' => $attachment->getContents()
-            ];
+                'contentBytes' => $attachment->getContentsEncoded()
+            ]);
         }
 
         // Return Final Array
