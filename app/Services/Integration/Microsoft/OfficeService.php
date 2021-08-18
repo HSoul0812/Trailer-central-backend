@@ -150,17 +150,18 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      */
     public function messages(AccessToken $accessToken, string $folder = 'Inbox',
                                 array $filters = []): Collection {
-        // Get Graph
+        // Get Folder
+        $folderId = $this->getFolderId($accessToken->access_token, $folder);
+        if(empty($folderId)) {
+            throw new MissingFolderException;
+        }
+
+        // Get Messages From Graph
         try {
-            // Initialize Microsoft Graph
             $graph = new Graph();
             $graph->setAccessToken($accessToken->access_token);
 
             // Get All Messages!
-            $folderId = $this->getFolderId($accessToken->access_token, $folder);
-            if(empty($folderId)) {
-                throw new MissingFolderException;
-            }
             $emails = $this->getMessages($graph, new Collection(), $folderId, $filters);
 
             // Return Collection of ParsedEmail
