@@ -6,19 +6,20 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
-use App\Services\Integration\Common\DTOs\AttachmentFile;
-use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\Integration\Common\DTOs\AttachmentFile;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
-use Illuminate\Http\UploadedFile;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Microsoft\OfficeServiceInterface;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -31,13 +32,68 @@ use Carbon\Carbon;
 class InteractionService implements InteractionServiceInterface
 {
     /**
+     * @var App\Services\Integration\Google\GoogleServiceInterface
+     */
+    protected $google;
+
+    /**
+     * @var App\Services\Integration\Google\GmailServiceInterface
+     */
+    protected $gmail;
+
+    /**
+     * @var App\Services\Integration\Microsoft\OfficeServiceInterface
+     */
+    protected $office;
+
+    /**
+     * @var App\Services\CRM\Interactions\NtlmEmailServiceInterface
+     */
+    protected $ntlm;
+
+    /**
+     * @var App\Services\CRM\Interactions\InteractionEmailServiceInterface
+     */
+    protected $interactionEmail;
+
+    /**
+     * @var App\Repositories\CRM\Interactions\InteractionsRepositoryInterface
+     */
+    protected $interactions;
+
+    /**
+     * @var App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface
+     */
+    protected $emailHistory;
+
+    /**
+     * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
+     */
+    protected $tokens;
+
+    /**
+     * @var App\Repositories\CRM\Leads\StatusRepositoryInterface
+     */
+    protected $leadStatus;
+
+
+    /**
      * InteractionsRepository constructor.
      * 
-     * @param EmailHistoryRepositoryInterface
+     * @param GoogleServiceInterface $google
+     * @param GmailServiceInterface $gmail
+     * @param OfficeServiceInterface $office
+     * @param NtlmEmailServiceInterface $ntlm
+     * @param InteractionEmailServiceInterface $service
+     * @param InteractionsRepositoryInterface $interactions
+     * @param EmailHistoryRepositoryInterface $emailHistory
+     * @param TokenRepositoryInterface $tokens
+     * @param StatusRepositoryInterface $leadStatus
      */
     public function __construct(
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
+        OfficeServiceInterface $office,
         NtlmEmailServiceInterface $ntlm,
         InteractionEmailServiceInterface $service,
         InteractionsRepositoryInterface $interactions,
@@ -47,6 +103,7 @@ class InteractionService implements InteractionServiceInterface
     ) {
         $this->google = $google;
         $this->gmail = $gmail;
+        $this->office = $office;
         $this->ntlm = $ntlm;
         $this->interactionEmail = $service;
         $this->interactions = $interactions;
@@ -103,6 +160,9 @@ class InteractionService implements InteractionServiceInterface
         // Send Email
         if($smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
+        } elseif($smtpConfig->isAuthTypeOffice()) {
+            // Send Office Email
+            $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
         } elseif($smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {

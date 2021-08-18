@@ -30,6 +30,7 @@ use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Microsoft\OfficeServiceInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use App\Transformers\CRM\Email\BuilderEmailTransformer;
@@ -132,12 +133,15 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param BounceRepositoryInterface $bounces
      * @param LeadRepositoryInterface $leads
      * @param SalesPersonRepositoryInterface $salespeople
+     * @param InteractionsRepositoryInterface $interactions
      * @param EmailHistoryRepositoryInterface $emailhistory
      * @param TokenRepositoryInterface $tokens
      * @param UserRepositoryInterface $users
+     * @param NtlmEmailServiceInterface $ntlm
      * @param AuthServiceInterface $auth
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
+     * @param OfficeServiceInterface $office
      * @param Manager $fractal
      */
     public function __construct(
@@ -155,6 +159,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         AuthServiceInterface $auth,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
+        OfficeServiceInterface $office,
         Manager $fractal
     ) {
         $this->blasts = $blasts;
@@ -172,6 +177,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $this->auth = $auth;
         $this->google = $google;
         $this->gmail = $gmail;
+        $this->office = $office;
 
         // Set Fractal
         $this->fractal = $fractal;
@@ -426,8 +432,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Send Gmail Email
         if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
-            // Refresh Token
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
+        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeOffice()) {
+            // Send Office Email
+            $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
         } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
             // Send NTLM Email
             $finalEmail = $this->ntlm->send($builder->dealerId, $smtpConfig, $parsedEmail);
