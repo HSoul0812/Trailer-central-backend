@@ -161,7 +161,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $this->log->info('Check Send Email Response: ' . print_r($email, true));
 
         // Return Email
-        return $email;
+        return $parsedEmail;
     }
 
     /**

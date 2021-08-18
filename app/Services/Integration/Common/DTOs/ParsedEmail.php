@@ -525,6 +525,7 @@ class ParsedEmail
         }
 
         // Append Attachment
+        $this->hasAttachments = true;
         $this->attachments->push($attachment);
     }
 
@@ -604,6 +605,7 @@ class ParsedEmail
         }
 
         // Append Existing Attachment
+        $this->hasAttachments = true;
         $this->existingAttachments->push($attachment);
     }
 
