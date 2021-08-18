@@ -15,6 +15,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
@@ -32,6 +33,11 @@ use Carbon\Carbon;
  */
 class InteractionService implements InteractionServiceInterface
 {
+    /**
+     * @var App\Services\Integration\AuthServiceInterface
+     */
+    protected $auth;
+
     /**
      * @var App\Services\Integration\Google\GoogleServiceInterface
      */
@@ -81,6 +87,7 @@ class InteractionService implements InteractionServiceInterface
     /**
      * InteractionsRepository constructor.
      * 
+     * @param AuthServiceInterface $auth
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
      * @param OfficeServiceInterface $office
@@ -92,6 +99,7 @@ class InteractionService implements InteractionServiceInterface
      * @param StatusRepositoryInterface $leadStatus
      */
     public function __construct(
+        AuthServiceInterface $auth,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
         OfficeServiceInterface $office,
@@ -102,11 +110,15 @@ class InteractionService implements InteractionServiceInterface
         TokenRepositoryInterface $tokens,
         StatusRepositoryInterface $leadStatus
     ) {
+        // Initialize Services
+        $this->auth = $auth;
         $this->google = $google;
         $this->gmail = $gmail;
         $this->office = $office;
         $this->ntlm = $ntlm;
         $this->interactionEmail = $service;
+
+        // Initialize Repositories
         $this->interactions = $interactions;
         $this->emailHistory = $emailHistory;
         $this->tokens = $tokens;
