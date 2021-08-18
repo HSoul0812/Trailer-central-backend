@@ -437,6 +437,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return Lead
      */
     private function findLead(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
+        // Lookup Lead
+        $this->log->info('Lookup lead for dealer #' . $dealerId . ' and sales person: ' . $salesperson->imap_email);
+
         // Get Emails
         $emails = [];
         if($salesperson->smtp_email !== $email->getToEmail() &&
@@ -450,6 +453,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Get Lead By Emails
+        $this->log->info('Match dealer ' . $dealerId . ' lead by emails: ' . print_r($emails, true));
         $lead = $this->leads->getByEmails($dealerId, $emails);
         if(!empty($lead->identifier)) {
             $email->setLeadId($lead->identifier);
