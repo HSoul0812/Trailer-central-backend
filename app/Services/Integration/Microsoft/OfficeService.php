@@ -152,7 +152,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         // Get Attachments
         $message->setHasAttachments($parsedEmail->hasAttachments);
         if($parsedEmail->hasAttachments) {
-            $message->setAttachments($this->fillAttachments($parsedEmail->attachments));
+            $message->setAttachments($this->fillAttachments($parsedEmail->getAllAttachments()));
         }
         $this->log->info("Sending Email Message: " . print_r($message, true));
 
