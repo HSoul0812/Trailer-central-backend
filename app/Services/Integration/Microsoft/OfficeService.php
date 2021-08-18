@@ -245,8 +245,8 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         }
 
         // Append query parameters to the '/me/mailFolders/{id}/messages' url
-        $this->log->info('Get ' . $params['$top'] . ' Messages from Folder ' . $folderId .
-                            ' Starting From ' . $params['$skip']);
+        $this->log->info('Get ' . $queryParams['$top'] . ' Messages from Folder ' . $folderId .
+                            ' Starting From ' . $queryParams['$skip']);
         $query = '/me/mailFolders/' . $folderId . '/messages?' . http_build_query($queryParams);
 
         // Get Messages From Microsoft Account
