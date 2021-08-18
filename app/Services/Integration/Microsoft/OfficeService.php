@@ -143,10 +143,10 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         try {
             // Initialize Microsoft Graph
             $graph = new Graph();
-            $graph->setAccessToken($accessToken->getAccessToken());
+            $graph->setAccessToken($accessToken->access_token);
 
             // Get All Messages!
-            $folderId = $this->getFolderId($accessToken, $folder);
+            $folderId = $this->getFolderId($accessToken->access_token, $folder);
             $emails = $this->getMessages($graph, new Collection(), $folderId, $filters);
 
             // Return Collection of ParsedEmail
