@@ -143,10 +143,10 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $message->setSubject($parsedEmail->subject);
         $message->setBody($parsedEmail->body);
         $message->setToRecipients([
-            ['emailAddress' => ['name' => $parsedEmail->toName, 'address' => $parsedEmail->address]]
+            ['emailAddress' => ['name' => $parsedEmail->toName, 'address' => $parsedEmail->to]]
         ]);
         $message->setFrom(['emailAddress' => [
-            'name' => $parsedEmail->froName, 'address' => $parsedEmail->address
+            'name' => $parsedEmail->fromName, 'address' => $parsedEmail->from
         ]]);
 
         // Get Attachments
