@@ -193,6 +193,12 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $to = $message->getToRecipients();
         $toEmail = !empty($to) ? $to[0]['emailAddress'] : null;
 
+        // Get Date
+        $date = $message->getSentDateTime();
+        if(empty($date)) {
+            $date = new \DateTime();
+        }
+
         // Parse Data
         return new ParsedEmail([
             'id' => $message->getId(),
@@ -205,7 +211,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             'subject' => $message->getSubject(),
             'body' => $body->getContent(),
             'is_html' => ($body->getContentType() === BodyType::HTML),
-            'date' => $message->getSentDateTime(),
+            'date' => Carbon::instance($date)->setTimezone('UTC')->toDateTimeString(),
             'has_attachments' => $message->getHasAttachments()
         ]);
     }
