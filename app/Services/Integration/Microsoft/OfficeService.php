@@ -13,6 +13,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
+use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model\Message;
 
 /**

@@ -196,7 +196,7 @@ class AzureService implements AzureServiceInterface
                     'delimiter' => ImapMailbox::DELIMITER
                 ]));
             }
-            $this->log->info('Got mail folders from graph: ' . print_r($folders, true));
+            $this->log->info('Got ' . $folders->count() . ' mail folders from graph');
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
