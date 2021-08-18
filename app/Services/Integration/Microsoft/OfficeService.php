@@ -363,7 +363,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
                 'contentType' => $attachment->mimeType,
                 'name' => $attachment->fileName,
                 'size' => $attachment->fileSize,
-                'contentBytes' => $attachment->getContents()
+                'contentBytes' => $attachment->getContent()
             ]);
         }
 
