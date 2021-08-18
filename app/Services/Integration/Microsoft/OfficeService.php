@@ -189,7 +189,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         $queryParams = [
             '$top' => $params['$top'] ?? self::PER_PAGE,
             '$skip' => $params['$skip'] ?? 0,
-            '$count' => true,
+            '$count' => 'true',
             '$orderby' => self::ORDER_BY
         ];
         if(!empty($filters)) {
