@@ -9,18 +9,19 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CustomerService implements CustomerServiceInterface
 {
     /**
-     * @var string $active_nur
+     * @var string $activeNur
      */
-    private $active_nur;
+    private $activeNur;
 
     /**
-     * @var object $active_customer
+     * @var object $activeCustomer
      */
-    private $active_customer;
+    private $activeCustomer;
 
     /**
      * @var CustomerRepository
@@ -56,70 +57,70 @@ class CustomerService implements CustomerServiceInterface
     }
 
 
-    public function importCSV(array $csvData, int $lineNumber, int $dealer_id, int $dealer_location_id, int $popular_type, string $category) {
+    public function importCSV(array $csvData, int $lineNumber, int $dealerId, int $dealerLocationId, int $popularType, string $category) {
         if ($lineNumber === 1) {
             return;
         }
         list(
-            $last_name,
-            $first_name,
-            $customer_nur,
+            $lastName,
+            $firstName,
+            $customerNur,
             $address,
-            $address_line2,
+            $addressLine2,
             $city,
             $state,
             $zip,
             $phone1,
             $phone2,
-            $customer_notes,
+            $customerNotes,
             $email,
-            $unit_year,
-            $unit_make,
-            $unit_model,
-            $unit_serial,
-            $registration_no,
-            $unit_type,
+            $unitYear,
+            $unitMake,
+            $unitModel,
+            $unitSerial,
+            $registrationNo,
+            $unitType,
             $length,
             $beam,
             $color,
-            $hours_miles,
-            $key_code,
-            $unit_notes,
-            $date_purchased,
-            $last_service_date,
-            $next_service_date,
-            $next_service_type,
+            $hoursMiles,
+            $keyCode,
+            $unitNotes,
+            $datePurchased,
+            $lastServiceDate,
+            $nextServiceDate,
+            $nextServiceType,
             $location,
-            $motor_year,
-            $motor_make,
-            $motor_model,
-            $motor_hp,
-            $motor_serial,
+            $motorYear,
+            $motorMake,
+            $motorModel,
+            $motorHp,
+            $motorSerial,
             $prop,
-            $trailer_year,
-            $trailer_make,
-            $trailer_serial,
+            $trailerYear,
+            $trailerMake,
+            $trailerSerial,
             ) = $csvData;
-        if($this->active_nur !== $customer_nur) {
-            $this->active_nur = $customer_nur;
-            $customer = $this->customerRepository->get([
-                CustomerRepositoryInterface::CONDITION_AND_WHERE => [
-                    ['first_name', 'like', $first_name],
-                    ['last_name', 'like', $last_name],
-                ],
-                'dealer_id' => $dealer_id
-            ]);
-
-            if(!$customer) {
-                $this->active_customer = $this->customerRepository->create(
+        if($this->activeNur !== $customerNur) {
+            $this->activeNur = $customerNur;
+            try {
+                $this->activeCustomer = $this->customerRepository->get([
+                    CustomerRepositoryInterface::CONDITION_AND_WHERE => [
+                        ['first_name', 'like', $firstName],
+                        ['last_name', 'like', $lastName],
+                    ],
+                    'dealer_id' => $dealerId
+                ]);
+            } catch(ModelNotFoundException $ex) {
+                $this->activeCustomer = $this->customerRepository->create(
                     [
-                        'first_name' => $first_name,
-                        'last_name' => $last_name,
-                        'display_name' => "$first_name $last_name",
+                        'first_name' => $firstName,
+                        'last_name' => $lastName,
+                        'display_name' => "$firstName $lastName",
                         'email' => $email,
                         'address' => $address,
                         'city' => $city,
-                        'dealer_id' => $dealer_id,
+                        'dealer_id' => $dealerId,
                         'region' => $state,
                         'postal_code' => $zip,
                         'home_phone' => $phone1,
@@ -127,46 +128,47 @@ class CustomerService implements CustomerServiceInterface
                         'country' => 'US',
                     ]
                 );
-            } else {
-                $this->active_customer = $customer;
             }
         }
 
-        $inventory = $this->inventoryRepository->get([
-            InventoryRepositoryInterface::CONDITION_AND_WHERE => [
-              ['vin', 'LIKE', '%'.$unit_serial.'%']
-            ],
-            'dealer_id' => $dealer_id,
-        ]);
-        if(!$inventory) {
+        try {
+            $inventory = $this->inventoryRepository->get([
+                InventoryRepositoryInterface::CONDITION_AND_WHERE => [
+                    ['vin', 'LIKE', '%' . $unitSerial . '%']
+                ],
+                'dealer_id' => $dealerId,
+            ]);
+        } catch(ModelNotFoundException $ex) {
             $inventory = $this->inventoryRepository->create([
-                'dealer_id' => $dealer_id,
-                'dealer_location_id' => $dealer_location_id,
-                'year' => $unit_year,
-                'manufacturer' => $unit_make,
-                'model' => $unit_model,
-                'notes' => $customer_notes,
-                'entity_type_id' => $popular_type,
-                'title' => "$unit_year $unit_make $unit_model",
+                'dealer_id' => $dealerId,
+                'dealer_location_id' => $dealerLocationId,
+                'year' => $unitYear,
+                'manufacturer' => $unitMake,
+                'model' => $unitModel,
+                'notes' => $customerNotes,
+                'entity_type_id' => $popularType,
+                'title' => "$unitYear $unitMake $unitModel",
                 'category' => $category,
                 'length' => $length,
-                'vin' => $unit_serial,
+                'vin' => $unitSerial,
                 'attributes' => [
                     ['attribute_id' => 11, 'value' => $color]
                 ]
             ]);
         }
-        $customer_id = $this->active_customer->getKey();
-        $inventory_id = $inventory->getKey();
 
-        $customer_inventory = $this->customerInventoryRepository->get([
-            'customer_id' => $customer_id,
-            'inventory_id' => $inventory_id
-        ]);
-        if(!$customer_inventory) {
+        $customerId = $this->activeCustomer->getKey();
+        $inventoryId = $inventory->getKey();
+
+        try {
+            $this->customerInventoryRepository->get([
+                'customer_id' => $customerId,
+                'inventory_id' => $inventoryId
+            ]);
+        } catch(ModelNotFoundException $ex) {
             $this->customerInventoryRepository->create([
-                'inventory_id' => $inventory->getKey(),
-                'customer_id' => $this->active_customer->getKey()
+                'inventory_id' => $inventoryId,
+                'customer_id' => $customerId
             ]);
         }
     }

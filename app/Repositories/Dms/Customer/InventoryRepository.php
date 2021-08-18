@@ -158,17 +158,19 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param array $params
-     * @return mixed|void
+     * @return CustomerInventory
      */
-    public function get($params): ?CustomerInventory
+    public function get($params)
     {
         $query = CustomerInventory::select('*');
         if(isset($params['customer_id'])) {
             $query->where('customer_id', $params['customer_id']);
-        } else if(isset($params['inventory_id'])){
+        }
+
+        if(isset($params['inventory_id'])){
             $query->where('inventory_id', $params['inventory_id']);
         };
-        return $query->first();
+        return $query->firstOrFail();
     }
 
     /**

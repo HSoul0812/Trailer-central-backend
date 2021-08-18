@@ -12,6 +12,7 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Dms\Customer\InventoryRepository as CustomerInventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Dms\Customer\CustomerService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Mockery;
@@ -19,7 +20,6 @@ use Tests\TestCase;
 
 class CustomerServiceTest extends TestCase
 {
-    use DatabaseTransactions;
     /**
      * @var CustomerService $service
      */
@@ -104,11 +104,11 @@ class CustomerServiceTest extends TestCase
         $this->customerRepository
             ->shouldReceive('get')
             ->once()
-            ->andReturn(null);
+            ->andThrow(new ModelNotFoundException());
         $this->inventoryRepository
             ->shouldReceive('get')
             ->once()
-            ->andReturn(null);
+            ->andThrow(new ModelNotFoundException());
         $this->customerRepository->shouldReceive('create')
             ->once()
             ->with(Mockery::subset(['first_name' => 'John', 'last_name' => 'Doe']))
@@ -121,7 +121,7 @@ class CustomerServiceTest extends TestCase
 
         $this->customerInventoryRepository->shouldReceive('get')
             ->once()
-            ->andReturn(null);
+            ->andThrow(new ModelNotFoundException());
 
         $this->customerInventoryRepository->shouldReceive('create')
             ->once()
@@ -139,7 +139,7 @@ class CustomerServiceTest extends TestCase
         $this->inventoryRepository
             ->shouldReceive('get')
             ->once()
-            ->andReturn(null);
+            ->andThrow(new ModelNotFoundException());
 
         $this->inventoryRepository->shouldReceive('create')
             ->once()
@@ -148,7 +148,7 @@ class CustomerServiceTest extends TestCase
 
         $this->customerInventoryRepository->shouldReceive('get')
             ->once()
-            ->andReturn(null);
+            ->andThrow(new ModelNotFoundException());
 
         $this->customerInventoryRepository->shouldReceive('create')
             ->once()
@@ -174,7 +174,7 @@ class CustomerServiceTest extends TestCase
 
         $this->customerInventoryRepository->shouldReceive('get')
             ->once()
-            ->andReturn(null);
+            ->andThrow(new ModelNotFoundException());
 
         $this->customerInventoryRepository->shouldReceive('create')
             ->once()
