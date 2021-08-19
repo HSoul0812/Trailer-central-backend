@@ -172,7 +172,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param SalesPerson $salesperson
      * @return int total number of imported emails
      */
-    public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson) {
+    public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson): int {
         // Token Exists?
         if(!empty($salesperson->active_token)) {
             // Refresh Token
@@ -209,7 +209,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param Folder $folder
      * @return int total number of imported emails
      */
-    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder) {
+    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder): int {
         // Try Importing
         try {
             // Get From Google?
@@ -244,9 +244,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param EmailFolder $emailFolder
-     * @return false || array of email results
+     * @return int total number of imported emails
      */
-    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
+    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
         $this->log->info("Connecting to Gmail with email: " . $salesperson->smtp_email);
         $messages = $this->gmail->messages($salesperson->active_token, $emailFolder->name, [
@@ -287,9 +287,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param EmailFolder $emailFolder
-     * @return false || array of email results
+     * @return int total number of imported emails
      */
-    private function importOffice(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
+    private function importOffice(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
         $this->log->info("Connecting to Office 365 with email: " . $salesperson->smtp_email);
         $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
@@ -329,9 +329,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param EmailFolder $emailFolder
-     * @return false || array of email results
+     * @return int total number of imported emails
      */
-    private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
+    private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From IMAP
         $imapConfig = ImapConfig::fillFromSalesPerson($salesperson, $emailFolder);
         $messages = $this->imap->messages($imapConfig);
@@ -434,9 +434,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param ParsedEmail $email
-     * @return Lead
+     * @return ParsedEmail with Lead
      */
-    private function findLead(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
+    private function findLead(int $dealerId, SalesPerson $salesperson, ParsedEmail $email): ParsedEmail {
         // Lookup Lead
         $this->log->info('Lookup lead for dealer #' . $dealerId . ' and sales person: ' . $salesperson->imap_email);
 
@@ -468,11 +468,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param int $userId
      * @param ParsedEmail $email
-     * @return array
+     * @return null|EmailHistory
      */
-    private function insertReply($dealerId, $userId, $email) {
+    private function insertReply($dealerId, $userId, $email): ?EmailHistory {
         // Start Transaction
-        $emailHistory = [];
+        $emailHistory = null;
         DB::transaction(function() use (&$emailHistory, $dealerId, $userId, $email) {
             // Insert Interaction
             $interaction = $this->interactions->create([
@@ -513,7 +513,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param EmailFolder $folder
      * @return EmailFolder
      */
-    private function updateFolder(SalesPerson $salesperson, EmailFolder $folder) {
+    private function updateFolder(SalesPerson $salesperson, EmailFolder $folder): EmailFolder {
         // Create or Update Folder
         return $this->folders->createOrUpdate([
             'id' => $folder->folder_id,
@@ -535,7 +535,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param Collection<AttachmentFile>
      * @return Collection<Attachment>
      */
-    private function insertAttachments(int $dealerId, string $messageId, Collection $files) {
+    private function insertAttachments(int $dealerId, string $messageId, Collection $files): Collection {
         // Loop Attachments
         $attachments = [];
         foreach($files as $file) {
