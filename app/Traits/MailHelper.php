@@ -8,6 +8,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 trait MailHelper
 {
@@ -31,6 +32,7 @@ trait MailHelper
             'security'  => $config->getSecurity(),
             'authMode'  => $config->getAuthMode()
         ];
+        Log::info('Send Email using custom credentials: ' . print_r($smtpConfig, true));
 
         // Create CRM Mailer
         $mailer = app()->makeWith('crm.mailer', $smtpConfig);
