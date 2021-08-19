@@ -52,8 +52,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                 'name' => $parsedEmail->getToName()
             ], new InteractionEmail([
                 'date' => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
-                'replyToEmail' => $smtpConfig->getUsername(),
-                'replyToName' => $smtpConfig->getFromName(),
                 'subject' => $parsedEmail->getSubject(),
                 'body' => $parsedEmail->getBody(),
                 'attach' => $parsedEmail->getAllAttachments(),

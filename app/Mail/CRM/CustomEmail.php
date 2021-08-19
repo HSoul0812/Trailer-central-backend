@@ -107,12 +107,10 @@ class CustomEmail extends Mailable
         $transport = new \Swift_SmtpTransport($host, $port);
         if(!empty($config['authMode'])) {
             $transport->setAuthMode($config['authMode']);
-            var_dump($config);
         }
         $transport->setUsername($username);
         $transport->setPassword($password);
         $transport->setEncryption($security);
-        var_dump($config);
 
         // Create Swift Mailer
         $swift_mailer = new \Swift_Mailer($transport);
