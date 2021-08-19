@@ -144,7 +144,6 @@ class CommonToken
      * Fill CommonToken From Access Token
      * 
      * @param AccessToken $accessToken
-     * @return CommonToken
      */
     public function fillFromToken(AccessToken $accessToken) {
         $this->fillFromArray([
