@@ -569,7 +569,8 @@ class ImapConfig
      *               username: string,
      *               password: string,
      *               protocol: string,
-     *               authentication: null|string}
+     *               authentication: null|string,
+     *               timeout: int}
      */
     public function getCredentials(): array {
         // Initialize Credentials

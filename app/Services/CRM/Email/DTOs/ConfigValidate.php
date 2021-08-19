@@ -86,7 +86,7 @@ class ConfigValidate
      * 
      * @return Collection<ImapMailbox>
      */
-    public function getDefaultFolders() {
+    public function getDefaultFolders(): Collection {
         // Loop Folders
         $mailboxes = new Collection();
         if($this->folders) {

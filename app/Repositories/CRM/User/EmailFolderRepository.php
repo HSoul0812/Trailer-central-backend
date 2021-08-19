@@ -149,7 +149,7 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
      * Delete Multiple Folders for Sales Person
      * 
      * @param int $salesPersonId
-     * @param array $excludeIds
+     * @param array<int> $excludeIds
      * @return int Number of successfully deleted folders
      */
     public function deleteBulk(int $salesPersonId, array $excludeIds): int

@@ -16,6 +16,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\ClientManager;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Support\MessageCollection;
@@ -205,7 +206,7 @@ class ImapService implements ImapServiceInterface
      * @param ParsedEmail $email
      * @return ParsedEmail updated with additional details
      */
-    public function full(Message $message, ParsedEmail $email) {
+    public function full(Message $message, ParsedEmail $email): ParsedEmail {
         // Handle Attachments
         $email->setAttachments($this->parseAttachments($message->getAttachments()));
         if(count($email->getAttachments()) > 0) {
@@ -222,9 +223,9 @@ class ImapService implements ImapServiceInterface
      *
      * @param string $folder
      * @param array $config
-     * @return type
+     * @return Client
      */
-    private function connectIMAP(ImapConfig $imapConfig) {
+    private function connectIMAP(ImapConfig $imapConfig): Client {
         // Return Mailbox
         try {
             // Connect to IMAP Server

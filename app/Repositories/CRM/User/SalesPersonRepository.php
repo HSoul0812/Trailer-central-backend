@@ -39,9 +39,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * Delete Sales Person
      * 
      * @param array $params
-     * @return true if deleted, false if doesn't exist
+     * @return bool true if deleted, false if doesn't exist
      */
-    public function delete($params) {
+    public function delete(array $params): bool {
         return SalesPerson::findOrFail($params['id'])->delete();
     }
 
@@ -139,7 +139,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * Get All Salespeople w/Imap Credentials
      *
      * @param int $userId
-     * @return Collection of SalesPerson
+     * @return Collection<SalesPerson>
      */
     public function getAllImap(int $userId): Collection {
         return SalesPerson::select(SalesPerson::getTableName().'.*')
