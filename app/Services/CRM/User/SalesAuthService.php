@@ -210,17 +210,10 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Authorize Login With Code to Return Access Token
      * 
      * @param AuthorizeSalesAuthRequest $request
-     * @param string $tokenType
-     * @param string $code
-     * @param int $userId
-     * @param null|string $state
-     * @param null|string $redirectUri
-     * @param null|array $scopes
-     * @param null|int $salesPersonId
      * @return array{data: array<TokenTransformer>,
      *               sales_person: array<SalesPersonTransformer>}
      */
-    public function authorize(AuthorizeSalesAuthRequest $request) {
+    public function authorize(AuthorizeSalesAuthRequest $request): array {
         // Find Sales Person By State
         if(!empty($request->state)) {
             $stateToken = $this->tokens->getByState($request->state);

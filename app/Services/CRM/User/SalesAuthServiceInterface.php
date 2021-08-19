@@ -4,7 +4,6 @@ namespace App\Services\CRM\User;
 
 use App\Http\Requests\CRM\User\AuthorizeSalesAuthRequest;
 use App\Models\Integration\Auth\AccessToken;
-use App\Services\CRM\Email\DTOs\ConfigValidate;
 
 interface SalesAuthServiceInterface {
     /**
@@ -47,7 +46,7 @@ interface SalesAuthServiceInterface {
      * @return array{data: array<TokenTransformer>,
      *               sales_person: array<SalesPersonTransformer>}
      */
-    public function authorize(AuthorizeSalesAuthRequest $request);
+    public function authorize(AuthorizeSalesAuthRequest $request): array;
 
     /**
      * Return Response
