@@ -75,6 +75,19 @@ class DealerLocationController extends RestfulControllerV2 {
     }
 
     /**
+     * @param  Request  $request
+     * @return Response
+     */
+    public function availableTaxCategories(Request $request): Response
+    {
+        return $this->response->array([
+            'data' => collect($this->service::AVAILABLE_TAX_CATEGORIES)->map(function (string $name, int $id) {
+                return ['id' => $id, 'name' => $name];
+            })->values()
+        ]);
+    }
+
+    /**
      * @return Response|void
      *
      * @throws ModelNotFoundException

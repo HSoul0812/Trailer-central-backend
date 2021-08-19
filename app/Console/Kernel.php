@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\Files\ClearLocalTmpFolder;
+use App\Console\Commands\Inventory\AutoArchiveSoldItems;
 use App\Console\Commands\Website\AddSitemaps;
 use App\Console\Commands\Website\GenerateDealerSpecificSiteUrls;
 use Illuminate\Console\Scheduling\Schedule;
@@ -18,6 +19,7 @@ use App\Console\Commands\Parts\IncreaseDealerCostCommand;
 use App\Console\Commands\Parts\FixPartVendor;
 use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
 use App\Console\Commands\CRM\Dms\GetCompletedSaleWithNoFullInvoice;
+use App\Console\Commands\Inventory\FixFloorplanBillStatus;
 
 class Kernel extends ConsoleKernel
 {
@@ -41,6 +43,8 @@ class Kernel extends ConsoleKernel
         GetCompletedSaleWithNoFullInvoice::class,
         ClearLocalTmpFolder::class,
         GenerateDealerSpecificSiteUrls::class,
+        AutoArchiveSoldItems::class,
+        FixFloorplanBillStatus::class
     ];
 
     /**
@@ -119,7 +123,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('text:auto-expire-phones')
                 ->weeklyOn(7, '4:00')
                 ->runInBackground();
-        
+
 
 
         /**
@@ -156,6 +160,14 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('website:generate-dealer-specific-site-urls')
             ->daily()
+            ->runInBackground();
+
+        $schedule->command('inventory:auto-archive-sold-items')
+            ->daily()
+            ->runInBackground();
+        
+        $schedule->command('inventory:fix-floorplan-bill-status')
+            ->hourly()
             ->runInBackground();
 
         // $schedule->command('inspire')

@@ -7,6 +7,7 @@ use App\Traits\Models\HasPermissions;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
+use App\Services\User\UserService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DealerUser extends Model implements Authenticatable, PermissionsInterface
@@ -140,6 +141,21 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
 
         // Find Sales Person
         return SalesPerson::find($salesPersonId);
+    }
+    
+    public function getCrmLoginUrl(string $route = '')
+    {        
+        $userService = app(UserService::class);
+        $crmLoginString = $userService->getUserCrmLoginUrl($this->getAuthIdentifier(), $this);
+        if ($route) {
+            $crmLoginString .= '&r='.$route;
+        }
+        return $crmLoginString;
+    }
+    
+    public function isSecondaryUser() : bool
+    {
+        return true;
     }
 
     public static function getTableName() {
