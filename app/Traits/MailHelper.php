@@ -32,7 +32,6 @@ trait MailHelper
             'security'  => $config->getSecurity(),
             'authMode'  => $config->getAuthMode()
         ];
-        Log::info('Send Email using custom credentials: ' . print_r($smtpConfig, true));
 
         // Create CRM Mailer
         $mailer = app()->makeWith('crm.mailer', $smtpConfig);

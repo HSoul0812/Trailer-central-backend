@@ -44,6 +44,8 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         // Try/Send Email!
         try {
             // Fill Smtp Config
+            Log::info('Send from ' . $smtpConfig->emailAddress . ' to: ' .
+                        $parsedEmail->getToName() . ' <' . $parsedEmail->getToEmail() . '>');
             $this->sendCustomEmail($smtpConfig, [
                 'email' => $parsedEmail->getToEmail(),
                 'name' => $parsedEmail->getToName()
