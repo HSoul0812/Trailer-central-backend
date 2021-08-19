@@ -11,6 +11,7 @@ use App\Mail\InteractionEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 
