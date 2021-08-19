@@ -127,11 +127,11 @@ class AttachmentFile
      */
     public static function getByImapAttachment(Attachment $attachment): AttachmentFile {
         // Save Attachment to Directory
-        $attachment->save($this->getAttachmentDir());
+        $attachment->save(self::getAttachmentDir());
 
         // Return Attachment File
         return new self([
-            'tmp_name' => $this->getAttachmentDir() . $attachment->getName(),
+            'tmp_name' => self::getAttachmentDir() . $attachment->getName(),
             'file_name' => $attachment->getName(),
             'mime_type' => $attachment->getMimeType(),
             'file_size' => $attachment->get('size')
@@ -374,7 +374,7 @@ class AttachmentFile
      * 
      * @return string
      */
-    private function getAttachmentDir(): string {
+    public static function getAttachmentDir(): string {
         return env('MAIL_ATTACHMENT_DIR');
     }
 }
