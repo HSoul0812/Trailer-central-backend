@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use App\Models\Integration\Auth\AccessToken;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -33,4 +34,20 @@ class ValidateToken
      * @var string Message Response to Return
      */
     private $message;
+
+    /**
+     * @var AccessToken Replacement Access Token
+     */
+    private $accessToken;
+
+
+    /**
+     * Set New Access Token
+     * 
+     * @param AccessToken $accessToken
+     * @return void
+     */
+    public function setAccessToken(AccessToken $accessToken): void {
+        $this->accessToken = $accessToken;
+    }
 }

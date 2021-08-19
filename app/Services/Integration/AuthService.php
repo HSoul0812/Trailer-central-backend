@@ -306,7 +306,8 @@ class AuthService implements AuthServiceInterface
         // Update Refresh Token
         if($validate->newToken && $validate->newToken->exists()) {
             $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
-            $this->tokens->refresh($accessToken->id, $validate->newToken);
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
+            $validate->setAccessToken($accessToken);
         }
 
         // Return Validation

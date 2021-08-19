@@ -326,8 +326,8 @@ class InteractionService implements InteractionServiceInterface
     private function refreshToken(AccessToken $accessToken): AccessToken {
         // Validate Token
         $validate = $this->auth->validate($accessToken);
-        if(!empty($validate->new_token)) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
+        if($validate->accessToken) {
+            $accessToken = $validate->accessToken;
         }
 
         // Return Access Token
