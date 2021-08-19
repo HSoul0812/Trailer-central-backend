@@ -259,7 +259,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         $token['dealer_id'] = $request->dealer_id;
 
         // Fill Correct Access Token Details
-        $this->tokens->deleteAll($request->relation_type, $salesPerson->id);
+        $this->tokens->deleteAll('sales_person', $salesPerson->id);
         $accessToken = $this->tokens->create($token);
 
         // Return Response
