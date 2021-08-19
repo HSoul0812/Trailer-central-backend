@@ -100,9 +100,10 @@ class TokenRepository implements TokenRepositoryInterface {
      * 
      * @param string $type
      * @param int $id
+     * @param null|int $except
      * @return int
      */
-    public function deleteAll(string $type, int $id): int
+    public function deleteAll(string $type, int $id, ?int $except = null): int
     {
         // Get Relations to Delete
         $relations = $this->getRelations($type, $id);
@@ -110,6 +111,9 @@ class TokenRepository implements TokenRepositoryInterface {
         // Loop Relations to Delete
         $deleted = 0;
         foreach($relations as $relation) {
+            if(!empty($except) && $relation->id === $except) {
+                continue;
+            }
             if($this->delete(['id' => $relation->id])) {
                 $deleted++;
             }
