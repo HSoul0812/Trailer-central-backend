@@ -206,7 +206,7 @@ trait MailHelper
 
     /**
      * Get the server hostname.
-     * Returns 'localhost.localdomain' if unknown.
+     * Returns config('mail.hostname') if unknown.
      *
      * @return string
      */
@@ -221,8 +221,11 @@ trait MailHelper
             $result = gethostname();
         } elseif (php_uname('n') !== false) {
             $result = php_uname('n');
-        } else {
-            return 'localhost.localdomain';
+        }
+
+        // Set Default Server Hostname
+        if(empty($result) || $result === '_') {
+            return config('mail.hostname');
         }
 
         return $result;
