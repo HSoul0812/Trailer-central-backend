@@ -124,6 +124,7 @@ use Laravel\Scout\Searchable;
  * @property bool $has_stock_images,
  * @property bool $qb_sync_processed,
  * @property array|null $changed_fields_in_dashboard
+ * @property string $identifier
  *
  * @property User $user
  * @property Lead $lead
@@ -169,7 +170,13 @@ class Inventory extends Model
     const STATUS_ON_ORDER_LABEL = 'On Order';
     const STATUS_PENDING_SALE_LABEL = 'Pending Sale';
     const STATUS_SPECIAL_ORDER_LABEL = 'Special Order';
+    
+    const IS_FLOORPLANNED = 1;
+    const IS_NOT_FLOORPLANNED = 0;
 
+    const IS_ARCHIVED = 1;
+    const IS_NOT_ARCHIVED = 0;
+    
     const STATUS_MAPPING = [
         self::STATUS_QUOTE          => self::STATUS_QUOTE_LABEL,
         self::STATUS_AVAILABLE      => self::STATUS_AVAILABLE_LABEL,
@@ -304,7 +311,8 @@ class Inventory extends Model
         'utc_integration_updated_at',
         'has_stock_images',
         'qb_sync_processed',
-        'changed_fields_in_dashboard'
+        'changed_fields_in_dashboard',
+        'is_archived',
     ];
 
     protected $casts = [
@@ -454,6 +462,11 @@ class Inventory extends Model
 
         // Return Value
         return $attribute->value ?? '';
+    }
+    
+    public function getIdentifierAttribute(): string
+    {
+        return CompactHelper::shorten($this->inventory_id);
     }
 
     /**

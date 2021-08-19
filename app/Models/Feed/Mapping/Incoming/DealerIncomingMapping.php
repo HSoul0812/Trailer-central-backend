@@ -29,6 +29,12 @@ class DealerIncomingMapping extends Model {
     const ENGINE_SIZE = 'engine_size';
     const FIELDS = 'fields';
     const DEFAULT_VALUES = 'default_values';
+    const DOORS = 'doors';
+    const BODY = 'body';
+    const TRANSMISSION_SPEED = 'transmission_speed';
+    const SERIES = 'series';
+    const CITY_MPG = 'city_mpg';
+    const HIGHWAY_MPG = 'highway_mpg';
 
     public static $types = [
         self::MAKE => 'Manufacturer',
@@ -48,7 +54,13 @@ class DealerIncomingMapping extends Model {
         self::DRIVE_TRAIL => 'Drive Trail',
         self::ENGINE_SIZE => 'Engine Size',
         self::FIELDS => 'Fields',
-        self::DEFAULT_VALUES => 'Default Values'
+        self::DEFAULT_VALUES => 'Default Values',
+        self::DOORS => 'Doors',
+        self::BODY => 'Body',
+        self::TRANSMISSION_SPEED => 'Transmission Speed',
+        self::SERIES => 'Series',
+        self::CITY_MPG => 'City MPG',
+        self::HIGHWAY_MPG => 'Highway MPG'
     ];
 
     protected $fillable = [

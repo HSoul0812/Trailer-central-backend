@@ -54,8 +54,14 @@ class SignInController extends RestfulController {
         $request = new GetDetailsRequest($request->all());
         if ($request->validate()) {
             $authToken = AuthToken::where('access_token', $accessToken)->firstOrFail();                        
-            return $this->response->item($authToken->user, new UserTransformer());
+            $response = $this->response->item($authToken->user, new UserTransformer());
+            
+            $response->addMeta('major_units_link', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/bill-of-sale'))
+                    ->addMeta('service_link', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/repair-orders'))
+                    ->addMeta('parts_link', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/pos-reports'));
+            return $response;
         } 
+        
         return $this->response->errorBadRequest();
     }
     

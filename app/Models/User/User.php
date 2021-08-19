@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 use App\Models\User\DealerLocation;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Services\User\UserService;
+use App\Traits\CompactHelper;
 
 /**
  * Class User
@@ -27,7 +29,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $email
  *
  * @property bool $isCrmActive
- *
+ * @property string $identifier 
+ * 
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
 class User extends Model implements Authenticatable, PermissionsInterface
@@ -222,6 +225,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
      * @return string
      */
     public function getRememberTokenName() {}
+    
+    public function getIdentifierAttribute()
+    {
+        return CompactHelper::shorten($this->dealer_id);
+    }
 
     public function getAccessTokenAttribute()
     {
@@ -277,6 +285,21 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function printerSettings() : HasOne
     {
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
+    }
+    
+    public function getCrmLoginUrl(string $route = '')
+    {        
+        $userService = app(UserService::class);
+        $crmLoginString = $userService->getUserCrmLoginUrl($this->getAuthIdentifier());
+        if ($route) {
+            $crmLoginString .= '&r='.$route;
+        }
+        return $crmLoginString;
+    }
+    
+    public function isSecondaryUser() : bool
+    {
+        return false;
     }
 
     public static function getTableName() {

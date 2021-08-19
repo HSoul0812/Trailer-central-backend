@@ -17,6 +17,7 @@ class UserTransformer extends TransformerAbstract
     {                
 	return [
              'id' => $user->dealer_id,
+             'identifier' => $user->identifier ?? $user->user->identifier,
              'created_at' => $user->created_at ?? $user->user->created_at,
              'name' => $user->name ?? $user->user->name,
              'email' => $user->email ?? $user->user->email,

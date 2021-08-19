@@ -35,6 +35,7 @@ class InventoryTransformer extends TransformerAbstract
     {
         return [
              'id' => $inventory->inventory_id,
+             'identifier' => $inventory->identifier,
              'active' => $inventory->active,
              'archived_at' => $inventory->archived_at,
              'availability' => $inventory->availability,
