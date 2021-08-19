@@ -263,7 +263,7 @@ class TokenRepository implements TokenRepositoryInterface {
      * @param array $newToken
      * @return AccessToken
      */
-    public function refresh(int $tokenId, CommonToken $newToken) {
+    public function refresh(int $tokenId, CommonToken $newToken): AccessToken {
         // Refresh Access Token
         return $this->update([
             'id' => $tokenId,

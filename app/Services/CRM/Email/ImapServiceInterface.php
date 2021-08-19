@@ -55,5 +55,5 @@ interface ImapServiceInterface {
      * @param ParsedEmail $email
      * @return ParsedEmail updated with additional details
      */
-    public function full(Message $message, ParsedEmail $email);
+    public function full(Message $message, ParsedEmail $email): ParsedEmail;
 }
