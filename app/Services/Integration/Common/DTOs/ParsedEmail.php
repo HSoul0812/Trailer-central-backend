@@ -5,6 +5,7 @@ namespace App\Services\Integration\Common\DTOs;
 use App\Models\CRM\Email\Attachment;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
+use App\Traits\MailHelper;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use Illuminate\Support\Collection;
@@ -17,7 +18,8 @@ use Carbon\Carbon;
  */
 class ParsedEmail
 {
-    use WithConstructor, WithGetter;
+    use MailHelper, WithConstructor, WithGetter;
+
 
     /**
      * Body HTML
@@ -158,6 +160,13 @@ class ParsedEmail
      */
     public function getMessageId(): string
     {
+        // No Message ID Exists?
+        if(empty($this->messageId)) {
+            // Get Unique Message ID
+            $this->messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
+        }
+
+        // Return Message ID
         return $this->messageId;
     }
 
