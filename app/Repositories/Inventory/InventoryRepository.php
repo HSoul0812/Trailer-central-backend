@@ -244,7 +244,18 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function get($params)
     {
-        return Inventory::findOrFail($params['id']);
+        if(isset($params['id'])) {
+            return Inventory::findOrFail($params['id']);
+        }
+
+        $query = Inventory::select('*');
+        if(isset($params['dealer_id'])) {
+            $query->where('dealer_id', $params['dealer_id']);
+        }
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+        return $query->firstOrFail();
     }
 
     /**
@@ -401,6 +412,19 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * @param int $dealer_id
+     * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
+     */
+    public function getPopularInventory(int $dealer_id) {
+        return DB::table('inventory')
+            ->select(DB::raw('count(*) as type_count, entity_type_id, category'))
+            ->where('dealer_id', $dealer_id)
+            ->groupBy('entity_type_id')
+            ->orderBy('type_count', 'desc')
+            ->first();
     }
 
     protected function getSortOrders() {

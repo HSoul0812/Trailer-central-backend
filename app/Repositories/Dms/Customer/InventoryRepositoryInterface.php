@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Dms\Customer;
 
+use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Repositories\Repository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
