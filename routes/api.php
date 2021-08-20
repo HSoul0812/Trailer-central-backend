@@ -159,6 +159,16 @@ $api->version('v1', function ($route) {
     |
     */
 
+    
+    /**
+     * Inventory Overlay
+     */
+    
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
+    });
+    
+    
     /**
      * Inventory Entity
      */

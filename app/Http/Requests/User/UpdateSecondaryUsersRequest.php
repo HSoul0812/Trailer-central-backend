@@ -12,15 +12,15 @@ class UpdateSecondaryUsersRequest extends Request
         'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
         'users' => 'array',
         'users.*.dealer_user_id' => 'integer|min:1|required|exists:dealer_users,dealer_user_id',
-        'users.*.email' => 'sometimes|required|email',
-        'users.*.password' => 'required|string',
-        'users.*.user_permissions' => 'required|array'
+        'users.*.email' => 'nullable|email',
+        'users.*.password' => 'nullable|string',
+        'users.*.user_permissions' => 'required|array',
+        'users.*.user_permissions.*.permission_level' => 'permission_level_valid'
     ];
     
     public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null) {
         parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
         $this->rules['users.*.user_permissions.*.feature'] = 'in:'.implode(',', PermissionsInterface::FEATURES);
-        $this->rules['users.*.user_permissions.*.permission_level'] = 'in:'.implode(',', PermissionsInterface::PERMISSION_LEVELS);
     }
     
     public function validate(): bool
