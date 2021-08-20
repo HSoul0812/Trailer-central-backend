@@ -223,9 +223,9 @@ class ImapService implements ImapServiceInterface
      *
      * @param string $folder
      * @param array $config
-     * @return Client
+     * @return null|Client
      */
-    private function connectIMAP(ImapConfig $imapConfig): Client {
+    private function connectIMAP(ImapConfig $imapConfig): ?Client {
         // Return Mailbox
         try {
             // Connect to IMAP Server
