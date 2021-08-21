@@ -50,6 +50,10 @@ class DealerUserRepository extends RepositoryAbstract implements DealerUserRepos
     {
         $dealerUser = null;
         
+        if (empty($params['password'])) {
+            throw new \Exception('Password cannot be empty.');
+        }
+        
         if ($this->dealerUserExists($params['email'], (int)$params['dealer_id'])) {
             throw new \Exception('Secondary User with the email already exists');
         }
@@ -91,6 +95,9 @@ class DealerUserRepository extends RepositoryAbstract implements DealerUserRepos
         $dealerUser = DealerUser::findOrFail($params['dealer_user_id']);
         
         DB::transaction(function() use ($params, &$dealerUser) {
+            if (empty($params['password'])) {
+                unset($params['password']);
+            }
             $dealerUser->fill($params);
             $dealerUser->save();
             

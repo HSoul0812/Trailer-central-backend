@@ -128,7 +128,7 @@ class Customer extends Model
 
     /**
      * Region Name
-     * 
+     *
      * @return BelongsTo
      */
     public function regionName(): BelongsTo {
@@ -137,7 +137,7 @@ class Customer extends Model
 
     /**
      * Region Code
-     * 
+     *
      * @return BelongsTo
      */
     public function regionCode(): BelongsTo
@@ -164,7 +164,7 @@ class Customer extends Model
 
     /**
      * Returns the customer full name
-     * 
+     *
      * @return string
      */
     public function getFullNameAttribute(): string
@@ -174,7 +174,7 @@ class Customer extends Model
 
     /**
      * Returns the customer display or full name
-     * 
+     *
      * @return string
      */
     public function getDisplayFullNameAttribute(): string
@@ -184,17 +184,17 @@ class Customer extends Model
 
     /**
      * Returns the customer age in years
-     * 
+     *
      * @return int
      */
     public function getAgeAttribute() : int
     {
         return (int)Carbon::parse($this->dob)->diff(Carbon::now())->format('%y');
     }
-    
+
     /**
      * Returns the customer birth month name
-     * 
+     *
      * @return string
      */
     public function getBirthMonthAttribute() : string
@@ -204,7 +204,7 @@ class Customer extends Model
 
     /**
      * Returns the region code for the customer address
-     * 
+     *
      * @return string
      */
     public function getRegionCodeAttribute() : string
@@ -214,13 +214,13 @@ class Customer extends Model
         }
         return $this->regionName->region_code ?? '';
     }
-    
+
     public function getOwnedUnitsAttribute() : Collection
     {
         $inventoryRepo = app(InventoryRepositoryInterface::class);
         return $inventoryRepo->getAll(['customer_id' => $this->id], false);
     }
-    
+
     public function lead() : HasOne
     {
         return $this->hasOne(Lead::class, 'identifier', 'website_lead_id');

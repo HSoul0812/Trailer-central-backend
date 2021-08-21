@@ -55,10 +55,14 @@ class SignInController extends RestfulController {
         if ($request->validate()) {
             $authToken = AuthToken::where('access_token', $accessToken)->firstOrFail();                        
             $response = $this->response->item($authToken->user, new UserTransformer());
-            
+
             $response->addMeta('major_units_link', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/bill-of-sale'))
                     ->addMeta('service_link', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/repair-orders'))
-                    ->addMeta('parts_link', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/pos-reports'));
+                    ->addMeta('parts_link', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/pos-reports'))
+                    ->addMeta('f_and_i', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/fandi/financing'))
+                    ->addMeta('back_office', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/accounting'))
+                    ->addMeta('crm', config('app.new_design_crm_url'));
+            
             return $response;
         } 
         
