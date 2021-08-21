@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\User;
 
 use App\Repositories\Repository;
+use App\Models\CRM\User\EmailFolder;
 
 interface EmailFolderRepositoryInterface extends Repository {
     /**
