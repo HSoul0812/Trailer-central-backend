@@ -152,9 +152,9 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
      * @param array<int> $excludeIds
      * @return int Number of successfully deleted folders
      */
-    public function deleteBulk(int $salesPersonId, array $excludeIds): int
+    public function deleteBulk(int $salesPersonId, array $excludeIds = []): int
     {
-        // Get All Folders to Delete
+        // Delete All Folders Except Provided Ones
         return EmailFolder::where('sales_person_id', $salesPersonId)
                           ->whereNotIn('folder_id', $excludeIds)
                           ->delete();

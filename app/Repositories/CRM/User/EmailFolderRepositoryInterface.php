@@ -20,4 +20,21 @@ interface EmailFolderRepositoryInterface extends Repository {
      * @return EmailFolder
      */
     public function markFailed($folderId);
+
+    /**
+     * Mark Imported as Current Time
+     * 
+     * @param int $folderId
+     * @return EmailFolder
+     */
+    public function markImported(int $folderId): EmailFolder;
+
+    /**
+     * Delete Multiple Folders for Sales Person
+     * 
+     * @param int $salesPersonId
+     * @param array<int> $excludeIds
+     * @return int Number of successfully deleted folders
+     */
+    public function deleteBulk(int $salesPersonId, array $excludeIds = []): int;
 }
