@@ -96,7 +96,7 @@ class SalesPersonService implements SalesPersonServiceInterface
             if(!empty($existing->id) && !empty($existing->deleted_at) && ($existing->id !== $params['id'])) {
                 $this->salespeople->delete(['id' => $params['id']]);
                 $params['id'] = $existing->id;
-            } elseif(!empty($existing->id)) {
+            } elseif(!empty($existing->id) && ($existing->id !== $params['id'])) {
                 // Throw exception instead!
                 throw new DuplicateChangeEmailSalesPersonException;
             }
