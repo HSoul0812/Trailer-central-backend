@@ -144,6 +144,9 @@ SQL;
         $totals = (array) DB::selectOne($totalTimeSQL, $bindings);
         $summary = collect(DB::select("SELECT employee_id, day FROM ($dailySQL) AS list GROUP BY employee_id, day", $bindings));
 
+        // @todo remove this when the global configuration is being setting time-zone up
+        DB::statement('SET time_zone = :time_zone', ['time_zone' => 'UTC']);
+
         return TimeClockSummary::from(array_merge(
             $totals,
             [
