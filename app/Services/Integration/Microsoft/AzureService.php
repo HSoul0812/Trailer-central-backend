@@ -57,11 +57,11 @@ class AzureService implements AzureServiceInterface
     public function getClient(?string $redirectUrl = null, array $scopes = []): GenericProvider {
         // Initialize the OAuth Client
         $authClient = new GenericProvider([
-            'clientId'                => config('azure.app.id'),
-            'clientSecret'            => config('azure.app.secret'),
-            'redirectUri'             => $redirectUrl ?? config('azure.redirectUri'),
-            'urlAuthorize'            => config('azure.authority.root').config('azure.authority.authorize'),
-            'urlAccessToken'          => config('azure.authority.root').config('azure.authority.token'),
+            'clientId'                => config('oauth.azure.app.id'),
+            'clientSecret'            => config('oauth.azure.app.secret'),
+            'redirectUri'             => $redirectUrl ?? config('oauth.azure.redirectUri'),
+            'urlAuthorize'            => config('oauth.azure.authority.root').config('oauth.azure.authority.authorize'),
+            'urlAccessToken'          => config('oauth.azure.authority.root').config('oauth.azure.authority.token'),
             'urlResourceOwnerDetails' => '',
             'scopes'                  => $this->getScopes($scopes)
         ]);
@@ -311,8 +311,8 @@ class AzureService implements AzureServiceInterface
     protected function getScopes(array $scopes = []): string {
         // Get Scopes
         if(empty($scopes)) {
-            if(!empty(config('azure.scopes'))) {
-                $scopes = explode(" ", config('azure.scopes'));
+            if(!empty(config('oauth.azure.scopes'))) {
+                $scopes = explode(" ", config('oauth.azure.scopes'));
             }
         }
 
