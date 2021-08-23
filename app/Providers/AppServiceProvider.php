@@ -17,6 +17,8 @@ use App\Repositories\CRM\User\CrmUserRepository;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepository;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\CRM\User\EmployeeRepository;
+use App\Repositories\CRM\User\EmployeeRepositoryInterface;
 use App\Repositories\CRM\User\TimeClockRepository;
 use App\Repositories\CRM\User\TimeClockRepositoryInterface;
 use App\Repositories\Dms\Pos\RegisterRepository;
@@ -93,6 +95,8 @@ use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\CRM\User\TimeClockService;
+use App\Services\CRM\User\TimeClockServiceInterface;
 use App\Services\Dms\Pos\RegisterService;
 use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
@@ -331,5 +335,7 @@ class AppServiceProvider extends ServiceProvider
             });
 
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
+        $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
+        $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
     }
 }
