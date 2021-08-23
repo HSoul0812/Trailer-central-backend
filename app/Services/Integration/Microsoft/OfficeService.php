@@ -77,11 +77,6 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * @return ValidateToken
      */
     public function validate(AccessToken $accessToken): ValidateToken {
-        // ID Token Exists?
-        if(empty($accessToken->id_token)) {
-            throw new MissingAzureIdTokenException;
-        }
-
         // Initialize Email Token
         $emailToken = new EmailToken();
         $emailToken->fillFromToken($accessToken);
