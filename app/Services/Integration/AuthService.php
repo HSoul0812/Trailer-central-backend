@@ -154,13 +154,13 @@ class AuthService implements AuthServiceInterface
      * @param string $tokenType
      * @param string $relationType
      * @param int $relationId
-     * @param null|array $scopes
+     * @param array $scopes
      * @param null|string $redirectUri
      * @throws InvalidAuthLoginTokenTypeException
      * @return array{url: string, ?state: string}
      */
     public function login(string $tokenType, string $relationType, int $relationId,
-                          ?array $scopes = null, ?string $redirectUri = null): array {
+                          array $scopes = [], ?string $redirectUri = null): array {
         // Get Login URL's
         switch($tokenType) {
             case 'google':
