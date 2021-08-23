@@ -311,7 +311,7 @@ class AuthController extends RestfulControllerV2
         if ($request->validate()) {
             // Return Auth
             return $this->response->array($this->auth->authorize($request->token_type, $request->auth_code, $request->state, $request->redirect_uri,
-                                            $request->scopes, $request->relation_type, $request->relation_id));
+                                            $request->scopes ?? [], $request->relation_type, $request->relation_id));
         }
         
         return $this->response->errorBadRequest();

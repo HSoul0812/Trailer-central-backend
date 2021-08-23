@@ -199,7 +199,7 @@ class SalesAuthService implements SalesAuthServiceInterface
 
         // Create Login URL
         $login = $this->auth->login($params['token_type'], $params['relation_type'],
-                                    $params['relation_id'], $params['scopes'] ?? null,
+                                    $params['relation_id'], $params['scopes'] ?? [],
                                     $params['redirect_uri'] ?? null);
 
         // Return Response
