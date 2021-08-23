@@ -15,10 +15,10 @@ interface AzureServiceInterface {
      * Get Client
      *
      * @param null|string $redirectUrl url to redirect auth back to again
-     * @param null|array $scopes scopes requested by login
+     * @param array $scopes scopes requested by login
      * @return GenericProvider
      */
-    public function getClient(?string $redirectUrl = null, ?array $scopes = null): GenericProvider;
+    public function getClient(?string $redirectUrl = null, array $scopes = []): GenericProvider;
 
     /**
      * Get Login URL
