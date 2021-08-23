@@ -2,31 +2,61 @@
 
 namespace App\Repositories\CRM\User;
 
-use App\Repositories\Repository;
+use App\DTO\CRM\Users\TimeClockSummary;
+use App\Models\CRM\User\TimeClock;
+use App\Repositories\GenericRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use InvalidArgumentException;
 
-interface TimeClockRepositoryInterface extends Repository
+interface TimeClockRepositoryInterface extends GenericRepository
 {
     /**
-     * Checks if the user/employee has the clock ticking currently.
+     * Finds all tracking data according some filters.
      *
-     * @param int $userId
-     * @return bool
+     * @param  array  $filters
+     * @returns LengthAwarePaginator
+     *
+     * @throws InvalidArgumentException when neither 'employee_id' and 'dealer_id' were not provided
+     * @throws InvalidArgumentException when 'from_date' was not provided
+     * @throws InvalidArgumentException when 'to_date' was not provided
+     * @throws InvalidArgumentException when date range was too wide
      */
-    public function isClockTicking(int $userId): bool;
+    public function find(array $filters): LengthAwarePaginator;
 
     /**
-     * Starts the clock for given user/employee
+     * Finds all tracking data according some filters.
      *
-     * @param int $userId
-     * @return bool
+     * @param  array  $filters
+     * @returns TimeClockSummary
+     *
+     * @throws InvalidArgumentException when neither 'employee_id' and 'dealer_id' were not provided
+     * @throws InvalidArgumentException when 'from_date' was not provided
+     * @throws InvalidArgumentException when 'to_date' was not provided
+     * @throws InvalidArgumentException when date range was too wide
      */
-    public function markPunchIn(int $userId): bool;
+    public function summary(array $filters): TimeClockSummary;
 
     /**
-     * Stops the clock for given user/employee
+     * Checks if the employee has the clock ticking currently.
      *
-     * @param int $userId
+     * @param  int  $employeeId
      * @return bool
      */
-    public function markPunchOut(int $userId): bool;
+    public function isClockTicking(int $employeeId): bool;
+
+    /**
+     * Starts the clock for given employee
+     *
+     * @param  int  $employeeId
+     * @return TimeClock
+     */
+    public function markPunchIn(int $employeeId): TimeClock;
+
+    /**
+     * Stops the clock for given employee
+     *
+     * @param  int  $employeeId
+     * @return TimeClock
+     */
+    public function markPunchOut(int $employeeId): TimeClock;
 }
