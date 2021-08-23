@@ -398,9 +398,9 @@ $api->version('v1', function ($route) {
         $route->put('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@updateBulk');
         $route->get('user/adf/settings', 'App\Http\Controllers\v1\User\AdfSettingsController@index');
 
-        $route->get('user/time-clock/status', 'App\Http\Controllers\v1\User\TimeClockController@status');
-        $route->post('user/time-clock/punch-in', 'App\Http\Controllers\v1\User\TimeClockController@punchIn');
-        $route->post('user/time-clock/punch-out', 'App\Http\Controllers\v1\User\TimeClockController@punchOut');
+        $route->get('user/time-clock/employees', 'App\Http\Controllers\v1\User\TimeClockController@employees');
+        $route->get('user/time-clock/tracking', 'App\Http\Controllers\v1\User\TimeClockController@tracking');
+        $route->post('user/time-clock/punch', 'App\Http\Controllers\v1\User\TimeClockController@punch');
     });
 
     /*
@@ -477,7 +477,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        
+
         /**
          * Inventory for customers
          */
@@ -485,9 +485,9 @@ $api->version('v1', function ($route) {
         $route->get('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@getAllByCustomer')->where('customer_id', '[0-9]+');
         $route->delete('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@bulkDestroy')->where('customer_id', '[0-9]+');
         $route->post('user/customers/{customer_id}/inventory', 'App\Http\Controllers\v1\Dms\Customer\InventoryController@attach')->where('customer_id', '[0-9]+');
-        
-        
-        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');        
+
+
+        $route->get('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@index');
         $route->put('user/customers', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@create');
         $route->post('user/customers/{id}', 'App\Http\Controllers\v1\Dms\Customer\CustomerController@update');
         $route->get('user/customers/balance/open', 'App\Http\Controllers\v1\Dms\Customer\OpenBalanceController@index');

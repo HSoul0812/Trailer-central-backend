@@ -1,66 +1,115 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\v1\User;
 
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
+use App\Http\Requests\CRM\User\GetTimeClockEmployeesRequest;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Http\Requests\CRM\User\GetTimeClockRequest;
+use App\Services\CRM\User\TimeClockServiceInterface;
+use App\Transformers\CRM\User\TimeClockTransformer;
+use App\Http\Requests\CRM\User\PostTimeClockPunchRequest;
+use App\Repositories\CRM\User\EmployeeRepositoryInterface;
+use App\Transformers\CRM\User\EmployeeTransformer;
 use App\Http\Controllers\RestfulControllerV2;
-use App\Http\Requests\CRM\User\GetTimeClockStatusRequest;
-use App\Http\Requests\CRM\User\PostTimeClockPunchInRequest;
-use App\Http\Requests\CRM\User\PostTimeClockPunchOutRequest;
-use App\Repositories\CRM\User\TimeClockRepositoryInterface;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class TimeClockController extends RestfulControllerV2
 {
-    private $timeClockRepository;
+    /** @var TimeClockServiceInterface */
+    private $service;
 
-    public function __construct(TimeClockRepositoryInterface $timeClockRepository)
-    {
+    /** @var EmployeeRepositoryInterface */
+    private $employeeRepository;
+
+    public function __construct(
+        TimeClockServiceInterface $timeClockService,
+        EmployeeRepositoryInterface $employeeRepository
+    ) {
         $this->middleware('setDealerIdOnRequest');
-        $this->timeClockRepository = $timeClockRepository;
+
+        $this->service = $timeClockService;
+        $this->employeeRepository = $employeeRepository;
     }
 
     /**
-     * Checks if the clock for given user is ticking.
+     * Starts/stop the clock for given employee.
+     *
+     * @return void|Response
+     *
+     * @throws HttpException when some validation has failed
+     * @throws NoObjectIdValueSetException when validateObjectBelongsToUser is set to true but getObjectIdValue is set to false
+     * @throws NoObjectTypeSetException when validateObjectBelongsToUser is set to true but getObject is set to false
      */
-    public function status(Request $request)
+    public function punch(Request $baseRequest)
     {
-        $request = new GetTimeClockStatusRequest($request->all());
+        $request = new PostTimeClockPunchRequest($baseRequest->all());
+
         if ($request->validate()) {
-            return $this->response->array([
-                'status' => $this->timeClockRepository->isClockTicking($request->user_id),
-            ]);
+            return $this->response->item(
+                $this->service->punch($request->getEmployeeId()),
+                new TimeClockTransformer()
+            );
         }
 
-        return $this->response->errorBadRequest();
+        $this->response->errorBadRequest();
     }
 
     /**
-     * Starts the clock for given user/employee.
+     * Starts the clock for given employee.
+     *
+     * @return void|Response
+     *
+     * @throws HttpException when some validation has failed
+     * @throws NoObjectIdValueSetException when validateObjectBelongsToUser is set to true but getObjectIdValue is set to false
+     * @throws NoObjectTypeSetException when validateObjectBelongsToUser is set to true but getObject is set to false
      */
-    public function punchIn(Request $request)
+    public function tracking(Request $baseRequest)
     {
-        $request = new PostTimeClockPunchInRequest($request->all());
+        $request = new GetTimeClockRequest($baseRequest->all());
+
         if ($request->validate()) {
-            return $this->response->array([
-                'status' => $this->timeClockRepository->markPunchIn($request->user_id),
-            ]);
+            $tracking = $this->service->trackingByEmployee(
+                $request->getEmployeeId(),
+                $request->getFromDate(),
+                $request->getToDate()
+            );
+
+            return $this->response->paginator(
+                $tracking->log,
+                new TimeClockTransformer()
+            )->setMeta($tracking->summary->asArray());
         }
 
-        return $this->response->errorBadRequest();
+        $this->response->errorBadRequest();
     }
 
     /**
-     * Stops the clock for given user/employee.
+     * Gets the employee list depending on user permissions
+     *
+     * @param  Request  $baseRequest
+     *
+     * @return void|Response
+     *
+     * @throws HttpException when some validation has failed
+     * @throws NoObjectIdValueSetException when validateObjectBelongsToUser is set to true but getObjectIdValue is set to false
+     * @throws NoObjectTypeSetException when validateObjectBelongsToUser is set to true but getObject is set to false
      */
-    public function punchOut(Request $request)
+    public function employees(Request $baseRequest)
     {
-        $request = new PostTimeClockPunchOutRequest($request->all());
+        $request = new GetTimeClockEmployeesRequest($baseRequest->all());
+
         if ($request->validate()) {
-            return $this->response->array([
-                'status' => $this->timeClockRepository->markPunchOut($request->user_id),
-            ]);
+            return $this->response->paginator(
+                $this->employeeRepository->findWhoHasTimeClockEnabled($request->all()),
+                new EmployeeTransformer()
+            );
         }
 
-        return $this->response->errorBadRequest();
+        $this->response->errorBadRequest();
     }
 }
