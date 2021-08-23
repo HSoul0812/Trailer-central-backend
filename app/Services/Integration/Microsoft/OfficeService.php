@@ -396,10 +396,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
                 ->setReturnType(MailFolder::class)->execute();
 
             // Get Full Collection
-            $folderId = '';
-            foreach($mailboxes as $mailbox) {
-                $folderId = $mailbox->getId();
-            }
+            $folderId = $mailboxes[0]->getId();
             $this->log->info('Got folder ID from graph: ' . $folderId . ' for folder name: ' . $name);
             return $folderId;
         } catch (\Exception $e) {

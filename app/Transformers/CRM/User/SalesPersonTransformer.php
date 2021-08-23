@@ -33,9 +33,7 @@ class SalesPersonTransformer extends TransformerAbstract
      * SalesPersonTransformer constructor.
      * @param ImapServiceInterface $imapService
      */
-    public function __construct(
-        ?ImapServiceInterface $imapService = null
-    ) {
+    public function __construct(ImapServiceInterface $imapService) {
         $this->imapService = $imapService;
     }
 
@@ -86,15 +84,7 @@ class SalesPersonTransformer extends TransformerAbstract
     {
         return $this->item($salesPerson, function($salesPerson) {
             // Get Validate
-            // TO DO: Replace every instance of new SalesPersonTransformer()
-            //        with construct loaded version of the transformer
-            //        This is out of scope of this task for now, so we're only
-            //        forcing it in SalesAuthService for now
-            $success = $salesPerson->imap_validate->success;
-            if(!empty($this->imapService)) {
-                $validate = $this->imapService->validate($salesPerson->imap_config);
-                $success = $validate->success;
-            }
+            $validate = $this->imapService->validate($salesPerson->imap_config);
 
             // Return Results
             return [
@@ -103,7 +93,7 @@ class SalesPersonTransformer extends TransformerAbstract
                 'host' => $salesPerson->imap_server,
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
-                'failed' => !$success,
+                'failed' => !$validate->success,
                 'message' => $salesPerson->imap_validate->getMessage()
             ];
         });

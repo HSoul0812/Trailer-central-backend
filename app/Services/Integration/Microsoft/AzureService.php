@@ -305,18 +305,15 @@ class AzureService implements AzureServiceInterface
     /**
      * Get Outlook Scopes Including Defaults
      * 
-     * @param null|array $scopes
+     * @param array $scopes
      * @return string
      */
-    protected function getScopes(?array $scopes = null): string {
+    protected function getScopes(array $scopes = []): string {
         // Get Scopes
         if(empty($scopes)) {
             if(!empty(config('azure.scopes'))) {
                 $scopes = explode(" ", config('azure.scopes'));
             }
-        }
-        if(empty($scopes)) {
-            $scopes = [];
         }
 
         // Return Final Scopes
