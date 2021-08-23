@@ -24,10 +24,10 @@ interface AzureServiceInterface {
      * Get Login URL
      *
      * @param null|string $redirectUrl url to redirect auth back to again
-     * @param null|array $scopes scopes requested by login
+     * @param array $scopes scopes requested by login
      * @return LoginUrlToken
      */
-    public function login(?string $redirectUrl = null, ?array $scopes = null): LoginUrlToken;
+    public function login(?string $redirectUrl = null, array $scopes = []): LoginUrlToken;
 
     /**
      * Use Authorize Code to Get Tokens
