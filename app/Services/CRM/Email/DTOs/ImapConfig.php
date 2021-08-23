@@ -237,7 +237,7 @@ class ImapConfig
         // Are We OAuth?!
         if($this->isAuthConfigOauth()) {
             // Return XOAauth Password Instead!
-            return $this->accessToken->access_token;
+            return $this->accessToken->access_token ?? '';
         }
 
         // Return Standard Password
