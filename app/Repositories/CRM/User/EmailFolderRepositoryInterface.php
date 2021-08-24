@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\User;
 
 use App\Repositories\Repository;
 use App\Models\CRM\User\EmailFolder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 interface EmailFolderRepositoryInterface extends Repository {
     /**
@@ -26,6 +27,7 @@ interface EmailFolderRepositoryInterface extends Repository {
      * Mark Imported as Current Time
      * 
      * @param int $folderId
+     * @throws ModelNotFoundException
      * @return EmailFolder
      */
     public function markImported(int $folderId): EmailFolder;

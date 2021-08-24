@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\User;
 
 use App\Models\CRM\User\EmailFolder;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class EmailFolderRepository implements EmailFolderRepositoryInterface
@@ -42,6 +43,7 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
      * Update Email Folder
      * 
      * @param array $params
+     * @throws ModelNotFoundException
      * @return EmailFolder
      */
     public function update($params) {
@@ -108,6 +110,7 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
      * Mark Imported as Current Time
      * 
      * @param int $folderId
+     * @throws ModelNotFoundException
      * @return EmailFolder
      */
     public function markImported(int $folderId): EmailFolder {
@@ -120,6 +123,7 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
     /**
      * find records; similar to findBy()
      * @param array $params
+     * @throws ModelNotFoundException
      * @return Collection<EmailFolder>
      */
     public function get($params)
