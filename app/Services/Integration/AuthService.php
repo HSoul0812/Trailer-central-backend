@@ -4,10 +4,10 @@ namespace App\Services\Integration;
 
 use App\Exceptions\Integration\Auth\InvalidAuthLoginTokenTypeException;
 use App\Exceptions\Integration\Auth\InvalidAuthCodeTokenTypeException;
-use App\Http\Requests\Integration\Auth\LoginTokenRequest;
 use App\Http\Requests\Integration\Auth\AuthorizeTokenRequest;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\Integration\Common\DTOs\AuthLoginPayload;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;

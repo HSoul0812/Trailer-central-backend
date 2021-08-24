@@ -3,6 +3,7 @@
 namespace App\Services\Integration;
 
 use App\Models\Integration\Auth\AccessToken;
+use App\Services\Integration\Common\DTOs\AuthLoginPayload;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
@@ -37,11 +38,11 @@ interface AuthServiceInterface {
     /**
      * Get Login URL
      * 
-     * @param LoginTokenRequest $request
+     * @param AuthLoginPayload
      * @throws InvalidAuthLoginTokenTypeException
      * @return array{url: string, ?state: string}
      */
-    public function login(LoginTokenRequest $request): array;
+    public function login(AuthLoginPayload $payload): array;
 
     /**
      * Handle Auth Code
