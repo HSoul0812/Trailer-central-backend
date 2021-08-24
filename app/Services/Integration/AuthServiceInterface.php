@@ -7,7 +7,6 @@ use App\Services\Integration\Common\DTOs\AuthLoginPayload;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
-use App\Http\Requests\Integration\Auth\LoginTokenRequest;
 use App\Http\Requests\Integration\Auth\AuthorizeTokenRequest;
 
 interface AuthServiceInterface {
