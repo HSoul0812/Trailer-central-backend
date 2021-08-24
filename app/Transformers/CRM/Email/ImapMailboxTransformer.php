@@ -13,7 +13,7 @@ class ImapMailboxTransformer extends TransformerAbstract
      * @param ImapMailbox $mailbox
      * @return array
      */
-    public function transform(ImapMailbox $mailbox)
+    public function transform(ImapMailbox $mailbox): array
     {
         return [
             'full' => $mailbox->full,

@@ -6,6 +6,8 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
 use App\Services\Integration\Common\DTOs\ValidateToken;
+use App\Http\Requests\Integration\Auth\LoginTokenRequest;
+use App\Http\Requests\Integration\Auth\AuthorizeTokenRequest;
 
 interface AuthServiceInterface {
     /**
@@ -35,16 +37,11 @@ interface AuthServiceInterface {
     /**
      * Get Login URL
      * 
-     * @param string $tokenType
-     * @param string $relationType
-     * @param int $relationId
-     * @param array $scopes
-     * @param null|string $redirectUri
+     * @param LoginTokenRequest $request
      * @throws InvalidAuthLoginTokenTypeException
      * @return array{url: string, ?state: string}
      */
-    public function login(string $tokenType, string $relationType, int $relationId,
-                          array $scopes = [], ?string $redirectUri = null): array;
+    public function login(LoginTokenRequest $request): array;
 
     /**
      * Handle Auth Code
@@ -61,18 +58,11 @@ interface AuthServiceInterface {
     /**
      * Authorize Login and Retrieve Tokens
      * 
-     * @param string $tokenType
-     * @param string $code
-     * @param null|string $state
-     * @param null|string $redirectUri
-     * @param null|array $scopes
-     * @param null|string $relationType
-     * @param null|int $relationId
+     * @param AuthorizeTokenRequest $request
      * @throws InvalidAuthCodeTokenTypeException
      * @return array<TokenTransformer>
      */
-    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null,
-                                ?array $scopes = null, ?string $relationType = null, ?int $relationId = null): array;
+    public function authorize(AuthorizeTokenRequest $request): array;
 
     /**
      * Get Refresh Token

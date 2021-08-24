@@ -14,5 +14,5 @@ interface InteractionServiceInterface {
      * @return Interaction
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function email(int $leadId, array $params, array $attachments = array()): Interaction;
+    public function email(int $leadId, array $params, array $attachments = []): Interaction;
 }

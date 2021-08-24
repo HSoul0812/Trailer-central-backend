@@ -7,7 +7,7 @@ use App\Services\Integration\Common\DTOs\ValidateToken;
 
 class ValidateTokenTransformer extends TransformerAbstract
 {
-    public function transform(ValidateToken $token)
+    public function transform(ValidateToken $token): array
     {
         return [
             'is_valid' => $token->isValid,

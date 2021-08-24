@@ -2,7 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
-use App\Exceptions\CRM\Email\MissingFolderException;
+use App\Exceptions\Common\MissingFolderException;
 use App\Exceptions\CRM\Email\ImapConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderConnectionFailedException;
 use App\Exceptions\CRM\Email\ImapFolderUnknownErrorException;

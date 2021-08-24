@@ -2,7 +2,7 @@
 
 namespace App\Services\Integration\Google;
 
-use App\Exceptions\CRM\Email\MissingFolderException;
+use App\Exceptions\Common\MissingFolderException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
 use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
@@ -282,8 +282,8 @@ class GmailService implements GmailServiceInterface
      * @param AccessToken $accessToken
      * @param string $search
      * @param bool $single
-     * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
-     * @throws App\Exceptions\Integration\Google\MissingFolderException
+     * @throws MissingGmailLabelsException
+     * @throws MissingFolderException
      * @return array of labels
      */
     public function labels(AccessToken $accessToken, array $search = []) {

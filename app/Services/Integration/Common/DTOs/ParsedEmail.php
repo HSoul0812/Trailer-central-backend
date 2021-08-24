@@ -478,7 +478,7 @@ class ParsedEmail
      */
     public function getIsHtml(): bool
     {
-        return $this->isHtml ?? false;
+        return (bool) $this->isHtml;
     }
 
     /**

@@ -208,7 +208,7 @@ class SalesPerson extends Model implements Filterable
      * 
      * @return HasMany
      */
-    public function tokens()
+    public function tokens(): HasMany
     {
         return $this->hasMany(AccessToken::class, 'relation_id', 'id')
                     ->whereRelationType('sales_person');

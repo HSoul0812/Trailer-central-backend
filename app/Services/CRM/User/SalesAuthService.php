@@ -4,10 +4,8 @@ namespace App\Services\CRM\User;
 
 use App\Http\Requests\CRM\User\AuthorizeSalesAuthRequest;
 use App\Models\Integration\Auth\AccessToken;
-use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\User\SalesPersonServiceInterface;
-use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\Integration\AuthServiceInterface;
 use App\Traits\SmtpHelper;

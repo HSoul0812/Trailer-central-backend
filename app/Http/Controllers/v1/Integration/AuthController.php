@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\Integration;
 
 use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Http\Requests\Integration\Auth\GetTokenRequest;
 use App\Http\Requests\Integration\Auth\CreateTokenRequest;
@@ -207,32 +208,15 @@ class AuthController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Get(
-     *     path="/api/integration/auth",
-     *     description="Validate an auth token without creating/saving",
-     
-     *     tags={"Post"},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="query",
-     *         description="Post ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns a post",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
+     * Validate OAuth Credentials
+     * 
+     * @param Request $request
+     * @return Response
      */
-    public function valid(Request $request) {
+    public function valid(Request $request): Response {
         // Validate Auth Request
         $request = new ValidateTokenRequest($request->all());
+
         if ( $request->validate() ) {
             // Get Common Token
             $accessToken = new CommonToken($request->all());
@@ -245,73 +229,36 @@ class AuthController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Put(
-     *     path="/api/integration/auth/login",
-     *     description="Initialize login process",
-     
-     *     tags={"Get"},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="query",
-     *         description="Post ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns a post",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
+     * Return OAuth Login URL
+     * 
+     * @param Request $request
+     * @return Response
      */
-    public function login(Request $request) {
+    public function login(Request $request): Response {
         // Start Login Token Request
         $request = new LoginTokenRequest($request->all());
+
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->auth->login($request->token_type,
-                                            $request->relation_type, $request->relation_id,
-                                            $request->scopes ?? [], $request->redirect_uri));
+            return $this->response->array($this->auth->login($request));
         }
         
         return $this->response->errorBadRequest();
     }
 
     /**
-     * @OA\Put(
-     *     path="/api/integration/auth/code",
-     *     description="Initialize auth code process",
-     
-     *     tags={"Get"},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="query",
-     *         description="Post ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns a post",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
+     * Authorize OAuth With Code
+     * 
+     * @param Request $request
+     * @return Response
      */
-    public function code(Request $request) {
+    public function code(Request $request): Response {
         // Start Authorize Token Request
         $request = new AuthorizeTokenRequest($request->all());
+
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->auth->authorize($request->token_type, $request->auth_code, $request->state, $request->redirect_uri,
-                                            $request->scopes ?? [], $request->relation_type, $request->relation_id));
+            return $this->response->array($this->auth->authorize($request));
         }
         
         return $this->response->errorBadRequest();

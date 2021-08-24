@@ -56,7 +56,7 @@ class AzureService implements AzureServiceInterface
      */
     public function getClient(?string $redirectUrl = null, array $scopes = []): GenericProvider {
         // Initialize the OAuth Client
-        $authClient = new GenericProvider([
+        return new GenericProvider([
             'clientId'                => config('oauth.azure.app.id'),
             'clientSecret'            => config('oauth.azure.app.secret'),
             'redirectUri'             => $redirectUrl ?? config('oauth.azure.redirectUri'),
@@ -65,9 +65,6 @@ class AzureService implements AzureServiceInterface
             'urlResourceOwnerDetails' => '',
             'scopes'                  => $this->getScopes($scopes)
         ]);
-
-        // Return Auth Client
-        return $authClient;
     }
 
     /**

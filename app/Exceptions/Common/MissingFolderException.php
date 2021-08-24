@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Exceptions\CRM\Email;
+namespace App\Exceptions\Common;
 
 /**
  * Class MissingFolderException
  *
  * Use this instead of \Exception to throw any kind of missing folder
  *
- * @package App\Exceptions\CRM\Email
+ * @package App\Exceptions\Common
  */
 class MissingFolderException extends \Exception
 {

@@ -2,7 +2,7 @@
 
 namespace App\Services\Integration\Microsoft;
 
-use App\Exceptions\CRM\Email\MissingFolderException;
+use App\Exceptions\Common\MissingFolderException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
@@ -359,7 +359,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      */
     private function fillAttachments(Collection $attachments): array {
         // Initialize Attachments
-        $files = array();
+        $files = [];
 
         // Loop Existing Attachments
         foreach($attachments as $attachment) {
@@ -422,6 +422,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
                 return 'Your Office 365 Authorization has been validated successfully!';
             }
         }
+
         return 'Your Office 365 Authorization failed! Please try connecting again.';
     }
 }

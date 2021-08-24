@@ -20,7 +20,7 @@ class SalesPersonConfigTransformer extends TransformerAbstract
      * @param ConfigValidate $config
      * @return array
      */
-    public function transform(SalesPersonConfig $config)
+    public function transform(SalesPersonConfig $config): array
     {
         return [
             'smtp_types' => $config->smtpTypes

@@ -4,6 +4,8 @@ namespace App\Services\Integration;
 
 use App\Exceptions\Integration\Auth\InvalidAuthLoginTokenTypeException;
 use App\Exceptions\Integration\Auth\InvalidAuthCodeTokenTypeException;
+use App\Http\Requests\Integration\Auth\LoginTokenRequest;
+use App\Http\Requests\Integration\Auth\AuthorizeTokenRequest;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\Integration\Common\DTOs\CommonToken;
@@ -151,32 +153,27 @@ class AuthService implements AuthServiceInterface
     /**
      * Get Login URL
      * 
-     * @param string $tokenType
-     * @param string $relationType
-     * @param int $relationId
-     * @param array $scopes
-     * @param null|string $redirectUri
+     * @param LoginTokenRequest $request
      * @throws InvalidAuthLoginTokenTypeException
      * @return array{url: string, ?state: string}
      */
-    public function login(string $tokenType, string $relationType, int $relationId,
-                          array $scopes = [], ?string $redirectUri = null): array {
+    public function login(LoginTokenRequest $request): array {
         // Get Login URL's
-        switch($tokenType) {
+        switch($request->token_type) {
             case 'google':
-                $login = $this->google->login($redirectUri, $scopes);
+                $login = $this->google->login($request->redirect_uri, $request->scopes ?? []);
             break;
             case 'office365':
-                $login = $this->office->login($redirectUri, $scopes);
+                $login = $this->office->login($request->redirect_uri, $request->scopes ?? []);
             break;
         }
 
         // Save State in Access Token Entry Temporarily
         if($login->authState) {
             $this->tokens->create([
-                'token_type' => $tokenType,
-                'relation_type' => $relationType,
-                'relation_id' => $relationId,
+                'token_type' => $request->token_type,
+                'relation_type' => $request->relation_type,
+                'relation_id' => $request->relation_id,
                 'state' => $login->authState
             ]);
         }
@@ -197,11 +194,11 @@ class AuthService implements AuthServiceInterface
      * @param string $tokenType
      * @param string $code
      * @param null|string $redirectUri
-     * @param null|array $scopes
+     * @param array $scopes
      * @throws InvalidAuthLoginTokenTypeException
      * @return EmailToken
      */
-    public function code(string $tokenType, string $code, ?string $redirectUri = null, ?array $scopes = null): EmailToken {
+    public function code(string $tokenType, string $code, ?string $redirectUri = null, array $scopes = []): EmailToken {
         // Get Access Token
         switch($tokenType) {
             case 'google':
@@ -225,29 +222,22 @@ class AuthService implements AuthServiceInterface
     /**
      * Authorize Login and Retrieve Tokens
      * 
-     * @param string $tokenType
-     * @param string $code
-     * @param null|string $state
-     * @param null|string $redirectUri
-     * @param null|array $scopes
-     * @param null|string $relationType
-     * @param null|int $relationId
+     * @param AuthorizeTokenRequest $request
      * @throws InvalidAuthCodeTokenTypeException
      * @return array<TokenTransformer>
      */
-    public function authorize(string $tokenType, string $code, ?string $state = null, ?string $redirectUri = null,
-                                ?array $scopes = null, ?string $relationType = null, ?int $relationId = null): array {
-        // Find Saved State of Token
-        if(!empty($state)) {
-            $stateToken = $this->tokens->getByState($state);
+    public function authorize(AuthorizeTokenRequest $request): array {
+        if(!empty($request->state)) {
+            $stateToken = $this->tokens->getByState($request->state);
         }
 
         // Get Email Token
-        $emailToken = $this->code($tokenType, $code, $redirectUri, $scopes);
+        $emailToken = $this->code($request->token_type, $request->auth_code,
+                                    $request->redirect_uri, $request->scopes ?? []);
 
         // Create/Update Correct Access Token Details
         $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null,
-                                                $tokenType, $relationType, $relationId));
+                            $request->token_type, $request->relation_type, $request->relation_id));
 
         // Return Response
         return $this->response($accessToken);

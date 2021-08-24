@@ -393,10 +393,7 @@ class SmtpConfig
      */
     public function isAuthConfigOauth(): bool
     {
-        if($this->accessToken) {
-            return true;
-        }
-        return false;
+        return (bool) $this->accessToken;
     }
 
     /**

@@ -110,6 +110,7 @@ class SalesPersonController extends RestfulController {
     public function valid(Request $request): Response
     {
         $request = new ValidateSalesPeopleRequest($request->all());
+
         if ($request->validate()) {
             // Return Validation
             return $this->response->item($this->salesService->validate($request->all()), $this->emailConfigTransformer);
@@ -121,6 +122,7 @@ class SalesPersonController extends RestfulController {
     public function config(Request $request): Response
     {
         $request = new ConfigSalesPeopleRequest($request->all());
+
         if ($request->validate()) {
             // Return Item SalesPersonConfig
             $data = new Item(new SalesPersonConfig(), $this->salesPersonConfigTransformer, 'data');

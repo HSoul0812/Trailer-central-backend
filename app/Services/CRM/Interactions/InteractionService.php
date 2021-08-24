@@ -134,7 +134,7 @@ class InteractionService implements InteractionServiceInterface
      * @return Interaction
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function email(int $leadId, array $params, array $attachments = array()): Interaction {
+    public function email(int $leadId, array $params, array $attachments = []): Interaction {
         // Get User
         $user = User::find($params['dealer_id']);
         $lead = Lead::findOrFail($leadId);

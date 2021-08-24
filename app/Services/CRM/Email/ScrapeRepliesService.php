@@ -2,7 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
-use App\Exceptions\CRM\Email\MissingFolderException;
+use App\Exceptions\Common\MissingFolderException;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\User\SalesPerson;
@@ -183,6 +183,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Process Messages
         $this->log->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
+        $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
             try {
@@ -190,7 +191,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $imports = $this->folder($dealer, $salesperson, $folder);
                 $this->log->info('Imported ' . $imports . ' Email Replies for Sales Person #' .
                             $salesperson->id . ' Folder ' . $folder->name);
-                $imported = ($imported ?? 0) + $imports;
+                $imported += $imports;
             } catch(\Exception $e) {
                 $this->log->error('Error Importing Sales Person #' .
                             $salesperson->id . ' Folder ' . $folder->name . '; ' .
@@ -199,7 +200,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Return Campaign Sent Entries
-        return $imported ?? 0;
+        return $imported;
     }
 
     /**
@@ -256,6 +257,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
+        $total = $skipped = 0;
         foreach($messages as $mailId) {
             // Get Parsed Message
             $email = $this->gmail->message($mailId);
@@ -263,9 +265,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
             if($result === self::IMPORT_SUCCESS) {
-                $total = ($total ?? 0) + 1;
+                $total++;
             } elseif($result === self::IMPORT_PROCESSED) {
-                $skipped = ($skipped ?? 0) + 1;
+                $skipped++;
             }
             $this->deleteAttachments($email->getAttachments());
         }
@@ -279,7 +281,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->folders->markImported($folder->folder_id);
 
         // Return Result Messages That Match
-        return $total ?? 0;
+        return $total;
     }
 
     /**
@@ -299,6 +301,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
+        $total = $skipped = 0;
         foreach($messages as $message) {
             // Get Parsed Message
             $email = $this->office->message($message);
@@ -306,9 +309,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
             if($result === self::IMPORT_SUCCESS) {
-                $total = ($total ?? 0) + 1;
+                $total++;
             } elseif($result === self::IMPORT_PROCESSED) {
-                $skipped = ($skipped ?? 0) + 1;
+                $skipped++;
             }
         }
 
@@ -321,7 +324,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->folders->markImported($folder->folder_id);
 
         // Return Result Messages That Match
-        return $total ?? 0;
+        return $total;
     }
 
     /**
@@ -339,6 +342,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
+        $total = $skipped = 0;
         foreach($messages as $message) {
             // Get Message Overview
             $email = $this->imap->overview($message);
@@ -347,9 +351,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email, $message);
             if($result === self::IMPORT_SUCCESS) {
-                $total = ($total ?? 0) + 1;
+                $total++;
             } elseif($result === self::IMPORT_PROCESSED) {
-                $skipped = ($skipped ?? 0) + 1;
+                $skipped++;
             }
         }
 
@@ -362,7 +366,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->folders->markImported($folder->folder_id);
 
         // Return Result Messages That Match
-        return $total ?? 0;
+        return $total;
     }
 
     /**

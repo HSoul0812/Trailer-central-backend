@@ -13,7 +13,7 @@ class AuthTypeTransformer extends TransformerAbstract
      * @param AuthType $config
      * @return array
      */
-    public function transform(AuthType $config)
+    public function transform(AuthType $config): array
     {
         return [
             'index' => $config->index,

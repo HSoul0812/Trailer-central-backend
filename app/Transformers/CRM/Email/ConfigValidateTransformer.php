@@ -18,7 +18,7 @@ class ConfigValidateTransformer extends TransformerAbstract
      * @param ConfigValidate $validate
      * @return array
      */
-    public function transform(ConfigValidate $validate)
+    public function transform(ConfigValidate $validate): array
     {
         return [
             'type' => $validate->type,
