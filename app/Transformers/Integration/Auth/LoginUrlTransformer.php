@@ -7,7 +7,7 @@ use League\Fractal\TransformerAbstract;
 
 class LoginUrlTransformer extends TransformerAbstract
 {
-    public function transform(LoginUrlToken $login)
+    public function transform(LoginUrlToken $login): array
     {
         return [
             'url' => $login->loginUrl,
