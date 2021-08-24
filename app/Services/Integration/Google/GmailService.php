@@ -99,8 +99,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // Return Formatted Auth Token
-        $accessToken = new EmailToken();
-        $accessToken->fillFromArray($authToken);
+        $accessToken = EmailToken::fillFromArray($authToken);
 
         // Get Profile
         $emailToken = $this->profile($accessToken);

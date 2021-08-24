@@ -67,86 +67,73 @@ class CommonToken
      * Fill Access Token From Array
      * 
      * @param array $authToken
+     * @return CommonToken
      */
-    public function fillFromArray(array $authToken) {
-        // Fill Access Token
-        $this->accessToken = $authToken['access_token'];
+    public static function fillFromArray(array $authToken): CommonToken {
+        // Return Common Token
+        $commonToken = new self([
+            'access_token' => $authToken['access_token'],
+            'refresh_token' => $authToken['refresh_token'] ?? '',
+            'id_token' => $authToken['id_token'],
+            'scopes' => explode(" ", $authToken['scope']),
+            'issued_at' => $authToken['issued_at'] ?? CarbonImmutable::now(),
+            'expires_in' => $authToken['expires_in'],
+            'expires_at' => $authToken['expires_at'] ?? ''
+        ]);
 
-        // Fill Refresh Token
-        if(isset($authToken['refresh_token'])) {
-            $this->refreshToken = $authToken['refresh_token'];
+        // Calculate Issued At
+        if(!empty($authToken['created'])) {
+            $commonToken->calcIssuedAt($authToken['created']);
         }
 
-        // Fill ID Token
-        $this->idToken = $authToken['id_token'];
-
-        // Fill Scopes
-        $this->setScopes($authToken['scope']);
-
-        // Fill Issued At
-        if(isset($authToken['created'])) {
-            $this->calcIssuedAt($authToken['created']);
-        } elseif(!empty($authToken['issued_at'])) {
-            $this->issuedAt = $authToken['issued_at'];
-        } else {
-            $this->issuedAt = CarbonImmutable::now();
-        }
-
-        // Fill Expires In
-        $this->setExpiresIn($authToken['expires_in']);
-
-        // Fill Expires At
-        if(isset($authToken['expires_at'])) {
-            $this->expiresAt = $authToken['expires_at'];
-        } else {
+        // Calculate Expires At?
+        if(empty($authToken['expires_at'])) {
             // Calculate Expires At Instead
-            $this->calcExpiresAt($this->getIssuedAt(), $this->getExpiresIn());
+            $commonToken->calcExpiresAt($commonToken->getIssuedAt(), $commonToken->getExpiresIn());
         }
+
+        // Return Common Token
+        return $commonToken;
     }
 
     /**
      * Fill Access Token From Array
      * 
      * @param LeagueToken $accessToken
+     * @return CommonToken
      */
-    public function fillFromLeague(LeagueToken $accessToken) {
-        // Fill From League Access Token
-        $this->accessToken = $accessToken->getToken();
-
-        // Fill From League Refresh Token
-        $this->refreshToken = $accessToken->getRefreshToken();
-
+    public static function fillFromLeague(LeagueToken $accessToken): CommonToken {
         // Fill From League ID Token
         $values = $accessToken->getValues();
-        if(!empty($values['id_token'])) {
-            $this->idToken = $values['id_token'];
-        }
 
-        // Fill From League Scope
-        if(!empty($values['scope'])) {
-            $this->setScopes($values['scope']);
-        }
-
-        // Fill From Expires In
-        if(!empty($values['ext_expires_in'])) {
-            $this->expiresIn = $values['ext_expires_in'];
-        }
+        // Return Common Token
+        $commonToken = new self([
+            'access_token' => $accessToken->getToken(),
+            'refresh_token' => $accessToken->getRefreshToken(),
+            'id_token' => $values['id_token'] ?? '',
+            'scopes' => !empty($values['scope']) ? explode(" ", $values['scope']) : [],
+            'expires_in' => $values['ext_expires_in'] ?? 0
+        ]);
 
         // Calculate Issued At
         $issuedAt = Carbon::createFromTimestamp($accessToken->getTimeNow())->setTimezone('UTC')->timestamp;
-        $this->calcIssuedAt($issuedAt);
+        $commonToken->calcIssuedAt($issuedAt);
 
         // Fill From League Refresh Token
-        $this->expiresAt = Carbon::createFromTimestamp($accessToken->getExpires())->setTimezone('UTC')->toDateTimeString();
+        $commonToken->setExpiresAt(Carbon::createFromTimestamp($accessToken->getExpires())->setTimezone('UTC')->toDateTimeString());
+
+        // Return Common Token
+        return $commonToken;
     }
 
     /**
      * Fill CommonToken From Access Token
      * 
      * @param AccessToken $accessToken
+     * @return CommonToken
      */
-    public function fillFromToken(AccessToken $accessToken) {
-        $this->fillFromArray([
+    public static function fillFromToken(AccessToken $accessToken): CommonToken {
+        return self::fillFromArray([
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
             'id_token' => $accessToken->id_token,

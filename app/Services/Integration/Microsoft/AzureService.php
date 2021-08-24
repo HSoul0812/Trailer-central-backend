@@ -116,8 +116,7 @@ class AzureService implements AzureServiceInterface
         }
 
         // Return Formatted Auth Token
-        $accessToken = new EmailToken();
-        $accessToken->fillFromLeague($authToken);
+        $accessToken = EmailToken::fillFromLeague($authToken);
         $this->log->info('Got authorized access token: ' . print_r($accessToken->toArray(), true));
 
         // Get Profile
@@ -212,8 +211,7 @@ class AzureService implements AzureServiceInterface
      */
     public function refresh(AccessToken $accessToken): EmailToken {
         // Initialize Email Token
-        $emailToken = new EmailToken();
-        $emailToken->fillFromToken($accessToken);
+        $emailToken = EmailToken::fillFromToken($accessToken);
 
         // Refresh By Custom Now
         return $this->refreshCustom($emailToken);
@@ -235,8 +233,7 @@ class AzureService implements AzureServiceInterface
         ]);
 
         // Return Updated EmailToken
-        $emailToken = new EmailToken();
-        $emailToken->fillFromLeague($newToken);
+        $emailToken = EmailToken::fillFromLeague($newToken);
         $this->log->info('Got refreshed access token: ' . print_r($emailToken->toArray(), true));
         return $emailToken;
     }
@@ -255,8 +252,7 @@ class AzureService implements AzureServiceInterface
         }
 
         // Initialize Email Token
-        $emailToken = new EmailToken();
-        $emailToken->fillFromToken($accessToken);
+        $emailToken = EmailToken::fillFromToken($accessToken);
 
         // Validate By Custom Now
         return $this->validateCustom($emailToken);

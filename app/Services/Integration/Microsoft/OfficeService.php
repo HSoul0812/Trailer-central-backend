@@ -87,8 +87,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         }
 
         // Initialize Email Token
-        $emailToken = new EmailToken();
-        $emailToken->fillFromToken($accessToken);
+        $emailToken = EmailToken::fillFromToken($accessToken);
 
         // Validate By Custom Now
         return $this->validateCustom($emailToken);

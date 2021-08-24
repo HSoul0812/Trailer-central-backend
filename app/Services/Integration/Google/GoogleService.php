@@ -111,7 +111,7 @@ class GoogleService implements GoogleServiceInterface
         $newToken = $client->fetchAccessTokenWithRefreshToken($accessToken->refresh_token);
         $commonToken = new EmailToken();
         if(!empty($newToken)) {
-            $commonToken->fillFromArray($newToken);
+            $commonToken = EmailToken::fillFromArray($newToken);
         }
 
         // Return New Common Token
@@ -260,7 +260,7 @@ class GoogleService implements GoogleServiceInterface
             $refreshToken = $client->getRefreshToken();
             $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
             if(!empty($newToken)) {
-                $emailToken->fillFromArray($newToken);
+                $emailToken = EmailToken::fillFromArray($newToken);
             }
         } catch (\Exception $e) {
             // We actually just want to verify this is true or false
