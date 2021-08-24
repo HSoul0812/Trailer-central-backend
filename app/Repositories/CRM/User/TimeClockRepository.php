@@ -132,7 +132,7 @@ SQL;
                                    (SUM(worked_time) - SUM(over_time)) AS regular_time
                             FROM (
                                      SELECT SUM(worked_time)                                      AS worked_time,
-                                            IF(SUM(worked_time) > 380, SUM(worked_time) - 380, 0) AS over_time,
+                                            IF(SUM(worked_time) > 2400, SUM(worked_time) - 2400, 0) AS over_time, -- 40 hour work week
                                             SUM(break_time)                                       AS break_time
                                      FROM ($dailySQL) AS dailies
                                      GROUP BY employee_id, week
