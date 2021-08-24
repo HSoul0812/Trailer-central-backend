@@ -153,27 +153,27 @@ class AuthService implements AuthServiceInterface
     /**
      * Get Login URL
      * 
-     * @param LoginTokenRequest $request
+     * @param AuthLoginPayload
      * @throws InvalidAuthLoginTokenTypeException
      * @return array{url: string, ?state: string}
      */
-    public function login(LoginTokenRequest $request): array {
+    public function login(AuthLoginPayload $payload): array {
         // Get Login URL's
-        switch($request->token_type) {
+        switch($payload->tokenType) {
             case 'google':
-                $login = $this->google->login($request->redirect_uri, $request->scopes ?? []);
+                $login = $this->google->login($payload->redirectUri, $payload->scopes);
             break;
             case 'office365':
-                $login = $this->office->login($request->redirect_uri, $request->scopes ?? []);
+                $login = $this->office->login($payload->redirectUri, $payload->scopes);
             break;
         }
 
         // Save State in Access Token Entry Temporarily
         if($login->authState) {
             $this->tokens->create([
-                'token_type' => $request->token_type,
-                'relation_type' => $request->relation_type,
-                'relation_id' => $request->relation_id,
+                'token_type' => $payload->tokenType,
+                'relation_type' => $payload->relationType,
+                'relation_id' => $payload->relationId,
                 'state' => $login->authState
             ]);
         }

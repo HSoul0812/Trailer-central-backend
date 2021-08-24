@@ -239,8 +239,11 @@ class AuthController extends RestfulControllerV2
         $request = new LoginTokenRequest($request->all());
 
         if ($request->validate()) {
+            // Get Auth Token Payload
+            $payload = new AuthLoginPayload($request->all());
+
             // Return Auth
-            return $this->response->array($this->auth->login($request));
+            return $this->response->array($this->auth->login($payload));
         }
         
         return $this->response->errorBadRequest();

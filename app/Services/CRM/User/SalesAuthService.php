@@ -185,20 +185,20 @@ class SalesAuthService implements SalesAuthServiceInterface
             $this->log->info('Created sales person #' . $salesPerson->id . ' and return ' . $params['token_type'] . ' login url');
         }
 
-        // Adjust Request
-        $params['relation_type'] = 'sales_person';
-        $params['relation_id'] = $salesPerson->id ?? 0;
-
         // Get Sales Person Response
         $response = [];
-        if(!empty($params['relation_id'])) {
-            $response = $this->salesResponse($params['relation_id']);
+        if(!empty($salesPerson->id)) {
+            $response = $this->salesResponse($salesPerson->id);
         }
 
         // Create Login URL
-        $login = $this->auth->login($params['token_type'], $params['relation_type'],
-                                    $params['relation_id'], $params['scopes'] ?? [],
-                                    $params['redirect_uri'] ?? null);
+        $login = $this->auth->login(new AuthLoginPayload([
+            'token_type'    => $params['token_type'],
+            'relation_type' => 'sales_person',
+            'relation_id'   => $salesPerson->id ?? 0,
+            'scopes'        => $params['scopes'] ?? [],
+            'redirect_uri'  => $params['redirect_uri'] ?? null
+        ]));
 
         // Return Response
         return array_merge($response, $login);
