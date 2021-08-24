@@ -49,11 +49,11 @@ interface AuthServiceInterface {
      * @param string $tokenType
      * @param string $code
      * @param null|string $redirectUri
-     * @param null|array $scopes
+     * @param array $scopes
      * @throws InvalidAuthLoginTokenTypeException
      * @return EmailToken
      */
-    public function code(string $tokenType, string $code, ?string $redirectUri = null, ?array $scopes = null): EmailToken;
+    public function code(string $tokenType, string $code, ?string $redirectUri = null, array $scopes = []): EmailToken;
 
     /**
      * Authorize Login and Retrieve Tokens
