@@ -222,7 +222,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         }
 
         // Get Email Token
-        $emailToken = $this->auth->code($request->token_type, $request->auth_code, $request->redirect_uri, $request->scopes);
+        $emailToken = $this->auth->code($request->token_type, $request->auth_code, $request->redirect_uri, $request->scopes ?? []);
         $this->log->info('Authorized token for email address ' . $emailToken->emailAddress);
 
         // Initialize Params for Sales Person
