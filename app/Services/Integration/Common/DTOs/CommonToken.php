@@ -2,10 +2,11 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
-use Carbon\Carbon;
 use App\Models\Integration\Auth\AccessToken;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use League\OAuth2\Client\Token\AccessToken as LeagueToken;
 
 /**
