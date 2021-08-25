@@ -71,7 +71,7 @@ class CommonToken
      */
     public static function fillFromArray(array $authToken): CommonToken {
         // Return Common Token
-        $commonToken = new self([
+        $commonToken = new static([
             'access_token' => $authToken['access_token'],
             'refresh_token' => $authToken['refresh_token'] ?? '',
             'id_token' => $authToken['id_token'],
@@ -107,7 +107,7 @@ class CommonToken
         $values = $accessToken->getValues();
 
         // Return Common Token
-        $commonToken = new self([
+        $commonToken = new static([
             'access_token' => $accessToken->getToken(),
             'refresh_token' => $accessToken->getRefreshToken(),
             'id_token' => $values['id_token'] ?? '',
@@ -133,7 +133,7 @@ class CommonToken
      * @return CommonToken
      */
     public static function fillFromToken(AccessToken $accessToken): CommonToken {
-        return self::fillFromArray([
+        return static::fillFromArray([
             'access_token' => $accessToken->access_token,
             'refresh_token' => $accessToken->refresh_token,
             'id_token' => $accessToken->id_token,
