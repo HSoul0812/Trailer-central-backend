@@ -282,9 +282,4 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public static function getTableName() {
         return self::TABLE_NAME;
     }
-
-    public function hasPermission(string $feature, string $permissionLevel): bool
-    {
-        return true;
-    }
 }

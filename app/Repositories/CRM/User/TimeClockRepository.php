@@ -24,7 +24,7 @@ class TimeClockRepository implements TimeClockRepositoryInterface
      * @throws InvalidArgumentException when 'to_date' was not provided
      * @throws InvalidArgumentException when date range was too wide
      */
-    public function find(array $filters): LengthAwarePaginator
+    public function getAll(array $filters): LengthAwarePaginator
     {
         $this->minimumFiltersGuard($filters);
 

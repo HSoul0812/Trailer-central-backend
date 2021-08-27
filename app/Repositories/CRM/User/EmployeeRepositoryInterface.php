@@ -20,7 +20,7 @@ interface EmployeeRepositoryInterface extends GenericRepository
      * @param array $filters
      * @return LengthAwarePaginator
      */
-    public function find(array $filters): LengthAwarePaginator;
+    public function getAll(array $filters): LengthAwarePaginator;
 
     /**
      * @param array $filters

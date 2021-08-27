@@ -16,7 +16,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
      * @param  array  $filters
      * @return LengthAwarePaginator
      */
-    public function find(array $filters): LengthAwarePaginator
+    public function getAll(array $filters): LengthAwarePaginator
     {
         $employeeTbName = Employee::getTableName();
         $technicianTbName = Technician::getTableName();
@@ -47,7 +47,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
 
     public function findWhoHasTimeClockEnabled(array $filters): LengthAwarePaginator
     {
-        return $this->find(array_merge($filters, ['is_timeclock_user' => true]));
+        return $this->getAll(array_merge($filters, ['is_timeclock_user' => true]));
     }
 
     /**
@@ -72,6 +72,6 @@ class EmployeeRepository implements EmployeeRepositoryInterface
             return $query->where('service_user_id', $filters['service_user_id'])->first();
         }
 
-        throw new InvalidArgumentException('It was not provided any key column to retrieve a employee.');
+        throw new InvalidArgumentException('It was not provided any key column to retrieve an employee.');
     }
 }
