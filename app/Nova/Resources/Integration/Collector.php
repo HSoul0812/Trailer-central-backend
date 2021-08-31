@@ -65,7 +65,10 @@ class Collector extends Resource
                 Text::make('Host', 'ftp_host')->rules('required', 'max:128')->hideFromIndex(),
                 Text::make('Path To File', 'ftp_path')->rules('required', 'max:128')->hideFromIndex(),
                 Text::make('Login', 'ftp_login')->rules('required', 'max:128')->hideFromIndex(),
-                Text::make('Password', 'ftp_password')->rules('required', 'max:128')->hideFromIndex(),
+                Text::make('Password', 'ftp_password')
+                    ->rules('required', 'max:128')
+                    ->hideFromIndex()
+                    ->help("Don't include any '@' or '\"' characters"),
                 Text::make('CDK Username', 'cdk_username')->rules('max:128')->hideFromIndex()->help(
                     "Only needed if file format is CDK"
                 ),
@@ -114,6 +117,11 @@ class Collector extends Resource
             new Panel('Images And Files', [
                 Boolean::make('Update Images', 'update_images')->hideFromIndex(),
                 Boolean::make('Update Files', 'update_files')->hideFromIndex(),
+                Text::make('Image Directory Address', 'local_image_directory_address')->hideFromIndex()->help(
+                    'If the images in the feed are not a URL and instead are uploaded to the FTP include the address to the images here. **Example 1: 
+                    / -> This would mean the images are in the root directory**
+                    **Example 2: /images/ are in the images directory**'
+                ),
                 Text::make('Images Delimiter', 'images_delimiter')->rules('max:128')->hideFromIndex()->help(
                     'Separator between links to images in the file (by default - ",")'
                 ),

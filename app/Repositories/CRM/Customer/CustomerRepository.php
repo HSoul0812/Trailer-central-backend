@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 class CustomerRepository implements CustomerRepositoryInterface
 {
     protected $model;
-    
+
     /**
      * list if ES index fields that have a 'keyword' field
      */
@@ -27,7 +27,7 @@ class CustomerRepository implements CustomerRepositoryInterface
         'region' => 'region.keyword',
         'postal_code' => 'postal_code.keyword',
     ];
-    
+
     public function __construct(Customer $customer) {
         $this->model = $customer;
     }
@@ -62,7 +62,18 @@ class CustomerRepository implements CustomerRepositoryInterface
     }
 
     public function get($params) {
-        return $this->model->findOrFail($params['id']);
+        if(isset($params['id'])) {
+            return $this->model->findOrFail($params['id']);
+        }
+
+        $query = Customer::select('*');
+        if(isset($params['dealer_id'])) {
+            $query->where('dealer_id', $params['dealer_id']);
+        }
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+        return $query->firstOrFail();
     }
 
     public function getAll($params) {
@@ -230,5 +241,4 @@ class CustomerRepository implements CustomerRepositoryInterface
 
         return $search->execute()->models();
     }
-
 }

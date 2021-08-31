@@ -53,7 +53,11 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
      */
     public function get($params): DealerLocation
     {
-        return DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
+        if(isset($params['dealer_id'])) {
+            return DealerLocation::where('dealer_id', $params['dealer_id'])->firstOrFail();
+        } else {
+            return DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
+        }
     }
 
     public function getDefaultByDealerId(int $dealerId): ?DealerLocation

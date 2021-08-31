@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends RestfulControllerV2
 {
@@ -86,11 +87,13 @@ class CustomerController extends RestfulControllerV2
     public function show(int $id) {
         $customer = $this->customerRepository->get(['id' => $id]);
         
+        $user = Auth::user();
+        
         $response = $this->response
                 ->item($customer, new CustomerDetailTransformer())
-                ->addMeta('major_units_link', config('app.new_design_crm_url'))
-                ->addMeta('service_link', config('app.new_design_crm_url'))
-                ->addMeta('parts_link', config('app.new_design_crm_url'));
+                ->addMeta('major_units_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/bill-of-sale'))
+                ->addMeta('service_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/repair-orders'))
+                ->addMeta('parts_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/pos-reports'));
         
         if ($customer->lead) {
             $response = $response->addMeta('see_more_interactions', config('app.url') . "/api/leads/{$customer->lead->identifier}/interactions");

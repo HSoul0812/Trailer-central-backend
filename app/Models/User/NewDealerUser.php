@@ -8,6 +8,8 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User\NewUser;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class NewDealerUser extends Model
 {
@@ -96,6 +98,11 @@ class NewDealerUser extends Model
     public function location()
     {
         return $this->hasMany(DealerLocation::class, 'dealer_id', 'id');
+    }
+    
+    public function newUser() : HasOne 
+    {
+        return $this->hasOne(NewUser::class, 'user_id', 'user_id');
     }
 
     /**

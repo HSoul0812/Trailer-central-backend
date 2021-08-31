@@ -60,7 +60,9 @@ class Attribute extends Model
         $array = [];
         foreach ($values as $value) {
             $value = explode(':', $value);
-            $array[$value[0]] = $value[1];
+            if (isset($value[1]) && isset($value[0])) {
+                $array[$value[0]] = $value[1];
+            }            
         }
 
         return $array;

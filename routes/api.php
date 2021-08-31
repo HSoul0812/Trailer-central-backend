@@ -159,6 +159,16 @@ $api->version('v1', function ($route) {
     |
     */
 
+    
+    /**
+     * Inventory Overlay
+     */
+    
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
+    });
+    
+    
     /**
      * Inventory Entity
      */
@@ -468,6 +478,7 @@ $api->version('v1', function ($route) {
         $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
+        $route->get('user/dealer-location-available-tax-categories', 'App\Http\Controllers\v1\User\DealerLocationController@availableTaxCategories');
 
         /*
         |--------------------------------------------------------------------------

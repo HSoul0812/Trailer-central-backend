@@ -244,7 +244,18 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function get($params)
     {
-        return Inventory::findOrFail($params['id']);
+        if(isset($params['id'])) {
+            return Inventory::findOrFail($params['id']);
+        }
+
+        $query = Inventory::select('*');
+        if(isset($params['dealer_id'])) {
+            $query->where('dealer_id', $params['dealer_id']);
+        }
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+        return $query->firstOrFail();
     }
 
     /**
@@ -403,6 +414,19 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * @param int $dealer_id
+     * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
+     */
+    public function getPopularInventory(int $dealer_id) {
+        return DB::table('inventory')
+            ->select(DB::raw('count(*) as type_count, entity_type_id, category'))
+            ->where('dealer_id', $dealer_id)
+            ->groupBy('entity_type_id')
+            ->orderBy('type_count', 'desc')
+            ->first();
+    }
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }
@@ -453,17 +477,26 @@ class InventoryRepository implements InventoryRepositoryInterface
                 $query = $query->where('true_cost', 0);
             }
         }
+        
+        if (isset($params['is_archived'])) {
+            $withDefault = false;
+            $query = $query->where('inventory.is_archived', $params['is_archived']);
+        }
 
         if ($withDefault) {
             $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
         }
 
-        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
-            $query = $query->where($params[self::CONDITION_AND_WHERE]);
+        if (isset($params['sold_at_lt'])) {
+            $query = $query->where('inventory.sold_at', '<', $params['sold_at_lt']);
         }
 
-        if (isset($params['is_archived'])) {
-            $query = $query->where('inventory.is_archived', $params['is_archived']);
+        if (isset($params['integration_item_hash']) && $params['integration_item_hash'] === 'not_null') {
+            $query = $query->whereNotNull('integration_item_hash');
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
 
         if (isset($params[self::CONDITION_AND_WHERE_IN]) && is_array($params[self::CONDITION_AND_WHERE_IN])) {

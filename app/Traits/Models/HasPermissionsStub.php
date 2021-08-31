@@ -4,7 +4,7 @@ namespace App\Traits\Models;
 
 use Illuminate\Support\Collection;
 use App\Models\User\DealerUserPermission;
-
+use App\Models\User\Interfaces\PermissionsInterface;
 /**
  * Class HasPermissionsEmpty
  * @package App\Traits\Models
@@ -26,10 +26,17 @@ trait HasPermissionsStub
      */
     public function getPermissionsAllowed(): Collection
     {
-        // Get all permissions
-        return DealerUserPermission::where('id', '>', 0)
+        $perms = [];
+        $permissions = DealerUserPermission::where('id', '>', 0)
                                 ->groupBy('feature')
                                 ->get();
+        
+        foreach($permissions as $perm) {
+            $perm->permission_level = PermissionsInterface::CAN_SEE_AND_CHANGE_PERMISSION;
+            $perms[] = $perm;
+        }
+        
+        return collect($perms);
     }
 
     /**

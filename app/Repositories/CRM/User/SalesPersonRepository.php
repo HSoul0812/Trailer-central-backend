@@ -223,8 +223,9 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
                        NULL                            AS inventory_stock,
                        NULL                            AS inventory_make,
-                       NULL                            AS inventory_notes
+                       NULL                            AS inventory_notes,
 
+                       NULL                            AS unit_sale_id
                 FROM crm_pos_sales ps
                          LEFT JOIN dms_customer c ON ps.customer_id = c.id
                          LEFT JOIN crm_pos_register pr ON ps.register_id = pr.id
@@ -296,7 +297,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
                        iv.stock                                                              AS inventory_stock,
                        iv.manufacturer                                                       AS inventory_make,
-                       iv.notes                                                              AS inventory_notes
+                       iv.notes                                                              AS inventory_notes,
+                       i.unit_sale_id                                                        AS unit_sale_id
                 FROM qb_invoice_item_inventories iii
                          LEFT JOIN qb_invoice_items ii ON ii.id = iii.invoice_item_id
                          LEFT JOIN qb_invoices i ON i.id = ii.invoice_id
@@ -304,18 +306,17 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                          LEFT JOIN dms_customer c ON i.customer_id = c.id
                          LEFT JOIN inventory iv ON iv.inventory_id = iii.inventory_id
                          LEFT JOIN (
-                    SELECT qb_payment.invoice_id,
-                           COALESCE(SUM(qb_payment.amount), 0) paid_amount
-                    FROM qb_payment
-                    GROUP BY qb_payment.invoice_id
-                ) payments ON i.id = payments.invoice_id
+                                SELECT qb_payment.invoice_id,
+                                       COALESCE(SUM(qb_payment.amount), 0) paid_amount
+                                FROM qb_payment
+                                GROUP BY qb_payment.invoice_id
+                        ) payments ON i.id = payments.invoice_id
                          LEFT JOIN dms_unit_sale us ON us.id = i.unit_sale_id
                          LEFT JOIN dms_repair_order ro ON ro.id = i.repair_order_id
                 WHERE i.dealer_id = :dealerId2
                   AND qi.description != 'Trade In Inventory item' /* exclude trade-ins */
                   AND ii.unit_price >= 0 /* exclude trade-ins */
                   $salesPersonClause2
-                  AND (i.total - payments.paid_amount) <= 0
                   $dateClause2
             ) sales ON sales.sales_person_id = sp.id
             LEFT JOIN new_dealer_user ndu ON ndu.user_id = sp.user_id
@@ -323,6 +324,37 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 SQL;
 
         $result = DB::select($sql, $dbParams);
+
+        $unitSaleIds = array_filter(array_column($result, 'unit_sale_id'));
+        $unitSaleIdsQuestionMarks = implode(',', array_fill(0, count($unitSaleIds), '?'));
+
+        // For down payment invoices
+        $sql2 = <<<SQL
+             SELECT qb_invoices.unit_sale_id,
+                  COALESCE(SUM(qb_payment.amount), 0) paid_amount
+             FROM qb_payment
+             JOIN qb_invoices ON qb_invoices.id = qb_payment.invoice_id
+             WHERE qb_invoices.unit_sale_id IN ($unitSaleIdsQuestionMarks)
+             GROUP BY qb_invoices.unit_sale_id
+SQL;
+
+        $paidAmounts = [];
+
+        foreach (DB::select($sql2, $unitSaleIds) as $paidAmount) {
+            $paidAmounts[$paidAmount->unit_sale_id] = $paidAmount;
+        }
+
+        foreach ($result as $item) {
+            if (isset($paidAmounts[$item->unit_sale_id]) && $item->remaining > 0) {
+                $paidAmount = $paidAmounts[$item->unit_sale_id]->paid_amount;
+
+                $item->remaining = number_format((float)($item->total - $paidAmount), 2, '.', '');
+            }
+        }
+
+        $result = array_filter($result, function ($item) {
+            return $item->remaining <= 0;
+        });
 
         // organize by sales person
         $all = [];
@@ -332,8 +364,6 @@ SQL;
 
         return $all;
     }
-
-
 
     /**
      * Find Newest Sales Person From Vars or Check DB

@@ -24,7 +24,11 @@ interface PermissionsInterface
     const SERVICE = 'service';
     const BACK_OFFICE = 'back_office';
     const TIME_CLOCK = 'time_clock';
-
+    const ACCOUNTS = 'accounts';
+    const PURCHASE_ORDERS = 'purchase_orders';
+    const MANAGE_SUBSCRIPTION = 'manage_subscription';
+    const LOCATIONS = 'locations';
+    
     const FEATURES = [
         self::INVENTORY,
         self::INTEGRATIONS,
@@ -36,7 +40,11 @@ interface PermissionsInterface
         self::POS,
         self::SERVICE,
         self::BACK_OFFICE,
-        self::TIME_CLOCK
+        self::TIME_CLOCK,
+        self::ACCOUNTS,
+        self::PURCHASE_ORDERS,
+        self::MANAGE_SUBSCRIPTION,
+        self::LOCATIONS
     ];
 
     /**

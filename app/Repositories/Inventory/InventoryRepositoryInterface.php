@@ -22,6 +22,8 @@ interface InventoryRepositoryInterface extends Repository
 
     public function getFloorplannedInventory($params);
 
+    public function getPopularInventory(int $dealer_id);
+
     public function update($params, array $options = []): Inventory;
 
     public function beginTransaction(): void;

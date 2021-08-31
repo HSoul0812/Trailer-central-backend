@@ -289,16 +289,14 @@ class PartsController extends RestfulController
      * )
      */
     public function create(Request $request) {
-        $request = new CreatePartRequest($request->all());
         $requestData = $request->all();
-
+        $request = new CreatePartRequest($requestData);
         if ( $request->validate() ) {
             return $this->response->item(
                 $this->partService->create($requestData, !empty($requestData['bins'])
                     ? $requestData['bins'] : []), new PartsTransformer()
             );
         }
-
         return $this->response->errorBadRequest();
     }
 
