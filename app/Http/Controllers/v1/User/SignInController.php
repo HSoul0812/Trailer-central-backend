@@ -61,7 +61,7 @@ class SignInController extends RestfulController {
                     ->addMeta('parts_link', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/pos-reports'))
                     ->addMeta('f_and_i', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/fandi/financing'))
                     ->addMeta('back_office', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl('/accounting'))
-                    ->addMeta('crm', config('app.new_design_crm_url'));
+                    ->addMeta('crm', config('app.new_design_crm_url') . $authToken->user->getCrmLoginUrl());
             
             return $response;
         } 

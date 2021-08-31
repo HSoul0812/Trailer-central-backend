@@ -20,6 +20,7 @@ use App\Console\Commands\Parts\FixPartVendor;
 use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
 use App\Console\Commands\CRM\Dms\GetCompletedSaleWithNoFullInvoice;
 use App\Console\Commands\Inventory\FixFloorplanBillStatus;
+use App\Console\Commands\CRM\Dms\FixEmptyManufacturerUnitSale;
 
 class Kernel extends ConsoleKernel
 {
@@ -44,7 +45,8 @@ class Kernel extends ConsoleKernel
         ClearLocalTmpFolder::class,
         GenerateDealerSpecificSiteUrls::class,
         AutoArchiveSoldItems::class,
-        FixFloorplanBillStatus::class
+        FixFloorplanBillStatus::class,
+        FixEmptyManufacturerUnitSale::class
     ];
 
     /**
