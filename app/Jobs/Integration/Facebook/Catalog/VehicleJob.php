@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Integration\Facebook;
+namespace App\Jobs\Integration\Facebook\Catalog;
 
 use App\Exceptions\Integration\Facebook\EmptyCatalogPayloadListingsException;
 use App\Exceptions\Integration\Facebook\FailedCreateTempCatalogCsvException;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
-class CatalogJob extends Job
+class VehicleJob extends Job
 {
     use Dispatchable;
 

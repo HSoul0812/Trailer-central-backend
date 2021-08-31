@@ -4,7 +4,8 @@ namespace App\Services\Integration\Facebook;
 
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Catalog;
-use App\Jobs\Integration\Facebook\CatalogJob;
+use App\Jobs\Integration\Facebook\Catalog\ProductJob;
+use App\Jobs\Integration\Facebook\Catalog\VehicleJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
@@ -272,7 +273,7 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Create Job
-            $this->dispatch(new CatalogJob($integration, $feed->feed_url));
+            $this->dispatch(new VehicleJob($integration, $feed->feed_url));
         }
 
         // Validate Feeds Exist?
