@@ -23,12 +23,12 @@ class SalesPersonService implements SalesPersonServiceInterface
     use SmtpHelper;
 
     /**
-     * @var SalesPersonRepository
+     * @var SalesPersonRepositoryInterface
      */
     protected $salespeople;
 
     /**
-     * @var EmailFolderRepository
+     * @var EmailFolderRepositoryInterface
      */
     protected $folders;
 
