@@ -69,9 +69,13 @@ SQL;
                    i.price - CAST(i.cost_of_unit AS DECIMAL(10, 2)) AS profit,
                    'inventories'                                    AS source
             FROM inventory i
-            WHERE i.dealer_id = :dealer_id_inventories AND i.inventory_id IS NOT NULL
-                  {$this->financialReportHelpers['searchWhereForInventories']} AND
-                  NOT EXISTS (
+            LEFT JOIN dms_customer_inventory ci ON ci.inventory_id = i.inventory_id
+            WHERE 1=1
+                  AND i.dealer_id = :dealer_id_inventories
+                  AND i.inventory_id IS NOT NULL
+                  AND ci.inventory_id IS NULL
+                  {$this->financialReportHelpers['searchWhereForInventories']}
+                  AND NOT EXISTS (
                     SELECT d.invoice_date FROM dms_quote_inventory qi
                         JOIN dms_unit_sale us on us.id = qi.quote_id
                         JOIN qb_invoices d on (us.id = d.unit_sale_id AND d.doc_num NOT LIKE 'DP-%')
