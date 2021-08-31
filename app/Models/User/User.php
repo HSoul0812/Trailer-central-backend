@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\CRM\Dms\Printer\Settings;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
+use App\Models\User\DealerLocation;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Services\User\UserService;
 use App\Traits\CompactHelper;
@@ -24,7 +25,6 @@ use App\Traits\CompactHelper;
  * @package App\Models\User
  *
  * @property int $dealer_id
- * @property int $dealer_user_id
  * @property string $name
  * @property string $email
  *
@@ -54,45 +54,45 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public const STATUS_EXTERNAL = 'external';
 
     public const STATUS_SIGNUP = 'signup';
-
+    
     public const AUTO_IMPORT_MODEL_LAST_7 = 'model+last 7 of vin (default)';
-
+    
     public const AUTO_IMPORT_MODEL_VIN = 'model+vin';
-
+    
     public const AUTO_IMPORT_MODEL_LAST_4 = 'last 4 of vin';
-
+    
     public const AUTO_IMPORT_HIDE_NOT_HIDDEN = 0;
-
+    
     public const AUTO_IMPORT_HIDE_HIDDEN = 1;
-
+    
     public const AUTO_IMPORT_HIDE_ARCHIVED = 2;
 
     public const USE_DESCRIPTION_IN_FEED = 1;
-
+    
     public const DONT_USE_DESCRIPTION_IN_FEED = 0;
-
+    
     public const USE_AUTO_MSRP = 1;
-
+    
     public const DONT_USE_AUTO_MSRP = 0;
-
+    
     public const OVERLAY_LOGO_POSITION_NONE = 'none';
-
+    
     public const OVERLAY_LOGO_POSITION_UPPER_LEFT = 'upper_left';
-
+    
     public const OVERLAY_LOGO_POSITION_UPPER_RIGHT = 'upper_right';
 
     public const OVERLAY_LOGO_POSITION_LOWER_LEFT = 'lower_left';
-
+    
     public const OVERLAY_LOGO_POSITION_LOWER_RIGHT = 'lower_right';
-
+    
     public const OVERLAY_UPPER_NONE = 'none';
-
+    
     public const OVERLAY_UPPER_DEALER_NAME = 'dealer';
-
+    
     public const OVERLAY_UPPER_DEALER_PHONE = 'phone';
-
+    
     public const OVERLAY_UPPER_DEALER_LOCATION_NAME = 'location';
-
+            
     public const TYPES = [
         self::TYPE_DEALER,
         self::TYPE_MANUFACTURER,
@@ -106,19 +106,19 @@ class User extends Model implements Authenticatable, PermissionsInterface
         self::STATUS_EXTERNAL,
         self::STATUS_SIGNUP
     ];
-
+    
     public const AUTO_IMPORT_SETTINGS = [
         self::AUTO_IMPORT_MODEL_LAST_7,
         self::AUTO_IMPORT_MODEL_VIN,
         self::AUTO_IMPORT_MODEL_LAST_4
     ];
-
+    
     public const AUTO_IMPORT_HIDE_SETTINGS = [
         self::AUTO_IMPORT_HIDE_NOT_HIDDEN => 'Auto-imported inventory is on website, not archived',
         self::AUTO_IMPORT_HIDE_HIDDEN => 'Auto-imported inventory is hidden from website',
         self::AUTO_IMPORT_HIDE_ARCHIVED => 'Auto-imported inventory is archived'
     ];
-
+    
     public const OVERLAY_LOGO_POSITIONS = [
         self::OVERLAY_LOGO_POSITION_NONE,
         self::OVERLAY_LOGO_POSITION_UPPER_LEFT,
@@ -126,7 +126,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
         self::OVERLAY_LOGO_POSITION_LOWER_LEFT,
         self::OVERLAY_LOGO_POSITION_LOWER_RIGHT
     ];
-
+    
     public const OVERLAY_UPPER_SETTINGS = [
         self::OVERLAY_UPPER_NONE,
         self::OVERLAY_UPPER_DEALER_NAME,
