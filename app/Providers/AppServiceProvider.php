@@ -161,6 +161,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('inventory_brand_exists', 'App\Rules\Inventory\BrandExists@passes');
         \Validator::extend('inventory_brand_valid', 'App\Rules\Inventory\BrandValid@passes');
         \Validator::extend('inventory_unique_stock', 'App\Rules\Inventory\UniqueStock@passes');
+        \Validator::extend('inventory_quotes_not_exist', 'App\Rules\Inventory\QuotesNotExist@passes');
         \Validator::extend('lead_exists', 'App\Rules\CRM\Leads\LeadExists@passes');
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
