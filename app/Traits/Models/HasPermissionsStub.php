@@ -18,10 +18,10 @@ trait HasPermissionsStub
     {
         return new Collection([]);
     }
-    
+
     /**
      * Returns permissions allowed for a given user
-     * 
+     *
      * @return Collection
      */
     public function getPermissionsAllowed(): Collection
@@ -46,6 +46,6 @@ trait HasPermissionsStub
      */
     public function hasPermission(string $feature, string $permissionLevel): bool
     {
-        return false;
+        return true;
     }
 }
