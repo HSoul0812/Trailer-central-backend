@@ -12,6 +12,13 @@ use App\Models\User;
 
 class HomeController extends AbstractRestfulController 
 {
+    
+    protected function constructRequestBindings() {
+        app()->bind(IndexRequestInterface::class, function () {
+            return inject_request_data(IndexHomeRequest::class);
+        });
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -49,12 +56,6 @@ class HomeController extends AbstractRestfulController
      */
     public function update(int $id, UpdateRequestInterface $request) {
         throw new NotImplementedException;
-    }
-    
-    protected function constructRequestBindings() {
-        app()->bind(IndexRequestInterface::class, function () {
-            return inject_request_data(IndexHomeRequest::class);
-        });
     }
 
 }
