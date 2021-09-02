@@ -6,6 +6,7 @@ use App\Models\CRM\Dms\ServiceOrder\MiscPartItem;
 use App\Models\CRM\Dms\ServiceOrder\OtherItem;
 use App\Models\CRM\Dms\ServiceOrder\PartItem;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
@@ -27,6 +28,7 @@ use App\Models\User\DealerLocation;
  */
 class ServiceOrder extends Model
 {
+    use TableAware;
 
     const SERVICE_ORDER_STATUS = [
         'picked_up' => 'Closed / Picked Up',
@@ -63,14 +65,12 @@ class ServiceOrder extends Model
     const SERVICE_ORDER_COMPLETED = 'completed';
     const SERVICE_ORDER_NOT_COMPLETED = 'not_completed';
 
-    const TABLE_NAME = 'dms_repair_order';
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = self::TABLE_NAME;
+    protected $table = 'dms_repair_order';
 
     protected $fillable = [
         'status',

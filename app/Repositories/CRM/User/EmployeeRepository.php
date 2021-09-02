@@ -11,6 +11,7 @@ use App\Models\CRM\Dms\ServiceOrder\Technician;
 use App\Models\CRM\User\Employee;
 use App\Models\User\DealerUser;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use InvalidArgumentException;
 
 class EmployeeRepository implements EmployeeRepositoryInterface
@@ -48,31 +49,35 @@ class EmployeeRepository implements EmployeeRepositoryInterface
         return $query->paginate($filters['per_page'])->appends($filters);
     }
 
-    public function getLaborDetails(array $params)
+    public function getLaborDetails(array $params): Collection
     {
         $employeeTbName = Employee::getTableName();
         $technicianTbName = Technician::getTableName();
+        $serviceOrderTbName = ServiceOrder::getTableName();
+        $serviceTechTbName = ServiceItemTechnician::getTableName();
+        $serviceItemTbName = ServiceItem::getTableName();
+        $laborCodeTbName = ServiceOrder\LaborCode::getTableName();
 
         $query = Employee::select(
             [
-                ServiceOrder::TABLE_NAME . '.user_defined_id' ,
-                ServiceItemTechnician::TABLE_NAME.'.paid_hrs',
-                ServiceItemTechnician::TABLE_NAME.'.billed_hrs',
-                ServiceItemTechnician::TABLE_NAME.'.start_date',
-                ServiceItemTechnician::TABLE_NAME.'.completed_date',
-                ServiceOrder\LaborCode::TABLE_NAME. '.name as labor_code',
+                $serviceOrderTbName . '.user_defined_id' ,
+                $serviceTechTbName.'.paid_hrs',
+                $serviceTechTbName.'.billed_hrs',
+                $serviceTechTbName.'.start_date',
+                $serviceTechTbName.'.completed_date',
+                $laborCodeTbName. '.name as labor_code',
                 $technicianTbName. '.hourly_rate'
             ]
         );
 
         $query->leftJoin($technicianTbName, $technicianTbName.'.id', '=', 'service_user_id');
-        $query->leftJoin(ServiceItemTechnician::TABLE_NAME, $employeeTbName . '.service_user_id', '=', ServiceItemTechnician::TABLE_NAME . '.dms_settings_technician_id');
-        $query->leftJoin(ServiceItem::TABLE_NAME, ServiceItemTechnician::TABLE_NAME.'.service_item_id', '=', ServiceItem::TABLE_NAME . '.id');
-        $query->leftJoin(ServiceOrder::TABLE_NAME, ServiceOrder::TABLE_NAME.'.id', '=', ServiceItem::TABLE_NAME . '.repair_order_id');
-        $query->leftJoin(ServiceOrder\LaborCode::TABLE_NAME, ServiceOrder\LaborCode::TABLE_NAME . '.id', '=', ServiceItem::TABLE_NAME . '.labor_code_id');
+        $query->leftJoin($serviceTechTbName, $employeeTbName . '.service_user_id', '=', $serviceTechTbName . '.dms_settings_technician_id');
+        $query->leftJoin($serviceItemTbName, $serviceTechTbName.'.service_item_id', '=', $serviceItemTbName . '.id');
+        $query->leftJoin($serviceOrderTbName, $serviceOrderTbName.'.id', '=', $serviceItemTbName . '.repair_order_id');
+        $query->leftJoin($laborCodeTbName, $laborCodeTbName . '.id', '=', $serviceItemTbName . '.labor_code_id');
 
-        $query->where(ServiceItemTechnician::TABLE_NAME . '.start_date', '>=', $params['from_date']);
-        $query->where(ServiceItemTechnician::TABLE_NAME . '.completed_date', '<=', $params['to_date']);
+        $query->where($serviceTechTbName . '.start_date', '>=', $params['from_date']);
+        $query->where($serviceTechTbName . '.completed_date', '<=', $params['to_date']);
         $query->where($employeeTbName . '.id', '=', $params['employee_id']);
 
         return $query->get();

@@ -11,7 +11,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 /**
- * @property-read Collection $timelog
+ * @property-read Collection<App\Models\CRM\User\TimeClock> $timelog
  * @property-read Collection $worklog
  * @property-read TimeClockSummary $summary
  */
@@ -20,7 +20,7 @@ class TimeClockQueryResult implements DTO
     use WithFactory;
     use WithGetter;
 
-    /** @var Collection */
+    /** @var Collection<App\Models\CRM\User\TimeClock> */
     private $timelog;
 
     /** @var Collection */
