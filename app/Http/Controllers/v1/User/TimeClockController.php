@@ -79,10 +79,15 @@ class TimeClockController extends RestfulControllerV2
                 $request->getToDate()
             );
 
-            return $this->response->paginator(
-                $tracking->log,
-                new TimeClockTransformer()
-            )->setMeta($tracking->summary->asArray());
+            return $this->response->array([
+                'data' => [
+                    'timelog' => collect($tracking->timelog)->map(function ($x, $y) {
+                        return (new TimeClockTransformer())->transform($x);
+                    }),
+                    //'worklog' => $tracking->worklog
+                ],
+                'meta' => $tracking->summary->asArray()
+            ]);
         }
 
         $this->response->errorBadRequest();

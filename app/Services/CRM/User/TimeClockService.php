@@ -49,11 +49,16 @@ class TimeClockService implements TimeClockServiceInterface
         $toDate = $toDate ? $toDate.' 23:59:59' : Date::now()->format('Y-m-d 23:59:59');
 
         return TimeClockQueryResult::result([
-                'log' => $this->repository->getAll([
+                'timelog' => $this->repository->getAll([
                     'employee_id' => $employeeId,
                     'from_date' => $fromDate,
                     'to_date' => $toDate
                 ]),
+                /*'worklog' => $this->repository->getAll([
+                    'employee_id' => $employeeId,
+                    'from_date' => $fromDate,
+                    'to_date' => $toDate
+                ]),*/
                 'summary' => $this->repository->summary([
                     'employee_id' => $employeeId,
                     'from_date' => $fromDate,

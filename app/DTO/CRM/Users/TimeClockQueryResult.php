@@ -8,9 +8,11 @@ use App\Contracts\Support\DTO;
 use App\Traits\WithFactory;
 use App\Traits\WithGetter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 /**
- * @property-read LengthAwarePaginator $log
+ * @property-read Collection $timelog
+ * @property-read Collection $worklog
  * @property-read TimeClockSummary $summary
  */
 class TimeClockQueryResult implements DTO
@@ -18,8 +20,11 @@ class TimeClockQueryResult implements DTO
     use WithFactory;
     use WithGetter;
 
-    /** @var LengthAwarePaginator */
-    private $log;
+    /** @var Collection */
+    private $timelog;
+
+    /** @var Collection */
+    private $worklog;
 
     /** @var TimeClockSummary */
     private $summary;
@@ -33,7 +38,8 @@ class TimeClockQueryResult implements DTO
     {
         return [
             'summary' => $this->summary,
-            'log' => $this->log
+            'timelog' => $this->timelog,
+            'worklog' => $this->worklog,
         ];
     }
 }

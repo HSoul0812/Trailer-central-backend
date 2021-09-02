@@ -6,6 +6,7 @@ use App\DTO\CRM\Users\TimeClockSummary;
 use App\Models\CRM\User\TimeClock;
 use App\Repositories\GenericRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use InvalidArgumentException;
 
 interface TimeClockRepositoryInterface extends GenericRepository
@@ -21,7 +22,7 @@ interface TimeClockRepositoryInterface extends GenericRepository
      * @throws InvalidArgumentException when 'to_date' was not provided
      * @throws InvalidArgumentException when date range was too wide
      */
-    public function getAll(array $filters): LengthAwarePaginator;
+    public function getAll(array $filters): Collection;
 
     /**
      * Finds all tracking data according some filters.
