@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eu
+
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+docker-compose up -d
+
+cli composer install
+
+cli php artisan vendor:publish --provider="Dingo\Api\Provider\LaravelServiceProvider"
+
+cp "${ROOT}"/.env.example "${ROOT}"/.env
+
+cli php artisan key:generate
+
