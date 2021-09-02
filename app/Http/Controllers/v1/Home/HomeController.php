@@ -8,7 +8,6 @@ use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Home\IndexHomeRequest;
 use App\Exceptions\NotImplementedException;
-use App\Models\User;
 
 class HomeController extends AbstractRestfulController 
 {
