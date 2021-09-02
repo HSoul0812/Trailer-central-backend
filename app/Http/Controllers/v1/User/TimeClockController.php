@@ -7,6 +7,7 @@ namespace App\Http\Controllers\v1\User;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Requests\CRM\User\GetTimeClockEmployeesRequest;
+use App\Transformers\CRM\User\WorkLogTransformer;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Requests\CRM\User\GetTimeClockRequest;
 use App\Services\CRM\User\TimeClockServiceInterface;
@@ -84,7 +85,9 @@ class TimeClockController extends RestfulControllerV2
                     'timelog' => collect($tracking->timelog)->map(function ($x, $y) {
                         return (new TimeClockTransformer())->transform($x);
                     }),
-                    //'worklog' => $tracking->worklog
+                    'worklog' => collect($tracking->worklog)->map(function ($x, $y) {
+                        return (new WorkLogTransformer())->transform($x);
+                    })
                 ],
                 'meta' => $tracking->summary->asArray()
             ]);

@@ -17,7 +17,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ServiceItem extends Model
 {
-    protected $table = "dms_service_item";
+    const TABLE_NAME = "dms_service_item";
+
+    protected $table = self::TABLE_NAME;
 
     public $timestamps = false;
 

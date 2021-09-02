@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\CRM\User;
 
+use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
 use App\Models\Traits\TableAware;
 use App\Models\User\DealerUser;

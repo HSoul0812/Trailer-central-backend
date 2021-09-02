@@ -63,12 +63,14 @@ class ServiceOrder extends Model
     const SERVICE_ORDER_COMPLETED = 'completed';
     const SERVICE_ORDER_NOT_COMPLETED = 'not_completed';
 
+    const TABLE_NAME = 'dms_repair_order';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'dms_repair_order';
+    protected $table = self::TABLE_NAME;
 
     protected $fillable = [
         'status',

@@ -17,7 +17,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LaborCode extends Model
 {
-    protected $table = 'dms_settings_labor_code';
+    const TABLE_NAME = 'dms_settings_labor_code';
+
+    protected $table = self::TABLE_NAME;
 
     public $timestamps = false;
 }

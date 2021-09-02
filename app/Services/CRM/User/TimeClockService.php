@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\CRM\User;
 
 use App\DTO\CRM\Users\TimeClockQueryResult;
+use App\Repositories\CRM\User\EmployeeRepository;
 use App\Repositories\CRM\User\TimeClockRepositoryInterface;
 use App\Models\CRM\User\TimeClock;
 use Illuminate\Support\Facades\Date;
@@ -14,9 +15,16 @@ class TimeClockService implements TimeClockServiceInterface
     /** @var TimeClockRepositoryInterface */
     protected $repository;
 
-    public function __construct(TimeClockRepositoryInterface $repository)
+    /** @var EmployeeRepository */
+    protected $employeeRepository;
+
+    public function __construct(
+        TimeClockRepositoryInterface $repository,
+        EmployeeRepository $employeeRepository
+    )
     {
         $this->repository = $repository;
+        $this->employeeRepository = $employeeRepository;
     }
 
     /**
@@ -54,11 +62,11 @@ class TimeClockService implements TimeClockServiceInterface
                     'from_date' => $fromDate,
                     'to_date' => $toDate
                 ]),
-                /*'worklog' => $this->repository->getAll([
+                'worklog' => $this->employeeRepository->getLaborDetails([
                     'employee_id' => $employeeId,
                     'from_date' => $fromDate,
                     'to_date' => $toDate
-                ]),*/
+                ]),
                 'summary' => $this->repository->summary([
                     'employee_id' => $employeeId,
                     'from_date' => $fromDate,

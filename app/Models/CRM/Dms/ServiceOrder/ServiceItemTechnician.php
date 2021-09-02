@@ -15,7 +15,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ServiceItemTechnician extends Model implements Filterable
 {
-    protected $table = 'dms_service_technician';
+    const TABLE_NAME = 'dms_service_technician';
+
+    protected $table = self::TABLE_NAME;
 
     public $timestamps = false;
 
