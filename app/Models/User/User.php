@@ -273,7 +273,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         return $this->hasMany(DealerLocation::class, 'dealer_id', 'dealer_id');
     }
-
+    
     /**
      * Get leads
      */

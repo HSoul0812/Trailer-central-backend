@@ -26,6 +26,7 @@ $allPartTotalPrice = 0;
         text-align: left;
         vertical-align: top;
         padding: 8px;
+        font-size: 11px;
     }
 
     .totals-row td {
