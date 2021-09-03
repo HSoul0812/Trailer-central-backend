@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Dms\ServiceOrder;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LaborCode extends Model
 {
+    use TableAware;
+
     protected $table = 'dms_settings_labor_code';
 
     public $timestamps = false;

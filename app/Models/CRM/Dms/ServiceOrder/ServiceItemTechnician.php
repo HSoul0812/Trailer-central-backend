@@ -4,6 +4,7 @@
 namespace App\Models\CRM\Dms\ServiceOrder;
 
 
+use App\Models\Traits\TableAware;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ServiceItemTechnician extends Model implements Filterable
 {
+    use TableAware;
+
     protected $table = 'dms_service_technician';
 
     public $timestamps = false;

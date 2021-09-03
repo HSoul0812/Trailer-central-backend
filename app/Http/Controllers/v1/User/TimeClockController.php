@@ -7,6 +7,9 @@ namespace App\Http\Controllers\v1\User;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Requests\CRM\User\GetTimeClockEmployeesRequest;
+use App\Models\CRM\User\Employee;
+use App\Models\CRM\User\TimeClock;
+use App\Transformers\CRM\User\WorkLogTransformer;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Requests\CRM\User\GetTimeClockRequest;
 use App\Services\CRM\User\TimeClockServiceInterface;
@@ -79,10 +82,17 @@ class TimeClockController extends RestfulControllerV2
                 $request->getToDate()
             );
 
-            return $this->response->paginator(
-                $tracking->log,
-                new TimeClockTransformer()
-            )->setMeta($tracking->summary->asArray());
+            return $this->response->array([
+                'data' => [
+                    'timelog' => collect($tracking->timelog)->map(function (TimeClock $log, int $index) {
+                        return (new TimeClockTransformer())->transform($log);
+                    }),
+                    'worklog' => collect($tracking->worklog)->map(function (Employee $employee, $index) {
+                        return (new WorkLogTransformer())->transform($employee);
+                    })
+                ],
+                'meta' => $tracking->summary->asArray()
+            ]);
         }
 
         $this->response->errorBadRequest();

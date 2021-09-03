@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Repositories\CRM\User;
 
 use App\DTO\CRM\Users\TimeClockSummary;
+use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\User\Employee;
 use App\Models\CRM\User\TimeClock;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -24,7 +26,7 @@ class TimeClockRepository implements TimeClockRepositoryInterface
      * @throws InvalidArgumentException when 'to_date' was not provided
      * @throws InvalidArgumentException when date range was too wide
      */
-    public function getAll(array $filters): LengthAwarePaginator
+    public function getAll(array $filters): Collection
     {
         $this->minimumFiltersGuard($filters);
 
@@ -58,7 +60,7 @@ class TimeClockRepository implements TimeClockRepositoryInterface
         $query->where('punch_in', '>=', $fromDate->toDateString());
         $query->where('punch_out', '<=', $toDate->toDateTimeString());
 
-        $paginator = $query->paginate($filters['per_page'])->appends($filters);
+        $paginator = $query->get();
 
         // @todo remove this when the global configuration is being setting time-zone up
         DB::statement('SET time_zone = :time_zone', ['time_zone' => 'UTC']);
