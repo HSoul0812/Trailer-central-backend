@@ -24,7 +24,7 @@ Bring the containers up:
 ./bin/setup
 ```
 
-Daily work
+Tooling
 --------------------------------------
 
 Start the containers:
@@ -33,8 +33,64 @@ Start the containers:
 docker-compose start
 ```
 
-Start the server:
+Start the serve (multiples ways):
 
 ```bash
-./bin/server
+./bin/serve
+```
+```bash
+./bin/cli php artisan serve --host 0.0.0.0
+```
+```bash
+./bin/php artisan serve --host 0.0.0.0
+```
+
+Get into the PHP container:
+
+```bash
+./bin/cli /bin/bash
+```
+
+Using the PHP container (examples): `./bin/cli <args>`
+
+```bash
+./bin/cli ./artisan tinker
+./bin/cli php artisan tinker
+./bin/cli ls
+./bin/cli uname -a
+```
+
+The PHP wrapper (examples): `./bin/php <args>`
+
+```bash
+./bin/php -v
+./bin/php -m
+./bin/php artisan tinker
+```
+
+Apply code styles:
+
+```bash
+./bin/fix-style-all
+```
+
+*pro-tip: to be able using the local bins add the follows to `.zshrc` or `.profile`*
+
+```
+# Options
+unsetopt cdablevars
+
+PATH="./bin:./vendor/bin:$PATH"
+```
+
+and you could use any bynary on this way:
+
+```bash
+php artisan tinker
+```
+```bash
+cli /bin/bash
+```
+```bash
+serve
 ```
