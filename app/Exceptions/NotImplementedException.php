@@ -2,6 +2,6 @@
 
 namespace App\Exceptions;
 
-class NotImplementedException extends \BadMethodCallException {
-    
+class NotImplementedException extends \BadMethodCallException
+{
 }

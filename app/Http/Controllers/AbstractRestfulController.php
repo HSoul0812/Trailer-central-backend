@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\RestfulControllerInterface;
-use Dingo\Api\Routing\Helpers;
 use App\Exceptions\NotImplementedException;
+use Dingo\Api\Routing\Helpers;
 
 abstract class AbstractRestfulController implements RestfulControllerInterface
 {
     use Helpers;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->constructRequestBindings();
     }
-    
+
     /**
-     * We must register the specific request bindings for our controller here
-     * 
+     * We must register the specific request bindings for our controller here.
+     *
      * @throws NotImplementedException
      */
     protected function constructRequestBindings()
