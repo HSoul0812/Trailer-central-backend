@@ -83,7 +83,7 @@ unsetopt cdablevars
 PATH="./bin:./vendor/bin:$PATH"
 ```
 
-and you could use any bynary on this way:
+and you could use any binary on this way:
 
 ```bash
 php artisan tinker
@@ -92,5 +92,28 @@ php artisan tinker
 cli /bin/bash
 ```
 ```bash
-serve
+    serve
+```
+
+*NOTE: just in case the connection through the VPN is not working, you could use a global tunnel as follows:*
+
+Add to `.ssh/config`
+```
+Host tc-tunnel
+  User admin
+  HostName rober.crm.trailercentral.r4dm.co # use your dev envirment host name
+  IdentityFile ~/.ssh/id_rsa
+  AddKeysToAgent yes
+  ServerAliveInterval 240
+  ServerAliveCountMax 2
+  LocalForward 3306  db.trailercentral.local:3306 # use the port wath you preffer 
+```
+Then
+```bash
+    ssh -N tc-tunnel
+```
+And finally in `.env` file ensure to use the localhost IP address
+```
+DMS_DB_HOST=127.0.0.1
+DMS_DB_PORT=3306
 ```
