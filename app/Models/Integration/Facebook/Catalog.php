@@ -16,6 +16,26 @@ class Catalog extends Model
     // Define Table Name Constant
     const TABLE_NAME = 'fbapp_catalog';
 
+
+    /**
+     * @const array Catalog Types
+     */
+    const CATALOG_TYPES = [
+        'commerce',
+        'hotels',
+        'flights',
+        'destinations',
+        'home_listings',
+        'vehicles',
+        'vehicle_offers'
+    ];
+
+    /**
+     * @const string Default Catalog Type
+     */
+    const DEFAULT_TYPE = 'vehicles';
+
+
     /**
      * @var string
      */
