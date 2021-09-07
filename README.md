@@ -92,7 +92,7 @@ php artisan tinker
 cli /bin/bash
 ```
 ```bash
-    serve
+serve
 ```
 
 *NOTE: just in case the connection through the VPN is not working, you could use a global tunnel as follows:*
@@ -106,11 +106,11 @@ Host tc-tunnel
   AddKeysToAgent yes
   ServerAliveInterval 240
   ServerAliveCountMax 2
-  LocalForward 3306  db.trailercentral.local:3306 # use the port wath you preffer 
+  LocalForward 3306 db.develop.tc.internal:3306 # use the port wath you preffer 
 ```
 Then
 ```bash
-    ssh -N tc-tunnel
+ssh -N tc-tunnel # let it working
 ```
 And finally in `.env` file ensure to use the localhost IP address
 ```

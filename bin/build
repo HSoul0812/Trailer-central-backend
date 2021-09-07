@@ -4,14 +4,11 @@ set -eu
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-docker-compose up -d
+docker-compose down
 
-cli composer install
+docker-compose up -d --build
 
-cp "${ROOT}"/.env.example "${ROOT}"/.env
-
-cli php artisan key:generate
-
+echo "Waiting for containers..."
 sleep 5
 
 cli php artisan migrate
