@@ -26,14 +26,6 @@ class SyncInventory extends Command
     }
 
     /**
-     * Get the list of signals handled by the command.
-     */
-    public function getSubscribedSignals(): array
-    {
-        return [SIGINT, SIGTERM];
-    }
-
-    /**
      * @throws \PDOException  when some unknown error has popped up
      * @throws \JsonException when the metadata were unable to be serialized
      */
