@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int                      $record_id
  * @property string                   $event        ['created'|'updated'|'price-changed']
  * @property string                   $status       ['available'|'sold']
+ * @property string                   $vin
  * @property string                   $brand
  * @property string                   $manufacturer
  * @property numeric                  $price
@@ -43,6 +44,7 @@ class StockLog extends Model
         'record_id',
         'event',
         'status',
+        'vin',
         'brand',
         'manufacturer',
         'price',

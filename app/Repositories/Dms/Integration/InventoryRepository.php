@@ -85,7 +85,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             ->select($columns);
 
         if ($lastDateSynchronized) {
-            $query->where('i.updated_at', '>=', $lastDateSynchronized);
+            $query->where('i.updated_at_auto', '>=', $lastDateSynchronized);
         }
 
         if ($offSet) {
@@ -106,7 +106,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             ->select('inventory_id');
 
         if ($lastDateSynchronized) {
-            $query->where('i.updated_at', '>=', $lastDateSynchronized);
+            $query->where('i.updated_at_auto', '>=', $lastDateSynchronized);
         }
 
         return $query->count('inventory_id');

@@ -21,6 +21,7 @@ class CreateStockLogsTable extends Migration
                 ->default('created')
                 ->index('stock_logs_i_event');
             $table->enum('status', ['available', 'sold'])->index('stock_logs_i_status');
+            $table->string('vin', 40)->nullable()->index('stock_logs_i_vin');
             $table->string('brand', 80)->nullable()->index('stock_logs_i_brand');
             $table->string('manufacturer', 80)->index('stock_logs_i_manufacturer');
             $table->decimal('price', 10)->unsigned();
@@ -33,6 +34,7 @@ class CreateStockLogsTable extends Migration
         });
 
         DB::statement('CREATE INDEX stock_logs_i_update_lookup ON stock_logs (created_at DESC)');
+        DB::statement('CREATE INDEX stock_logs_igin_vin ON stock_logs USING gin (vin gin_trgm_ops)');
     }
 
     /**

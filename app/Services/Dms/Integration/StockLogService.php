@@ -53,10 +53,11 @@ class StockLogService implements StockLogServiceInterface
         }
 
         return sprintf(
-            '(%d, %s, %s, %s, %s, %f, %s),',
+            '(%d, %s, %s, %s, %s, %s, %f, %s),',
             $record->inventory_id,
             $this->quote('created'),
             $this->quote($this->mapStatus($record->status)),
+            $record->vin ? $this->quote($record->vin): 'NULL',
             $record->brand ? $this->quote($record->brand) : 'NULL',
             $this->quote($record->manufacturer ?: 'na'),
             (float) $record->price,
@@ -72,7 +73,7 @@ class StockLogService implements StockLogServiceInterface
     private function compileInsertStatement(string $values): string
     {
         return sprintf(
-            'INSERT INTO %s (record_id, "event", status, brand, manufacturer, price, "meta") VALUES %s ',
+            'INSERT INTO %s (record_id, "event", status, vin, brand, manufacturer, price, "meta") VALUES %s ',
             StockLog::getTableName(),
             substr($values, 0, -1)
         );
