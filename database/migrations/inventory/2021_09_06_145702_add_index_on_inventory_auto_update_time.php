@@ -7,7 +7,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class AddIndexOnInventoryUpdateTime extends Migration
+class AddIndexOnInventoryAutoUpdateTime extends Migration
 {
     /**
      * Run the migrations.
