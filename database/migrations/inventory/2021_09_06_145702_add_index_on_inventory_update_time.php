@@ -16,7 +16,7 @@ class AddIndexOnInventoryUpdateTime extends Migration
      */
     public function up(): void
     {
-        DB::statement('ALTER TABLE `inventory` ADD INDEX `inventory_update_lookup` (`updated_at` DESC)');
+        DB::statement('ALTER TABLE `inventory` ADD INDEX `inventory_auto_updated_at_lookup` (`updated_at_auto` DESC)');
     }
 
     /**
@@ -27,7 +27,7 @@ class AddIndexOnInventoryUpdateTime extends Migration
     public function down(): void
     {
         Schema::table('inventory', function (Blueprint $table) {
-            $table->dropIndex('inventory_update_lookup');
+            $table->dropIndex('inventory_auto_updated_at_lookup');
         });
     }
 }
