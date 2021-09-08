@@ -2,9 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User\DealerUser;
+use App\Models\User\User;
 use Closure;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Website\Website;
 
 class SetDealerIdOnRequest
 {
@@ -17,11 +18,19 @@ class SetDealerIdOnRequest
      */
     public function handle($request, Closure $next)
     {
-        if (empty(Auth::user())) {
+        /** @var User|DealerUser $user */
+        $user = Auth::user();
+
+        if (empty($user)) {
             return response('Invalid access token.', 403);
         }
-        $request['dealer_id'] = Auth::user()->dealer_id;
-        
+
+        $request['dealer_id'] = $user->dealer_id;
+
+        if ($user->dealer_user_id) {
+            $request['dealer_user_id'] = $user->dealer_user_id;
+        }
+
         return $next($request);
     }
 }

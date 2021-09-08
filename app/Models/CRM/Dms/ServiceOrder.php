@@ -6,6 +6,7 @@ use App\Models\CRM\Dms\ServiceOrder\MiscPartItem;
 use App\Models\CRM\Dms\ServiceOrder\OtherItem;
 use App\Models\CRM\Dms\ServiceOrder\PartItem;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
@@ -27,6 +28,7 @@ use App\Models\User\DealerLocation;
  */
 class ServiceOrder extends Model
 {
+    use TableAware;
 
     const SERVICE_ORDER_STATUS = [
         'picked_up' => 'Closed / Picked Up',

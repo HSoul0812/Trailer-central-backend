@@ -8,18 +8,29 @@ use App\Transformers\Inventory\InventoryTransformer;
 use App\Transformers\Website\TrackingTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use Illuminate\Database\Eloquent\Collection;
+use App\Transformers\CRM\Leads\LeadTransformer;
 
 class CustomerDetailTransformer extends CustomerTransformer 
 {
     protected $defaultIncludes = [
         'unitsPurchased',
         'unitsViewed',
-        'interactions'
+        'interactions',
+        'lead'
     ];
     
     public function transform($customer) {
         $transformedData  = parent::transform($customer);
         return $transformedData;
+    }
+    
+    public function includeLead(Customer $customer)
+    {
+        if ($customer->lead) {
+            return $this->item($customer->lead, new LeadTransformer());
+        }
+        
+        return $this->null();
     }
     
     public function includeUnitsPurchased(Customer $customer)

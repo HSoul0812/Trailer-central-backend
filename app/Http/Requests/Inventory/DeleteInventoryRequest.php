@@ -12,18 +12,6 @@ use App\Models\CRM\Dms\UnitSale;
 class DeleteInventoryRequest extends Request
 {
     protected $rules = [
-        'id' => 'required|integer|inventory_valid'
+        'id' => 'required|integer|inventory_valid|inventory_quotes_not_exist'
     ];
-    
-    public function validate(): bool {
-        $valid = parent::validate();
-        if ($valid) {
-            // Do not allow deleting inventory linked to quotes
-            $unitSale = UnitSale::where('inventory_id', $this->id)->first();
-            if ($unitSale) {
-                $valid = false;
-            }
-        }
-        return $valid;
-    }
 }
