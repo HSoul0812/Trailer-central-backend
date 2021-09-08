@@ -125,6 +125,12 @@ class Catalog extends Model
      */
     public function getCatalogIdAttribute(): string
     {
-        return !empty($this->catalog_name) ? $this->catalog_name : '#' . $this->catalog_id;
+        // Catalog Name Exists?
+        if(!empty($this->catalog_name)) {
+            return $this->catalog_name;
+        }
+
+        // Return Catalog ID
+        return !empty($this->catalog_id) ? '#' . $this->catalog_id : '';
     }
 }
