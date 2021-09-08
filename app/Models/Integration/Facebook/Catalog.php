@@ -57,6 +57,8 @@ class Catalog extends Model
         'fbapp_page_id',
         'business_id',
         'catalog_id',
+        'catalog_name',
+        'catalog_type',
         'account_name',
         'account_id',
         'filters',
@@ -113,5 +115,16 @@ class Catalog extends Model
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('facebook')
                     ->whereRelationType('fbapp_catalog');
+    }
+
+
+    /**
+     * Get Catalog Name or ID
+     *
+     * @return string
+     */
+    public function getCatalogIdAttribute(): string
+    {
+        return !empty($this->catalog_name) ? $this->catalog_name : '#' . $this->catalog_id;
     }
 }

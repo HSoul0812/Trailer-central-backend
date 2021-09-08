@@ -17,6 +17,7 @@ class CreateCatalogRequest extends Request {
             'dealer_location_id' => 'required|integer',
             'business_id' => 'integer',
             'catalog_id' => 'required|integer',
+            'catalog_name' => 'required|string|max:255',
             'account_name' => 'required|string',
             'account_id' => 'required|integer',
             'page_title' => 'required|string',

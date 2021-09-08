@@ -18,6 +18,7 @@ class UpdateCatalogRequest extends Request {
             'dealer_location_id' => 'integer',
             'business_id' => 'integer',
             'catalog_id' => 'integer',
+            'catalog_name' => 'string|max:255',
             'account_name' => 'string',
             'account_id' => 'integer',
             'page_title' => 'string',
