@@ -123,7 +123,7 @@ class Catalog extends Model
      *
      * @return string
      */
-    public function getCatalogIdAttribute(): string
+    public function getCatalogNameIdAttribute(): string
     {
         // Catalog Name Exists?
         if(!empty($this->catalog_name)) {
