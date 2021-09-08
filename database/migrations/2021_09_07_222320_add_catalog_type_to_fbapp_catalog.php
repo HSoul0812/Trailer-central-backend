@@ -5,7 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddFbappCatalogTypeField extends Migration
+class AddCatalogTypeToFbappCatalog extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,9 @@ class AddFbappCatalogTypeField extends Migration
     public function up()
     {
         Schema::table('fbapp_catalog', function (Blueprint $table) {
-            $table->enum('catalog_type', Catalog::CATALOG_TYPES)->after('catalog_id')
+            $table->string('catalog_name')->after('catalog_id')->nullable();
+
+            $table->enum('catalog_type', Catalog::CATALOG_TYPES)->after('catalog_name')
                   ->default(Catalog::DEFAULT_TYPE)->index();
         });
     }
@@ -28,6 +30,7 @@ class AddFbappCatalogTypeField extends Migration
     public function down()
     {
         Schema::table('fbapp_catalog', function (Blueprint $table) {
+            $table->dropColumn('catalog_name');
             $table->dropColumn('catalog_type');
         });
     }
