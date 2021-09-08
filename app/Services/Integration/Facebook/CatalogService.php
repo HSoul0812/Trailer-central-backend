@@ -242,15 +242,15 @@ class CatalogService implements CatalogServiceInterface
     /**
      * Process Payload
      * 
-     * @param array $params
+     * @param string $type
+     * @param string $payload
      * @return Fractal
      */
-    public function payload($params) {
+    public function payload(string $payload) {
         // Parse Payload Data
-        $payload = json_decode($params['payload']);
-        $success = false;
+        $json = json_decode($payload);
         $feeds = [];
-        foreach($payload as $integration) {
+        foreach($json as $integration) {
             // Validate Payload
             if(empty($integration->business_id) && empty($integration->catalog_id)) {
                 continue;
@@ -273,17 +273,20 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Create Job
-            $this->dispatch(new VehicleJob($integration, $feed->feed_url));
-        }
-
-        // Validate Feeds Exist?
-        if(count($feeds) > 0) {
-            $success = true;
+            switch($integration->type) {
+                case Catalog::TYPE_VEHICLE:
+                case Catalog::TYPE_VEHICLE_OFFER:
+                    $this->dispatch(new VehicleJob($integration, $feed->feed_url));
+                break;
+                default:
+                    $this->dispatch(new ProductJob($integration, $feed->feed_url));
+                break;
+            }
         }
 
         // Return Response
         return [
-            'success' => $success,
+            'success' => count($feeds) > 0,
             'feeds' => count($feeds)
         ];
     }
