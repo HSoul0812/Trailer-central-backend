@@ -59,7 +59,7 @@ return [
             'timezone'       => env('APP_TIMEZONE', 'UTC'),
             'options'        => [
                 // To be able importing huge result-sets
-                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => env('TC_SYNCHRONIZATION_MYSQL_ATTR_USE_BUFFERED_QUERY', false),
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => env('TC_SYNCHRONIZATION_MYSQL_ATTR_USE_BUFFERED_QUERY', true),
             ],
         ],
 
