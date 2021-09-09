@@ -20,10 +20,6 @@ class SyncProcessRepository implements SyncProcessRepositoryInterface
 
     public function lastFinishedByProcessName(string $name): ?SyncProcess
     {
-        /*dd(SyncProcess::query()
-            ->where('name', $name)
-                ->where('status', SyncProcess::STATUS_FINISHED)
-            ->latest()->toSql());*/
         return SyncProcess::query()
             ->where('name', $name)
             ->where('status', SyncProcess::STATUS_FINISHED)
