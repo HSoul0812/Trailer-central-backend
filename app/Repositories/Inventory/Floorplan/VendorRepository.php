@@ -64,8 +64,6 @@ class VendorRepository implements VendorRepositoryInterface
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        // Do not show deleted vendors
-        $query = $query->whereNull('deleted_at');
 
         return $query->paginate($params['per_page'])->appends($params);
     }
