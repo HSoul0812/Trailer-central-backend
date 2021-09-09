@@ -248,7 +248,7 @@ class ProductJob extends Job
             try {
                 $this->insertCsvRow($file, $listing);
             } catch(\Exception $e) {
-                Log::error("Exception returned processing listing #" . $listing->vehicle_id .
+                Log::error("Exception returned processing listing #" . $listing->id .
                             " on catalog # " . $this->interaction->catalog_id . "; " . 
                             $e->getMessage() . ": " . $e->getTraceAsString());
             }
@@ -331,8 +331,8 @@ class ProductJob extends Job
         }
 
         // Encode Images
-        if(is_array($listing->image)) {
-            $listing->image = json_encode($listing->image);
+        if(is_array($listing->additional_image_link)) {
+            $listing->additional_image_link = implode(",", $listing->additional_image_link);
         }
 
 
