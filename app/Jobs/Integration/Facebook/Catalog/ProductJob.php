@@ -249,7 +249,7 @@ class ProductJob extends Job
                 $this->insertCsvRow($file, $listing);
             } catch(\Exception $e) {
                 Log::error("Exception returned processing listing #" . $listing->id .
-                            " on catalog # " . $this->interaction->catalog_id . "; " . 
+                            " on catalog # " . $this->integraction->catalog_id . "; " . 
                             $e->getMessage() . ": " . $e->getTraceAsString());
             }
         }

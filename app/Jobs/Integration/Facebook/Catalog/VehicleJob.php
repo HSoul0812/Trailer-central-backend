@@ -296,7 +296,7 @@ class VehicleJob extends Job
                 $this->insertCsvRow($file, $listing);
             } catch(\Exception $e) {
                 Log::error("Exception returned processing listing #" . $listing->vehicle_id .
-                            " on catalog # " . $this->interaction->catalog_id . "; " . 
+                            " on catalog # " . $this->integraction->catalog_id . "; " . 
                             $e->getMessage() . ": " . $e->getTraceAsString());
             }
         }
