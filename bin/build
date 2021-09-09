@@ -8,7 +8,8 @@ docker-compose down
 
 docker-compose up -d --build
 
-echo "Waiting for containers..."
+echo "Waiting for postgres database..."
 sleep 5
 
+cli composer dump-autoload
 cli php artisan migrate

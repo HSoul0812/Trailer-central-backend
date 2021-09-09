@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Support\Traits;
 
-use App\Exceptions\PropertyDoesNotExists;
+use App\Exceptions\PropertyDoesNotExist;
 
 trait WithGetter
 {
     /**
      * @return mixed
      *
-     * @throws PropertyDoesNotExists when the provided property does not exist
+     * @throws PropertyDoesNotExist when the provided property does not exist
      */
     public function __get(string $key)
     {
@@ -19,6 +19,6 @@ trait WithGetter
             return $this->{$key};
         }
 
-        throw new PropertyDoesNotExists();
+        throw new PropertyDoesNotExist();
     }
 }

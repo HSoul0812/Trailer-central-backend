@@ -43,21 +43,23 @@ return [
 
         'mysql' => [
             'driver'         => 'mysql',
-            'url'            => env('DMS_DATABASE_URL'),
-            'host'           => env('DMS_DB_HOST', 'db.local'),
-            'port'           => env('DMS_DB_PORT', '3306'),
-            'database'       => env('DMS_DB_DATABASE', 'trailer-central'),
-            'username'       => env('DMS_DB_USERNAME', 'trailer-central'),
-            'password'       => env('DMS_DB_PASSWORD', 'none'),
-            'unix_socket'    => env('DMS_DB_SOCKET', ''),
+            'url'            => env('TC_DATABASE_URL'),
+            'host'           => env('TC_DB_HOST', 'db.local'),
+            'port'           => env('TC_DB_PORT', '3306'),
+            'database'       => env('TC_DB_DATABASE', 'trailer-central'),
+            'username'       => env('TC_DB_USERNAME', 'trailer-central'),
+            'password'       => env('TC_DB_PASSWORD', 'none'),
+            'unix_socket'    => env('TC_DB_SOCKET', ''),
             'charset'        => 'utf8mb4',
             'collation'      => 'utf8mb4_unicode_ci',
             'prefix'         => '',
             'prefix_indexes' => true,
             'strict'         => true,
             'engine'         => null,
+            'timezone'       => env('APP_TIMEZONE', 'UTC'),
             'options'        => [
-                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false, // Important to be able importing huge result sets
+                // To be able importing huge result-sets
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => env('TC_SYNCHRONIZATION_MYSQL_ATTR_USE_BUFFERED_QUERY', false),
             ],
         ],
 

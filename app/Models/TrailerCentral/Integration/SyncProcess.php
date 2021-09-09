@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models\Dms\Integration;
+namespace App\Models\TrailerCentral\Integration;
 
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

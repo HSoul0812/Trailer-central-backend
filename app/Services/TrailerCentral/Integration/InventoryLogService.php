@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Dms\Integration;
+namespace App\Services\TrailerCentral\Integration;
 
-use App\Models\StockLog;
-use App\Repositories\StockLogRepositoryInterface;
+use App\Models\InventoryLog;
+use App\Repositories\InventoryLogRepositoryInterface;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use PDO;
 use stdClass;
 
-class StockLogService implements StockLogServiceInterface
+class InventoryLogService implements InventoryLogServiceInterface
 {
     private Closure|PDO $pdo;
 
-    public function __construct(private StockLogRepositoryInterface $repository)
+    public function __construct(private InventoryLogRepositoryInterface $repository)
     {
         $this->pdo = DB::connection()->getPdo();
     }
 
     /**
-     * @throws \PDOException when some unknown error has popped up
+     * @throws \PDOException when some unknown PDO error has been thrown
      */
     public function execute(string $sql): int
     {
@@ -38,13 +38,14 @@ class StockLogService implements StockLogServiceInterface
         $log = $this->getPreviousDataState($isNotTheFirstImport, $record->inventory_id);
 
         if ($log) {
-            $eventName = $log->price == $record->price ? StockLog::EVENT_UPDATED : StockLog::EVENT_PRICE_CHANGED;
+            $eventName = $log->price == $record->price ? InventoryLog::EVENT_UPDATED : InventoryLog::EVENT_PRICE_CHANGED;
 
             return sprintf(
-                '(%d, %s, %s, %s, %s, %f, %s),',
+                '(%d, %s, %s, %s, %s, %s, %f, %s),',
                 $record->inventory_id,
                 $this->quote($eventName),
                 $this->quote($this->mapStatus($record->status)),
+                $record->vin ? $this->quote($record->vin) : 'NULL',
                 $record->brand ? $this->quote($record->brand) : 'NULL',
                 $this->quote($record->manufacturer ?: 'na'),
                 (float) $record->price,
@@ -57,7 +58,7 @@ class StockLogService implements StockLogServiceInterface
             $record->inventory_id,
             $this->quote('created'),
             $this->quote($this->mapStatus($record->status)),
-            $record->vin ? $this->quote($record->vin): 'NULL',
+            $record->vin ? $this->quote($record->vin) : 'NULL',
             $record->brand ? $this->quote($record->brand) : 'NULL',
             $this->quote($record->manufacturer ?: 'na'),
             (float) $record->price,
@@ -65,7 +66,7 @@ class StockLogService implements StockLogServiceInterface
         );
     }
 
-    private function getPreviousDataState(bool $isNotTheFirstImport, int $recordId): ?StockLog
+    private function getPreviousDataState(bool $isNotTheFirstImport, int $recordId): ?InventoryLog
     {
         return $isNotTheFirstImport ? $this->repository->lastByRecordId($recordId) : null;
     }
@@ -74,7 +75,7 @@ class StockLogService implements StockLogServiceInterface
     {
         return sprintf(
             'INSERT INTO %s (record_id, "event", status, vin, brand, manufacturer, price, "meta") VALUES %s ',
-            StockLog::getTableName(),
+            InventoryLog::getTableName(),
             substr($values, 0, -1)
         );
     }
@@ -90,8 +91,8 @@ class StockLogService implements StockLogServiceInterface
     private function mapStatus(?int $status): string
     {
         return match ($status) {
-            2, 3, 4, 5, 6 => StockLog::STATUS_SOLD,
-            default => StockLog::STATUS_AVAILABLE
+            2, 3, 4, 5, 6 => InventoryLog::STATUS_SOLD,
+            default => InventoryLog::STATUS_AVAILABLE
         };
     }
 }

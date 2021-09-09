@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Dms\Integration;
+namespace App\Services\TrailerCentral\Integration;
 
 use stdClass;
 
-interface StockLogServiceInterface
+interface InventoryLogServiceInterface
 {
     /**
      * @return int number of affected rows
      *
-     * @throws \PDOException when some unknown error has popped up
+     * @throws \PDOException when some unknown PDO error has been thrown
      */
     public function execute(string $sql): int;
 

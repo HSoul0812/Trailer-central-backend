@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('sync:inventory')
             ->daily()
+            ->withoutOverlapping()
             ->runInBackground();
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Dms\Integration;
+namespace App\Services\TrailerCentral\Integration\Console;
 
 interface InventorySyncServiceInterface extends SyncServiceInterface
 {

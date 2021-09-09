@@ -12,10 +12,10 @@ class EnableTrigrams extends Migration
      */
     public function up(): void
     {
-        /**
+        /*
          * @see https://scoutapm.com/blog/how-to-make-text-searches-in-postgresql-faster-with-trigram-similarity
          */
-        DB::statement('CREATE EXTENSION IF NOT EXISTS pg_trgm');// for enhanced search
+        DB::statement('CREATE EXTENSION IF NOT EXISTS pg_trgm'); // for enhanced search
     }
 
     /**

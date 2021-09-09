@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property array                    $meta         json data
  * @property DateTimeInterface|string $created_at
  */
-class StockLog extends Model
+class InventoryLog extends Model
 {
     use HasFactory;
     use TableAware;

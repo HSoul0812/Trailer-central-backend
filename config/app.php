@@ -173,7 +173,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\DmsIntegrationServiceProvider::class,
+        App\Providers\TrailerCentralIntegrationServiceProvider::class,
     ],
 
     /*

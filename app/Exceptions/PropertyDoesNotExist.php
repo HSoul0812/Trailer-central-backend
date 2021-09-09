@@ -8,10 +8,10 @@ use Exception;
 use JetBrains\PhpStorm\Pure;
 use Throwable;
 
-class PropertyDoesNotExists extends Exception
+class PropertyDoesNotExist extends Exception
 {
     #[Pure]
-    public function __construct($message = 'The property does not exists', $code = 0, Throwable $previous = null)
+    public function __construct($message = 'The property does not exist', $code = 0, Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }

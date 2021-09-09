@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\Dms\Integration;
+namespace App\Repositories\TrailerCentral\Integration;
 
-use App\Models\Dms\Integration\SyncProcess;
+use App\Models\TrailerCentral\Integration\SyncProcess;
 use App\Repositories\Common\CrudCommonWriterRepositoryInterface;
 
 interface SyncProcessRepositoryInterface extends CrudCommonWriterRepositoryInterface
 {
     public function isNotTheFirstImport(string $name): bool;
 
-    public function lastByProcessName(string $name): ?SyncProcess;
+    public function lastFinishedByProcessName(string $name): ?SyncProcess;
 
     /**
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException

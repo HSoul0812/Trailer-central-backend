@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Dms\Integration;
+namespace App\Services\TrailerCentral\Integration;
 
-use App\Models\Dms\Integration\SyncProcess;
-use App\Repositories\Dms\Integration\SyncProcessRepositoryInterface;
+use App\Models\TrailerCentral\Integration\SyncProcess;
+use App\Repositories\TrailerCentral\Integration\SyncProcessRepositoryInterface;
 
 class SyncProcessService implements SyncProcessServiceInterface
 {

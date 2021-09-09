@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\Dms\Integration;
+namespace App\Repositories\TrailerCentral\Integration;
 
 use App\Exceptions\NotImplementedException;
-use App\Models\Dms\Integration\SyncProcess;
+use App\Models\TrailerCentral\Integration\SyncProcess;
 use Illuminate\Support\Facades\Date;
 
 class SyncProcessRepository implements SyncProcessRepositoryInterface
@@ -18,11 +18,15 @@ class SyncProcessRepository implements SyncProcessRepositoryInterface
             ->exists();
     }
 
-    public function lastByProcessName(string $name): ?SyncProcess
+    public function lastFinishedByProcessName(string $name): ?SyncProcess
     {
+        /*dd(SyncProcess::query()
+            ->where('name', $name)
+                ->where('status', SyncProcess::STATUS_FINISHED)
+            ->latest()->toSql());*/
         return SyncProcess::query()
             ->where('name', $name)
-            ->where('status', '!=', SyncProcess::STATUS_FAILED)
+            ->where('status', SyncProcess::STATUS_FINISHED)
             ->latest()
             ->first();
     }
@@ -63,7 +67,7 @@ class SyncProcessRepository implements SyncProcessRepositoryInterface
      */
     public function update($primaryKey, array $newAttributes): bool
     {
-        throw new NotImplementedException();
+        return SyncProcess::query()->findOrFail($primaryKey)->update($newAttributes);
     }
 
     /**
