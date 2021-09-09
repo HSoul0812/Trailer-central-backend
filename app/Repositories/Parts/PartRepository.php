@@ -424,7 +424,7 @@ class PartRepository implements PartRepositoryInterface {
                 'b.name AS category_name',
             ])
             ->selectRaw(DB::raw('COALESCE((SELECT SUM(bc.qty) FROM part_bin_qty bc WHERE bc.part_id = p.id), 0) total_qty'))
-            ->selectRaw(DB::raw("(SELECT group_concat(i.image_url , '   ') FROM part_images i WHERE i.part_id = p.id) images"))
+            ->selectRaw(DB::raw("(SELECT group_concat(i.image_url , '\n') FROM part_images i WHERE i.part_id = p.id) images"))
             ->leftJoin(Vendor::getTableName().' AS v', 'p.vendor_id','=','v.id')
             ->leftJoin(Brand::getTableName().' AS b', 'p.brand_id','=','b.id')
             ->leftJoin(Type::getTableName().' AS t', 'p.type_id','=','t.id')
