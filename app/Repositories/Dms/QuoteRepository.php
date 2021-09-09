@@ -115,6 +115,14 @@ class QuoteRepository implements QuoteRepositoryInterface {
                                         ->havingRaw('paid_amount >= dms_unit_sale.total_price');
                                 });
                         });
+
+                    if (isset($params['sort']) && $params['sort'] === '-completed_at') {
+                        $query = $query->orderBy('created_at');
+                    }
+
+                    if (isset($params['sort']) && $params['sort'] === 'completed_at') {
+                        $query = $query->orderBy('created_at', 'DESC');
+                    }
                     break;
             }
         }
@@ -167,7 +175,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
 
     private function addSortQuery($query, $sort) {
         if (!isset($this->sortOrders[$sort])) {
-            return;
+            return $query;
         }
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
