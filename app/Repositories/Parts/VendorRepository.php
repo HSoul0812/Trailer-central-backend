@@ -5,8 +5,6 @@ namespace App\Repositories\Parts;
 use App\Repositories\Parts\VendorRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Parts\Vendor;
-use App\Models\Parts\Part;
-use Illuminate\Support\Facades\DB;
 
 /**
  *  
@@ -65,6 +63,8 @@ class VendorRepository implements VendorRepositoryInterface {
         if (isset($params['name'])) {
             $query = $query->where('name', 'like', '%'.$params['name'].'%');
         }
+        // Do not return deleted vendors
+        $query = $query->whereNull('deleted_at');
 
         return $query->paginate($params['per_page'])->appends($params);
     }
