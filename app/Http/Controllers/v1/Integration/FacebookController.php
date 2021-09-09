@@ -133,7 +133,7 @@ class FacebookController extends RestfulControllerV2 {
         $request = new PayloadCatalogRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->service->payload($request->all()));
+            return $this->response->array($this->service->payload($request->payload));
         }
         
         return $this->response->errorBadRequest();
