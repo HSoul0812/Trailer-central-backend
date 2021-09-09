@@ -14,7 +14,7 @@ class AddDeletedAtToVendors extends Migration
     public function up()
     {
         Schema::table('qb_vendors', function (Blueprint $table) {
-            $table->dateTime('deleted_at')->after('updated_at')->nullable();
+            $table->softDeletes()->after('updated_at');
         });
     }
 
@@ -26,7 +26,7 @@ class AddDeletedAtToVendors extends Migration
     public function down()
     {
         Schema::table('qb_vendors', function (Blueprint $table) {
-            $table->dropColumn('deleted_at');
+            $table->dropSoftDeletes();
         });
     }
 }

@@ -3,9 +3,12 @@
 namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vendor extends Model
 { 
+    use SoftDeletes;
+
     protected $table = 'qb_vendors';
     
     /**
@@ -35,7 +38,6 @@ class Vendor extends Model
         'auto_created',
         'created_at',
         'updated_at',
-        'deleted_at',
         'qb_id',
     ];
 
