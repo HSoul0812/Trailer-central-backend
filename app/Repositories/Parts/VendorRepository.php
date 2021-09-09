@@ -63,8 +63,6 @@ class VendorRepository implements VendorRepositoryInterface {
         if (isset($params['name'])) {
             $query = $query->where('name', 'like', '%'.$params['name'].'%');
         }
-        // Do not return deleted vendors
-        $query = $query->whereNull('deleted_at');
 
         return $query->paginate($params['per_page'])->appends($params);
     }
