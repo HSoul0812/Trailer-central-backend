@@ -31,6 +31,14 @@ class Catalog extends Model
     ];
 
     /**
+     * @const array Vehicle Types
+     */
+    const VEHICLE_TYPES = [
+        'vehicles',
+        'vehicle_offers'
+    ];
+
+    /**
      * @const string Default Catalog Type
      */
     const DEFAULT_TYPE = 'vehicles';

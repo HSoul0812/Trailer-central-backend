@@ -273,14 +273,10 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Create Job
-            switch($integration->catalog_type) {
-                case Catalog::TYPE_VEHICLE:
-                case Catalog::TYPE_VEHICLE_OFFER:
-                    $this->dispatch(new VehicleJob($integration, $feed->feed_url));
-                break;
-                default:
-                    $this->dispatch(new ProductJob($integration, $feed->feed_url));
-                break;
+            if(in_array($integration->catalog_type, Catalog::TYPE_VEHICLES)) {
+                $this->dispatch(new VehicleJob($integration, $feed->feed_url));
+            } else {
+                $this->dispatch(new ProductJob($integration, $feed->feed_url));
             }
         }
 
