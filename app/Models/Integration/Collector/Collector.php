@@ -53,6 +53,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $ids_token
  * @property string|null $ids_default_location
  * @property string|null $xml_url
+ * @property string|null $pipe_delimited
  * @property string|null $zero_msrp
  * @property string|null $only_types
  * @property string|null $linebreak_characters
@@ -68,7 +69,8 @@ class Collector extends Model implements Filterable
         self::FILE_FORMAT_CSV,
         self::FILE_FORMAT_CDK,
         self::FILE_FORMAT_IDS,
-        self::FILE_FORMAT_XML_URL
+        self::FILE_FORMAT_XML_URL,
+        self::FILE_FORMAT_PIPE_DELIMITED,
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
@@ -76,6 +78,7 @@ class Collector extends Model implements Filterable
     public const FILE_FORMAT_CSV = 'csv';
     public const FILE_FORMAT_IDS = 'ids';
     public const FILE_FORMAT_XML_URL = 'xml_url';
+    public const FILE_FORMAT_PIPE_DELIMITED = 'pipe_delimited';
 
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
