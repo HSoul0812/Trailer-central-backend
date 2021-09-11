@@ -338,7 +338,7 @@ class ProductJob extends Job
 
         // Append Description
         $listing->description = isset($listing->description) ? trim($listing->description) : '';
-        if($listing->dealer_id == 8757 && !empty($listing->description)) {
+        if($listing->real_dealer_id == 8757 && !empty($listing->description)) {
             $listing->description .= 'In some cases, pricing may not include freight, prep, doc/title fees, additional equipment, or sales tax';
         }
 
