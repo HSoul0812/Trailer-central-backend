@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\Integrations\TrailerCentral;
 
-use App\Services\LoggerServiceInterface;
 use App\Services\Integrations\TrailerCentral\Inventory\Console\SyncServiceInterface;
+use App\Services\LoggerServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 
