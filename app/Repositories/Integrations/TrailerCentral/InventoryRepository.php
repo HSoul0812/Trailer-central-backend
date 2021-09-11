@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\TrailerCentral\Integration;
+namespace App\Repositories\Integrations\TrailerCentral;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;

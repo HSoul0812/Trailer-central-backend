@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models;
+namespace App\Models\Inventory;
 
 use App\Support\Traits\TableAware;
 use DateTimeInterface;

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Services\TrailerCentral\Integration;
+namespace App\Services\Integrations\TrailerCentral\Inventory\Console;
 
-use App\Models\InventoryLog;
-use App\Repositories\InventoryLogRepositoryInterface;
+use App\Models\Inventory\InventoryLog;
+use App\Repositories\Inventory\InventoryLogRepositoryInterface;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use PDO;
 use stdClass;
 
-class InventoryLogService implements InventoryLogServiceInterface
+class LogService implements LogServiceInterface
 {
     private Closure|PDO $pdo;
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories;
+namespace App\Repositories\Inventory;
 
-use App\Models\InventoryLog;
+use App\Models\Inventory\InventoryLog;
 
 interface InventoryLogRepositoryInterface
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models\TrailerCentral\Integration;
+namespace App\Models;
 
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -45,9 +45,4 @@ class SyncProcess extends Model
     protected $casts = [
         'meta' => 'array',
     ];
-
-    public function isStillWorking(): bool
-    {
-        return empty($this->finished_at) && $this->status !== self::STATUS_FAILED;
-    }
 }

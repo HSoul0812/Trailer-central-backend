@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Console\Commands\TrailerCentral\Integration;
+namespace App\Console\Commands\Integrations\TrailerCentral;
 
-use App\Services\Common\LoggerServiceInterface;
-use App\Services\TrailerCentral\Integration\Console\InventorySyncServiceInterface;
+use App\Services\LoggerServiceInterface;
+use App\Services\Integrations\TrailerCentral\Inventory\Console\SyncServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 
@@ -15,10 +15,10 @@ class SyncInventory extends Command
     protected $signature = 'sync:inventory';
 
     /** @var string The console command description. */
-    protected $description = 'Sync the inventory history from the TrailerCentral database';
+    protected $description = 'Sync the inventory history from the Integrations database';
 
     public function __construct(
-        private InventorySyncServiceInterface $service,
+        private SyncServiceInterface $service,
         private LoggerServiceInterface $logger
     ) {
         parent::__construct();

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Common;
+namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;

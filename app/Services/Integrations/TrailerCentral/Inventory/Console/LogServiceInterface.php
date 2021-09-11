@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Services\TrailerCentral\Integration;
+namespace App\Services\Integrations\TrailerCentral\Inventory\Console;
 
 use stdClass;
 
-interface InventoryLogServiceInterface
+interface LogServiceInterface
 {
     /**
      * @return int number of affected rows

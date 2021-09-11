@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\Common;
+namespace App\Repositories;
 
 interface CrudCommonWriterRepositoryInterface
 {
@@ -16,18 +16,18 @@ interface CrudCommonWriterRepositoryInterface
     /**
      * Updates a single record by primary key.
      *
-     * @param mixed $primaryKey
+     * @param mixed $id
      *
      *  @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function update($primaryKey, array $newAttributes): bool;
+    public function update($id, array $newAttributes): bool;
 
     /**
      * Deletes a single record by primary key.
      *
-     * @param mixed $primaryKey
+     * @param mixed $id
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function delete($primaryKey): bool;
+    public function delete($id): bool;
 }

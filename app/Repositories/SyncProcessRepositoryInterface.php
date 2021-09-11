@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\TrailerCentral\Integration;
+namespace App\Repositories;
 
-use App\Models\TrailerCentral\Integration\SyncProcess;
-use App\Repositories\Common\CrudCommonWriterRepositoryInterface;
+use App\Models\SyncProcess;
 
 interface SyncProcessRepositoryInterface extends CrudCommonWriterRepositoryInterface
 {
@@ -31,18 +30,18 @@ interface SyncProcessRepositoryInterface extends CrudCommonWriterRepositoryInter
     public function create(array $attributes): SyncProcess;
 
     /**
-     * @param int $primaryKey
+     * @param int $id
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function update($primaryKey, array $newAttributes): bool;
+    public function update($id, array $newAttributes): bool;
 
     /**
      * Deletes a single record by primary key.
      *
-     * @param int $primaryKey
+     * @param int $id
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function delete($primaryKey): bool;
+    public function delete($id): bool;
 }

@@ -3,7 +3,7 @@
 return [
     /*
      |--------------------------------------------------------------------------
-     | TrailerCentral
+     | Integrations
      |--------------------------------------------------------------------------
      |
      | This option controls the default memory to be allocated on importing time.

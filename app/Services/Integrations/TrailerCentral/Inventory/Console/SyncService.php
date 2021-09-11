@@ -2,25 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Services\TrailerCentral\Integration\Console;
+namespace App\Services\Integrations\TrailerCentral\Inventory\Console;
 
 use App\Exceptions\CannotBeUsedBeyondConsole;
-use App\Repositories\TrailerCentral\Integration\InventoryRepositoryInterface;
-use App\Repositories\TrailerCentral\Integration\SyncProcessRepositoryInterface;
-use App\Services\Common\LoggerServiceInterface;
-use App\Services\TrailerCentral\Integration\InventoryLogServiceInterface;
-use App\Services\TrailerCentral\Integration\SyncProcessServiceInterface;
+use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
+use App\Repositories\SyncProcessRepositoryInterface;
+use App\Services\LoggerServiceInterface;
 use Exception;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 use Illuminate\Support\Facades\DB;
 
-class InventorySyncService implements InventorySyncServiceInterface
+class SyncService implements SyncServiceInterface
 {
     public function __construct(
         private InventoryRepositoryInterface $inventoryRepository,
         private SyncProcessRepositoryInterface $processRepository,
-        private SyncProcessServiceInterface $processService,
-        private InventoryLogServiceInterface $inventoryLogService,
+        private LogServiceInterface $inventoryLogService,
         private ApplicationContract $app,
         private LoggerServiceInterface $logger
     ) {
@@ -40,7 +37,7 @@ class InventorySyncService implements InventorySyncServiceInterface
         // needed to create an insertion buffer, surely it only will be at the very first time
         ini_set('memory_limit', config('trailercentral.memory_limit'));
 
-        $process = $this->processService->start(self::PROCESS_NAME);
+        $process = $this->processRepository->create(['name' => self::PROCESS_NAME]);
 
         try {
             $lastProcess = $this->processRepository->lastFinishedByProcessName(self::PROCESS_NAME);
@@ -81,7 +78,7 @@ class InventorySyncService implements InventorySyncServiceInterface
 
             $this->inventoryLogService->execute($insertValues);
 
-            $this->logger->info("[InventorySyncService] $numberOfRecordsImported records imported on process {$process->id}");
+            $this->logger->info("[SyncService] $numberOfRecordsImported records imported on process $process->id");
         };
     }
 }

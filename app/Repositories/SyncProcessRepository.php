@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\TrailerCentral\Integration;
+namespace App\Repositories;
 
 use App\Exceptions\NotImplementedException;
-use App\Models\TrailerCentral\Integration\SyncProcess;
+use App\Models\SyncProcess;
 use Illuminate\Support\Facades\Date;
 
 class SyncProcessRepository implements SyncProcessRepositoryInterface
@@ -32,7 +32,7 @@ class SyncProcessRepository implements SyncProcessRepositoryInterface
      */
     public function finishById(int $id, array $meta = []): bool
     {
-        return SyncProcess::query()->findOrFail($id)->update([
+        return SyncProcess::query()->findOrFail($id)?->update([
             'finished_at' => Date::now(),
             'status'      => SyncProcess::STATUS_FINISHED,
             'meta'        => $meta,
@@ -44,7 +44,7 @@ class SyncProcessRepository implements SyncProcessRepositoryInterface
      */
     public function failById(int $id, array $meta = []): bool
     {
-        return SyncProcess::query()->findOrFail($id)->update([
+        return SyncProcess::query()->findOrFail($id)?->update([
             'finished_at' => Date::now(),
             'status'      => SyncProcess::STATUS_FAILED,
             'meta'        => $meta,
@@ -57,19 +57,19 @@ class SyncProcessRepository implements SyncProcessRepositoryInterface
     }
 
     /**
-     * @param int $primaryKey
+     * @param int $id
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function update($primaryKey, array $newAttributes): bool
+    public function update($id, array $newAttributes): bool
     {
-        return SyncProcess::query()->findOrFail($primaryKey)->update($newAttributes);
+        return SyncProcess::query()->findOrFail($id)?->update($newAttributes);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function delete($primaryKey): bool
+    public function delete($id): bool
     {
         throw new NotImplementedException();
     }

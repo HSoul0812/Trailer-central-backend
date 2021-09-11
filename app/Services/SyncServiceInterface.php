@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\TrailerCentral\Integration\Console;
+namespace App\Services;
 
 interface SyncServiceInterface
 {
