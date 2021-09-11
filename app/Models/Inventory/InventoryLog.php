@@ -11,14 +11,14 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int                      $id
- * @property int                      $record_id
- * @property string                   $event        ['created'|'updated'|'price-changed']
- * @property string                   $status       ['available'|'sold']
+ * @property int                      $trailercentral_id
+ * @property string                   $event             ['created'|'updated'|'price-changed']
+ * @property string                   $status            ['available'|'sold']
  * @property string                   $vin
  * @property string                   $brand
  * @property string                   $manufacturer
  * @property numeric                  $price
- * @property array                    $meta         json data
+ * @property array                    $meta              json data
  * @property DateTimeInterface|string $created_at
  */
 class InventoryLog extends Model
@@ -41,7 +41,7 @@ class InventoryLog extends Model
      * @var string[]
      */
     protected $fillable = [
-        'record_id',
+        'trailercentral_id',
         'event',
         'status',
         'vin',

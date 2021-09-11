@@ -10,10 +10,10 @@ use App\Repositories\Inventory\InventoryLogRepository;
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;
 use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
-use App\Services\Integrations\TrailerCentral\Inventory\Console\LogService as InventoryLogService;
-use App\Services\Integrations\TrailerCentral\Inventory\Console\LogServiceInterface as InventoryLogServiceInterface;
-use App\Services\Integrations\TrailerCentral\Inventory\Console\SyncService as InventorySyncService;
-use App\Services\Integrations\TrailerCentral\Inventory\Console\SyncServiceInterface as InventorySyncServiceInterface;
+use App\Services\Integrations\TrailerCentral\Console\Inventory\LogService as InventoryLogService;
+use App\Services\Integrations\TrailerCentral\Console\Inventory\LogServiceInterface as InventoryLogServiceInterface;
+use App\Services\Integrations\TrailerCentral\Console\Inventory\SyncService as InventorySyncService;
+use App\Services\Integrations\TrailerCentral\Console\Inventory\SyncServiceInterface as InventorySyncServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider

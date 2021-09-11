@@ -16,7 +16,7 @@ class CreateInventoryLogsTable extends Migration
     {
         Schema::create('inventory_logs', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();
-            $table->integer('record_id')->unsigned()->index('inventory_logs_i_record_id');
+            $table->integer('trailercentral_id')->unsigned()->index('inventory_logs_i_trailercentral_id');
             $table->enum('event', ['created', 'updated', 'price-changed'])
                 ->default('created')
                 ->index('inventory_logs_i_event');
@@ -29,11 +29,12 @@ class CreateInventoryLogsTable extends Migration
             $table->jsonb('meta')->default('{}');
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP(0)'));
-
-            $table->index(['event', 'manufacturer', 'brand', 'created_at'], 'inventory_logs_i_default_lookup');
         });
 
-        DB::statement('CREATE INDEX inventory_logs_i_update_lookup ON inventory_logs (created_at DESC)');
+        DB::statement('CREATE INDEX inventory_logs_i_default_lookup ON inventory_logs (event ASC, manufacturer ASC, brand ASC, created_at DESC)');
+        DB::statement('CREATE INDEX inventory_logs_i_created_lookup ON inventory_logs (created_at DESC)');
+        DB::statement('CREATE INDEX inventory_logs_igin_manufacturer ON inventory_logs USING gin (manufacturer gin_trgm_ops)');
+        DB::statement('CREATE INDEX inventory_logs_igin_brand ON inventory_logs USING gin (brand gin_trgm_ops)');
         DB::statement('CREATE INDEX inventory_logs_igin_vin ON inventory_logs USING gin (vin gin_trgm_ops)');
     }
 
