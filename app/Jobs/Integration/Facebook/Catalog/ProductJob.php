@@ -335,6 +335,15 @@ class ProductJob extends Job
             $listing->additional_image_link = implode(",", $listing->additional_image_link);
         }
 
+        // Fix Availability
+        if($listing->availability === '4') {
+            $listing->availability = self::PENDING;
+        } elseif($listing->availability === '2') {
+            $listing->availability = self::UNAVAILABLE;
+        } else {
+            $listing->availability = self::AVAILABLE;
+        }
+
 
         // Append Description
         $listing->description = isset($listing->description) ? trim($listing->description) : '';

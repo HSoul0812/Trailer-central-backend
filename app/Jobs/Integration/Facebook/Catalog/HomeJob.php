@@ -206,6 +206,8 @@ class HomeJob extends Job
         // Fix Availability
         if($listing->availability === '4') {
             $listing->availability = self::PENDING;
+        } elseif($listing->availability === '2') {
+            $listing->availability = self::UNAVAILABLE;
         } else {
             $listing->availability = self::AVAILABLE;
         }
