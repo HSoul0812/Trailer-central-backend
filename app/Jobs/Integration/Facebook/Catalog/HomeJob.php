@@ -67,7 +67,7 @@ class HomeJob extends Job
         'description',
         'url',
         'year_built',
-        'images',
+        'image',
         'price',
         'availability',
         'product_type',
