@@ -72,7 +72,9 @@ class HomeJob extends Job
         'availability',
         'product_type',
         'num_beds',
-        'address'
+        'address',
+        'latitude',
+        'longitude'
     );
 
 
@@ -217,10 +219,12 @@ class HomeJob extends Job
             'city' => $listing->address_city,
             'region' => $listing->address_region,
             'country' => $listing->address_country,
-            'postal' => $listing->address_postal,
-            'latitude' => $listing->address_latitude ?? 0,
-            'longitude' => $listing->address_longitude ?? 0
+            'postal' => $listing->address_postal
         ]);
+
+        // Set Latitude/Longitude
+        $listing->latitude = $listing->address_latitude ?? 0;
+        $listing->longitude => $listing->address_longitude ?? 0;
 
         // Append Description
         $listing->description = isset($listing->description) ? trim($listing->description) : '';
