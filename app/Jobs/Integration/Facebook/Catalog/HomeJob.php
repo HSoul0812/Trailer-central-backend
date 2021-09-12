@@ -27,7 +27,7 @@ class HomeJob extends Job
      */
     const CABIN = 'Cabin';
     const COTTAGE = 'Cottage';
-    const BARB = 'Barn';
+    const BARn = 'Barn';
     const GARAGE = 'Garage/Carport';
     const VINYL = 'Vinyl';
     const METAL = 'Metal Building';
