@@ -31,19 +31,14 @@ class Catalog extends Model
     ];
 
     /**
-     * @const array Vehicle Types
+     * @const array Vehicle Type
      */
-    const VEHICLE_TYPES = [
-        'vehicles',
-        'vehicle_offers'
-    ];
+    const VEHICLE_TYPE = 'vehicles';
 
     /**
-     * @const array Home Types
+     * @const array Home Type
      */
-    const HOME_TYPES = [
-        'home_listings'
-    ];
+    const HOME_TYPE = 'home_listings';
 
     /**
      * @const string Default Catalog Type
