@@ -26,6 +26,11 @@ class Kernel extends ConsoleKernel
             ->daily()
             ->withoutOverlapping()
             ->runInBackground();
+
+        $schedule->command('sync:leads')
+            ->daily()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**
