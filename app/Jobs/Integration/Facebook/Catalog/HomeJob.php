@@ -67,7 +67,7 @@ class HomeJob extends Job
         'description',
         'url',
         'year_built',
-        'image',
+        'image[0].url',
         'price',
         'availability',
         'product_type',
@@ -200,7 +200,7 @@ class HomeJob extends Job
 
         // Encode Images
         if(is_array($listing->image)) {
-            $listing->image = json_encode(reset($listing->image));
+            $listing->{'image[0].url'} = $listing->image[0]->url;
         }
 
         // Fix Availability
