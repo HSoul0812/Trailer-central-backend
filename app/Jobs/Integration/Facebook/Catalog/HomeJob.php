@@ -198,7 +198,7 @@ class HomeJob extends Job
 
         // Encode Images
         if(is_array($listing->image)) {
-            $listing->image = json_encode($listing->image);
+            $listing->image = json_encode(reset($listing->image));
         }
 
         // Fix Availability
@@ -218,8 +218,8 @@ class HomeJob extends Job
             'region' => $listing->address_region,
             'country' => $listing->address_country,
             'postal' => $listing->address_postal,
-            'latitude' => $listing->address_latitude,
-            'longitude' => $listing->address_longitude
+            'latitude' => $listing->address_latitude ?? 0,
+            'longitude' => $listing->address_longitude ?? 0
         ]);
 
         // Append Description
