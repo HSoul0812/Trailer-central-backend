@@ -224,7 +224,7 @@ class HomeJob extends Job
 
         // Set Latitude/Longitude
         $listing->latitude = $listing->address_latitude ?? 0;
-        $listing->longitude => $listing->address_longitude ?? 0;
+        $listing->longitude = $listing->address_longitude ?? 0;
 
         // Append Description
         $listing->description = isset($listing->description) ? trim($listing->description) : '';
