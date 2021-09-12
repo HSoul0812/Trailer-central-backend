@@ -165,7 +165,7 @@ class HomeJob extends Job
         $clean = $this->cleanCsvRow($listing);
 
         // Skip if Fields Missing
-        if(empty($clean->title) || empty($clean->description) || empty($clean->model)) {
+        if(empty($clean->name) || empty($clean->description)) {
             return false;
         }
 
