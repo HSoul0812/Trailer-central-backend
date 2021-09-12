@@ -4,6 +4,7 @@ namespace App\Services\Integration\Facebook;
 
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Catalog;
+use App\Jobs\Integration\Facebook\Catalog\HomeJob;
 use App\Jobs\Integration\Facebook\Catalog\ProductJob;
 use App\Jobs\Integration\Facebook\Catalog\VehicleJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
@@ -275,6 +276,8 @@ class CatalogService implements CatalogServiceInterface
             // Create Job
             if(in_array($integration->catalog_type, Catalog::VEHICLE_TYPES)) {
                 $this->dispatch(new VehicleJob($integration, $feed->feed_url));
+            }  elseif(in_array($integration->catalog_type, Catalog::HOME_TYPES)) {
+                $this->dispatch(new HomeJob($integration, $feed->feed_url));
             } else {
                 $this->dispatch(new ProductJob($integration, $feed->feed_url));
             }
