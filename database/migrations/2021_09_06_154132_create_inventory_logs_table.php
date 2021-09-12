@@ -33,6 +33,7 @@ class CreateInventoryLogsTable extends Migration
 
         DB::statement('CREATE INDEX inventory_logs_i_default_lookup ON inventory_logs (event ASC, manufacturer ASC, brand ASC, created_at DESC)');
         DB::statement('CREATE INDEX inventory_logs_i_created_lookup ON inventory_logs (created_at DESC)');
+
         DB::statement('CREATE INDEX inventory_logs_igin_manufacturer ON inventory_logs USING gin (manufacturer gin_trgm_ops)');
         DB::statement('CREATE INDEX inventory_logs_igin_brand ON inventory_logs USING gin (brand gin_trgm_ops)');
         DB::statement('CREATE INDEX inventory_logs_igin_vin ON inventory_logs USING gin (vin gin_trgm_ops)');
