@@ -14,7 +14,7 @@ class CreateLeadLogsTable extends Migration
      */
     public function up(): void
     {
-        Schema::create('lead_logs`', function (Blueprint $table) {
+        Schema::create('lead_logs', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();
             $table->integer('trailercentral_id')->unsigned()->index('lead_logs_i_trailercentral_id');
             $table->integer('inventory_id')->unsigned()->index('lead_logs_i_inventory_id');
