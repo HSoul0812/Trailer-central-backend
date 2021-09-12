@@ -18,9 +18,9 @@ class HomeJob extends Job
     /**
      * Facebook Availability
      */
-    const AVAILABLE = 'AVAILABLE';
-    const UNAVAILABLE = 'NOT_AVAILABLE';
-    const PENDING = 'PENDING';
+    const AVAILABLE = 'for_sale';
+    const UNAVAILABLE = 'off_market';
+    const PENDING = 'sale_pending';
 
     /**
      * @const Property Types
@@ -197,8 +197,8 @@ class HomeJob extends Job
         $listing->url = $this->getInventoryUrl($listing->home_listing_id);
 
         // Encode Images
-        if(is_array($listing->images)) {
-            $listing->images = json_encode($listing->images);
+        if(is_array($listing->image)) {
+            $listing->image = json_encode($listing->image);
         }
 
         // Fix Availability
