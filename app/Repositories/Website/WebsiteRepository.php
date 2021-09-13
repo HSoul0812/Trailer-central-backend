@@ -5,6 +5,7 @@ namespace App\Repositories\Website;
 use App\Exceptions\NotImplementedException;
 use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\Website\Website;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -37,7 +38,7 @@ class WebsiteRepository implements WebsiteRepositoryInterface
      */
     public function get($params)
     {
-        return Website::findOrFail($params['id']); 
+        return Website::findOrFail($params['id']);
     }
 
     /**
@@ -52,11 +53,13 @@ class WebsiteRepository implements WebsiteRepositoryInterface
     /**
      * @param $params
      * @param bool $withDefault
-     * @return Collection
+     * @return Collection|LengthAwarePaginator
      */
-    public function getAll($params, bool $withDefault = true): Collection
+    public function getAll($params, bool $withDefault = true)
     {
-        $query = Website::select('*');
+        $query = Website::query();
+
+        $query = $query->select('*');
 
         if ($withDefault) {
             $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
@@ -64,6 +67,23 @@ class WebsiteRepository implements WebsiteRepositoryInterface
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+
+        if (!empty($params['dealer_id']) && !empty($params['type']) && $params['type'] === Website::WEBSITE_TYPE_CLASSIFIED) {
+            $query->where(function ($query) use ($params) {
+                $query->where('dealer_id', '=', $params['dealer_id'])
+                    ->orWhereNull('dealer_id');
+            });
+        } elseif (!empty($params['dealer_id'])) {
+            $query->where('dealer_id', '=', $params['dealer_id']);
+        }
+
+        if (!empty($params['type'])) {
+            $query->where('type', '=', $params['type']);
+        }
+
+        if (!empty($params['per_page'])) {
+            return $query->paginate($params['per_page'])->appends($params);
         }
 
         return $query->get();
