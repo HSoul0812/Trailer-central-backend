@@ -16,6 +16,36 @@ class Catalog extends Model
     // Define Table Name Constant
     const TABLE_NAME = 'fbapp_catalog';
 
+
+    /**
+     * @const array Catalog Types
+     */
+    const CATALOG_TYPES = [
+        'commerce',
+        'hotels',
+        'flights',
+        'destinations',
+        'home_listings',
+        'vehicles',
+        'vehicle_offers'
+    ];
+
+    /**
+     * @const array Vehicle Type
+     */
+    const VEHICLE_TYPE = 'vehicles';
+
+    /**
+     * @const array Home Type
+     */
+    const HOME_TYPE = 'home_listings';
+
+    /**
+     * @const string Default Catalog Type
+     */
+    const DEFAULT_TYPE = 'vehicles';
+
+
     /**
      * @var string
      */
@@ -37,6 +67,8 @@ class Catalog extends Model
         'fbapp_page_id',
         'business_id',
         'catalog_id',
+        'catalog_name',
+        'catalog_type',
         'account_name',
         'account_id',
         'filters',
@@ -93,5 +125,22 @@ class Catalog extends Model
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('facebook')
                     ->whereRelationType('fbapp_catalog');
+    }
+
+
+    /**
+     * Get Catalog Name or ID
+     *
+     * @return string
+     */
+    public function getCatalogNameIdAttribute(): string
+    {
+        // Catalog Name Exists?
+        if(!empty($this->catalog_name)) {
+            return $this->catalog_name;
+        }
+
+        // Return Catalog ID
+        return !empty($this->catalog_id) ? '#' . $this->catalog_id : '';
     }
 }
