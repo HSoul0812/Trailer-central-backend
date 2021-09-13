@@ -4,12 +4,12 @@ namespace App\Models\Parts;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vendor extends Model
-{
     protected $table = 'qb_vendors';
 
-    use TableAware;
+    use TableAware, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
