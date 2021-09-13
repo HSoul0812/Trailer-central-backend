@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Services\LoggerService;
+use App\Services\LoggerServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -9,14 +13,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register()
+    public function register(): void
     {
-    }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot()
-    {
+        $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
     }
 }

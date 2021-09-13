@@ -15,7 +15,7 @@ RUN pecl install swoole
 RUN docker-php-ext-enable swoole
 
 # laravel and project extensions
-RUN docker-php-ext-install sodium zip pdo pdo_mysql pgsql pdo_pgsql
+RUN docker-php-ext-install sodium zip pdo pdo_mysql pgsql pdo_pgsql pcntl
 
 RUN curl -sS https://getcomposer.org/installer | php -- \
         --install-dir=/usr/local/bin --filename=composer
