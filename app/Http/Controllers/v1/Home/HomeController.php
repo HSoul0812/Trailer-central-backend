@@ -32,6 +32,7 @@ class HomeController extends AbstractRestfulController
      */
     public function index(IndexRequestInterface $request)
     {
+        die('vvvv');
         if ($request->validate()) {
             return $this->response->noContent();
         }
