@@ -48,7 +48,8 @@ class PartsTransformer extends TransformerAbstract
              'video_embed_code' => $part->video_embed_code,
              'stock_min' => $part->stock_min,
              'stock_max' => $part->stock_max,
-             'bins' => $part->bins
+             'bins' => $part->bins,
+             'disabled' => count($part->bins) === 0
          ];
     }
 

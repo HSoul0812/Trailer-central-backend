@@ -98,7 +98,7 @@ class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements B
             ->setHeaders($exporter->getHeaders())
 
             // a line mapper maps the db columns by name to csv column by position
-            ->setLineMapper(static function (Part $part) use ($exporter): array {
+            ->setLineMapper(static function (\stdClass $part) use ($exporter): array {
                 return $exporter->getLineMapper($part);
             })
 
