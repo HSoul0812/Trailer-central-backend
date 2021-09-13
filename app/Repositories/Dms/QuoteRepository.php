@@ -41,11 +41,11 @@ class QuoteRepository implements QuoteRepositoryInterface {
             'direction' => 'ASC'
         ],
         'completed_at' => [
-            'field' => 'created_at',
+            'field' => 'completed_at',
             'direction' => 'DESC'
         ],
         '-completed_at' => [
-            'field' => 'created_at',
+            'field' => 'completed_at',
             'direction' => 'ASC'
         ],
     ];
