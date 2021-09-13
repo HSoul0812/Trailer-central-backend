@@ -47,6 +47,8 @@ class CatalogTransformer extends TransformerAbstract
             'dealer_location' => $this->dealerLocationTransformer->transform($catalog->dealerLocation),
             'business_id' => $catalog->business_id,
             'catalog_id' => $catalog->catalog_id,
+            'catalog_name' => $catalog->catalog_name_id,
+            'catalog_type' => $catalog->catalog_type,
             'account_id' => $catalog->account_id,
             'account_name' => $catalog->account_name,
             'access_token' => $this->tokenTransformer->transform($catalog->accessToken),

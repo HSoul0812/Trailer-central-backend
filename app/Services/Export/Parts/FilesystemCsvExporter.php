@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Export\Parts;
 
-use App\Models\Parts\Part;
 use App\Services\Export\FilesystemCsvExporter as GenericFilesystemCsvExporter;
+use stdClass;
 
 /**
  * General purpose export CSV to a `Filesystem` object from query
@@ -15,16 +15,16 @@ class FilesystemCsvExporter extends GenericFilesystemCsvExporter
     /**
      * Maps a `Part` data to respective CSV columns
      *
-     * @param Part $part
+     * @param stdClass $part
      * @return array
      */
     public function getLineMapper($part): array
     {
         return [
-            'Vendor' => $part->vendor ? $part->vendor->name : '',
-            'Brand' => $part->brand ? $part->brand->name : '',
-            'Type' => $part->type ? $part->type->name : '',
-            'Category' => $part->category ? $part->category->name : '',
+            'Vendor' => $part->vendor_name,
+            'Brand' => $part->brand_name,
+            'Type' => $part->type_name,
+            'Category' => $part->category_name,
             'Subcategory' => $part->subcategory,
             'Title' => $part->title,
             'SKU' => $part->sku,
@@ -35,7 +35,7 @@ class FilesystemCsvExporter extends GenericFilesystemCsvExporter
             'Weight Rating' => $part->weight_rating,
             'Description' => $part->description,
             'Show on website' => $part->show_on_website,
-            'Image' => !empty($part->images) ? implode("\n", $part->images->all()) : '',
+            'Image' => $part->images,
             'Video Embed Code' => $part->video_embed_code,
             'Qty' => $part->total_qty
         ];
