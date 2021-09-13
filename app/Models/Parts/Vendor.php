@@ -2,12 +2,15 @@
 
 namespace App\Models\Parts;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 class Vendor extends Model
-{ 
+{
     protected $table = 'qb_vendors';
-    
+
+    use TableAware;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -46,7 +49,7 @@ class Vendor extends Model
     protected $hidden = [
 
     ];
-    
+
     public function parts()
     {
         return $this->hasMany('App\Models\Parts\Part');
