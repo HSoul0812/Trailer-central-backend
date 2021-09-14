@@ -12,6 +12,9 @@ use stdClass;
 use Tests\Common\WithArtifacts;
 use Tests\Unit\WithFaker;
 
+/**
+ * @covers \App\Services\Integrations\TrailerCentral\Console\Inventory\LogService::mapToInsertString
+ */
 class MapToInsertStringTest extends LogServiceTestCase
 {
     use WithFaker;
