@@ -8,6 +8,7 @@ Requirements
 --------------------------------------
 - Docker
 - Docker compose
+- Laravel Nova
 
 Setup
 --------------------------------------
