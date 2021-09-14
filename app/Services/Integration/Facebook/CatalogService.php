@@ -276,7 +276,7 @@ class CatalogService implements CatalogServiceInterface
             // Create Job
             if($integration->catalog_type === Catalog::VEHICLE_TYPE) {
                 $this->dispatch(new VehicleJob($integration, $feed->feed_url));
-            }  elseif($integration->catalog_type === Catalog::HOME_TYPE) {
+            } elseif($integration->catalog_type === Catalog::HOME_TYPE) {
                 $this->dispatch(new HomeJob($integration, $feed->feed_url));
             } else {
                 $this->dispatch(new ProductJob($integration, $feed->feed_url));

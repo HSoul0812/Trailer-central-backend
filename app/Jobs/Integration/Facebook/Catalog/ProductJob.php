@@ -171,6 +171,7 @@ class ProductJob extends Job
     const AVAILABLE = 'in stock';
     const UNAVAILABLE = 'out of stock';
     const ONORDER = 'on order';
+    const PENDING = 'pending';
 
 
     /**
@@ -338,6 +339,8 @@ class ProductJob extends Job
         // Fix Availability
         if($listing->availability === '4') {
             $listing->availability = self::PENDING;
+        } elseif($listing->availability === '3') {
+            $listing->availability = self::ONORDER;
         } elseif($listing->availability === '2') {
             $listing->availability = self::UNAVAILABLE;
         } else {
