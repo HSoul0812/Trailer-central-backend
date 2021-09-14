@@ -7,13 +7,14 @@ namespace App\Services\Integrations\TrailerCentral\Console\Inventory;
 use App\Models\Inventory\InventoryLog;
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Console\AbstractLogService;
+use Illuminate\Database\ConnectionInterface;
 use stdClass;
 
 class LogService extends AbstractLogService implements LogServiceInterface
 {
-    public function __construct(protected InventoryLogRepositoryInterface $repository)
+    public function __construct(protected InventoryLogRepositoryInterface $repository, ConnectionInterface $connection)
     {
-        parent::__construct();
+        parent::__construct($connection);
     }
 
     /**
