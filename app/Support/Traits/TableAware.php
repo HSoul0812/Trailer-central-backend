@@ -10,7 +10,9 @@ trait TableAware
 
     public static function getTableName(): string
     {
-        static::$static = static::$static ?? with(new static());
+        if (!isset(static::$static)) {
+            static::$static = with(new static());
+        }
 
         return static::$static->getTable();
     }

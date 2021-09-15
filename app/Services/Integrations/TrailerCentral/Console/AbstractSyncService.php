@@ -5,28 +5,37 @@ declare(strict_types=1);
 namespace App\Services\Integrations\TrailerCentral\Console;
 
 use App\Exceptions\CannotBeUsedBeyondConsole;
+use App\Models\SyncProcess;
 use App\Repositories\Integrations\TrailerCentral\SourceRepositoryInterface;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Services\LoggerServiceInterface;
 use Exception;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Support\Collection;
+use Throwable;
 
 abstract class AbstractSyncService
 {
+    protected ?SyncProcess $lastProcess = null;
+    protected SyncProcess $currentProcess;
+    protected bool $isNotTheFirstImport;
+    protected int $numberOfRecordsImported;
+
     public function __construct(
         private SourceRepositoryInterface $sourceRepository,
         private LogServiceInterface $targetRepository,
         private SyncProcessRepositoryInterface $processRepository,
         private ApplicationContract $app,
-        private LoggerServiceInterface $logger
+        private LoggerServiceInterface $logger,
+        private ConnectionInterface $connection
     ) {
     }
 
     /**
-     * @throws \PDOException  when some unknown PDO error has been thrown
-     * @throws \JsonException when the metadata were unable to be serialized
-     * @throws \Exception     when some unknown exception has been thrown
+     * @throws \PDOException         when some unknown PDO error has been thrown
+     * @throws \JsonException        when the metadata were unable to be serialized
+     * @throws \Exception|\Throwable when some unknown exception has been thrown
      */
     public function sync(): int
     {
@@ -37,31 +46,28 @@ abstract class AbstractSyncService
         // needed to create an insertion buffer, surely it only will be at the very first time
         ini_set('memory_limit', $this->getMemoryLimit());
 
-        $process = $this->processRepository->create(['name' => $this->getProcessName()]);
+        $this->currentProcess = $this->processRepository->create(['name' => $this->getProcessName()]);
 
         try {
-            $lastProcess = $this->processRepository->lastFinishedByProcessName($this->getProcessName());
+            $this->lastProcess = $this->processRepository->lastFinishedByProcessName($this->getProcessName());
 
-            $numberOfRecordsImported = 0;
+            $this->numberOfRecordsImported = 0;
 
-            $isNotTheFirstImport = $this->processRepository->isNotTheFirstImport($this->getProcessName());
+            $this->isNotTheFirstImport = $this->processRepository->isNotTheFirstImport($this->getProcessName());
 
-            DB::transaction(function () use ($lastProcess, $isNotTheFirstImport, $process, &$numberOfRecordsImported) {
-                $this->sourceRepository
-                    ->queryAllSince($lastProcess?->finished_at)
-                    ->chunk(
-                        $this->getChunkLimit(),
-                        function ($records) use ($isNotTheFirstImport, &$numberOfRecordsImported, $process): void {
-                            $this->applyToChuck($records, $isNotTheFirstImport, $numberOfRecordsImported, $process);
-                        }
-                    );
+            $this->connection->transaction(fn () => $this->applyToTransaction());
 
-                $this->processRepository->finishById($process->id, ['numberOfRecordsImported' => $numberOfRecordsImported]);
-            });
+            return $this->numberOfRecordsImported;
+        } catch (Exception|Throwable $exception) {
+            $this->processRepository->failById($this->currentProcess->id, ['errorMessage' => $exception->getMessage()]);
 
-            return $numberOfRecordsImported;
-        } catch (Exception $exception) {
-            $this->processRepository->failById($process->id, ['errorMessage' => $exception->getMessage()]);
+            $this->logger->error(sprintf(
+                    '[SyncService::%s] process %d has failed due %s',
+                    $this->getProcessName(),
+                    $this->currentProcess->id,
+                    $exception->getMessage()
+                )
+            );
 
             throw $exception;
         }
@@ -78,14 +84,31 @@ abstract class AbstractSyncService
      * @throws \JsonException when the metadata were unable to be serialized
      * @throws \Exception     when some unknown exception has been thrown
      */
-    private function applyToChuck($records, $isNotTheFirstImport, &$numberOfRecordsImported, $process): void
+    protected function applyToTransaction(): void
+    {
+        $this->sourceRepository
+            ->queryAllSince($this->lastProcess?->finished_at)
+            ->chunk($this->getChunkLimit(), fn ($records) => $this->applyToChuck($records));
+
+        $this->processRepository->finishById(
+            $this->currentProcess->id,
+            ['numberOfRecordsImported' => $this->numberOfRecordsImported]
+        );
+    }
+
+    /**
+     * @throws \PDOException  when some unknown PDO error has been thrown
+     * @throws \JsonException when the metadata were unable to be serialized
+     * @throws \Exception     when some unknown exception has been thrown
+     */
+    protected function applyToChuck(Collection $records): void
     {
         $insertValues = '';
 
         foreach ($records as $record) {
-            $insertValues .= $this->targetRepository->mapToInsertString($record, $isNotTheFirstImport);
+            $insertValues .= $this->targetRepository->mapToInsertString($record, $this->isNotTheFirstImport);
 
-            ++$numberOfRecordsImported;
+            ++$this->numberOfRecordsImported;
         }
 
         $this->targetRepository->execute($insertValues);
@@ -93,8 +116,8 @@ abstract class AbstractSyncService
         $this->logger->info(sprintf(
                 '[SyncService::%s] %d records imported on process %d',
                 $this->getProcessName(),
-                $numberOfRecordsImported,
-                $process->id
+                $this->numberOfRecordsImported,
+                $this->currentProcess->id
             )
         );
     }

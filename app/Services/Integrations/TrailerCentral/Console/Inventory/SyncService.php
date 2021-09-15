@@ -9,6 +9,7 @@ use App\Repositories\SyncProcessRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Console\AbstractSyncService;
 use App\Services\LoggerServiceInterface;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
+use Illuminate\Database\ConnectionInterface;
 use JetBrains\PhpStorm\Pure;
 
 class SyncService extends AbstractSyncService implements SyncServiceInterface
@@ -20,8 +21,9 @@ class SyncService extends AbstractSyncService implements SyncServiceInterface
         LoggerServiceInterface $logger,
         SyncProcessRepositoryInterface $processRepository,
         ApplicationContract $app,
+        ConnectionInterface $connection
     ) {
-        parent::__construct($sourceRepository, $targetRepository, $processRepository, $app, $logger);
+        parent::__construct($sourceRepository, $targetRepository, $processRepository, $app, $logger, $connection);
     }
 
     protected function getProcessName(): string
