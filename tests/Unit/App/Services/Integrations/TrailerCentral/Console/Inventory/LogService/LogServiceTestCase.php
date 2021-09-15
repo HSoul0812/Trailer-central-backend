@@ -26,7 +26,6 @@ abstract class LogServiceTestCase extends UnitTestCase
             'repository' => $this->mockClassWithoutArguments(InventoryLogRepositoryInterface::class),
             'connection' => $this->getMockBuilder(ConnectionInterface::class)
                 ->disableOriginalConstructor()
-                //->addMethods(array_merge($availableMethods, ['getPdo']))
                 ->addMethods(['getPdo'])
                 ->onlyMethods($availableMethods)
                 ->getMock(),
