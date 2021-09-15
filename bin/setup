@@ -4,6 +4,8 @@ set -eu
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+unzip nova.zip
+
 cp "${ROOT}"/.env.example "${ROOT}"/.env
 
 docker-compose up -d

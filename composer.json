@@ -31,7 +31,7 @@
     },
     "repositories": [
         {
-            "type": "composer",
+            "type": "path",
             "url": "./laravel-nova-bd32015c9dce9060fe327f09e96abbe729900648"
         }
     ],
@@ -73,5 +73,5 @@
         "sort-packages": true
     },
     "minimum-stability": "dev",
-    "prefer-stable": true    
+    "prefer-stable": true
 }
