@@ -20,5 +20,11 @@ return [
 
     'memory_limit' => env('TC_SYNCHRONIZATION_MEMORY_LIMIT', '650M'),
 
-    'records_per_chunk' => env('TC_SYNCHRONIZATION_RECORDS_PER_CHUNK', 8000),
+    'inventory' => [
+        'records_per_chunk' => env('TC_SYNCHRONIZATION_INVENTORY_RECORDS_PER_CHUNK', 8000),
+    ],
+
+    'leads' => [
+        'records_per_chunk' => env('TC_SYNCHRONIZATION_LEADS_RECORDS_PER_CHUNK', 16000),
+    ],
 ];

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models\Inventory;
+namespace App\Models\Leads;
 
 use App\Support\Traits\TableAware;
 use DateTimeInterface;
@@ -12,26 +12,18 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int                      $id
  * @property int                      $trailercentral_id
- * @property string                   $event             ['created'|'updated'|'price-changed']
- * @property string                   $status            ['available'|'sold']
- * @property string                   $vin
- * @property string                   $brand
- * @property string                   $manufacturer
- * @property numeric                  $price
+ * @property int                      $inventory_id
+ * @property string                   $first_name
+ * @property string                   $last_name
+ * @property string                   $email_address
  * @property array                    $meta              json data
+ * @property DateTimeInterface|string $submitted_at
  * @property DateTimeInterface|string $created_at
  */
-class InventoryLog extends Model
+class LeadLog extends Model
 {
     use HasFactory;
     use TableAware;
-
-    public const STATUS_AVAILABLE = 'available';
-    public const STATUS_SOLD = 'sold';
-
-    public const EVENT_CREATED = 'created';
-    public const EVENT_UPDATED = 'updated';
-    public const EVENT_PRICE_CHANGED = 'price-changed';
 
     public $timestamps = false;
 
@@ -42,13 +34,12 @@ class InventoryLog extends Model
      */
     protected $fillable = [
         'trailercentral_id',
-        'event',
-        'status',
-        'vin',
-        'brand',
-        'manufacturer',
-        'price',
+        'inventory_id',
+        'first_name',
+        'last_name',
+        'email_address',
         'meta',
+        'submitted_at',
     ];
 
     /**

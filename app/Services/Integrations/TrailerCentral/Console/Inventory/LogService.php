@@ -2,22 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Integrations\TrailerCentral\Inventory\Console;
+namespace App\Services\Integrations\TrailerCentral\Console\Inventory;
 
 use App\Models\Inventory\InventoryLog;
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;
-use Closure;
-use Illuminate\Support\Facades\DB;
-use PDO;
+use App\Services\Integrations\TrailerCentral\Console\AbstractLogService;
 use stdClass;
 
-class LogService implements LogServiceInterface
+class LogService extends AbstractLogService implements LogServiceInterface
 {
-    private Closure|PDO $pdo;
-
-    public function __construct(private InventoryLogRepositoryInterface $repository)
+    public function __construct(protected InventoryLogRepositoryInterface $repository)
     {
-        $this->pdo = DB::connection()->getPdo();
+        parent::__construct();
     }
 
     /**
@@ -74,19 +70,14 @@ class LogService implements LogServiceInterface
     private function compileInsertStatement(string $values): string
     {
         return sprintf(
-            'INSERT INTO %s (record_id, "event", status, vin, brand, manufacturer, price, "meta") VALUES %s ',
+            'INSERT INTO %s (trailercentral_id, "event", status, vin, brand, manufacturer, price, "meta") VALUES %s ',
             InventoryLog::getTableName(),
             substr($values, 0, -1)
         );
     }
 
-    private function quote(mixed $value): string
-    {
-        return $this->pdo->quote($value);
-    }
-
     /**
-     * Maps a status as integer (DMS type) to a string.
+     * Maps a status as integer (Trailer Central type) to a string used by Trailer Trader.
      */
     private function mapStatus(?int $status): string
     {

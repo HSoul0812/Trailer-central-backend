@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Integrations\TrailerCentral\Inventory\Console;
+namespace App\Services\Integrations\TrailerCentral\Console;
 
 use stdClass;
 
