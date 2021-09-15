@@ -7,6 +7,30 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Website\Blog\Post;
 use App\Models\User\User;
 
+/**
+ * Class Website
+ * @package App\Models\Website
+ *
+ * @property int $id
+ * @property string $domain
+ * @property string $canonical_host
+ * @property string $render
+ * @property bool $render_cms
+ * @property bool $https_supported
+ * @property string $type
+ * @property string $template
+ * @property bool $responsive
+ * @property int $dealer_id
+ * @property string $type_config
+ * @property float $handling_fee
+ * @property int $parts_fulfillment
+ * @property \DateTimeInterface $date_created
+ * @property int $date_updated
+ * @property bool $is_active
+ * @property bool $is_live
+ * @property string $parts_email
+ * @property bool $force_elastic
+ */
 class Website extends Model
 {
     const WEBSITE_TYPE_CLASSIFIED = 'classified';
@@ -31,7 +55,7 @@ class Website extends Model
     {
         return $this->hasOne(User::class, 'dealer_id', 'dealer_id');
     }
-    
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -39,7 +63,7 @@ class Website extends Model
     {
         return $this->hasMany(WebsiteConfig::class, 'website_id', 'id');
     }
-    
+
     public function blogPosts()
     {
         return $this->hasMany(Post::class, 'website_id', 'id');
