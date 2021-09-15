@@ -17,3 +17,4 @@ cli php artisan key:generate
 sleep 5
 
 cli php artisan migrate
+cli php artisan nova:publish
