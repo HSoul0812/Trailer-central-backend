@@ -4,6 +4,8 @@ set -eu
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+unzip nova.zip
+
 cp "${ROOT}"/.env.example "${ROOT}"/.env
 
 docker-compose up -d
@@ -15,3 +17,4 @@ cli php artisan key:generate
 sleep 5
 
 cli php artisan migrate
+cli php artisan nova:publish
