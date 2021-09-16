@@ -4,7 +4,9 @@ namespace App\Services\Integration\Facebook;
 
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Catalog;
-use App\Jobs\Integration\Facebook\CatalogJob;
+use App\Jobs\Integration\Facebook\Catalog\HomeJob;
+use App\Jobs\Integration\Facebook\Catalog\ProductJob;
+use App\Jobs\Integration\Facebook\Catalog\VehicleJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
@@ -233,15 +235,15 @@ class CatalogService implements CatalogServiceInterface
     /**
      * Process Payload
      * 
-     * @param array $params
+     * @param string $type
+     * @param string $payload
      * @return Fractal
      */
-    public function payload($params) {
+    public function payload(string $payload) {
         // Parse Payload Data
-        $payload = json_decode($params['payload']);
-        $success = false;
+        $json = json_decode($payload);
         $feeds = [];
-        foreach($payload as $integration) {
+        foreach($json as $integration) {
             // Validate Payload
             if(empty($integration->business_id) && empty($integration->catalog_id)) {
                 continue;
@@ -264,17 +266,18 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Create Job
-            $this->dispatch(new CatalogJob($integration, $feed->feed_url));
-        }
-
-        // Validate Feeds Exist?
-        if(count($feeds) > 0) {
-            $success = true;
+            if($integration->catalog_type === Catalog::VEHICLE_TYPE) {
+                $this->dispatch(new VehicleJob($integration, $feed->feed_url));
+            } elseif($integration->catalog_type === Catalog::HOME_TYPE) {
+                $this->dispatch(new HomeJob($integration, $feed->feed_url));
+            } else {
+                $this->dispatch(new ProductJob($integration, $feed->feed_url));
+            }
         }
 
         // Return Response
         return [
-            'success' => $success,
+            'success' => count($feeds) > 0,
             'feeds' => count($feeds)
         ];
     }
