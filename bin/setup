@@ -4,17 +4,24 @@ set -eu
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+. "$ROOT"/bin/libs/env.sh
+
+rm -Rf laravel-nova-bd32015c9dce9060fe327f09e96abbe729900648 # just in case it exists
 unzip nova.zip
 
 cp "${ROOT}"/.env.example "${ROOT}"/.env
+cp "${ROOT}"/.env.testing.example "${ROOT}"/.env.testing
 
+docker-compose down
 docker-compose up -d
+
+echo "Waiting for postgres database..."
+sleep 6 # this is not elegant, but it works
 
 cli composer install
 
 cli php artisan key:generate
-
-sleep 5
-
 cli php artisan migrate
 cli php artisan nova:publish
+cli php artisan optimize
+cli php artisan route:clear
