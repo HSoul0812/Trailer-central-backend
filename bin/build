@@ -4,7 +4,6 @@ set -eu
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-
 rm -Rf laravel-nova-bd32015c9dce9060fe327f09e96abbe729900648 # just in case it exists
 unzip nova.zip
 

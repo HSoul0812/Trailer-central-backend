@@ -10,7 +10,7 @@ rm -Rf laravel-nova-bd32015c9dce9060fe327f09e96abbe729900648 # just in case it e
 unzip nova.zip
 
 cp "${ROOT}"/.env.example "${ROOT}"/.env
-cp "${ROOT}"/.env "${ROOT}"/.env.testing
+cp "${ROOT}"/.env.testing.example "${ROOT}"/.env.testing
 
 docker-compose down
 docker-compose up -d
@@ -21,13 +21,6 @@ sleep 6 # this is not elegant, but it works
 cli composer install
 
 cli php artisan key:generate
-
-cp "${ROOT}"/.env "${ROOT}"/.env.testing
-
-DB_DATABASE=$(read_env_var "DB_DATABASE" "trailertrader")
-
-sed -i "s/DB_DATABASE=${DB_DATABASE}/DB_DATABASE=${DB_DATABASE}_test/" "${ROOT}"/.env.testing
-
 cli php artisan migrate
 cli php artisan nova:publish
 cli php artisan optimize
