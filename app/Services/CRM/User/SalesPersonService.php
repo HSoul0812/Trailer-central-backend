@@ -12,6 +12,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Email\DTOs\ImapConfig;
 use App\Traits\SmtpHelper;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class SalesPersonService
