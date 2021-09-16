@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\User;
 
+use App\Exceptions\CRM\User\MissingNameSalesPersonException;
 use App\Http\Requests\CRM\User\AuthorizeSalesAuthRequest;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
@@ -209,6 +210,7 @@ class SalesAuthService implements SalesAuthServiceInterface
      * Authorize Login With Code to Return Access Token
      * 
      * @param AuthorizeSalesAuthRequest $request
+     * @throws MissingNameSalesPersonException
      * @return array{data: array<TokenTransformer>,
      *               sales_person: array<SalesPersonTransformer>}
      */
@@ -233,6 +235,9 @@ class SalesAuthService implements SalesAuthServiceInterface
         $params['smtp']       = ['email' => $emailToken->emailAddress, 'failed' => 0];
         $params['imap']       = ['email' => $emailToken->emailAddress, 'failed' => 0];
         $params['folders']    = $emailToken->getDefaultFolders();
+        if(empty($params['first_name']) || empty($params['last_name'])) {
+            throw new MissingNameSalesPersonException;
+        }
 
         // Create or Update Sales Person
         if(!empty($stateToken->relation_id) || !empty($request->sales_person_id)) {
