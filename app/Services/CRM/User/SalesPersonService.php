@@ -48,6 +48,9 @@ class SalesPersonService implements SalesPersonServiceInterface
         $this->salespeople = $salesPerson;
         $this->folders = $folders;
         $this->imap = $imap;
+
+        // Initialize Logger
+        $this->log = Log::channel('auth');
     }
 
     /**
@@ -95,6 +98,9 @@ class SalesPersonService implements SalesPersonServiceInterface
             $existing = $this->salespeople->getByEmail($params['user_id'], $params['email']);
             if(!empty($existing->id) && ($existing->id !== $params['id'])) {
                 // Has Been Deleted?
+                $this->log->info('Got Existing sales person # ' . $existing->id .
+                                    ' that doesn\'t match updated sales person # ' . $params['id'] .
+                                    ' for email address ' . $params['email']);
                 if(!empty($existing->deleted_at)) {
                     $this->salespeople->delete(['id' => $params['id']]);
                     $params['id'] = $existing->id;
