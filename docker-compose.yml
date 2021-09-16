@@ -3,12 +3,15 @@ services:
   postgres:
     image: postgres:12.0 # Aurora Postgres is v12
     container_name: trailertrader_postgres
+    volumes:
+        - ./bin/pg-init-scripts:/docker-entrypoint-initdb.d
     environment:
       DB_HOST: ${DB_HOST}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_DB: ${DB_DATABASE}
       DB_CONNECTION: pgsql
+      POSTGRES_MULTIPLE_DATABASES: ${DB_DATABASE}_test # just in case it was necessary, we could separate by comma, e.g: ${DB_DATABASE}_test1,${DB_DATABASE}_test2
     ports:
         - '5432:5432'
   php:
@@ -17,4 +20,7 @@ services:
     volumes:
         - ~/.composer-docker/cache:/root/.composer/cache:delegated
         - ./:/app:delegated
-    network_mode: 'host' # to be able using the host network and tunneling
+    ports:
+        - '8000:8000'
+    links:
+        - postgres
