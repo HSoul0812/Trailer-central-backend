@@ -21,3 +21,5 @@ services:
         - ~/.composer-docker/cache:/root/.composer/cache:delegated
         - ./:/app:delegated
     network_mode: 'host' # to be able using the host network and tunneling
+    depends_on:
+        - postgres
