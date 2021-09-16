@@ -18,10 +18,10 @@ docker-compose up -d
 echo "Waiting for postgres database..."
 sleep 6 # this is not elegant, but it works
 
-cli composer install
+"$ROOT"/bin/cli composer install
 
-cli php artisan key:generate
-cli php artisan migrate
-cli php artisan nova:publish
-cli php artisan optimize
-cli php artisan route:clear
+"$ROOT"/bin/cli php artisan key:generate
+"$ROOT"/bin/cli php artisan migrate
+"$ROOT"/bin/cli php artisan nova:publish
+"$ROOT"/bin/cli php artisan optimize
+"$ROOT"/bin/cli php artisan route:clear
