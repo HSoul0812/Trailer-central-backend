@@ -19,3 +19,5 @@ cli composer update nothing
 
 cli php artisan migrate
 cli php artisan nova:publish
+cli php artisan optimize
+cli php artisan route:clear
