@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\CRM\Interactions\MessageRepository;
+use App\Repositories\CRM\Interactions\MessageRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\CRM\Email\BounceRepository;
 use App\Repositories\CRM\Email\BounceRepositoryInterface;
@@ -87,6 +89,8 @@ class InteractionServiceProvider extends ServiceProvider
         // Interaction Repositories
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
+
+        $this->app->bind(MessageRepositoryInterface::class, MessageRepository::class);
     }
 
 }

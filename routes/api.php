@@ -159,16 +159,16 @@ $api->version('v1', function ($route) {
     |
     */
 
-    
+
     /**
      * Inventory Overlay
      */
-    
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
     });
-    
-    
+
+
     /**
      * Inventory Entity
      */
@@ -441,6 +441,21 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------
+        | Message
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'interaction/message'
+        ], function ($route) {
+            $route->get('/search', 'App\Http\Controllers\v1\CRM\Interactions\MessageController@search');
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
         | Leads
         |--------------------------------------------------------------------------
         |
@@ -561,14 +576,6 @@ $api->version('v1', function ($route) {
             });
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Integrations
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
         $route->group([
             'prefix' => 'integration'
         ], function ($route) {
