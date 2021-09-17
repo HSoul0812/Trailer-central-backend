@@ -22,6 +22,7 @@ sleep 6 # this is not elegant, but it works
 
 "$ROOT"/bin/cli php artisan key:generate
 "$ROOT"/bin/cli php artisan migrate
+"$ROOT"/bin/cli php artisan db:seed
 "$ROOT"/bin/cli php artisan nova:publish
 "$ROOT"/bin/cli php artisan optimize
 "$ROOT"/bin/cli php artisan route:clear

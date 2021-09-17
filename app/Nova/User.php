@@ -101,4 +101,16 @@ class User extends Resource
     {
         return [];
     }
+
+    /**
+     * Get the extra dashboards that should be displayed on the Nova dashboard.
+     *
+     * @return array
+     */
+    protected function dashboards()
+    {
+        return [
+            (new Dashboards\InventoryInsights())->canSeeWhen('viewUserInsights', User::class),
+        ];
+    }
 }
