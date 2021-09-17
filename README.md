@@ -118,3 +118,10 @@ And finally in `.env` file ensure to use the localhost IP address
 DMS_DB_HOST=127.0.0.1
 DMS_DB_PORT=3306
 ```
+
+Test User access
+--------------------------------------
+```
+tc@trailercentral.com
+squadron*RAF99
+```

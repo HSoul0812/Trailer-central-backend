@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Nova\Dashboards\InventoryInsights;
 use Illuminate\Support\Facades\Gate;
+use JetBrains\PhpStorm\Pure;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
@@ -72,11 +74,12 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
     /**
      * Get the extra dashboards that should be displayed on the Nova dashboard.
-     *
-     * @return array
      */
-    protected function dashboards()
+    #[Pure]
+    protected function dashboards(): array
     {
-        return [];
+        return [
+            new InventoryInsights(),
+        ];
     }
 }
