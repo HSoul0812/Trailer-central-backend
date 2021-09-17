@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Exceptions\CRM\Email\MissingAccessTokenImportFolderException;
 use App\Exceptions\Common\MissingFolderException;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Attachment;
@@ -215,11 +216,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Try Importing
         try {
             // Get From Google?
-            if(!empty($salesperson->active_token) && $salesperson->active_token->token_type === 'google') {
+            if(!empty($salesperson->active_token->access_token) && $salesperson->active_token->token_type === 'google') {
                 $total = $this->importGmail($dealer->id, $salesperson, $folder);
-            } elseif(!empty($salesperson->active_token) && $salesperson->active_token->token_type === 'office365') {
+            } elseif(!empty($salesperson->active_token->access_token) && $salesperson->active_token->token_type === 'office365') {
                 // Get From Office 365?
                 $total = $this->importOffice($dealer->id, $salesperson, $folder);
+            } elseif(!empty($salesperson->active_token) && empty($salesperson->active_token->access_token)) {
+                throw new MissingAccessTokenImportFolderException;
             } else {
                 // Get From IMAP Instead
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
