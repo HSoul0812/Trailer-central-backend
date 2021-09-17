@@ -9,10 +9,8 @@ class InventoryInsights extends Dashboard
 {
     /**
      * Get the cards for the dashboard.
-     *
-     * @return array
      */
-    public function cards()
+    public function cards(): array
     {
         $labels = [
             'industryAverage'   => 'Industry Average',
@@ -78,20 +76,16 @@ class InventoryInsights extends Dashboard
 
     /**
      * Get the URI key for the dashboard.
-     *
-     * @return string
      */
-    public static function uriKey()
+    public static function uriKey(): string
     {
         return 'inventory-insights';
     }
 
     /**
      * Get the displayable name of the dashboard.
-     *
-     * @return string
      */
-    public static function label()
+    public static function label(): string
     {
         return 'Inventory Insights';
     }
