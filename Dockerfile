@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y \
     libpq-dev
 
 # php extension for concurrent programming
-RUN pecl install swoole
-RUN docker-php-ext-enable swoole
+RUN pecl install swoole xdebug
+RUN docker-php-ext-enable swoole xdebug
 
 # laravel and project extensions
 RUN docker-php-ext-install sodium zip pdo pdo_mysql pgsql pdo_pgsql pcntl
