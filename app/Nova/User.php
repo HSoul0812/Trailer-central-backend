@@ -13,17 +13,17 @@ class User extends Resource
     /**
      * The model the resource corresponds to.
      */
-    public static string $model = \App\Models\User::class;
+    public static $model = \App\Models\User::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      */
-    public static string $title = 'name';
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
      */
-    public static array $search = [
+    public static $search = [
         'id', 'name', 'email',
     ];
 
