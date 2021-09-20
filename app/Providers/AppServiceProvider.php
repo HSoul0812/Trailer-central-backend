@@ -133,6 +133,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -243,6 +245,22 @@ class AppServiceProvider extends ServiceProvider
                     $query->bindings,
                     $query->time
                 );
+            });
+        }
+
+        if (config('app.debug') === true) {
+            DB::listen(function ($query) {
+                $monolog = new Logger('log');
+                $monolog->pushHandler(
+                    new StreamHandler(storage_path('logs/query.log')),
+                    Logger::INFO
+                );
+
+                $monolog->info('Query', [
+                    'sql' => $query->sql,
+                    'bindings' => $query->bindings,
+                    'time' => $query->time,
+                ]);
             });
         }
     }
