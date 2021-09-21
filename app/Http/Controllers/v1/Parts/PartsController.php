@@ -292,6 +292,8 @@ class PartsController extends RestfulController
         $requestData = $request->all();
         $request = new CreatePartRequest($requestData);
         if ( $request->validate() ) {
+            $requestData['subcategory'] = $requestData['subcategory'] ?? '';
+
             return $this->response->item(
                 $this->partService->create($requestData, !empty($requestData['bins'])
                     ? $requestData['bins'] : []), new PartsTransformer()
