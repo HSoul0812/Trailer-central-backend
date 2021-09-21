@@ -24,11 +24,21 @@ class ChatController extends RestfulControllerV2 {
      */
     private $service;
 
-    public function __construct(ChatRepositoryInterface $repository, ChatServiceInterface $service) {
+    /**
+     * @var App\Transformers\Integration\Facebook\ChatTransformer
+     */
+    private $transformer;
+
+    public function __construct(
+        ChatRepositoryInterface $repository,
+        ChatServiceInterface $service,
+        ChatTransformer $transformer
+    ) {
         $this->middleware('setUserIdOnRequest')->only(['create', 'update', 'index']);
 
         $this->repository = $repository;
         $this->service = $service;
+        $this->transformer = $transformer;
     }
 
     /**
@@ -43,7 +53,7 @@ class ChatController extends RestfulControllerV2 {
         $request = new GetChatRequest($request->all());
         if ($request->validate()) {
             // Get Chat Integrations
-            return $this->response->paginator($this->repository->getAll($request->all()), new ChatTransformer());
+            return $this->response->paginator($this->repository->getAll($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

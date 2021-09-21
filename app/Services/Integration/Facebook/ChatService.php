@@ -43,6 +43,11 @@ class ChatService implements ChatServiceInterface
     protected $sdk;
 
     /**
+     * @var ChatTransformer
+     */
+    protected $transformer;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -55,12 +60,14 @@ class ChatService implements ChatServiceInterface
         PageRepositoryInterface $pages,
         TokenRepositoryInterface $tokens,
         BusinessServiceInterface $sdk,
+        ChatTransformer $transformer,
         Manager $fractal
     ) {
         $this->chat = $chat;
         $this->pages = $pages;
         $this->tokens = $tokens;
         $this->sdk = $sdk;
+        $this->transformer = $transformer;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -226,7 +233,7 @@ class ChatService implements ChatServiceInterface
      */
     public function response(Chat $chat, AccessToken $accessToken): array {
         // Convert Chat to Array
-        $data = new Item($chat, new ChatTransformer(), 'data');
+        $data = new Item($chat, $this->transformer, 'data');
         $response = $this->fractal->createData($data)->toArray();
 
         // Set Validate
