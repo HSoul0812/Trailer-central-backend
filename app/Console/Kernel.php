@@ -66,7 +66,7 @@ class Kernel extends ConsoleKernel
                 ->runInBackground();
 
         $schedule->command('user:create-access-token')
-                ->daily()
+                ->hourly()
                 ->runInBackground();
 
         $schedule->command('crm:dms:update-po-num-ref')
@@ -167,7 +167,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('inventory:auto-archive-sold-items')
             ->daily()
             ->runInBackground();
-        
+
         $schedule->command('inventory:fix-floorplan-bill-status')
             ->hourly()
             ->runInBackground();
