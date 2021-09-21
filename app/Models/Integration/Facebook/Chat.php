@@ -10,10 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Class Catalog
+ * Class Chat
  * @package App\Models\Integration\Facebook
  */
-class Feed extends Model
+class Chat extends Model
 {
     // Define Table Name Constant
     const TABLE_NAME = 'fbapp_chat';
