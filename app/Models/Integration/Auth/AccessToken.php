@@ -27,7 +27,8 @@ class AccessToken extends Model
         'system_emails' => 'System Email',
         'sales_person' => 'Sales Person',
         'fbapp_page' => 'Facebook Page',
-        'fbapp_catalog' => 'Facebook Catalog'
+        'fbapp_catalog' => 'Facebook Catalog',
+        'fbapp_chat' => 'Facebook Chat'
     ];
 
     // Define Supported Token Types
@@ -35,7 +36,8 @@ class AccessToken extends Model
         'system_emails' => 'google',
         'sales_person' => 'google',
         'fbapp_page' => 'facebook',
-        'fbapp_catalog' => 'facebook'
+        'fbapp_catalog' => 'facebook',
+        'fbapp_chat' => 'facebook'
     ];
 
     /**

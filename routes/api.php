@@ -614,6 +614,25 @@ $api->version('v1', function ($route) {
 
             /*
             |--------------------------------------------------------------------------
+            | Facebook Chat
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'fbchat',
+                'middleware' => 'facebook.chat.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@create');
+                $route->get('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@destroy')->where('id', '[0-9]+');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
             | CVR
             |--------------------------------------------------------------------------
             |
