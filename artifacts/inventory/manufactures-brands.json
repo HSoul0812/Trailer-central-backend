@@ -1,0 +1,62 @@
+[
+    {
+       "name":"Dutchmen Manufacturing",
+       "brands": ["Kodiak","Coleman"]
+    },
+    {
+       "name":"InTech RV",
+       "brands": ["Luna","Flyer"]
+    },
+    {
+       "name":"Kz",
+       "brands": ["Sportsmen","Escape"]
+    },
+    {
+       "name":"Winnebago",
+       "brands": ["Sightseer","Aerolite"]
+    },
+    {
+        "name": "Starcraft",
+        "brands": ["Travel Star","AR-One Maxx"]
+    },
+    {
+        "name": "Cherokee",
+        "brands": ["Cherokee","Arctic Wolf"]
+    },
+    {
+        "name": "Fleetwood",
+        "brands": ["Bayside","Wilderness"]
+    },
+    {
+        "name": "Gulfstream",
+        "brands": ["Conquest","Springdale"]
+    },
+    {
+        "name": "Sundowner Trailers",
+        "brands": ["Impact","Krawler"]
+    },
+    {
+        "name": "Heartland",
+        "brands": ["Gravity","Milestone"]
+    },
+    {
+        "name": "Airstream",
+        "brands": ["Classic","Globetrotter"]
+    },
+    {
+        "name": "4-Star Trailers",
+        "brands": ["Alexandro Bergstrom","Carbon"]
+    },
+    {
+        "name": "ABC",
+        "brands": ["Beaver","Agnes Bogisich I"]
+    },
+    {
+        "name": "Griffin",
+        "brands": ["Phaeton","Allegro Breeze"]
+    },
+    {
+        "name": "Keystone RV",
+        "brands": ["Cougar","Laredo"]
+    }
+]

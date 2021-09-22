@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Inventory;
 
 use App\Support\Traits\TableAware;
+use Database\Factories\Inventory\InventoryLogFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property numeric                  $price
  * @property array                    $meta              json data
  * @property DateTimeInterface|string $created_at
+ *
+ * @method static InventoryLogFactory factory(...$parameters)
  */
 class InventoryLog extends Model
 {

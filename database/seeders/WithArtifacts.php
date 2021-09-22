@@ -9,7 +9,7 @@ trait WithArtifacts
     public static array $loadedFiles = [];
 
     /**
-     * @throws \JsonException
+     * @throws \JsonException when the json cannot be parsed
      */
     public function fromJson(string $fileName): Collection
     {
