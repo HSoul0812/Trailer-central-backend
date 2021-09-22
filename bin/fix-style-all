@@ -12,3 +12,4 @@ cd "${ROOT}"
 ./vendor/bin/php-cs-fixer fix ./database --config=.php-cs-fixer.dist.php --allow-risky=yes
 ./vendor/bin/php-cs-fixer fix ./routes --config=.php-cs-fixer.dist.php --allow-risky=yes
 ./vendor/bin/php-cs-fixer fix ./tests --config=.php-cs-fixer.dist.php --allow-risky=yes
+./vendor/bin/php-cs-fixer fix ./nova-components --config=.php-cs-fixer.dist.php --allow-risky=yes

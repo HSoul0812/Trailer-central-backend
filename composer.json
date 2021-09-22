@@ -16,6 +16,7 @@
         "laravel/nova": "~3.0",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
+        "nesbot/carbon": "^2.53",
         "psr/log": "^1.0"
     },
     "require-dev": {
@@ -41,7 +42,8 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "Laravel\\Nova\\": "nova-components/overrides/"
         }
     },
     "autoload-dev": {
