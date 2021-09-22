@@ -11,7 +11,7 @@ class CreateLeadLogsTable extends Migration
 {
     /**
      * Pitifully Laravel doesn't support multiples schemas for testing, somehow it just fails at BD recreation time,
-     * so we will handle this in the MySQL way
+     * so we will handle this in the MySQL way.
      *
      * Run the migrations.
      */
