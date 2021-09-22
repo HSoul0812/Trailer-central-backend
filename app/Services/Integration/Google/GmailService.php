@@ -291,6 +291,7 @@ class GmailService implements GmailServiceInterface
 
         // Get Labels
         $results = $this->gmail->users_labels->listUsersLabels('me');
+        $this->log->info('Found ' . count($results->getLabels()) . ' total labels on Gmail Email');
         if(count($results->getLabels()) == 0) {
             throw new MissingGmailLabelsException;
         }
@@ -308,6 +309,7 @@ class GmailService implements GmailServiceInterface
         }
 
         // None Exist?!
+        $this->log->info('Returned ' . count($labels) . ' labels on Gmail Email');
         if(count($labels) < 1) {
             throw new MissingFolderException;
         }
