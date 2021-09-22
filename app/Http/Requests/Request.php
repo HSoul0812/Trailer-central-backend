@@ -12,10 +12,8 @@ class Request extends BaseRequest implements RequestInterface
 {
     /**
      * Rules to validate.
-     *
-     * @var array
      */
-    protected $rules = [];
+    protected array $rules = [];
 
     /**
      * {@inheritDoc}
