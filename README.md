@@ -137,3 +137,12 @@ Test User access
 tc@trailercentral.com
 squadron*RAF99
 ```
+
+Seeding manually
+--------------------------------------
+In case it is necessary to seed some data that is thought to be seeded under demand by the tests,
+you could use the follows seeders:
+
+```bash
+php artisan db:seed --class=Database\\Seeders\\Inventory\\AverageStockSeeder
+```
