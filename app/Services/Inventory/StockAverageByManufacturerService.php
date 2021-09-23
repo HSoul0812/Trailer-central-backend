@@ -3,8 +3,8 @@
 namespace App\Services\Inventory;
 
 use App\Repositories\Inventory\StockAverageByManufacturerRepositoryInterface;
+use App\Services\InsightResultSet;
 use App\Support\CriteriaBuilder;
-use Illuminate\Support\Collection;
 
 class StockAverageByManufacturerService implements StockAverageByManufacturerServiceInterface
 {
@@ -12,22 +12,34 @@ class StockAverageByManufacturerService implements StockAverageByManufacturerSer
     {
     }
 
-    /**
-     * @return array{all: Collection, aggregate: Collection}
-     */
-    public function getAll(CriteriaBuilder $cb): array
+    public function collect(CriteriaBuilder $cb): InsightResultSet
     {
         $criteriaForAll = $cb->except('manufacturer')->addCriteria('not_manufacturer', $cb->get('manufacturer'));
 
-        return match ($cb->getOrFail('period')) {
+        $data = match ($cb->getOrFail('period')) {
             'per_day' => [
-                'all'       => $this->repository->getAllPerDay($criteriaForAll),
-                'aggregate' => $this->repository->getAllPerDay($cb),
+                'complement' => $this->repository->getAllPerDay($criteriaForAll),
+                'subset'     => $this->repository->getAllPerDay($cb),
             ],
             'per_week' => [
-                'all'       => $this->repository->getAllPerWeek($criteriaForAll),
-                'aggregate' => $this->repository->getAllPerWeek($cb),
+                'complement' => $this->repository->getAllPerWeek($criteriaForAll),
+                'subset'     => $this->repository->getAllPerWeek($cb),
             ],
         };
+
+        $complement = [];
+        $subset = [];
+        $legends = [];
+
+        foreach ($data['complement'] as $element) {
+            $complement[] = $element->stock;
+            $legends[] = $element->period;
+        }
+
+        foreach ($data['subset'] as $element) {
+            $subset[] = $element->stock;
+        }
+
+        return new InsightResultSet($complement, $subset, $legends);
     }
 }

@@ -11,6 +11,7 @@ use App\Services\Inventory\StockAverageByManufacturerServiceInterface;
 use App\Support\CriteriaBuilder;
 use Coroowicaksono\ChartJsIntegration\AreaChart;
 use Dingo\Api\Routing\Helpers;
+use Insights\Filters\Filters;
 use Laravel\Nova\Dashboard;
 
 class StockAverageByManufacturerInsights extends Dashboard
@@ -31,48 +32,15 @@ class StockAverageByManufacturerInsights extends Dashboard
     public function cards(StockAverageRequestInterface $request): array
     {
         if ($request->validate()) {
-            $data = $this->service->getAll(new CriteriaBuilder([
+            $insights = $this->service->collect(new CriteriaBuilder([
                 'period'       => $request->getPeriod(),
                 'from'         => $request->getFrom(),
                 'to'           => $request->getTo(),
                 'manufacturer' => $request->getAggregateValue(),
             ]));
 
-            //@todo prepare the data to be provided to the chart
-
-            $labels = [
-                'industryAverage'   => 'Industry Average',
-                'manufacturerBrand' => 'Manufacturer / Brand',
-                'category'          => 'category',
-                'state'             => 'state',
-                'year'              => 'year',
-            ];
-
-            $payload = [
-                'data' => [
-                    'industryAverage'   => [50, 55, 60, 53, 48, 45, 40],
-                    'manufacturerBrand' => [55, 52, 55, 51, 50, 55, 45],
-                ],
-                'meta' => [
-                    'labels' => [
-                        'xAxis' => [
-                            '01-05-2021',
-                            '05-06-2021',
-                            '11-07-2021',
-                            '21-08-2021',
-                            '09-09-2021',
-                            '25-10-2021',
-                            '06-11-2021',
-                        ],
-                        'yAxis' => [],
-                    ],
-                    'summaries' => [
-                        'yoyChangePercent' => 2021,
-                    ],
-                ],
-            ];
-
             return [
+                // new Filters(), // we need to add a card with the filters
                 (new AreaChart())
                     ->title('YOY % CHANGE')
                     ->animations([
@@ -82,23 +50,21 @@ class StockAverageByManufacturerInsights extends Dashboard
                     ->series([
                         [
                             'barPercentage'   => 0.5,
-                            'label'           => $labels['industryAverage'],
+                            'label'           => 'Industry Average',
                             'borderColor'     => '#1FE074',
                             'backgroundColor' => 'rgba(31, 224, 116, 0.2)',
-                            'data'            => $payload['data']['industryAverage'],
+                            'data'            => $insights->complement,
                         ], [
                             'barPercentage'   => 0.5,
-                            'label'           => $labels['manufacturerBrand'],
+                            'label'           => 'Kz',
                             'borderColor'     => '#008AC5',
                             'backgroundColor' => 'rgba(0, 138, 197, 0.2)',
-                            'data'            => $payload['data']['manufacturerBrand'],
+                            'data'            => $insights->subset,
                         ],
                     ])
                     ->options([
-                        'btnReload' => true,
-                        'extLink'   => 'xx',
-                        'xaxis'     => [
-                            'categories' => $payload['meta']['labels']['xAxis'],
+                        'xaxis' => [
+                            'categories' => $insights->legends,
                         ],
                     ]),
             ];

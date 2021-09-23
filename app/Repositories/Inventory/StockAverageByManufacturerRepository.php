@@ -17,7 +17,7 @@ class StockAverageByManufacturerRepository implements StockAverageByManufacturer
      */
     public function getAllPerDay(CriteriaBuilder $cb): Collection
     {
-        $query = DB::table('inventory_stock_average_per_day')->selectRaw('SUM(stock) stock, day');
+        $query = DB::table('inventory_stock_average_per_day')->selectRaw('SUM(stock) AS stock, day AS period');
 
         if ($cb->isNotBlank('manufacturer')) {
             $query->where('manufacturer', $cb->get('manufacturer'));
@@ -44,7 +44,7 @@ class StockAverageByManufacturerRepository implements StockAverageByManufacturer
      */
     public function getAllPerWeek(CriteriaBuilder $cb): Collection
     {
-        $query = DB::table('inventory_stock_average_per_week')->selectRaw('SUM(stock) stock, week');
+        $query = DB::table('inventory_stock_average_per_week')->selectRaw('SUM(stock) AS stock, week AS period');
 
         if ($cb->isNotBlank('manufacturer')) {
             $query->where('manufacturer', $cb->get('manufacturer'));

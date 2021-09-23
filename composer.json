@@ -43,7 +43,7 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
-            "Laravel\\Nova\\": "nova-components/overrides/"
+            "Laravel\\Nova\\": "nova-components/Overrides/"
         }
     },
     "autoload-dev": {

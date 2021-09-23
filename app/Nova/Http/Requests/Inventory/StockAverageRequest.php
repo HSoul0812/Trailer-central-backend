@@ -11,7 +11,7 @@ class StockAverageRequest extends Request implements StockAverageRequestInterfac
 {
     public function getPeriod(): string
     {
-        return $this->input('period', self::PERIOD_PER_DAY);
+        return $this->input('period', self::PERIOD_PER_WEEK);
     }
 
     public function getFrom(): ?string
