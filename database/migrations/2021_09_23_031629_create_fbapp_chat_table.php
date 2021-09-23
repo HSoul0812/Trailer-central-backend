@@ -17,6 +17,7 @@ class CreateFbappChatTable extends Migration
             $table->bigIncrements('id');
             $table->integer('user_id');
             $table->integer('sales_person_id');
+            $table->string('account_name');
             $table->bigInteger('page_id')->index();
             $table->timestamps();
 
