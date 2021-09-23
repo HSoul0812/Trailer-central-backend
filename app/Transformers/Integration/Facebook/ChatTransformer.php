@@ -32,12 +32,10 @@ class ChatTransformer extends TransformerAbstract
     protected $tokenTransformer;
 
     public function __construct(
-        UserTransformer $user,
         SalesPersonTransformer $salesPerson,
         PageTransformer $page,
         TokenTransformer $token
     ) {
-        $this->userTransformer = $user;
         $this->salesPersonTransformer = $salesPerson;
         $this->pageTransformer = $page;
         $this->tokenTransformer = $token;
@@ -47,7 +45,6 @@ class ChatTransformer extends TransformerAbstract
     {
         return [
             'id' => $chat->id,
-            'crmUser' => $this->userTransformer->transform($chat->crmUser),
             'salesPerson' => $this->salesPersonTransformer->transform($chat->salesPerson),
             'access_token' => $this->tokenTransformer->transform($chat->accessToken),
             'page' => $this->pageTransformer->transform($chat->page),
