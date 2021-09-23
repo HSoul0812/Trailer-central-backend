@@ -38,6 +38,11 @@ class SalesAuthService implements SalesAuthServiceInterface
     protected $auth;
 
     /**
+     * @var SalesPersonTransformer
+     */
+    protected $transformer;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -49,11 +54,13 @@ class SalesAuthService implements SalesAuthServiceInterface
         SalesPersonRepositoryInterface $salesPersonRepo,
         TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
+        SalesPersonTransformer $transformer,
         Manager $fractal
     ) {
         $this->salesPerson = $salesPersonRepo;
         $this->tokens = $tokens;
         $this->auth = $auth;
+        $this->transformer = $transformer;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -160,8 +167,8 @@ class SalesAuthService implements SalesAuthServiceInterface
         $salesPerson = $this->salesPerson->get([
             'sales_person_id' => $params['relation_id']
         ]);
-        $item = new Item($salesPerson, new SalesPersonTransformer(), 'sales_person');
-        $this->fractal->parseIncludes('smtp,imap,folders');
+        $item = new Item($salesPerson, $this->salesPersonTransformer, 'sales_person');
+        $this->fractal->parseIncludes('smtp,imap,folders,facebookIntegrations');
         $response = $this->fractal->createData($item)->toArray();
 
         // Return Response

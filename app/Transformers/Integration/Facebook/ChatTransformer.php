@@ -11,6 +11,13 @@ use App\Transformers\User\UserTransformer;
 
 class ChatTransformer extends TransformerAbstract
 {
+    protected $defaultIncludes = [];
+
+    protected $availableIncludes = [
+        'salesPerson'
+    ];
+
+
     /**
      * @var UserTransformer
      */
@@ -45,7 +52,6 @@ class ChatTransformer extends TransformerAbstract
     {
         return [
             'id' => $chat->id,
-            'salesPerson' => !empty($chat->salesPerson) ? $this->salesPersonTransformer->transform($chat->salesPerson) : null,
             'access_token' => $this->tokenTransformer->transform($chat->accessToken),
             'account_name' => $chat->account_name,
             'account_id' => $chat->account_id,
@@ -53,5 +59,13 @@ class ChatTransformer extends TransformerAbstract
             'created_at' => $chat->created_at,
             'updated_at' => $chat->updated_at
         ];
+    }
+
+    public function includeSalesPerson(Chat $chat)
+    {
+        if(!empty($chat->salesPerson)) {
+            return $this->item($chat->salesPerson, $this->salesPersonTransformer);
+        }
+        return $this->null();
     }
 }
