@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Models\Integration\Facebook;
 
 use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Integration\Facebook\Page;
+use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
