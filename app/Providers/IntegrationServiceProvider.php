@@ -12,6 +12,8 @@ use App\Repositories\Integration\CollectorRepository;
 use App\Repositories\Integration\CollectorRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepository;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
+use App\Repositories\Integration\Facebook\ChatRepository;
+use App\Repositories\Integration\Facebook\ChatRepositoryInterface;
 use App\Repositories\Integration\Facebook\FeedRepository;
 use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepository;
@@ -26,6 +28,8 @@ use App\Services\Integration\Google\GmailService;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Facebook\CatalogService;
 use App\Services\Integration\Facebook\CatalogServiceInterface;
+use App\Services\Integration\Facebook\ChatService;
+use App\Services\Integration\Facebook\ChatServiceInterface;
 use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Repositories\Integration\CVR\CvrFileRepository;
@@ -49,11 +53,13 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(GoogleServiceInterface::class, GoogleService::class);
         $this->app->bind(GmailServiceInterface::class, GmailService::class);
         $this->app->bind(CatalogServiceInterface::class, CatalogService::class);
+        $this->app->bind(ChatServiceInterface::class, ChatService::class);
         $this->app->bind(BusinessServiceInterface::class, BusinessService::class);
         
         // Integration Repositories
         $this->app->bind(TokenRepositoryInterface::class, TokenRepository::class);
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
+        $this->app->bind(ChatRepositoryInterface::class, ChatRepository::class);
         $this->app->bind(FeedRepositoryInterface::class, FeedRepository::class);
         $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
         
