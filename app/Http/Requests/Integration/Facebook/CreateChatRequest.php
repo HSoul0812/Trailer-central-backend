@@ -14,9 +14,9 @@ class CreateChatRequest extends Request {
     protected $rules = [
         'user_id' => 'required|integer',
         'sales_person_id' => 'integer',
-        'page_title' => 'required|string',
+        'account_id' => 'required|integer',
+        'account_name' => 'required|string',
         'page_id' => 'required|integer',
-        'page_token' => 'required|string|max:255',
         'access_token' => 'required|string|max:255',
         'id_token' => 'string',
         'issued_at' => 'date_format:Y-m-d H:i:s',
