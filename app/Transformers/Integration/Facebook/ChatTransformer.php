@@ -47,6 +47,8 @@ class ChatTransformer extends TransformerAbstract
             'id' => $chat->id,
             'salesPerson' => !empty($chat->salesPerson) ? $this->salesPersonTransformer->transform($chat->salesPerson) : null,
             'access_token' => $this->tokenTransformer->transform($chat->accessToken),
+            'account_name' => $this->account_name,
+            'account_id' => $this->account_id,
             'page' => $this->pageTransformer->transform($chat->page),
             'created_at' => $chat->created_at,
             'updated_at' => $chat->updated_at
