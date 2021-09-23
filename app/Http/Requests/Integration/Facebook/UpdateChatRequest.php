@@ -16,6 +16,7 @@ class UpdateChatRequest extends Request {
         'sales_person_id' => 'integer',
         'account_id' => 'integer',
         'account_name' => 'string',
+        'page_title' => 'string',
         'page_id' => 'integer',
         'access_token' => 'string|max:255',
         'refresh_token' => 'nullable|string|max:255',

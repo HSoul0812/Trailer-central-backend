@@ -16,6 +16,7 @@ class CreateChatRequest extends Request {
         'sales_person_id' => 'integer',
         'account_id' => 'required|integer',
         'account_name' => 'required|string',
+        'page_title' => 'required|string',
         'page_id' => 'required|integer',
         'access_token' => 'required|string|max:255',
         'id_token' => 'string',
