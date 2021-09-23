@@ -69,7 +69,7 @@ class Chat extends Model
      */
     public function salesPerson(): BelongsTo
     {
-        return $this->belongsTo(SalesPerson::class, 'id', 'sales_person_id');
+        return $this->belongsTo(SalesPerson::class, 'sales_person_id', 'id');
     }
 
     /**
