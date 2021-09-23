@@ -9,10 +9,12 @@ use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\Integration\Auth\AccessToken;
+use App\Models\Integration\Facebook\Chat;
 use App\Utilities\JsonApi\Filterable;
 use App\Traits\SmtpHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class SalesPerson
@@ -176,6 +178,15 @@ class SalesPerson extends Model implements Filterable
         return $this->hasMany(EmailHistory::class, 'from_email', 'email')
                     ->orWhere(SalesPerson::getTableName() . '.smtp_email', '=', EmailHistory::getTableName() . '.from_email');
         
+    }
+
+    /**
+     * Get Facebook Integrations
+     * 
+     * @return HasMany
+     */
+    public function facebookIntegrations(): HasMany {
+        return $this->hasMany(Chat::class, 'sales_person_id', 'id');
     }
 
     /**
