@@ -4,6 +4,8 @@ namespace App\Nova\Resources\Dealer;
 
 use App\Nova\Actions\Dealer\ActivateCrm;
 use App\Nova\Actions\Dealer\DeactivateCrm;
+use App\Nova\Actions\Dealer\ActivateECommerce;
+use App\Nova\Actions\Dealer\DeactivateECommerce;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
@@ -106,6 +108,8 @@ class Dealer extends Resource
         return [
             app()->make(ActivateCrm::class),
             app()->make(DeactivateCrm::class),
+            app()->make(ActivateECommerce::class),
+            app()->make(DeactivateECommerce::class),
         ];
     }
 }

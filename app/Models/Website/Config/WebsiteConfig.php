@@ -21,6 +21,12 @@ class WebsiteConfig extends Model
 
     public $timestamps = false;
 
+    protected $fillable = [
+        "website_id",
+        "key",
+        "value"
+    ];
+
     /**
      * @return BelongsTo
      */

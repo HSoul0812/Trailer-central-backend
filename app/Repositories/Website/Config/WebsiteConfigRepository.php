@@ -5,15 +5,31 @@ namespace App\Repositories\Website\Config;
 use App\Exceptions\NotImplementedException;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Models\Website\Config\WebsiteConfigDefault;
+use Illuminate\Support\Facades\DB;
 
 class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
-    public function create($params) {
-        throw new NotImplementedException;
+      /**
+      * WebsiteConfigRepository constructor.
+      *
+      * @param WebsiteConfig $model
+      */
+     public function __construct(WebsiteConfig $websiteConfig)
+     {
+         $this->websiteConfig = $websiteConfig;
+     }
+
+    public function create($params) : WebsiteConfig
+    {
+      $this->websiteConfig->fill($params)->save();
+
+      return $this->websiteConfig;
     }
 
     public function delete($params) {
-        throw new NotImplementedException;
+      $websiteConfig = $this->websiteConfig->findOrFail($params['id']);
+
+      return (bool)$websiteConfig->delete();
     }
 
     public function get($params) {
@@ -52,8 +68,15 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         return $query->get();
     }
 
-    public function update($params) {
-        throw new NotImplementedException;
+    public function update($params)
+    {
+      $websiteConfig = $this->websiteConfig->where(['id' => $params['id']])->first();
+
+      DB::transaction(function() use (&$websiteConfig, $params) {
+          $websiteConfig->fill($params)->save();
+      });
+
+      return $websiteConfig;
     }
 
     /**
