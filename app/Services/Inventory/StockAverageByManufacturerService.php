@@ -5,6 +5,7 @@ namespace App\Services\Inventory;
 use App\Repositories\Inventory\StockAverageByManufacturerRepositoryInterface;
 use App\Services\InsightResultSet;
 use App\Support\CriteriaBuilder;
+use Illuminate\Support\Collection;
 
 class StockAverageByManufacturerService implements StockAverageByManufacturerServiceInterface
 {
@@ -16,30 +17,40 @@ class StockAverageByManufacturerService implements StockAverageByManufacturerSer
     {
         $criteriaForAll = $cb->except('manufacturer')->addCriteria('not_manufacturer', $cb->get('manufacturer'));
 
-        $data = match ($cb->getOrFail('period')) {
+        $manufacturer = $cb->get('manufacturer');
+
+        /** @var array{complement: Collection, subset: Collection} $rawData */
+        $rawData = match ($cb->getOrFail('period')) {
             'per_day' => [
                 'complement' => $this->repository->getAllPerDay($criteriaForAll),
-                'subset'     => $this->repository->getAllPerDay($cb),
+                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerDay($cb) : [],
             ],
             'per_week' => [
                 'complement' => $this->repository->getAllPerWeek($criteriaForAll),
-                'subset'     => $this->repository->getAllPerWeek($cb),
+                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerWeek($cb) : [],
             ],
         };
 
         $complement = [];
-        $subset = [];
         $legends = [];
+        $subset = null;
 
-        foreach ($data['complement'] as $element) {
+        foreach ($rawData['complement'] as $element) {
             $complement[] = $element->stock;
             $legends[] = $element->period;
         }
 
-        foreach ($data['subset'] as $element) {
-            $subset[] = $element->stock;
+        if ($rawData['subset']) {
+            foreach ($rawData['subset'] as $element) {
+                $subset[] = $element->stock;
+            }
         }
 
-        return new InsightResultSet($complement, $subset, $legends);
+        return new InsightResultSet($subset, $complement, $legends);
+    }
+
+    public function getAllManufacturers(): Collection
+    {
+        return $this->repository->getAllManufacturers();
     }
 }

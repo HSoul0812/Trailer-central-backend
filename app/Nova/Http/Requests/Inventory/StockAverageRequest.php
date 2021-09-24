@@ -24,9 +24,9 @@ class StockAverageRequest extends Request implements StockAverageRequestInterfac
         return $this->input('to');
     }
 
-    public function getAggregateValue(): ?string
+    public function getSubset(): ?string
     {
-        return $this->input('aggregate_value', 'Kz'); // dummy value by the moment
+        return $this->input('subset', '');
     }
 
     /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */

@@ -9,10 +9,10 @@ use App\Nova\Http\Requests\Inventory\StockAverageRequestInterface;
 use App\Nova\Http\Requests\WithCardRequestBindings;
 use App\Services\Inventory\StockAverageByManufacturerServiceInterface;
 use App\Support\CriteriaBuilder;
-use Coroowicaksono\ChartJsIntegration\AreaChart;
 use Dingo\Api\Routing\Helpers;
-use Insights\Filters\Filters;
 use Laravel\Nova\Dashboard;
+use stdClass;
+use TrailerTrader\Insights\AreaChart;
 
 class StockAverageByManufacturerInsights extends Dashboard
 {
@@ -36,34 +36,58 @@ class StockAverageByManufacturerInsights extends Dashboard
                 'period'       => $request->getPeriod(),
                 'from'         => $request->getFrom(),
                 'to'           => $request->getTo(),
-                'manufacturer' => $request->getAggregateValue(),
+                'manufacturer' => $request->getSubset(),
             ]));
 
+            $series = [
+                [
+                    'barPercentage'   => 0.5,
+                    'label'           => 'Industry Average',
+                    'borderColor'     => '#1FE074',
+                    'backgroundColor' => 'rgba(31, 224, 116, 0.2)',
+                    'data'            => $insights->complement,
+                ],
+            ];
+
+            if (!is_null($insights->subset)) {
+                $series[] = [
+                    'barPercentage'   => 0.5,
+                    'label'           => $request->getSubset(),
+                    'borderColor'     => '#008AC5',
+                    'backgroundColor' => 'rgba(0, 138, 197, 0.2)',
+                    'data'            => $insights->subset,
+                ];
+            }
+
+            $manufacturerList = $this->service
+                ->getAllManufacturers()
+                ->map(fn (stdClass $item) => [
+                    'text' => $item->manufacturer, 'value' => $item->manufacturer,
+                ])
+                ->prepend(['value' => '', 'text' => 'Manufacturer'])
+                ->toArray();
+
             return [
-                // new Filters(), // we need to add a card with the filters
                 (new AreaChart())
                     ->title('YOY % CHANGE')
                     ->animations([
                         'enabled' => true,
                         'easing'  => 'easeinout',
                     ])
-                    ->series([
-                        [
-                            'barPercentage'   => 0.5,
-                            'label'           => 'Industry Average',
-                            'borderColor'     => '#1FE074',
-                            'backgroundColor' => 'rgba(31, 224, 116, 0.2)',
-                            'data'            => $insights->complement,
-                        ], [
-                            'barPercentage'   => 0.5,
-                            'label'           => 'Kz',
-                            'borderColor'     => '#008AC5',
-                            'backgroundColor' => 'rgba(0, 138, 197, 0.2)',
-                            'data'            => $insights->subset,
+                    ->series($series)
+                    ->filters([
+                        'subset' => [
+                            'show'     => true,
+                            'list'     => $manufacturerList,
+                            'default'  => 'Manufacturer',
+                            'selected' => $request->getSubset(),
+                        ],
+                        'period' => [
+                            'selected' => $request->getPeriod(),
                         ],
                     ])
                     ->options([
-                        'xaxis' => [
+                        'xAxis' => [
                             'categories' => $insights->legends,
                         ],
                     ]),

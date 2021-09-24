@@ -17,5 +17,10 @@ interface InsightRequestInterface extends CardRequestInterface
 
     public function getTo(): ?string;
 
-    public function getAggregateValue(): ?string;
+    /**
+     * Should return the criteria used to filter by, e.g: if we're using a manufacturer aggregate, then we would like to
+     * filter by 'Griffin' manufacturer, by the other hand, if we're using a category aggregate, then we would like to
+     * filter by 'Boats', or 'Trucks'.
+     */
+    public function getSubset(): ?string;
 }
