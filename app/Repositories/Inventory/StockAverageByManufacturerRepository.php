@@ -67,10 +67,7 @@ class StockAverageByManufacturerRepository implements StockAverageByManufacturer
             $from = $cb->get('from');
             $to = $cb->get('to', Date::now()->format('y-m-d'));
 
-            $query->whereBetween('week', [
-                Date::createFromFormat('y-m-d', $from)->format('Y-W'),
-                Date::createFromFormat('y-m-d', $to)->format('Y-W'),
-            ]);
+            $query->whereBetween('week', [$from, $to]);
         }
 
         $query->groupBy('week')

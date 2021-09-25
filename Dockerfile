@@ -8,7 +8,11 @@ RUN apt-get update && apt-get install -y \
     libsodium-dev \
     unzip \
     libssl-dev \
-    libpq-dev
+    libpq-dev \
+    libpng-dev \
+    npm
+
+RUN npm install -g cross-env
 
 # php extension for concurrent programming
 RUN pecl install swoole xdebug

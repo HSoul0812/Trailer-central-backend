@@ -85,6 +85,13 @@ class StockAverageByManufacturerInsights extends Dashboard
                         'period' => [
                             'selected' => $request->getPeriod(),
                         ],
+                        'datePicker' => [
+                            'show'      => true,
+                            'dateRange' => [
+                                'startDate' => $request->getFrom(),
+                                'endDate'   => $request->getTo(),
+                            ],
+                        ],
                     ])
                     ->options([
                         'xAxis' => [

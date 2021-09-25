@@ -2,6 +2,18 @@
     <card class="p-10">
         <div class="insight-filters">
             <div class="stay-right">
+                <date-range-picker
+                    ref="picker"
+                    v-show="filters.datePicker.show"
+                    :minDate="filters.datePicker.minDate"
+                    :maxDate="filters.datePicker.maxDate"
+                    :opens="left"
+                    v-model="filters.datePicker.dateRange"
+                    @update="refresh()">
+                    <template v-slot:input="picker" style="min-width: 350px;">
+                        {{ dateFormat(picker.startDate) }} - {{ dateFormat(picker.endDate) }}
+                    </template>
+                </date-range-picker>
                 <select @change="refresh()" v-model="filters.period.selected" v-show="filters.period.show"
                         class="select-box-sm ml-auto min-w-24 h-6 text-xs appearance-none bg-40 pl-2 pr-6
                                active:outline-none active:shadow-outline focus:outline-none focus:shadow-outline">
@@ -27,12 +39,16 @@
 
 import LineChart from '../area-chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import DateRangePicker from 'vue2-daterange-picker'
+import moment from 'moment/dist/moment'
+import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
 
 Chart.plugins.unregister(ChartDataLabels);
 
 export default {
     components: {
-        LineChart
+        LineChart,
+        DateRangePicker
     },
     data() {
         const filterPeriodDefault = 'per_week';
@@ -43,11 +59,15 @@ export default {
             // { text: 'Per year', value: 'per_year' }
         ];
 
+        const defaultMinDate = '2020-12-31';
+        const defaultMaxDate = moment().format('YYYY-MM-DD');
+        const defaultDate = moment().format('YYYY-MM-DD');
+
         this.card.options = this.card.options !== undefined ? this.card.options : {};
 
         this.card.options.endpoint = this.card.options.endpoint !== undefined ?
             this.card.options.endpoint :
-            document.URL.replace('admin','nova-api');
+            document.URL.replace('admin', 'nova-api');
 
         this.card.filters.period = this.card.filters.period !== undefined ? this.card.filters.period : {
             show: true,
@@ -65,9 +85,25 @@ export default {
 
         this.card.options.xAxis = this.card.options.xAxis !== undefined ? this.card.options.xAxis : {categories: []};
 
+        this.card.filters.datePicker = this.card.filters.datePicker !== undefined ? this.card.filters.datePicker : {
+            show: false,
+            minDate: defaultMinDate,
+            maxDate: defaultMaxDate,
+            dateRange: {startDate: defaultDate, endDate: defaultDate}
+        };
+
         return {
             dataCollection: {},
             filters: {
+                datePicker: {
+                    show: this.card.filters.datePicker.show !== undefined ? this.card.filters.datePicker.show : true,
+                    minDate: this.card.filters.datePicker.minDate !== undefined ? this.card.filters.datePicker.minDate : defaultMinDate,
+                    maxDate: this.card.filters.datePicker.maxDate !== undefined ? this.card.filters.datePicker.maxDate : defaultMaxDate,
+                    dateRange: {
+                        startDate: this.card.filters.datePicker.dateRange.startDate !== undefined ? this.card.filters.datePicker.dateRange.startDate : defaultDate,
+                        endDate: this.card.filters.datePicker.dateRange.endDate !== undefined ? this.card.filters.datePicker.dateRange.endDate : defaultDate,
+                    },
+                },
                 period: {
                     show: this.card.filters.period.show !== undefined ? this.card.filters.period.show : true,
                     list: this.card.filters.period.list !== undefined ? this.card.filters.period.list : filterPeriodList,
@@ -113,9 +149,17 @@ export default {
         this.fillData(this.card.options.xAxis.categories, this.card.series);
     },
     methods: {
+        dateFormat (datetime) {
+            return moment(datetime).format('YYYY-MM-DD')
+        },
         refresh() {
             Nova.request().get(this.card.options.endpoint, {
-                params: {period: this.filters.period.selected, subset: encodeURI(this.filters.subset.selected)},
+                params: {
+                    period: this.filters.period.selected,
+                    subset: encodeURI(this.filters.subset.selected),
+                    from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
+                    to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
+                },
             }).then(({data}) => {
                 const chartData = data.cards.filter((card) => card.component === 'area-chart')[0];
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Nova\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rule;
 
 class StockAverageRequest extends Request implements StockAverageRequestInterface
@@ -16,12 +17,12 @@ class StockAverageRequest extends Request implements StockAverageRequestInterfac
 
     public function getFrom(): ?string
     {
-        return $this->input('from');
+        return $this->input('from', Date::createFromFormat('Y-m-d', '2021-01-01')->format('Y-m-d'));
     }
 
     public function getTo(): ?string
     {
-        return $this->input('to');
+        return $this->input('to', Date::now()->format('Y-m-d'));
     }
 
     public function getSubset(): ?string

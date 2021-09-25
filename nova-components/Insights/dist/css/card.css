@@ -1,3 +1,11 @@
+.insight-filters .reportrange-text {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: inherit !important;
+  font-weight: 600;
+}
+
 .small {
   max-width: 600px;
   margin: 150px auto;

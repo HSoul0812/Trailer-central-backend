@@ -11,6 +11,7 @@ use Carbon\CarbonPeriod;
 use Database\Factories\Inventory\InventoryLogFactory;
 use Database\Seeders\WithArtifacts;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * This seeder will be run under demand by the tests itself, so please do not add to the main DataSeeder.
@@ -62,6 +63,9 @@ class AverageStockSeeder extends Seeder
             }
 
             $this->seedByManufacturer($kzManufacturer, $_day, $factory, 15, $numberOfInventoriesPerBrand[3]);
+
+            DB::statement('REFRESH MATERIALIZED VIEW inventory_stock_average_per_day');
+            DB::statement('REFRESH MATERIALIZED VIEW inventory_stock_average_per_week');
         }
     }
 

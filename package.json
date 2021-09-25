@@ -8,6 +8,7 @@
         "hot": "mix watch --hot",
         "prod": "npm run production",
         "production": "mix --production",
+        "watch-insights": "cd nova-components/Insights && npm run watch",
         "build-insights": "cd nova-components/Insights && npm run dev",
         "build-insights-prod": "cd nova-components/Insights && npm run prod"
     },
