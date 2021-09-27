@@ -52,8 +52,7 @@
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
-        "staudenmeir/belongs-to-through": "^2.5",
-        "jenssegers/model": "^v1.4.0"
+        "staudenmeir/belongs-to-through": "^2.5"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

@@ -48,7 +48,6 @@ class Kernel extends ConsoleKernel
         AutoArchiveSoldItems::class,
         FixFloorplanBillStatus::class,
         FixEmptyManufacturerUnitSale::class,
-        Test::class
     ];
 
     /**
