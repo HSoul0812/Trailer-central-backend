@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Interactions\TextLog;
+use App\Repositories\CRM\Interactions\InteractionMessageRepository;
+use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
 use App\Repositories\CRM\Interactions\MessageRepository;
 use App\Repositories\CRM\Interactions\MessageRepositoryInterface;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\CRM\Email\BounceRepository;
 use App\Repositories\CRM\Email\BounceRepositoryInterface;
@@ -91,6 +96,15 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
 
         $this->app->bind(MessageRepositoryInterface::class, MessageRepository::class);
+
+        $this->app->bind(InteractionMessageRepositoryInterface::class, InteractionMessageRepository::class);
     }
 
+    public function boot()
+    {
+        Relation::morphMap([
+            'dealer_texts_log' => TextLog::class,
+            'crm_email_history' => EmailHistory::class,
+        ]);
+    }
 }

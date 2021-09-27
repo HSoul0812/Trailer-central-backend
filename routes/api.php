@@ -335,6 +335,8 @@ $api->version('v1', function ($route) {
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
 
+    $route->get('leads/interaction-message/search', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@search');
+
 
     /*
     |--------------------------------------------------------------------------
