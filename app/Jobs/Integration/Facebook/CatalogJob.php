@@ -23,7 +23,7 @@ class CatalogJob extends Job
     /**
      * Default Inventory URL
      */
-    const DEFAULT_INVENTORY_URL = 'https://trailertrader.com';
+    const DEFAULT_INVENTORY_URL = 'https://trailertrader.com/';
 
     /**
      * Facebook Vehicle Types
