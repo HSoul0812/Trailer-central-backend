@@ -65,7 +65,7 @@ class WebsiteConfigRepositoryTest extends TestCase
 
       $websiteConfigParams = [
         'website_id' => $this->seeder->website->id,
-        'key' => 'parts/ecommerce/enabled',
+        'key' => WebsiteConfig::ECOMMERCE_KEY_ENABLE,
         'value' => 1
       ];
     

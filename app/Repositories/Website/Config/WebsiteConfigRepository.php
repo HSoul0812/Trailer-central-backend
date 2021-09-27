@@ -70,7 +70,7 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
     public function update($params)
     {
-      $websiteConfig = $this->websiteConfig->where(['id' => $params['id']])->first();
+      $websiteConfig = $this->websiteConfig->find($params['id']);
 
       DB::transaction(function() use (&$websiteConfig, $params) {
           $websiteConfig->fill($params)->save();

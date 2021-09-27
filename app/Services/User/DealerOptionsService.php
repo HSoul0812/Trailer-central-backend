@@ -13,6 +13,8 @@ use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\User\NewUserRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Exceptions\Nova\Actions\Dealer\EcommerceActivationException;
+use App\Exceptions\Nova\Actions\Dealer\EcommerceDeactivationException;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -210,7 +212,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
           $newWebsiteConfigActiveParams = [
             'website_id' => $webiste->id,
-            'key' => 'parts/ecommerce/enabled',
+            'key' => self::ECOMMERCE_KEY_ENABLE,
             'value' => 1
           ];
 
@@ -226,7 +228,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
 
           return true;
-      } catch (\Exception $e) {
+      } catch (\EcommerceActivationException $e) {
           Log::error("E-Commerce activation error. dealer_id - {$dealerId}", $e->getTrace());
 
           return false;
@@ -245,7 +247,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           
           $websiteConfigParams = [
               'website_id' => $webiste->id,
-              'key' => 'parts/ecommerce/enabled'
+              'key' => self::ECOMMERCE_KEY_ENABLE
           ];
 
           $websiteConfigall = $this->websiteConfigRepository->getall($websiteConfigParams);
@@ -259,7 +261,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
 
           return true;
-      } catch (\Exception $e) {
+      } catch (\EcommerceDeactivationException $e) {
           Log::error("E-Commerce deactivation error. dealer_id - {$user}", $e->getTrace());
 
           return false;
@@ -287,9 +289,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function isAllowedParts(int $dealerId): bool
     {
-      $dealerParts = $this->dealerPartRepository->get(['dealer_id' => $dealerId]);
-      
-      return (bool)$dealerParts;
+      return $this->dealerPartRepository->get(['dealer_id' => $dealerId])->exists();
     }
 
     /**

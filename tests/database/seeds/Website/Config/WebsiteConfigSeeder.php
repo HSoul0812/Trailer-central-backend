@@ -42,7 +42,7 @@ class WebsiteConfigSeeder extends Seeder
         $dealerId = $this->dealer->getKey();
         $websiteId = $this->website->getKey();
 
-        $this->websiteConfig = factory(WebsiteConfig::class, 1)->create(['value' => 1, 'key' => 'parts/ecommerce/enabled', 'website_id' => $websiteId]); // 1 new websiteconfig
+        $this->websiteConfig = factory(WebsiteConfig::class, 1)->create(['value' => 1, 'key' => WebsiteConfig::ECOMMERCE_KEY_ENABLE, 'website_id' => $websiteId]); // 1 new websiteconfig
     }
 
     public function seedDealer(): void

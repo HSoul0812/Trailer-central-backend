@@ -4,15 +4,12 @@ namespace App\Nova\Actions\Dealer;
 
 use App\Models\User\User;
 use App\Services\User\DealerOptionsServiceInterface;
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 
 class ActivateECommerce extends Action
 {
-    use InteractsWithQueue, Queueable;
 
     public $showOnTableRow = true;
 
@@ -41,10 +38,6 @@ class ActivateECommerce extends Action
         /** @var User $model */
         foreach ($models as $model) {
             $result = $this->dealerOptionsService->activateECommerce($model->dealer_id);
-
-            if (!$result) {
-                throw new \InvalidArgumentException('E-Commerce activation error', 500);
-            }
         }
     }
 
