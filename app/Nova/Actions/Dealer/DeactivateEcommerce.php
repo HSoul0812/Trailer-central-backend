@@ -37,7 +37,7 @@ class DeactivateECommerce extends Action
     {
         /** @var User $model */
         foreach ($models as $model) {
-            $result = $this->dealerOptionsService->deactivateECommerce($model->dealer_id);
+            $this->dealerOptionsService->deactivateECommerce($model->dealer_id);
         }
     }
 

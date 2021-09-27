@@ -228,10 +228,10 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
 
           return true;
-      } catch (\EcommerceActivationException $e) {
+      } catch (\Exception $e) {
           Log::error("E-Commerce activation error. dealer_id - {$dealerId}", $e->getTrace());
 
-          return false;
+          throw new EcommerceActivationException;
       }
     }
 
@@ -261,10 +261,10 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
 
           return true;
-      } catch (\EcommerceDeactivationException $e) {
+      } catch (\Exception $e) {
           Log::error("E-Commerce deactivation error. dealer_id - {$user}", $e->getTrace());
 
-          return false;
+          throw new EcommerceDeactivationException;
       }
     }
 

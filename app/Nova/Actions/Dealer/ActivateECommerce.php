@@ -37,7 +37,7 @@ class ActivateECommerce extends Action
     {
         /** @var User $model */
         foreach ($models as $model) {
-            $result = $this->dealerOptionsService->activateECommerce($model->dealer_id);
+            $this->dealerOptionsService->activateECommerce($model->dealer_id);
         }
     }
 
