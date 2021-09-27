@@ -7,6 +7,6 @@ use App\Http\Requests\Request;
 
 class IndexHomeRequest extends Request implements IndexRequestInterface
 {
-    protected $rules = [
+    protected array $rules = [
     ];
 }

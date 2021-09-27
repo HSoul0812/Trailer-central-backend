@@ -55,7 +55,7 @@ class HomeController extends AbstractRestfulController
         throw new NotImplementedException();
     }
 
-    protected function constructRequestBindings()
+    protected function constructRequestBindings(): void
     {
         app()->bind(IndexRequestInterface::class, function () {
             return inject_request_data(IndexHomeRequest::class);
