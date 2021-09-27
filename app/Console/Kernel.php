@@ -4,7 +4,6 @@ namespace App\Console;
 
 use App\Console\Commands\Files\ClearLocalTmpFolder;
 use App\Console\Commands\Inventory\AutoArchiveSoldItems;
-use App\Console\Commands\Test;
 use App\Console\Commands\Website\AddSitemaps;
 use App\Console\Commands\Website\GenerateDealerSpecificSiteUrls;
 use Illuminate\Console\Scheduling\Schedule;
@@ -47,7 +46,7 @@ class Kernel extends ConsoleKernel
         GenerateDealerSpecificSiteUrls::class,
         AutoArchiveSoldItems::class,
         FixFloorplanBillStatus::class,
-        FixEmptyManufacturerUnitSale::class,
+        FixEmptyManufacturerUnitSale::class
     ];
 
     /**
@@ -168,7 +167,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('inventory:auto-archive-sold-items')
             ->daily()
             ->runInBackground();
-
+        
         $schedule->command('inventory:fix-floorplan-bill-status')
             ->hourly()
             ->runInBackground();

@@ -335,8 +335,9 @@ $api->version('v1', function ($route) {
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
 
-    $route->get('leads/interaction-message/search', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@search');
-
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('leads/interaction-message/search', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@search');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -441,21 +442,6 @@ $api->version('v1', function ($route) {
     $route->get('user/interactions/tasks/sort-fields', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@sortFields');
 
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
-        /*
-        |--------------------------------------------------------------------------
-        | Message
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
-        $route->group([
-            'prefix' => 'interaction/message'
-        ], function ($route) {
-            $route->get('/search', 'App\Http\Controllers\v1\CRM\Interactions\MessageController@search');
-        });
-
-
         /*
         |--------------------------------------------------------------------------
         | Leads
