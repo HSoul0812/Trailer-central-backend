@@ -119,8 +119,20 @@ DMS_DB_HOST=127.0.0.1
 DMS_DB_PORT=3306
 ```
 
-Test User access
+Testing 
 --------------------------------------
+
+For normal testing 
+```bash
+./bin/php artisan test --env=testing
+```
+
+For parallel testing
+```bash
+./bin/php artisan test -p --env=testing
+```
+
+Test User access
 ```
 tc@trailercentral.com
 squadron*RAF99

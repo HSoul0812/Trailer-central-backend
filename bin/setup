@@ -20,9 +20,14 @@ sleep 6 # this is not elegant, but it works
 
 "$ROOT"/bin/cli composer install
 
-"$ROOT"/bin/cli php artisan key:generate
-"$ROOT"/bin/cli php artisan migrate
-"$ROOT"/bin/cli php artisan db:seed
-"$ROOT"/bin/cli php artisan nova:publish
-"$ROOT"/bin/cli php artisan optimize
-"$ROOT"/bin/cli php artisan route:clear
+"$ROOT"/bin/php artisan optimize:clear
+"$ROOT"/bin/php artisan config:clear
+"$ROOT"/bin/php artisan cache:clear
+"$ROOT"/bin/php artisan key:generate
+"$ROOT"/bin/php artisan key:generate --env=testing
+"$ROOT"/bin/php artisan migrate
+"$ROOT"/bin/php artisan migrate --env=testing
+"$ROOT"/bin/php artisan db:seed
+"$ROOT"/bin/php artisan db:seed --env=testing
+"$ROOT"/bin/php artisan nova:publish
+"$ROOT"/bin/php artisan route:clear

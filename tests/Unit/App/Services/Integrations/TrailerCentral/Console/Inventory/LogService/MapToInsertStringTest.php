@@ -6,10 +6,10 @@ namespace Tests\Unit\App\Services\Integrations\TrailerCentral\Console\Inventory\
 
 use App\Models\Inventory\InventoryLog;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogService;
+use Database\Seeders\WithArtifacts;
 use JsonException;
 use PDO;
 use stdClass;
-use Tests\Common\WithArtifacts;
 use Tests\Unit\WithFaker;
 
 /**
@@ -23,7 +23,7 @@ class MapToInsertStringTest extends LogServiceTestCase
     public function testWillThrowJsonException(): void
     {
         /** @var stdClass $inventory */
-        $inventory = (object) $this->loadJson('TrailerCentral/inventory.json')->random();
+        $inventory = (object) $this->fromJson('trailer-central/inventory.json')->random();
         $inventory->malformedData = utf8_decode('ñáẃ');
 
         $isNotTheFirstImport = false;
@@ -60,7 +60,7 @@ class MapToInsertStringTest extends LogServiceTestCase
     public function testWillBuildTheValuesForTheFirstTime(): void
     {
         /** @var stdClass $inventory */
-        $inventory = (object) $this->loadJson('TrailerCentral/inventory.json')->random();
+        $inventory = (object) $this->fromJson('trailer-central/inventory.json')->random();
         $inventory->status = $this->faker->randomElement([2, 3, 4, 5, 6]); // sold
         $isNotTheFirstImport = false;
 
@@ -107,7 +107,7 @@ class MapToInsertStringTest extends LogServiceTestCase
     public function testWillBuildTheValuesForNotTheFirstTime(array $propertiesToBeChanged, string $expectedEventName): void
     {
         /** @var array $info */
-        $info = $this->loadJson('TrailerCentral/inventory.json')->random();
+        $info = $this->fromJson('trailer-central/inventory.json')->random();
         $info['status'] = 7; // available
         $inventory = $this->mockEloquent(InventoryLog::class, [
             'id'                => $this->faker->randomNumber(),

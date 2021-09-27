@@ -5,6 +5,7 @@
 namespace Tests\Unit\App\Services\Integrations\TrailerCentral\Console\Leads\LogService;
 
 use App\Services\Integrations\TrailerCentral\Console\Leads\LogService;
+use Database\Seeders\WithArtifacts;
 use Illuminate\Database\ConnectionInterface;
 use JsonException;
 use PDO;
@@ -12,7 +13,6 @@ use ReflectionClass;
 use ReflectionMethod;
 use stdClass;
 use Tests\Common\UnitTestCase;
-use Tests\Common\WithArtifacts;
 use Tests\Unit\WithFaker;
 
 /**
@@ -26,7 +26,7 @@ class MapToInsertStringTest extends UnitTestCase
     public function testWillThrowJsonException(): void
     {
         /** @var stdClass $lead */
-        $lead = (object) $this->loadJson('TrailerCentral/leads.json')->random();
+        $lead = (object) $this->fromJson('trailer-central/leads.json')->random();
         $lead->malformedData = utf8_decode('ñáẃ');
 
         $isNotTheFirstImport = false;
@@ -59,7 +59,7 @@ class MapToInsertStringTest extends UnitTestCase
     public function testWillBuildTheSQLFragment(): void
     {
         /** @var stdClass $lead */
-        $lead = (object) $this->loadJson('TrailerCentral/leads.json')->random();
+        $lead = (object) $this->fromJson('trailer-central/leads.json')->random();
         $isNotTheFirstImport = false;
 
         $dependency = $this->mockDependency();
