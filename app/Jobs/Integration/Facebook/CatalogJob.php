@@ -21,6 +21,11 @@ class CatalogJob extends Job
     const TC_PRIVACY_POLICY_URL = 'https://trailercentral.com/privacy-policy/';
 
     /**
+     * Default Inventory URL
+     */
+    const DEFAULT_INVENTORY_URL = 'https://trailertrader.com';
+
+    /**
      * Facebook Vehicle Types
      */
     const BOAT = 'BOAT';
@@ -462,11 +467,11 @@ class CatalogJob extends Job
 
         // Check Length
         if(\strlen($clean) === 10) {
-            $clean = '1' . $clean;
+            $clean = '+1 ' . $clean;
         }
 
         // Return Clean With + at Start
-        return urlencode('+' . $clean);
+        return $clean;
     }
 
     /**
@@ -489,18 +494,17 @@ class CatalogJob extends Job
         // Get Inventory Item for Vehicle
         $inventory = Inventory::find($inventoryId);
 
+        // Get URL
+        $url = $inventory->getUrl();
+
         // Website Domain Exists?
         if(!empty($inventory->user->website->domain)) {
-            $url = $inventory->getUrl();
-
-            // Domain/URL Exists?
-            if(!empty($url)) {
-                return 'https://' . $inventory->user->website->domain . $url;
-            }
+            // Return Website Domain
+            return 'https://' . $inventory->user->website->domain . $url;
         }
 
         // Return Empty URL
-        return '';
+        return self::DEFAULT_INVENTORY_URL . $url;
     }
 
 
