@@ -19,6 +19,8 @@ use App\Repositories\User\DealerUserRepositoryInterface;
 use App\Repositories\User\DealerUserRepository;
 use App\Repositories\User\DealerXmlExportRepositoryInterface;
 use App\Repositories\User\DealerXmlExportRepository;
+use App\Repositories\User\DealerPartRepository;
+use App\Repositories\User\DealerPartRepositoryInterface;
 
 class UserServiceProvider extends ServiceProvider
 {
@@ -40,7 +42,7 @@ class UserServiceProvider extends ServiceProvider
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(DealerUserRepositoryInterface::class, DealerUserRepository::class);
         $this->app->bind(DealerXmlExportRepositoryInterface::class, DealerXmlExportRepository::class);
-        
+        $this->app->bind(DealerPartRepositoryInterface::class, DealerPartRepository::class);
     }
 
 }
