@@ -3,9 +3,15 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class AddStripeCredsTable extends Migration
 {
+    private const DEFAULT_TEST_CREDS = [
+        'publishable' => 'pk_test_SrHkSx5n3ekBXKiV9cLrRFe9',
+        'secret' => 'sk_test_cDKDKSNuzJde6031tghXKTCU',
+    ];
+
     /**
      * Run the migrations.
      *
@@ -19,6 +25,8 @@ class AddStripeCredsTable extends Migration
                 $table->string('publishable')->nullable();
                 $table->string('secret')->nullable();
             });
+
+            DB::table('stripe_checkout_credentials')->insert(self::DEFAULT_TEST_CREDS);
         }
     }
 
