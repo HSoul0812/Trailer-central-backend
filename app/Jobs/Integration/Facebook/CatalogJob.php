@@ -23,7 +23,7 @@ class CatalogJob extends Job
     /**
      * Default Inventory URL
      */
-    const DEFAULT_INVENTORY_URL = 'https://trailertrader.com/';
+    const DEFAULT_INVENTORY_DOMAIN = 'https://trailertrader.com';
 
     /**
      * Facebook Vehicle Types
@@ -465,9 +465,13 @@ class CatalogJob extends Job
         // Get Dealer Phone
         $clean = trim(preg_replace('/[^0-9]/', '', $phone));
 
-        // Check Length
+        // Normal Phone Number
         if(\strlen($clean) === 10) {
             $clean = '+1 ' . $clean;
+        }
+        // Phone With Starting 1
+        elseif(\strlen($clean) === 11) {
+            $clean = '+1 ' . substr($clean, 1);
         }
 
         // Return Clean With + at Start
@@ -503,8 +507,13 @@ class CatalogJob extends Job
             return 'https://' . $inventory->user->website->domain . $url;
         }
 
+        // Use Default Domain Instead?
+        if(!empty($url) && $inventory->show_on_website && $inventory->user->clsf_active) {
+            return self::DEFAULT_INVENTORY_DOMAIN . $url;
+        }
+
         // Return Empty URL
-        return self::DEFAULT_INVENTORY_URL . $url;
+        return $this->getDefaultInventoryDomain();
     }
 
 
@@ -582,5 +591,22 @@ class CatalogJob extends Job
 
         // Return Result
         return $train;
+    }
+
+
+    /**
+     * Get Default Inventory Domain
+     * 
+     * @return string default inventory domain
+     */
+    private function getDefaultInventoryDomain() {
+        // Get Environment Variables
+        $domain = config('oauth.fb.catalog.domain');
+        if(!empty($domain)) {
+            return $domain;
+        }
+
+        // Return Default Inventory Domain
+        return self::DEFAULT_INVENTORY_DOMAIN;
     }
 }
