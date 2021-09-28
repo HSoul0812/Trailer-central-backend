@@ -475,7 +475,7 @@ class CatalogJob extends Job
         }
 
         // Return Clean With + at Start
-        return $clean;
+        return urlencode($clean);
     }
 
     /**
