@@ -390,7 +390,9 @@ class CatalogJob extends Job
         }
 
         // Fix Availability
-        if($listing->availability === '4') {
+        if($listing->availability === '2') {
+            $listing->availability = self::UNAVAILABLE;
+        } elseif($listing->availability === '4') {
             $listing->availability = self::PENDING;
         } else {
             $listing->availability = self::AVAILABLE;
