@@ -58137,7 +58137,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(275);
-module.exports = __webpack_require__(295);
+module.exports = __webpack_require__(294);
 
 
 /***/ }),
@@ -58157,7 +58157,7 @@ var normalizeComponent = __webpack_require__(277)
 /* script */
 var __vue_script__ = __webpack_require__(278)
 /* template */
-var __vue_template__ = __webpack_require__(294)
+var __vue_template__ = __webpack_require__(293)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -58316,7 +58316,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_vue2_daterange_picker__ = __webpack_require__(285);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_vue2_daterange_picker___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_vue2_daterange_picker__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_moment_dist_moment__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_vue2_daterange_picker_dist_vue2_daterange_picker_css__ = __webpack_require__(289);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_vue2_daterange_picker_dist_vue2_daterange_picker_css__ = __webpack_require__(288);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_vue2_daterange_picker_dist_vue2_daterange_picker_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_vue2_daterange_picker_dist_vue2_daterange_picker_css__);
 //
 //
@@ -58471,7 +58471,7 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_1_chartjs_plugin_datalabels__
             Nova.request().get(this.card.options.endpoint, {
                 params: {
                     period: this.filters.period.selected,
-                    subset: encodeURI(this.filters.subset.selected),
+                    subset: this.filters.subset.selected,
                     from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
                     to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
                 }
@@ -59517,14 +59517,13 @@ module.exports = webpackContext;
 webpackContext.id = 287;
 
 /***/ }),
-/* 288 */,
-/* 289 */
+/* 288 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(290);
+var content = __webpack_require__(289);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -59532,7 +59531,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(292)(content, options);
+var update = __webpack_require__(291)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -59549,10 +59548,10 @@ if(false) {
 }
 
 /***/ }),
-/* 290 */
+/* 289 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(291)(false);
+exports = module.exports = __webpack_require__(290)(false);
 // imports
 
 
@@ -59563,7 +59562,7 @@ exports.push([module.i, "td[data-v-73d7ae10],th[data-v-73d7ae10]{padding:2px;bac
 
 
 /***/ }),
-/* 291 */
+/* 290 */
 /***/ (function(module, exports) {
 
 /*
@@ -59645,7 +59644,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 292 */
+/* 291 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -59691,7 +59690,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(293);
+var	fixUrls = __webpack_require__(292);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -60004,7 +60003,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 293 */
+/* 292 */
 /***/ (function(module, exports) {
 
 
@@ -60099,7 +60098,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 294 */
+/* 293 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -60306,7 +60305,7 @@ if (false) {
 }
 
 /***/ }),
-/* 295 */
+/* 294 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

@@ -156,7 +156,7 @@ export default {
             Nova.request().get(this.card.options.endpoint, {
                 params: {
                     period: this.filters.period.selected,
-                    subset: encodeURI(this.filters.subset.selected),
+                    subset: this.filters.subset.selected,
                     from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
                     to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
                 },
