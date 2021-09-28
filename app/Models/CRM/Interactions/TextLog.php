@@ -1,11 +1,25 @@
 <?php
 
-
 namespace App\Models\CRM\Interactions;
 
 use App\Models\CRM\Leads\Lead;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
+/**
+ * Class TextLog
+ * @package App\Models\CRM\Interactions
+ *
+ * @property integer $id
+ * @property integer $lead_id
+ * @property string $log_message
+ * @property string $from_number
+ * @property string $to_number
+ * @property \DateTimeInterface $date_sent
+ *
+ * @property Lead $lead
+ */
 class TextLog extends Model
 {
     /**
@@ -45,11 +59,23 @@ class TextLog extends Model
         'lead_id',
         'log_message',
         'from_number',
-        'to_number'
+        'to_number',
+        'date_sent'
     ];
 
-    public function lead()
+    /**
+     * @return BelongsTo
+     */
+    public function lead(): BelongsTo
     {
-        return $this->belongsTo(Lead::class, 'identifier', 'lead_id');
+        return $this->belongsTo(Lead::class, 'lead_id', 'identifier');
+    }
+
+    /**
+     * @return MorphOne
+     */
+    public function interactionMessage(): MorphOne
+    {
+        return $this->morphOne(InteractionMessage::class, 'interactionMessage', 'tb_name', 'tb_primary_id');
     }
 }

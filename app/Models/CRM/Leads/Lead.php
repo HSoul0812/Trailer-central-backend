@@ -7,8 +7,6 @@ use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Product\Product;
-use App\Models\CRM\Leads\LeadProduct;
-use App\Models\CRM\Leads\InventoryLead;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
@@ -21,48 +19,51 @@ use App\Models\Website\Tracking\Tracking;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * Class Lead
  * @package App\Models\CRM\Leads
  *
- * @property $identifier
- * @property $website_id
- * @property $lead_type
- * @property $inventory_id
- * @property $referral
- * @property $title
- * @property $first_name
- * @property $last_name
- * @property $email_address
- * @property $address
- * @property $city
- * @property $state
- * @property $zip
- * @property $preferred_contact
- * @property $phone_number
- * @property $status
- * @property $comments
- * @property $next_followup
- * @property $date_submitted
- * @property $is_spam
- * @property $contact_email_sent
- * @property $adf_email_sent
- * @property $cdk_email_sent
- * @property $metadata
- * @property $newsletter
- * @property $note
- * @property $is_from_classifieds
- * @property $dealer_id
- * @property $dealer_location_id
- * @property $is_archived
- * @property $unique_id
+ * @property int $identifier
+ * @property int $website_id
+ * @property string $lead_type
+ * @property int $inventory_id
+ * @property string $referral
+ * @property string $title
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $email_address
+ * @property string $address
+ * @property string $city
+ * @property string $state
+ * @property string $zip
+ * @property string $preferred_contact
+ * @property string $phone_number
+ * @property string $status
+ * @property string $comments
+ * @property \DateTimeInterface $next_followup
+ * @property \DateTimeInterface $date_submitted
+ * @property bool $is_spam
+ * @property \DateTimeInterface $contact_email_sent
+ * @property \DateTimeInterface $adf_email_sent
+ * @property bool $cdk_email_sent
+ * @property string $metadata
+ * @property bool $newsletter
+ * @property string $note
+ * @property bool $is_from_classifieds
+ * @property int $dealer_id
+ * @property int $dealer_location_id
+ * @property bool $is_archived
+ * @property int $unique_id
+ *
+ * @property Website $website
  */
 class Lead extends Model
 {
     use TableAware;
-       
+
     const STATUS_WON = 'Closed';
     const STATUS_WON_CLOSED = 'Closed (Won)';
     const STATUS_LOST = 'Closed (Lost)';
@@ -74,10 +75,10 @@ class Lead extends Model
 
     const NOT_ARCHIVED = 0;
     const LEAD_ARCHIVED = 1;
-    
+
     const IS_NOT_SPAM = 0;
     const IS_SPAM = 1;
-    
+
     const IS_IDS_EXPORTED = 1;
     const IS_NOT_IDS_EXPORTED = 0;
 
@@ -154,7 +155,7 @@ class Lead extends Model
     {
         return $this->hasMany(EmailHistory::class, 'lead_id', 'identifier');
     }
-    
+
     public function getAllInteractions() : Collection
     {
         $interactionsRepo = app(InteractionsRepositoryInterface::class);
@@ -163,7 +164,7 @@ class Lead extends Model
             'lead_id' => $this->identifier
         ]);
     }
-    
+
     /**
      * Get the email history for the lead.
      */
@@ -195,7 +196,7 @@ class Lead extends Model
     {
         return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id', 'identifier');
     }
-    
+
     public function websiteTracking()
     {
         return $this->hasMany(Tracking::class, 'lead_id', 'identifier');
@@ -224,7 +225,7 @@ class Lead extends Model
     {
         return $this->hasMany(UnitSale::class, 'lead_id', 'identifier');
     }
- 
+
     /**
      * Get Dealer location
      */
@@ -243,7 +244,7 @@ class Lead extends Model
 
     /**
      * Get Crm User
-     * 
+     *
      * @return HasOneThrough
      */
     public function crmUser(): HasOneThrough
@@ -254,9 +255,9 @@ class Lead extends Model
     /**
      * Get Website.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
-    public function website()
+    public function website(): BelongsTo
     {
         return $this->belongsTo(Website::class, 'website_id', 'id');
     }
@@ -457,7 +458,7 @@ class Lead extends Model
 
     /**
      * Preferred Dealer Location Attribute
-     * 
+     *
      * @return null|DealerLocation
      */
     public function getPreferredDealerLocationAttribute()
@@ -488,7 +489,7 @@ class Lead extends Model
         // Return Nothing
         return 0;
     }
-    
+
     public function getInquiryTypeAttribute() : string
     {
         switch($this->lead_type) {
@@ -505,7 +506,7 @@ class Lead extends Model
 
     /**
      * Get Inquiry Name Attribute
-     * 
+     *
      * @return string
      */
     public function getInquiryNameAttribute(): string {
@@ -525,7 +526,7 @@ class Lead extends Model
 
     /**
      * Get Inquiry Email Attribute
-     * 
+     *
      * @return string
      */
     public function getInquiryEmailAttribute(): string {
