@@ -3,12 +3,16 @@
 namespace App\Models\CRM\Dms\Quickbooks;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @author Marcel
  */
 class Account extends Model
 {
+
+    use SoftDeletes;
+
     const TYPE_BANK = 'Bank';
     const TYPE_OTHER_CURRENT_ASSET = 'Other Current Asset';
     const TYPE_FIXED_ASSET = 'Fixed Asset';
