@@ -13,7 +13,7 @@ class CreateCompletedOrdersTable extends Migration
      */
     public function up()
     {
-        Schema::create('stripe_completed_orders', function (Blueprint $table) {
+        Schema::create('ecommerce_completed_orders', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('customer_email');
             $table->integer('total_amount');
@@ -36,6 +36,6 @@ class CreateCompletedOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('stripe_completed_orders');
+        Schema::dropIfExists('ecommerce_completed_orders');
     }
 }

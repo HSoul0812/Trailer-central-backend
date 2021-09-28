@@ -14,7 +14,7 @@ class CompletedOrder extends Model
      *
      * @var string
      */
-    protected $table = 'stripe_completed_orders';
+    protected $table = 'ecommerce_completed_orders';
 
     protected $fillable = [
         'customer_email',
