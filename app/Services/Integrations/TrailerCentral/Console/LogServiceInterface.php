@@ -9,9 +9,9 @@ use stdClass;
 interface LogServiceInterface
 {
     /**
-     * @return int number of affected rows
-     *
      * @throws \PDOException when some unknown PDO error has been thrown
+     *
+     * @return int number of affected rows
      */
     public function execute(string $sql): int;
 

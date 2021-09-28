@@ -19,9 +19,9 @@ class LogService extends AbstractLogService implements LogServiceInterface
     }
 
     /**
-     * @return string SQL insert values fragment
-     *
      * @throws \JsonException when the metadata were unable to be serialized
+     *
+     * @return string SQL insert values fragment
      */
     public function mapToInsertString(stdClass $record, bool $isNotTheFirstImport): string
     {

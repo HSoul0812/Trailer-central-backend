@@ -16,7 +16,10 @@ return (new PhpCsFixer\Config())
         'blank_line_before_statement' => true,
         'phpdoc_no_empty_return' => true,
         'concat_space' => ['spacing' => 'one'],
-        'single_line_throw' => false
+        'single_line_throw' => false,
+        'declare_strict_types' => true,
+        'phpdoc_order' => true,
+        'phpdoc_no_package' => true
     ])
     ->setFinder($finder)
     ->setUsingCache(false);

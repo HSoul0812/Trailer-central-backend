@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /** @noinspection PhpUnhandledExceptionInspection */
 
 namespace Tests\Unit\App\Services\Integrations\TrailerCentral\Console\AbstractSyncService;

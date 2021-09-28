@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\App\Services\Integrations\TrailerCentral\Console\AbstractSyncService;
 
 use App\Repositories\Integrations\TrailerCentral\SourceRepositoryInterface;

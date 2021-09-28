@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 if (!function_exists('include_route_files')) {
     /**
      * Loops through a folder and requires all PHP files

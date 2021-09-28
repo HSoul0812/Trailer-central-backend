@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /** @noinspection PhpMissingReturnTypeInspection */
 
 namespace Tests\Common;
@@ -21,10 +23,10 @@ abstract class UnitTestCase extends TestCase
     }
 
     /**
+     * @throws \ReflectionException when the class property does not exist
+     *
      * @return mixed|\PHPUnit\Framework\MockObject\MockObject
      * @noinspection PhpMissingReturnTypeInspection
-     *
-     * @throws \ReflectionException when the class property does not exist
      */
     public function mockEloquent(string $class, array $attributes = [], array $methods = [])
     {

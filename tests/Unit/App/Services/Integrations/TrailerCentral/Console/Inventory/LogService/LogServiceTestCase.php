@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\App\Services\Integrations\TrailerCentral\Console\Inventory\LogService;
 
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;

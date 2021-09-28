@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /** @noinspection PhpMissingParamTypeInspection */
 /** @noinspection PhpMissingReturnTypeInspection */
 
@@ -56,10 +58,10 @@ trait MockPrivateMembers
      * @param object|string $object       Class name, or instantiated object that we will get property from
      * @param string        $propertyName Property name to set
      *
-     * @return mixed
-     *
      * @throws TypeError           when the property is non-static, and you provide a class name instead an object
      * @throws ReflectionException when the class property does not exist
+     *
+     * @return mixed
      */
     public function getProperty($object, string $propertyName)
     {

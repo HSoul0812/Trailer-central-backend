@@ -9,9 +9,9 @@ use App\Exceptions\PropertyDoesNotExist;
 trait WithGetter
 {
     /**
-     * @return mixed
-     *
      * @throws PropertyDoesNotExist when the provided property does not exist
+     *
+     * @return mixed
      */
     public function __get(string $key)
     {

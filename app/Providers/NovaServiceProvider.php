@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights;
@@ -82,9 +84,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     /**
      * Get the extra dashboards that should be displayed on the Nova dashboard.
      *
-     * @return array<Element>
-     *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     *
+     * @return array<Element>
      */
     protected function dashboards(): array
     {
