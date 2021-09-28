@@ -467,15 +467,15 @@ class CatalogJob extends Job
 
         // Normal Phone Number
         if(\strlen($clean) === 10) {
-            $clean = '+1 ' . $clean;
+            $clean = '%2B1%20' . $clean;
         }
         // Phone With Starting 1
         elseif(\strlen($clean) === 11) {
-            $clean = '+1 ' . substr($clean, 1);
+            $clean = '%2B1%20' . substr($clean, 1);
         }
 
         // Return Clean With + at Start
-        return urlencode($clean);
+        return $clean;
     }
 
     /**
