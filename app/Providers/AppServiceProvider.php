@@ -25,6 +25,8 @@ use App\Repositories\Dms\Pos\RegisterRepository;
 use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
+use App\Repositories\Ecommerce\CompletedOrderRepository;
+use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
@@ -99,6 +101,8 @@ use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
 use App\Services\Dms\Pos\RegisterService;
 use App\Services\Dms\Pos\RegisterServiceInterface;
+use App\Services\Ecommerce\CompletedOrder\CompletedOrderService;
+use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
@@ -323,6 +327,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
+
+        $this->app->bind(CompletedOrderServiceInterface::class, CompletedOrderService::class);
+        $this->app->bind(CompletedOrderRepositoryInterface::class, CompletedOrderRepository::class);
 
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)

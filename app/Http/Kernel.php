@@ -2,6 +2,8 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
+use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -113,7 +115,8 @@ class Kernel extends HttpKernel
         'parts.orders.validate' => PartOrderValidate::class,
         'printer.form.validate' => PrinterFormValidate::class,
         'printer.instruction.validate' => PrinterInstructionValidate::class,
-        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
+        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class,
+        'stripe.webhook.validate' => StripeWebhookValidate::class,
     ];
 
     /**

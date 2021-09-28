@@ -29,6 +29,18 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Completed Orders
+     */
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@index');
+        $route->get('ecommerce/orders/{id}', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@show')->where('id', '[0-9]+');
+    });
+
+    $route->group(['middleware' => 'stripe.webhook.validate'], function ($route) {
+        $route->post('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@create');
+    });
+
+    /**
      * Floorplan Payments
      */
     $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
