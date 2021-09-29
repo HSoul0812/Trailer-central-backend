@@ -15,17 +15,47 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
 
     public function create($params): CompletedOrder
     {
-        $completedOrder = new CompletedOrder();
-
         $data = $params['data']['object'];
 
-        $completedOrder->customer_email = $data['customer_details']['email'];
-        $completedOrder->total_amount = $data['amount_total'];
-        $completedOrder->payment_method = $data['payment_method_types'][0];
-        $completedOrder->payment_status = $data['payment_status'];
-        $completedOrder->event_id = $params['id'];
-        $completedOrder->object_id = $data['id'];
-        $completedOrder->stripe_customer = $data['customer'];
+        $completedOrder = CompletedOrder::where('object_id', $data['id'])->first();
+
+        if (!$completedOrder) {
+            $completedOrder = new CompletedOrder();
+
+            $completedOrder->event_id = $params['id'];
+            $completedOrder->object_id = $data['id'];
+            $completedOrder->parts = $data['parts'];
+            $completedOrder->total_amount = $data['amount_total'];
+
+            $completedOrder->shipping_name = $data['shipto_name'] ?? '';
+            $completedOrder->shipping_country = $data['shipto_country'] ?? '';
+            $completedOrder->shipping_address = $data['shipto_address'] ?? '';
+            $completedOrder->shipping_city = $data['shipto_city'] ?? '';
+            $completedOrder->shipping_zip = $data['shipto_postal'] ?? '';
+            $completedOrder->shipping_region = $data['shipto_region'] ?? '';
+
+            if (isset($data['no-billing']) && $data['no-billing'] == "1") {
+                $completedOrder->billing_name = $data['shipto_name'] ?? '';
+                $completedOrder->billing_country = $data['shipto_country'] ?? '';
+                $completedOrder->billing_address = $data['shipto_address'] ?? '';
+                $completedOrder->billing_city = $data['shipto_city'] ?? '';
+                $completedOrder->billing_zip = $data['shipto_postal'] ?? '';
+                $completedOrder->billing_region = $data['shipto_region'] ?? '';
+            } else {
+                $completedOrder->billing_name = $data['billto_name'] ?? '';
+                $completedOrder->billing_country = $data['billto_country'] ?? '';
+                $completedOrder->billing_address = $data['billto_address'] ?? '';
+                $completedOrder->billing_city = $data['billto_city'] ?? '';
+                $completedOrder->billing_zip = $data['billto_postal'] ?? '';
+                $completedOrder->billing_region = $data['billto_region'] ?? '';
+            }
+        } else {
+            $completedOrder->customer_email = $data['customer_details']['email'];
+            $completedOrder->total_amount = $data['amount_total'];
+            $completedOrder->payment_method = $data['payment_method_types'][0];
+            $completedOrder->payment_status = $data['payment_status'] ?? '';
+            $completedOrder->stripe_customer = $data['customer'] ?? '';
+        }
 
         $completedOrder->save();
 
