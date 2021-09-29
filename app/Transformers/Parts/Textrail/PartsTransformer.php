@@ -1,23 +1,16 @@
 <?php
 
-namespace App\Transformers\Parts;
+namespace App\Transformers\Parts\Textrail;
 
-use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
-use League\Fractal\Resource\Collection;
+use App\Models\Parts\Textrail\Part;
 use League\Fractal\TransformerAbstract;
-use App\Models\Parts\Part;
 
-class PartsTransformer extends TransformerAbstract
+class PartsTransformer extends TransformerAbstract 
 {
-    protected $availableIncludes = [
-        'purchaseOrders',
-    ];
-
     public function transform(Part $part): array
     {
 	 return [
              'id' => (int)$part->id,
-             'dealer_id' => $part->dealer_id ? (int)$part->dealer_id : null,
              'vendor' => $part->vendor,
              'manufacturer' => $part->manufacturer,
              'brand' => $part->brand,
@@ -43,33 +36,7 @@ class PartsTransformer extends TransformerAbstract
              'qty' => (int)$part->qty,
              'show_on_website' => (bool)$part->show_on_website,
              'is_vehicle_specific' => (bool)$part->is_vehicle_specific,
-             'images' => $part->images->pluck('image_url'),
-             'vehicle_specific' => $part->vehicleSpecific,
-             'video_embed_code' => $part->video_embed_code,
-             'stock_min' => $part->stock_min,
-             'stock_max' => $part->stock_max,
-             'bins' => $part->bins,
-             'disabled' => count($part->bins) === 0
+             'images' => $part->images->pluck('image_url')
          ];
-    }
-
-    /**
-     * Include purchases resource object
-     *
-     * @param Part $part
-     * @return Collection
-     */
-    public function includePurchaseOrders(Part $part): Collection
-    {
-        return $this->collection(
-            $part->purchaseOrders,
-            new PurchaseOrderPartTransformer(), 'data')
-            ->setMeta([
-                'has_not_completed' => $part->purchaseOrders->filter(static function (
-                    PurchaseOrderPart $poPart
-                ): bool {
-                    return !$poPart->purchaseOrder->isCompleted();
-                })->isNotEmpty()
-            ]);
     }
 }
