@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Nova\Dashboards\Inventory\PriceAverageByManufacturerInsights;
 use App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights;
+use App\Repositories\Inventory\PriceAverageByManufacturerRepository;
+use App\Repositories\Inventory\PriceAverageByManufacturerRepositoryInterface;
 use App\Repositories\Inventory\StockAverageByManufacturerRepository;
 use App\Repositories\Inventory\StockAverageByManufacturerRepositoryInterface;
+use App\Services\Inventory\PriceAverageByManufacturerService;
+use App\Services\Inventory\PriceAverageByManufacturerServiceInterface;
 use App\Services\Inventory\StockAverageByManufacturerService;
 use App\Services\Inventory\StockAverageByManufacturerServiceInterface;
 use Illuminate\Support\Facades\Gate;
@@ -43,6 +48,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         $this->app->bind(StockAverageByManufacturerRepositoryInterface::class, StockAverageByManufacturerRepository::class);
         $this->app->bind(StockAverageByManufacturerServiceInterface::class, StockAverageByManufacturerService::class);
+
+        $this->app->bind(PriceAverageByManufacturerRepositoryInterface::class, PriceAverageByManufacturerRepository::class);
+        $this->app->bind(PriceAverageByManufacturerServiceInterface::class, PriceAverageByManufacturerService::class);
     }
 
     /**
@@ -92,6 +100,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         return [
             app()->make(StockAverageByManufacturerInsights::class),
+            app()->make(PriceAverageByManufacturerInsights::class),
             // another dashboards
         ];
     }
