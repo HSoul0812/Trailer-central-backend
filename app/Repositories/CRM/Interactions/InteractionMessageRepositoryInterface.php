@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Interactions;
 
+use App\Models\CRM\Interactions\InteractionMessage;
 use App\Repositories\Repository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -21,4 +22,10 @@ interface InteractionMessageRepositoryInterface extends Repository
      * @return LengthAwarePaginator|null
      */
     public function getPaginator(): ?LengthAwarePaginator;
+
+    /**
+     * @param array $params
+     * @return InteractionMessage
+     */
+    public function searchable(array $params): InteractionMessage;
 }

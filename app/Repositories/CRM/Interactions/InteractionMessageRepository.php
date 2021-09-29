@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Interactions;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Interactions\InteractionMessage;
 use App\Repositories\RepositoryAbstract;
 use App\Traits\Repository\Pagination;
@@ -45,6 +46,13 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $search->filter('term', ['hidden' => $params['hidden']]);
         }
 
+        if ($params['sort'] ?? null) {
+            $sortDir = substr($params['sort'], 0, 1) === '-'? 'asc': 'desc';
+            $field = str_replace('-', '', $params['sort']);
+
+            $search->sort($field, $sortDir);
+        }
+
         if ($params['page'] ?? null) {
             $searchResult = $this->esPaginationExecute($search, $params['page'], $params['per_page'] ?? 10);
 
@@ -59,5 +67,59 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         return $search->execute()->documents()->map(function (Document $document) {
             return $document->getContent();
         })->toArray();
+    }
+
+    /**
+     * @param array $params
+     * @return InteractionMessage
+     */
+    public function create($params): InteractionMessage
+    {
+        /** @var InteractionMessage $interactionMessage */
+        $interactionMessage = InteractionMessage::query()->create($params);
+        return $interactionMessage;
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     * @throws \Exception
+     */
+    public function delete($params): bool
+    {
+        if (empty($params['tb_name']) || empty($params['tb_primary_id'])) {
+            throw new RepositoryInvalidArgumentException('message_type or tb_primary_id has been missed. Params - ' . json_encode($params));
+        }
+
+        /** @var InteractionMessage $interactionMessage */
+        $interactionMessage = InteractionMessage::query()->where($params)->first();
+
+        if (!$interactionMessage instanceof InteractionMessage) {
+            throw new RepositoryInvalidArgumentException('Interaction message not found. Params - ' . json_encode($params));
+        }
+
+        return (bool)$interactionMessage->delete();
+    }
+
+    /**
+     * @param array $params
+     * @return InteractionMessage
+     */
+    public function searchable(array $params): InteractionMessage
+    {
+        if (empty($params['tb_name']) || empty($params['tb_primary_id'])) {
+            throw new RepositoryInvalidArgumentException('message_type or tb_primary_id has been missed. Params - ' . json_encode($params));
+        }
+
+        /** @var InteractionMessage $interactionMessage */
+        $interactionMessage = InteractionMessage::query()->where($params)->first();
+
+        if (!$interactionMessage instanceof InteractionMessage) {
+            throw new RepositoryInvalidArgumentException('Interaction message not found. Params - ' . json_encode($params));
+        }
+
+        $interactionMessage->searchable();
+
+        return  $interactionMessage;
     }
 }
