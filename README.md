@@ -146,3 +146,6 @@ you could use the follows seeders:
 ```bash
 php artisan db:seed --class=Database\\Seeders\\Inventory\\AverageStockSeeder
 ```
+```bash
+php artisan db:seed --class=Database\\Seeders\\Inventory\\AveragePriceSeeder
+```
