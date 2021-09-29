@@ -18,12 +18,12 @@ use Illuminate\Support\Facades\DB;
 /**
  * This seeder will be run under demand by the tests itself, so please do not add to the main DataSeeder.
  */
-class AverageStockSeeder extends Seeder
+class AveragePriceSeeder extends Seeder
 {
     use WithArtifacts;
 
     /**
-     * Seeds the inventory stock flow for 4 manufactures (2 brands per manufacturer), which 3 of them will keep
+     * Seeds the inventory price flow for 4 manufactures (2 brands per manufacturer), which 3 of them will keep
      * their inventories 5 days and KZ manufacturer will keep their stock 15 days.
      *
      * @throws \JsonException when the json cannot be parsed
@@ -32,14 +32,21 @@ class AverageStockSeeder extends Seeder
     {
         $factory = InventoryLog::factory();
         $allManufactures = $this->fromJson('inventory/manufactures-brands.json');
-        $randomManufactures = $allManufactures->filter(fn (array $data): bool => $data['name'] !== 'Kz')->random(3);
-        $kzManufacturer = $allManufactures->filter(fn (array $data): bool => $data['name'] === 'Kz')->first();
+        $randomManufactures = $allManufactures->filter(fn (array $data): bool => $data['name'] !== 'Winnebago')->random(3);
+        $kzManufacturer = $allManufactures->filter(fn (array $data): bool => $data['name'] === 'Winnebago')->first();
 
         $numberOfInventoriesPerBrand = [
             [1, 2],
             [2, 1],
             [1, 1],
             [2, 2],
+        ];
+
+        $priceOfInventoriesPerBrand = [
+            [1000, 1200],
+            [500, 600],
+            [800, 900],
+            [400, 800],
         ];
 
         $counter = 0;
@@ -60,14 +67,22 @@ class AverageStockSeeder extends Seeder
                     $day,
                     $factory,
                     5,
-                    $numberOfInventoriesPerBrand[$index]
+                    $numberOfInventoriesPerBrand[$index],
+                    $priceOfInventoriesPerBrand[$index]
                 );
             }
 
-            $this->seedByManufacturer($kzManufacturer, $day, $factory, 15, $numberOfInventoriesPerBrand[3]);
+            $this->seedByManufacturer(
+                $kzManufacturer,
+                $day,
+                $factory,
+                15,
+                $numberOfInventoriesPerBrand[3],
+                $priceOfInventoriesPerBrand[3]
+            );
 
-            DB::statement('REFRESH MATERIALIZED VIEW inventory_stock_average_per_day');
-            DB::statement('REFRESH MATERIALIZED VIEW inventory_stock_average_per_week');
+            DB::statement('REFRESH MATERIALIZED VIEW inventory_price_average_per_day');
+            DB::statement('REFRESH MATERIALIZED VIEW inventory_price_average_per_week');
         }
     }
 
@@ -79,32 +94,33 @@ class AverageStockSeeder extends Seeder
         array $manufacturer,
         CarbonImmutable $date,
         InventoryLogFactory $factory,
-        int $daysInStock,
-        array $inventoriesPerBrand
+        int $daysWithSamePrice,
+        array $inventoriesPerBrand,
+        array $pricesPerBrand,
     ): void {
         foreach ($manufacturer['brands'] as $index => $brand) { // 2 brands
             /** @var InventoryLog[] $inventories */
             $inventories = $factory->count($inventoriesPerBrand[$index])->create([
                 'brand'        => $brand,
                 'manufacturer' => $manufacturer['name'],
-                'price'        => $factory->faker->numberBetween(1000, 2000),
+                'price'        => $pricesPerBrand[$index],
                 'event'        => InventoryLog::EVENT_CREATED,
                 'status'       => InventoryLog::STATUS_AVAILABLE,
                 'created_at'   => $date->toDateTimeString(),
             ]);
 
             foreach ($inventories as $inventory) {
-                // suddenly that inventory is sold some 'X' days after its creation
+                // suddenly that inventory suffered a price down 'X' days after its creation
                 $factory->create([
-                        'trailercentral_id' => $inventory->trailercentral_id,
-                        'event'             => $inventory->event,
-                        'status'            => InventoryLog::STATUS_SOLD,
-                        'vin'               => $inventory->vin,
-                        'brand'             => $inventory->brand,
-                        'manufacturer'      => $inventory->manufacturer,
-                        'price'             => $inventory->price,
-                        'created_at'        => $date->addDays($daysInStock)->toDateTimeString(),
-                    ]
+                    'trailercentral_id' => $inventory->trailercentral_id,
+                    'event'             => InventoryLog::EVENT_PRICE_CHANGED,
+                    'status'            => $inventory->status,
+                    'vin'               => $inventory->vin,
+                    'brand'             => $inventory->brand,
+                    'manufacturer'      => $inventory->manufacturer,
+                    'price'             => $inventory->price - 100,
+                    'created_at'        => $date->addDays($daysWithSamePrice)->toDateTimeString(),
+                ]
                 );
             }
         }

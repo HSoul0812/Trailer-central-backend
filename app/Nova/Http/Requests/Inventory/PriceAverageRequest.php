@@ -6,6 +6,6 @@ namespace App\Nova\Http\Requests\Inventory;
 
 use App\Nova\Http\Requests\AbstractAverageRequest;
 
-class StockAverageRequest extends AbstractAverageRequest implements StockAverageRequestInterface
+class PriceAverageRequest extends AbstractAverageRequest implements StockAverageRequestInterface
 {
 }
