@@ -6,16 +6,16 @@ namespace App\Repositories\Inventory;
 
 use App\Exceptions\NotImplementedException;
 
-class StockAverageByManufacturerRepository extends AbstractAverageByManufacturerRepository implements StockAverageByManufacturerRepositoryInterface
+class PriceAverageByManufacturerRepository extends AbstractAverageByManufacturerRepository implements PriceAverageByManufacturerRepositoryInterface
 {
     protected function getPerDayViewName(): string
     {
-        return 'inventory_stock_average_per_day';
+        return 'inventory_price_average_per_day';
     }
 
     protected function getPerWeekViewName(): string
     {
-        return 'inventory_stock_average_per_week';
+        return 'inventory_price_average_per_week';
     }
 
     protected function getPerMonthViewName(): string
@@ -30,6 +30,6 @@ class StockAverageByManufacturerRepository extends AbstractAverageByManufacturer
 
     protected function getAggregateName(): string
     {
-        return 'stock';
+        return 'price';
     }
 }
