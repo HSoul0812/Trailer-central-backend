@@ -1,9 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 /** @noinspection PhpMissingParamTypeInspection */
-/** @noinspection PhpMissingReturnTypeInspection */
+/* @noinspection PhpMissingReturnTypeInspection */
+
+declare(strict_types=1);
 
 namespace Tests\Unit;
 
