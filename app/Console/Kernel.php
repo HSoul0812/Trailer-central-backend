@@ -38,7 +38,7 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule->command('db:refresh-views weekly')
-            ->daily()
+            ->weekly()
             ->withoutOverlapping()
             ->runInBackground();
     }
