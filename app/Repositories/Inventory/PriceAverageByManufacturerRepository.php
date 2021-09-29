@@ -27,9 +27,4 @@ class PriceAverageByManufacturerRepository extends AbstractAverageByManufacturer
     {
         throw new NotImplementedException();
     }
-
-    protected function getAggregateName(): string
-    {
-        return 'price';
-    }
 }

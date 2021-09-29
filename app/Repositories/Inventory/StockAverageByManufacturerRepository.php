@@ -27,9 +27,4 @@ class StockAverageByManufacturerRepository extends AbstractAverageByManufacturer
     {
         throw new NotImplementedException();
     }
-
-    protected function getAggregateName(): string
-    {
-        return 'stock';
-    }
 }

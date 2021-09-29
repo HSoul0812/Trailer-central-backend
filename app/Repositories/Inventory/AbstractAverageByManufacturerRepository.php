@@ -96,6 +96,4 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
     abstract protected function getPerMonthViewName(): string;
 
     abstract protected function getPerYearViewName(): string;
-
-    abstract protected function getAggregateName(): string;
 }
