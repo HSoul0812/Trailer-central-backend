@@ -33,7 +33,10 @@
     "is_archived": 0,
     "unique_id": null,
     "customer_id": 7170,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "WER1234568",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   },
   {
     "identifier": 1730942,
@@ -69,7 +72,10 @@
     "is_archived": 0,
     "unique_id": null,
     "customer_id": 7171,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "WER1234569",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   },
   {
     "identifier": 1969442,
@@ -105,7 +111,10 @@
     "is_archived": 0,
     "unique_id": null,
     "customer_id": 7180,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "JWER123456",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   },
   {
     "identifier": 1984227,
@@ -141,7 +150,10 @@
     "is_archived": 1,
     "unique_id": null,
     "customer_id": 7182,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "XWER123456",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   },
   {
     "identifier": 1984774,
@@ -177,7 +189,10 @@
     "is_archived": 1,
     "unique_id": null,
     "customer_id": 7184,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "AWER123456",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   },
   {
     "identifier": 2642175,
@@ -213,7 +228,10 @@
     "is_archived": 0,
     "unique_id": null,
     "customer_id": null,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "BWER123456",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   },
   {
     "identifier": 2656748,
@@ -249,7 +267,10 @@
     "is_archived": 0,
     "unique_id": null,
     "customer_id": null,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "CWER123456",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   },
   {
     "identifier": 2671531,
@@ -285,7 +306,10 @@
     "is_archived": 0,
     "unique_id": null,
     "customer_id": null,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "WER1234567",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   },
   {
     "identifier": 2688503,
@@ -321,6 +345,9 @@
     "is_archived": 0,
     "unique_id": null,
     "customer_id": null,
-    "ids_exported": 1
+    "ids_exported": 1,
+    "vin" : "WER123456",
+    "manufacturer": "Kz",
+    "brand": "Sportsmen"
   }
 ]
