@@ -26,14 +26,17 @@ class LogService extends AbstractLogService implements LogServiceInterface
     public function mapToInsertString(stdClass $record, bool $isNotTheFirstImport): string
     {
         return sprintf(
-            '(%d, %d, %s, %s, %s, %s, %s),',
+            '(%d, %d, %s, %s, %s, %s, %s, %s, %s, %s),',
             $record->identifier,
             $record->inventory_id,
             $record->first_name ? $this->quote($record->first_name) : 'NULL',
             $record->last_name ? $this->quote($record->last_name) : 'NULL',
             $record->email_address ? $this->quote($record->email_address) : 'NULL',
             $record->date_submitted ? $this->quote($record->date_submitted) : 'NULL',
-            $this->quote(json_encode((array) $record, JSON_THROW_ON_ERROR))
+            $this->quote(json_encode((array) $record, JSON_THROW_ON_ERROR)),
+            $record->vin ? $this->quote($record->vin) : 'NULL',
+            $record->manufacturer ? $this->quote($record->manufacturer) : 'NULL',
+            $record->brand ? $this->quote($record->brand) : 'NULL'
         );
     }
 
@@ -47,7 +50,10 @@ class LogService extends AbstractLogService implements LogServiceInterface
                         last_name,
                         email_address,
                         submitted_at,
-                        "meta") VALUES %s ',
+                        "meta",
+                        vin,
+                        manufacturer,
+                        brand) VALUES %s ',
             LeadLog::getTableName(),
             substr($values, 0, -1)
         );

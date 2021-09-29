@@ -15,11 +15,15 @@ class LeadRepository implements LeadRepositoryInterface
 
     public function queryAllSince(?string $lastDateSynchronized): Builder
     {
+        $columns = array_merge($this->getSerializableColumnsNames(), ['i.manufacturer', 'i.brand', 'i.vin']);
+
         $query = DB::connection('mysql')
             ->table('website_lead', 'l')
-            ->select($this->getSerializableColumnsNames())
-            ->where('is_spam', self::IS_NOT_SPAM)
-            ->where('lead_type', self::INVENTORY_TYPE);
+            ->select($columns)
+            ->join('inventory as i', 'i.inventory_id', '=', 'l.inventory_id')
+            ->where('l.is_spam', self::IS_NOT_SPAM)
+            ->where('l.inventory_id', '!=', 0)
+            ->where('l.lead_type', self::INVENTORY_TYPE);
 
         if ($lastDateSynchronized) {
             $query->where('l.date_submitted', '>=', $lastDateSynchronized);
@@ -32,6 +36,7 @@ class LeadRepository implements LeadRepositoryInterface
     {
         return collect(Schema::connection('mysql')
             ->getColumnListing('website_lead'))
+            ->map(fn ($column) => "l.$column")
             ->toArray();
     }
 }
