@@ -25,7 +25,7 @@ class CreateViewInventoryStockAveragePerDay extends Migration
             counters AS (
                  SELECT s.day,
                         l.manufacturer,
-                        COUNT(l.manufacturer) filter (where l.created_at::date = s.day AND l.status = 'available') AS stock,
+                        COUNT(l.manufacturer) filter (where l.created_at::date = s.day AND l.status = 'available') AS aggregate,
                         EXISTS(
                                 (
                                     SELECT il.manufacturer
@@ -43,9 +43,9 @@ class CreateViewInventoryStockAveragePerDay extends Migration
             SELECT c.day,
                    c.manufacturer,
                    CASE
-                       WHEN c.exists THEN c.stock
-                       ELSE LAG(stock) OVER (PARTITION BY c.manufacturer ORDER BY c.day, c.manufacturer)
-                   END AS stock -- in case there isn't any record for the manufacturer on the day, it will use a carrier
+                       WHEN c.exists THEN c.aggregate
+                       ELSE LAG(aggregate) OVER (PARTITION BY c.manufacturer ORDER BY c.day, c.manufacturer)
+                   END AS aggregate -- in case there isn't any record for the manufacturer on the day, it will use a carrier
             FROM counters c
             ORDER BY c.day, c.manufacturer;
 SQL
