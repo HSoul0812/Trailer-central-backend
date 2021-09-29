@@ -25,7 +25,17 @@ class CompletedOrder extends Model
         'object_id',
         'stripe_customer',
         'shipping_address',
+        'shipping_name',
+        'shipping_country',
+        'shipping_city',
+        'shipping_region',
+        'shipping_zip',
         'billing_address',
-        'postal_code'
+        'billing_name',
+        'billing_country',
+        'billing_city',
+        'billing_region',
+        'billing_zip',
+        'parts'
     ];
 }
