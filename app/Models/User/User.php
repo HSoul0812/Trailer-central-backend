@@ -264,7 +264,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public function getIsEcommerceActiveAttribute(): bool
     {
-        $website = $this->website()->first();
+        $website = $this->website;
         
         if ($website) {
           $isWebsiteConfigEcommerce = WebsiteConfig::where('website_id', $website->id)->where('key', WebsiteConfig::ECOMMERCE_KEY_ENABLE)->where('value', 1)->exists();
