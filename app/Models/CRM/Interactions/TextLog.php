@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Interactions;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -22,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  */
 class TextLog extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *

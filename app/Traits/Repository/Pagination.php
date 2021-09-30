@@ -20,11 +20,6 @@ trait Pagination
     private $paginator;
 
     /**
-     * @var Collection|null
-     */
-    private $data;
-
-    /**
      * @return LengthAwarePaginator|null
      */
     public function getPaginator(): ?LengthAwarePaginator

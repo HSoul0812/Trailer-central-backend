@@ -25,8 +25,9 @@ class InteractionMessage extends Model
 {
     use Searchable, CustomSearch;
 
-    const TB_NAME_TEXTS_LOG = 'dealer_texts_log';
-    const TB_NAME_EMAIL_HISTORY = 'crm_email_history';
+    const MESSAGE_TYPE_EMAIL = 'email';
+    const MESSAGE_TYPE_SMS = 'sms';
+    const MESSAGE_TYPE_FB = 'fb';
 
     protected $table = 'interaction_message';
 
@@ -36,7 +37,6 @@ class InteractionMessage extends Model
         'tb_name',
         'name',
         'hidden',
-        'lead_id',
     ];
 
     /**
@@ -64,7 +64,11 @@ class InteractionMessage extends Model
 
         $message = $this->message;
 
-        if ($this->tb_name === self::TB_NAME_TEXTS_LOG) {
+        if (!$message) {
+            return $array;
+        }
+
+        if ($this->tb_name === TextLog::getTableName()) {
             $array['text'] = $message->log_message;
             $array['from_number'] = $message->from_number;
             $array['to_number'] = $message->to_number;
@@ -79,7 +83,7 @@ class InteractionMessage extends Model
             $array['date_delivered'] = null;
         }
 
-        if ($this->tb_name === self::TB_NAME_EMAIL_HISTORY) {
+        if ($this->tb_name === EmailHistory::getTableName()) {
             $array['interaction_id'] = $message->interaction_id;
             $array['parent_message_id'] = $message->parent_message_id;
             $array['title'] = $message->subject;
