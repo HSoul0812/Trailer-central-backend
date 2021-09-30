@@ -33,7 +33,7 @@ class LogService extends AbstractLogService implements LogServiceInterface
             $record->last_name ? $this->quote($record->last_name) : 'NULL',
             $record->email_address ? $this->quote($record->email_address) : 'NULL',
             $record->date_submitted ? $this->quote($record->date_submitted) : 'NULL',
-            $this->quote(json_encode((array) $record, JSON_THROW_ON_ERROR)),
+            $this->quote(str_replace('\\u0000', ' ', json_encode((array) $record, JSON_THROW_ON_ERROR))),
             $record->vin ? $this->quote($record->vin) : 'NULL',
             $record->manufacturer ? $this->quote($record->manufacturer) : 'NULL',
             $record->brand ? $this->quote($record->brand) : 'NULL'
