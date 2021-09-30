@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 
-class DealerActivateUserAccounts extends Action
+class ActivateUserAccounts extends Action
 {
     use InteractsWithQueue, Queueable;
 
