@@ -42,23 +42,25 @@ class UserService
     
     public function getUserCrmLoginUrl(int $dealerId, ?DealerUser $secondaryUser = null)
     {
-        $newDealerUser = $this->newDealerUser->where('id', $dealerId)->first();
-        
-        if (empty($newDealerUser)) {
-            return '';
-        }
-        
-        $newUser = $newDealerUser->newUser;
-        
-        $credentials = [
-            'email' => $newUser->email,
-            'password' => $newUser->password
-        ];
-        
         if ($secondaryUser) {
+            $credentials['email'] = $secondaryUser->newDealerUser->newUser->email;
+            $credentials['password'] = $secondaryUser->newDealerUser->newUser->password;
             $credentials['is_sales_person'] = true;
             $credentials['sales_person_email'] = $secondaryUser->email;
             $credentials['secondary_id'] = $secondaryUser->getAuthIdentifier();
+        } else {
+            $newDealerUser = $this->newDealerUser->where('id', $dealerId)->first();
+        
+            if (empty($newDealerUser)) {
+                return '';
+            }
+
+            $newUser = $newDealerUser->newUser;
+
+            $credentials = [
+                'email' => $newUser->email,
+                'password' => $newUser->password
+            ];
         }
         
         return self::CRM_USER_LOGIN_ROUTE.urlencode(base64_encode(json_encode($credentials)));

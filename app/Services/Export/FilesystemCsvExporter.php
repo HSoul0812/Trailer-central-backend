@@ -88,25 +88,21 @@ abstract class FilesystemCsvExporter extends QueryCsvExporter
     public function export(): void
     {
         // init progress details
-        $this->setProgressMax($this->query->count());
-        $this->setProgress(0);
+        $this->setProgressMax($this->query->count() / 100);
+        $this->setProgress(1);
         $this->progressIncrement();
 
         // main loop
-        $startTime = time(); // time will be used to set intervals when progress is saved
         $processed = 0;
-        $this->query->chunk(1000, function ($lines) use (&$processed, &$startTime) {
+
+        $this->query->chunk(10000, function ($lines) use (&$processed) {
             foreach ($lines as $line) {
                 $this->write($line);
                 $processed++;
             }
 
-            // if it's time to save progress (every after 10 secs)
-            if (time() - $startTime > 10) {
-                $this->setProgress($processed);
-                $this->progressIncrement();
-                $startTime = time();
-            }
+            $this->setProgress($processed);
+            $this->progressIncrement();
         });
 
         // last progress update

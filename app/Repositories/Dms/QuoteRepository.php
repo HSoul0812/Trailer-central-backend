@@ -40,6 +40,14 @@ class QuoteRepository implements QuoteRepositoryInterface {
             'field' => 'total_price',
             'direction' => 'ASC'
         ],
+        'completed_at' => [
+            'field' => 'completed_at',
+            'direction' => 'DESC'
+        ],
+        '-completed_at' => [
+            'field' => 'completed_at',
+            'direction' => 'ASC'
+        ],
     ];
 
 

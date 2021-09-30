@@ -20,7 +20,7 @@ class CreatePartRequest extends Request {
         'type_id' => 'required|integer',
         'category_id' => 'required|integer',
         'qb_id' => 'nullable|integer',
-        'subcategory' => 'string',
+        'subcategory' => 'nullable|string',
         'title' => 'required|string|filled',
         'alternative_part_number' => 'nullable|string',
         'sku' => 'required|string|parts_sku_unique',
