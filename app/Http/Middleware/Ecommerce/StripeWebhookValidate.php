@@ -2,6 +2,7 @@
 namespace App\Http\Middleware\Ecommerce;
 
 use Closure;
+use Illuminate\Support\Facades\Config;
 
 class StripeWebhookValidate
 {
@@ -15,7 +16,9 @@ class StripeWebhookValidate
     public function handle($request, Closure $next)
     {
         if ($request->header('Stripe-Signature')) {
-            $ipList = explode(',', env('STRIPE_WEBHOOK_ALLOWED_IPS'));
+            $webookIps = Config::get('stripe_checkout.webhook')['allowed_ip_addresses'];
+
+            $ipList = explode(',', $webookIps);
 
             if (in_array($request->getClientIp(), $ipList)) {
                 return $next($request);
