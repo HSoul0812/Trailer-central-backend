@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Website\Website;
+use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\CRM\Dms\Printer\Settings;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -259,6 +260,18 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         $crmUser = $this->crmUser()->first();
         return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
+    }
+
+    public function getIsEcommerceActiveAttribute(): bool
+    {
+        $website = $this->website;
+        
+        if ($website) {
+          $isWebsiteConfigEcommerce = WebsiteConfig::where('website_id', $website->id)->where('key', WebsiteConfig::ECOMMERCE_KEY_ENABLE)->where('value', 1)->exists();
+        } else {
+          $isWebsiteConfigEcommerce = false;
+        }
+        return $isWebsiteConfigEcommerce;
     }
 
     /**
