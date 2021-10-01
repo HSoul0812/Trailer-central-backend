@@ -7,7 +7,7 @@ class AddUserAccountsToWebsiteConfigDefaultTable extends Migration
 {
     private const USER_ACCOUNTS_OPTION = [
         'key' => 'general/user_accounts',
-        'private' => 0,
+        'private' => 1,
         'type' => 'checkbox',
         'label' => 'Activate/Deactivate user accounts',
         'note' => null,
