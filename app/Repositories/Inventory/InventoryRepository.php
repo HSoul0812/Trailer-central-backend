@@ -698,4 +698,16 @@ class InventoryRepository implements InventoryRepositoryInterface
             $item->inventoryFiles()->where('file_id', '=', $existingFile['file_id'])->update($inventoryFileParams);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getAndIncrementTimesViewed(array $params): Inventory 
+    {
+        $inventory = $this->get($params);
+        $inventory->times_viewed += 1;
+        $inventory->save();
+        return $inventory;
+    }
+
 }

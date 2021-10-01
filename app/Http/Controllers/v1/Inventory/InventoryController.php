@@ -188,7 +188,7 @@ class InventoryController extends RestfulControllerV2
      * @return \Dingo\Api\Http\Response
      */
     public function show(int $id) {
-        return $this->response->item($this->inventoryRepository->get(['id' => $id]), new InventoryTransformer());
+        return $this->response->item($this->inventoryRepository->getAndIncrementTimesViewed(['id' => $id]), new InventoryTransformer());
     }
 
     /**
