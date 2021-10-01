@@ -161,7 +161,13 @@ $api->version('v1', function ($route) {
     $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show')->where('id', '[0-9]+');
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
-
+    
+    /**
+     * Textrail Parts
+     */
+    $route->get('textrail/parts', 'App\Http\Controllers\v1\Parts\Textrail\PartsController@index');
+    $route->get('textrail/parts/{id}', 'App\Http\Controllers\v1\Parts\Textrail\PartsController@show')->where('id', '[0-9]+');
+    
     /*
     |--------------------------------------------------------------------------
     | Inventory
@@ -263,6 +269,11 @@ $api->version('v1', function ($route) {
     $route->get('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@show')->where('id', '[0-9]+');
     $route->post('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@update')->where('id', '[0-9]+');
     $route->delete('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@destroy')->where('id', '[0-9]+');
+
+    /**
+     * Website Textrail Part Filters
+     */
+       $route->get('website/parts/textrail/filters', 'App\Http\Controllers\v1\Website\Parts\Textrail\FilterController@index');
 
     /**
      * Website Blog Posts

@@ -462,7 +462,7 @@ class PartsController extends RestfulController
         $request = new GetPartsRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->paginator($this->parts->getAll($request->all()), new PartsTransformer());
+            return $this->response->paginator($this->parts->getAll($request->all()), $this->partsTransformer);
         }
 
         return $this->response->errorBadRequest();

@@ -60,6 +60,8 @@ class Dealer extends Resource
                 ->rules('required', 'email', 'max:254'),
 
             Boolean::make('CRM', 'isCrmActive')->hideWhenCreating()->hideWhenUpdating(),
+            
+            Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
         ];
     }
 
