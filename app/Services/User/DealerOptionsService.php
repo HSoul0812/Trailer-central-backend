@@ -6,11 +6,16 @@ use App\Helpers\StringHelper;
 use App\Models\User\NewDealerUser;
 use App\Models\User\NewUser;
 use App\Models\User\User;
+use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\Repository;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\User\NewUserRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepository;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -50,6 +55,16 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     private $stringHelper;
 
     /**
+     * @var WebsiteConfigRepositoryInterface
+     */
+    private $websiteConfigRepository;
+
+    /**
+     * @var WebsiteRepositoryInterface
+     */
+    private $websiteRepository;
+
+    /**
      * DealerOptionsService constructor.
      * @param UserRepositoryInterface $userRepository
      * @param CrmUserRepositoryInterface $crmUserRepository
@@ -57,6 +72,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param NewDealerUserRepositoryInterface $newDealerUserRepository
      * @param NewUserRepositoryInterface $newUserRepository
      * @param StringHelper $stringHelper
+     * @param WebsiteRepositoryInterface $websiteRepository
+     * @param WebsiteConfigRepositoryInterface $websiteConfigRepository
      */
     public function __construct(
         UserRepositoryInterface $userRepository,
@@ -64,7 +81,9 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         CrmUserRoleRepositoryInterface $crmUserRoleRepository,
         NewDealerUserRepositoryInterface $newDealerUserRepository,
         NewUserRepositoryInterface $newUserRepository,
-        StringHelper $stringHelper
+        StringHelper $stringHelper,
+        WebsiteRepositoryInterface $websiteRepository,
+        WebsiteConfigRepositoryInterface  $websiteConfigRepository
     ) {
         $this->userRepository = $userRepository;
         $this->crmUserRepository = $crmUserRepository;
@@ -73,6 +92,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         $this->newUserRepository = $newUserRepository;
 
         $this->stringHelper = $stringHelper;
+        $this->websiteRepository = $websiteRepository;
+        $this->websiteConfigRepository = $websiteConfigRepository;
     }
 
     /**
@@ -161,6 +182,50 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         } catch (\Exception $e) {
             Log::error("CRM deactivation error. dealer_id - {$dealerId}", $e->getTrace());
 
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateUserAccounts(int $dealerId): bool {
+        try {
+            $websites = $this->websiteRepository->getAll([
+                Repository::CONDITION_AND_WHERE => [
+                    ['dealer_id', '=', $dealerId]
+                ],
+            ], false);
+
+            foreach($websites as $website) {
+                $this->websiteConfigRepository->setValue($website->getKey(), 'general/user_accounts', 1);
+            }
+            return true;
+        } catch(\Exception $e) {
+            \Log::error($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateUserAccounts(int $dealerId): bool {
+        try {
+            $websites = $this->websiteRepository->getAll([
+                Repository::CONDITION_AND_WHERE => [
+                    ['dealer_id', '=', $dealerId]
+                ]
+            ], false);
+
+            foreach($websites as $website) {
+                $this->websiteConfigRepository->setValue($website->getKey(), 'general/user_accounts', 0);
+            }
+            return true;
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
             return false;
         }
     }
