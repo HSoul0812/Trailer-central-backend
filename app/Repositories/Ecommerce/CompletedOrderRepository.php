@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories\Ecommerce;
 
+use App\Events\Ecommerce\QtyUpdated;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Traits\Repository\Transaction;
 
@@ -26,6 +27,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             $completedOrder->object_id = $data['id'];
             $completedOrder->parts = $data['parts'];
             $completedOrder->total_amount = $data['amount_total'];
+            $completedOrder->payment_status = $data['payment_status'] ?? '';
 
             $completedOrder->shipping_name = $data['shipto_name'] ?? '';
             $completedOrder->shipping_country = $data['shipto_country'] ?? '';
@@ -53,8 +55,14 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             $completedOrder->customer_email = $data['customer_details']['email'];
             $completedOrder->total_amount = $data['amount_total'];
             $completedOrder->payment_method = $data['payment_method_types'][0];
-            $completedOrder->payment_status = $data['payment_status'] ?? '';
             $completedOrder->stripe_customer = $data['customer'] ?? '';
+
+            $parts = json_decode($completedOrder->parts, true);
+
+            // Dispatch for handle quantity reducing.
+            foreach ($parts as $part) {
+                QtyUpdated::dispatch($part['id'], $part['qty']);
+            }
         }
 
         $completedOrder->save();

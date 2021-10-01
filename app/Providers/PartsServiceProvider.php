@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\Ecommerce\QtyUpdated;
 use App\Events\Parts\PartQtyUpdated;
+use App\Listeners\Ecommerce\PartQtyReducer;
 use App\Listeners\Parts\PartQtyAuditLogNotification;
 use App\Listeners\Parts\PartReindexNotification;
 use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
@@ -52,6 +54,9 @@ class PartsServiceProvider extends ServiceProvider
             // part should be reindexed
             PartReindexNotification::class,
         ],
+        QtyUpdated::class => [
+            PartQtyReducer::class,
+        ]
     ];
 
     public function boot()
