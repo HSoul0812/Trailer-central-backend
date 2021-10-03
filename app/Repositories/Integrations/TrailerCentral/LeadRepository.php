@@ -13,6 +13,8 @@ class LeadRepository implements LeadRepositoryInterface
     private const INVENTORY_TYPE = 'inventory';
     private const IS_NOT_SPAM = 0;
 
+    private const SELECT_EXCEPT_COLUMNS = ['metadata'];
+
     public function queryAllSince(?string $lastDateSynchronized): Builder
     {
         $columns = array_merge($this->getSerializableColumnsNames(), ['i.manufacturer', 'i.brand', 'i.vin']);
@@ -36,7 +38,8 @@ class LeadRepository implements LeadRepositoryInterface
     {
         return collect(Schema::connection('mysql')
             ->getColumnListing('website_lead'))
-            ->map(fn ($column) => "l.$column")
+            ->filter(fn (string $columnName): bool => !in_array($columnName, self::SELECT_EXCEPT_COLUMNS))
+            ->map(fn ($column)                     => "l.$column")
             ->toArray();
     }
 }

@@ -8,19 +8,15 @@ namespace Tests\Unit\App\Services\Integrations\TrailerCentral\Console\Leads\LogS
 
 use App\Services\Integrations\TrailerCentral\Console\Leads\LogService;
 use Database\Seeders\WithArtifacts;
-use Illuminate\Database\ConnectionInterface;
 use JsonException;
 use PDO;
-use ReflectionClass;
-use ReflectionMethod;
 use stdClass;
-use Tests\Common\UnitTestCase;
 use Tests\Unit\WithFaker;
 
 /**
  * @covers \App\Services\Integrations\TrailerCentral\Console\Leads\LogService::mapToInsertString
  */
-class MapToInsertStringTest extends UnitTestCase
+class MapToInsertStringTest extends LogServiceTestCase
 {
     use WithFaker;
     use WithArtifacts;
@@ -88,19 +84,5 @@ class MapToInsertStringTest extends UnitTestCase
 
         $this->assertStringContainsString("##$lead->first_name##", $sqlFragment);
         $this->assertStringContainsString("##$lead->last_name##", $sqlFragment);
-    }
-
-    private function mockDependency(): \PHPUnit\Framework\MockObject\MockObject|ConnectionInterface
-    {
-        $interfaceReflection = new ReflectionClass(ConnectionInterface::class);
-        $availableMethods = collect($interfaceReflection->getMethods())
-            ->map(fn (ReflectionMethod $method) => $method->getName())
-            ->toArray();
-
-        return $this->getMockBuilder(ConnectionInterface::class)
-            ->disableOriginalConstructor()
-            ->addMethods(['getPdo'])
-            ->onlyMethods($availableMethods)
-            ->getMock();
     }
 }

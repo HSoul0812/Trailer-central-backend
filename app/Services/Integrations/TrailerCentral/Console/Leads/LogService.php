@@ -19,7 +19,7 @@ class LogService extends AbstractLogService implements LogServiceInterface
     }
 
     /**
-     * @throws \JsonException when the metadata were unable to be serialized
+     * @throws \JsonException when some column was unable to be serialized
      *
      * @return string SQL insert values fragment
      */
