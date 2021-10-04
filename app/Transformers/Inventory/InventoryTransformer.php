@@ -86,9 +86,10 @@ class InventoryTransformer extends TransformerAbstract
              'floorplan_vendor' => $inventory->floorplanVendor,
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
-             'times_viewed' => $inventory->times_viewed
+             'times_viewed' => $inventory->times_viewed,
+             'attribute' => $inventory->attributes
          ];
-    }
+    } 
 
     public function includeWebsite($inventory)
     {
