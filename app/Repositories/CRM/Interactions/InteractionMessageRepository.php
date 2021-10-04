@@ -105,6 +105,9 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             })->toArray();
         }
 
+        $size = $options['size'] ?? 50;
+        $search->size($size);
+
         return $search->execute()->documents()->map(function (Document $document) {
             return $document->getContent();
         })->toArray();
