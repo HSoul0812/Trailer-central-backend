@@ -16,12 +16,20 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 {
     use Pagination;
 
+    const PER_PAGE_DEFAULT = 10;
+
+    const SORT_DIR_DEFAULT = 'desc';
+    const SORT_FIELD_DEFAULT = 'date_sent';
+
     /**
      * @param array $params
      * @return array
      */
     public function search(array $params): array
     {
+        $perPage = $params['per_page'] ?? self::PER_PAGE_DEFAULT;
+        $paginationParams = [];
+
         $search = InteractionMessage::boolSearch();
 
         if ($params['query'] ?? null) {
@@ -34,8 +42,20 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $search->must('match_all', []);
         }
 
+        if ($params['sort'] ?? null) {
+            $sortDir = substr($params['sort'], 0, 1) === '-' ? 'asc' : 'desc';
+            $sortField = str_replace('-', '', $params['sort']);
+        } else {
+            $sortDir = self::SORT_DIR_DEFAULT;
+            $sortField = self::SORT_FIELD_DEFAULT;
+        }
+
         if ($params['dealer_id'] ?? null) {
             $search->filter('term', ['dealer_id' => $params['dealer_id']]);
+        }
+
+        if ($params['lead_id'] ?? null) {
+            $search->filter('term', ['lead_id' => $params['lead_id']]);
         }
 
         if ($params['message_type'] ?? null) {
@@ -46,23 +66,44 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $search->filter('term', ['hidden' => $params['hidden']]);
         }
 
-        if ($params['sort'] ?? null) {
-            $sortDir = substr($params['sort'], 0, 1) === '-'? 'asc': 'desc';
-            $field = str_replace('-', '', $params['sort']);
+        if ($params['dispatched'] ?? null) {
+            $search->filter('exists', ['field' => 'date_sent']);
+        }
 
-            $search->sort($field, $sortDir);
+        if ($params['latest_messages'] ?? null) {
+            $search->sort('date_sent', "desc");
+
+            $search->collapseRaw([
+                "field" => "lead_id",
+                "inner_hits" => [
+                    "name" => "last_messages",
+                    "size" => 1,
+                    "sort" => [[$sortField => $sortDir]],
+                ],
+                "max_concurrent_group_searches" => 4
+            ]);
+
+            $search->aggregateRaw([
+                "total" => [
+                    "cardinality" => [
+                        "field" => "lead_id"
+                    ],
+                ],
+            ]);
+
+            $paginationParams['aggregationTotal'] = true;
+
+        } else {
+            $search->sort($sortField, $sortDir);
         }
 
         if ($params['page'] ?? null) {
-            $searchResult = $this->esPaginationExecute($search, $params['page'], $params['per_page'] ?? 10);
+            $searchResult = $this->esPagination($search, $params['page'], $perPage, $paginationParams);
 
-            return $searchResult->documents()->map(function (Document $document) {
+            $searchResult->documents()->map(function (Document $document) {
                 return $document->getContent();
             })->toArray();
         }
-
-        $size = $options['size'] ?? 50;
-        $search->size($size);
 
         return $search->execute()->documents()->map(function (Document $document) {
             return $document->getContent();

@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property string $from_number
  * @property string $to_number
  * @property \DateTimeInterface $date_sent
+ * @property \DateTimeInterface $created_at
+ * @property \DateTimeInterface $updated_at
  *
  * @property Lead $lead
  */
