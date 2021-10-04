@@ -223,7 +223,7 @@ class InventoryController extends RestfulControllerV2
      * @throws NoObjectTypeSetException
      */
     public function update(int $id, Request $request): Response
-    {
+    {        
         $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
 
         $transformer = app()->make(SaveInventoryTransformer::class);

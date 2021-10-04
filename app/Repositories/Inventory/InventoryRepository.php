@@ -98,6 +98,22 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-fp_vendor' => [
             'field' => 'fp_vendor',
             'direction' => 'ASC'
+        ],
+        'created_at' => [
+            'field' => 'created_at',
+            'direction' => 'DESC'
+        ],
+        '-created_at' => [
+            'field' => 'created_at',
+            'direction' => 'ASC'
+        ],
+        'updated_at' => [
+            'field' => 'updated_at',
+            'direction' => 'DESC'
+        ],
+        '-updated_at' => [
+            'field' => 'updated_at',
+            'direction' => 'ASC'
         ]
     ];
 
