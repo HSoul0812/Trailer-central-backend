@@ -15,8 +15,14 @@ class StripeWebhookValidate
      */
     public function handle($request, Closure $next)
     {
-        if ($request->header('Allowed-Website')) {
-            return $next($request);
+        if ($request->header('Allowed-Website-Password')) {
+            $pwd = Config::get('ecommerce.allowed_websites')['auth']['password'];
+
+            if ($pwd === base64_decode($request->header('Allowed-Website-Password'))) {
+                return $next($request);
+            }
+
+            return response('Invalid Password/Token', 401);
         }
 
         if ($request->header('Stripe-Signature')) {
