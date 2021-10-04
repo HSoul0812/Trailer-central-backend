@@ -19,7 +19,7 @@ class SearchInteractionMessagesRequest extends Request
         'hidden' => 'boolean',
         'dispatched' => 'boolean',
         'latest_messages' => 'boolean',
-        'sort' => 'string',
+        'sort' => 'string|in:date_sent,-date_sent',
     ];
 }
 

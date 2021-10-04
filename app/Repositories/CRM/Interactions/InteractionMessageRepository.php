@@ -62,11 +62,11 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $search->filter('term', ['message_type' => $params['message_type']]);
         }
 
-        if ($params['hidden'] ?? null) {
+        if (isset($params['hidden'])) {
             $search->filter('term', ['hidden' => $params['hidden']]);
         }
 
-        if ($params['dispatched'] ?? null) {
+        if (isset($params['dispatched'])) {
             $search->filter('exists', ['field' => 'date_sent']);
         }
 
@@ -118,6 +118,24 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
     {
         /** @var InteractionMessage $interactionMessage */
         $interactionMessage = InteractionMessage::query()->create($params);
+        return $interactionMessage;
+    }
+
+    /**
+     * @param array $params
+     * @return InteractionMessage
+     */
+    public function update($params): InteractionMessage
+    {
+        if (empty($params['id'])) {
+            throw new RepositoryInvalidArgumentException('id has been missed. Params - ' . json_encode($params));
+        }
+
+        /** @var InteractionMessage $interactionMessage */
+        $interactionMessage = InteractionMessage::findOrFail($params['id']);
+
+        $interactionMessage->fill($params)->save();
+
         return $interactionMessage;
     }
 

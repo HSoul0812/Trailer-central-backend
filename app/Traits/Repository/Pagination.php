@@ -42,7 +42,9 @@ trait Pagination
         $searchResult = $search->execute();
         $data = $searchResult->models();
 
-        $total = (isset($params['aggregationTotal']) && $params['aggregationTotal']) ? $searchResult->aggregations()['total']['value'] : $searchResult->total();
+        $total = (isset($params['aggregationTotal']) && $params['aggregationTotal'])
+            ? $searchResult->aggregations()['total']['value']
+            : $searchResult->total();
 
         $this->initPaginator($data, $total, $page, $perPage);
 
