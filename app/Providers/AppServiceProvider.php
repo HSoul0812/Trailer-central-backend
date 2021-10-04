@@ -237,6 +237,9 @@ class AppServiceProvider extends ServiceProvider
 
             // invoicing
             __DIR__ . '/../../database/migrations/invoicing',
+
+            // ecommerce
+            __DIR__ . '/../../database/migrations/ecommerce',
         ]);
 
         // log all queries
