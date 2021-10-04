@@ -15,6 +15,10 @@ class StripeWebhookValidate
      */
     public function handle($request, Closure $next)
     {
+        if ($request->header('Allowed-Website')) {
+            return $next($request);
+        }
+
         if ($request->header('Stripe-Signature')) {
             $webookIps = Config::get('stripe_checkout.webhook')['allowed_ip_addresses'];
 
