@@ -100,7 +100,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         if ($params['page'] ?? null) {
             $searchResult = $this->esPagination($search, $params['page'], $perPage, $paginationParams);
 
-            $searchResult->documents()->map(function (Document $document) {
+            return $searchResult->documents()->map(function (Document $document) {
                 return $document->getContent();
             })->toArray();
         }
