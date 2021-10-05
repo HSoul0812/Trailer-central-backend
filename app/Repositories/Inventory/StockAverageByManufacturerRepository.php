@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Inventory;
 
 use App\Exceptions\NotImplementedException;
+use App\Repositories\AbstractAverageByManufacturerRepository;
 
 class StockAverageByManufacturerRepository extends AbstractAverageByManufacturerRepository implements StockAverageByManufacturerRepositoryInterface
 {

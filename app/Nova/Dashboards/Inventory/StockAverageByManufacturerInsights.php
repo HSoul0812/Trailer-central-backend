@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Nova\Dashboards\Inventory;
 
+use App\Nova\Dashboards\AbstractAverageByManufacturerInsights;
 use App\Nova\Http\Requests\Inventory\StockAverageRequest;
 use App\Nova\Http\Requests\Inventory\StockAverageRequestInterface;
 use App\Services\Inventory\StockAverageByManufacturerServiceInterface;
