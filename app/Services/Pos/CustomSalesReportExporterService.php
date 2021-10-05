@@ -6,10 +6,13 @@ namespace App\Services\Pos;
 
 use App\Repositories\Pos\SalesReportRepositoryInterface;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Writer;
+use League\Fractal\Resource\Collection;
+use App\Transformers\Pos\Sales\Reports\CustomSalesReportTransformer;
 
 class CustomSalesReportExporterService implements CustomSalesReportExporterServiceInterface
 {
@@ -162,5 +165,34 @@ class CustomSalesReportExporterService implements CustomSalesReportExporterServi
         $this->filename = sprintf('custom-sales-report-exported-%s-%s.csv', date('Y-m-d-H-i-s'), Str::random(8));
 
         return fopen($this->fs->path($this->filename), 'wb+');
+    }
+
+    public function get(array $params): Collection
+    {
+        $salesData = $this->repository->customReport($params);
+
+        $salesData = collect($salesData);
+        $groupedCollection = $salesData->groupBy('doc_id');
+        $quantityByInvoice = [];
+
+        $salesData = $salesData->map(function ($item) use ($groupedCollection, $quantityByInvoice) {
+            if (!Arr::exists($quantityByInvoice, $item->doc_id)) {
+                $totalQuantity = $groupedCollection->get($item->doc_id)->sum('qty');
+                // $quantityByInvoice[$item->doc_id] = round(((float) $item->invoice_discount / $totalQuantity), 2);
+                $quantityByInvoice[$item->doc_id] = round(((float) $item->invoice_discount / $groupedCollection->get($item->doc_id)->count()), 2);
+            }
+
+            $partDiscount = $quantityByInvoice[$item->doc_id] ?? 0;
+            $item->price = round($item->price - $partDiscount, 2);
+            $item->profit = round($item->profit - $partDiscount, 2);
+
+            return $item;
+        });
+
+        return new Collection(
+            $salesData->toArray(),
+            new CustomSalesReportTransformer(),
+            'data'
+        );
     }
 }

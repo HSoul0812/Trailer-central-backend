@@ -35,6 +35,8 @@ class SalesReportRepository implements SalesReportRepositoryInterface
     public function customReport(array $params): array
     {
         ['sql' => $sql, 'params' => $boundParams] = $this->sqlForCustomReport($params);
+        // dd($boundParams, DB::raw($sql), DB::select(DB::raw($sql), $boundParams));
+
 
         return DB::select(DB::raw($sql), $boundParams);
     }
@@ -100,14 +102,15 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                            DATE_FORMAT(qi.invoice_date, '%M') AS month,
                            DATE_FORMAT(qi.invoice_date, '%d') AS day,
                            DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
-                           p.title,
-                           p.sku AS reference,
-                           IFNULL(iitem.cost,0) * ii.qty AS cost,
-                           IFNULL(ii.unit_price,0) * ii.qty AS price,
+                           IFNULL(p.title, ii.description) AS title,
+                           IFNULL(p.sku,  AS reference,
+                           @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
+                           ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
+                           @actual_price:=ROUND(IFNULL(ii.unit_price,0) * ii.qty, 2) AS price,
                            FLOOR(ii.qty) AS qty,
                            ii.taxes_amount AS taxes_amount,
                            @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
-                           ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
+                           ROUND((@actual_price - @cost - @refund), 2) AS profit,
                            IF(
                               qi.unit_sale_id IS NOT NULL,
                               CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
@@ -132,9 +135,9 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                     FROM dealer_sales_history sh
                     JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
-                    JOIN qb_invoice_items ii on qi.id = ii.invoice_id
+                    LEFT JOIN qb_invoice_items ii on qi.id = ii.invoice_id
                     JOIN qb_items iitem on ii.item_id = iitem.id AND iitem.type = 'part'
-                    JOIN parts_v1 p on iitem.item_primary_id = p.id
+                    LEFT JOIN parts_v1 p on iitem.item_primary_id = p.id
                     WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_part_qb)
                           AND qi.invoice_date >= :from_date_part_qb AND qi.invoice_date <= :to_date_part_qb
                           {$this->customReportHelpers['partsWhere']['part_qb']}
@@ -146,12 +149,13 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
                         p.title,
                         p.sku AS reference,
-                        IFNULL(iitem.cost,0)  * psp.qty AS cost,
-                        IFNULL(psp.price,0) * psp.qty AS price,
+                        @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
+                        ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
+                        @actual_price:=ROUND(IFNULL(psp.price,0) * psp.qty, 2) AS price,
                         FLOOR(psp.qty),
                         NULL AS taxes_amount,
                         @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
-                        ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
+                        ROUND((@actual_price - @cost - @refund), 2) AS profit,
                         (
                             SELECT GROUP_CONCAT(r.receipt_path)
                             FROM dealer_sales_receipt r
@@ -166,10 +170,11 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         'POS' AS type,
                         '' AS model
                     FROM dealer_sales_history sh
+                    JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
                     JOIN qb_items iitem on psp.item_id = iitem.id AND iitem.type = 'part'
-                    JOIN parts_v1 p on iitem.item_primary_id = p.id
+                    LEFT JOIN parts_v1 p on iitem.item_primary_id = p.id
                     WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_part_pos)
                           AND ps.created_at >= :from_date_part_pos AND ps.created_at <= :to_date_part_pos
                           {$this->customReportHelpers['partsWhere']['part_pos']}
@@ -274,7 +279,8 @@ SQL;
                     'to_date_part_pos' => $params['to_date'] . ' 23:59:59',
                     'to_date_inventory_qb' => $params['to_date'] . ' 23:59:59',
                     'to_date_inventory_pos' => $params['to_date'] . ' 23:59:59',
-                ]);
+                ]
+            );
 
             $sql = "$partsSQL \nUNION\n $inventorySQL";
         } elseif ($params['report_type'] === self::PARTS_REPORT_TYPE) {
@@ -287,7 +293,8 @@ SQL;
                     'from_date_part_pos' => $params['from_date'],
                     'to_date_part_qb' => $params['to_date'] . ' 23:59:59',
                     'to_date_part_pos' => $params['to_date'] . ' 23:59:59',
-                ]);
+                ]
+            );
 
             $sql = $partsSQL;
         } else {
@@ -300,7 +307,8 @@ SQL;
                     'from_date_inventory_pos' => $params['from_date'],
                     'to_date_inventory_qb' => $params['to_date'] . ' 23:59:59',
                     'to_date_inventory_pos' => $params['to_date'] . ' 23:59:59',
-                ]);
+                ]
+            );
 
             $sql = $inventorySQL;
         }
