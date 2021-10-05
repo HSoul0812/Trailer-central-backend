@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\Inventory;
+namespace App\Repositories;
 
 use App\Exceptions\NotImplementedException;
 use App\Support\CriteriaBuilder;

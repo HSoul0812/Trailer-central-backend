@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Inventory;
+namespace App\Services;
 
-use App\Repositories\Inventory\AverageByManufacturerRepositoryInterface;
-use App\Services\InsightResultSet;
+use App\Repositories\AverageByManufacturerRepositoryInterface;
 use App\Support\CriteriaBuilder;
 use Illuminate\Support\Collection;
 

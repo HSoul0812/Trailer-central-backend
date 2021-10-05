@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Nova\Dashboards\Inventory;
+namespace App\Nova\Dashboards;
 
 use App\Nova\Http\Requests\InsightRequestInterface;
 use App\Nova\Http\Requests\WithCardRequestBindings;
-use App\Services\Inventory\AverageByManufacturerServiceInterface;
+use App\Services\AverageByManufacturerServiceInterface;
 use App\Support\CriteriaBuilder;
 use Dingo\Api\Routing\Helpers;
 use Laravel\Nova\Dashboard;
