@@ -35,8 +35,6 @@ class SalesReportRepository implements SalesReportRepositoryInterface
     public function customReport(array $params): array
     {
         ['sql' => $sql, 'params' => $boundParams] = $this->sqlForCustomReport($params);
-        // dd($boundParams, DB::raw($sql), DB::select(DB::raw($sql), $boundParams));
-
 
         return DB::select(DB::raw($sql), $boundParams);
     }
@@ -102,8 +100,8 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                            DATE_FORMAT(qi.invoice_date, '%M') AS month,
                            DATE_FORMAT(qi.invoice_date, '%d') AS day,
                            DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
-                           IFNULL(p.title, ii.description) AS title,
-                           IFNULL(p.sku,  AS reference,
+                           IFNULL(p.title, iitem.name) AS title,
+                           IFNULL(p.sku, iitem.sku) AS reference,
                            @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
                            ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
                            @actual_price:=ROUND(IFNULL(ii.unit_price,0) * ii.qty, 2) AS price,
@@ -147,8 +145,8 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         DATE_FORMAT(ps.created_at, '%M') AS month,
                         DATE_FORMAT(ps.created_at, '%d') AS day,
                         DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
-                        p.title,
-                        p.sku AS reference,
+                        IFNULL(p.title, p.sku) AS title,
+                        IFNULL(p.sku, iitem.sku) AS reference,
                         @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
                         ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
                         @actual_price:=ROUND(IFNULL(psp.price,0) * psp.qty, 2) AS price,
@@ -186,14 +184,14 @@ SQL;
                     DATE_FORMAT(qi.invoice_date, '%M') AS month,
                     DATE_FORMAT(qi.invoice_date, '%d') AS day,
                     DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
-                    i.title,
+                    IFNULL(i.title, i.stock) AS title,
                     i.stock AS reference,
-                    IFNULL(iitem.cost,0) * ii.qty AS cost,
-                    IFNULL(ii.unit_price,0) * ii.qty AS price,
+                    @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
+                    @actual_price:=IFNULL(ii.unit_price,0) * ii.qty AS price,
                     FLOOR(ii.qty) AS qty,
                     ii.taxes_amount AS taxes_amount,
                     @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
-                    ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
+                    ROUND(@actual_price - @cost - @refund, 2) AS profit,
                     IF(
                       qi.unit_sale_id IS NOT NULL,
                       CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
@@ -231,14 +229,14 @@ SQL;
                         DATE_FORMAT(ps.created_at, '%M') AS month,
                         DATE_FORMAT(ps.created_at, '%d') AS day,
                         DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
-                        i.title,
+                        IFNULL(i.title, i.stock) AS title,
                         i.stock AS reference,
-                        IFNULL(iitem.cost,0) * psp.qty AS cost,
-                        IFNULL(psp.price,0) * psp.qty AS price,
+                        @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
+                        @actual_price:=IFNULL(psp.price,0) * psp.qty AS price,
                         FLOOR(psp.qty),
                         NULL AS taxes_amount,
                         @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
-                        ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
+                        ROUND(@actual_price - @cost - @refund, 2) AS profit,
                         (
                             SELECT GROUP_CONCAT(r.receipt_path)
                             FROM dealer_sales_receipt r
