@@ -12,8 +12,14 @@ use App\Repositories\Website\Tracking\TrackingUnitRepository;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Repositories\Website\WebsiteDealerUrlRepository;
 use App\Repositories\Website\WebsiteDealerUrlRepositoryInterface;
+use App\Repositories\Website\WebsiteUserRepository;
+use App\Repositories\Website\WebsiteUserRepositoryInterface;
+use App\Repositories\Website\WebsiteUserTokenRepository;
+use App\Repositories\Website\WebsiteUserTokenRepositoryInterface;
 use App\Services\Website\WebsiteDealerUrlService;
 use App\Services\Website\WebsiteDealerUrlServiceInterface;
+use App\Services\Website\WebsiteUserService;
+use App\Services\Website\WebsiteUserServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class WebsiteServiceProvider extends ServiceProvider
@@ -31,9 +37,11 @@ class WebsiteServiceProvider extends ServiceProvider
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(DefaultConfigRepositoryInterface::class, DefaultConfigRepository::class);
         $this->app->bind(WebsiteDealerUrlRepositoryInterface::class, WebsiteDealerUrlRepository::class);
+        $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
 
         // Services
         $this->app->bind(WebsiteDealerUrlServiceInterface::class, WebsiteDealerUrlService::class);
+        $this->app->bind(WebsiteUserServiceInterface::class, WebsiteUserSerivce::class);
 
         // Blog
         $this->app->bind('App\Repositories\Website\Blog\BulkRepositoryInterface', 'App\Repositories\Website\Blog\BulkRepository');
