@@ -33,7 +33,7 @@ class AverageStockSeeder extends Seeder
         $factory = InventoryLog::factory();
         $allManufactures = $this->fromJson('inventory/manufactures-brands.json');
         $randomManufactures = $allManufactures->filter(fn (array $data): bool => $data['name'] !== 'Kz')->random(3);
-        $kzManufacturer = $allManufactures->filter(fn (array $data): bool => $data['name'] === 'Kz')->first();
+        $specificManufacturer = $allManufactures->filter(fn (array $data): bool => $data['name'] === 'Kz')->first();
 
         $numberOfInventoriesPerBrand = [
             [1, 2],
@@ -64,7 +64,7 @@ class AverageStockSeeder extends Seeder
                 );
             }
 
-            $this->seedByManufacturer($kzManufacturer, $day, $factory, 15, $numberOfInventoriesPerBrand[3]);
+            $this->seedByManufacturer($specificManufacturer, $day, $factory, 15, $numberOfInventoriesPerBrand[3]);
 
             DB::statement('REFRESH MATERIALIZED VIEW inventory_stock_average_per_day');
             DB::statement('REFRESH MATERIALIZED VIEW inventory_stock_average_per_week');
