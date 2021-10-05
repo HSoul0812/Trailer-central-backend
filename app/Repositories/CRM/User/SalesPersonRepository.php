@@ -115,6 +115,13 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
             $query = $query->where('user_id', $params['user_id']);
         }
 
+        // Implement With
+        if (!empty($params['with']) && is_array($params['with'])) {
+            foreach ($params['with'] as $with) {
+                $query = $query->with($with);
+            }
+        }
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
