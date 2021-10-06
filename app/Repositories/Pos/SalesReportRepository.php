@@ -18,7 +18,9 @@ class SalesReportRepository implements SalesReportRepositoryInterface
         'partBoundParams' => [],
         'inventoryBoundParams' => [],
         'partsWhere' => ['part_qb' => '', 'part_pos' => ''],
-        'inventoryWhere' => ['inventory_qb' => '', 'inventory_pos' => '']
+        'inventoryWhere' => ['inventory_qb' => '', 'inventory_pos' => ''],
+        'laborsBoundParams' => [],
+        'laborsWhere' => ['labor_qb' => '', 'labor_pos' => ''],
     ];
 
     /**
@@ -134,7 +136,7 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                     JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
                     LEFT JOIN qb_invoice_items ii on qi.id = ii.invoice_id
-                    JOIN qb_items iitem on ii.item_id = iitem.id AND iitem.type = 'part'
+                    JOIN qb_items iitem on ii.item_id = iitem.id AND iitem.type IN ('part', 'labor')
                     LEFT JOIN parts_v1 p on iitem.item_primary_id = p.id
                     WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_part_qb)
                           AND qi.invoice_date >= :from_date_part_qb AND qi.invoice_date <= :to_date_part_qb
@@ -148,7 +150,7 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         IFNULL(p.title, p.sku) AS title,
                         IFNULL(p.sku, iitem.sku) AS reference,
                         @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
-                        ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
+                        ROUND(IFNULL(ps.discount, 0), 2) AS invoice_discount,
                         @actual_price:=ROUND(IFNULL(psp.price,0) * psp.qty, 2) AS price,
                         FLOOR(psp.qty),
                         NULL AS taxes_amount,
@@ -168,10 +170,9 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         'POS' AS type,
                         '' AS model
                     FROM dealer_sales_history sh
-                    JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
-                    JOIN qb_items iitem on psp.item_id = iitem.id AND iitem.type = 'part'
+                    JOIN qb_items iitem on psp.item_id = iitem.id AND iitem.type IN ('part', 'labor')
                     LEFT JOIN parts_v1 p on iitem.item_primary_id = p.id
                     WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_part_pos)
                           AND ps.created_at >= :from_date_part_pos AND ps.created_at <= :to_date_part_pos
@@ -187,6 +188,7 @@ SQL;
                     IFNULL(i.title, i.stock) AS title,
                     i.stock AS reference,
                     @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
+                    ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
                     @actual_price:=IFNULL(ii.unit_price,0) * ii.qty AS price,
                     FLOOR(ii.qty) AS qty,
                     ii.taxes_amount AS taxes_amount,
@@ -232,6 +234,7 @@ SQL;
                         IFNULL(i.title, i.stock) AS title,
                         i.stock AS reference,
                         @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
+                        ROUND(IFNULL(ps.discount, 0), 2) AS invoice_discount,
                         @actual_price:=IFNULL(psp.price,0) * psp.qty AS price,
                         FLOOR(psp.qty),
                         NULL AS taxes_amount,
@@ -258,6 +261,87 @@ SQL;
                     WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_inventory_pos)
                           AND ps.created_at >= :from_date_inventory_pos AND ps.created_at <= :to_date_inventory_pos
                           {$this->customReportHelpers['inventoryWhere']['inventory_pos']}
+SQL;
+
+        $laborSQL = <<<SQL
+                    SELECT
+                           DATE_FORMAT(qi.invoice_date, '%Y') AS year,
+                           DATE_FORMAT(qi.invoice_date, '%M') AS month,
+                           DATE_FORMAT(qi.invoice_date, '%d') AS day,
+                           DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
+                           iitem.name AS title,
+                           iitem.sku AS reference,
+                           @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
+                           ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
+                           @actual_price:=ROUND(IFNULL(ii.unit_price,0) * ii.qty, 2) AS price,
+                           FLOOR(ii.qty) AS qty,
+                           ii.taxes_amount AS taxes_amount,
+                           @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
+                           ROUND((@actual_price - @cost - @refund), 2) AS profit,
+                           IF(
+                              qi.unit_sale_id IS NOT NULL,
+                              CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
+                              (
+                               SELECT GROUP_CONCAT(r.receipt_path)
+                               FROM dealer_sales_receipt r
+                               JOIN qb_payment p ON r.tb_primary_id = p.id
+                               WHERE p.invoice_id = qi.id AND r.tb_name = 'qb_payment'
+                               )
+                           ) AS links,
+                           ro.type AS ro_type,
+                           'labor-qb' AS source,
+                           iitem.id AS item_id,
+                           qi.id AS doc_id,
+                           qi.doc_num AS doc_num,
+                           CASE
+                               WHEN qi.unit_sale_id IS NOT NULL THEN 'Deal'
+                               WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
+                               ELSE 'Service'
+                           END AS type,
+                           '' AS model
+                    FROM dealer_sales_history sh
+                    JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
+                    LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
+                    LEFT JOIN qb_invoice_items ii on qi.id = ii.invoice_id
+                    JOIN qb_items iitem on ii.item_id = iitem.id AND iitem.type = 'labor'
+                    WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_labor_qb)
+                          AND qi.invoice_date >= :from_date_labor_qb AND qi.invoice_date <= :to_date_labor_qb
+                          {$this->customReportHelpers['laborsWhere']['labor_pos']}
+                    UNION
+                    SELECT
+                        DATE_FORMAT(ps.created_at, '%Y') AS year,
+                        DATE_FORMAT(ps.created_at, '%M') AS month,
+                        DATE_FORMAT(ps.created_at, '%d') AS day,
+                        DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
+                        iitem.name AS title,
+                        iitem.sku AS reference,
+                        @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
+                        ROUND(IFNULL(ps.discount, 0), 2) AS invoice_discount,
+                        @actual_price:=ROUND(IFNULL(psp.price,0) * psp.qty, 2) AS price,
+                        FLOOR(psp.qty),
+                        NULL AS taxes_amount,
+                        @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
+                        ROUND((@actual_price - @cost - @refund), 2) AS profit,
+                        (
+                            SELECT GROUP_CONCAT(r.receipt_path)
+                            FROM dealer_sales_receipt r
+                            JOIN crm_pos_sales p ON r.tb_primary_id = p.id
+                            WHERE r.tb_name = 'crm_pos_sales'
+                        ) AS links,
+                        '' AS ro_type,
+                        'labor-pos' AS source,
+                        iitem.id AS item_id,
+                        ps.id AS doc_id,
+                        CONCAT('POS Sales # ',  ps.id) AS doc_num,
+                        'POS' AS type,
+                        '' AS model
+                    FROM dealer_sales_history sh
+                    JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
+                    JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
+                    JOIN qb_items iitem on psp.item_id = iitem.id AND iitem.type = 'labor'
+                    WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_labor_pos)
+                          AND ps.created_at >= :from_date_labor_pos AND ps.created_at <= :to_date_labor_pos
+                          {$this->customReportHelpers['laborsWhere']['labor_pos']}
 SQL;
 
         if ($params['report_type'] === self::MIXED_REPORT_TYPE) {
@@ -291,9 +375,16 @@ SQL;
                     'from_date_part_pos' => $params['from_date'],
                     'to_date_part_qb' => $params['to_date'] . ' 23:59:59',
                     'to_date_part_pos' => $params['to_date'] . ' 23:59:59',
+
+                    // 'dealer_id_labor_qb' => $params['dealer_id'],
+                    // 'dealer_id_labor_pos' => $params['dealer_id'],
+                    // 'from_date_labor_qb' => $params['from_date'],
+                    // 'from_date_labor_pos' => $params['from_date'],
+                    // 'to_date_labor_qb' => $params['to_date'] . ' 23:59:59',
+                    // 'to_date_labor_pos' => $params['to_date'] . ' 23:59:59',
                 ]
             );
-
+            // $sql = "$partsSQL \nUNION\n $laborSQL";
             $sql = $partsSQL;
         } else {
             $boundParams = array_merge(
