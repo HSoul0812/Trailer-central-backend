@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class CreateViewPriceAveragePerDay extends Migration
+class CreateViewLeadsAveragePerDay extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateViewPriceAveragePerDay extends Migration
     public function up(): void
     {
         DB::statement(<<<SQL
-            CREATE MATERIALIZED VIEW inventory_price_average_per_day AS
+            CREATE MATERIALIZED VIEW leads_average_per_day AS
             WITH days as (
                 SELECT day::date
                 FROM generate_series(
-                             (SELECT created_at FROM inventory_logs LIMIT 1),
+                             (SELECT submitted_at FROM lead_logs LIMIT 1),
                              NOW(),
                              '1 day'
                          ) as series(day)
@@ -25,17 +25,16 @@ class CreateViewPriceAveragePerDay extends Migration
             averages AS (
                 SELECT s.day,
                        l.manufacturer,
-                       AVG(l.price) filter (where l.created_at::date = s.day AND (l.event IN ('created', 'price-changed'))) AS aggregate,
+                       COUNT(l.id) filter (where l.submitted_at::date = s.day) AS aggregate,
                        EXISTS(
                                (
                                    SELECT il.manufacturer
-                                   FROM inventory_logs il
+                                   FROM lead_logs il
                                    WHERE l.manufacturer = il.manufacturer
-                                     AND s.day = il.created_at::date
-                                     AND (il.event IN ('created', 'price-changed'))
+                                     AND s.day = il.submitted_at::date
                                )
                            )
-                FROM days as s, inventory_logs l
+                FROM days as s, lead_logs l
                 GROUP BY s.day, l.manufacturer
                 ORDER BY s.day, l.manufacturer
             ) -- averages per day and manufacturer
@@ -57,6 +56,6 @@ SQL
      */
     public function down(): void
     {
-        DB::statement('DROP MATERIALIZED VIEW IF EXISTS inventory_price_average_per_day');
+        DB::statement('DROP MATERIALIZED VIEW IF EXISTS leads_average_per_day');
     }
 }

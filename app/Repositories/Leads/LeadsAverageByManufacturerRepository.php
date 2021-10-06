@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\Inventory;
+namespace App\Repositories\Leads;
 
 use App\Exceptions\NotImplementedException;
 use App\Repositories\AbstractAverageByManufacturerRepository;
 
-class StockAverageByManufacturerRepository extends AbstractAverageByManufacturerRepository implements StockAverageByManufacturerRepositoryInterface
+class LeadsAverageByManufacturerRepository extends AbstractAverageByManufacturerRepository implements LeadsAverageByManufacturerRepositoryInterface
 {
     protected function getPerDayViewName(): string
     {
-        return 'inventory_stock_average_per_day';
+        return 'leads_average_per_day';
     }
 
     protected function getPerWeekViewName(): string
     {
-        return 'inventory_stock_average_per_week';
+        return 'leads_average_per_week';
     }
 
     protected function getPerMonthViewName(): string

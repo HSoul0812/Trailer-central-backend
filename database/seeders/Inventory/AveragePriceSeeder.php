@@ -33,7 +33,7 @@ class AveragePriceSeeder extends Seeder
         $factory = InventoryLog::factory();
         $allManufactures = $this->fromJson('inventory/manufactures-brands.json');
         $randomManufactures = $allManufactures->filter(fn (array $data): bool => $data['name'] !== 'Winnebago')->random(3);
-        $kzManufacturer = $allManufactures->filter(fn (array $data): bool => $data['name'] === 'Winnebago')->first();
+        $specificManufacturer = $allManufactures->filter(fn (array $data): bool => $data['name'] === 'Winnebago')->first();
 
         $numberOfInventoriesPerBrand = [
             [1, 2],
@@ -73,7 +73,7 @@ class AveragePriceSeeder extends Seeder
             }
 
             $this->seedByManufacturer(
-                $kzManufacturer,
+                $specificManufacturer,
                 $day,
                 $factory,
                 15,

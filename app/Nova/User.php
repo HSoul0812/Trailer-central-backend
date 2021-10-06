@@ -15,7 +15,7 @@ class User extends Resource
     /**
      * The model the resource corresponds to.
      */
-    public static $model = \App\Models\User::class;
+    public static string $model = \App\Models\User::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -94,7 +94,6 @@ class User extends Resource
     protected function dashboards(): array
     {
         return [
-            (new Dashboards\InventoryInsights())->canSeeWhen('viewUserInsights', User::class),
         ];
     }
 }
