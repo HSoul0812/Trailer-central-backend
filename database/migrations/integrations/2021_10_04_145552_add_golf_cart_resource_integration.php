@@ -4,15 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class AddPushNPullIntegration extends Migration
+class AddGOLFCARTRESOURCE_Integration extends Migration
 {
 
-    private const PUSHNPULL_PARAMS = [
+    private const GOLFCARTRESOURCE_PARAMS = [
         'integration_id' => 80,
-        'code' => 'pushnpull',
-        'module_name' => 'pushnpull',
+        'code' => 'golfcartresource',
+        'module_name' => 'golfcartresource',
         'module_status' => 'idle',
-        'name' => 'PushNPull',
+        'name' => 'GolfCartResource',
         'description' => null,
         'domain' => '',
         'create_account_url' => '',
@@ -25,7 +25,7 @@ class AddPushNPullIntegration extends Migration
         'show_for_integrated' => 0
     ];
 
-    private const PUSHNPULL_DEALER = [
+    private const GOLFCARTRESOURCE_DEALER = [
         'integration_id' => 80,
         'dealer_id' => 8506,
         'active' => 1,
@@ -46,9 +46,9 @@ class AddPushNPullIntegration extends Migration
     {
         DB::transaction(function ()
         {
-            DB::table('integration')->insert(self::PUSHNPULL_PARAMS);
+            DB::table('integration')->insert(self::GOLFCARTRESOURCE_PARAMS);
 
-            $pushnpullDealer = self::PUSHNPULL_DEALER;
+            $pushnpullDealer = self::GOLFCARTRESOURCE_DEALER;
             $pushnpullDealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
             $pushnpullDealer['settings'] = serialize($pushnpullDealer['settings']);
 
@@ -65,8 +65,8 @@ class AddPushNPullIntegration extends Migration
     {
         DB::transaction(function ()
         {
-            DB::table('integration_dealer')->delete(self::PUSHNPULL_PARAMS['integration_id']);
-            DB::table('integration')->delete(self::PUSHNPULL_PARAMS['integration_id']);
+            DB::table('integration_dealer')->delete(self::GOLFCARTRESOURCE_PARAMS['integration_id']);
+            DB::table('integration')->delete(self::GOLFCARTRESOURCE_PARAMS['integration_id']);
         });
     }
 }
