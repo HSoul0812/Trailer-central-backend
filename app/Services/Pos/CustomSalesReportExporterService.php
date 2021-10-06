@@ -177,9 +177,8 @@ class CustomSalesReportExporterService implements CustomSalesReportExporterServi
 
         $salesData = $salesData->map(function ($item) use ($groupedCollection, $quantityByInvoice) {
             if (!Arr::exists($quantityByInvoice, $item->doc_id)) {
-                $totalQuantity = $groupedCollection->get($item->doc_id)->sum('qty');
-                // $quantityByInvoice[$item->doc_id] = round(((float) $item->invoice_discount / $totalQuantity), 2);
-                $quantityByInvoice[$item->doc_id] = round(((float) $item->invoice_discount / $groupedCollection->get($item->doc_id)->count()), 2);
+                $totalItems = $groupedCollection->get($item->doc_id)->count();
+                $quantityByInvoice[$item->doc_id] = round(((float) $item->invoice_discount / $totalItems), 2);
             }
 
             $partDiscount = $quantityByInvoice[$item->doc_id] ?? 0;
