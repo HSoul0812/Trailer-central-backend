@@ -58353,8 +58353,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
 
 
 
@@ -58374,9 +58372,8 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_1_chartjs_plugin_datalabels__
         var filterPeriodDefault = 'per_week';
         var filterPeriodList = [{ text: 'Per day', value: 'per_day' }, { text: 'Per week', value: 'per_week' }];
 
-        var defaultMinDate = '2020-12-31';
-        var defaultMaxDate = Object(__WEBPACK_IMPORTED_MODULE_3_moment_dist_moment__["a" /* default */])().format('YYYY-MM-DD');
-        var defaultDate = Object(__WEBPACK_IMPORTED_MODULE_3_moment_dist_moment__["a" /* default */])().format('YYYY-MM-DD');
+        var defaultStartDate = Object(__WEBPACK_IMPORTED_MODULE_3_moment_dist_moment__["a" /* default */])().startOf('year');
+        var defaultDate = Object(__WEBPACK_IMPORTED_MODULE_3_moment_dist_moment__["a" /* default */])().endOf('year');
 
         this.card.options = this.card.options !== undefined ? this.card.options : {};
 
@@ -58400,9 +58397,7 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_1_chartjs_plugin_datalabels__
 
         this.card.filters.datePicker = this.card.filters.datePicker !== undefined ? this.card.filters.datePicker : {
             show: false,
-            minDate: defaultMinDate,
-            maxDate: defaultMaxDate,
-            dateRange: { startDate: defaultDate, endDate: defaultDate }
+            dateRange: { startDate: defaultStartDate, endDate: defaultDate }
         };
 
         return {
@@ -58410,10 +58405,8 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_1_chartjs_plugin_datalabels__
             filters: {
                 datePicker: {
                     show: this.card.filters.datePicker.show !== undefined ? this.card.filters.datePicker.show : true,
-                    minDate: this.card.filters.datePicker.minDate !== undefined ? this.card.filters.datePicker.minDate : defaultMinDate,
-                    maxDate: this.card.filters.datePicker.maxDate !== undefined ? this.card.filters.datePicker.maxDate : defaultMaxDate,
                     dateRange: {
-                        startDate: this.card.filters.datePicker.dateRange.startDate !== undefined ? this.card.filters.datePicker.dateRange.startDate : defaultDate,
+                        startDate: this.card.filters.datePicker.dateRange.startDate !== undefined ? this.card.filters.datePicker.dateRange.startDate : defaultStartDate,
                         endDate: this.card.filters.datePicker.dateRange.endDate !== undefined ? this.card.filters.datePicker.dateRange.endDate : defaultDate
                     }
                 },
@@ -60124,11 +60117,7 @@ var render = function() {
                 }
               ],
               ref: "picker",
-              attrs: {
-                minDate: _vm.filters.datePicker.minDate,
-                maxDate: _vm.filters.datePicker.maxDate,
-                opens: _vm.left
-              },
+              attrs: { opens: _vm.left },
               on: {
                 update: function($event) {
                   return _vm.refresh()

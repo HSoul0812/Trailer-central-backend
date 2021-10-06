@@ -5,8 +5,6 @@
                 <date-range-picker
                     ref="picker"
                     v-show="filters.datePicker.show"
-                    :minDate="filters.datePicker.minDate"
-                    :maxDate="filters.datePicker.maxDate"
                     :opens="left"
                     v-model="filters.datePicker.dateRange"
                     @update="refresh()">
@@ -59,9 +57,8 @@ export default {
             // { text: 'Per year', value: 'per_year' }
         ];
 
-        const defaultMinDate = '2020-12-31';
-        const defaultMaxDate = moment().format('YYYY-MM-DD');
-        const defaultDate = moment().format('YYYY-MM-DD');
+        const defaultStartDate = moment().startOf('year');
+        const defaultDate = moment().endOf('year');
 
         this.card.options = this.card.options !== undefined ? this.card.options : {};
 
@@ -87,9 +84,7 @@ export default {
 
         this.card.filters.datePicker = this.card.filters.datePicker !== undefined ? this.card.filters.datePicker : {
             show: false,
-            minDate: defaultMinDate,
-            maxDate: defaultMaxDate,
-            dateRange: {startDate: defaultDate, endDate: defaultDate}
+            dateRange: {startDate: defaultStartDate, endDate: defaultDate}
         };
 
         return {
@@ -97,10 +92,8 @@ export default {
             filters: {
                 datePicker: {
                     show: this.card.filters.datePicker.show !== undefined ? this.card.filters.datePicker.show : true,
-                    minDate: this.card.filters.datePicker.minDate !== undefined ? this.card.filters.datePicker.minDate : defaultMinDate,
-                    maxDate: this.card.filters.datePicker.maxDate !== undefined ? this.card.filters.datePicker.maxDate : defaultMaxDate,
                     dateRange: {
-                        startDate: this.card.filters.datePicker.dateRange.startDate !== undefined ? this.card.filters.datePicker.dateRange.startDate : defaultDate,
+                        startDate: this.card.filters.datePicker.dateRange.startDate !== undefined ? this.card.filters.datePicker.dateRange.startDate : defaultStartDate,
                         endDate: this.card.filters.datePicker.dateRange.endDate !== undefined ? this.card.filters.datePicker.dateRange.endDate : defaultDate,
                     },
                 },

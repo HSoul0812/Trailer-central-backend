@@ -149,3 +149,6 @@ php artisan db:seed --class=Database\\Seeders\\Inventory\\AverageStockSeeder
 ```bash
 php artisan db:seed --class=Database\\Seeders\\Inventory\\AveragePriceSeeder
 ```
+```bash
+php artisan db:seed --class=Database\\Seeders\\Leads\\LeadsAverageSeeder
+```

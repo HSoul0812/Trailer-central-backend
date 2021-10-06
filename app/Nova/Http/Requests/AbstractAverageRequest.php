@@ -17,7 +17,7 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
 
     public function getFrom(): ?string
     {
-        return $this->input('from', Date::now()->subYear()->format('Y-m-d'));
+        return $this->input('from', Date::now()->startOf('year')->format('Y-m-d'));
     }
 
     public function getTo(): ?string
