@@ -98,8 +98,10 @@ class InteractionMessage extends Model
             $array['to_number'] = null;
         }
 
-        $array['date_sent'] = $message->date_sent ? new Carbon($message->date_sent) : null;
+        $array['date_sent'] = $message->date_sent instanceof \DateTimeInterface ? $message->date_sent : null;
         $array['lead_id'] = $message->lead_id;
+        $array['message_created_at'] = $message->created_at;
+        $array['message_updated_at'] = $message->updated_at;
 
         $lead = $message->lead;
 

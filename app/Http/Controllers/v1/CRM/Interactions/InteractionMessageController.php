@@ -6,6 +6,7 @@ use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\CRM\Interactions\SearchInteractionMessagesRequest;
+use App\Http\Requests\CRM\Interactions\UpdateInteractionMessageRequest;
 use Dingo\Api\Http\Request;
 use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
 use App\Transformers\CRM\Interactions\InteractionMessageTransformer;
@@ -20,16 +21,16 @@ class InteractionMessageController extends RestfulControllerV2
     /**
      * @var InteractionMessageRepositoryInterface
      */
-    private $interactionLeadRepository;
+    private $interactionMessageRepository;
 
     /**
-     * @param InteractionMessageRepositoryInterface $interactionLeadRepository
+     * @param InteractionMessageRepositoryInterface $interactionMessageRepository
      */
-    public function __construct(InteractionMessageRepositoryInterface $interactionLeadRepository)
+    public function __construct(InteractionMessageRepositoryInterface $interactionMessageRepository)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['search']);
+        $this->middleware('setDealerIdOnRequest')->only(['search', 'update']);
 
-        $this->interactionLeadRepository = $interactionLeadRepository;
+        $this->interactionMessageRepository = $interactionMessageRepository;
     }
 
     /**
@@ -73,9 +74,30 @@ class InteractionMessageController extends RestfulControllerV2
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
-     *         name="query",
-     *         in="hidden",
+     *         name="hidden",
+     *         in="query",
      *         description="Hidden or not",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="dispatched",
+     *         in="query",
+     *         description="Dispathced or not",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="latest_messages",
+     *         in="query",
+     *         description="Get only latest messages grouped by a lead",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="Sort order can be: date_sent,-date_sent",
      *         required=false,
      *         @OA\Schema(type="boolean")
      *     ),
@@ -104,9 +126,58 @@ class InteractionMessageController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $data = $this->interactionLeadRepository->search($request->all());
-        $paginator = $this->interactionLeadRepository->getPaginator();
+        $data = $this->interactionMessageRepository->search($request->all());
+        $paginator = $this->interactionMessageRepository->getPaginator();
 
         return $this->collectionResponse($data, new InteractionMessageTransformer(), $paginator);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/leads/interaction-message/{id}",
+     *     description="Retrieve a list of interaction messages",
+     *     tags={"Interaction"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Interaction Message ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="hidden",
+     *         in="query",
+     *         description="Hidden or not",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns interaction message id",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param int $id
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function update(int $id, Request $request): Response
+    {
+        $request = new UpdateInteractionMessageRequest(array_merge(['id' => $id], $request->all()));
+
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
+        }
+
+        $model = $this->interactionMessageRepository->update($request->all());
+
+        return $this->updatedResponse($model->id);
     }
 }

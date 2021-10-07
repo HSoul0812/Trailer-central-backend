@@ -337,6 +337,7 @@ $api->version('v1', function ($route) {
 
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('leads/interaction-message/search', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@search');
+        $route->post('leads/interaction-message/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@update');
     });
 
     /*

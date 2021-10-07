@@ -17,7 +17,7 @@ trait Pagination
     /**
      * @var LengthAwarePaginator|null
      */
-    private $paginator;
+    protected $paginator;
 
     /**
      * @return LengthAwarePaginator|null
@@ -31,9 +31,10 @@ trait Pagination
      * @param SearchRequestBuilder $search
      * @param int $page
      * @param int $perPage
+     * @param array $params
      * @return SearchResult
      */
-    protected function esPaginationExecute(SearchRequestBuilder $search, int $page, int $perPage = 10): SearchResult
+    protected function esPagination(SearchRequestBuilder $search, int $page, int $perPage = 10, array $params = []): SearchResult
     {
         $search->from(($page - 1) * $perPage);
         $search->size($perPage);
@@ -41,9 +42,26 @@ trait Pagination
         $searchResult = $search->execute();
         $data = $searchResult->models();
 
+        $total = (isset($params['aggregationTotal']) && $params['aggregationTotal'])
+            ? $searchResult->aggregations()['total']['value']
+            : $searchResult->total();
+
+        $this->initPaginator($data, $total, $page, $perPage);
+
+        return $searchResult;
+    }
+
+    /**
+     * @param mixed $data
+     * @param int $total
+     * @param int $page
+     * @param int $perPage
+     */
+    protected function initPaginator($data, int $total, int $page, int $perPage = 10)
+    {
         $this->paginator = new \Illuminate\Pagination\LengthAwarePaginator(
             $data,
-            $searchResult->total(),
+            $total,
             $perPage,
             $page,
             [
@@ -51,7 +69,5 @@ trait Pagination
                 'pageName' => 'page',
             ]
         );
-
-        return $searchResult;
     }
 }

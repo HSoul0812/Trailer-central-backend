@@ -17,7 +17,9 @@ class SearchInteractionMessagesRequest extends Request
         'message_type' => 'string|in:sms,email,fb',
         'query' => 'string',
         'hidden' => 'boolean',
-        'sort' => 'string',
+        'dispatched' => 'boolean',
+        'latest_messages' => 'boolean',
+        'sort' => 'string|in:date_sent,-date_sent',
     ];
 }
 

@@ -107,5 +107,7 @@ class InteractionServiceProvider extends ServiceProvider
 
         TextLog::observe(TextLogObserver::class);
         EmailHistory::observe(EmailHistoryObserver::class);
+
+        \Validator::extend('interaction_message_valid', 'App\Rules\CRM\Interactions\ValidInteractionMessage@passes');
     }
 }
