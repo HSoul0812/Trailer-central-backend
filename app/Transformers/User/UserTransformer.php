@@ -7,7 +7,7 @@ use App\Transformers\User\DealerPermissionsTransformer;
 
 class UserTransformer extends TransformerAbstract 
 {
-    private const PROFILE_IMAGE = 'https://static-trailercentral.s3.amazonaws.com/files/Screen+Shot+2021-04-15+at+4.02.05+PM.png';
+    private const PROFILE_IMAGE = 'https://static-trailercentral.s3.amazonaws.com/files/download+(1).png';
     
     protected $defaultIncludes = [
         'permissions'
