@@ -11,7 +11,18 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
 
     public function getAll($params)
     {
-        return CompletedOrder::all();
+      if (!isset($params['per_page'])) {
+          $params['per_page'] = 100;
+      }
+
+      $query = CompletedOrder::select('*');
+      
+      if (isset($params['status'])) {
+          $query->where('status', $params['status']);
+      }
+
+
+      return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function create($params): CompletedOrder

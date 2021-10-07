@@ -16,6 +16,18 @@ class CompletedOrder extends Model
      */
     protected $table = 'ecommerce_completed_orders';
 
+    /**
+     * @const array
+     */
+    const STATUS_FIELDS = [
+        'dropshipped',
+        'abandoned',
+        'unfulfilled',
+        'pending',
+        'fulfilled',
+        'manual'
+    ];
+
     protected $fillable = [
         'customer_email',
         'total_amount',
