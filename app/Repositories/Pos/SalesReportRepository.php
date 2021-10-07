@@ -8,6 +8,11 @@ use Generator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
+/**
+ * Class SalesReportRepository
+ *
+ * @package App\Repositories\Pos
+ */
 class SalesReportRepository implements SalesReportRepositoryInterface
 {
     public const MIXED_REPORT_TYPE = 'mixed';
@@ -433,10 +438,11 @@ SQL;
             $this->customReportHelpers['inventoryWhere']['inventory_pos'] .= ' AND EXISTS (SELECT r.id FROM crm_pos_sale_products r
                             JOIN qb_items sqi ON r.item_id = sqi.id
                             WHERE r.sale_id = ps.id AND (' . implode(' OR ', $feeFilter['inventory_pos']) . '))';
+
+            // Labor Fees Filter Query
+            $this->getFeeFilters($params);
         }
     }
-
-
 
     /**
      * @param array $data
@@ -552,7 +558,7 @@ SQL;
                 )
                 AND qi.invoice_date >= :from_date_labor_qb
                 AND qi.invoice_date <= :to_date_labor_qb
-                {$this->customReportHelpers['laborWhere']['labor_pos']}
+                {$this->customReportHelpers['laborWhere']['labor_qb']}
             UNION
             SELECT
                 DATE_FORMAT(ps.created_at, '%Y') AS year,
@@ -595,5 +601,50 @@ SQL;
                 AND ps.created_at >= :from_date_labor_pos AND ps.created_at <= :to_date_labor_pos
                 {$this->customReportHelpers['laborWhere']['labor_pos']}
         SQL;
+    }
+
+    /**
+     * @param array $params
+     * @param string $qbKey
+     * @param string $posKey
+     * @param string $boundParamKey
+     * @param string $whereKey
+     *
+     * @return void
+     */
+    private function getFeeFilters(
+        array $params,
+        string $qbKey = self::CUSTOM_PARAMS_LABOR,
+        string $posKey = self::CUSTOM_PARAMS_LABOR,
+        string $boundParamKey = self::CUSTOM_PARAMS_LABOR,
+        string $whereKey = self::CUSTOM_PARAMS_LABOR
+    ): void {
+        $posKey .= '_pos';
+        $qbKey .= '_qb';
+        $boundParamKey .= 'BoundParams';
+        $whereKey .= 'Where';
+
+        $feeFilter = [$qbKey => [], $posKey => []];
+
+        foreach ([$qbKey, $posKey] as $suffix) {
+            foreach ($params['fee_type'] as $fee) {
+                // snake to human text
+                $text = '%' . strtoupper(str_replace('_', ' ', $fee)) . '%';
+
+                $feeSuffix = $fee . '_' . $suffix;
+
+                $this->customReportHelpers[$boundParamKey][$feeSuffix] = $text;
+
+                $feeFilter[$suffix][] = "sqi.name LIKE :{$feeSuffix}";
+            }
+        }
+
+        $this->customReportHelpers[$whereKey][$qbKey] .= ' AND EXISTS (SELECT r.id FROM qb_invoice_items r
+            JOIN qb_items sqi ON r.item_id = sqi.id
+            WHERE r.invoice_id = qi.id AND (' . implode(' OR ', $feeFilter[$qbKey]) . '))';
+
+        $this->customReportHelpers[$whereKey][$posKey] .= ' AND EXISTS (SELECT r.id FROM crm_pos_sale_products r
+            JOIN qb_items sqi ON r.item_id = sqi.id
+            WHERE r.sale_id = ps.id AND (' . implode(' OR ', $feeFilter[$posKey]) . '))';
     }
 }
