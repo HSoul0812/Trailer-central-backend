@@ -101,8 +101,8 @@ class InteractionServiceProvider extends ServiceProvider
     public function boot()
     {
         Relation::morphMap([
-            'dealer_texts_log' => TextLog::class,
-            'crm_email_history' => EmailHistory::class,
+            TextLog::getTableName() => TextLog::class,
+            EmailHistory::getTableName() => EmailHistory::class,
         ]);
 
         TextLog::observe(TextLogObserver::class);
