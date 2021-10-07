@@ -261,7 +261,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
     }
 
-    public function getIsUserAccountsActiveAttribute(): bool
+    public function getIsUserAccountsActiveAttribute(): ?bool
     {
         if(isset($this->website)) {
             return $this->website->websiteConfigByKey('general/user_accounts');
