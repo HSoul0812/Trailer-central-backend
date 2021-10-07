@@ -39,8 +39,9 @@ class CriteriaBuilder extends Collection
     /**
      * Get an item from the collection by key.
      *
-     * @param  mixed  $key
-     * @param  mixed  $default
+     * @param mixed $key
+     * @param mixed $default
+     *
      * @return mixed
      */
     public function get($key, $default = null)

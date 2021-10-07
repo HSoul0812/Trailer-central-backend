@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Nova\Http\Requests;
 
 use App\Http\Requests\Request;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rule;
 
 abstract class AbstractAverageRequest extends Request implements InsightRequestInterface

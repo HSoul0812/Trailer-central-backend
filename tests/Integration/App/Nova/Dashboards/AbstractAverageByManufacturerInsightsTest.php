@@ -10,6 +10,7 @@ use App\Nova\Http\Requests\Inventory\PriceAverageRequest;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Support\Facades\Date;
 use Tests\Common\IntegrationTestCase;
+use TrailerTrader\Insights\AreaChart;
 
 /**
  * Since this method is implemented in an abstract class, and to avoid any mocking, this test case will cover all
@@ -20,9 +21,9 @@ use Tests\Common\IntegrationTestCase;
 class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
 {
     /**
-     * @covers \App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights::cards
-     * @covers \App\Nova\Dashboards\Leads\LeadsAverageByManufacturerInsights::cards
-     * @covers \App\Nova\Dashboards\Inventory\PriceAverageByManufacturerInsights::cards
+     * @covers       \App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights::cards
+     * @covers       \App\Nova\Dashboards\Leads\LeadsAverageByManufacturerInsights::cards
+     * @covers       \App\Nova\Dashboards\Inventory\PriceAverageByManufacturerInsights::cards
      *
      * @dataProvider invalidParametersProvider
      */
@@ -32,7 +33,7 @@ class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
         string $expectedExceptionMessage,
         $expectedErrorMessages
     ): void {
-        $controller = app(PriceAverageByManufacturerInsights::class);
+        $dashboard = app(PriceAverageByManufacturerInsights::class);
 
         $paramsExtracted = $this->extractValues($params);
 
@@ -42,7 +43,7 @@ class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
         $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
-            $controller->cards($request);
+            $dashboard->cards($request);
         } catch (ResourceException $exception) {
             self::assertSame($expectedErrorMessages, $exception->getErrors()->first());
 
@@ -51,23 +52,24 @@ class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
     }
 
     /**
-     * @covers \App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights::cards
-     * @covers \App\Nova\Dashboards\Leads\LeadsAverageByManufacturerInsights::cards
-     * @covers \App\Nova\Dashboards\Inventory\PriceAverageByManufacturerInsights::cards
+     * @covers       \App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights::cards
+     * @covers       \App\Nova\Dashboards\Leads\LeadsAverageByManufacturerInsights::cards
+     * @covers       \App\Nova\Dashboards\Inventory\PriceAverageByManufacturerInsights::cards
      *
      * @dataProvider validParametersProvider
      */
     public function testWithValidParameters(array $params): void
     {
-        $controller = app(PriceAverageByManufacturerInsights::class);
+        $dashboard = app(PriceAverageByManufacturerInsights::class);
 
         $paramsExtracted = $this->extractValues($params);
 
         $request = new PriceAverageRequest($paramsExtracted);
 
-        $response = $controller->cards($request);
+        $response = $dashboard->cards($request);
 
         self::assertIsArray($response);
+        self::assertInstanceOf(AreaChart::class, $response[0]);
     }
 
     /**
@@ -79,10 +81,10 @@ class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
     public function invalidParametersProvider(): array
     {
         return [          // array $params, string $expectedException, string $expectedExceptionMessage, string|array $firstExpectedErrorMessage
-            'wrong period' => [['period' => 'yearly'], ResourceException::class, 'Validation Failed', 'The selected period is invalid.'],
-            'wrong from'   => [['from' => '33-33-3333'], ResourceException::class, 'Validation Failed', 'The from does not match the format Y-m-d.'],
-            'wrong to'     => [['from' => '2021-09-09', 'to' => '2021-09-07'], ResourceException::class, 'Validation Failed', 'The from must be a date before or equal to 2021-09-07.'],
-            'from is required'     => [['to' => '2021-09-07'], ResourceException::class, 'Validation Failed', 'The from field is required.'],
+            'wrong period'     => [['period' => 'yearly'], ResourceException::class, 'Validation Failed', 'The selected period is invalid.'],
+            'wrong from'       => [['from' => '33-33-3333'], ResourceException::class, 'Validation Failed', 'The from does not match the format Y-m-d.'],
+            'wrong to'         => [['from' => '2021-09-09', 'to' => '2021-09-07'], ResourceException::class, 'Validation Failed', 'The from must be a date before or equal to 2021-09-07.'],
+            'from is required' => [['to' => '2021-09-07'], ResourceException::class, 'Validation Failed', 'The from field is required.'],
         ];
     }
 
@@ -97,9 +99,9 @@ class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
         $now = Date::now()->format('Y-m-d');
 
         return [          // array $params
-           'valid period' => [['period' => InsightRequestInterface::PERIOD_PER_DAY]],
-           'valid from'   => [['from' => $now]],
-           'valid to'     => [['from' => Date::now()->startOf('year')->format('Y-m-d'), 'to' => $now]],
+            'valid period' => [['period' => InsightRequestInterface::PERIOD_PER_DAY]],
+            'valid from'   => [['from' => $now]],
+            'valid to'     => [['from' => Date::now()->startOf('year')->format('Y-m-d'), 'to' => $now]],
         ];
     }
 }
