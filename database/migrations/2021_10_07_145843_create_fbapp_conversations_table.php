@@ -15,7 +15,7 @@ class CreateFbappConversationsTable extends Migration
     {
         Schema::create('fbapp_conversations', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('conversation_id')->unique();
+            $table->string('conversation_id', 25)->unique();
             $table->bigInteger('page_id')->index();
             $table->bigInteger('user_id')->index();
             $table->string('link');
