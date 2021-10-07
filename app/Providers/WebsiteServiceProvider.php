@@ -14,8 +14,6 @@ use App\Repositories\Website\WebsiteDealerUrlRepository;
 use App\Repositories\Website\WebsiteDealerUrlRepositoryInterface;
 use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
-use App\Repositories\Website\WebsiteUserTokenRepository;
-use App\Repositories\Website\WebsiteUserTokenRepositoryInterface;
 use App\Services\Website\WebsiteDealerUrlService;
 use App\Services\Website\WebsiteDealerUrlServiceInterface;
 use App\Services\Website\WebsiteUserService;
@@ -41,7 +39,7 @@ class WebsiteServiceProvider extends ServiceProvider
 
         // Services
         $this->app->bind(WebsiteDealerUrlServiceInterface::class, WebsiteDealerUrlService::class);
-        $this->app->bind(WebsiteUserServiceInterface::class, WebsiteUserSerivce::class);
+        $this->app->bind(WebsiteUserServiceInterface::class, WebsiteUserService::class);
 
         // Blog
         $this->app->bind('App\Repositories\Website\Blog\BulkRepositoryInterface', 'App\Repositories\Website\Blog\BulkRepository');

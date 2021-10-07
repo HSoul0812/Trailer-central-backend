@@ -4,21 +4,29 @@ namespace App\Repositories\Website;
 
 use App\Models\Website\DealerWebsiteUser;
 use App\Exceptions\NotImplementedException;
-use App\Exceptions\RepositoryInvalidArgumentException;
-use App\Models\Website\Website;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Website\DealerWebsiteUserToken;
 
 /**
  * Class WebsiteRepository
  * @package App\Repositories\Website
  */
 class WebsiteUserRepository implements WebsiteUserRepositoryInterface {
-    public function create($params) {
-        $user = new DealerWebsiteUser($params);
-        $user->save();
+
+    private $userModel;
+    private $tokenModel;
+
+    public function __construct(DealerWebsiteUser $dealerWebsiteUser, DealerWebsiteUserToken $dealerWebsiteUserToken) {
+        $this->userModel = $dealerWebsiteUser;
+        $this->tokenModel = $dealerWebsiteUserToken;
+    }
+    /**
+     * @param $params
+     * @return DealerWebsiteUser
+     */
+    public function create($params): DealerWebsiteUser {
+        $user = $this->userModel->create($params);
         $user->token()->create([
-            'token' => $params['token']
+            'access_token' => $params['token']
         ]);
         return $user;
     }
@@ -34,12 +42,19 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface {
 
     /**
      * @param array $params
-     * @return mixed|void
+     * @return DealerWebsiteUser
      * @throws NotImplementedException
      */
-    public function get($params)
+    public function get($params): DealerWebsiteUser
     {
-        throw new NotImplementedException;
+        $query = $this->userModel->select('*');
+        if($params['website_id']) {
+            $query->where('website_id', $params['website_id']);
+        }
+        if($params['email']) {
+            $query->where('email', $params['email']);
+        }
+        return $query->first();
     }
 
     /**

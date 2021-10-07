@@ -17,7 +17,7 @@ class CreateDealerWebsiteUserTokenTable extends Migration
             $table->bigIncrements('id');
             $table->string('access_token', 255);
             $table->bigInteger('dealer_website_user_id')->unsigned();
-            $table->foreign('dealer_website_user_id')->references('id')->on('dealer_website_user');
+            $table->foreign('dealer_website_user_id')->references('id')->on('dealer_website_user')->onDelete('cascade');
             $table->timestamps();
         });
     }
