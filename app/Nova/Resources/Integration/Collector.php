@@ -84,6 +84,18 @@ class Collector extends Resource
                 Text::make('XML URL', 'xml_url')->hideFromIndex()->help(
                     "Only needed if file format is xml_url"
                 ),
+                Text::make('Motility Account Number', 'motility_account_no')->hideFromIndex()->help(
+                    "Only needed if file format is motility"
+                ),
+                Text::make('Motility Username', 'motility_username')->hideFromIndex()->help(
+                    "Only needed if file format is motility"
+                ),
+                Text::make('Motility Password', 'motility_password')->hideFromIndex()->help(
+                    "Only needed if file format is motility"
+                ),
+                Text::make('Motility IntegrationID', 'motility_integration_id')->hideFromIndex()->help(
+                    "Only needed if file format is motility"
+                ),
                 Select::make('File Format', 'file_format')
                     ->options(array_combine(CollectorModel::FILE_FORMATS, CollectorModel::FILE_FORMATS))
                     ->displayUsingLabels()

@@ -19,4 +19,16 @@ interface DealerOptionsServiceInterface
      * @return bool
      */
     public function deactivateCrm(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateUserAccounts(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateUserAccounts(int $dealerId): bool;
 }

@@ -36,4 +36,13 @@ interface InventoryRepositoryInterface extends Repository
      * @return int number of touched records
      */
     public function moveLocationId(int $from, int $to): int;
+    
+    /**
+     * Returns data about an inventory item and increments its times viewed
+     * counter
+     * 
+     * @param array $params
+     * @return Inventory
+     */
+    public function getAndIncrementTimesViewed(array $params): Inventory;
 }
