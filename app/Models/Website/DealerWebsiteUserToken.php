@@ -7,6 +7,10 @@ use Illuminate\Support\Str;
 
 class DealerWebsiteUserToken extends Model
 {
+    protected $fillable = [
+        'access_token'
+    ];
+
     //
     protected $table = 'dealer_website_user_token';
 

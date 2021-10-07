@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Dms;
+namespace Tests\Unit\Repositories\Inventory;
 
 
 use App\Repositories\Inventory\InventoryRepository;
@@ -17,38 +17,38 @@ use Tests\TestCase;
  */
 class InventoryRepositoryTest extends TestCase
 {
-    
+
     /**
      * @var LegacyMockInterface|InventoryRepositoryInterface
      */
     private $inventoryRepositoryMock;
-    
+
     /**
      * @var App\Models\Inventory\Inventory
      */
     private $inventoryMock;
-    
+
     public function setUp(): void
     {
         parent::setUp();
 
         $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
         $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepositoryMock);
-        
+
         $this->inventoryMock = $this->getEloquentMock(Inventory::class);
         $this->app->instance(Inventory::class, $this->inventoryMock);
     }
-    
+
     /**
      * @covers ::getAll
      */
-    public function testGetAllDefault(): void 
+    public function testGetAllDefault(): void
     {
         $serviceRepoParams = [
             'id' =>  $this->serviceOrderMock->id,
             'status' => ServiceOrder::SERVICE_ORDER_STATUS['picked_up']
         ];
-                
+
         $this->serviceOrderMock
                 ->shouldReceive('save')
                 ->once()
@@ -56,23 +56,23 @@ class InventoryRepositoryTest extends TestCase
                     'id' => $this->serviceOrderMock->id,
                     'status' => ServiceOrder::SERVICE_ORDER_STATUS['ready_for_pickup']
                 ]));
-        
+
         $this->serviceOrderMock
                 ->shouldReceive('fill')
                 ->once()
                 ->with($serviceRepoParams);
-        
+
         $this->serviceOrderMock
                 ->shouldReceive('findOrFail')
                 ->once()
                 ->with($this->serviceOrderMock->id)
-                ->andReturn($this->serviceOrderMock);        
-        
+                ->andReturn($this->serviceOrderMock);
+
 
         $serviceRepo = $this->app->make(ServiceOrderRepository::class);
 
         $result = $serviceRepo->update($serviceRepoParams);
         $this->assertEquals($result->id, $this->serviceOrderMock->id);
     }
-    
+
 }
