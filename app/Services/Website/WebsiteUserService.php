@@ -1,7 +1,7 @@
 <?php
 namespace App\Services\Website;
 
-use App\Models\Website\DealerWebsiteUser;
+use App\Models\Website\User\WebsiteUser;
 use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
 use Illuminate\Auth\AuthenticationException;
@@ -26,24 +26,24 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
 
     /**
      * @param array $userInfo
-     * @return DealerWebsiteUser
+     * @return WebsiteUser
      */
-    public function createUser(array $userInfo): DealerWebsiteUser {
+    public function createUser(array $userInfo): WebsiteUser {
         $userInfo = array_replace([], $userInfo, ['token' => $this->generateUserToken()]);
         return $this->websiteUserRepository->create($userInfo);
     }
 
     /**
      * @param array $userInfo
-     * @return DealerWebsiteUser
-     * @throws AuthenticationException
+     * @return WebsiteUser
+     * @throws UnauthorizedException
      */
-    public function loginUser(array $userInfo): DealerWebsiteUser {
+    public function loginUser(array $userInfo): WebsiteUser {
         $user = $this->websiteUserRepository->get($userInfo);
-        if($user->checkPassword($userInfo['password'])) {
+        if($user && $user->checkPassword($userInfo['password'])) {
             return $user;
         } else {
-            throw new AuthenticationException();
+            abort(401, 'Failed to authenticate the user');
         }
     }
 

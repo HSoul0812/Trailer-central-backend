@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\Website;
+namespace App\Models\Website\User;
 
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Model;
 
-class DealerWebsiteUser extends Model
+class WebsiteUser extends Model
 {
     //
     protected $fillable = [
@@ -17,9 +17,9 @@ class DealerWebsiteUser extends Model
         'website_id',
     ];
 
-    protected $table = 'dealer_website_user';
+    protected $table = 'website_user';
     public function token() {
-        return $this->hasOne(DealerWebsiteUserToken::class, 'dealer_website_user_id', 'id');
+        return $this->hasOne(WebsiteUserToken::class, 'website_user_id', 'id');
     }
 
     public function website() {

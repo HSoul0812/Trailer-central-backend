@@ -1,8 +1,8 @@
 <?php
 namespace Tests\Unit\Repositories\Website;
 
-use App\Models\Website\DealerWebsiteUser;
-use App\Models\Website\DealerWebsiteUserToken;
+use App\Models\Website\User\WebsiteUser;
+use App\Models\Website\User\WebsiteUserToken;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
 use Mockery;
 use Tests\TestCase;
@@ -19,11 +19,11 @@ class WebsiteUserRepositoryTest extends TestCase
 
     public function setUp(): void {
         parent::setUp();
-        $this->websiteUserMock = $this->getEloquentMock(DealerWebsiteUser::class);
-        $this->websiteUserTokenMock = $this->getEloquentMock(DealerWebsiteUserToken::class);
+        $this->websiteUserMock = $this->getEloquentMock(WebsiteUser::class);
+        $this->websiteUserTokenMock = $this->getEloquentMock(WebsiteUserToken::class);
 
-        $this->app->instance(DealerWebsiteUser::class, $this->websiteUserMock);
-        $this->app->instance(DealerWebsiteUserToken::class, $this->websiteUserTokenMock);
+        $this->app->instance(WebsiteUser::class, $this->websiteUserMock);
+        $this->app->instance(WebsiteUserToken::class, $this->websiteUserTokenMock);
     }
 
     public function testGet(): void {

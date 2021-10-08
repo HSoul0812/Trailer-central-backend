@@ -2,7 +2,7 @@
 
 namespace App\Transformers\Website;
 
-use App\Models\Website\DealerWebsiteUser;
+use App\Models\Website\User\WebsiteUser;
 use App\Models\Website\Website;
 use League\Fractal\TransformerAbstract;
 
@@ -12,7 +12,7 @@ use League\Fractal\TransformerAbstract;
  */
 class WebsiteUserTransformer extends TransformerAbstract
 {
-    public function transform(DealerWebsiteUser $user): array
+    public function transform(WebsiteUser $user): array
     {
         return [
             'access_token' => $user->token->access_token,

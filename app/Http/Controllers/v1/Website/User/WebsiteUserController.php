@@ -10,8 +10,8 @@ use App\Services\Website\WebsiteUserService;
 use App\Services\Website\WebsiteUserServiceInterface;
 
 use App\Transformers\Website\WebsiteUserTransformer;
+use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
-use Illuminate\Http\Request;
 
 class WebsiteUserController extends RestfulControllerV2 {
     /**
