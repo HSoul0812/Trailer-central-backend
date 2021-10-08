@@ -7,6 +7,7 @@ use App\Models\CRM\Interactions\InteractionMessage;
 use App\Repositories\RepositoryAbstract;
 use App\Traits\Repository\Pagination;
 use ElasticAdapter\Documents\Document;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class InteractionLeadRepository
@@ -115,6 +116,59 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 
     /**
      * @param array $params
+     * @return array
+     */
+    public function searchCountOf(array $params): array
+    {
+        $search = InteractionMessage::boolSearch();
+
+        if (empty($params['group_by'])) {
+            throw new RepositoryInvalidArgumentException('group_by has been missed. Params - ' . json_encode($params));
+        }
+
+        if ($params['dealer_id'] ?? null) {
+            $search->filter('term', ['dealer_id' => $params['dealer_id']]);
+        }
+
+        if ($params['lead_id'] ?? null) {
+            $search->filter('term', ['lead_id' => $params['lead_id']]);
+        }
+
+        if (isset($params['hidden'])) {
+            $search->filter('term', ['hidden' => $params['hidden']]);
+        }
+
+        if (isset($params['dispatched'])) {
+            $search->filter('exists', ['field' => 'date_sent']);
+        }
+
+        if (isset($params['is_read'])) {
+            $search->filter('term', ['is_read' => $params['is_read']]);
+        }
+
+        $search->size(0);
+
+        $groupBy = is_string($params['group_by']) ? $params['group_by'] . '.keyword' : $params['group_by'];
+
+        $search->aggregateRaw([
+            "grouped_by" => [
+                "terms" => ["field" => $groupBy],
+            ],
+        ]);
+
+        $data = [];
+
+        $result = $search->execute()->aggregations()->toArray()['grouped_by']['buckets'];
+
+        foreach ($result as $item) {
+            $data[$item['key']] = $item['doc_count'];
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array $params
      * @return InteractionMessage
      */
     public function create($params): InteractionMessage
@@ -140,6 +194,29 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         $interactionMessage->fill($params)->save();
 
         return $interactionMessage;
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if (empty($params['ids']) || !is_array($params['ids'])) {
+            throw new RepositoryInvalidArgumentException('ids has been missed. Params - ' . json_encode($params));
+        }
+
+        $ids = $params['ids'];
+        unset($params['ids']);
+
+        /** @var InteractionMessage<Collection> $interactionMessages */
+        $interactionMessages = InteractionMessage::query()->whereIn('id', $ids)->get();
+
+        foreach ($interactionMessages as $interactionMessage) {
+            $interactionMessage->update($params);
+        }
+
+        return true;
     }
 
     /**
