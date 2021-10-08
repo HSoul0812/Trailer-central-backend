@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class AddGOLFCARTRESOURCE_Integration extends Migration
+class AddGolfCartResourceIntegration extends Migration
 {
 
     private const GOLFCARTRESOURCE_PARAMS = [
