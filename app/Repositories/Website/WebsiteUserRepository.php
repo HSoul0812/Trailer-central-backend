@@ -2,9 +2,9 @@
 
 namespace App\Repositories\Website;
 
-use App\Models\Website\DealerWebsiteUser;
+use App\Models\Website\User\WebsiteUser;
 use App\Exceptions\NotImplementedException;
-use App\Models\Website\DealerWebsiteUserToken;
+use App\Models\Website\User\WebsiteUserToken;
 
 /**
  * Class WebsiteRepository
@@ -15,15 +15,15 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface {
     private $userModel;
     private $tokenModel;
 
-    public function __construct(DealerWebsiteUser $dealerWebsiteUser, DealerWebsiteUserToken $dealerWebsiteUserToken) {
-        $this->userModel = $dealerWebsiteUser;
-        $this->tokenModel = $dealerWebsiteUserToken;
+    public function __construct(WebsiteUser $websiteUser, WebsiteUserToken $websiteUserToken) {
+        $this->userModel = $websiteUser;
+        $this->tokenModel = $websiteUserToken;
     }
     /**
      * @param $params
-     * @return DealerWebsiteUser
+     * @return WebsiteUser
      */
-    public function create($params): DealerWebsiteUser {
+    public function create($params): WebsiteUser {
         $user = $this->userModel->create($params);
         $user->token()->create([
             'access_token' => $params['token']
@@ -42,10 +42,10 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface {
 
     /**
      * @param array $params
-     * @return DealerWebsiteUser
+     * @return WebsiteUser|null
      * @throws NotImplementedException
      */
-    public function get($params): DealerWebsiteUser
+    public function get($params)
     {
         $query = $this->userModel->select('*');
         if($params['website_id']) {

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDealerWebsiteUserTable extends Migration
+class CreateWebsiteUserTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateDealerWebsiteUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('dealer_website_user', function (Blueprint $table) {
+        Schema::create('website_user', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('first_name', 50);
             $table->string('middle_name', 50)->nullable();
@@ -34,6 +34,6 @@ class CreateDealerWebsiteUserTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dealer_website_user');
+        Schema::dropIfExists('website_user');
     }
 }

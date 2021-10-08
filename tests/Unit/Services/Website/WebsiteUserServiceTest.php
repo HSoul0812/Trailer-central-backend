@@ -1,8 +1,7 @@
 <?php
 namespace Tests\Unit\Services\Website;
 
-use App\Models\Website\DealerWebsiteUser;
-use App\Models\Website\DealerWebsiteUserToken;
+use App\Models\Website\User\WebsiteUser;
 use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
 use App\Services\Website\WebsiteUserServiceInterface;
@@ -29,13 +28,13 @@ class WebsiteUserServiceTest extends TestCase {
             'password' => '12345',
             'website_id' => 123,
         ];
-        $dealerWebsiteUser = new DealerWebsiteUser($params);
+        $websiteUser = new WebsiteUser($params);
         $websiteUserRepository = Mockery::mock(WebsiteUserRepository::class);
         $this->app->instance(WebsiteUserRepositoryInterface::class, $websiteUserRepository);
         $websiteUserRepository
             ->shouldReceive('get')
             ->once()
-            ->andReturn($dealerWebsiteUser);
+            ->andReturn($websiteUser);
         $websiteUserService = $this->app->make(WebsiteUserServiceInterface::class);
         $result = $websiteUserService->loginUser($params);
         $this->assertEquals($result->email, $params['email']);
@@ -48,7 +47,7 @@ class WebsiteUserServiceTest extends TestCase {
             'password' => '12345',
             'website_id' => 123,
         ];
-        $dealerWebsiteUser = new DealerWebsiteUser(
+        $websiteUser = new WebsiteUser(
             array_replace($params, [
                 'password' => '1234'
             ])
@@ -58,7 +57,7 @@ class WebsiteUserServiceTest extends TestCase {
         $websiteUserRepository
             ->shouldReceive('get')
             ->once()
-            ->andReturn($dealerWebsiteUser);
+            ->andReturn($websiteUser);
 
         $this->app->instance(WebsiteUserRepositoryInterface::class, $websiteUserRepository);
 
@@ -79,13 +78,13 @@ class WebsiteUserServiceTest extends TestCase {
             'website_id' => 123,
             'token' => 'token12345'
         ];
-        $dealerWebsiteUser = new DealerWebsiteUser($params);
+        $websiteUser = new WebsiteUser($params);
         $websiteUserRepository = Mockery::mock(WebsiteUserRepository::class);
         $this->app->instance(WebsiteUserRepositoryInterface::class, $websiteUserRepository);
         $websiteUserRepository
             ->shouldReceive('create')
             ->once()
-            ->andReturn($dealerWebsiteUser);
+            ->andReturn($websiteUser);
         $websiteUserService = $this->app->make(WebsiteUserServiceInterface::class);
         $result = $websiteUserService->createUser($params);
         $this->assertEquals($result->email, $params['email']);
