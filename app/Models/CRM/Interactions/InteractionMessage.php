@@ -18,6 +18,7 @@ use Laravel\Scout\Searchable;
  * @property string $tb_name
  * @property string|null $name
  * @property boolean $hidden
+ * @property boolean $is_read
  *
  * @property EmailHistory|TextLog $message
  */
@@ -37,6 +38,7 @@ class InteractionMessage extends Model
         'tb_name',
         'name',
         'hidden',
+        'is_read',
     ];
 
     /**
