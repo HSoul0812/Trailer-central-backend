@@ -17,6 +17,6 @@ $factory->define(WebsiteConfig::class, static function (Faker $faker, array $att
     return [
         'website_id' => $website_id,
         'key' => $attributes['key'] ?? WebsiteConfig::ECOMMERCE_KEY_ENABLE,
-        'value' => $attributes['key'] ?? 1
+        'value' => $attributes['value'] ?? 1
     ];
 });

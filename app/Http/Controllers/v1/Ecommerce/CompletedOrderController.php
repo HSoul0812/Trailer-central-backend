@@ -31,11 +31,9 @@ class CompletedOrderController extends RestfulController
     }
 
 
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
-        $completedOrders = $this->completedOrderRepo->getAll($request->all());
-
-        return $this->response->collection($completedOrders, new CompletedOrderTransformer());
+        return $this->response->paginator($this->completedOrderRepo->getAll($request->all()), new CompletedOrderTransformer());
     }
 
     /**
