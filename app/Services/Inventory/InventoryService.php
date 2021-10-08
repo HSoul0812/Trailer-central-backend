@@ -210,9 +210,9 @@ class InventoryService implements InventoryServiceInterface
                 throw new InventoryException('Inventory item update error');
             }
             
-            if (empty($newImages)) {
-                $inventory->images()->delete();
-            }
+//            if (empty($newImages)) {
+//                $inventory->images()->delete();
+//            }
 
             if ($addBill) {
                 $this->addBill($params, $inventory);

@@ -34,6 +34,14 @@ class AccessToken
             return $next($request);
         }
         
+        if ( strpos($request->url(), 'feed/atw') && $request->header('access-token') )
+        {
+            if ( $request->header('access-token') === config('integrations.atw.credentials.access_token') ) 
+            {
+                return $next($request);
+            }
+        }
+        
         if (strpos($request->url(), 'admin') === false && 
             strpos($request->url(), 'nova-api') === false && 
             strpos($request->url(), 'api/user/login') === false &&
