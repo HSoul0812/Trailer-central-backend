@@ -12,7 +12,7 @@ class ChangeUserTypeFieldInAuthTokenTable extends Migration
      */
     public function up()
     {
-        DB::statement("ALTER TABLE `auth_token` CHANGE `user_type` `user_type` ENUM('dealer','category','integration') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'dealer';");
+        DB::statement("ALTER TABLE `auth_token` CHANGE `user_type` `user_type` ENUM('dealer','dealer_user','integration') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'dealer';");
     }
 
     /**
@@ -22,6 +22,6 @@ class ChangeUserTypeFieldInAuthTokenTable extends Migration
      */
     public function down()
     {
-        DB::statement("ALTER TABLE `auth_token` CHANGE `user_type` `user_type` ENUM('dealer','category') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'dealer';");
+        DB::statement("ALTER TABLE `auth_token` CHANGE `user_type` `user_type` ENUM('dealer','dealer_user') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'dealer';");
     }
 }
