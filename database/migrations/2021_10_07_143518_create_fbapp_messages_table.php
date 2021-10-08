@@ -18,8 +18,8 @@ class CreateFbappMessagesTable extends Migration
             $table->string('message_id', 100)->unique();
             $table->string('conversation_id', 25)->index();
             $table->integer('interaction_id')->index();
-            $table->bigInteger('page_id')->index();
-            $table->bigInteger('user_id')->index();
+            $table->bigInteger('from_id');
+            $table->bigInteger('to_id');
             $table->string('message');
             $table->string('tags');
             $table->tinyInteger('read');
