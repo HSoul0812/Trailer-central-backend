@@ -30,6 +30,8 @@ use App\Repositories\CRM\Leads\TypeRepository;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepository;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\CRM\Leads\FacebookRepository;
+use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepository;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
@@ -64,6 +66,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
         $this->app->bind(UnitRepositoryInterface::class, UnitRepository::class);
+        $this->app->bind(FacebookRepositoryInterface::class, FacebookRepository::class);
         $this->app->bind(IDSLeadRepositoryInterface::class, IDSLeadRepository::class);
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);

@@ -22,6 +22,10 @@ use App\Repositories\CRM\Interactions\EmailHistoryRepository;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepository;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Interactions\Facebook\ConversationRepository;
+use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
+use App\Repositories\CRM\Interactions\Facebook\MessageRepository;
+use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepository as TextBlastRepository;
 use App\Repositories\CRM\Text\BlastRepositoryInterface as TextBlastRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepository as TextCampaignRepository;
@@ -94,8 +98,9 @@ class InteractionServiceProvider extends ServiceProvider
         // Interaction Repositories
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
-
         $this->app->bind(InteractionMessageRepositoryInterface::class, InteractionMessageRepository::class);
+        $this->app->bind(ConversationRepositoryInterface::class, ConversationRepository::class);
+        $this->app->bind(MessageRepositoryInterface::class, MessageRepository::class);
     }
 
     public function boot()
