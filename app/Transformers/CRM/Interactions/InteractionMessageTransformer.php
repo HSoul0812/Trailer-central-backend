@@ -37,6 +37,7 @@ class InteractionMessageTransformer extends TransformerAbstract
             'date_delivered' => $interactionMessage['date_delivered'],
             'date_sent' => $interactionMessage['date_sent'],
             'hidden' => $interactionMessage['hidden'],
+            'is_read' => $interactionMessage['is_read'],
         ];
     }
 }

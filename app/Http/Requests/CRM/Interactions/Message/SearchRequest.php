@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\CRM\Interactions;
+namespace App\Http\Requests\CRM\Interactions\Message;
 
 use App\Http\Requests\Request;
 
@@ -8,7 +8,7 @@ use App\Http\Requests\Request;
  * Class SearchInteractionLead
  * @package App\Http\Requests\CRM\Interactions
  */
-class SearchInteractionMessagesRequest extends Request
+class SearchRequest extends Request
 {
     protected $rules = [
         'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',

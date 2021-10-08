@@ -337,6 +337,8 @@ $api->version('v1', function ($route) {
 
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('leads/interaction-message/search', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@search');
+        $route->get('leads/interaction-message/search/count-of/{field}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@searchCountOf');
+        $route->post('leads/interaction-message/bulk', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@bulkUpdate');
         $route->post('leads/interaction-message/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@update');
     });
 

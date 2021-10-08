@@ -19,6 +19,12 @@ interface InteractionMessageRepositoryInterface extends Repository
     public function search(array $params): array;
 
     /**
+     * @param array $params
+     * @return array
+     */
+    public function searchCountOf(array $params): array;
+
+    /**
      * @return LengthAwarePaginator|null
      */
     public function getPaginator(): ?LengthAwarePaginator;
@@ -28,4 +34,10 @@ interface InteractionMessageRepositoryInterface extends Repository
      * @return InteractionMessage
      */
     public function searchable(array $params): InteractionMessage;
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool;
 }
