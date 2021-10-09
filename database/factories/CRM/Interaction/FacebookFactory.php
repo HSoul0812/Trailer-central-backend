@@ -28,9 +28,9 @@ $factory->define(Conversation::class, function (Faker $faker, array $attributes)
 
 $factory->define(Message::class, function (Faker $faker, array $attributes) {
     // Get Conversation
+    var_dump($attributes);
     if(!empty($attributes['conversation_id'])) {
         $conversation = Conversation::where('conversation_id', $attributes['conversation_id'])->first();
-        var_dump($conversation);
     } else {
         $conversation = factory(Conversation::class)->create();
     }
