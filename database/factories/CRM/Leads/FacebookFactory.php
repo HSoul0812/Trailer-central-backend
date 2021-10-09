@@ -5,6 +5,7 @@
 use App\Models\CRM\Leads\Facebook\User as FbUser;
 use App\Models\CRM\Leads\Facebook\Lead as FbLead;
 use App\Models\Integration\Facebook\Page;
+use App\Models\CRM\Leads\Lead;
 use App\Models\User\User;
 use Faker\Generator as Faker;
 
