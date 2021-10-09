@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\CRM\Interactions;
+namespace App\Models\CRM\Interactions\Facebook;
 
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\Traits\TableAware;

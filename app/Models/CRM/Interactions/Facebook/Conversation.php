@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\CRM\Interactions;
+namespace App\Models\CRM\Interactions\Facebook;
 
 use App\Models\Integration\Facebook\Page;
 use App\Models\Integration\Facebook\User;
