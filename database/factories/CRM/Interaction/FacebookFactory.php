@@ -5,7 +5,6 @@ use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Leads\Facebook\User as FbUser;
 use App\Models\Integration\Facebook\Page;
-use App\Models\User\User;
 use Faker\Generator as Faker;
 
 $factory->define(Conversation::class, function (Faker $faker, array $attributes) {
@@ -17,7 +16,7 @@ $factory->define(Conversation::class, function (Faker $faker, array $attributes)
 
     // Return Overrides
     return [
-        'conversation_id' => 't_' . $faker->uuid,
+        'conversation_id' => substr('t_' . $faker->uuid, 0, 25),
         'page_id' => $page_id,
         'user_id' => $user_id,
         'link' => '/' . $page_id . '/inbox/' . $faker->randomNumber(8, true) . $faker->randomNumber(8, true) . '/',
