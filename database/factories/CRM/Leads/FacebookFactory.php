@@ -11,7 +11,7 @@ use Faker\Generator as Faker;
 $factory->define(FbUser::class, function (Faker $faker, array $attributes) {
     // Return Overrides
     return [
-        'user_id' => $faker->randomNumber(20, true),
+        'user_id' => $faker->randomNumber(9, true) . $faker->randomNumber(9, true),
         'name' => $attributes['name'] ?? $faker->name(),
         'email' => $attributes['email'] ?? $faker->safeEmail
     ];

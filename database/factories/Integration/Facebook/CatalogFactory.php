@@ -35,11 +35,11 @@ $factory->define(Catalog::class, function (Faker $faker, array $attributes) {
         'dealer_id' => $dealer_id,
         'dealer_location_id' => $dealer_location_id,
         'fbapp_page_id' => $page_id,
-        'business_id' => $faker->randomNumber(20, true),
-        'catalog_id' => $faker->randomNumber(20, true),
+        'business_id' => $faker->randomNumber(9, true) . $faker->randomNumber(9, true),
+        'catalog_id' => $faker->randomNumber(9, true) . $faker->randomNumber(9, true),
         'catalog_name' => $company . "'s Catalog",
         'catalog_type' => $faker->randomElement(['vehicles', 'commerce']),
-        'account_id' => $faker->randomNumber(20, true),
+        'account_id' => $faker->randomNumber(9, true) . $faker->randomNumber(9, true),
         'account_name' => $faker->name()
     ];
 });
@@ -54,7 +54,7 @@ $factory->define(Page::class, function (Faker $faker, array $attributes) {
     // Return Overrides
     return [
         'dealer_id' => $dealer_id,
-        'page_id' => $faker->randomNumber(20, true),
+        'page_id' => $faker->randomNumber(9, true) . $faker->randomNumber(9, true),
         'title' => $faker->company
     ];
 });

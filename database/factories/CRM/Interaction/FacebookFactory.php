@@ -27,10 +27,10 @@ $factory->define(Conversation::class, function (Faker $faker, array $attributes)
 
     // Return Overrides
     return [
-        'conversation_id' => 't_' . $faker->randomNumber(20, true),
+        'conversation_id' => 't_' . $faker->uuid,
         'page_id' => $page_id,
         'user_id' => $user_id,
-        'link' => '/' . $page_id . '/inbox/' . $faker->randomNumber(16, true) . '/',
+        'link' => '/' . $page_id . '/inbox/' . $faker->randomNumber(8, true) . $faker->randomNumber(8, true) . '/',
         'snippet' => $faker->sentence,
         'newest_update' => $faker->dateTimeThisMonth->format('Y-m-d H:i:s')
     ];
@@ -47,7 +47,7 @@ $factory->define(Message::class, function (Faker $faker, array $attributes) {
 
     // Return Overrides
     return [
-        'message_id' => 'm_' . $faker->randomNumber(90, true),
+        'message_id' => 'm_' . $faker->uuid . $faker->uuid,
         'conversation_id' => $conversation_id,
         'interaction_id' => 0,
         'from_id' => $attributes['from_id'] ?? $user_id,

@@ -37,7 +37,7 @@ $factory->define(Catalog::class, function (Faker $faker, array $attributes) {
     return [
         'user_id' => $user_id,
         'sales_person_id' => $sales_person_id,
-        'account_id' => $faker->randomNumber(20, true),
+        'account_id' => $faker->randomNumber(9, true) . $faker->randomNumber(9, true),
         'account_name' => $faker->name(),
         'page_id' => $page_id
     ];
