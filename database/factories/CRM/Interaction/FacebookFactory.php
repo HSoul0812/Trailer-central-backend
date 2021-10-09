@@ -29,11 +29,11 @@ $factory->define(Conversation::class, function (Faker $faker, array $attributes)
 $factory->define(Message::class, function (Faker $faker, array $attributes) {
     // Get Conversation
     if(!empty($attributes['conversation_id'])) {
-        $conversation = Conversation::where('conversation_id', $attributes['conversation_id']);
+        $conversation = Conversation::where('conversation_id', $attributes['conversation_id'])->first();
     } else {
         $conversation = factory(Conversation::class)->create();
     }
-    $conversation_id = $conversation->getKey();
+    $conversation_id = $conversation->conversation_id;
 
     // Get Page/User
     $page_id = $conversation->page_id;
