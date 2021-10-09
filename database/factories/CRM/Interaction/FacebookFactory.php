@@ -30,9 +30,7 @@ $factory->define(Message::class, function (Faker $faker, array $attributes) {
     // Get Conversation
     if(!empty($attributes['conversation_id'])) {
         $conversation = Conversation::where('conversation_id', $attributes['conversation_id'])->first();
-        if(empty($conversation->conversation_id)) {
-            $conversation = factory(Conversation::class)->create(['conversation_id' => $attributes['conversation_id']]);
-        }
+        var_dump($conversation);
     } else {
         $conversation = factory(Conversation::class)->create();
     }
