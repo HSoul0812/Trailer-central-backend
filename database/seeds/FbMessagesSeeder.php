@@ -28,7 +28,6 @@ class FbMessagesSeeder extends Seeder
 
         // Create FB Lead
         $fbLead = factory(FbLead::class)->create([
-            'dealer_id' => self::DEALER_ID,
             'page_id' => $page->page_id
         ]);
 

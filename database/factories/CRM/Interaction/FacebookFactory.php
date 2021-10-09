@@ -9,18 +9,8 @@ use App\Models\User\User;
 use Faker\Generator as Faker;
 
 $factory->define(Conversation::class, function (Faker $faker, array $attributes) {
-    // Get Page Id
-    if(!empty($attributes['page_id'])) {
-        $page_id = $attributes['page_id'];
-    } else {
-        // Get Dealer ID
-        $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
-
-        // Get Page
-        $page_id = factory(Page::class)->create([
-            'dealer_id' => $dealer_id
-        ])->page_id;
-    }
+    // Get Page
+    $page_id = $attributes['page_id'] ?? factory(Page::class)->create()->page_id;
 
     // Get User
     $user_id = $attributes['user_id'] ?? factory(FbUser::class)->create()->getKey();
