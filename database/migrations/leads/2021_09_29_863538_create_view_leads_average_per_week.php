@@ -21,31 +21,16 @@ class CreateViewLeadsAveragePerWeek extends Migration
                              '1 WEEK'
                          ) as series(date)
             ), -- list of weeks from the first record
-            counters AS (
-                SELECT s.week,
-                       l.manufacturer,
-                       COUNT(l.id) filter (where to_char(l.submitted_at, 'IYYY-IW') = s.week) AS aggregate,
-                       EXISTS(
-                               (
-                                   SELECT il.manufacturer
-                                   FROM lead_logs il
-                                   WHERE l.manufacturer = il.manufacturer
-                                     AND s.week = to_char(il.submitted_at, 'IYYY-IW')
-                               )
-                            )
-                FROM weeks as s, lead_logs l
-                GROUP BY s.week, l.manufacturer
-                ORDER BY s.week, l.manufacturer
-            ) -- counters per week and manufacturer
+            manufacturers as (SELECT l.manufacturer FROM lead_logs l GROUP BY l.manufacturer)
 
-            SELECT c.week,
-                   c.manufacturer,
-                   CASE
-                       WHEN c.exists THEN c.aggregate
-                       ELSE LAG(aggregate) OVER (PARTITION BY c.manufacturer ORDER BY c.week, c.manufacturer)
-                   END AS aggregate -- in case there isn't any record for the manufacturer on the week, it will use a carrier
-            FROM counters c
-            ORDER BY c.week, c.manufacturer;
+            SELECT s.week ,
+               m.manufacturer,
+               COUNT(l.id) AS aggregate
+            FROM weeks as s
+            CROSS JOIN manufacturers m
+            LEFT JOIN lead_logs l ON l.manufacturer = m.manufacturer AND to_char(l.submitted_at, 'IYYY-IW') = s.week
+            GROUP BY s.week, m.manufacturer
+            ORDER BY s.week, m.manufacturer;
 SQL
         );
     }
