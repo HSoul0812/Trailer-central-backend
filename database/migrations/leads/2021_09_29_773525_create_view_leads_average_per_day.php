@@ -17,36 +17,21 @@ class CreateViewLeadsAveragePerDay extends Migration
             WITH days as (
                 SELECT day::date
                 FROM generate_series(
-                             (SELECT submitted_at FROM lead_logs LIMIT 1),
+                             (SELECT submitted_at FROM lead_logs ORDER BY submitted_at LIMIT 1),
                              NOW(),
                              '1 day'
                          ) as series(day)
             ), -- list of days since the very first record
-            averages AS (
-                SELECT s.day,
-                       l.manufacturer,
-                       COUNT(l.id) filter (where l.submitted_at::date = s.day) AS aggregate,
-                       EXISTS(
-                               (
-                                   SELECT il.manufacturer
-                                   FROM lead_logs il
-                                   WHERE l.manufacturer = il.manufacturer
-                                     AND s.day = il.submitted_at::date
-                               )
-                           )
-                FROM days as s, lead_logs l
-                GROUP BY s.day, l.manufacturer
-                ORDER BY s.day, l.manufacturer
-            ) -- averages per day and manufacturer
+            manufacturers as (SELECT l.manufacturer FROM lead_logs l GROUP BY l.manufacturer)
 
-            SELECT a.day,
-                   a.manufacturer,
-                   CASE
-                       WHEN a.exists THEN a.aggregate
-                       ELSE LAG(aggregate) OVER (PARTITION BY a.manufacturer ORDER BY a.day, a.manufacturer)
-                       END AS aggregate -- in case there isn't any record for the manufacturer on the day, it will use a carrier
-            FROM averages a
-            ORDER BY a.day, a.manufacturer;
+            SELECT s.day ,
+                   m.manufacturer,
+                   COUNT(l.id) AS aggregate
+            FROM days as s
+            CROSS JOIN manufacturers m
+            LEFT JOIN lead_logs l ON l.manufacturer = m.manufacturer AND l.created_at::date = s.day
+            GROUP BY s.day, m.manufacturer
+            ORDER BY s.day, m.manufacturer;
 SQL
         );
     }

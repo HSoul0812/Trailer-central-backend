@@ -26,8 +26,7 @@ class LogService extends AbstractLogService implements LogServiceInterface
     public function mapToInsertString(stdClass $record, bool $isNotTheFirstImport): string
     {
         return sprintf(
-            '(%d, %d, %s, %s, %s, %s, %s, %s, %s, %s),',
-            $record->identifier,
+            '(%d, %s, %s, %s, %s, %s, %s, %s, %s),',
             $record->inventory_id,
             $record->first_name ? $this->quote($record->first_name) : 'NULL',
             $record->last_name ? $this->quote($record->last_name) : 'NULL',
@@ -45,7 +44,6 @@ class LogService extends AbstractLogService implements LogServiceInterface
         return sprintf(
             'INSERT INTO %s (
                         trailercentral_id,
-                        inventory_id,
                         first_name,
                         last_name,
                         email_address,

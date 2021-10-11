@@ -19,13 +19,13 @@ use TrailerTrader\Insights\AreaChart;
  */
 class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 {
+    protected string $seeder = AveragePriceSeeder::class;
+
     /**
      * Test that SUT is returning a payload with a well known insights by week and by day.
      */
     public function testHasAnExpectedResponse(): void
     {
-        $this->seed(AveragePriceSeeder::class);
-
         $dashboard = app(PriceAverageByManufacturerInsights::class);
 
         $this->testByWeeks($dashboard);
@@ -53,7 +53,7 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 
         self::assertGreaterThanOrEqual(39, $series->count());
         self::assertEquals(779.1666666666666667, $series->first());
-        self::assertEquals(697.9166666666666667, $series->last());
+        self::assertEquals(729.1666666666666667, $series->last());
 
         // option categories assertions
         self::assertArrayHasKey('options', $meta);
@@ -86,7 +86,7 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 
         self::assertGreaterThanOrEqual(278, $series->count());
         self::assertEquals(779.1666666666666667, $series->first());
-        self::assertEquals(500, $series->last());
+        self::assertEquals(729.1666666666666667, $series->last());
 
         // option categories assertions
         self::assertArrayHasKey('options', $meta);

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int                      $id
- * @property int                      $trailercentral_id
+ * @property int                      $trailercentral_id the inventory id in the TrailerCentral DB
  * @property string                   $first_name
  * @property string                   $last_name
  * @property string                   $email_address

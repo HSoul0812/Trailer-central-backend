@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Nova\Http\Requests;
 
 use App\Http\Requests\Request;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rule;
 
 abstract class AbstractAverageRequest extends Request implements InsightRequestInterface
@@ -16,12 +17,12 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
 
     public function getFrom(): ?string
     {
-        return $this->input('from');
+        return $this->input('from', Date::now()->startOf('year')->format('Y-m-d'));
     }
 
     public function getTo(): ?string
     {
-        return $this->input('to');
+        return $this->input('to', Date::now()->format('Y-m-d'));
     }
 
     public function getSubset(): ?string
@@ -44,7 +45,7 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
         $toDate = $this->getTo();
 
         return $toDate ?
-            sprintf('required|date_format:Y-m-d|before_or_equal:%s', $toDate) :
+            sprintf('date_format:Y-m-d|before_or_equal:%s', $toDate) :
             'nullable|date_format:Y-m-d';
     }
 
