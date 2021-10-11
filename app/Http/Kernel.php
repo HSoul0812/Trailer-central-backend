@@ -7,7 +7,6 @@ use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
-use App\Http\Middleware\User\UserValidate;
 use App\Http\Middleware\Website\WebsiteValidate;
 use App\Http\Middleware\Website\FieldMapValidate;
 use App\Http\Middleware\SetDealerIdOnRequest;
@@ -25,7 +24,6 @@ use App\Http\Middleware\CRM\Text\BlastValidate as TextBlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate as TextCampaignValidate;
 use App\Http\Middleware\CRM\User\SalesPersonValidate;
 use App\Http\Middleware\Dms\Printer\FormValidate as PrinterFormValidate;
-use App\Http\Middleware\Dms\Printer\InstructionValidate as PrinterInstructionValidate;
 use App\Http\Middleware\Integration\AuthValidate;
 use App\Http\Middleware\Integration\Facebook\CatalogValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
@@ -90,7 +88,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'cors' => CorsMiddleware::class,
-        'user.validate' => UserValidate::class,
         'website.validate' => WebsiteValidate::class,
         'forms.field-map.validate' => FieldMapValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
@@ -112,7 +109,6 @@ class Kernel extends HttpKernel
         'sales-person.validate' => SalesPersonValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
         'printer.form.validate' => PrinterFormValidate::class,
-        'printer.instruction.validate' => PrinterInstructionValidate::class,
         'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
     ];
 
