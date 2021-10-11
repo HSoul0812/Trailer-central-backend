@@ -42,9 +42,8 @@ class WebsiteUserSeeder extends Seeder {
             'website_id' => $this->website->id,
             'password' => $this->password,
         ]);
-        $this->websiteUser->each(function ($user) {
-            $user->token()->save(factory(WebsiteUserToken::class)->make());
-        });
+
+        $this->websiteUser->token()->save(factory(WebsiteUserToken::class)->make());
     }
     public function cleanUp(): void
     {
