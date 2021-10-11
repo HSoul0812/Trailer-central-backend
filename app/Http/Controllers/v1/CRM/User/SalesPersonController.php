@@ -77,7 +77,7 @@ class SalesPersonController extends RestfulController {
     {
         $request = new GetSalesPeopleRequest($request->all());
         if ($request->validate()) {
-            return $this->response->paginator($this->salesPerson->getAll($request->all()), new SalesPersonTransformer);
+            return $this->response->paginator($this->salesPerson->getAll($request->all()), $this->salesPersonTransformer);
         }
 
         $this->fractal->parseIncludes($request->query('with', ''));
