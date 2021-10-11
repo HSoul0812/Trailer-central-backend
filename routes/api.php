@@ -390,7 +390,9 @@ $api->version('v1', function ($route) {
     |
     |
     */
-
+    
+    $route->post('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@create');
+    
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
 

@@ -33,6 +33,8 @@ class WebsiteUserControllerTest extends TestCase {
 
     public function tearDown(): void
     {
+        $this->websiteSeeder->cleanUp();
+        $this->websiteUserSeeder->cleanUp();
         parent::tearDown();
     }
 
@@ -127,7 +129,6 @@ class WebsiteUserControllerTest extends TestCase {
         ];
         $websiteId = $this->websiteUserSeeder->website->id;
         $response = $this->json('POST', "/api/website/$websiteId/user/login", $data);
-        var_dump($response);
         $response->assertStatus(JsonResponse::HTTP_UNAUTHORIZED);
     }
 }

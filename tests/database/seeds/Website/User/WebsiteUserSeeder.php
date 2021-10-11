@@ -48,8 +48,10 @@ class WebsiteUserSeeder extends Seeder {
     }
     public function cleanUp(): void
     {
-        User::destroy($this->dealer->getKey());
-        Website::destroy($this->website->getKey());
-        WebsiteUser::destroy($this->websiteUser->getKey());
+        if(isset($this->dealer)) {
+            User::destroy($this->dealer->getKey());
+            Website::destroy($this->website->getKey());
+            WebsiteUser::destroy($this->websiteUser->getKey());
+        }
     }
 }
