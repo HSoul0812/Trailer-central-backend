@@ -26,10 +26,8 @@ class AverageSeeder extends Seeder
     {
         $factory = LeadLog::factory();
         $allManufactures = $this->fromJson('leads/manufactures-brands.json');
-        $randomManufactures = $allManufactures->filter(fn (array $data
-        ): bool => $data['name'] !== 'Starcraft')->random(3);
-        $specificManufacturer = $allManufactures->filter(fn (array $data
-        ): bool => $data['name'] === 'Starcraft')->first();
+        $randomManufactures = $allManufactures->filter(fn (array $data): bool => $data['name'] !== 'Starcraft')->random(3);
+        $specificManufacturer = $allManufactures->filter(fn (array $data): bool => $data['name'] === 'Starcraft')->first();
 
         $numberOfLeadsPerBrand = [
             [1, 2],

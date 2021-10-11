@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Nova\Http\Requests;
 
 use App\Http\Requests\Request;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rule;
 
 abstract class AbstractAverageRequest extends Request implements InsightRequestInterface
@@ -17,12 +16,12 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
 
     public function getFrom(): ?string
     {
-        return $this->input('from', Date::now()->startOf('year')->format('Y-m-d'));
+        return $this->input('from');
     }
 
     public function getTo(): ?string
     {
-        return $this->input('to', Date::now()->format('Y-m-d'));
+        return $this->input('to');
     }
 
     public function getSubset(): ?string
@@ -35,17 +34,26 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
     {
         return [
             'period' => Rule::in([self::PERIOD_PER_DAY, self::PERIOD_PER_WEEK]), // by the moment
-            'from'   => 'nullable|date_format:Y-m-d',
+            'from'   => $this->validFromDate(),
             'to'     => $this->validToDate(),
         ];
     }
 
+    private function validFromDate(): string
+    {
+        $toDate = $this->getTo();
+
+        return $toDate ?
+            sprintf('required|date_format:Y-m-d|before_or_equal:%s', $toDate) :
+            'nullable|date_format:Y-m-d';
+    }
+
     private function validToDate(): string
     {
-        $formDate = $this->getFrom();
+        $fromDate = $this->getFrom();
 
-        return $formDate ?
-            sprintf('required_with:from|date_format:Y-m-d|after_or_equal:%s', $formDate) :
-            'required_with:from|date_format:Y-m-d';
+        return $fromDate ?
+            sprintf('date_format:Y-m-d|after_or_equal:%s', $fromDate) :
+            'nullable|date_format:Y-m-d';
     }
 }

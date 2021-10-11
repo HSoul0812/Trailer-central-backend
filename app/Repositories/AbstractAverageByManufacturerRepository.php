@@ -73,8 +73,7 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
             ]);
         }
 
-        $query->groupBy('week')
-            ->orderBy('week');
+        $query->groupBy('week')->orderBy('week');
 
         return $query->cursor();
     }

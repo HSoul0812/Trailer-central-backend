@@ -35,4 +35,21 @@ class CriteriaBuilder extends Collection
 
         return $this;
     }
+
+    /**
+     * Get an item from the collection by key.
+     *
+     * @param mixed $key
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        if (array_key_exists($key, $this->items)) {
+            return !blank($this->items[$key]) ? $this->items[$key] : value($default);
+        }
+
+        return value($default);
+    }
 }
