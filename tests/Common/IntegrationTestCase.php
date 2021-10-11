@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Common;
 
 use Generator;
+use Illuminate\Contracts\Console\Kernel;
 
 abstract class IntegrationTestCase extends TestCase
 {
@@ -30,5 +31,14 @@ abstract class IntegrationTestCase extends TestCase
         };
 
         return iterator_to_array($iterator($values), true);
+    }
+
+    protected function refreshTestDatabase(): void
+    {
+        $this->artisan('migrate:fresh', $this->migrateFreshUsing());
+
+        $this->app[Kernel::class]->setArtisan(null);
+
+        $this->beginDatabaseTransaction();
     }
 }
