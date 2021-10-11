@@ -1,10 +1,16 @@
 <?php
+namespace App\Repositories\Website;
+
 use App\Exceptions\NotImplementedException;
+use App\Models\Website\User\WebsiteUserFavoriteInventory;
 
 class WebsiteUserFavoriteInventoryRepository implements WebsiteUserFavoriteInventoryRepositoryInterface {
 
     public function create($params)
     {
+
+        WebsiteUserFavoriteInventory::create();
+
         throw new NotImplementedException();
     }
 
