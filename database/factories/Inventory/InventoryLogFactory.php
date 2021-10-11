@@ -42,8 +42,12 @@ class InventoryLogFactory extends Factory
 
         $manufacturer = $this->getManufacturers()->random();
 
+        $inventory_id = Str::of(microtime(true) . $this->faker->randomDigitNotZero())
+            ->replace('.', '')
+            ->substr(-7);
+
         return [
-            'trailercentral_id' => $this->faker->randomDigitNotZero(),
+            'trailercentral_id' => $inventory_id,
             'event'             => $this->faker->randomElement($events),
             'status'            => $this->faker->randomElement($statuses),
             'vin'               => Str::upper(Str::random('21')),

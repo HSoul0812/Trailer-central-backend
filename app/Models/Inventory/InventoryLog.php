@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int                      $id
- * @property int                      $trailercentral_id
+ * @property int                      $trailercentral_id the inventory id in the TrailerCentral DB
  * @property string                   $event             ['created'|'updated'|'price-changed']
  * @property string                   $status            ['available'|'sold']
  * @property string                   $vin
