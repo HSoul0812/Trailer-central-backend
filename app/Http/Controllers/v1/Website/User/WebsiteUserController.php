@@ -12,6 +12,7 @@ use App\Services\Website\WebsiteUserServiceInterface;
 use App\Transformers\Website\WebsiteUserTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use Illuminate\Database\QueryException;
 
 class WebsiteUserController extends RestfulControllerV2 {
     /**
@@ -39,9 +40,12 @@ class WebsiteUserController extends RestfulControllerV2 {
         if(!$request->validate()) {
             $this->response->errorBadRequest();
         }
-
-        $user = $this->websiteUserService->createUser($requestData);
-        return $this->response->item($user, $this->userTransformer);
+        try {
+            $user = $this->websiteUserService->createUser($requestData);
+            return $this->response->item($user, $this->userTransformer);
+        } catch(QueryException $exception)  {
+            $this->response->errorInternal();
+        }
     }
 
     /**
