@@ -4,9 +4,11 @@ use Illuminate\Database\Seeder;
 
 use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Models\CRM\Interactions\Facebook\Message;
-use App\Models\Integration\Facebook\Page;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\Facebook\User as FbUser;
 use App\Models\CRM\Leads\Facebook\Lead as FbLead;
+use App\Models\Integration\Facebook\Page;
 
 class FbMessagesSeeder extends Seeder
 {
