@@ -13,7 +13,7 @@ class AddNonLeadFacebookToWebsiteLeadType extends Migration
     public function up()
     {
         // Update Website Lead > Lead Type to Support NonLead / Facebook
-        DB::statement("ALTER TABLE website_lead MODIFY COLUMN lead_type ENUM('" . implode("', '", array_keys(LeadType::TYPE_ARRAY_FULL)) . "')");
+        DB::statement("ALTER TABLE website_lead MODIFY COLUMN lead_type ENUM('" . implode("', '", LeadType::TYPE_ARRAY_FULL) . "')");
     }
 
     /**
