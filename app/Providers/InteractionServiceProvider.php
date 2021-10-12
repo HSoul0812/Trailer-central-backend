@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\Observers\CRM\Interactions\EmailHistoryObserver;
+use App\Models\Observers\CRM\Interactions\FbMessageObserver;
 use App\Models\Observers\CRM\Interactions\TextLogObserver;
 use App\Repositories\CRM\Interactions\InteractionMessageRepository;
 use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
@@ -108,10 +110,12 @@ class InteractionServiceProvider extends ServiceProvider
         Relation::morphMap([
             'dealer_texts_log' => TextLog::class,
             'crm_email_history' => EmailHistory::class,
+            'fbapp_messages' => Message::class,
         ]);
 
         TextLog::observe(TextLogObserver::class);
         EmailHistory::observe(EmailHistoryObserver::class);
+        Message::observe(FbMessageObserver::class);
 
         \Validator::extend('interaction_message_valid', 'App\Rules\CRM\Interactions\ValidInteractionMessage@passes');
     }

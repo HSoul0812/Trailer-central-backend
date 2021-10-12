@@ -2,11 +2,12 @@
 
 namespace App\Models\CRM\Leads\Facebook;
 
-use Beta\Microsoft\Graph\Model\Conversation;
+use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\Facebook\Lead as UserLead;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
@@ -53,7 +54,7 @@ class User extends Model
 
     /**
      * Get leads related to the user
-     * 
+     *
      * @return HasManyThrough
      */
     public function leads(): HasManyThrough
@@ -63,7 +64,7 @@ class User extends Model
 
     /**
      * Get the conversations for the user.
-     * 
+     *
      * @return HasMany
      */
     public function conversations(): HasMany

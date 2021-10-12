@@ -2,10 +2,12 @@
 
 namespace App\Models\CRM\Interactions\Facebook;
 
+use App\Models\CRM\Leads\Facebook\User;
 use App\Models\Integration\Facebook\Page;
-use App\Models\Integration\Facebook\User;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Conversation extends Model
 {
@@ -43,7 +45,7 @@ class Conversation extends Model
 
     /**
      * Get the email history for the interaction.
-     * 
+     *
      * @return HasMany
      */
     public function messages(): HasMany
@@ -53,7 +55,7 @@ class Conversation extends Model
 
     /**
      * Get Page
-     * 
+     *
      * @return BelongsTo
      */
     public function page()
@@ -63,7 +65,7 @@ class Conversation extends Model
 
     /**
      * Get facebook user
-     * 
+     *
      * @return BelongsTo
      */
     public function fbUser(): BelongsTo

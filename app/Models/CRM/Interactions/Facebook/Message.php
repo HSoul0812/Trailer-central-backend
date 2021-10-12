@@ -3,8 +3,10 @@
 namespace App\Models\CRM\Interactions\Facebook;
 
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Interactions\InteractionMessage;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -46,7 +48,7 @@ class Message extends Model
 
     /**
      * Get the interaction that owns the message.
-     * 
+     *
      * @return BelongsTo
      */
     public function interaction(): BelongsTo
@@ -56,11 +58,19 @@ class Message extends Model
 
     /**
      * Get the conversation the message belongs to
-     * 
+     *
      * @return BelongsTo
      */
     public function conversation(): BelongsTo
     {
-        return $this->hasMany(Conversation::class, 'conversation_id', 'conversation_id');
+        return $this->belongsTo(Conversation::class, 'conversation_id', 'conversation_id');
+    }
+
+    /**
+     * @return MorphOne
+     */
+    public function interactionMessage(): MorphOne
+    {
+        return $this->morphOne(InteractionMessage::class, 'interactionMessage', 'tb_name', 'tb_primary_id');
     }
 }
