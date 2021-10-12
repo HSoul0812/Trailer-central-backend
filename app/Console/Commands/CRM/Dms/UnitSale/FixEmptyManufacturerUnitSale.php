@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands\CRM\Dms;
+namespace App\Console\Commands\CRM\Dms\UnitSale;
 
 use App\Models\CRM\Dms\UnitSale;
 use Illuminate\Console\Command;
@@ -17,12 +17,12 @@ class FixEmptyManufacturerUnitSale extends Command
     }
 
     public function handle()
-    { 
+    {
         $unitSales = UnitSale::where('inventory_manufacturer', '')
                                 ->where('inventory_id', '!=', 0)
                                 ->get();
 
-        foreach($unitSales as $unitSale) {            
+        foreach($unitSales as $unitSale) {
             if (empty($unitSale->inventory)) {
                 continue;
             }
@@ -30,7 +30,7 @@ class FixEmptyManufacturerUnitSale extends Command
             $unitSale->inventory_manufacturer = $unitSale->inventory->manufacturer;
             $unitSale->save();
         }
-        
-        
+
+
     }
 }

@@ -33,23 +33,24 @@ class AccessToken
         if ($request->isMethod('get')) {
             return $next($request);
         }
-        
+
         if ( strpos($request->url(), 'feed/atw') && $request->header('access-token') )
         {
-            if ( $request->header('access-token') === config('integrations.atw.credentials.access_token') ) 
+            if ( $request->header('access-token') === config('integrations.atw.credentials.access_token') )
             {
                 return $next($request);
             }
         }
-        
-        if (strpos($request->url(), 'admin') === false && 
-            strpos($request->url(), 'nova-api') === false && 
+
+        if (strpos($request->url(), 'admin') === false &&
+            strpos($request->url(), 'nova-api') === false &&
             strpos($request->url(), 'api/user/login') === false &&
             strpos($request->url(), 'api/user/password-reset/start') === false &&
+            preg_match('/api\/website\/[0-9]*\/user/', $request->url()) === false &&
             strpos($request->url(), 'user/password-reset/finish') === false) {
             return response('Invalid access token.', 403);
         }
-        
+
         return $next($request);
     }
 }
