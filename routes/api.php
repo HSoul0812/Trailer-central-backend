@@ -34,6 +34,7 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@index');
         $route->get('ecommerce/orders/{id}', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@show')->where('id', '[0-9]+');
+        $route->post('ecommerce/shipping-costs', 'App\Http\Controllers\v1\Ecommerce\ShippingController@calculateCosts');
     });
 
     $route->group(['middleware' => 'stripe.webhook.validate'], function ($route) {

@@ -103,6 +103,12 @@ use App\Services\Dms\Pos\RegisterService;
 use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderService;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
+use App\Services\Ecommerce\DataProvider\DataProviderInterface;
+use App\Services\Ecommerce\DataProvider\DataProviderManager;
+use App\Services\Ecommerce\DataProvider\DataProviderManagerInterface;
+use App\Services\Ecommerce\DataProvider\Providers\TextrailMagento;
+use App\Services\Ecommerce\Shipping\ShippingService;
+use App\Services\Ecommerce\Shipping\ShippingServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
@@ -333,6 +339,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CompletedOrderServiceInterface::class, CompletedOrderService::class);
         $this->app->bind(CompletedOrderRepositoryInterface::class, CompletedOrderRepository::class);
+
+
+        $this->app->bind(ShippingServiceInterface::class, ShippingService::class);
+        $this->app->bind(DataProviderManagerInterface::class, DataProviderManager::class);
+        $this->app->bind(DataProviderInterface::class, TextrailMagento::class);
 
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)
