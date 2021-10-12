@@ -43,8 +43,17 @@ class UserService
     public function getUserCrmLoginUrl(int $dealerId, ?DealerUser $secondaryUser = null)
     {
         if ($secondaryUser) {
-            $credentials['email'] = $secondaryUser->newDealerUser->newUser->email;
-            $credentials['password'] = $secondaryUser->newDealerUser->newUser->password;
+            
+            if (empty($secondaryUser->newDealerUser)) {
+                $secondaryUserEmail = $secondaryUser->email;
+                $secondaryUserPassword = $secondaryUser->password;
+            } else {
+                $secondaryUserEmail = $secondaryUser->newDealerUser->newUser->email;
+                $secondaryUserPassword = $secondaryUser->newDealerUser->newUser->password;
+            }
+            
+            $credentials['email'] = $secondaryUserEmail;
+            $credentials['password'] = $secondaryUserPassword;
             $credentials['is_sales_person'] = true;
             $credentials['sales_person_email'] = $secondaryUser->email;
             $credentials['secondary_id'] = $secondaryUser->getAuthIdentifier();

@@ -318,6 +318,14 @@ $api->version('v1', function ($route) {
     });
 
 
+    /**
+     * Website users
+     */
+    $route->group(['prefix' => 'website/{websiteId}/user'], function($route) {
+        $route->post('signup', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@create');
+        $route->post('login', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@login');
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
@@ -382,7 +390,9 @@ $api->version('v1', function ($route) {
     |
     |
     */
-
+    
+    $route->post('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@create');
+    
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
 
