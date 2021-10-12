@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Console\Commands\CRM\Dms;
+namespace App\Console\Commands\CRM\Dms\UnitSale;
 
 use App\Models\User\User;
 use App\Repositories\Dms\QuoteRepositoryInterface;
@@ -25,16 +25,16 @@ class GetCompletedSaleWithNoFullInvoice extends Command
     }
 
     public function handle()
-    { 
+    {
         $dealers = User::where('is_dms_active', 1)->where('dealer_id', '!=', 1001)->get();
         foreach($dealers as $dealer) {
-            $deals = $this->quoteRepository->getCompletedDeals($dealer->dealer_id);     
+            $deals = $this->quoteRepository->getCompletedDeals($dealer->dealer_id);
             foreach($deals as $deal) {
                 $invoices = $deal->invoice()->where('doc_num', 'LIKE', '%DP-%')->get();
                 if ( $invoices->count() === $deal->invoice->count() ) {
                     $this->info('"'.$deal->title.'",'.$dealer->dealer_id.','.'"'.$deal->created_at.'"');
-                }            
+                }
             }
-        }        
+        }
     }
 }
