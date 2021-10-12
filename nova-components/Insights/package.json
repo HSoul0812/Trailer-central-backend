@@ -20,6 +20,7 @@
         "sweetalert2": "^9.17.1",
         "vue": "^2.5.0",
         "vue-chartjs": "^3.5.0",
+        "vue-search-select": "^2.9.5",
         "vue2-daterange-picker": "^0.6.6"
     }
 }

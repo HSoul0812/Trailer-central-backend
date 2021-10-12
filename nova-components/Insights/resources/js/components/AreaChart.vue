@@ -19,13 +19,13 @@
                         {{ filter.text }}
                     </option>
                 </select>
-                <select @change="refresh()" v-model="filters.subset.selected" v-show="filters.subset.show"
-                        class="select-box-sm ml-auto min-w-24 h-6 text-xs appearance-none bg-40 pl-2 pr-6
-                               active:outline-none active:shadow-outline focus:outline-none focus:shadow-outline">
-                    <option v-for="filter in filters.subset.list" v-bind:value="filter.value" :key="filter.key">
-                        {{ filter.text }}
-                    </option>
-                </select>
+                <div class="float-right manufacturer-list">
+                    <model-select :options="filters.subset.list"
+                                  v-model="filters.subset.selected"
+                                  @input="refresh"
+                                  v-show="filters.subset.show">
+                    </model-select>
+                </div>
             </div>
         </div>
         <h4 class="chart-js-dashboard-title">{{ chartTitle }}</h4>
@@ -33,20 +33,53 @@
     </card>
 </template>
 
+<style>
+.manufacturer-list {
+    margin-left: 3px;
+}
+
+.manufacturer-list .ui.dropdown,
+.manufacturer-list .ui.dropdown .menu > .item,
+.manufacturer-list .ui.search.dropdown > .text,
+.manufacturer-list .ui.search.selection.dropdown > input.search {
+    font-size: 12px;
+}
+
+.manufacturer-list {
+    min-width: 14rem;
+}
+
+.manufacturer-list .ui.search.selection.dropdown > input.search,
+.manufacturer-list .ui.selection.dropdown {
+    padding: 0 0.5em 0 1.5em;
+    height: 1.5rem;
+}
+
+.manufacturer-list .ui.search.dropdown > .text {
+    top: 5px
+}
+
+.manufacturer-list .ui.fluid.dropdown > .dropdown.icon {
+    padding: 0.5em;
+}
+</style>
 <script>
 
+import { ModelSelect } from 'vue-search-select'
 import LineChart from '../area-chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import DateRangePicker from 'vue2-daterange-picker'
 import moment from 'moment/dist/moment'
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
+import 'vue-search-select/dist/VueSearchSelect.css'
 
 Chart.plugins.unregister(ChartDataLabels);
 
 export default {
     components: {
         LineChart,
-        DateRangePicker
+        DateRangePicker,
+        ModelSelect
     },
     data() {
         const filterPeriodDefault = 'per_week';
@@ -107,7 +140,7 @@ export default {
                     show: this.card.filters.subset.show !== undefined ? this.card.filters.subset.show : true,
                     list: this.card.filters.subset.list !== undefined ? this.card.filters.subset.list : [],
                     default: this.card.filters.subset.default !== undefined ? this.card.filters.subset.default : null,
-                    selected: this.card.filters.subset.selected !== undefined ? this.card.filters.subset.selected : null,
+                    selected: this.card.filters.subset.selected !== undefined ? this.card.filters.subset.selected : null
                 }
             },
             chartTooltips: this.card.options.tooltips !== undefined ? this.card.options.tooltips : undefined,
@@ -195,6 +228,14 @@ export default {
                 maintainAspectRatio: false,
                 plugins: this.chartPlugins,
             };
+
+            this.options.tooltips = {};
+
+            this.options.tooltips.callbacks = {
+                label: function (tooltipItem, data) {
+                    return tooltipItem.yLabel.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                }
+            }
 
             if (this.chartTooltips !== undefined) {
                 this.options.tooltips = this.chartTooltips;
