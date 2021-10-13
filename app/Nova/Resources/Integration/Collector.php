@@ -62,6 +62,9 @@ class Collector extends Resource
             ]),
 
             new Panel('Source', [
+                Boolean::make('Use Latest FTP File Only', 'use_latest_ftp_file_only')->hideFromIndex()->help(
+                    'Activate if you want the Collector to ignore any FTP file names specified and use the latest file that was dropped'
+                ),
                 Text::make('Host', 'ftp_host')->rules('required', 'max:128')->hideFromIndex(),
                 Text::make('Path To File', 'ftp_path')->rules('required', 'max:128')->hideFromIndex(),
                 Text::make('Login', 'ftp_login')->rules('required', 'max:128')->hideFromIndex(),

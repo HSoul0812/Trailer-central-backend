@@ -65,7 +65,8 @@ class CollectorTransformer extends TransformerAbstract
             'zero_msrp_on_used' => $collector->zero_msrp,
             'specifications' => $collector->specifications,
             'linebreak_characters' => $collector->linebreak_characters,
-            'local_image_directory_address' => $collector->local_image_directory_address
+            'local_image_directory_address' => $collector->local_image_directory_address,
+            'use_latest_ftp_file_only' => $collector->use_latest_ftp_file_only
         ];
     }
 }
