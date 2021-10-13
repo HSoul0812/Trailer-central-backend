@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Website\User\WebsiteUserFavoriteInventory;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\Config\DefaultConfigRepositoryInterface;
@@ -19,7 +18,6 @@ use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
 use App\Services\Website\WebsiteDealerUrlService;
 use App\Services\Website\WebsiteDealerUrlServiceInterface;
-use App\Services\Website\WebsiteUserService;
 use App\Services\Website\WebsiteUserServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
@@ -39,6 +37,7 @@ class WebsiteServiceProvider extends ServiceProvider
         $this->app->bind(DefaultConfigRepositoryInterface::class, DefaultConfigRepository::class);
         $this->app->bind(WebsiteDealerUrlRepositoryInterface::class, WebsiteDealerUrlRepository::class);
         $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
+        $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
         $this->app->bind(
             WebsiteUserFavoriteInventoryRepositoryInterface::class,
             WebsiteUserFavoriteInventoryRepository::class
@@ -47,7 +46,6 @@ class WebsiteServiceProvider extends ServiceProvider
         // Services
         $this->app->bind(WebsiteDealerUrlServiceInterface::class, WebsiteDealerUrlService::class);
         $this->app->bind(WebsiteUserServiceInterface::class, WebsiteUserService::class);
-
 
         // Blog
         $this->app->bind('App\Repositories\Website\Blog\BulkRepositoryInterface', 'App\Repositories\Website\Blog\BulkRepository');

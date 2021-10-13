@@ -42,14 +42,15 @@ class WebsiteUserSeeder extends Seeder {
             'website_id' => $this->website->id,
             'password' => $this->password,
         ]);
-        $this->websiteUser->each(function ($user) {
-            $user->token()->save(factory(WebsiteUserToken::class)->make());
-        });
+
+        $this->websiteUser->token()->save(factory(WebsiteUserToken::class)->make());
     }
     public function cleanUp(): void
     {
-        User::destroy($this->dealer->getKey());
-        Website::destroy($this->website->getKey());
-        WebsiteUser::destroy($this->websiteUser->getKey());
+        if(isset($this->dealer)) {
+            User::destroy($this->dealer->getKey());
+            Website::destroy($this->website->getKey());
+            WebsiteUser::destroy($this->websiteUser->getKey());
+        }
     }
 }

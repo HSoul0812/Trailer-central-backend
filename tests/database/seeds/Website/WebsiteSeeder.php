@@ -27,7 +27,9 @@ class WebsiteSeeder extends Seeder {
     }
     public function cleanUp(): void
     {
-        User::destroy($this->dealer->getKey());
-        Website::destroy($this->website->getKey());
+        if(isset($this->dealer)) {
+            User::destroy($this->dealer->getKey());
+            Website::destroy($this->website->getKey());
+        }
     }
 }
