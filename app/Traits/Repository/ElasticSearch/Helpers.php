@@ -11,13 +11,13 @@ trait Helpers
     /**
      * Make a multimatch query with a desired relevance for a one or more fields
      *
-     * @param  array  $fields e.g: 'display_name^0.4', 'first_name'
+     * @param  array  $fields  e.g: 'display_name^0.4', 'first_name'
      * @param  string  $query
      * @return array
      */
     public function makeMultiMatchQueryWithRelevance(array $fields, string $query): array
     {
-        $criteria = [];
+        $filters = [];
 
         foreach ($fields as $fieldWithRelevance) {
             $fieldConfig = explode('^', $fieldWithRelevance);
@@ -32,7 +32,12 @@ trait Helpers
                 );
             }
 
-            $criteria[] = [
+            $criteria = [
+                'bool' => [
+                    'should' => []
+                ]
+            ];
+            $criteria['bool']['should'][] = [
                 'match_phrase' => [
                     $fieldConfig[0] => [
                         'query' => trim($query),
@@ -41,11 +46,13 @@ trait Helpers
                 ]
             ];
 
-            $criteria[] = [
+            $criteria['bool']['should'][] = [
                 'match' => [
                     $fieldConfig[0] => [
                         'query' => trim($query),
-                        'fuzziness' => 'AUTO',
+                        'fuzziness' => Constants::FUZZY_THRESHOLD,
+                        'max_expansions' => Constants::MAX_EXPANSIONS,
+                        'prefix_length' => Constants::PREFIX_LENGTH
                     ]
                 ]
             ];
@@ -54,18 +61,20 @@ trait Helpers
                 'match' => [
                     $fieldConfig[0] => [
                         'query' => trim($query),
-                        'operator' => 'and'
+                        'operator' => 'OR'
                     ]
                 ]
             ];
 
             if (!empty($fieldConfig[1])) {
-                $matchConfig['match'][$fieldConfig[0]]['boost'] = $fieldConfig[1];
+                $matchConfig['match'][$fieldConfig[0]]['boost'] = (float) $fieldConfig[1];
             }
 
-            $criteria[] = $matchConfig;
+            $criteria['bool']['should'][] = $matchConfig;
+
+            $filters[] = $criteria;
         }
 
-        return $criteria;
+        return $filters;
     }
 }

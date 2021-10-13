@@ -47,9 +47,14 @@ class HelpersTest extends TestCase
 
         $field = explode('^', $fields[0], 2);
 
-        $criteria = $mock->makeMultiMatchQueryWithRelevance($fields, $query);
+        $criterias = $mock->makeMultiMatchQueryWithRelevance($fields, $query)[0];
 
-        $this->assertCount(3, $criteria);
+        $this->assertArrayHasKey('bool', $criterias);
+        $this->assertArrayHasKey('should', $criterias['bool']);
+        $this->assertCount(3, $criterias['bool']['should']);
+
+        $criteria = $criterias['bool']['should'];
+
         $this->assertArrayHasKey('match_phrase', $criteria[0]);
         $this->assertArrayHasKey($field[0], $criteria[0]['match_phrase']);
         $this->assertArrayHasKey('query', $criteria[0]['match_phrase'][$field[0]]);
@@ -63,7 +68,7 @@ class HelpersTest extends TestCase
 
         if (isset($field[1])) {
             $this->assertArrayHasKey('boost', $criteria[2]['match'][$field[0]]);
-            $this->assertSame($field[1], $criteria[2]['match'][$field[0]]['boost']);
+            $this->assertSame((float) $field[1], $criteria[2]['match'][$field[0]]['boost']);
         }
     }
 
