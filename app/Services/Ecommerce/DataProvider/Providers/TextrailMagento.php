@@ -17,9 +17,6 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
     /** @var string */
     private $token;
 
-    /** @var int */
-    private $quoteId;
-
     /**
      * TextrailMagento constructor.
      * @param string $apiUrl
@@ -56,7 +53,7 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
         throw new \LogicException('Token generation failed.');
     }
 
-    public function addItemToCart(array $params)
+    public function addItemToCart(array $params, int $quoteId)
     {
         foreach ($params as $item) {
             $this->httpClient->post('rest/V1/carts/mine/items', [
@@ -67,7 +64,7 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
                    'cartItem' => [
                        'sku' => $item['sku'],
                        'qty' => $item['qty'],
-                       'quote_id' => $this->quoteId
+                       'quote_id' => $quoteId
                    ]
                 ]
             ]);
@@ -82,9 +79,9 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
 
         $credentials = $this->createCustomer($customer_details);
         $this->token = $this->generateAccessToken($credentials);
-        $this->quoteId = $this->createQuote();
+        $quoteId = $this->createQuote();
 
-        $this->addItemToCart($items);
+        $this->addItemToCart($items, $quoteId);
 
         $response = $this->httpClient->post('rest/V1/carts/mine/estimate-shipping-methods', [
             'headers' => [
@@ -101,8 +98,11 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
 
         $costs = reset($costs);
 
+        $tax = ($costs['price_incl_tax'] - $costs['price_excl_tax'] < 0) ? 0 : $costs['price_incl_tax'] - $costs['price_excl_tax'];
+
         return [
-            'cost' => $costs['price_incl_tax']
+            'cost' => $costs['price_incl_tax'],
+            'tax' => $tax,
         ];
     }
 

@@ -28,7 +28,9 @@ class ShippingControllerTest extends TestCase
         $responseJson = json_decode($response->getContent(), true);
 
         $this->assertArrayHasKey('cost', $responseJson);
+        $this->assertArrayHasKey('tax', $responseJson);
         $this->assertEquals(54, $responseJson['cost']);
+        $this->assertEquals(0, $responseJson['tax']);
     }
 
     public function testFailAuthKey()
