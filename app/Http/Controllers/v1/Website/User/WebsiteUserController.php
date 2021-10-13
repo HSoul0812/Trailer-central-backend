@@ -3,9 +3,9 @@ namespace App\Http\Controllers\v1\Website\User;
 
 use App\Http\Controllers\RestfulControllerV2;
 
-use App\Http\Requests\Website\CreateUserRequest;
+use App\Http\Requests\Website\CreateRequest;
 use App\Http\Requests\Website\GetAllRequest;
-use App\Http\Requests\Website\LoginUserRequest;
+use App\Http\Requests\Website\LoginRequest;
 use App\Services\Website\WebsiteUserService;
 use App\Services\Website\WebsiteUserServiceInterface;
 
@@ -36,7 +36,7 @@ class WebsiteUserController extends RestfulControllerV2 {
      */
     public function create(int $websiteId, Request $request): Response {
         $requestData = array_replace($request->all(), ['website_id' => $websiteId]);
-        $request = new CreateUserRequest($requestData);
+        $request = new CreateRequest($requestData);
         if(!$request->validate()) {
             $this->response->errorBadRequest();
         }
@@ -55,7 +55,7 @@ class WebsiteUserController extends RestfulControllerV2 {
      */
     public function login(int $websiteId, Request $request): Response {
         $requestData = array_replace($request->all(), ['website_id' => $websiteId]);
-        $request = new LoginUserRequest($requestData);
+        $request = new LoginRequest($requestData);
         if(!$request->validate()) {
             $this->response->errorBadRequest();
         }

@@ -26,6 +26,10 @@ class WebsiteUser extends Model
         return $this->belongsTo(Website::class, 'website_id');
     }
 
+    public function favoriteInventories() {
+        return $this->hasMany(WebsiteUserFavoriteInventory::class, 'website_user_id');
+    }
+
     public function setPasswordAttribute($value) {
         $this->attributes['password'] = \Hash::make($value);
     }

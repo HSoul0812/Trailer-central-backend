@@ -6,7 +6,7 @@ namespace App\Http\Requests\Website;
 
 use App\Http\Requests\Request;
 
-class CreateUserRequest extends Request
+class CreateRequest extends Request
 {
     protected $rules = [
         'first_name' => 'required',

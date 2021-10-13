@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Website\User\WebsiteUserFavoriteInventory;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\Config\DefaultConfigRepositoryInterface;
@@ -12,6 +13,8 @@ use App\Repositories\Website\Tracking\TrackingUnitRepository;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Repositories\Website\WebsiteDealerUrlRepository;
 use App\Repositories\Website\WebsiteDealerUrlRepositoryInterface;
+use App\Repositories\Website\WebsiteUserFavoriteInventoryRepository;
+use App\Repositories\Website\WebsiteUserFavoriteInventoryRepositoryInterface;
 use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
 use App\Services\Website\WebsiteDealerUrlService;
@@ -36,10 +39,15 @@ class WebsiteServiceProvider extends ServiceProvider
         $this->app->bind(DefaultConfigRepositoryInterface::class, DefaultConfigRepository::class);
         $this->app->bind(WebsiteDealerUrlRepositoryInterface::class, WebsiteDealerUrlRepository::class);
         $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
+        $this->app->bind(
+            WebsiteUserFavoriteInventoryRepositoryInterface::class,
+            WebsiteUserFavoriteInventoryRepository::class
+        );
 
         // Services
         $this->app->bind(WebsiteDealerUrlServiceInterface::class, WebsiteDealerUrlService::class);
         $this->app->bind(WebsiteUserServiceInterface::class, WebsiteUserService::class);
+
 
         // Blog
         $this->app->bind('App\Repositories\Website\Blog\BulkRepositoryInterface', 'App\Repositories\Website\Blog\BulkRepository');
