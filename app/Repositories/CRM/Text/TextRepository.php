@@ -3,7 +3,6 @@
 namespace App\Repositories\CRM\Text;
 
 use Illuminate\Support\Facades\DB;
-use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
@@ -44,7 +43,7 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * TextRepository constructor.
-     * 
+     *
      * @param TextServiceInterface $service
      */
     public function __construct(TextServiceInterface $service, StatusRepositoryInterface $leadStatus, DealerLocationRepositoryInterface $dealerLocation)
@@ -53,7 +52,7 @@ class TextRepository implements TextRepositoryInterface {
         $this->leadStatus = $leadStatus;
         $this->dealerLocation = $dealerLocation;
     }
-    
+
     public function create($params) {
         return TextLog::create($params);
     }
@@ -69,7 +68,7 @@ class TextRepository implements TextRepositoryInterface {
 
     public function getAll($params) {
         $query = Template::where('id', '>', 0);
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
@@ -85,7 +84,7 @@ class TextRepository implements TextRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
@@ -102,7 +101,7 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * Stop Processing Text Repository
-     * 
+     *
      * @param array $params
      * @return Stop
      */
@@ -118,7 +117,7 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * Send Text
-     * 
+     *
      * @param int $leadId
      * @param string $textMessage
      * @return TextLog
@@ -162,7 +161,7 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * Add Sort Query
-     * 
+     *
      * @param type $query
      * @param type $sort
      * @return type

@@ -28,7 +28,8 @@ interface PermissionsInterface
     const PURCHASE_ORDERS = 'purchase_orders';
     const MANAGE_SUBSCRIPTION = 'manage_subscription';
     const LOCATIONS = 'locations';
-    
+    const DEALER_TEXTS = 'dealer_texts';
+
     const FEATURES = [
         self::INVENTORY,
         self::INTEGRATIONS,
@@ -44,7 +45,8 @@ interface PermissionsInterface
         self::ACCOUNTS,
         self::PURCHASE_ORDERS,
         self::MANAGE_SUBSCRIPTION,
-        self::LOCATIONS
+        self::LOCATIONS,
+        self::DEALER_TEXTS,
     ];
 
     /**
