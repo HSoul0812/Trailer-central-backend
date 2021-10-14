@@ -37,10 +37,10 @@ class TextrailPartService implements TextrailPartServiceInterface
       $url = self::TEXTRAIL_PRODUCT_URL;
       
       $currentPage = 1;
-      $pageSize = 1;
+      $pageSize = 1000;
       $Allparts = [];
 
-      for ($i=0; $i < 2; $i+=$pageSize) {
+      for ($i=0; $i < $totalParts; $i+=$pageSize) {
         $queryParts = [
           'searchCriteria[page_size]' => $pageSize,
           'searchCriteria[currentPage]' => $currentPage
