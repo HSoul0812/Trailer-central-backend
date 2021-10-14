@@ -18,6 +18,7 @@ use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
 use App\Services\Website\WebsiteDealerUrlService;
 use App\Services\Website\WebsiteDealerUrlServiceInterface;
+use App\Services\Website\WebsiteUserService;
 use App\Services\Website\WebsiteUserServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
@@ -36,7 +37,6 @@ class WebsiteServiceProvider extends ServiceProvider
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(DefaultConfigRepositoryInterface::class, DefaultConfigRepository::class);
         $this->app->bind(WebsiteDealerUrlRepositoryInterface::class, WebsiteDealerUrlRepository::class);
-        $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
         $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
         $this->app->bind(
             WebsiteUserFavoriteInventoryRepositoryInterface::class,

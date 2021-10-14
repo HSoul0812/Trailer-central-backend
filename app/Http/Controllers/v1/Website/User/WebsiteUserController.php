@@ -3,10 +3,8 @@ namespace App\Http\Controllers\v1\Website\User;
 
 use App\Http\Controllers\RestfulControllerV2;
 
-use App\Http\Requests\Website\CreateRequest;
-use App\Http\Requests\Website\GetAllRequest;
-use App\Http\Requests\Website\LoginRequest;
-use App\Services\Website\WebsiteUserService;
+use App\Http\Requests\Website\User\CreateRequest;
+use App\Http\Requests\Website\User\LoginRequest;
 use App\Services\Website\WebsiteUserServiceInterface;
 
 use App\Transformers\Website\WebsiteUserTransformer;

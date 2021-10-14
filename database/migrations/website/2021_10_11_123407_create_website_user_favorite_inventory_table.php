@@ -19,7 +19,7 @@ class CreateWebsiteUserFavoriteInventoryTable extends Migration
             $table->unsignedInteger('inventory_id');
             $table->foreign('website_user_id')->references('id')->on('website_user')->onDelete('cascade');
             $table->foreign('inventory_id')->references('inventory_id')->on('inventory')->onDelete('cascade');
-            $table->unique(['website_user_id', 'inventory_id']);
+            $table->unique(['website_user_id', 'inventory_id'], 'unique_website_user_inventory');
             $table->timestamps();
         });
     }

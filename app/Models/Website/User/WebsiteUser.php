@@ -3,11 +3,11 @@
 namespace App\Models\Website\User;
 
 use App\Models\Website\Website;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 
-class WebsiteUser extends Model
+class WebsiteUser extends Model implements Authenticatable
 {
-    //
     protected $fillable = [
         'first_name',
         'middle_name',
@@ -36,5 +36,32 @@ class WebsiteUser extends Model
 
     public function checkPassword($password) {
         return \Hash::check($password, $this->attributes['password']);
+    }
+
+    public function getAuthIdentifierName()
+    {
+        return $this->getKeyName();
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->password;
+    }
+
+    public function getRememberToken()
+    {
+        return '';
+    }
+
+    public function setRememberToken($value) {}
+
+    public function getRememberTokenName()
+    {
+        return '';
     }
 }
