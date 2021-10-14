@@ -41,7 +41,7 @@ class WebsiteUserFavoriteInventoryController extends RestfulControllerV2
     public function index(Request $request) {
         $websiteUserId = $this->user->id;
         $inventories = $this->websiteUserService->getUserInventories($websiteUserId);
-        $this->response->collection($inventories, $this->websiteUserFavoriteInventoryTransformer);
+        return $this->response->collection($inventories, $this->websiteUserFavoriteInventoryTransformer);
     }
 
     /**
@@ -51,7 +51,7 @@ class WebsiteUserFavoriteInventoryController extends RestfulControllerV2
         $websiteUserId = $this->user->id;
         $requestData = $request->all();
         $request = new FavoriteInventoryRequest($request->all());
-        if($request->validate()) {
+        if(!$request->validate()) {
             $this->response->errorBadRequest();
         }
 
@@ -59,7 +59,7 @@ class WebsiteUserFavoriteInventoryController extends RestfulControllerV2
             $websiteUserId,
             $requestData['inventory_ids']
         );
-        $this->response->array($inventories, $this->websiteUserFavoriteInventoryTransformer);
+        return $this->response->collection(collect($inventories), $this->websiteUserFavoriteInventoryTransformer);
     }
 
     /**
@@ -69,11 +69,11 @@ class WebsiteUserFavoriteInventoryController extends RestfulControllerV2
         $websiteUserId = $this->user->id;
         $requestData = $request->all();
         $request = new FavoriteInventoryRequest($request->all());
-        if($request->validate()) {
+        if(!$request->validate()) {
             $this->response->errorBadRequest();
         }
 
         $this->websiteUserService->removeUserInventories($websiteUserId, $requestData['inventory_ids']);
-        $this->successResponse();
+        return $this->successResponse();
     }
 }

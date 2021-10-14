@@ -168,7 +168,7 @@ return [
     */
 
     'auth' => [
-
+        'website_auth' => App\Providers\WebsiteUserAuthProvider::class
     ],
 
     /*
@@ -228,5 +228,4 @@ return [
         ],
 
     ],
-
 ];

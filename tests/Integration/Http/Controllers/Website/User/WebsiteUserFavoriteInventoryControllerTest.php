@@ -45,7 +45,7 @@ class WebsiteUserFavoriteInventoryControllerTest extends TestCase {
             'inventory_ids' => [
                 $this->inventorySeeder->inventory->inventory_id
             ]
-        ], ['access_token' => $this->websiteUserSeeder->websiteUser->token->access_token]);
+        ], ['access-token' => $this->websiteUserSeeder->websiteUser->token->access_token]);
         $response->assertJson([
             'data' => [
                 [
@@ -68,7 +68,12 @@ class WebsiteUserFavoriteInventoryControllerTest extends TestCase {
             'website_user_id' => $this->websiteUserSeeder->websiteUser->id,
             'inventory_id' => $this->inventorySeeder->inventory->inventory_id
         ]);
-        $response = $this->json('GET', "/api/website/inventory/favorite");
+        $response = $this->json(
+            'GET',
+            "/api/website/inventory/favorite",
+            [],
+            ['access-token' => $this->websiteUserSeeder->websiteUser->token->access_token]
+        );
         $response->assertStatus(JsonResponse::HTTP_OK);
         $response->assertJson([
             'data' => [
@@ -83,11 +88,14 @@ class WebsiteUserFavoriteInventoryControllerTest extends TestCase {
     public function testDelete() {
         $this->websiteUserSeeder->seed();
         $this->inventorySeeder->seed();
-        $response = $this->json('DELETE', "/api/website/inventory/favorite", [
-            'inventory_ids' => [
+        $response = $this->json(
+            'DELETE',
+            "/api/website/inventory/favorite",
+            [ 'inventory_ids' => [
                 $this->inventorySeeder->inventory->inventory_id
-            ]
-        ], ['access_token' => $this->websiteUserSeeder->websiteUser->token->access_token]);
+            ]],
+            ['access-token' => $this->websiteUserSeeder->websiteUser->token->access_token]
+        );
         $response->assertStatus(JsonResponse::HTTP_OK);
     }
 }
