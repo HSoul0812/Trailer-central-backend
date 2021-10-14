@@ -2,9 +2,7 @@
 namespace App\Transformers\Ecommerce;
 
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
-use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Parts\Textrail\PartRepository;
-use App\Transformers\Parts\Textrail\PartsTransformer;
 use League\Fractal\TransformerAbstract;
 
 class CompletedOrderTransformer extends TransformerAbstract
@@ -40,8 +38,15 @@ class CompletedOrderTransformer extends TransformerAbstract
             'payment_status' => $completedOrder->payment_status,
             'stripe_customer_id' => $completedOrder->stripe_customer,
             'shipping_address' => $completedOrder->shipping_address,
+            'shipping_country' => $completedOrder->shipping_country,
+            'shipping_city' => $completedOrder->shipping_city,
+            'shipping_zip' => $completedOrder->shipping_zip,
+            'shipping_region' => $completedOrder->shipping_region,
             'billing_address' => $completedOrder->billing_address,
-            'postal_code' => $completedOrder->postal_code,
+            'billing_country' => $completedOrder->billing_country,
+            'billing_city' => $completedOrder->billing_city,
+            'billing_zip' => $completedOrder->billing_zip,
+            'billing_region' => $completedOrder->billing_region,
             'created_at' => $completedOrder->created_at,
             'status' => $completedOrder->status,
             'parts' => $partCollection,
