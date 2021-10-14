@@ -66,7 +66,10 @@ class CollectorTransformer extends TransformerAbstract
             'specifications' => $collector->specifications,
             'linebreak_characters' => $collector->linebreak_characters,
             'local_image_directory_address' => $collector->local_image_directory_address,
-            'use_latest_ftp_file_only' => $collector->use_latest_ftp_file_only
+            'use_latest_ftp_file_only' => $collector->use_latest_ftp_file_only,
+            'spincar_active' => $collector->spincar_active,
+            'spincar_spincar_id' => $collector->spincar_spincar_id,
+            'spincar_filenames' => $collector->spincar_filenames
         ];
     }
 }

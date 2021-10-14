@@ -59,6 +59,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $only_types
  * @property string|null $linebreak_characters
  * @property bool $use_latest_ftp_file_only
+ * @property bool $spincar_active
+ * @property int|null $spincar_spincar_id
+ * @property string|null $spincar_filenames
  * 
  * @property Collection<CollectorSpecification> $specifications
  * @property User $dealers
@@ -150,7 +153,10 @@ class Collector extends Model implements Filterable
         'zero_msrp',
         'only_types',
         'linebreak_characters',
-        'use_latest_ftp_file_only'
+        'use_latest_ftp_file_only',
+        'spincar_active',
+        'spincar_spincar_id',
+        'spincar_filenames'
     ];
 
     public function dealers(): BelongsTo
