@@ -41,7 +41,9 @@ class Message extends Model
         "to_id",
         "message",
         "tags",
-        "read"
+        "read",
+        "created_at",
+        "updated_at"
     ];
 
     /**

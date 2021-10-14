@@ -163,7 +163,6 @@ $api->version('v1', function ($route) {
     /**
      * Inventory Overlay
      */
-
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
     });
@@ -172,21 +171,23 @@ $api->version('v1', function ($route) {
     /**
      * Inventory Entity
      */
-
     $route->get('inventory/entity', 'App\Http\Controllers\v1\Inventory\EntityController@index');
 
     /**
      * Inventory Manufacturers
      */
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+
     /**
      * Inventory Categories
      */
     $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
+
     /**
      * Inventory Statuses
      */
     $route->get('inventory/statuses', 'App\Http\Controllers\v1\Inventory\StatusController@index');
+
     /**
      * Inventory Attributes
      */
@@ -220,7 +221,7 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    $route->get('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@index');
+    $route->get('inventory/packages', 'App\Httloup\Controllers\v1\Inventory\PackageController@index');
     $route->get('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@show');
     $route->put('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@create');
     $route->post('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@update');
@@ -335,12 +336,21 @@ $api->version('v1', function ($route) {
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
 
+    /**
+     * Facebook Webhooks
+     */
+    $route->post('leads/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\WebhookController@message');
+
+    /**
+     * Interaction Messages
+     */
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('leads/interaction-message/search', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@search');
         $route->get('leads/interaction-message/search/count-of/{field}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@searchCountOf');
         $route->post('leads/interaction-message/bulk', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@bulkUpdate');
         $route->post('leads/interaction-message/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@update');
     });
+
 
     /*
     |--------------------------------------------------------------------------
