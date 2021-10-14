@@ -93,7 +93,7 @@ class TextrailPartService implements TextrailPartServiceInterface
         
         $currentPage++;
       }
-      var_dump($Allparts);
+
       return $Allparts;
     }
 
