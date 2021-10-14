@@ -7,6 +7,6 @@ return [
         ],
     ],
     'textrail' => [
-        'bearer'=> env('TEXTRAI_BEARER', '0m5elzlp6wp7pofevd0jt2i5w6d038mk')
+        'bearer'=> env('TEXTRAIL_BEARER', '0m5elzlp6wp7pofevd0jt2i5w6d038mk')
     ]
 ];

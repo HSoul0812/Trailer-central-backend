@@ -16,7 +16,7 @@ class TextrailPartsTransformer extends TransformerAbstract
              'type_id' => $part->type_id,
              'category_id' => $part->category_id,
              'sku' => $part->sku,
-             'title' => $part->name,
+             'title' => $part->title,
              'price' => $part->price,
              'weight' => $part->weight ? $part->weight : '',
              'description' => $part->description,

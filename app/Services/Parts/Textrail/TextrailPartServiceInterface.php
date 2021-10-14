@@ -8,11 +8,11 @@ interface TextrailPartServiceInterface {
 
   public function getAllParts();
   
-  public function getTextrailCategory($categoryId);
+  public function getTextrailCategory(int $categoryId);
   
   public function getTextrailManufacturers();
   
   public function getTextrailBrands();
   
-  public function getTextrailImage($img);
+  public function getTextrailImage(array $img);
 }
