@@ -28,7 +28,6 @@ class FacebookController extends RestfulController
      */
     public function __construct(WebhookServiceInterface $service, MessageTransformer $transformer)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->service = $service;
         $this->transformer = $transformer;
     }
