@@ -62,6 +62,9 @@ class Collector extends Resource
             ]),
 
             new Panel('Source', [
+                Boolean::make('Use Latest FTP File Only', 'use_latest_ftp_file_only')->hideFromIndex()->help(
+                    'Activate if you want the Collector to ignore any FTP file names specified and use the latest file that was dropped'
+                ),
                 Text::make('Host', 'ftp_host')->rules('required', 'max:128')->hideFromIndex(),
                 Text::make('Path To File', 'ftp_path')->rules('required', 'max:128')->hideFromIndex(),
                 Text::make('Login', 'ftp_login')->rules('required', 'max:128')->hideFromIndex(),
@@ -104,7 +107,19 @@ class Collector extends Resource
                     'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
                 ),
             ]),
-
+            
+            new Panel('Spincar', [
+                Boolean::make('Activate Spincar', 'spincar_active')->hideFromIndex()->help(
+                    'Whether or not to use Spincar for this feed (images will be overwritten by whatever spincar sends)'
+                ),
+                Text::make('Spincar ID', 'spincar_spincar_id')->hideFromIndex()->help(
+                    'The dealer ID as provided by Spincar'
+                ),
+                Text::make('Spincar Filename', 'spincar_filenames')->hideFromIndex()->help(
+                    'The Spincar filename being dropped in our FTP'
+                ),
+            ]),
+            
             new Panel('Factory Settings', [
                 Boolean::make('Use Factory Mapping', 'use_factory_mapping')->hideFromIndex()->help(
                     'Whether or not to use the data from FV to populate these units'
