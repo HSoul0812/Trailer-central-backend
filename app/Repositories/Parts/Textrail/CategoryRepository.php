@@ -33,7 +33,8 @@ class CategoryRepository implements CategoryRepositoryInterface
         throw new NotImplementedException;
     }
 
-    public function firstOrCreate($params) {
+    public function firstOrCreate(array $params) : Category
+    {
         return $this->model->firstOrCreate($params);
     }
 

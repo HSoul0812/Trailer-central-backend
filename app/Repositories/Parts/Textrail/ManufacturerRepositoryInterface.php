@@ -6,6 +6,6 @@ use \App\Repositories\Repository;
 
 interface ManufacturerRepositoryInterface extends Repository {
 
-    public function firstOrCreate($params);
+    public function firstOrCreate(array $params);
 
 }

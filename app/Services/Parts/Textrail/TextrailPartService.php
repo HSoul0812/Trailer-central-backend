@@ -24,7 +24,7 @@ class TextrailPartService implements TextrailPartServiceInterface
         $this->httpClient = new GuzzleHttpClient();
     }
 
-    public function getAllParts($currentPage = 1, $pageSize = 1000): array
+    public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
     {
       $headers = self::getHeaders();
       
@@ -97,7 +97,7 @@ class TextrailPartService implements TextrailPartServiceInterface
       return $Allparts;
     }
 
-    public function getTextrailTotalPartsCount($pageSize = 1, $currentPage = 1): int
+    public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int
     {
       $headers = self::getHeaders();
 

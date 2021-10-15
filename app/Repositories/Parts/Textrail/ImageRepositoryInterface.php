@@ -6,6 +6,6 @@ use \App\Repositories\Repository;
 
 interface ImageRepositoryInterface extends Repository {
 
-    public function firstOrCreate($params, $fileName, $imageData);
+    public function firstOrCreate(array $params, string $fileName, string $imageData);
 
 }

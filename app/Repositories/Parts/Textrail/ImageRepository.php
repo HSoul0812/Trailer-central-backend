@@ -34,7 +34,8 @@ class ImageRepository implements ImageRepositoryInterface
         throw new NotImplementedException;
     }
 
-    public function firstOrCreate($params, $fileName, $imageData) {
+    public function firstOrCreate(array $params, string $fileName, string $imageData) : Image
+    {
         Storage::disk('s3')->put($fileName, $imageData, 'public');
         $s3ImageUrl = Storage::disk('s3')->url($fileName);
         $params['image_url'] = $s3ImageUrl;

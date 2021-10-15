@@ -33,7 +33,8 @@ class ManufacturerRepository implements ManufacturerRepositoryInterface
         throw new NotImplementedException;
     }
 
-    public function firstOrCreate($params) {
+    public function firstOrCreate(array $params) : Manufacturer
+    {
         return $this->model->firstOrCreate($params);
     }
 

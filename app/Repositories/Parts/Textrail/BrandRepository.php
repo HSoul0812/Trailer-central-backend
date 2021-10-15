@@ -33,7 +33,8 @@ class BrandRepository implements BrandRepositoryInterface
         throw new NotImplementedException;
     }
 
-    public function firstOrCreate($params) {
+    public function firstOrCreate(array $params) : Brand
+    {
         return $this->model->firstOrCreate($params);
     }
 

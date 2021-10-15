@@ -6,6 +6,6 @@ use \App\Repositories\Repository;
 
 interface TypeRepositoryInterface extends Repository {
 
-    public function firstOrCreate($params);
+    public function firstOrCreate(array $params);
 
 }

@@ -33,7 +33,8 @@ class TypeRepository implements TypeRepositoryInterface
         throw new NotImplementedException;
     }
 
-    public function firstOrCreate($params) {
+    public function firstOrCreate(array $params) : Type
+    {
         return $this->model->firstOrCreate($params);
     }
 

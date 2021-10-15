@@ -15,11 +15,13 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
         $this->model = $model;
     }
 
-    public function getById($id) {
+    public function getById(int $id) : Part
+    {
         return Part::findOrFail($id);
     }
 
-    public function createOrUpdateBySku($params) {
+    public function createOrUpdateBySku(array $params) : Part
+    {
         return $this->model->updateOrCreate(['sku' => $params['sku']], $params);
     }
 
