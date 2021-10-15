@@ -339,11 +339,6 @@ class VehicleJob extends Job
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
 
-        // Skip if Fields Missing
-        if(empty($clean->title) || empty($clean->description) || empty($clean->model)) {
-            return false;
-        }
-
         // Create Row
         $row = array();
         foreach($this->csvColumns as $k => $column) {
