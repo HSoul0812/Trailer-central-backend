@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\v1\Website\User;
 
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Website\User\CreateFavoriteInventoryRequest;
 use App\Http\Requests\Website\User\FavoriteInventoryRequest;
-use App\Models\Website\User\WebsiteUserFavoriteInventory;
 use App\Services\Website\WebsiteUserService;
 use App\Services\Website\WebsiteUserServiceInterface;
 use App\Transformers\Website\WebsiteUserFavoriteInventoryTransformer;
@@ -39,7 +39,7 @@ class WebsiteUserFavoriteInventoryController extends RestfulControllerV2
      * @param Request $request
      */
     public function index(Request $request) {
-        $websiteUserId = $this->user->id;
+        $websiteUserId = $this->user->getKey();
         $inventories = $this->websiteUserService->getUserInventories($websiteUserId);
         return $this->response->collection($inventories, $this->websiteUserFavoriteInventoryTransformer);
     }
@@ -48,13 +48,16 @@ class WebsiteUserFavoriteInventoryController extends RestfulControllerV2
      * @param Request $request
      */
     public function create(Request $request) {
-        $websiteUserId = $this->user->id;
+        $dealerId = $this->user->website->dealer->getKey();
+
+        $websiteUserId = $this->user->getKey();
         $requestData = $request->all();
-        $request = new FavoriteInventoryRequest($request->all());
+        $request = new CreateFavoriteInventoryRequest(
+            array_merge($request->all(), ['dealer_id' => $dealerId])
+        );
         if(!$request->validate()) {
             $this->response->errorBadRequest();
         }
-
         $inventories = $this->websiteUserService->addUserInventories(
             $websiteUserId,
             $requestData['inventory_ids']
@@ -66,9 +69,9 @@ class WebsiteUserFavoriteInventoryController extends RestfulControllerV2
      * @param Request $request
      */
     public function delete(Request $request) {
-        $websiteUserId = $this->user->id;
+        $websiteUserId = $this->user->getKey();
         $requestData = $request->all();
-        $request = new FavoriteInventoryRequest($request->all());
+        $request = new FavoriteInventoryRequest($requestData);
         if(!$request->validate()) {
             $this->response->errorBadRequest();
         }
