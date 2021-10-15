@@ -1,7 +1,6 @@
 <?php
 namespace Tests\Integration\Http\Controllers\Ecommerce;
 
-
 use Tests\database\seeds\Ecommerce\ShippingSeeder;
 use Tests\TestCase;
 
