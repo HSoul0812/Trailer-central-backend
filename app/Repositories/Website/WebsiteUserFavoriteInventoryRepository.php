@@ -34,7 +34,7 @@ class WebsiteUserFavoriteInventoryRepository implements WebsiteUserFavoriteInven
         throw new NotImplementedException();
     }
 
-    public function deleteBulk($params) {
+    public function deleteBulk(array $params) {
         $this->websiteUserFavoriteInventory
             ->where('website_user_id', $params['website_user_id'])
             ->whereIn('inventory_id', $params['inventory_ids'])

@@ -2,12 +2,11 @@
 namespace App\Services\Website;
 
 use App\Models\Website\User\WebsiteUser;
-use App\Models\Website\User\WebsiteUserFavoriteInventory;
 use App\Repositories\Website\WebsiteUserFavoriteInventoryRepository;
 use App\Repositories\Website\WebsiteUserFavoriteInventoryRepositoryInterface;
 use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
-use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\UnauthorizedException;
 
 
@@ -58,7 +57,7 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
         }
     }
 
-    public function addUserInventories($websiteUserId, array $inventoryIds) {
+    public function addUserInventories(int $websiteUserId, array $inventoryIds): array {
         $results = [];
         foreach($inventoryIds as $inventoryId) {
             $results[] = $this->websiteUserFavoriteInventoryRepository->create([
@@ -69,21 +68,21 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
         return $results;
     }
 
-    public function removeUserInventories($websiteUserId, array $inventories) {
+    public function removeUserInventories(int $websiteUserId, array $inventories): void {
         $this->websiteUserFavoriteInventoryRepository->deleteBulk([
             'website_user_id' => $websiteUserId,
             'inventory_ids' => $inventories
         ]);
     }
 
-    public function getUserInventories($websiteUserId) {
+    public function getUserInventories(int $websiteUserId): Collection {
         return $this->websiteUserFavoriteInventoryRepository->getAll(['website_user_id' => $websiteUserId]);
     }
 
     /**
      * @return string
      */
-    private function generateUserToken() {
+    private function generateUserToken(): string {
         $token = \Str::random(60);
         return hash('sha256', $token);
     }
