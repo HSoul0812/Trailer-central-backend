@@ -5,21 +5,18 @@ namespace App\Services\Integration\Facebook;
 use App\Exceptions\Integration\Facebook\FailedGetProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedDeleteProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
-use App\Exceptions\Integration\Facebook\FailedValidateAccessTokenException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\ExpiredFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\FailedReceivingLongLivedTokenException;
+use App\Services\CRM\Interactions\Facebook\DTOs\ChatMessage;
 use FacebookAds\Api;
 use FacebookAds\Http\Client;
 use FacebookAds\Http\Request;
 use FacebookAds\Http\Parameters;
 use FacebookAds\Object\Application;
-use FacebookAds\Logger\CurlLogger;
-use FacebookAds\Object\AdAccount;
-use FacebookAds\Object\Campaign;
-use FacebookAds\Object\Fields\CampaignFields;
+use FacebookAds\Object\Page;
 use FacebookAds\Object\ProductCatalog;
-use FacebookAds\Object\ProductFeed;
+use FacebookAds\Object\UnifiedThread;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -29,7 +26,16 @@ use Illuminate\Support\Facades\Log;
  */
 class BusinessService implements BusinessServiceInterface
 {
+    /**
+     * @const string
+     */
     const GRAPH_API_VERSION = '8.0';
+
+    /**
+     * @const int
+     */
+    const PER_PAGE_LIMIT = 100;
+
 
     /**
      * @var FacebookAds\Api
@@ -123,6 +129,7 @@ class BusinessService implements BusinessServiceInterface
         // Return Payload Results
         return $result;
     }
+
 
     /**
      * Validate a Feed Exists
@@ -256,6 +263,107 @@ class BusinessService implements BusinessServiceInterface
 
         // Return Null
         return null;
+    }
+
+
+    /**
+     * Get Conversations for Page
+     * 
+     * @param AccessToken $accessToken
+     * @param int $pageId
+     * @param int $limit default: 0
+     * @param string $after default: ''
+     * @return Collection<ChatConversation>
+     */
+    public function getConversations(AccessToken $accessToken, int $pageId, int $limit = 0, string $after = ''): Collection {
+        // Configure Client
+        $this->initApi($accessToken);
+        $collection = new Collection();
+
+        // Get Page
+        try {
+            $page = new Page($pageId);
+
+            // Get Conversations
+            $conversations = $page->getConversations(
+                ['id', 'link', 'updated_time', 'snippet', 'message_count', 'participants'],
+                ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
+            );
+            foreach($conversations as $conversation) {
+                $collection->push(ChatConversation::getFromUnifiedThread($conversation));
+            }
+
+            // Get Next
+            $next = $conversations->getNext();
+            if(!empty($next)) {
+                return $this->getConversations($accessToken, $pageId, $limit, $conversations->getAfter());
+            }
+
+            // Return Collection<ChatConversation>
+            return $collection;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            Log::error("Exception returned during get conversations: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedGetConversationsException;
+            }
+        }
+
+        // Return Empty Collection
+        return $collection;
+    }
+
+    /**
+     * Get Conversations for Page
+     * 
+     * @param AccessToken $accessToken
+     * @param string $conversationId
+     * @param int $limit default: 0
+     * @param string $after default: ''
+     * @return Collection<ChatMessage>
+     */
+    public function getMessages(AccessToken $accessToken, string $conversationId, int $limit = 0, string $after = ''): Collection {
+        // Configure Client
+        $this->initApi($accessToken);
+        $collection = new Collection();
+
+        // Get Page
+        try {
+            $conversation = new UnifiedThread($conversationId);
+
+            // Get Conversations
+            $messages = $conversation->getMessages(
+                ['id', 'created_time', 'message', 'from', 'to'],
+                ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
+            );
+            foreach($messages as $message) {
+                $collection->push(ChatMessage::getFromCrud($message));
+            }
+
+            // Get Next
+            $next = $messages->getNext();
+            if(!empty($next)) {
+                return $this->getConversations($accessToken, $conversationId, $limit, $messages->getAfter());
+            }
+
+            // Return Collection<ChatConversation>
+            return $collection;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            Log::error("Exception returned during get messages: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedGetConversationsException;
+            }
+        }
+
+        // Return Empty Collection
+        return $collection;
     }
 
 

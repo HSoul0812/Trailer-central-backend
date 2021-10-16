@@ -7,18 +7,18 @@ use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
 /**
- * Class ChatMessage
+ * Class ChatConversation
  * 
  * @package App\Services\CRM\Interactions\Facebook\DTOs
  */
-class ChatMessage
+class ChatConversation
 {
     use WithConstructor, WithGetter;
 
     /**
-     * @var string Message ID
+     * @var string Conversation ID
      */
-    private $messageId;
+    private $conversationId;
 
     /**
      * @var int Sender ID
