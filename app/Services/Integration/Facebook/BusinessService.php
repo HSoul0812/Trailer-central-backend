@@ -8,6 +8,8 @@ use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\ExpiredFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\FailedReceivingLongLivedTokenException;
+use App\Repositories\Integration\Facebook\PageRepositoryInterface;
+use App\Services\CRM\Interactions\Facebook\DTOs\ChatConversation;
 use App\Services\CRM\Interactions\Facebook\DTOs\ChatMessage;
 use FacebookAds\Api;
 use FacebookAds\Http\Client;
@@ -38,6 +40,12 @@ class BusinessService implements BusinessServiceInterface
 
 
     /**
+     * @var PageRepositoryInterface
+     */
+    protected $pages;
+
+
+    /**
      * @var FacebookAds\Api
      */
     protected $api;
@@ -56,7 +64,10 @@ class BusinessService implements BusinessServiceInterface
     /**
      * Construct Http Client/Request
      */
-    public function __construct() {
+    public function __construct(PageRepositoryInterface $pages) {
+        // Get Pages Repository
+        $this->pages = $pages;
+
         // Init Request
         $this->client = new Client();
         $this->request = new Request($this->client);
@@ -279,18 +290,18 @@ class BusinessService implements BusinessServiceInterface
         // Configure Client
         $this->initApi($accessToken);
         $collection = new Collection();
+        $page = $this->pages->getByPageId($pageId);
 
         // Get Page
         try {
-            $page = new Page($pageId);
-
             // Get Conversations
-            $conversations = $page->getConversations(
+            $fbPage = new Page($pageId);
+            $conversations = $fbPage->getConversations(
                 ['id', 'link', 'updated_time', 'snippet', 'message_count', 'participants'],
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($conversations as $conversation) {
-                $collection->push(ChatConversation::getFromUnifiedThread($conversation));
+                $collection->push(ChatConversation::getFromUnifiedThread($conversation), $page);
             }
 
             // Get Next

@@ -137,7 +137,10 @@ class ChatService implements ChatServiceInterface
             unset($params['page_token']);
 
             // Get Access Token
-            $this->tokens->create($params);
+            $pageToken = $this->tokens->create($params);
+
+            // Dispatch Send EmailBuilder Job
+            $this->dispatch(new MessagesJob($pageToken, $page->page_id));
         }
 
         // Return Response

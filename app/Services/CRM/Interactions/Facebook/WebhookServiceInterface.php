@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Services\CRM\Interactions;
+namespace App\Services\CRM\Interactions\Facebook;
 
-interface InteractionServiceInterface {
+use App\Http\Requests\CRM\Interactions\Facebook\MessageWebhookRequest;
+
+interface WebhookServiceInterface {
     /**
      * Handle Messages From Webhook
      * 

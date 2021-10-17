@@ -86,4 +86,44 @@ class MessageRepository implements MessageRepositoryInterface {
         // Return Full Details
         return $message;
     }
+
+    /**
+     * Find By ID or Message ID
+     * 
+     * @param array $params
+     * @return null|Message
+     */
+    public function find(array $params): ?Message {
+        // Get Message By ID
+        if(isset($params['id'])) {
+            $message = Message::find($params['id']);
+        }
+
+        // Get Message By Message ID
+        if(empty($message->id) && isset($params['message_id'])) {
+            $message = Message::where('message_id', $params['message_id'])->first();
+        }
+
+        // Return Full Details
+        return $message ?? null;
+    }
+
+    /**
+     * Create Or Update Message
+     * 
+     * @param array $params
+     * @return Message
+     */
+    public function createOrUpdate(array $params): Message {
+        // Get Message
+        $message = $this->find($params);
+
+        // If Exists, Then Update
+        if(!empty($message->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
+    }
 }

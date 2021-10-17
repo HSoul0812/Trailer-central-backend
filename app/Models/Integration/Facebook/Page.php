@@ -49,7 +49,17 @@ class Page extends Model
     }
 
     /**
-     * Get Catalog
+     * Get Website
+     * 
+     * @return BelongsTo
+     */
+    public function website(): BelongsTo
+    {
+        return $this->belongsTo(Website::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Catalogs
      * 
      * @return HasMany
      */
