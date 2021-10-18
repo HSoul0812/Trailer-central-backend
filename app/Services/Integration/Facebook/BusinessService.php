@@ -21,6 +21,7 @@ use FacebookAds\Object\Page;
 use FacebookAds\Object\ProductCatalog;
 use FacebookAds\Object\UnifiedThread;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 
 /**
  * Class BusinessService
