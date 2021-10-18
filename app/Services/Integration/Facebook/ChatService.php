@@ -12,6 +12,7 @@ use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Transformers\Integration\Facebook\ChatTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
