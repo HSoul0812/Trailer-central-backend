@@ -372,8 +372,7 @@ class BusinessService implements BusinessServiceInterface
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($conversations as $conversation) {
-                $this->log->debug('Returned conversation data to process: ' . print_r($conversation->exportAllData(), true));
-                $collection->push(ChatConversation::getFromUnifiedThread($conversation->exportAllData(), $page));
+                $collection->push(ChatConversation::getFromUnifiedThread($conversation, $page));
             }
 
             // Get Next
@@ -423,7 +422,7 @@ class BusinessService implements BusinessServiceInterface
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($messages as $message) {
-                $collection->push(ChatMessage::getFromCrud($message->exportAllData()));
+                $collection->push(ChatMessage::getFromCrud($message));
             }
 
             // Get Next

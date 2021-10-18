@@ -60,15 +60,18 @@ class ChatConversation
      * @return ChatMessage
      */
     public static function getFromUnifiedThread(UnifiedThread $conversation, Page $page): ChatConversation {
+        // Get Data
+        $data = $conversation->exportAllData();
+
         // Create ChatConversation
         return new self([
-            'conversation_id' => $conversation->id,
+            'conversation_id' => $data['id'],
             'page_id' => $page->page_id,
             'page' => $page,
-            'user' => self::parseUser($conversation->participants->data, $page->page_id),
-            'link' => $conversation->link,
-            'snippet' => $conversation->snippet,
-            'newest_update' => Carbon::parse($conversation->newest_update)->toDateTimeString(),
+            'user' => self::parseUser($data['participants']['data'], $page->page_id),
+            'link' => $data['link'],
+            'snippet' => $data['snippet'],
+            'newest_update' => Carbon::parse($data['newest_update'])->toDateTimeString(),
         ]);
     }
 

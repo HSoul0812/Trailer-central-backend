@@ -53,13 +53,17 @@ class ChatMessage
      * @return ChatMessage
      */
     public static function getFromCrud(AbstractCrudObject $message): ChatMessage {
+        // Get Data
+        $data = $message->exportAllData();
+
+        // Create ChatMessage
         return new self([
-            'message_id' => $message->id,
-            'created_at' => Carbon::parse($message->created_time)->toDateTimeString(),
-            'from_id' => $message->from->id,
-            'to_id' => $message->to->id,
-            'text' => $message->message,
-            'tags' => self::parseTags($message->tags->data)
+            'message_id' => $data['id'],
+            'created_at' => Carbon::parse($data['created_time'])->toDateTimeString(),
+            'from_id' => $data['from']['id'],
+            'to_id' => $data['to']['id'],
+            'text' => $data['message'],
+            'tags' => self::parseTags($data['tags']['data'])
         ]);
     }
 
