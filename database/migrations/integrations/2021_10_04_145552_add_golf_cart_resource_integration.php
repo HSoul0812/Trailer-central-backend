@@ -21,7 +21,7 @@ class AddGolfCartResourceIntegration extends Migration
         'frequency' => 21600,
         'settings' => 'a:0:{}',
         'include_sold' => 0,
-        'uses_staging' => 0,
+        'uses_staging' => 1,
         'show_for_integrated' => 0
     ];
 
