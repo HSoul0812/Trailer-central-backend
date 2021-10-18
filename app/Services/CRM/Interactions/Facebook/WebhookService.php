@@ -4,6 +4,7 @@ namespace App\Services\CRM\Interactions\Facebook;
 
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Services\CRM\Interactions\WebhookServiceInterface;
+use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 
 /**
