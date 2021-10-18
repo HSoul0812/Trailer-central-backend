@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 use Laravel\Scout\Searchable;
+use App\Models\CRM\Interactions\Facebook\Message as FbMessage;
 
 /**
  * Class InteractionMessage
@@ -20,7 +21,7 @@ use Laravel\Scout\Searchable;
  * @property boolean $hidden
  * @property boolean $is_read
  *
- * @property EmailHistory|TextLog $message
+ * @property EmailHistory|TextLog|FbMessage $message
  */
 class InteractionMessage extends Model
 {
@@ -77,6 +78,10 @@ class InteractionMessage extends Model
         }
 
         if ($this->tb_name === TextLog::getTableName()) {
+            $lead = $message->lead;
+            $leadId = $message->lead_id;
+            $dateSent = $message->date_sent;
+
             $array['text'] = $message->log_message;
             $array['from_number'] = $message->from_number;
             $array['to_number'] = $message->to_number;
@@ -92,6 +97,10 @@ class InteractionMessage extends Model
         }
 
         if ($this->tb_name === EmailHistory::getTableName()) {
+            $lead = $message->lead;
+            $leadId = $message->lead_id;
+            $dateSent = $message->date_sent;
+
             $array['interaction_id'] = $message->interaction_id;
             $array['parent_message_id'] = $message->parent_message_id;
             $array['title'] = $message->subject;
@@ -106,20 +115,35 @@ class InteractionMessage extends Model
             $array['to_number'] = null;
         }
 
-        if (empty($message->date_sent)) {
+        if ($this->tb_name === FbMessage::getTableName()) {
+            $lead = $message->conversation->fbUser->leads->first();
+            $leadId = $lead->lead_id;
+            $dateSent = $message->created_at;
+
+            $array['interaction_id'] = $message->interaction_id;
+            $array['text'] = $message->message;
+            $array['date_delivered'] = $message->created_at;
+
+            $array['parent_message_id'] = null;
+            $array['title'] = null;
+            $array['from_email'] = null;
+            $array['to_email'] = null;
+            $array['from_name'] = null;
+            $array['to_name'] = null;
+            $array['from_number'] = null;
+            $array['to_number'] = null;
+        }
+
+        if (empty($dateSent)) {
             $dateSent = null;
-        } elseif ($message->date_sent instanceof \DateTimeInterface) {
-            $dateSent = $message->date_sent;
-        } else {
-            $dateSent = new Carbon($this->message->date_sent);
+        } elseif (!$dateSent instanceof \DateTimeInterface)  {
+            $dateSent = new Carbon($dateSent);
         }
 
         $array['date_sent'] = $dateSent;
-        $array['lead_id'] = $message->lead_id;
+        $array['lead_id'] = $leadId;
         $array['message_created_at'] = $message->created_at;
         $array['message_updated_at'] = $message->updated_at;
-
-        $lead = $message->lead;
 
         $array['lead_first_name'] = $lead->first_name;
         $array['lead_last_name'] = $lead->last_name;

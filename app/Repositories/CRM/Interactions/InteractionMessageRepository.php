@@ -259,6 +259,6 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 
         $interactionMessage->searchable();
 
-        return  $interactionMessage;
+        return $interactionMessage;
     }
 }

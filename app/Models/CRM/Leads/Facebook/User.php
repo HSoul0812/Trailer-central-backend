@@ -6,9 +6,10 @@ use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\Facebook\Lead as UserLead;
 use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * Class Lead
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property string $lead_type
  *
  * @property Website $website
+ * @property Lead<Collection> $leads
  */
 class User extends Model
 {
@@ -55,11 +57,11 @@ class User extends Model
     /**
      * Get leads related to the user
      *
-     * @return HasManyThrough
+     * @return BelongsToMany
      */
-    public function leads(): HasManyThrough
+    public function leads(): BelongsToMany
     {
-        return $this->hasManyThrough(Lead::class, UserLead::class, 'identifier', 'lead_id', 'user_id', 'user_id');
+        return $this->belongsToMany(Lead::class, UserLead::class, 'user_id', 'lead_id','user_id', 'identifier');
     }
 
     /**

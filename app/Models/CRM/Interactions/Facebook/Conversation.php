@@ -9,6 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Class Conversation
+ * @package App\Models\CRM\Interactions\Facebook
+ *
+ *  @property User $fbUser
+ */
 class Conversation extends Model
 {
     use TableAware;
