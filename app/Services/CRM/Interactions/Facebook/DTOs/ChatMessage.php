@@ -76,7 +76,7 @@ class ChatMessage
         // Get Tags
         $collection = new Collection();
         foreach($tags as $tag) {
-            $collection->push($tag->name);
+            $collection->push($tag['name']);
         }
 
         // Return Result

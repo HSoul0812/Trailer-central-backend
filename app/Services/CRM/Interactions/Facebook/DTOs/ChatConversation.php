@@ -84,16 +84,16 @@ class ChatConversation
         // Loop Participants
         $chosen = null;
         foreach($users as $user) {
-            if((int) $user->id !== $pageId) {
+            if((int) $user['id'] !== $pageId) {
                 $chosen = $user;
             }
         }
 
         // Return Result
         return new FacebookUser([
-            'user_id' => $chosen->id,
-            'name' => $chosen->name,
-            'email' => $chosen->email
+            'user_id' => $chosen['id'],
+            'name' => $chosen['name'],
+            'email' => $chosen['email']
         ]);
     }
 
