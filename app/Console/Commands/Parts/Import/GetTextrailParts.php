@@ -92,7 +92,7 @@ class GetTextrailParts extends Command
      {
        
        $parts = $this->textrailPartService->getAllParts();
-       
+
        foreach ($parts as $item) {
 
          $textrailCategory = $this->textrailPartService->getTextrailCategory($item->category_id);
