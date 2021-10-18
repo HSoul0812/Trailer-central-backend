@@ -182,7 +182,7 @@ class Kernel extends ConsoleKernel
          */
          
         $schedule->command('command:get-textrail-parts')
-           ->dailyAt('1:00');
+           ->dailyAt('1:00')
            ->runInBackground();
     }
 
