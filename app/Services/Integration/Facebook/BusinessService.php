@@ -120,17 +120,18 @@ class BusinessService implements BusinessServiceInterface
      * 
      * @param AccessToken $accessToken
      * @param int $pageId
-     * @return CommonToken
+     * @return string
      */
-    public function pageToken(AccessToken $accessToken, int $pageId): CommonToken {
-        // Initialize Page Token
-        $pageToken = new CommonToken();
+    public function pageToken(AccessToken $accessToken, int $pageId): string {
+        // Get API
+        $this->initApi($accessToken);
 
-        // Get Long-Lived Access Token for User
-        $refresh = $this->getLongLivedAccessToken($params['access_token']);
+        // Get Page
+        $fbPage = new Page($pageId);
+        $page = $fbPage->getSelf(['access-token']);
 
         // Return Payload Results
-        return $refresh;
+        return $page->access_token;
     }
 
     /**
