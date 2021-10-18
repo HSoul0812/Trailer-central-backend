@@ -4,7 +4,7 @@ namespace App\Repositories\CRM\Interactions\Facebook;
 
 use App\Exceptions\NotImplementedException;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
-use App\Models\CRM\Interactions\Message;
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 

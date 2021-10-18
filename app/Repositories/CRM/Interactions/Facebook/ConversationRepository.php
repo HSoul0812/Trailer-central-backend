@@ -4,7 +4,7 @@ namespace App\Repositories\CRM\Interactions\Facebook;
 
 use App\Exceptions\NotImplementedException;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
-use App\Models\CRM\Interactions\Conversation;
+use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 
