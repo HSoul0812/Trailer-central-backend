@@ -1,17 +1,14 @@
 <?php
 
 
-namespace App\Http\Requests\Website;
+namespace App\Http\Requests\Website\User;
 
 
 use App\Http\Requests\Request;
 use Illuminate\Validation\Rule;
 
-class CreateUserRequest extends Request
+class CreateRequest extends Request
 {
-    /**
-     * @var array
-     */
     protected $rules = [];
     protected function getRules(): array
     {
