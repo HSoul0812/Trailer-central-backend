@@ -2,11 +2,9 @@
 
 namespace App\Services\CRM\Interactions\Facebook;
 
-use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\User\SalesPerson;
-use App\Models\User\User;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Services\CRM\Interactions\WebhookServiceInterface;
+use App\Services\Integration\Facebook\BusinessServiceInterface;
 
 /**
  * Class WebhookService
