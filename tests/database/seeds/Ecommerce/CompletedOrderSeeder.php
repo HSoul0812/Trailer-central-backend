@@ -6,11 +6,14 @@ namespace Tests\database\seeds\Ecommerce;
 
 use App\Models\Parts\Textrail\Part;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
+use App\Models\User\AuthToken;
+use App\Models\User\User;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
 /**
  * @property-read CompletedOrder $completedOrder
+ * @property-read AuthToken $authToken
  */
 class CompletedOrderSeeder extends Seeder
 {
@@ -22,13 +25,36 @@ class CompletedOrderSeeder extends Seeder
     protected $part;
 
     /**
+     * @var User
+     */
+    private $dealer;
+
+    /**
+     * @var AuthToken
+     */
+    private $authToken;
+
+    /**
      * @var CompletedOrder
      */
     protected $completedOrder;
 
+    /**
+     * CompletedOrderSeeder constructor.
+     */
+    public function __construct()
+    {
+        $this->dealer = factory(User::class)->create();
+    }
+
     public function seed(): void
     {
         $this->seedPart();
+
+        $this->authToken = factory(AuthToken::class)->create([
+            'user_id' => $this->dealer->dealer_id,
+            'user_type' => AuthToken::USER_TYPE_DEALER,
+        ]);
 
 
         $this->completedOrder = factory(CompletedOrder::class, 1)->create(); // 1 new completed order
@@ -49,5 +75,10 @@ class CompletedOrderSeeder extends Seeder
         // Database clean up
         CompletedOrder::whereIn('id', $this->completedOrder->getKey())->delete();
         Part::whereIn('id', $this->part->getKey())->delete();
+
+        $dealerId = $this->dealer->getKey();
+
+        AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
+        User::destroy($dealerId);
     }
 }
