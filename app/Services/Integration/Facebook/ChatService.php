@@ -56,6 +56,11 @@ class ChatService implements ChatServiceInterface
     private $fractal;
 
     /**
+     * Log
+     */
+    private $log;
+
+    /**
      * Construct Facebook Service
      */
     public function __construct(
@@ -75,6 +80,9 @@ class ChatService implements ChatServiceInterface
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('facebook');
     }
 
     /**

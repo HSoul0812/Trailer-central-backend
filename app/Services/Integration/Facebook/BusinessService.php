@@ -89,6 +89,11 @@ class BusinessService implements BusinessServiceInterface
      */
     protected $request;
 
+    /**
+     * Log
+     */
+    private $log;
+
 
     /**
      * Construct Http Client/Request
@@ -101,6 +106,9 @@ class BusinessService implements BusinessServiceInterface
         $this->client = new Client();
         $this->request = new Request($this->client);
         $this->request->setGraphVersion(self::GRAPH_API_VERSION);
+
+        // Initialize Logger
+        $this->log = Log::channel('facebook');
     }
 
     /**
@@ -238,7 +246,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -283,7 +291,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -327,7 +335,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -378,7 +386,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during get conversations: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned during get conversations: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -428,7 +436,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during get messages: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned during get messages: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -472,7 +480,7 @@ class BusinessService implements BusinessServiceInterface
             );
         } catch(\Exception $e) {
             $this->api = null;
-            Log::error("Exception returned initializing facebook api: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned initializing facebook api: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
         }
 
         // Return SDK
@@ -534,7 +542,7 @@ class BusinessService implements BusinessServiceInterface
             return $validate;
         } catch (\Exception $ex) {
             // Expired Exception?
-            Log::error("Exception returned trying to validate access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned trying to validate access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
         }
 
         // Return Defaults
@@ -564,7 +572,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned getting accounts: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned getting accounts: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -606,7 +614,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned trying to get long-lived access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned trying to get long-lived access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
