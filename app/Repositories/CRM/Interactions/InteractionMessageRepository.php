@@ -152,7 +152,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 
         $search->aggregateRaw([
             "grouped_by" => [
-                "terms" => ["field" => $groupBy],
+                "terms" => ["field" => $groupBy]
             ],
         ]);
 
