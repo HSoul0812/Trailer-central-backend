@@ -70,6 +70,7 @@ class MessageService implements MessageServiceInterface
         $this->interactions = $interactions;
         $this->leads = $leads;
         $this->sdk = $sdk;
+        $this->sdk->setAppType(BusinessService::APP_TYPE_CHAT);
     }
 
     /**

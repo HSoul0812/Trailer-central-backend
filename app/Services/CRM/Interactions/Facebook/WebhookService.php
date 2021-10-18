@@ -21,9 +21,12 @@ class WebhookService implements WebhookServiceInterface
      * @param InteractionsRepositoryInterface $interactions
      */
     public function __construct(
-        InteractionsRepositoryInterface $interactions
+        InteractionsRepositoryInterface $interactions,
+        BusinessServiceInterface $sdk
     ) {
         $this->interactions = $interactions;
+        $this->sdk = $sdk;
+        $this->sdk->setAppType(BusinessService::APP_TYPE_CHAT);
     }
 
     /**
