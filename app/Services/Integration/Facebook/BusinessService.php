@@ -372,7 +372,7 @@ class BusinessService implements BusinessServiceInterface
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($conversations as $conversation) {
-                $collection->push(ChatConversation::getFromUnifiedThread($conversation), $page);
+                $collection->push(ChatConversation::getFromUnifiedThread($conversation, $page));
             }
 
             // Get Next
