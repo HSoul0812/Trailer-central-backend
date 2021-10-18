@@ -87,7 +87,7 @@ class DealerLocation extends Model
      */
     protected $primaryKey = 'dealer_location_id';
 
-    const DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES = [
+    public const DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES = [
          'standard' => 'Standard',
          'tax_exempt' => 'Tax Exempt',
          'out_of_state_reciprocal' => 'Out-of-state Reciprocal',
