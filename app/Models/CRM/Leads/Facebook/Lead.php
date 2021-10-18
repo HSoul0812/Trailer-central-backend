@@ -6,6 +6,7 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\Lead AS CrmLead;
 use App\Models\Integration\Facebook\Page;
 use App\Models\Traits\TableAware;
+use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Lead extends Model
 {
-    use TableAware;
+    use TableAware, Compoships;
 
     const TABLE_NAME = 'fbapp_users_leads';
 
@@ -70,6 +71,16 @@ class Lead extends Model
     public function fbUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get all conversations
+     * 
+     * @return BelongsTo
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class, ['page_id', 'user_id'], ['page_id', 'user_id']);
     }
 
     /**
