@@ -4,6 +4,7 @@ namespace App\Services\CRM\Interactions\Facebook\DTOs;
 
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Integration\Facebook\Page;
+use App\Services\CRM\Leads\DTOs\FacebookUser;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use FacebookAds\Object\UnifiedThread;
