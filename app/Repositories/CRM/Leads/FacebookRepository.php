@@ -137,7 +137,7 @@ class FacebookRepository implements FacebookRepositoryInterface {
      * @param int $mergeId
      * @return FbLead
      */
-    public function convertLead(int $pageId, int $userId, int $leadId, int $mergeId = 0) {
+    public function convertLead(int $pageId, int $userId, int $leadId, int $mergeId = 0): FBLead {
         return FbLead::create([
             'page_id' => $pageId,
             'user_id' => $userId,

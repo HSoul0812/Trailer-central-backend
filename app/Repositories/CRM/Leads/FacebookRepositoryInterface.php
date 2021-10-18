@@ -33,7 +33,7 @@ interface FacebookRepositoryInterface extends Repository {
      * @param int $mergeId
      * @return FbLead
      */
-    public function convertLead(int $pageId, int $userId, int $leadId, int $mergeId): FbLead;
+    public function convertLead(int $pageId, int $userId, int $leadId, int $mergeId = 0): FBLead;
 
     /**
      * Lead Exists for Page/User?
