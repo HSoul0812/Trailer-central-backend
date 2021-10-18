@@ -4,6 +4,7 @@ namespace App\Services\Integration\Facebook;
 
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Chat;
+use App\Jobs\CRM\Interactions\Facebook\MessageJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\ChatRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
@@ -137,7 +138,7 @@ class ChatService implements ChatServiceInterface
             ]);
 
             // Dispatch Send EmailBuilder Job
-            $this->dispatch(new MessagesJob($pageAccessToken, $page->page_id));
+            $this->dispatch(new MessageJob($pageAccessToken, $page->page_id));
         }
 
         // Return Response
