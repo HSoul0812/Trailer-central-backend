@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Interactions\Facebook\DTOs;
 
 use App\Models\CRM\Leads\LeadType;
+use App\Models\Integration\Facebook\Page;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use FacebookAds\Object\UnifiedThread;
