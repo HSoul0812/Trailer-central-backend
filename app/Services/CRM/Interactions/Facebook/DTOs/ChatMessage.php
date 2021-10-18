@@ -2,9 +2,10 @@
 
 namespace App\Services\CRM\Interactions\Facebook\DTOs;
 
-use FacebookAds\Object\AbstractCrudObject;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use FacebookAds\Object\AbstractCrudObject;
+use Carbon\Carbon;
 
 /**
  * Class ChatMessage

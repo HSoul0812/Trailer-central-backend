@@ -8,6 +8,7 @@ use App\Services\CRM\Leads\DTOs\FacebookUser;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use FacebookAds\Object\UnifiedThread;
+use Carbon\Carbon;
 
 /**
  * Class ChatConversation
