@@ -3,6 +3,8 @@
 namespace App\Services\Integration\Facebook;
 
 use App\Exceptions\Integration\Facebook\FailedGetProductFeedException;
+use App\Exceptions\Integration\Facebook\FailedGetConversationsException;
+use App\Exceptions\Integration\Facebook\FailedGetMessagesException;
 use App\Exceptions\Integration\Facebook\FailedDeleteProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
@@ -430,7 +432,7 @@ class BusinessService implements BusinessServiceInterface
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
-                throw new FailedGetConversationsException;
+                throw new FailedGetMessagesException;
             }
         }
 
