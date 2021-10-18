@@ -129,7 +129,7 @@ class BusinessService implements BusinessServiceInterface
 
         // Get Page
         $fbPage = new Page($pageId);
-        $page = $fbPage->getSelf(['access-token']);
+        $page = $fbPage->getSelf(['access_token']);
 
         // Return Payload Results
         return $page->access_token;
