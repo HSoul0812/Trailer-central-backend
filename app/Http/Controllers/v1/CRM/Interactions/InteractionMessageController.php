@@ -9,9 +9,10 @@ use App\Http\Requests\CRM\Interactions\Message\BulkUpdateRequest;
 use App\Http\Requests\CRM\Interactions\Message\SearchCountOfRequest;
 use App\Http\Requests\CRM\Interactions\Message\SearchRequest;
 use App\Http\Requests\CRM\Interactions\Message\UpdateRequest;
+use App\Transformers\CRM\Interactions\Message\SearchCountOfTransformer;
 use Dingo\Api\Http\Request;
 use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
-use App\Transformers\CRM\Interactions\InteractionMessageTransformer;
+use App\Transformers\CRM\Interactions\Message\SearchTransformer;
 use Dingo\Api\Http\Response;
 
 /**
@@ -97,6 +98,13 @@ class InteractionMessageController extends RestfulControllerV2
      *         @OA\Schema(type="boolean")
      *     ),
      *     @OA\Parameter(
+     *         name="is_read",
+     *         in="query",
+     *         description="Read or not",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
      *         name="sort",
      *         in="query",
      *         description="Sort order can be: date_sent,-date_sent",
@@ -131,7 +139,7 @@ class InteractionMessageController extends RestfulControllerV2
         $data = $this->interactionMessageRepository->search($request->all());
         $paginator = $this->interactionMessageRepository->getPaginator();
 
-        return $this->collectionResponse($data, new InteractionMessageTransformer(), $paginator);
+        return $this->collectionResponse($data, new SearchTransformer(), $paginator);
     }
 
     /**
@@ -196,7 +204,7 @@ class InteractionMessageController extends RestfulControllerV2
 
         $data = $this->interactionMessageRepository->searchCountOf($request->all());
 
-        return $this->response->array(['data' => $data]);
+        return $this->response->array($data, new SearchCountOfTransformer($groupBy));
     }
 
     /**
@@ -215,6 +223,13 @@ class InteractionMessageController extends RestfulControllerV2
      *         name="hidden",
      *         in="query",
      *         description="Hidden or not",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_read",
+     *         in="query",
+     *         description="Read or not",
      *         required=false,
      *         @OA\Schema(type="boolean")
      *     ),
