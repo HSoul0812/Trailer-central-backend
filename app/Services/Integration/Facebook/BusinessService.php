@@ -368,7 +368,7 @@ class BusinessService implements BusinessServiceInterface
             // Get Conversations
             $fbPage = new Page($pageId);
             $conversations = $fbPage->getConversations(
-                ['id', 'link', 'newest_update', 'snippet', 'message_count', 'participants'],
+                ['id', 'link', 'updated_time', 'snippet', 'message_count', 'participants'],
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($conversations as $conversation) {

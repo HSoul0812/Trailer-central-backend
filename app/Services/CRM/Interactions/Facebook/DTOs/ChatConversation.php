@@ -73,7 +73,7 @@ class ChatConversation
             'user' => self::parseUser($data['participants']['data'], $page->page_id),
             'link' => $data['link'],
             'snippet' => $data['snippet'],
-            'newest_update' => Carbon::parse($data['newest_update'])->toDateTimeString(),
+            'newest_update' => Carbon::parse($data['updated_time'])->toDateTimeString(),
         ]);
     }
 
