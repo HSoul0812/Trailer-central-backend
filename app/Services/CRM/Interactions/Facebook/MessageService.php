@@ -2,11 +2,13 @@
 
 namespace App\Services\CRM\Interactions\Facebook;
 
+use App\Models\Integration\Auth\AccessToken;
 use App\Models\CRM\Leads\Facebook\User as FbUser;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
+use App\Services\CRM\Interactions\Facebook\DTOs\ChatConversation;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use Illuminate\Support\Collection;
