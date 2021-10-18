@@ -31,12 +31,37 @@ class BusinessService implements BusinessServiceInterface
     /**
      * @const string
      */
+    const APP_TYPE_DEFAULT = 'marketing';
+
+    /**
+     * @const string
+     */
+    const APP_TYPE_CHAT = 'chat';
+
+    /**
+     * @const array
+     */
+    const APP_TYPES = [
+        self::APP_TYPE_DEFAULT,
+        self::APP_TYPE_CHAT
+    ];
+
+
+    /**
+     * @const string
+     */
     const GRAPH_API_VERSION = '8.0';
 
     /**
      * @const int
      */
     const PER_PAGE_LIMIT = 100;
+
+
+    /**
+     * @var string : marketing|chat
+     */
+    protected $type = 'marketing';
 
 
     /**
@@ -74,6 +99,39 @@ class BusinessService implements BusinessServiceInterface
         $this->request->setGraphVersion(self::GRAPH_API_VERSION);
     }
 
+    /**
+     * Set App Type
+     * 
+     * @param string $type
+     * @return void
+     */
+    public function setAppType(string $type) {
+        // Type is Valid?
+        if(in_array($type, self::APP_TYPES)) {
+            $this->type = $type;
+        } else {
+            $this->type = self::APP_TYPE_DEFAULT;
+        }
+    }
+
+
+    /**
+     * Get Page Token
+     * 
+     * @param AccessToken $accessToken
+     * @param int $pageId
+     * @return CommonToken
+     */
+    public function pageToken(AccessToken $accessToken, int $pageId): CommonToken {
+        // Initialize Page Token
+        $pageToken = new CommonToken();
+
+        // Get Long-Lived Access Token for User
+        $refresh = $this->getLongLivedAccessToken($params['access_token']);
+
+        // Return Payload Results
+        return $refresh;
+    }
 
     /**
      * Get Refresh Token
@@ -403,8 +461,8 @@ class BusinessService implements BusinessServiceInterface
 
             // Return SDK
             $this->api = Api::init(
-                $_ENV['FB_SDK_APP_ID'],
-                $_ENV['FB_SDK_APP_SECRET'],
+                $this->getAppId(),
+                $this->getAppSecret(),
                 $apiToken
             );
         } catch(\Exception $e) {
@@ -440,7 +498,7 @@ class BusinessService implements BusinessServiceInterface
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
-            'access_token' => ($_ENV['FB_SDK_APP_ID'] . '|' . $_ENV['FB_SDK_APP_SECRET']),
+            'access_token' => $this->getAppId() . '|' . $this->getAppSecret(),
             'input_token' => $inputToken
         ]);
         $this->request->setQueryParams($params);
@@ -522,10 +580,10 @@ class BusinessService implements BusinessServiceInterface
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
-            'access_token' => ($_ENV['FB_SDK_APP_ID'] . '|' . $_ENV['FB_SDK_APP_SECRET']),
+            'access_token' => $this->getAppId() . '|' . $this->getAppSecret(),
             'grant_type' => 'fb_exchange_token',
-            'client_id' => $_ENV['FB_SDK_APP_ID'],
-            'client_secret' => $_ENV['FB_SDK_APP_SECRET'],
+            'client_id' => $this->getAppId(),
+            'client_secret' => $this->getAppSecret(),
             'fb_exchange_token' => $accessToken
         ]);
         $this->request->setQueryParams($params);
@@ -553,5 +611,27 @@ class BusinessService implements BusinessServiceInterface
 
         // Return Null
         return null;
+    }
+
+
+    /**
+     * Get App ID For Provided Type
+     */
+    private function getAppId() {
+        return config('oauth.fb.' . $this->type . '.app.id');
+    }
+
+    /**
+     * Get App Secret For Provided Type
+     */
+    private function getAppSecret() {
+        return config('oauth.fb.' . $this->type . '.app.secret');
+    }
+
+    /**
+     * Get App Scopes For Provided Type
+     */
+    private function getAppScopes() {
+        return config('oauth.fb.' . $this->type . '.scopes');
     }
 }
