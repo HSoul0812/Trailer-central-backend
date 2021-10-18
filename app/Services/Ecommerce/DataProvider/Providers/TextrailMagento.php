@@ -31,7 +31,7 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
      */
     public function __construct()
     {
-        $this->apiUrl = 'https://mcstaging.textrail.com/';
+        $this->apiUrl = env("TEXTRAIL_API_URL", 'https://mcstaging.textrail.com/');
         $this->httpClient = new GuzzleHttpClient(['base_uri' => $this->apiUrl]);
     }
 
