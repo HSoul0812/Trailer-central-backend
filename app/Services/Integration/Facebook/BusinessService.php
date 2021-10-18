@@ -372,7 +372,6 @@ class BusinessService implements BusinessServiceInterface
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($conversations as $conversation) {
-                $this->log->debug('Returned conversation data to process: ' . print_r($conversation->exportAllData(), true));
                 $collection->push(ChatConversation::getFromUnifiedThread($conversation, $page));
             }
 
@@ -383,6 +382,7 @@ class BusinessService implements BusinessServiceInterface
             }
 
             // Return Collection<ChatConversation>
+            $this->log->debug("Returned " . $collection->count() . " conversations from the page #" . $pageId);
             return $collection;
         } catch (\Exception $ex) {
             // Expired Exception?
@@ -429,10 +429,11 @@ class BusinessService implements BusinessServiceInterface
             // Get Next
             $next = $messages->getNext();
             if(!empty($next)) {
-                return $this->getConversations($accessToken, $conversationId, $limit, $messages->getAfter());
+                return $this->getMessages($accessToken, $messageId, $limit, $messages->getAfter());
             }
 
-            // Return Collection<ChatConversation>
+            // Return Collection<ChatMessage>
+            $this->log->debug("Returned " . $collection->count() . " messages from the conversation #" . $conversationId);
             return $collection;
         } catch (\Exception $ex) {
             // Expired Exception?
