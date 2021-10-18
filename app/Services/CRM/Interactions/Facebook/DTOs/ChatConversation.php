@@ -65,7 +65,7 @@ class ChatConversation
             'conversation_id' => $conversation->id,
             'page_id' => $page->page_id,
             'page' => $page,
-            'user' => $this->parseUser($conversation->participants->data, $page->page_id),
+            'user' => self::parseUser($conversation->participants->data, $page->page_id),
             'link' => $conversation->link,
             'snippet' => $conversation->snippet,
             'newest_update' => Carbon::parse($conversation->newest_update)->toDateTimeString(),
