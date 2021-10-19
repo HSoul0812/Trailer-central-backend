@@ -7,6 +7,7 @@ use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ConversationRepository implements ConversationRepositoryInterface {
 
@@ -83,7 +84,10 @@ class ConversationRepository implements ConversationRepositoryInterface {
 
     public function update($params) {
         // Get Conversation
-        $conversation = Conversation::findOrFail($params['id']);
+        $conversation = $this->find($params);
+        if(empty($conversation->id)) {
+            throw new ModelNotFoundException;
+        }
 
         // Update Conversation
         DB::transaction(function() use (&$conversation, $params) {

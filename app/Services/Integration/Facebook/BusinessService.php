@@ -424,7 +424,7 @@ class BusinessService implements BusinessServiceInterface
 
         // Get Page
         try {
-            $conversation = new UnifiedThread(str_replace('t_', '', $conversationId));
+            $conversation = new UnifiedThread();
             $conversation->setId($conversationId);
 
             // Get Conversations

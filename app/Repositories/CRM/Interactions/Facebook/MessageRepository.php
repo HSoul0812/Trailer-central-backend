@@ -7,6 +7,7 @@ use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Models\CRM\Interactions\Facebook\Message;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MessageRepository implements MessageRepositoryInterface {
 
@@ -76,7 +77,10 @@ class MessageRepository implements MessageRepositoryInterface {
 
     public function update($params) {
         // Get Lead
-        $message = Message::findOrFail($params['id']);
+        $message = $this->find($params);
+        if(empty($message->id)) {
+            throw new ModelNotFoundException;
+        }
 
         // Update Lead
         DB::transaction(function() use (&$message, $params) {
