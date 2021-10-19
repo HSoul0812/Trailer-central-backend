@@ -1,42 +1,25 @@
 <?php
 
-namespace App\Transformers\CRM\Interactions;
+namespace App\Transformers\CRM\Interactions\Facebook;
 
 use League\Fractal\TransformerAbstract;
-use App\Models\CRM\Interactions\Interaction;
-use App\Transformers\CRM\Leads\LeadTransformer;
-use App\Transformers\CRM\User\SalesPersonTransformer;
-use Carbon\Carbon;
 
-class TaskTransformer extends TransformerAbstract 
+class MessageTransformer extends TransformerAbstract 
 {
-    /**
-     * @var LeadTransformer
-     */
-    protected $leadTransformer;
-
-    /**
-     * @var SalesPersonTransformer
-     */
-    protected $salesPersonTransformer;
-    
-    public function __construct(LeadTransformer $leadTransformer, SalesPersonTransformer $salesPersonTransformer)
+    public function transform(Message $message)
     {
-        $this->leadTransformer = $leadTransformer;
-        $this->salesPersonTransformer = $salesPersonTransformer;
-    }
-    public function transform(Interaction $interaction)
-    {       
-        $interactionTime = Carbon::parse($interaction->interaction_time);
 	return [
-           'task_date' => $interactionTime->format('Y-m-d'),
-           'task_time' => $interactionTime->format('h:i A'),
-           'type' => $interaction->interaction_type,
-           'lead' => $this->leadTransformer->transform($interaction->lead),
-           'notes' => $interaction->interaction_notes,
-           'id' => $interaction->interaction_id,
-           'contact_name' => $interaction->lead->getFullNameAttribute(),
-           'sales_person' => $interaction->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($interaction->leadStatus->salesPerson) : null
+            "id" => $message->id,
+            "message_id" => $message->message_id,
+            "conversation_id" => $message->conversation_id,
+            "interaction_id" => $message->interaction_id,
+            "from_id" => $message->from_id,
+            "to_id" => $message->to_id,
+            "message" => $message->message,
+            "tags" => $message->tags_array,
+            "read" => !empty($message->read),
+            "created_at" => $message->created_at,
+            "updated_at" => $message->updated_at
         ];
     }
 }
