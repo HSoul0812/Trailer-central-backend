@@ -6,6 +6,7 @@ use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Services\CRM\Interactions\WebhookServiceInterface;
 use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class WebhookService
@@ -26,6 +27,9 @@ class WebhookService implements WebhookServiceInterface
         $this->interactions = $interactions;
         $this->sdk = $sdk;
         $this->sdk->setAppType(BusinessService::APP_TYPE_CHAT);
+
+        // Initialize Logger
+        $this->log = Log::channel('facebook');
     }
 
     /**

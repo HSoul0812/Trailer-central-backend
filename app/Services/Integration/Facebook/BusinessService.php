@@ -357,10 +357,14 @@ class BusinessService implements BusinessServiceInterface
      * @param string $after default: ''
      * @return Collection<ChatConversation>
      */
-    public function getConversations(AccessToken $accessToken, int $pageId, int $limit = 0, string $after = ''): Collection {
+    public function getConversations(AccessToken $accessToken, int $pageId, int $limit = 0, string $after = '', Collection $collection = null): Collection {
+        // Initialize Collection of Conversations
+        if(empty($collection)) {
+            $collection = new Collection();
+        }
+
         // Configure Client
         $this->initApi($accessToken);
-        $collection = new Collection();
         $page = $this->pages->getByPageId($pageId);
 
         // Get Page
@@ -378,7 +382,8 @@ class BusinessService implements BusinessServiceInterface
             // Get Next
             $next = $conversations->getNext();
             if(!empty($next)) {
-                return $this->getConversations($accessToken, $pageId, $limit, $conversations->getAfter());
+                $this->log->debug("Retrieved " . $collection->count() . " conversations so far, getting next " . $limit . " conversations");
+                return $this->getConversations($accessToken, $pageId, $limit, $conversations->getAfter(), $collection);
             }
 
             // Return Collection<ChatConversation>
@@ -408,10 +413,14 @@ class BusinessService implements BusinessServiceInterface
      * @param string $after default: ''
      * @return Collection<ChatMessage>
      */
-    public function getMessages(AccessToken $accessToken, string $conversationId, int $limit = 0, string $after = ''): Collection {
+    public function getMessages(AccessToken $accessToken, string $conversationId, int $limit = 0, string $after = '', Collection $collection = null): Collection {
+        // Initialize Collection of Conversations
+        if(empty($collection)) {
+            $collection = new Collection();
+        }
+
         // Configure Client
         $this->initApi($accessToken);
-        $collection = new Collection();
 
         // Get Page
         try {
@@ -429,7 +438,8 @@ class BusinessService implements BusinessServiceInterface
             // Get Next
             $next = $messages->getNext();
             if(!empty($next)) {
-                return $this->getMessages($accessToken, $messageId, $limit, $messages->getAfter());
+                $this->log->debug("Retrieved " . $collection->count() . " messages so far, getting next " . $limit . " messages");
+                return $this->getMessages($accessToken, $messageId, $limit, $messages->getAfter(), $collection);
             }
 
             // Return Collection<ChatMessage>
