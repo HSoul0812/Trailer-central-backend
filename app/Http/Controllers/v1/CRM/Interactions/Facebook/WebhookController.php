@@ -35,10 +35,10 @@ class FacebookController extends RestfulController
     public function message(Request $request) {
         $request = new MessageWebhookRequest($request->all());
 
-        if ($request->validate()) {             
-            return $this->response->paginator($this->service->message($request));
+        if ($request->validate()) {
+            return $this->response->item($this->service->message($request), $this->transformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 }
