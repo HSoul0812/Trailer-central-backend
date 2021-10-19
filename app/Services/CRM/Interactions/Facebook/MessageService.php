@@ -91,24 +91,24 @@ class MessageService implements MessageServiceInterface
         // No User?
         if(empty($user->user_id)) {
             $user = $this->users->create($conversation->user->getParams());
-            $this->log->info('Created new facebook user with ID #' . $user->user_id);
+            $this->log->debug('Created new facebook user with ID #' . $user->user_id);
         } else {
-            $this->log->info('Found existing facebook user with ID #' . $user->user_id);
+            $this->log->debug('Found existing facebook user with ID #' . $user->user_id);
         }
 
         // FB User Assigned to Page?
         if(!$this->users->leadExists($conversation->pageId, $user->user_id)) {
             // Lead Does Not Exist?
-            $this->log->info('Lead doesn\'t exist for page #' . $conversation->pageId . ' and user #' . $user->user_id);
+            $this->log->debug('Lead doesn\'t exist for page #' . $conversation->pageId . ' and user #' . $user->user_id);
 
             // Create Facebook Lead
             $lead = $this->leads->create($conversation->getLeadParams());
 
             // Convert FB User to Lead on Page
             $this->users->convertLead($conversation->pageId, $user->user_id, $lead->identifier);
-            $this->log->info('Created lead #' . $lead->identifier . ' for page #' . $conversation->pageId . ' and user #' . $user->user_id);
+            $this->log->debug('Created lead #' . $lead->identifier . ' for page #' . $conversation->pageId . ' and user #' . $user->user_id);
         } else {
-            $this->log->info('Lead already exists for page #' . $conversation->pageId . ' and user #' . $user->user_id);
+            $this->log->debug('Lead already exists for page #' . $conversation->pageId . ' and user #' . $user->user_id);
         }
 
         // Return Facebook User
@@ -125,7 +125,7 @@ class MessageService implements MessageServiceInterface
     public function scrapeMessages(AccessToken $pageToken, int $pageId): Collection {
         // Get Conversations
         $conversations = $this->sdk->getConversations($pageToken, $pageId);
-        $this->log->info('Retrieved ' . $conversations->count() . ' conversations from Page #' . $pageId);
+        $this->log->debug('Retrieved ' . $conversations->count() . ' conversations from Page #' . $pageId);
 
         // Loop Conversations
         $collection = new Collection();
@@ -142,9 +142,9 @@ class MessageService implements MessageServiceInterface
             foreach($messages as $message) {
                 $this->messages->createOrUpdate($message->getParams());
             }
-            $this->log->info('Updated ' . $messages->count() . ' messages for conversation #' . $conversation->conversation_id);
+            $this->log->debug('Updated ' . $messages->count() . ' messages for conversation #' . $conversation->conversation_id);
         }
-        $this->log->info('Updated ' . $conversations->count() . ' conversations from Page #' . $pageId);
+        $this->log->debug('Updated ' . $conversations->count() . ' conversations from Page #' . $pageId);
 
         // Return Conversations Collection
         return $collection;
