@@ -97,18 +97,18 @@ class MessageService implements MessageServiceInterface
         }
 
         // FB User Assigned to Page?
-        if(!$this->users->leadExists($conversation->page_id, $user->user_id)) {
+        if(!$this->users->leadExists($conversation->pageId, $user->user_id)) {
             // Lead Does Not Exist?
-            $this->log->info('Lead doesn\'t exist for page #' . $conversation->page_id . ' and user #' . $user->user_id);
+            $this->log->info('Lead doesn\'t exist for page #' . $conversation->pageId . ' and user #' . $user->user_id);
 
             // Create Facebook Lead
             $lead = $this->leads->create($conversation->getLeadParams());
 
             // Convert FB User to Lead on Page
-            $this->users->convertLead($conversation->page_id, $user->user_id, $lead->identifier);
-            $this->log->info('Created lead #' . $lead->identifier . ' for page #' . $conversation->page_id . ' and user #' . $user->user_id);
+            $this->users->convertLead($conversation->pageId, $user->user_id, $lead->identifier);
+            $this->log->info('Created lead #' . $lead->identifier . ' for page #' . $conversation->pageId . ' and user #' . $user->user_id);
         } else {
-            $this->log->info('Lead already exists for page #' . $conversation->page_id . ' and user #' . $user->user_id);
+            $this->log->info('Lead already exists for page #' . $conversation->pageId . ' and user #' . $user->user_id);
         }
 
         // Return Facebook User
