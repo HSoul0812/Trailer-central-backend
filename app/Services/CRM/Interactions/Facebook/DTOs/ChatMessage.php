@@ -23,6 +23,11 @@ class ChatMessage
     private $messageId;
 
     /**
+     * @var string Conversation ID
+     */
+    private $conversationId;
+
+    /**
      * @var int Sender ID
      */
     private $fromId;
@@ -49,18 +54,40 @@ class ChatMessage
 
 
     /**
+     * Get Tags String
+     * 
+     * @return string
+     */
+    public function getTags(): string {
+        // Initialize Tags
+        $tags = '';
+
+        // Loop Tags
+        foreach($this->tags as $tag) {
+            if(!empty($tags)) {
+                $tags .= ',' . $tag;
+            }
+        }
+
+        // Return Tags
+        return $tags;
+    }
+
+
+    /**
      * Get From Crud
      * 
      * AbstractCrudObject $message
      * @return ChatMessage
      */
-    public static function getFromCrud(AbstractCrudObject $message): ChatMessage {
+    public static function getFromCrud(AbstractCrudObject $message, string $conversationId): ChatMessage {
         // Get Data
         $data = $message->exportAllData();
 
         // Create ChatMessage
         return new self([
             'message_id' => $data['id'],
+            'conversation_id' => $conversationId,
             'created_at' => Carbon::parse($data['created_time'])->toDateTimeString(),
             'from_id' => $data['from']['id'],
             'to_id' => self::parseToId($data['to']),
@@ -106,5 +133,28 @@ class ChatMessage
 
         // Return Result
         return $toId ?? 0;
+    }
+
+    /**
+     * Get Params For Conversation
+     * 
+     * @return array{message_id: string,
+     *               conversation_id: string,
+     *               from_id: int,
+     *               to_id: int,
+     *               message: string,
+     *               tags: string,
+     *               created_at: string}
+     */
+    public function getParams(): array {
+        return [
+            'message_id' => $this->messageId,
+            'conversation_id' => $this->conversationId,
+            'from_id' => $this->fromId,
+            'to_id' => $this->toId,
+            'message' => $this->text,
+            'tags' => $this->getTags(),
+            'created_at' => $this->createdAt
+        ];
     }
 }

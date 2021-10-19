@@ -433,7 +433,7 @@ class BusinessService implements BusinessServiceInterface
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($messages as $message) {
-                $collection->push(ChatMessage::getFromCrud($message));
+                $collection->push(ChatMessage::getFromCrud($message, $conversationId));
             }
 
             // Get Next
