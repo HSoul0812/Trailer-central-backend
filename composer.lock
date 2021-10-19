@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f9e92d516ed3c2e6d63bd3c52b2970b9",
+    "content-hash": "9b46f67c308134b04849d9e8076f8873",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -75,6 +75,66 @@
                 "search"
             ],
             "time": "2021-04-07T16:50:58+00:00"
+        },
+        {
+            "name": "awobaz/compoships",
+            "version": "2.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/topclaudy/compoships.git",
+                "reference": "df6a9eb558d03c2c8be2ebb07e277568eb3302c0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/topclaudy/compoships/zipball/df6a9eb558d03c2c8be2ebb07e277568eb3302c0",
+                "reference": "df6a9eb558d03c2c8be2ebb07e277568eb3302c0",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": ">=5.6 <9.0"
+            },
+            "require-dev": {
+                "ext-sqlite3": "*"
+            },
+            "suggest": {
+                "awobaz/blade-active": "Blade directives for the Laravel 'Active' package",
+                "awobaz/eloquent-auto-append": "Automatically append accessors to model serialization",
+                "awobaz/eloquent-mutators": "Reusable mutators (getters/setters) for Laravel 5's Eloquent",
+                "awobaz/syntactic": "Syntactic sugar for named and indexed parameters call."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Awobaz\\Compoships\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Claudin J. Daniel",
+                    "email": "cdaniel@awobaz.com"
+                }
+            ],
+            "description": "Laravel relationships with support for composite/multiple keys",
+            "keywords": [
+                "laravel",
+                "laravel composite keys",
+                "laravel relationships"
+            ],
+            "support": {
+                "issues": "https://github.com/topclaudy/compoships/issues",
+                "source": "https://github.com/topclaudy/compoships/tree/2.1.2"
+            },
+            "funding": [
+                {
+                    "url": "https://paypal.me/awobaz",
+                    "type": "custom"
+                }
+            ],
+            "time": "2021-09-04T16:00:10+00:00"
         },
         {
             "name": "aws/aws-sdk-php",
@@ -1764,11 +1824,11 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-develop",
+            "version": "dev-feature/FCLNP-42-fix-conversation-lead-relation",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
-                "reference": "e7c10fe736cc39f64b21aa9147752bc6e395f804"
+                "reference": "8fd7d56324ac0c7c64f8886e4ff46e0991f75b69"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -9941,5 +10001,5 @@
         "ext-json": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.1.0"
 }

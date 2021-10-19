@@ -12,6 +12,7 @@
         "php": "^7.2",
         "ext-json": "*",
         "algolia/algoliasearch-client-php": "^2.4",
+        "awobaz/compoships": "^2.1",
         "aws/aws-sdk-php": "^3.0",
         "babenkoivan/elastic-migrations": "^1.2",
         "babenkoivan/elastic-scout-driver": "^1.2",
@@ -47,12 +48,12 @@
         "predis/predis": "^1.1",
         "psr/log": "^1.0",
         "spatie/laravel-sitemap": "^5.7",
+        "staudenmeir/belongs-to-through": "^2.5",
         "swiftmailer/swiftmailer": "^6.0",
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
-        "twilio/sdk": "^5.31",
-        "staudenmeir/belongs-to-through": "^2.5"
+        "twilio/sdk": "^5.31"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

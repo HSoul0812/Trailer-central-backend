@@ -2,12 +2,16 @@
 
 namespace App\Models\CRM\Leads\Facebook;
 
+use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\Lead AS CrmLead;
 use App\Models\Integration\Facebook\Page;
 use App\Models\Traits\TableAware;
+use Awobaz\Compoships\Compoships;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
@@ -18,10 +22,16 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $user_id
  * @property int $lead_id
  * @property int $merge_id
+ *
+ * @property Page $page
+ * @property User $fbUser
+ * @property Conversation<Collection> $conversations
+ * @property Interaction $interaction
+ * @property CrmLead $lead
  */
 class Lead extends Model
 {
-    use TableAware;
+    use TableAware, Compoships;
 
     const TABLE_NAME = 'fbapp_users_leads';
 
@@ -54,17 +64,17 @@ class Lead extends Model
 
     /**
      * Get Page
-     * 
+     *
      * @return BelongsTo
      */
-    public function page()
+    public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class, 'page_id', 'page_id');
     }
 
     /**
      * Get facebook user
-     * 
+     *
      * @return BelongsTo
      */
     public function fbUser(): BelongsTo
@@ -73,8 +83,18 @@ class Lead extends Model
     }
 
     /**
+     * Get all conversations
+     *
+     * @return HasMany
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class, ['page_id', 'user_id'], ['page_id', 'user_id']);
+    }
+
+    /**
      * Get the interaction that owns the facebook lead.
-     * 
+     *
      * @return BelongsTo
      */
     public function interaction(): BelongsTo
@@ -84,7 +104,7 @@ class Lead extends Model
 
     /**
      * Get lead related to the facebook lead
-     * 
+     *
      * @return HasOne
      */
     public function lead(): HasOne
