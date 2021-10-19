@@ -429,10 +429,11 @@ class BusinessService implements BusinessServiceInterface
 
             // Get Conversations
             $messages = $conversation->getMessages(
-                ['id', 'created_time', 'message', 'from', 'to'],
+                ['id', 'created_time', 'message', 'from', 'to', 'tags'],
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($messages as $message) {
+                $this->log->debug("Got full data for message " . print_r($message->exportAllData()));
                 $collection->push(ChatMessage::getFromCrud($message));
             }
 
