@@ -14,7 +14,6 @@ class ShippingControllerTest extends TestCase
 
         $response = $this->json("POST", '/api/ecommerce/shipping-costs',
             [
-                'customer_details' => $shippingSeeder->customerDetails,
                 'shipping_details' => $shippingSeeder->shippingDetails,
                 'items' => $shippingSeeder->products
             ],
@@ -40,7 +39,6 @@ class ShippingControllerTest extends TestCase
 
         $response = $this->json("POST", '/api/ecommerce/shipping-costs',
             [
-                'customer_details' => $shippingSeeder->customerDetails,
                 'shipping_details' => $shippingSeeder->shippingDetails,
                 'items' => $shippingSeeder->products
             ]
