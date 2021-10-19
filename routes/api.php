@@ -339,7 +339,7 @@ $api->version('v1', function ($route) {
     /**
      * Facebook Webhooks
      */
-    $route->post('leads/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\WebhookController@message');
+    $route->post('leads/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\WebhookController@message');
 
     /**
      * Interaction Messages

@@ -8,7 +8,7 @@ use App\Services\CRM\Interactions\Facebook\WebhookServiceInterface;
 use App\Transformers\CRM\Interactions\Facebook\MessageTransformer;
 use Dingo\Api\Http\Request;
 
-class FacebookController extends RestfulController
+class WebhookController extends RestfulController
 {
     /**
      * @var WebhookServiceInterface
