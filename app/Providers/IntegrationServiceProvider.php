@@ -36,6 +36,8 @@ use App\Repositories\Integration\CVR\CvrFileRepository;
 use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Services\Integration\CVR\CvrFileService;
 use App\Services\Integration\CVR\CvrFileServiceInterface;
+use FacebookAds\Http\Client;
+use FacebookAds\Http\Request;
 use Illuminate\Support\ServiceProvider;
 
 class IntegrationServiceProvider extends ServiceProvider
@@ -72,6 +74,12 @@ class IntegrationServiceProvider extends ServiceProvider
         });
         $this->app->bind(CollectorFieldsRepositoryInterface::class, function () {
             return new CollectorFieldsRepository(CollectorFields::query());
+        });
+
+
+        // Get Facebook Client
+        $this->app->bind(Request::class, function() {
+            return new Request(new Client());
         });
     }
 

@@ -10,14 +10,20 @@ use Carbon\Carbon;
 
 class TaskTransformer extends TransformerAbstract 
 {
+    /**
+     * @var LeadTransformer
+     */
     protected $leadTransformer;
-    
+
+    /**
+     * @var SalesPersonTransformer
+     */
     protected $salesPersonTransformer;
     
-    public function __construct()
+    public function __construct(LeadTransformer $leadTransformer, SalesPersonTransformer $salesPersonTransformer)
     {
-        $this->leadTransformer = new LeadTransformer;
-        $this->salesPersonTransformer = new SalesPersonTransformer;
+        $this->leadTransformer = $leadTransformer;
+        $this->salesPersonTransformer = $salesPersonTransformer;
     }
     public function transform(Interaction $interaction)
     {       

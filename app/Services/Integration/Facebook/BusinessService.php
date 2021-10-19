@@ -15,7 +15,6 @@ use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\CRM\Interactions\Facebook\DTOs\ChatConversation;
 use App\Services\CRM\Interactions\Facebook\DTOs\ChatMessage;
 use FacebookAds\Api;
-use FacebookAds\Http\Client;
 use FacebookAds\Http\Request;
 use FacebookAds\Http\Parameters;
 use FacebookAds\Object\Application;
@@ -98,13 +97,12 @@ class BusinessService implements BusinessServiceInterface
     /**
      * Construct Http Client/Request
      */
-    public function __construct(PageRepositoryInterface $pages) {
+    public function __construct(PageRepositoryInterface $pages, Request $request) {
         // Get Pages Repository
         $this->pages = $pages;
 
         // Init Request
-        $this->client = new Client();
-        $this->request = new Request($this->client);
+        $this->request = $request;
         $this->request->setGraphVersion(self::GRAPH_API_VERSION);
 
         // Initialize Logger
@@ -535,7 +533,7 @@ class BusinessService implements BusinessServiceInterface
         // Catch Error
         try {
             // Get URL
-            $response = $this->client->sendRequest($this->request);
+            $response = $this->request->getClient()->sendRequest($this->request);
 
             // Validate!
             $content = $response->getContent();
@@ -620,7 +618,7 @@ class BusinessService implements BusinessServiceInterface
         // Catch Error
         try {
             // Get URL
-            $response = $this->client->sendRequest($this->request);
+            $response = $this->request->getClient()->sendRequest($this->request);
 
             // Return Access Token
             return $response->getContent();
