@@ -12,7 +12,8 @@ class DealerLocationTransformer extends TransformerAbstract
     protected $availableIncludes = [
         'fees',
         'salesTaxItems',
-        'salesTaxItemsV1'
+        'salesTaxItemsV1',
+        'mileageFees',
     ];
 
     public function transform(DealerLocation $dealerLocation): array
@@ -77,6 +78,15 @@ class DealerLocationTransformer extends TransformerAbstract
         }
 
         return $this->primitive($location->salesTaxItems);
+    }
+
+    public function includeMileageFees(DealerLocation  $location): Primitive
+    {
+        if (empty($location->mileageFees)) {
+            return new Primitive([]);
+        }
+
+        return $this->primitive($location->mileageFees);
     }
 
     /**

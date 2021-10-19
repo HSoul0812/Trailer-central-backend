@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\DealerLocationMileageFee;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Region;
@@ -210,6 +211,14 @@ class DealerLocation extends Model
     public function fees(): HasMany
     {
         return $this->hasMany(DealerLocationQuoteFee::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function mileageFees(): HasMany
+    {
+        return $this->hasMany(DealerLocationMileageFee::class, 'dealer_location_id', 'dealer_location_id');
     }
 
     /**
