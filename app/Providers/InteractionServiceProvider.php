@@ -52,6 +52,8 @@ use App\Services\CRM\Text\TwilioService;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Services\CRM\Interactions\Facebook\MessageService;
 use App\Services\CRM\Interactions\Facebook\MessageServiceInterface;
+use App\Services\CRM\Interactions\Facebook\WebhookService;
+use App\Services\CRM\Interactions\Facebook\WebhookServiceInterface;
 use App\Services\CRM\Interactions\InteractionService;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailService;
@@ -85,6 +87,7 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
         $this->app->bind(NtlmEmailServiceInterface::class, NtlmEmailService::class);
         $this->app->bind(MessageServiceInterface::class, MessageService::class);
+        $this->app->bind(WebhookServiceInterface::class, WebhookService::class);
 
 
         // Text Repositories
