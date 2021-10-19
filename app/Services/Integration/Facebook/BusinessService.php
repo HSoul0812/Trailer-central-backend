@@ -433,7 +433,7 @@ class BusinessService implements BusinessServiceInterface
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($messages as $message) {
-                $this->log->debug("Got full data for message " . print_r($message->exportAllData()));
+                $this->log->debug("Got full data for message " . print_r($message->exportAllData()), true);
                 $collection->push(ChatMessage::getFromCrud($message));
             }
 
