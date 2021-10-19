@@ -142,7 +142,7 @@ class MessageService implements MessageServiceInterface
             foreach($messages as $message) {
                 $this->messages->createOrUpdate($message->getParams());
             }
-            $this->log->debug('Updated ' . $messages->count() . ' messages for conversation #' . $conversation->conversation_id);
+            $this->log->debug('Updated ' . $messages->count() . ' messages for conversation #' . $conversation->conversationId);
         }
         $this->log->debug('Updated ' . $conversations->count() . ' conversations from Page #' . $pageId);
 
