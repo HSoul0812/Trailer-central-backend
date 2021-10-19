@@ -82,6 +82,11 @@ class Part extends BasePart
         return env('INDEX_PARTS_TEXTRAIL', 'parts_textrail');
     }
 
+    public function searchable()
+    {
+       return;
+    }
+
     public function toSearchableArray(): array
     {
         $array = $this->toArray();

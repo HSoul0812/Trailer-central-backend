@@ -6,6 +6,7 @@ use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Ecommerce\CreateCompletedOrderRequest;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
+use App\Repositories\Parts\Textrail\PartRepository;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
 use App\Transformers\Ecommerce\CompletedOrderTransformer;
 use Dingo\Api\Http\Request;
@@ -19,23 +20,29 @@ class CompletedOrderController extends RestfulController
     /** @var CompletedOrderRepositoryInterface */
     private $completedOrderRepo;
 
+    /** @var PartRepository */
+    private $textRailPartRepo;
+
     /**
      * CompletedOrderController constructor.
      * @param CompletedOrderServiceInterface $completedOrderService
      * @param CompletedOrderRepositoryInterface $completedOrderRepo
+     * @param PartRepository $textRailPartRepo
      */
-    public function __construct(CompletedOrderServiceInterface $completedOrderService, CompletedOrderRepositoryInterface $completedOrderRepo)
+    public function __construct(
+        CompletedOrderServiceInterface $completedOrderService,
+        CompletedOrderRepositoryInterface $completedOrderRepo,
+        PartRepository $textRailPartRepo
+    )
     {
         $this->completedOrderService = $completedOrderService;
         $this->completedOrderRepo = $completedOrderRepo;
+        $this->textRailPartRepo = $textRailPartRepo;
     }
 
-
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
-        $completedOrders = $this->completedOrderRepo->getAll($request->all());
-
-        return $this->response->collection($completedOrders, new CompletedOrderTransformer());
+        return $this->response->paginator($this->completedOrderRepo->getAll($request->all()), new CompletedOrderTransformer($this->textRailPartRepo));
     }
 
     /**
@@ -59,6 +66,6 @@ class CompletedOrderController extends RestfulController
 
     public function show(int $id)
     {
-        return $this->response->item($this->completedOrderRepo->get(['id' => $id]), new CompletedOrderTransformer());
+        return $this->response->item($this->completedOrderRepo->get(['id' => $id]), new CompletedOrderTransformer($this->textRailPartRepo));
     }
 }
