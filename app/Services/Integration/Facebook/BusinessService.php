@@ -433,7 +433,6 @@ class BusinessService implements BusinessServiceInterface
                 ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
             );
             foreach($messages as $message) {
-                $this->log->debug("Got full data for message: " . print_r($message->exportAllData(), true));
                 $collection->push(ChatMessage::getFromCrud($message));
             }
 
@@ -441,7 +440,7 @@ class BusinessService implements BusinessServiceInterface
             $next = $messages->getNext();
             if(!empty($next)) {
                 $this->log->debug("Retrieved " . $collection->count() . " messages so far, getting next " . $limit . " messages");
-                return $this->getMessages($accessToken, $messageId, $limit, $messages->getAfter(), $collection);
+                return $this->getMessages($accessToken, $conversationId, $limit, $messages->getAfter(), $collection);
             }
 
             // Return Collection<ChatMessage>

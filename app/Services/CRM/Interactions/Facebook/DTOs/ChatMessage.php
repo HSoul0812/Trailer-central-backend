@@ -62,7 +62,7 @@ class ChatMessage
             'message_id' => $data['id'],
             'created_at' => Carbon::parse($data['created_time'])->toDateTimeString(),
             'from_id' => $data['from']['id'],
-            'to_id' => $data['to']['id'],
+            'to_id' => self::parseToId($data['to']),
             'text' => $data['message'],
             'tags' => self::parseTags($data['tags']['data'])
         ]);
@@ -82,5 +82,28 @@ class ChatMessage
 
         // Return Result
         return $collection;
+    }
+
+    /**
+     * Parse To ID From To Array
+     * 
+     * @param array $to
+     * @return int
+     */
+    public static function parseToId(array $to): int {
+        // Parse To Data
+        if(isset($to['data'])) {
+            if(is_array($to['data'])) {
+                $toId = (int) $to['data'][0]['id'];
+            }
+        }
+
+        // Get To ID
+        if(isset($to['id'])) {
+            $toId = (int) $to['id'];
+        }
+
+        // Return Result
+        return $toId ?? 0;
     }
 }
