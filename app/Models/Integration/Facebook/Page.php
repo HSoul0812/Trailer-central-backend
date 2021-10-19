@@ -2,11 +2,12 @@
 
 namespace App\Models\Integration\Facebook;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
 use App\Models\Website\Website;
 use App\Models\Integration\Facebook\Catalog;
 use App\Models\Integration\Auth\AccessToken;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Page
