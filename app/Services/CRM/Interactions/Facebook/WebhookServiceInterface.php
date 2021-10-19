@@ -3,13 +3,14 @@
 namespace App\Services\CRM\Interactions\Facebook;
 
 use App\Http\Requests\CRM\Interactions\Facebook\MessageWebhookRequest;
+use App\Models\CRM\Interactions\Facebook\Message;
 
 interface WebhookServiceInterface {
     /**
-     * Handle Messages From Webhook
+     * Handle Message From Webhook
      * 
      * @param MessageWebhookRequest $request
-     * @return MessageWebhookResponse
+     * @return Message
      */
-    public function message(MessageWebhookRequest $request): MessageWebhookResponse;
+    public function message(MessageWebhookRequest $request): Message;
 }
