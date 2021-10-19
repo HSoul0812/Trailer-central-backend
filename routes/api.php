@@ -1,4 +1,4 @@
- <?php
+<?php
 
 use Dingo\Api\Routing\Router;
 
@@ -43,16 +43,40 @@ $api->version('v1', function ($route) {
     /**
      * Floorplan Payments
      */
-    $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
-    $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
 
-    $route->put('inventory/floorplan/bulk/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create');
+    $route->group([
+        'prefix' => 'inventory'
+    ], function ($route) {
+        $route->group([
+            'prefix' => 'floorplan',
+        ], function ($route) {
+            $route->get(
+                'payments',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index'
+            );
+            $route->put(
+                'payments',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create'
+            );
+            $route->put(
+                'bulk/payments',
+                'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create'
+            );
 
-    $route->get('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@index');
-    $route->put('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@create');
-    $route->get('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@show')->where('id', '[0-9]+');
-    $route->post('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@update')->where('id', '[0-9]+');
-    $route->delete('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')->where('id', '[0-9]+');
+            $route->group([
+                'prefix' => 'vendors',
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@create');
+                $route->get('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@show')
+                    ->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@update')
+                    ->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')
+                    ->where('id', '[0-9]+');
+            });
+        });
+    });
 
     /**
      * Part bins
@@ -177,7 +201,6 @@ $api->version('v1', function ($route) {
     |
     */
 
-
     /**
      * Inventory Overlay
      */
@@ -185,7 +208,6 @@ $api->version('v1', function ($route) {
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
     });
-
 
     /**
      * Inventory Entity
@@ -319,6 +341,23 @@ $api->version('v1', function ($route) {
     });
 
 
+    /**
+     * Website users
+     */
+    $route->group(['prefix' => 'website/{websiteId}/user'], function($route) {
+        $route->post('signup', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@create');
+        $route->post('login', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@login');
+    });
+
+    /**
+     * Website User Favorite Inventory
+     */
+    $route->group(['prefix' => 'website/inventory/favorite', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
@@ -383,6 +422,8 @@ $api->version('v1', function ($route) {
     |
     |
     */
+
+    $route->post('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@create');
 
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');

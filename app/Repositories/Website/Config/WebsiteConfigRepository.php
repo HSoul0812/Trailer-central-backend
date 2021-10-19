@@ -102,6 +102,18 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
 
     /**
+     * @param int $websiteId
+     * @param string $key
+     * @param string $value
+     * @return WebsiteConfig
+     */
+    public function setValue(int $websiteId, string $key, string $value): WebsiteConfig {
+        return WebsiteConfig::updateOrCreate(
+            ['website_id' => $websiteId, 'key' => $key],
+            ['value' => $value]
+        );
+    }
+    /**
      * Get Values Mapping
      *
      * @param array $values

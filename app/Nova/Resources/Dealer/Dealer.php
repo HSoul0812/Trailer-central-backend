@@ -2,6 +2,8 @@
 
 namespace App\Nova\Resources\Dealer;
 
+use App\Nova\Actions\ActivateUserAccounts;
+use App\Nova\Actions\DeactivateUserAccounts;
 use App\Nova\Actions\Dealer\ActivateCrm;
 use App\Nova\Actions\Dealer\DeactivateCrm;
 use App\Nova\Actions\Dealer\ActivateECommerce;
@@ -62,6 +64,9 @@ class Dealer extends Resource
             Boolean::make('CRM', 'isCrmActive')->hideWhenCreating()->hideWhenUpdating(),
             
             Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
+
+            Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
+
         ];
     }
 
@@ -112,6 +117,8 @@ class Dealer extends Resource
             app()->make(DeactivateCrm::class),
             app()->make(ActivateECommerce::class),
             app()->make(DeactivateECommerce::class),
+            app()->make(ActivateUserAccounts::class),
+            app()->make(DeactivateUserAccounts::class),
         ];
     }
 }

@@ -166,6 +166,8 @@ class InventoryService implements InventoryServiceInterface
     {
         try {
             $this->inventoryRepository->beginTransaction();
+            
+            $currentInventory = $this->inventoryRepository->get(['id' => $params['inventory_id']]);
 
             $newImages = $params['new_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
@@ -182,13 +184,15 @@ class InventoryService implements InventoryServiceInterface
             $addBill = $params['add_bill'] ?? false;
 
             if (!empty($newImages)) {
+                $currentInventory->images()->delete();
                 $params['new_images'] = $this->uploadImages($params, 'new_images');
-            }
+            } 
 
             $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
             unset($params['hidden_files']);
 
             if (!empty($newFiles)) {
+                $currentInventory->inventoryFiles()->delete();
                 $params['new_files'] = $this->uploadFiles($params, 'new_files');
             }
 
@@ -205,6 +209,10 @@ class InventoryService implements InventoryServiceInterface
 
                 throw new InventoryException('Inventory item update error');
             }
+            
+//            if (empty($newImages)) {
+//                $inventory->images()->delete();
+//            }
 
             if ($addBill) {
                 $this->addBill($params, $inventory);

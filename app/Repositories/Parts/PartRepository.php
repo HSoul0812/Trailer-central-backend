@@ -469,7 +469,9 @@ class PartRepository implements PartRepositoryInterface {
 
                         }
                     }
-                }
+                } else {
+                    $part->images()->delete();
+                } 
 
                 if (isset($params['bins'])) {
                     $part->bins()->delete();

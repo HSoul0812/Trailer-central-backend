@@ -159,7 +159,10 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
         }
 
         if (isset($params['inventory_ids']) && is_array($params['inventory_ids'])) {
-            $query = $query->whereIn('inventory_id', $params['inventory_ids']);
+            $query = $query->where(function($q) use ($params) {
+                $q->where('inventory_id', $params['inventory_ids'])
+                        ->where('inventory_id', '!=', 0);
+            });
         }
 
         return $query->paginate($params['per_page'])->appends($params);
