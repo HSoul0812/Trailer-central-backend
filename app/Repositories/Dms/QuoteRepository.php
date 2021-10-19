@@ -8,12 +8,21 @@ use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Account\Payment;
+use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @author Marcel
  */
-class QuoteRepository implements QuoteRepositoryInterface {
+class QuoteRepository extends BaseRepository implements QuoteRepositoryInterface
+{
+    /**
+     * @param UnitSale $unitSale
+     */
+    public function __construct(UnitSale $unitSale)
+    {
+        $this->model = $unitSale;
+    }
 
     private $sortOrders = [
         'title' => [
@@ -180,7 +189,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
-    public function getCompletedDeals(int $dealerId): Collection 
+    public function getCompletedDeals(int $dealerId): Collection
     {
         return UnitSale::where('dealer_id', '=', $dealerId)
                 ->where('is_archived', '=', 0)
@@ -193,5 +202,4 @@ class QuoteRepository implements QuoteRepositoryInterface {
                         });
                 })->orderBy('created_at', 'asc')->get();
     }
-
 }
