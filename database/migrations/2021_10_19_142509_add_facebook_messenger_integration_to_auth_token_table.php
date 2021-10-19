@@ -49,12 +49,12 @@ class AddFacebookMessengerIntegrationToAuthTokenTable extends Migration
         $fb = DB::table('interaction_integration')->where(['name' => self::FBCHAT_INTEGRATION_NAME])->first(['id']);
 
         // Delete Auth Token
-        DB::table('auth_token')->delete(['user_type' => 'integration', 'user_id' => $fb->id]);
+        DB::table('auth_token')->where(['user_type' => 'integration', 'user_id' => $fb->id])->delete();
 
         // Delete Permission
-        DB::table('interaction_integration_permission')->delete(['integration_id' => $fb->id]);
+        DB::table('interaction_integration_permission')->where(['integration_id' => $fb->id])->delete();
 
         // Delete Integration
-        DB::table('interaction_integration')->delete(['id' => $fb->id]);
+        DB::table('interaction_integration')->where(['id' => $fb->id])->delete();
     }
 }
