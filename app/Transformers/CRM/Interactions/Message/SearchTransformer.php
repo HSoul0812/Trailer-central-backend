@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Transformers\CRM\Interactions;
+namespace App\Transformers\CRM\Interactions\Message;
 
 use League\Fractal\TransformerAbstract;
 
@@ -8,7 +8,7 @@ use League\Fractal\TransformerAbstract;
  * Class InteractionLeadTransformer
  * @package App\Transformers\CRM\Interactions
  */
-class InteractionMessageTransformer extends TransformerAbstract
+class SearchTransformer extends TransformerAbstract
 {
     /**
      * @param array $interactionMessage

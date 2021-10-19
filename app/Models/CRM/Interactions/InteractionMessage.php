@@ -30,6 +30,12 @@ class InteractionMessage extends Model
     const MESSAGE_TYPE_SMS = 'sms';
     const MESSAGE_TYPE_FB = 'fb';
 
+    const MESSAGE_TYPES = [
+        self::MESSAGE_TYPE_EMAIL,
+        self::MESSAGE_TYPE_SMS,
+        self::MESSAGE_TYPE_FB,
+    ];
+
     protected $table = 'interaction_message';
 
     protected $fillable = [
@@ -100,7 +106,15 @@ class InteractionMessage extends Model
             $array['to_number'] = null;
         }
 
-        $array['date_sent'] = $message->date_sent instanceof \DateTimeInterface ? $message->date_sent : null;
+        if (empty($message->date_sent)) {
+            $dateSent = null;
+        } elseif ($message->date_sent instanceof \DateTimeInterface) {
+            $dateSent = $message->date_sent;
+        } else {
+            $dateSent = new Carbon($this->message->date_sent);
+        }
+
+        $array['date_sent'] = $dateSent;
         $array['lead_id'] = $message->lead_id;
         $array['message_created_at'] = $message->created_at;
         $array['message_updated_at'] = $message->updated_at;
