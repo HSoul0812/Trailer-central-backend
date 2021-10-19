@@ -5,6 +5,7 @@ namespace App\Services\CRM\Interactions\Facebook\DTOs;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use FacebookAds\Object\AbstractCrudObject;
+use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
 /**
