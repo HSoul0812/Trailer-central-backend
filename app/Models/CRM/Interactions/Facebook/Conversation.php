@@ -3,18 +3,25 @@
 namespace App\Models\CRM\Interactions\Facebook;
 
 use App\Models\CRM\Leads\Facebook\User;
+use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\Facebook\Page;
 use App\Models\Traits\TableAware;
 use Awobaz\Compoships\Compoships;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\CRM\Leads\Facebook\Lead as FbLead;
 
 /**
  * Class Conversation
  * @package App\Models\CRM\Interactions\Facebook
  *
  *  @property User $fbUser
+ *  @property FbLead $fbLead
+ *  @property Lead $lead
+ *  @property Page $page
+ *  @property Message<Collection> $messages
  */
 class Conversation extends Model
 {
@@ -65,7 +72,7 @@ class Conversation extends Model
      *
      * @return BelongsTo
      */
-    public function page()
+    public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class, 'page_id', 'page_id');
     }
@@ -82,7 +89,7 @@ class Conversation extends Model
 
     /**
      * Get facebook lead
-     * 
+     *
      * @return BelongsTo
      */
     public function fbLead(): BelongsTo
@@ -92,7 +99,7 @@ class Conversation extends Model
 
     /**
      * Get lead
-     * 
+     *
      * @return Lead
      */
     public function getLeadAttribute(): Lead
