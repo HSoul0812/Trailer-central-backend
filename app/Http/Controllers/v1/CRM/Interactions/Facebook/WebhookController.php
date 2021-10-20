@@ -36,7 +36,7 @@ class WebhookController extends RestfulController
         $request = new MessageWebhookRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->item($this->service->message($request), $this->transformer);
+            return $this->response->collection($this->service->message($request), $this->transformer);
         }
 
         return $this->response->errorBadRequest();

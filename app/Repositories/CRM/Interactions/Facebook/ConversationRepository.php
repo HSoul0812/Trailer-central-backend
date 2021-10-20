@@ -137,4 +137,17 @@ class ConversationRepository implements ConversationRepositoryInterface {
         // Create Instead
         return $this->create($params);
     }
+
+
+    /**
+     * Find By Page ID and User ID
+     * 
+     * @param string $pageId
+     * @param string $userId
+     * @return null|Conversation
+     */
+    public function getByParticipants(string $pageId, string $userId): ?Conversation {
+        // Get Conversation By ID
+        return Conversation::where('page_id', $pageId)->where('user_id', $userId)->first();
+    }
 }

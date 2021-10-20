@@ -21,4 +21,13 @@ interface ConversationRepositoryInterface extends Repository {
      * @return Conversation
      */
     public function createOrUpdate(array $params): Conversation;
+
+    /**
+     * Find By Page ID and User ID
+     * 
+     * @param string $pageId
+     * @param string $userId
+     * @return null|Conversation
+     */
+    public function getByParticipants(string $pageId, string $userId): ?Conversation;
 }
