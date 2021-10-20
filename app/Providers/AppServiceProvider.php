@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Contracts\LoggerServiceInterface;
 use App\Helpers\ImageHelper;
 use App\Helpers\SanitizeHelper;
+use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\File\FileController;
 use App\Http\Controllers\v1\File\ImageController;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
@@ -145,6 +146,7 @@ use App\Services\Export\DomPdfExporterService;
 use App\Services\Export\DomPdfExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
+use App\Transformers\Ecommerce\CompletedOrderTransformer;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -347,7 +349,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CompletedOrderServiceInterface::class, CompletedOrderService::class);
         $this->app->bind(CompletedOrderRepositoryInterface::class, CompletedOrderRepository::class);
-        $this->app->when(CompletedOrderService::class)
+        $this->app->when([CompletedOrderService::class, CompletedOrderController::class, CompletedOrderTransformer::class])
             ->needs(PartRepositoryInterface::class)
             ->give(function () {
                 return app()->make(PartRepository::class);

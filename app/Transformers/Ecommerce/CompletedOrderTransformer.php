@@ -2,29 +2,27 @@
 namespace App\Transformers\Ecommerce;
 
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
-use App\Repositories\Parts\Textrail\PartRepository;
+use App\Repositories\Parts\PartRepositoryInterface;
 use League\Fractal\TransformerAbstract;
 
 class CompletedOrderTransformer extends TransformerAbstract
 {
-    /** @var PartRepository */
+    /** @var PartRepositoryInterface */
     private $textRailPartRepository;
 
     /**
      * CompletedOrderTransformer constructor.
-     * @param PartRepository $textRailPartRepository
+     * @param PartRepositoryInterface $textRailPartRepository
      */
-    public function __construct(PartRepository $textRailPartRepository)
+    public function __construct(PartRepositoryInterface $textRailPartRepository)
     {
         $this->textRailPartRepository = $textRailPartRepository;
     }
 
     public function transform(CompletedOrder $completedOrder)
     {
-        $parts = json_decode($completedOrder->parts, true);
-
         $partCollection = [];
-        foreach ($parts as $part) {
+        foreach ($completedOrder->parts as $part) {
             $partCollection[] = $this->textRailPartRepository->getById($part['id']);
         }
 

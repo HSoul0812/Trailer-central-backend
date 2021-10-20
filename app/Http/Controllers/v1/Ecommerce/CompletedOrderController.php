@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v1\Ecommerce;
 
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Ecommerce\CreateCompletedOrderRequest;
-use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
+use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Parts\Textrail\PartRepository;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
 use App\Transformers\Ecommerce\CompletedOrderTransformer;
@@ -20,7 +20,7 @@ class CompletedOrderController extends RestfulController
     /** @var CompletedOrderRepositoryInterface */
     private $completedOrderRepo;
 
-    /** @var PartRepository */
+    /** @var PartRepositoryInterface */
     private $textRailPartRepo;
 
     /**
@@ -32,7 +32,7 @@ class CompletedOrderController extends RestfulController
     public function __construct(
         CompletedOrderServiceInterface $completedOrderService,
         CompletedOrderRepositoryInterface $completedOrderRepo,
-        PartRepository $textRailPartRepo
+        PartRepositoryInterface $textRailPartRepo
     )
     {
         $this->completedOrderService = $completedOrderService;
