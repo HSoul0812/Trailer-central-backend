@@ -16,7 +16,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
       }
 
       $query = CompletedOrder::select('*');
-      
+
       if (isset($params['status'])) {
           $query->where('status', $params['status']);
       }
@@ -36,9 +36,10 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
 
             $completedOrder->event_id = $params['id'];
             $completedOrder->object_id = $data['id'];
-            $completedOrder->parts = $data['parts'];
-            $completedOrder->total_amount = $data['amount_total'];
+            $completedOrder->parts = isset($data['parts']) ? json_decode($data['parts'], true) : [];
+            $completedOrder->total_amount = $data['amount_total'] / 100; // Since Stripe use the amount in cents, we need to convert it
             $completedOrder->payment_status = $data['payment_status'] ?? '';
+            $completedOrder->payment_intent = $data['payment_intent'] ?? null;
 
             $completedOrder->shipping_name = $data['shipto_name'] ?? '';
             $completedOrder->shipping_country = $data['shipto_country'] ?? '';
@@ -48,6 +49,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             $completedOrder->shipping_region = $data['shipto_region'] ?? '';
 
             if (isset($data['no-billing']) && $data['no-billing'] == "1") {
+
                 $completedOrder->billing_name = $data['shipto_name'] ?? '';
                 $completedOrder->billing_country = $data['shipto_country'] ?? '';
                 $completedOrder->billing_address = $data['shipto_address'] ?? '';
@@ -64,14 +66,12 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             }
         } else {
             $completedOrder->customer_email = $data['customer_details']['email'];
-            $completedOrder->total_amount = $data['amount_total'];
+            $completedOrder->total_amount = $data['amount_total'] / 100; // Since Stripe use the amount in cents, we need to convert it
             $completedOrder->payment_method = $data['payment_method_types'][0];
             $completedOrder->stripe_customer = $data['customer'] ?? '';
 
-            $parts = json_decode($completedOrder->parts, true);
-
             // Dispatch for handle quantity reducing.
-            foreach ($parts as $part) {
+            foreach ($completedOrder->parts as $part) {
                 QtyUpdated::dispatch($part['id'], $part['qty']);
             }
         }
@@ -81,11 +81,24 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         return $completedOrder;
     }
 
-    public function update($params)
+    /**
+     * @param  array  $params
+     * @return bool
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function update($params): bool
     {
-        // TODO: Implement delete() method.
+        $order = $this->get($params);
+
+        return $order && $order->fill($params)->save();
     }
 
+    /**
+     * @param  array  $params
+     * @return CompletedOrder
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
     public function get($params)
     {
         if (isset($params['id'])) {
