@@ -5,7 +5,6 @@ namespace App\Http\Controllers\v1\CRM\Interactions\Facebook;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\CRM\Interactions\Facebook\MessageWebhookRequest;
 use App\Services\CRM\Interactions\Facebook\WebhookServiceInterface;
-use App\Transformers\CRM\Interactions\Facebook\MessageTransformer;
 use Dingo\Api\Http\Request;
 
 class WebhookController extends RestfulController
@@ -26,10 +25,9 @@ class WebhookController extends RestfulController
      * @param WebhookServiceInterface $service
      * @param MessageTransformer $transformer
      */
-    public function __construct(WebhookServiceInterface $service, MessageTransformer $transformer)
+    public function __construct(WebhookServiceInterface $service)
     {
         $this->service = $service;
-        $this->transformer = $transformer;
     }
 
     public function message(Request $request) {
@@ -40,7 +38,8 @@ class WebhookController extends RestfulController
         $request = new MessageWebhookRequest($json);
 
         if ($request->validate()) {
-            return $this->response->collection($this->service->message($request), $this->transformer);
+            $this->service->message($request);
+            return $this->response->item(WebhookServiceInterface::VALID_RESPONSE);
         }
 
         return $this->response->errorBadRequest();

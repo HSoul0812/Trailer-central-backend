@@ -12,16 +12,16 @@ use App\Http\Requests\Request;
 class MessageWebhookRequest extends Request
 {
     protected $rules = [
-        'object' => 'required|string',
-        'entry' => 'required|array',
-        'entry.*.id' => 'required|string',
-        'entry.*.time' => 'required|integer',
-        'entry.*.messaging' => 'required|array',
-        'entry.*.messaging.*.sender.id' => 'required|string',
-        'entry.*.messaging.*.recipient.id' => 'required|string',
-        'entry.*.messaging.*.timestamp' => 'required|integer',
-        'entry.*.messaging.*.message' => 'required|array',
-        'entry.*.messaging.*.message.mid' => 'required|string',
-        'entry.*.messaging.*.message.text' => 'required|string'
+        'object' => 'string',
+        'entry' => 'array',
+        'entry.*.id' => 'string',
+        'entry.*.time' => 'integer',
+        'entry.*.messaging' => 'array',
+        'entry.*.messaging.*.sender.id' => 'string',
+        'entry.*.messaging.*.recipient.id' => 'string',
+        'entry.*.messaging.*.timestamp' => 'integer',
+        'entry.*.messaging.*.message' => 'array',
+        'entry.*.messaging.*.message.mid' => 'string',
+        'entry.*.messaging.*.message.text' => 'string'
     ];
 }

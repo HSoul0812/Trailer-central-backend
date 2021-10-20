@@ -69,18 +69,20 @@ class WebhookService implements WebhookServiceInterface
      * @param MessageWebhookRequest $request
      * @return Collection<Message>
      */
-    public function message(MessageWebhookRequest $request): Collection {
+    public function message(MessageWebhookRequest $request): bool {
         // Check Request
         $this->log->info('The following request was received by the Facebook Message Webhook: ' . print_r($request->all(), true));
 
         // Get Page ID
         if($request->object !== 'page') {
-            throw new InvalidFacebookWebhookObjectException;
+            $this->log->error('Webhook sent an invalid object, we can\'t process this here!');
+            return false;
         }
 
         // Missing Entry?
         if(empty($request->entry)) {
-            throw new MissingFacebookWebhookEntryException;
+            $this->log->error('Webhook is missing entries to updated, we can\'t process this here!');
+            return false;
         }
 
         // Loop Entries
@@ -107,6 +109,6 @@ class WebhookService implements WebhookServiceInterface
         }
 
         // Return Messages Collection
-        return $messages;
+        return ($messages->count() > 0);
     }
 }

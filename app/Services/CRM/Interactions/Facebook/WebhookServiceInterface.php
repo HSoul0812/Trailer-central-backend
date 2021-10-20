@@ -7,6 +7,12 @@ use Illuminate\Support\Collection;
 
 interface WebhookServiceInterface {
     /**
+     * @const Valid Response to Facebook
+     */
+    const VALID_RESPONSE = 'EVENT_RECEIVED';
+
+
+    /**
      * Handle Message From Webhook
      * 
      * @param MessageWebhookRequest $request
