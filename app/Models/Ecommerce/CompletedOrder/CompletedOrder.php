@@ -1,13 +1,28 @@
 <?php
-namespace App\Models\Ecommerce\CompletedOrder;
 
+namespace App\Models\Ecommerce\CompletedOrder;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property float $total_amount
+ * @property string $payment_status 'paid', 'unpaid'
+ * @property string $refund_status i.e 'unrefunded', 'refunded', 'partial_refunded'
+ * @property string $payment_intent the payment unique id
+ * @property array<array<int, int>> $parts i.e: [{id:int, qty: int}]
+ */
 class CompletedOrder extends Model
 {
     use TableAware;
+
+    public const PAYMENT_STATUS_PAID = 'paid';
+    public const PAYMENT_STATUS_UNPAID = 'unpaid';
+
+    public const REFUND_STATUS_UNREFUNDED = 'unrefunded';
+    public const REFUND_STATUS_REFUNDED = 'refunded';
+    public const REFUND_STATUS_PARTIAL_REFUNDED = 'partial_refunded';
 
     /**
      * The table associated with the model.
@@ -33,6 +48,8 @@ class CompletedOrder extends Model
         'total_amount',
         'payment_method',
         'payment_status',
+        'payment_intent',
+        'refund_status',
         'event_id',
         'object_id',
         'stripe_customer',
@@ -50,4 +67,21 @@ class CompletedOrder extends Model
         'billing_zip',
         'parts'
     ];
+
+    protected $casts = [
+        'parts' => 'json'
+    ];
+
+    public function isPaid(): bool
+    {
+        return $this->payment_status === self::PAYMENT_STATUS_PAID;
+    }
+
+    public function isRefundable(): bool
+    {
+        return in_array(
+            $this->refund_status,
+            [self::REFUND_STATUS_PARTIAL_REFUNDED, self::REFUND_STATUS_UNREFUNDED]
+        );
+    }
 }

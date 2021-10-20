@@ -3,17 +3,16 @@
 namespace App\Models\Parts\Textrail;
 
 use App\Models\Parts\Part as BasePart;
-use App\Models\Parts\Textrail\Type;
-use App\Models\Parts\Textrail\Category;
-use App\Models\Parts\Textrail\Brand;
-use App\Models\Parts\Textrail\Manufacturer;
-use App\Models\Parts\Textrail\Image;
-use Illuminate\Database\Eloquent\Model;
 
-class Part extends BasePart 
+/**
+ * @property int $id
+ * @property string $sku
+ * @property string $title
+ */
+class Part extends BasePart
 {
     protected $table = 'textrail_parts';
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -50,7 +49,7 @@ class Part extends BasePart
         'stock_max',
         'is_sublet_specific'
     ];
-    
+
     public function brand()
     {
         return $this->belongsTo(Brand::class);
@@ -76,7 +75,7 @@ class Part extends BasePart
     {
         return $this->hasMany(Image::class);
     }
-    
+
     public function searchableAs()
     {
         return env('INDEX_PARTS_TEXTRAIL', 'parts_textrail');
@@ -109,10 +108,10 @@ class Part extends BasePart
 
         return $array;
     }
-    
+
     /**
      * Remove implementation
-     * 
+     *
      * @return void
      */
     public function updateCacheStoreTimes()
