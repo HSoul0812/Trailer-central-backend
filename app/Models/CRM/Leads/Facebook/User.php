@@ -15,9 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Class Lead
  * @package App\Models\CRM\Leads\Facebook
  *
- * @property int $identifier
- * @property int $website_id
- * @property string $lead_type
+ * @property int $user_id
+ * @property string $name
+ * @property string $email
  *
  * @property Website $website
  * @property Lead<Collection> $leads
