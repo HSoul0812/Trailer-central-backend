@@ -33,7 +33,7 @@ class WebhookController extends RestfulController
     }
 
     public function message(Request $request) {
-        var_dump($request->all());
+        var_dump($request->getContent());
         die;
         $request = new MessageWebhookRequest($request->all());
 
