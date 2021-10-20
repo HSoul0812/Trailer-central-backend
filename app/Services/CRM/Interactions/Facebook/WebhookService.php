@@ -67,7 +67,7 @@ class WebhookService implements WebhookServiceInterface
      * Handle Message From Webhook
      * 
      * @param MessageWebhookRequest $request
-     * @return Collection<Message>
+     * @return bool | true = messages posted successfull, false = no messages were sent
      */
     public function message(MessageWebhookRequest $request): bool {
         // Check Request
