@@ -33,9 +33,11 @@ class WebhookController extends RestfulController
     }
 
     public function message(Request $request) {
-        var_dump($request->getContent());
-        die;
-        $request = new MessageWebhookRequest($request->all());
+        // Get JSON
+        $json = json_decode($request->getContent());
+
+        // Convert to Request
+        $request = new MessageWebhookRequest($json);
 
         if ($request->validate()) {
             return $this->response->collection($this->service->message($request), $this->transformer);
