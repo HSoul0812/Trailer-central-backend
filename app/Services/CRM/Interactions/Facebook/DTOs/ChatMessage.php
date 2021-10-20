@@ -111,8 +111,8 @@ class ChatMessage
             'conversation_id' => $conversationId,
             'created_at' => Carbon::parse($message['timestamp'])->toDateTimeString(),
             'from_id' => $message['sender']['id'],
-            'to_id' => $data['recipient']['id'],
-            'text' => $data['message']['text']
+            'to_id' => $message['recipient']['id'],
+            'text' => $message['message']['text']
         ]);
     }
 
