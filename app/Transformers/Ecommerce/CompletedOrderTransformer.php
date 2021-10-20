@@ -36,6 +36,8 @@ class CompletedOrderTransformer extends TransformerAbstract
             'total_amount' => $completedOrder->total_amount,
             'payment_method' => $completedOrder->payment_method,
             'payment_status' => $completedOrder->payment_status,
+            'payment_intent' => $completedOrder->payment_intent,
+            'refund_status' => $completedOrder->refund_status,
             'stripe_customer_id' => $completedOrder->stripe_customer,
             'shipping_address' => $completedOrder->shipping_address,
             'shipping_country' => $completedOrder->shipping_country,
