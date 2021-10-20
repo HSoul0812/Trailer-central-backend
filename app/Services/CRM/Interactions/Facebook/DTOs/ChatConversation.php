@@ -54,6 +54,11 @@ class ChatConversation
      */
     private $newestUpdate;
 
+    /**
+     * @var int Count of Messages in Conversation
+     */
+    private $messageCount;
+
 
     /**
      * Get From UnifiedThread
@@ -74,6 +79,7 @@ class ChatConversation
             'link' => $data['link'],
             'snippet' => $data['snippet'],
             'newest_update' => Carbon::parse($data['updated_time'])->toDateTimeString(),
+            'message_count' => $data['message_count']
         ]);
     }
 
