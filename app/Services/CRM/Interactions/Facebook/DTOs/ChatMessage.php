@@ -107,7 +107,7 @@ class ChatMessage
     public static function getFromWebhook(array $message, string $conversationId): ChatMessage {
         // Create ChatMessage
         return new self([
-            'message_id' => $message['message']['id'],
+            'message_id' => $message['message']['mid'],
             'conversation_id' => $conversationId,
             'created_at' => Carbon::parse($message['timestamp'])->toDateTimeString(),
             'from_id' => $message['sender']['id'],
