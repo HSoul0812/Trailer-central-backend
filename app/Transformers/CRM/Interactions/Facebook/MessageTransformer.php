@@ -2,6 +2,7 @@
 
 namespace App\Transformers\CRM\Interactions\Facebook;
 
+use App\Models\CRM\Interactions\Facebook\Message;
 use League\Fractal\TransformerAbstract;
 
 class MessageTransformer extends TransformerAbstract 
