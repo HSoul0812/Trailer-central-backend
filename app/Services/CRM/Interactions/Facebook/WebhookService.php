@@ -85,6 +85,8 @@ class WebhookService implements WebhookServiceInterface
      */
     public function verify(MessageWebhookVerify $request): ?string {
         // Mode Exists?
+        var_dump($request);
+        var_dump($request->all());
         if(empty($request->{'hub.mode'}) || $request->{'hub.mode'} !== 'subscribe') {
             throw new FacebookWebhookVerifyInvalidModeException;
         }
