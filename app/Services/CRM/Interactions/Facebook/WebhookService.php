@@ -2,6 +2,12 @@
 
 namespace App\Services\CRM\Interactions\Facebook;
 
+use App\Exceptions\CRM\Interactions\Facebook\FacebookWebhookVerifyInvalidModeException;
+use App\Exceptions\CRM\Interactions\Facebook\FacebookWebhookVerifyMismatchException;
+use App\Exceptions\CRM\Interactions\Facebook\InvalidFacebookWebhookObjectException;
+use App\Exceptions\CRM\Interactions\Facebook\MissingFacebookWebhookEntryException;
+use App\Models\User\Integration\Integration;
+use App\Models\User\AuthToken;
 use App\Http\Requests\CRM\Interactions\Facebook\MessageWebhookRequest;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
@@ -19,6 +25,12 @@ use Illuminate\Support\Collection;
  */
 class WebhookService implements WebhookServiceInterface
 {
+    /**
+     * @const Facebook Messenger Integration Name
+     */
+    const FBCHAT_INTEGRATION_NAME = 'facebook_messenger';
+
+
     /**
      * @var InteractionRepositoryInterface
      */
@@ -63,26 +75,53 @@ class WebhookService implements WebhookServiceInterface
         $this->log = Log::channel('facebook');
     }
 
+
+    /**
+     * Verify Endpoint
+     * 
+     * @param MessageWebhookVerify $request
+     * @return null|string
+     */
+    public function verify(MessageWebhookVerify $request): ?string {
+        // Mode Exists?
+        if(empty($request->{'hub.mode'}) || $request->{'hub.mode'} !== 'subscribe') {
+            throw new FacebookWebhookVerifyInvalidModeException;
+        }
+
+        // Get Verify Token From DB
+        $integration = Integration::where('name', self::FBCHAT_INTEGRATION_NAME)->first();
+
+        // Get Auth Token
+        $authToken = AuthToken::where('user_type', 'integration')->where('user_id', $integration->id)->first();
+
+        // Access Token Doesn't Match?!
+        if($authToken->access_token !== $request->{'hub.verify_token'}) {
+            throw new FacebookWebhookVerifyMismatchException;
+        }
+
+        // Return Challenge Instead!
+        return $request->{'hub.challenge'};
+    }
+
+
     /**
      * Handle Message From Webhook
      * 
      * @param MessageWebhookRequest $request
-     * @return bool | true = messages posted successfull, false = no messages were sent
+     * @return Collection<Message>
      */
-    public function message(MessageWebhookRequest $request): bool {
+    public function message(MessageWebhookRequest $request): Collection {
         // Check Request
         $this->log->info('The following request was received by the Facebook Message Webhook: ' . print_r($request->all(), true));
 
         // Get Page ID
         if($request->object !== 'page') {
-            $this->log->error('Webhook sent an invalid object, we can\'t process this here!');
-            return false;
+            throw new InvalidFacebookWebhookObjectException;
         }
 
         // Missing Entry?
         if(empty($request->entry)) {
-            $this->log->error('Webhook is missing entries to updated, we can\'t process this here!');
-            return false;
+            throw new MissingFacebookWebhookEntryException;
         }
 
         // Loop Entries
@@ -104,11 +143,11 @@ class WebhookService implements WebhookServiceInterface
                 $chat = ChatMessage::getFromWebhook($message, $conversation->conversation_id);
 
                 // Save Message
-                $messages->push($this->messages->createOrUpdate($chat->getParams()));
+                $messages->push($this->messages->create($chat->getParams()));
             }
         }
 
         // Return Messages Collection
-        return ($messages->count() > 0);
+        return $messages;
     }
 }

@@ -3,19 +3,14 @@
 namespace App\Services\CRM\Interactions\Facebook;
 
 use App\Http\Requests\CRM\Interactions\Facebook\MessageWebhookRequest;
+use Illuminate\Support\Collection;
 
 interface WebhookServiceInterface {
-    /**
-     * @const Valid Response to Facebook
-     */
-    const VALID_RESPONSE = 'EVENT_RECEIVED';
-
-
     /**
      * Handle Message From Webhook
      * 
      * @param MessageWebhookRequest $request
-     * @return bool | true = messages posted successfull, false = no messages were sent
+     * @return Collection<Message>
      */
-    public function message(MessageWebhookRequest $request): bool;
+    public function message(MessageWebhookRequest $request): Collection;
 }
