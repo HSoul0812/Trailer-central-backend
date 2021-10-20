@@ -35,6 +35,7 @@ $api->version('v1', function ($route) {
         $route->get('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@index');
         $route->get('ecommerce/orders/{id}', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@show')->where('id', '[0-9]+');
         $route->post('ecommerce/shipping-costs', 'App\Http\Controllers\v1\Ecommerce\ShippingController@calculateCosts');
+        $route->post('ecommerce/refunds/{order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@create')->where('order_id', '[0-9]+');
     });
 
     $route->group(['middleware' => 'stripe.webhook.validate'], function ($route) {
@@ -186,13 +187,13 @@ $api->version('v1', function ($route) {
     $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show')->where('id', '[0-9]+');
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
-    
+
     /**
      * Textrail Parts
      */
     $route->get('textrail/parts', 'App\Http\Controllers\v1\Parts\Textrail\PartsController@index');
     $route->get('textrail/parts/{id}', 'App\Http\Controllers\v1\Parts\Textrail\PartsController@show')->where('id', '[0-9]+');
-    
+
     /*
     |--------------------------------------------------------------------------
     | Inventory
