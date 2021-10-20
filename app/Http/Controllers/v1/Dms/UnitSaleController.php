@@ -132,9 +132,6 @@ class UnitSaleController extends RestfulController
      */
     public function bulkArchive(BulkArchiveUpdateRequest $request)
     {
-        return $this->response->errorBadRequest();
-
-        return $this->response->array(['message' => 'success']);
         if ($this->service->bulkArchive(
             $request->only('quote_ids'),
             auth()->user()

@@ -54,7 +54,7 @@ class UnitSaleService extends BaseService
             $whereInCondition['values'] = $quotes->pluck('id');
 
             return $this->quoteRepository->bulkUpdate([
-                'is_archived' => false,
+                'is_archived' => true,
             ], $whereCondition, [$whereInCondition]);
         }
 
