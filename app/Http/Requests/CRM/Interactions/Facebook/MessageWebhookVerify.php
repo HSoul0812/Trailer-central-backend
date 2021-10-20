@@ -12,8 +12,8 @@ use App\Http\Requests\Request;
 class MessageWebhookVerify extends Request
 {
     protected $rules = [
-        'hub.mode' => 'required|string',
-        'hub.token' => 'required|string',
-        'hub.challenge' => 'required|string'
+        'hub\.mode' => 'required|string',
+        'hub\.token' => 'required|string',
+        'hub\.challenge' => 'required|string'
     ];
 }
