@@ -142,12 +142,21 @@ class ConversationRepository implements ConversationRepositoryInterface {
     /**
      * Find By Page ID and User ID
      * 
-     * @param string $pageId
-     * @param string $userId
+     * @param int $pageId
+     * @param int $userId
      * @return null|Conversation
      */
-    public function getByParticipants(string $pageId, string $userId): ?Conversation {
+    public function getByParticipants(int $pageId, int $userId): ?Conversation {
         // Get Conversation By ID
         return Conversation::where('page_id', $pageId)->where('user_id', $userId)->first();
+    }
+
+    /**
+     * Get Newest Conversation Update From Page
+     * 
+     * @param int $pageId
+     */
+    public function getNewestUpdate(int $pageId): string {
+        return Conversation::where('page_id', $pageId)->max('newest_update');
     }
 }

@@ -70,4 +70,23 @@ class Conversation extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
+
+
+    /**
+     * Get Count of Messages
+     * 
+     * @return int
+     */
+    public function getMessageCountAttribute(): int {
+        return $this->messages()->count();
+    }
+
+    /**
+     * Get Newest Message Time
+     * 
+     * @return string
+     */
+    public function getNewestMessageTimeAttribute(): string {
+        return $this->messages()->max('created_at');
+    }
 }
