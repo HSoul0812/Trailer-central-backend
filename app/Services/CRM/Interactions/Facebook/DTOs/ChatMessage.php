@@ -63,9 +63,11 @@ class ChatMessage
         $tags = '';
 
         // Loop Tags
-        foreach($this->tags as $tag) {
-            if(!empty($tags)) {
-                $tags .= ',' . $tag;
+        if($this->tags) {
+            foreach($this->tags as $tag) {
+                if(!empty($tags)) {
+                    $tags .= ',' . $tag;
+                }
             }
         }
 
@@ -93,6 +95,24 @@ class ChatMessage
             'to_id' => self::parseToId($data['to']),
             'text' => $data['message'],
             'tags' => self::parseTags($data['tags']['data'])
+        ]);
+    }
+
+    /**
+     * Get From Crud
+     * 
+     * AbstractCrudObject $message
+     * @return ChatMessage
+     */
+    public static function getFromWebhook(array $message, string $conversationId): ChatMessage {
+        // Create ChatMessage
+        return new self([
+            'message_id' => $message['message']['id'],
+            'conversation_id' => $conversationId,
+            'created_at' => Carbon::parse($message['timestamp'])->toDateTimeString(),
+            'from_id' => $message['sender']['id'],
+            'to_id' => $data['recipient']['id'],
+            'text' => $data['message']['text']
         ]);
     }
 

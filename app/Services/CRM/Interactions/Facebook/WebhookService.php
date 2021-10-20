@@ -87,19 +87,19 @@ class WebhookService implements WebhookServiceInterface
         $messages = new Collection();
         foreach($request->entry as $entry) {
             // Get Page ID
-            $pageId = $entry->id;
+            $pageId = $entry['id'];
 
             // Process Messages for Page
-            foreach($entry->messaging as $message) {
+            foreach($entry['messaging'] as $message) {
                 // Get User ID
-                $userId = $message->sender->id === $pageId ? $message->recipient->id : $message->sender->id;
+                $userId = $message['sender']['id'] === $pageId ? $message['recipient']['id'] : $message['sender']['id'];
 
                 // Find Conversation ID
                 $conversation = $this->conversations->getByParticipants($pageId, $userId);
                 $this->log->info('Found conversation #' . $conversation->conversation_id . ' between user #' . $userId . ' and page #' . $pageId);
 
                 // Get ChatMessage From Webhook
-                $chat = ChatMessage::getFromWebhook($message, $pageId, $conversation->conversation_id);
+                $chat = ChatMessage::getFromWebhook($message, $conversation->conversation_id);
 
                 // Save Message
                 $messages->push($this->messages->create($chat->getParams()));
