@@ -3,6 +3,7 @@
 namespace App\Services\Ecommerce\CompletedOrder;
 
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
+use App\Models\Parts\Textrail\Part;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
@@ -38,7 +39,7 @@ class CompletedOrderService implements CompletedOrderServiceInterface
     /**
      * @throws \Brick\Money\Exception\MoneyMismatchException
      */
-    public function updateRefundStatus(int $orderId): bool
+    public function updateRefundSummary(int $orderId): bool
     {
         /** @var CompletedOrder $order */
         $order = $this->completedOrderRepository->get(['id' => $orderId]);
@@ -56,6 +57,18 @@ class CompletedOrderService implements CompletedOrderServiceInterface
             $refund_status = CompletedOrder::REFUND_STATUS_PARTIAL_REFUNDED;
         }
 
-        return $refund_status && $this->completedOrderRepository->update(['id' => $orderId, 'refund_status' => $refund_status]);
+        $refundedParts = $this->refundRepository->getRefundedParts($orderId)->map(static function (Part $part): int {
+            return $part->id;
+        })->toArray();
+
+        $refundedAmount = $this->refundRepository->getRefundedAmount($orderId);
+
+        return $refund_status && $this->completedOrderRepository->update([
+                    'id' => $orderId,
+                    'refund_status' => $refund_status,
+                    'refunded_parts' => $refundedParts,
+                    'refunded_amount' => $refundedAmount->getAmount()
+                ]
+            );
     }
 }

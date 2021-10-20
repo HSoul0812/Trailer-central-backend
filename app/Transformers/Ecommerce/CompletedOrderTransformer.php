@@ -3,11 +3,12 @@ namespace App\Transformers\Ecommerce;
 
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Repositories\Parts\PartRepositoryInterface;
+use App\Repositories\Parts\Textrail\PartRepository;
 use League\Fractal\TransformerAbstract;
 
 class CompletedOrderTransformer extends TransformerAbstract
 {
-    /** @var PartRepositoryInterface */
+    /** @var PartRepository */
     private $textRailPartRepository;
 
     /**
@@ -19,12 +20,13 @@ class CompletedOrderTransformer extends TransformerAbstract
         $this->textRailPartRepository = $textRailPartRepository;
     }
 
-    public function transform(CompletedOrder $completedOrder)
+    public function transform(CompletedOrder $completedOrder): array
     {
-        $partCollection = [];
-        foreach ($completedOrder->parts as $part) {
-            $partCollection[] = $this->textRailPartRepository->getById($part['id']);
-        }
+        $partIds = collect($completedOrder->parts)->map(static function (array $part): int {
+            return $part['id'];
+        })->toArray();
+
+        $partCollection = $this->textRailPartRepository->getAllByIds($partIds);
 
         return [
             'id' => $completedOrder->id,
@@ -36,6 +38,8 @@ class CompletedOrderTransformer extends TransformerAbstract
             'payment_status' => $completedOrder->payment_status,
             'payment_intent' => $completedOrder->payment_intent,
             'refund_status' => $completedOrder->refund_status,
+            'refunded_amount' => $completedOrder->refunded_amount,
+            'refunded_parts' => $completedOrder->refunded_parts,
             'stripe_customer_id' => $completedOrder->stripe_customer,
             'shipping_address' => $completedOrder->shipping_address,
             'shipping_country' => $completedOrder->shipping_country,

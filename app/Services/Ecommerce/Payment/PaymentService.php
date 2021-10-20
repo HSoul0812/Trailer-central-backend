@@ -285,7 +285,7 @@ class PaymentService implements PaymentServiceInterface
             $this->orderRepository->beginTransaction();
 
             $this->refundRepository->markAsFinished($refund, $gatewayRefundResponse);
-            $this->orderService->updateRefundStatus($refund->order_id);
+            $this->orderService->updateRefundSummary($refund->order_id);
 
             $this->logger->info(
                 sprintf('The refund {%d} for {%d} order was successfully done', $refund->id, $refund->order_id),

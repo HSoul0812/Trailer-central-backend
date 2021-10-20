@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property float $total_amount
  * @property string $payment_status 'paid', 'unpaid'
  * @property string $refund_status i.e 'unrefunded', 'refunded', 'partial_refunded'
+ * @property array<int> $refunded_parts part's ids
+ * @property float $refunded_amount
  * @property string $payment_intent the payment unique id
  * @property array<array<int, int>> $parts i.e: [{id:int, qty: int}]
  */
@@ -50,6 +52,8 @@ class CompletedOrder extends Model
         'payment_status',
         'payment_intent',
         'refund_status',
+        'refunded_amount',
+        'refunded_parts',
         'event_id',
         'object_id',
         'stripe_customer',
@@ -69,7 +73,8 @@ class CompletedOrder extends Model
     ];
 
     protected $casts = [
-        'parts' => 'json'
+        'parts' => 'json',
+        'refunded_parts' => 'json'
     ];
 
     public function isPaid(): bool

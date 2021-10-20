@@ -12,5 +12,5 @@ interface CompletedOrderServiceInterface
      */
     public function create(array $params): CompletedOrder;
 
-    public function updateRefundStatus(int $orderId): bool;
+    public function updateRefundSummary(int $orderId): bool;
 }
