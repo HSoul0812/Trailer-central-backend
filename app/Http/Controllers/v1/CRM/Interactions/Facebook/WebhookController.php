@@ -66,7 +66,7 @@ class WebhookController extends RestfulController
         $request = new MessageWebhookVerify($request->all());
 
         if ($request->validate()) {
-            return $this->response->plain($this->service->verify($request));
+            return $this->response->text($this->service->verify($request));
         }
 
         return $this->response->errorBadRequest();
