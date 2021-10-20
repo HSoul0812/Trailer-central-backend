@@ -3,7 +3,6 @@
 namespace App\Services\CRM\Interactions\Facebook;
 
 use App\Http\Requests\CRM\Interactions\Facebook\MessageWebhookRequest;
-use App\Models\CRM\Interactions\Facebook\Message;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
@@ -11,6 +10,7 @@ use App\Services\CRM\Interactions\Facebook\ChatMessage;
 use App\Services\Integration\Facebook\BusinessService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 
 /**
  * Class WebhookService
