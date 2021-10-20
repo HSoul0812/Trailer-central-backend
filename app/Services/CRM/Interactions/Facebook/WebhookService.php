@@ -85,9 +85,7 @@ class WebhookService implements WebhookServiceInterface
      */
     public function verify(MessageWebhookVerify $request): ?string {
         // Mode Exists?
-        var_dump($request);
-        var_dump($request->all());
-        if(empty($request->{'hub.mode'}) || $request->{'hub.mode'} !== 'subscribe') {
+        if(empty($request->hub_mode) || $request->hub_mode !== 'subscribe') {
             throw new FacebookWebhookVerifyInvalidModeException;
         }
 
@@ -98,12 +96,12 @@ class WebhookService implements WebhookServiceInterface
         $authToken = AuthToken::where('user_type', 'integration')->where('user_id', $integration->id)->first();
 
         // Access Token Doesn't Match?!
-        if($authToken->access_token !== $request->{'hub.verify_token'}) {
+        if($authToken->access_token !== $request->hub_verify_token) {
             throw new FacebookWebhookVerifyMismatchException;
         }
 
         // Return Challenge Instead!
-        return $request->{'hub.challenge'};
+        return $request->hub_challenge;
     }
 
 
