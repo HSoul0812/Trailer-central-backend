@@ -9,6 +9,7 @@ use App\Exceptions\CRM\Interactions\Facebook\MissingFacebookWebhookEntryExceptio
 use App\Models\User\Integration\Integration;
 use App\Models\User\AuthToken;
 use App\Http\Requests\CRM\Interactions\Facebook\MessageWebhookRequest;
+use App\Http\Requests\CRM\Interactions\Facebook\MessageWebhookVerify;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
