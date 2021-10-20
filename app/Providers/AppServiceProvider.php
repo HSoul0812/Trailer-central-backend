@@ -27,6 +27,8 @@ use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
 use App\Repositories\Ecommerce\CompletedOrderRepository;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
+use App\Repositories\Ecommerce\RefundRepository;
+use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
@@ -55,6 +57,8 @@ use App\Repositories\Dms\Quickbooks\ItemNewRepository;
 use App\Repositories\Dms\Quickbooks\ItemNewRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
+use App\Repositories\Parts\PartRepositoryInterface;
+use App\Repositories\Parts\Textrail\PartRepository;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
@@ -107,6 +111,10 @@ use App\Services\Ecommerce\DataProvider\DataProviderInterface;
 use App\Services\Ecommerce\DataProvider\DataProviderManager;
 use App\Services\Ecommerce\DataProvider\DataProviderManagerInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailMagento;
+use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
+use App\Services\Ecommerce\Payment\Gateways\Stripe\StripeService;
+use App\Services\Ecommerce\Payment\PaymentServiceInterface as EcommercePaymentServiceInterface;
+use App\Services\Ecommerce\Payment\PaymentService as EcommercePaymentService;
 use App\Services\Ecommerce\Shipping\ShippingService;
 use App\Services\Ecommerce\Shipping\ShippingServiceInterface;
 use App\Services\File\FileService;
@@ -339,7 +347,14 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CompletedOrderServiceInterface::class, CompletedOrderService::class);
         $this->app->bind(CompletedOrderRepositoryInterface::class, CompletedOrderRepository::class);
-
+        $this->app->when(CompletedOrderService::class)
+            ->needs(PartRepositoryInterface::class)
+            ->give(function () {
+                return app()->make(PartRepository::class);
+            });
+        $this->app->bind(RefundRepositoryInterface::class, RefundRepository::class);
+        $this->app->bind(EcommercePaymentServiceInterface::class, EcommercePaymentService::class);
+        $this->app->bind(PaymentGatewayServiceInterface::class, StripeService::class);
 
         $this->app->bind(ShippingServiceInterface::class, ShippingService::class);
         $this->app->bind(DataProviderManagerInterface::class, DataProviderManager::class);
