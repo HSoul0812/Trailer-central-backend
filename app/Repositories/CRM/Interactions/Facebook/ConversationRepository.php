@@ -4,9 +4,10 @@ namespace App\Repositories\CRM\Interactions\Facebook;
 
 use App\Exceptions\NotImplementedException;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
-use App\Models\CRM\Interactions\Conversation;
+use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ConversationRepository implements ConversationRepositoryInterface {
 
@@ -40,7 +41,7 @@ class ConversationRepository implements ConversationRepositoryInterface {
     ];
 
     public function create($params) {
-        // Create Lead
+        // Create Conversation
         return Conversation::create($params);
     }
 
@@ -82,15 +83,71 @@ class ConversationRepository implements ConversationRepositoryInterface {
     }
 
     public function update($params) {
-        // Get Lead
-        $conversation = Conversation::findOrFail($params['id']);
+        // Get Conversation
+        $conversation = $this->find($params);
+        if(empty($conversation->id)) {
+            throw new ModelNotFoundException;
+        }
 
-        // Update Lead
+        // Update Conversation
         DB::transaction(function() use (&$conversation, $params) {
             $conversation->fill($params)->save();
         });
 
         // Return Full Details
         return $conversation;
+    }
+
+    /**
+     * Find By ID or Conversation ID
+     * 
+     * @param array $params
+     * @return null|Conversation
+     */
+    public function find(array $params): ?Conversation {
+        // Get Conversation By ID
+        if(isset($params['id'])) {
+            $conversation = Conversation::find($params['id']);
+        }
+
+        // Get Conversation By Conversation ID
+        if(empty($conversation->id) && isset($params['conversation_id'])) {
+            $conversation = Conversation::where('conversation_id', $params['conversation_id'])->first();
+        }
+
+        // Return Full Details
+        return $conversation ?? null;
+    }
+
+    /**
+     * Create Or Update Conversation
+     * 
+     * @param array $params
+     * @return Conversation
+     */
+    public function createOrUpdate(array $params): Conversation {
+        // Get Conversation
+        $conversation = $this->find($params);
+
+        // If Exists, Then Update
+        if(!empty($conversation->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
+    }
+
+
+    /**
+     * Find By Page ID and User ID
+     * 
+     * @param string $pageId
+     * @param string $userId
+     * @return null|Conversation
+     */
+    public function getByParticipants(string $pageId, string $userId): ?Conversation {
+        // Get Conversation By ID
+        return Conversation::where('page_id', $pageId)->where('user_id', $userId)->first();
     }
 }

@@ -4,11 +4,15 @@ namespace App\Services\Integration\Facebook;
 
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Chat;
+use App\Jobs\CRM\Interactions\Facebook\MessageJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\ChatRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
+use App\Services\Integration\Facebook\BusinessService;
+use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Transformers\Integration\Facebook\ChatTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
@@ -53,6 +57,11 @@ class ChatService implements ChatServiceInterface
     private $fractal;
 
     /**
+     * Log
+     */
+    private $log;
+
+    /**
      * Construct Facebook Service
      */
     public function __construct(
@@ -67,10 +76,14 @@ class ChatService implements ChatServiceInterface
         $this->pages = $pages;
         $this->tokens = $tokens;
         $this->sdk = $sdk;
+        $this->sdk->setAppType(BusinessService::APP_TYPE_CHAT);
         $this->transformer = $transformer;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('facebook');
     }
 
     /**
@@ -119,25 +132,22 @@ class ChatService implements ChatServiceInterface
         // Get Access Token
         $accessToken = $this->tokens->create($params);
 
+        // Get Page Token
+        $pageToken = $this->sdk->pageToken($accessToken, $page->page_id);
+
         // Page Token Exists?
-        if(isset($params['page_token'])) {
-            // Adjust Request
-            $params['token_type'] = 'facebook';
-            $params['relation_type'] = 'fbapp_page';
-            $params['relation_id'] = $page->id;
-
-            // Get Refresh Token
-            $refresh = $this->sdk->refresh($params);
-            if(!empty($refresh)) {
-                $params['refresh_token'] = $refresh;
-            } else {
-                $params['refresh_token'] = NULL;
-            }
-            unset($params['id_token']);
-            unset($params['page_token']);
-
+        if(!empty($pageToken)) {
             // Get Access Token
-            $this->tokens->create($params);
+            $pageAccessToken = $this->tokens->create([
+                'token_type' => 'facebook',
+                'relation_type' => 'fbapp_page',
+                'relation_id' => $page->id,
+                'access_token' => $pageToken,
+                'refresh_token' => $pageToken
+            ]);
+
+            // Dispatch Send EmailBuilder Job
+            $this->dispatch(new MessageJob($pageAccessToken, $page->page_id));
         }
 
         // Return Response

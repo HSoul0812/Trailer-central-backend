@@ -3,24 +3,26 @@
 namespace App\Services\Integration\Facebook;
 
 use App\Exceptions\Integration\Facebook\FailedGetProductFeedException;
+use App\Exceptions\Integration\Facebook\FailedGetConversationsException;
+use App\Exceptions\Integration\Facebook\FailedGetMessagesException;
 use App\Exceptions\Integration\Facebook\FailedDeleteProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
-use App\Exceptions\Integration\Facebook\FailedValidateAccessTokenException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\ExpiredFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\FailedReceivingLongLivedTokenException;
+use App\Models\Integration\Auth\AccessToken;
+use App\Repositories\Integration\Facebook\PageRepositoryInterface;
+use App\Services\CRM\Interactions\Facebook\DTOs\ChatConversation;
+use App\Services\CRM\Interactions\Facebook\DTOs\ChatMessage;
 use FacebookAds\Api;
-use FacebookAds\Http\Client;
 use FacebookAds\Http\Request;
 use FacebookAds\Http\Parameters;
 use FacebookAds\Object\Application;
-use FacebookAds\Logger\CurlLogger;
-use FacebookAds\Object\AdAccount;
-use FacebookAds\Object\Campaign;
-use FacebookAds\Object\Fields\CampaignFields;
+use FacebookAds\Object\Page;
 use FacebookAds\Object\ProductCatalog;
-use FacebookAds\Object\ProductFeed;
+use FacebookAds\Object\UnifiedThread;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 
 /**
  * Class BusinessService
@@ -29,7 +31,47 @@ use Illuminate\Support\Facades\Log;
  */
 class BusinessService implements BusinessServiceInterface
 {
+    /**
+     * @const string
+     */
+    const APP_TYPE_DEFAULT = 'marketing';
+
+    /**
+     * @const string
+     */
+    const APP_TYPE_CHAT = 'chat';
+
+    /**
+     * @const array
+     */
+    const APP_TYPES = [
+        self::APP_TYPE_DEFAULT,
+        self::APP_TYPE_CHAT
+    ];
+
+
+    /**
+     * @const string
+     */
     const GRAPH_API_VERSION = '8.0';
+
+    /**
+     * @const int
+     */
+    const PER_PAGE_LIMIT = 100;
+
+
+    /**
+     * @var string : marketing|chat
+     */
+    protected $type = 'marketing';
+
+
+    /**
+     * @var PageRepositoryInterface
+     */
+    protected $pages;
+
 
     /**
      * @var FacebookAds\Api
@@ -46,17 +88,61 @@ class BusinessService implements BusinessServiceInterface
      */
     protected $request;
 
+    /**
+     * Log
+     */
+    private $log;
+
 
     /**
      * Construct Http Client/Request
      */
-    public function __construct() {
+    public function __construct(PageRepositoryInterface $pages, Request $request) {
+        // Get Pages Repository
+        $this->pages = $pages;
+
         // Init Request
-        $this->client = new Client();
-        $this->request = new Request($this->client);
+        $this->request = $request;
         $this->request->setGraphVersion(self::GRAPH_API_VERSION);
+
+        // Initialize Logger
+        $this->log = Log::channel('facebook');
     }
 
+    /**
+     * Set App Type
+     * 
+     * @param string $type
+     * @return void
+     */
+    public function setAppType(string $type) {
+        // Type is Valid?
+        if(in_array($type, self::APP_TYPES)) {
+            $this->type = $type;
+        } else {
+            $this->type = self::APP_TYPE_DEFAULT;
+        }
+    }
+
+
+    /**
+     * Get Page Token
+     * 
+     * @param AccessToken $accessToken
+     * @param int $pageId
+     * @return string
+     */
+    public function pageToken(AccessToken $accessToken, int $pageId): string {
+        // Get API
+        $this->initApi($accessToken);
+
+        // Get Page
+        $fbPage = new Page($pageId);
+        $page = $fbPage->getSelf(['access_token']);
+
+        // Return Payload Results
+        return $page->access_token;
+    }
 
     /**
      * Get Refresh Token
@@ -124,6 +210,7 @@ class BusinessService implements BusinessServiceInterface
         return $result;
     }
 
+
     /**
      * Validate a Feed Exists
      * 
@@ -157,7 +244,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -202,7 +289,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -246,7 +333,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -256,6 +343,120 @@ class BusinessService implements BusinessServiceInterface
 
         // Return Null
         return null;
+    }
+
+
+    /**
+     * Get Conversations for Page
+     * 
+     * @param AccessToken $accessToken
+     * @param int $pageId
+     * @param int $limit default: 0
+     * @param string $after default: ''
+     * @return Collection<ChatConversation>
+     */
+    public function getConversations(AccessToken $accessToken, int $pageId, int $limit = 0, string $after = '', Collection $collection = null): Collection {
+        // Initialize Collection of Conversations
+        if(empty($collection)) {
+            $collection = new Collection();
+        }
+
+        // Configure Client
+        $this->initApi($accessToken);
+        $page = $this->pages->getByPageId($pageId);
+
+        // Get Page
+        try {
+            // Get Conversations
+            $fbPage = new Page($pageId);
+            $conversations = $fbPage->getConversations(
+                ['id', 'link', 'updated_time', 'snippet', 'message_count', 'participants'],
+                ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
+            );
+            foreach($conversations as $conversation) {
+                $collection->push(ChatConversation::getFromUnifiedThread($conversation, $page));
+            }
+
+            // Get Next
+            $next = $conversations->getNext();
+            if(!empty($next)) {
+                $this->log->debug("Retrieved " . $collection->count() . " conversations so far, getting next " . $limit . " conversations");
+                return $this->getConversations($accessToken, $pageId, $limit, $conversations->getAfter(), $collection);
+            }
+
+            // Return Collection<ChatConversation>
+            $this->log->debug("Returned " . $collection->count() . " conversations from the page #" . $pageId);
+            return $collection;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            $this->log->error("Exception returned during get conversations: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedGetConversationsException;
+            }
+        }
+
+        // Return Empty Collection
+        return $collection;
+    }
+
+    /**
+     * Get Conversations for Page
+     * 
+     * @param AccessToken $accessToken
+     * @param string $conversationId
+     * @param int $limit default: 0
+     * @param string $after default: ''
+     * @return Collection<ChatMessage>
+     */
+    public function getMessages(AccessToken $accessToken, string $conversationId, int $limit = 0, string $after = '', Collection $collection = null): Collection {
+        // Initialize Collection of Conversations
+        if(empty($collection)) {
+            $collection = new Collection();
+        }
+
+        // Configure Client
+        $this->initApi($accessToken);
+
+        // Get Page
+        try {
+            $conversation = new UnifiedThread();
+            $conversation->setId($conversationId);
+
+            // Get Conversations
+            $messages = $conversation->getMessages(
+                ['id', 'created_time', 'message', 'from', 'to', 'tags'],
+                ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
+            );
+            foreach($messages as $message) {
+                $collection->push(ChatMessage::getFromCrud($message, $conversationId));
+            }
+
+            // Get Next
+            $next = $messages->getNext();
+            if(!empty($next)) {
+                $this->log->debug("Retrieved " . $collection->count() . " messages so far, getting next " . $limit . " messages");
+                return $this->getMessages($accessToken, $conversationId, $limit, $messages->getAfter(), $collection);
+            }
+
+            // Return Collection<ChatMessage>
+            $this->log->debug("Returned " . $collection->count() . " messages from the conversation #" . $conversationId);
+            return $collection;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            $this->log->error("Exception returned during get messages: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedGetMessagesException;
+            }
+        }
+
+        // Return Empty Collection
+        return $collection;
     }
 
 
@@ -284,13 +485,13 @@ class BusinessService implements BusinessServiceInterface
 
             // Return SDK
             $this->api = Api::init(
-                $_ENV['FB_SDK_APP_ID'],
-                $_ENV['FB_SDK_APP_SECRET'],
+                $this->getAppId(),
+                $this->getAppSecret(),
                 $apiToken
             );
         } catch(\Exception $e) {
             $this->api = null;
-            Log::error("Exception returned initializing facebook api: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned initializing facebook api: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
         }
 
         // Return SDK
@@ -321,7 +522,7 @@ class BusinessService implements BusinessServiceInterface
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
-            'access_token' => ($_ENV['FB_SDK_APP_ID'] . '|' . $_ENV['FB_SDK_APP_SECRET']),
+            'access_token' => $this->getAppId() . '|' . $this->getAppSecret(),
             'input_token' => $inputToken
         ]);
         $this->request->setQueryParams($params);
@@ -332,7 +533,7 @@ class BusinessService implements BusinessServiceInterface
         // Catch Error
         try {
             // Get URL
-            $response = $this->client->sendRequest($this->request);
+            $response = $this->request->getClient()->sendRequest($this->request);
 
             // Validate!
             $content = $response->getContent();
@@ -352,7 +553,7 @@ class BusinessService implements BusinessServiceInterface
             return $validate;
         } catch (\Exception $ex) {
             // Expired Exception?
-            Log::error("Exception returned trying to validate access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned trying to validate access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
         }
 
         // Return Defaults
@@ -382,7 +583,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned getting accounts: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned getting accounts: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -403,10 +604,10 @@ class BusinessService implements BusinessServiceInterface
         // Set Access Token
         $params = new Parameters();
         $params->enhance([
-            'access_token' => ($_ENV['FB_SDK_APP_ID'] . '|' . $_ENV['FB_SDK_APP_SECRET']),
+            'access_token' => $this->getAppId() . '|' . $this->getAppSecret(),
             'grant_type' => 'fb_exchange_token',
-            'client_id' => $_ENV['FB_SDK_APP_ID'],
-            'client_secret' => $_ENV['FB_SDK_APP_SECRET'],
+            'client_id' => $this->getAppId(),
+            'client_secret' => $this->getAppSecret(),
             'fb_exchange_token' => $accessToken
         ]);
         $this->request->setQueryParams($params);
@@ -417,14 +618,14 @@ class BusinessService implements BusinessServiceInterface
         // Catch Error
         try {
             // Get URL
-            $response = $this->client->sendRequest($this->request);
+            $response = $this->request->getClient()->sendRequest($this->request);
 
             // Return Access Token
             return $response->getContent();
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned trying to get long-lived access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            $this->log->error("Exception returned trying to get long-lived access token: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -434,5 +635,27 @@ class BusinessService implements BusinessServiceInterface
 
         // Return Null
         return null;
+    }
+
+
+    /**
+     * Get App ID For Provided Type
+     */
+    private function getAppId() {
+        return config('oauth.fb.' . $this->type . '.app.id');
+    }
+
+    /**
+     * Get App Secret For Provided Type
+     */
+    private function getAppSecret() {
+        return config('oauth.fb.' . $this->type . '.app.secret');
+    }
+
+    /**
+     * Get App Scopes For Provided Type
+     */
+    private function getAppScopes() {
+        return config('oauth.fb.' . $this->type . '.scopes');
     }
 }
