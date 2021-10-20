@@ -9,20 +9,82 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
 {
     use Transaction;
 
+    private $sortOrders = [
+        'status' => [
+            'field' => 'status',
+            'direction' => 'ASC'
+        ],
+        '-status' => [
+            'field' => 'status',
+            'direction' => 'DESC'
+        ],
+        'created_at' => [
+            'field' => 'created_at',
+            'direction' => 'ASC'
+        ],
+        '-created_at' => [
+            'field' => 'created_at',
+            'direction' => 'DESC'
+        ],
+        'customer_email' => [
+            'field' => 'customer_email',
+            'direction' => 'DESC'
+        ],
+        '-customer_email' => [
+            'field' => 'customer_email',
+            'direction' => 'DESC'
+        ],
+    ];
+
+    public function getGrandTotals()
+    {
+        return [
+            'total_all' => $this->getTotalAmount(),
+            'total_qty' => $this->getTotalQty(),
+        ];
+    }
+
+    private function getTotalAmount()
+    {
+        return CompletedOrder::sum('total_amount');
+    }
+
+    private function getTotalQty()
+    {
+        $completedOrders = CompletedOrder::select('parts')->get();
+
+        $totalQty = 0;
+        foreach ($completedOrders as $completedOrder)
+        {
+            if (!empty($completedOrder['parts'])) {
+                $parts = json_decode($completedOrder['parts'], true);
+                if ($parts) {
+                    array_map(function ($part) use (&$totalQty) { $totalQty += $part['qty']; }, $parts);
+                }
+            }
+        }
+
+        return $totalQty;
+    }
+
     public function getAll($params)
     {
-      if (!isset($params['per_page'])) {
+        if (!isset($params['per_page'])) {
           $params['per_page'] = 100;
-      }
+        }
 
-      $query = CompletedOrder::select('*');
-      
-      if (isset($params['status'])) {
-          $query->where('status', $params['status']);
-      }
+        $query = CompletedOrder::select('*');
 
+        /**
+         * Filters
+         */
+        $query = $this->addFiltersToQuery($query, $params);
 
-      return $query->paginate($params['per_page'])->appends($params);
+        if (isset($params['sort'])) {
+            $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
+        }
+
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function create($params): CompletedOrder
@@ -39,6 +101,8 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             $completedOrder->parts = $data['parts'];
             $completedOrder->total_amount = $data['amount_total'];
             $completedOrder->payment_status = $data['payment_status'] ?? '';
+            $completedOrder->invoice_id = $data['invoice_id'] ?? '';
+            $completedOrder->invoice_url = $data['invoice_url'] ?? '';
 
             $completedOrder->shipping_name = $data['shipto_name'] ?? '';
             $completedOrder->shipping_country = $data['shipto_country'] ?? '';
@@ -96,5 +160,48 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
     public function delete($params)
     {
         // TODO: Implement delete() method.
+    }
+
+    private function addFiltersToQuery($query, $filters, $noStatusJoin = false) {
+        if (isset($filters['search_term'])) {
+            $query = $this->addSearchToQuery($query, $filters['search_term']);
+        }
+
+        if (isset($filters['date_from'])) {
+            $query = $this->addDateFromToQuery($query, $filters['date_from']);
+        }
+
+        if (isset($filters['date_to'])) {
+            $query = $this->addDateToToQuery($query, $filters['date_to']);
+        }
+
+        if (isset($filters['status'])) {
+            $query = $this->addStatusToQuery($query, $filters['status']);
+        }
+
+        return $query;
+    }
+
+    private function addDateToToQuery($query, $dateTo) {
+        return $query->where(CompletedOrder::getTableName().'.created_at', '<=', $dateTo);
+    }
+
+    private function addDateFromToQuery($query, $dateFrom) {
+        return $query->where(CompletedOrder::getTableName().'.created_at', '>=', $dateFrom);
+    }
+
+    private function addSearchToQuery($query, $search) {;
+        return $query->where(function($q) use ($search) {
+            $q->where(CompletedOrder::getTableName().'.customer_email', 'LIKE', '%' . $search . '%')
+                ->orWhere(CompletedOrder::getTableName().'.payment_method', 'LIKE', '%' . $search . '%')
+                ->orWhere(CompletedOrder::getTableName().'.payment_status', 'LIKE', '%' . $search . '%')
+                ->orWhere(CompletedOrder::getTableName().'.event_id', 'LIKE', '%' . $search . '%')
+                ->orWhere(CompletedOrder::getTableName().'.object_id', 'LIKE', '%' . $search . '%')
+                ->orWhere(CompletedOrder::getTableName().'.status', 'LIKE', '%' . $search . '%');
+        });
+    }
+
+    private function addStatusToQuery($query, $status) {
+        return $query->where(CompletedOrder::getTableName(). '.status', '=', $status);
     }
 }

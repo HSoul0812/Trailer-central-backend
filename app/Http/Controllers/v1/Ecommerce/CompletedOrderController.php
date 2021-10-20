@@ -4,7 +4,7 @@ namespace App\Http\Controllers\v1\Ecommerce;
 
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Ecommerce\CreateCompletedOrderRequest;
-use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
+use App\Http\Requests\Ecommerce\GetCompletedOrderRequest;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Parts\Textrail\PartRepository;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
@@ -42,7 +42,15 @@ class CompletedOrderController extends RestfulController
 
     public function index(Request $request): Response
     {
-        return $this->response->paginator($this->completedOrderRepo->getAll($request->all()), new CompletedOrderTransformer($this->textRailPartRepo));
+        $listRequest = new GetCompletedOrderRequest($request->all());
+
+        if ($listRequest->validate()) {
+            return $this->response
+                ->paginator($this->completedOrderRepo->getAll($request->all()), new CompletedOrderTransformer($this->textRailPartRepo))
+                ->addMeta('totals', $this->completedOrderRepo->getGrandTotals());
+        }
+
+        return $this->response->errorBadRequest();
     }
 
     /**

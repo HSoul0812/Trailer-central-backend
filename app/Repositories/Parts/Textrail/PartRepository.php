@@ -9,6 +9,6 @@ use App\Repositories\Parts\PartRepository as BaseRepository;
 class PartRepository extends BaseRepository implements PartRepositoryInterface
 {
     public function getById($id) {
-        return Part::findOrFail($id);
+        return Part::find($id);
     }
 }
