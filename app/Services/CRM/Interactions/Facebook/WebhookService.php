@@ -144,7 +144,7 @@ class WebhookService implements WebhookServiceInterface
                 $chat = ChatMessage::getFromWebhook($message, $conversation->conversation_id);
 
                 // Save Message
-                $messages->push($this->messages->create($chat->getParams()));
+                $messages->push($this->messages->createOrUpdate($chat->getParams()));
             }
         }
 
