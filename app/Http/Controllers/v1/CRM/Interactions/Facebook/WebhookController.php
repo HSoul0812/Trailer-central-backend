@@ -62,11 +62,8 @@ class WebhookController extends RestfulController
      * @return Response
      */
     public function verifyMessage(Request $request) {
-        // Get JSON
-        $json = json_decode($request->getContent(), true);
-
-        // Convert to Request
-        $request = new MessageWebhookVerify($json);
+        // Verify Request
+        $request = new MessageWebhookVerify($request->all());
 
         if ($request->validate()) {
             return $this->response($this->service->verify($request));
