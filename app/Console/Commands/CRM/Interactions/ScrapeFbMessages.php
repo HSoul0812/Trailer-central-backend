@@ -6,7 +6,7 @@ namespace App\Console\Commands\CRM\Interactions;
 
 use App\Jobs\CRM\Interactions\Facebook\MessageJob;
 use App\Repositories\User\UserRepositoryInterface;
-use App\Repositories\Integration\Facebook\PageRepositoryInterface;
+use App\Repositories\Integration\Facebook\ChatRepositoryInterface;
 use App\Services\CRM\Interactions\Facebook\MessageServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -40,9 +40,9 @@ class ScrapeFbMessages extends Command
     protected $users;
 
     /**
-     * @var App\Repositories\Integration\Facebook\PageRepositoryInterface
+     * @var App\Repositories\Integration\Facebook\ChatRepositoryInterface
      */
-    protected $pages;
+    protected $chats;
 
     /**
      * @var string
@@ -62,14 +62,14 @@ class ScrapeFbMessages extends Command
      * @return void
      */
     public function __construct(UserRepositoryInterface $users,
-                                PageRepositoryInterface $pages,
+                                ChatRepositoryInterface $chats,
                                 MessageServiceInterface $service)
     {
         parent::__construct();
 
         $this->service = $service;
         $this->users = $users;
-        $this->pages = $pages;
+        $this->chats = $chats;
         
         date_default_timezone_set(env('DB_TIMEZONE'));
         
@@ -108,13 +108,13 @@ class ScrapeFbMessages extends Command
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
                 // Get Pages for Dealer
-                $pages = $this->pages->getAll(['dealer_id' => $dealer->id]);
-                $this->info("{$this->command} found " . count($pages) . " facebook pages #{$dealer->id} to scrape messages for");
+                $chats = $this->chats->getAll(['user_id' => $dealer->user_id]);
+                $this->info("{$this->command} found " . count($chats) . " facebook pages #{$dealer->id} to scrape messages for");
 
-                // Loop Pages
-                foreach($pages as $page) {
-                    $this->dispatch(new MessageJob($page->accessToken, $page->page_id));
-                    $this->info("{$this->command} started message job for facebook page #{$page->page_id} on dealer #{$dealer->id}");
+                // Loop Chats
+                foreach($chats as $chat) {
+                    $this->dispatch(new MessageJob($chat->accessToken, $chat->page_id));
+                    $this->info("{$this->command} started message job for facebook page #{$chat->page_id} on dealer #{$dealer->id}");
                 }
             }
         } catch(\Exception $e) {
