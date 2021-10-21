@@ -16,11 +16,9 @@ class CreateDealerLocationMileageFeeTable extends Migration
         Schema::create('dealer_location_mileage_fee', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('dealer_location_id');
-            $table->unsignedInteger('entity_type_id');
             $table->unsignedInteger('inventory_category_id');
             $table->decimal('fee_per_mile', 9, 2);
             $table->foreign('dealer_location_id')->on('dealer_location')->references('dealer_location_id');
-            $table->foreign('entity_type_id')->on('eav_entity_type')->references('entity_type_id');
             $table->foreign('inventory_category_id')->on('inventory_category')->references('inventory_category_id');
             $table->timestamps();
         });

@@ -14,7 +14,6 @@ class DealerLocationMileageFee extends Model
     protected $table = 'dealer_location_mileage_fee';
     protected $fillable = [
         'dealer_location_id',
-        'entity_type_id',
         'inventory_category_id',
         'fee_per_mile',
     ];

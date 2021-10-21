@@ -64,6 +64,9 @@ class DealerLocationMileageFeeRepository implements DealerLocationMileageFeeRepo
      */
     public function get($params)
     {
-        throw new NotImplementedException();
+        return $this->locationMileageFee
+            ->where('inventory_category_id', $params['inventory_category_id'])
+            ->where('dealer_location_id', $params['dealer_location_id'])
+            ->firstOrFail();
     }
 }

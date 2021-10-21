@@ -8,7 +8,6 @@ class CreateDealerLocationMileageFeeRequest extends Request
 {
     protected $rules = [
         'dealer_location_id' => 'required|exists:dealer_location',
-        'entity_type_id' => 'required|exists:eav_entity_type',
         'inventory_category_id' => 'required|exists:inventory_category',
         'fee_per_mile' => 'required|numeric'
     ];
