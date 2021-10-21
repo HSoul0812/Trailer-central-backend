@@ -1,10 +1,9 @@
 <?php
 
-namespace App;
+namespace App\Models\User;
 
 use App\Models\Inventory\Category;
 use App\Models\Inventory\EntityType;
-use App\Models\User\DealerLocation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

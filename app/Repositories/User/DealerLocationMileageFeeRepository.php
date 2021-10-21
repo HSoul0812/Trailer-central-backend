@@ -4,7 +4,7 @@
 namespace App\Repositories\User;
 
 
-use App\DealerLocationMileageFee;
+use App\Models\User\DealerLocationMileageFee;
 use App\Exceptions\NotImplementedException;
 
 class DealerLocationMileageFeeRepository implements DealerLocationMileageFeeRepositoryInterface
