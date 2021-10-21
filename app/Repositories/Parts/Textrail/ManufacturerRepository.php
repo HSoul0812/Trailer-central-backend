@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class ManufacturerRepository implements ManufacturerRepositoryInterface
 {
+    /**     
+     * @var App\Models\Parts\Textrail\Manufacturer
+     */
     protected $model;
 
     public function __construct(Manufacturer $model) {

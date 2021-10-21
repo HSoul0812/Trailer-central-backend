@@ -6,13 +6,19 @@ namespace App\Services\Parts\Textrail;
 
 interface TextrailPartServiceInterface {
 
-  public function getAllParts();
+  /**
+   * @return array<TextrailPartDTO>
+   */
+  public function getAllParts(): array;
   
-  public function getTextrailCategory(int $categoryId);
+  public function getTextrailCategory(int $categoryId): object;
   
-  public function getTextrailManufacturers();
+  public function getTextrailManufacturers(): array;
   
-  public function getTextrailBrands();
+  public function getTextrailBrands(): array;
   
-  public function getTextrailImage(array $img);
+  /**
+   * @return null|array{imageData: array, fileName: string}
+   */
+  public function getTextrailImage(array $img): ?array;
 }

@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class CategoryRepository implements CategoryRepositoryInterface
 {
+    /**     
+     * @var App\Models\Parts\Textrail\Category
+     */
     protected $model;
 
     public function __construct(Category $model) {

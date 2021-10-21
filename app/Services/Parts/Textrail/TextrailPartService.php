@@ -8,17 +8,22 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailMagento;
+use App\Services\Ecommerce\DataProvider\DataProviderInterface;
 
 
 class TextrailPartService implements TextrailPartServiceInterface
 {
+    /**     
+     * @var DataProviderInterface
+     */
+    private $provider;
 
-    public function __construct()
+    public function __construct(DataProviderInterface $provider)
     {
-        $this->provider = new TextrailMagento();
+        $this->provider = $provider;
     }
 
-    public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
+    public function getAllParts(int $currentPage = 1, int $pageSize = 1): array
     {
       return $this->provider->getAllParts($currentPage , $pageSize);
   

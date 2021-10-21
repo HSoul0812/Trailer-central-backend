@@ -109,6 +109,7 @@ class PartsServiceProvider extends ServiceProvider
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind(PartServiceInterface::class, PartService::class);
         $this->app->bind(TextrailPartServiceInterface::class, TextrailPartService::class);
+        $this->app->bind('App\Services\Parts\Textrail\TextrailPartImporterServiceInterface', 'App\Services\Parts\Textrail\TextrailPartImporterService');
         $this->app->bind('App\Repositories\Parts\Textrail\BrandRepositoryInterface', 'App\Repositories\Parts\Textrail\BrandRepository');
         $this->app->bind('App\Repositories\Parts\Textrail\CategoryRepositoryInterface', 'App\Repositories\Parts\Textrail\CategoryRepository');
         $this->app->bind('App\Repositories\Parts\Textrail\ManufacturerRepositoryInterface', 'App\Repositories\Parts\Textrail\ManufacturerRepository');

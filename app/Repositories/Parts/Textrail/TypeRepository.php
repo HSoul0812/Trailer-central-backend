@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class TypeRepository implements TypeRepositoryInterface
 {
+    /**     
+     * @var App\Models\Parts\Textrail\Type
+     */
     protected $model;
 
     public function __construct(Type $model) {

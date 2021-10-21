@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Storage;
 
 class ImageRepository implements ImageRepositoryInterface
 {
+    /**     
+     * @var App\Models\Parts\Textrail\Image
+     */
     protected $model;
 
     public function __construct(Image $model) {

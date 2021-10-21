@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 class BrandRepository implements BrandRepositoryInterface
 {
+    /**     
+     * @var App\Models\Parts\Textrail\Brand
+     */
+     
     protected $model;
 
     public function __construct(Brand $model) {

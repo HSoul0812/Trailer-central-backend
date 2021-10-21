@@ -129,6 +129,10 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
         throw new \LogicException('Quote generation failed.');
     }
 
+    /**
+     * @return array<TextrailPartDTO>
+     */
+
     public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
     {
       $headers = self::getHeaders();
@@ -138,7 +142,7 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
 
       $Allparts = [];
 
-      for ($i=0; $i < $totalParts; $i+=$pageSize) {
+      for ($i=0; $i < 1; $i+=$pageSize) {
         
         $queryParts = [
           'searchCriteria[page_size]' => $pageSize,
@@ -215,7 +219,6 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
 
     public function getTextrailManufacturers(): array
     {
-      
       $headers = self::getHeaders();
       return json_decode($this->httpClient->get(self::TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL, ['headers' => $headers])->getBody()->getContents());
     }
@@ -226,9 +229,13 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
       return json_decode($this->httpClient->get(self::TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL, ['headers' => $headers])->getBody()->getContents());
     }
 
+    /**
+     * @return null|array{imageData: array, fileName: string}
+     */
+
     public function getTextrailImage(array $img): ?array
     {
-      $img_url = env('TEXTRAIL_API_URL') . self::TEXTRAIL_ATTRIBUTES_MEDIA_URL . $img['file'];
+      $img_url = $this->getTextrailImagesBaseUrl() . $img['file'];
       $checkFile = get_headers($img_url);
 
       if ($checkFile[0] == "HTTP/1.1 200 OK") {
@@ -240,6 +247,11 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
       } else {
         return null;
       }
+    }
+
+    public function getTextrailImagesBaseUrl()
+    {
+      return env('TEXTRAIL_API_URL') . self::TEXTRAIL_ATTRIBUTES_MEDIA_URL;
     }
 
     public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int
@@ -261,6 +273,10 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
       
       return $totalParts;
     }
+
+    /**
+     * @return array{"Content-Type": string, "Authorization": string}
+     */
 
     private function getHeaders(): array
     {
