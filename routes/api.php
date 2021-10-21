@@ -331,6 +331,15 @@ $api->version('v1', function ($route) {
         $route->post('login', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@login');
     });
 
+    /**
+     * Website User Favorite Inventory
+     */
+    $route->group(['prefix' => 'website/inventory/favorite', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
