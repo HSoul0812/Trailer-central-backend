@@ -129,33 +129,44 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         // Get First Dealer Location SMS Numbers
         $query = DealerLocation::where('dealer_id', $params['dealer_id']);
 
+        $select = '*';
+        if (!empty($params['select'])) {
+            if (is_array($params['select'])) {
+                $select = $params['select'];
+            } elseif (is_string($params['select'])) {
+                $select = explode(',', $params['select']);
+            }
+        }
+
+        $query->select($select);
+
         // Match Name
-        if(isset($params['name'])) {
+        if (isset($params['name'])) {
             $query->where('name', $params['name']);
         }
 
         // Match Phone
-        if(isset($params['phone'])) {
+        if (isset($params['phone'])) {
             $query->where('phone', $params['phone']);
         }
 
         // Match Email
-        if(isset($params['email'])) {
+        if (isset($params['email'])) {
             $query->where('email', $params['email']);
         }
 
         // Match City
-        if(isset($params['city'])) {
+        if (isset($params['city'])) {
             $query->where('city', $params['city']);
         }
 
         // Match State
-        if(isset($params['region'])) {
+        if (isset($params['region'])) {
             $query->where('region', $params['region']);
         }
 
         // Match Zip
-        if(isset($params['zip'])) {
+        if (isset($params['zip'])) {
             $query->where('postalcode', $params['zip']);
         }
 

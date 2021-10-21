@@ -15,6 +15,7 @@ use App\Services\User\DealerLocationServiceInterface;
 use App\Transformers\User\DealerLocationQuoteFeeTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use App\Http\Requests\User\CommonDealerLocationRequest;
+use App\Transformers\User\DealerLocationTitleTransformer;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Http\Request;
 use Dingo\Api\Http\Response;
@@ -50,7 +51,8 @@ class DealerLocationController extends RestfulControllerV2 {
     )
     {
         $this->middleware('setDealerIdOnRequest')->only([
-            'index', 'quoteFees', 'destroy', 'update', 'show', 'create', 'update', 'check'
+            'index', 'quoteFees', 'destroy', 'update', 'show', 'create', 'update', 'check',
+            'getDealerLocationTitles'
         ]);
         $this->dealerLocation = $dealerLocationRepo;
         $this->dealerLocationQuoteFee = $dealerLocationRepoFee;
@@ -104,24 +106,6 @@ class DealerLocationController extends RestfulControllerV2 {
             }
 
             $this->response->errorInternal();
-        }
-
-        $this->response->errorBadRequest();
-    }
-
-    /**
-     * @return Response|void
-     *
-     * @throws ModelNotFoundException
-     * @throws ResourceException when there was a failed validation
-     * @throws HttpException when the provided resource id does not belongs to dealer who has made the request
-     */
-    public function show(int $id, Request $request): Response
-    {
-        $request = new CommonDealerLocationRequest(['id' => $id] + $request->all());
-
-        if ($request->validate()) {
-            return $this->sendResponseForSingleLocation($id, $request->getInclude());
         }
 
         $this->response->errorBadRequest();
@@ -210,5 +194,22 @@ class DealerLocationController extends RestfulControllerV2 {
         $locationItem = new Item($this->dealerLocation->get(['dealer_location_id' => $id]), $this->transformer);
 
         return $this->response->array($this->fractal->createData($locationItem)->toArray());
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function getDealerLocationTitles(Request $request): Response
+    {
+        $request = new GetDealerLocationRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->array(
+                $this->service->getDealerLocationTitles($request->only('dealer_id'))
+            );
+        }
+
+        $this->response->errorBadRequest();
     }
 }
