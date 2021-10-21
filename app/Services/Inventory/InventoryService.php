@@ -2,7 +2,6 @@
 
 namespace App\Services\Inventory;
 
-use App\DealerLocationMileageFee;
 use App\Exceptions\Inventory\InventoryException;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
@@ -10,7 +9,6 @@ use App\Models\Inventory\Inventory;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
-use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;

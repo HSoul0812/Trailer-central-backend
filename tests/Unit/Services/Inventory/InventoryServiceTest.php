@@ -7,16 +7,23 @@ use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
 use App\Models\Inventory\Inventory;
+use App\Models\User\DealerLocation;
+use App\Models\User\DealerLocationMileageFee;
+use App\Nova\Resources\Inventory\InventoryCategory;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
+use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
+use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\File\DTOs\FileDto;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use App\Services\Inventory\InventoryService;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -77,6 +84,21 @@ class InventoryServiceTest extends TestCase
      */
     private $fileServiceMock;
 
+    /**
+     * @var DealerLocationRepositoryInterface|LegacyMockInterface|Mockery\MockInterface
+     */
+    private $dealerLocationRepositoryMock;
+
+    /**
+     * @var DealerLocationMileageFeeRepositoryInterface|LegacyMockInterface|Mockery\MockInterface
+     */
+    private $dealerLocationMileageFeeRepositoryMock;
+
+    /**
+     * @var CategoryRepositoryInterface|LegacyMockInterface|Mockery\MockInterface
+     */
+    private $categoryRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -101,6 +123,15 @@ class InventoryServiceTest extends TestCase
 
         $this->fileServiceMock = Mockery::mock(FileService::class);
         $this->app->instance(FileService::class, $this->fileServiceMock);
+
+        $this->dealerLocationRepositoryMock = Mockery::mock(DealerLocationRepositoryInterface::class);
+        $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepositoryMock);
+
+        $this->dealerLocationMileageFeeRepositoryMock = Mockery::mock(DealerLocationMileageFeeRepositoryInterface::class);
+        $this->app->instance(DealerLocationMileageFeeRepositoryInterface::class, $this->dealerLocationMileageFeeRepositoryMock);
+
+        $this->categoryRepositoryMock = Mockery::mock(CategoryRepositoryInterface::class);
+        $this->app->instance(CategoryRepositoryInterface::class, $this->categoryRepositoryMock);
     }
 
     /**
@@ -963,7 +994,10 @@ class InventoryServiceTest extends TestCase
                 $this->billRepositoryMock,
                 $this->quickbookApprovalRepositoryMock,
                 $this->imageServiceMock,
-                $this->fileServiceMock
+                $this->fileServiceMock,
+                $this->dealerLocationRepositoryMock,
+                $this->dealerLocationMileageFeeRepositoryMock,
+                $this->categoryRepositoryMock
             ])
             ->onlyMethods(['delete'])
             ->getMock();
@@ -1053,6 +1087,51 @@ class InventoryServiceTest extends TestCase
         $assertedResult = ['deletedDuplicates' => 0, 'couldNotDeleteDuplicates' => []];
 
         $this->assertSame($assertedResult, $result);
+    }
+
+    public function testDeliveryPrice() {
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->id = 1;
+        $inventory->lat = 10;
+        $inventory->lng = 10;
+
+        $dealerLocation = $this->getEloquentMock(DealerLocation::class);
+        $dealerLocation->lat = 11;
+        $dealerLocation->lng = 11;
+        $dealerLocation->dealer_location_id = 1;
+        $dealerLocation
+            ->shouldReceive('getKey')
+            ->once()
+            ->andReturn(1);
+
+        $inventory->dealerLocation = $dealerLocation;
+
+        $mileageFee = $this->getEloquentMock(DealerLocationMileageFee::class);
+        $mileageFee->fee_per_mile = 1;
+
+        $inventoryCategory = $this->getEloquentMock(InventoryCategory::class);
+        $inventoryCategory->id = 1;
+        $inventoryCategory
+            ->shouldReceive('getKey')
+            ->once()
+            ->andReturn(1);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->andReturn($inventory);
+        $this->categoryRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->andReturn($inventoryCategory);
+        $this->dealerLocationMileageFeeRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->andReturn($mileageFee);
+        $inventoryService = app()->make(InventoryServiceInterface::class);
+        $price = $inventoryService->deliveryPrice($inventory->id);
+        $this->assertGreaterThan(96, $price);
+        $this->assertLessThan(97, $price);
     }
 
     /**
