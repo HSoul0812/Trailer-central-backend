@@ -23,7 +23,7 @@ class TextrailPartService implements TextrailPartServiceInterface
         $this->provider = $provider;
     }
 
-    public function getAllParts(int $currentPage = 1, int $pageSize = 1): array
+    public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
     {
       return $this->provider->getAllParts($currentPage , $pageSize);
   

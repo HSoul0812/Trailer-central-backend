@@ -142,7 +142,7 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
 
       $Allparts = [];
 
-      for ($i=0; $i < 1; $i+=$pageSize) {
+      for ($i=0; $i < $totalParts; $i+=$pageSize) {
         
         $queryParts = [
           'searchCriteria[page_size]' => $pageSize,
