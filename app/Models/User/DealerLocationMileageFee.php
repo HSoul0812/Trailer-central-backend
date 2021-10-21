@@ -4,12 +4,14 @@ namespace App\Models\User;
 
 use App\Models\Inventory\Category;
 use App\Models\Inventory\EntityType;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DealerLocationMileageFee extends Model
 {
-    //
+    use TableAware;
+
     protected $table = 'dealer_location_mileage_fee';
     protected $fillable = [
         'dealer_location_id',

@@ -72,6 +72,14 @@ class DealerLocationMileageFeeController extends RestfulControllerV2
         $this->response->errorBadRequest();
     }
 
+    /**
+     * @param int $locationId
+     * @param int $feeId
+     * @param Request $request
+     * @return Response
+     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
+     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
+     */
     public function update(int $locationId, int $feeId, Request $request) {
         $requestData = ['dealer_location_id' => $locationId] + $request->all();
         $request = new CreateDealerLocationMileageFeeRequest($requestData);
@@ -85,10 +93,14 @@ class DealerLocationMileageFeeController extends RestfulControllerV2
         $this->response->errorBadRequest();
     }
 
-    public function delete(int $feeId, Request $request) {
+    /**
+     * @param int $feeId
+     * @param Request $request
+     */
+    public function delete(int $feeId, Request $request): Response {
         $this->dealerLocationMileageFeeRepository->delete([
             'id' => $feeId
         ]);
-        $this->deletedResponse();
+        return $this->deletedResponse();
     }
 }

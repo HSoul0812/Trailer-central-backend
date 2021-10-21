@@ -127,6 +127,10 @@ class DealerLocationSeeder extends Seeder
             ->whereIn('dealer_location_id', $locationsId)
             ->delete();
 
+        DB::table(DealerLocationMileageFee::getTableName())
+            ->whereIn('dealer_location_id', $locationsId)
+            ->delete();
+
         DB::table(DealerLocation::getTableName())
             ->whereIn('dealer_id', $dealersId)
             ->delete();
