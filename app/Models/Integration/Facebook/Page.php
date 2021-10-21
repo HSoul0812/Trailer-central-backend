@@ -2,10 +2,12 @@
 
 namespace App\Models\Integration\Facebook;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
+use App\Models\Website\Website;
 use App\Models\Integration\Facebook\Catalog;
 use App\Models\Integration\Auth\AccessToken;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Page
@@ -49,7 +51,17 @@ class Page extends Model
     }
 
     /**
-     * Get Catalog
+     * Get Website
+     * 
+     * @return BelongsTo
+     */
+    public function website(): BelongsTo
+    {
+        return $this->belongsTo(Website::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Catalogs
      * 
      * @return HasMany
      */

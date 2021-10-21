@@ -94,6 +94,7 @@ class InteractionMessage extends Model
             $array['from_name'] = null;
             $array['to_name'] = null;
             $array['date_delivered'] = null;
+            $array['user_name'] = null;
         }
 
         if ($this->tb_name === EmailHistory::getTableName()) {
@@ -113,6 +114,7 @@ class InteractionMessage extends Model
 
             $array['from_number'] = null;
             $array['to_number'] = null;
+            $array['user_name'] = null;
         }
 
         if ($this->tb_name === FbMessage::getTableName()) {
@@ -123,6 +125,7 @@ class InteractionMessage extends Model
             $array['interaction_id'] = $message->interaction_id;
             $array['text'] = $message->message;
             $array['date_delivered'] = $message->created_at;
+            $array['user_name'] = $message->conversation->fbUser->name;
 
             $array['parent_message_id'] = null;
             $array['title'] = null;

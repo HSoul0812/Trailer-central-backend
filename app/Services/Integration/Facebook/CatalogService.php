@@ -63,6 +63,11 @@ class CatalogService implements CatalogServiceInterface
     private $fractal;
 
     /**
+     * Log
+     */
+    private $log;
+
+    /**
      * Construct Facebook Service
      */
     public function __construct(
@@ -83,6 +88,9 @@ class CatalogService implements CatalogServiceInterface
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('facebook');
     }
 
     /**
@@ -323,7 +331,7 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->validateFeed($accessToken, $catalogId, $feedId);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                $this->log->error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             }
         }
 
@@ -335,7 +343,7 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->scheduleFeed($accessToken, $catalogId, $feedUrl, $feedName);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                $this->log->error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
                 $feedId = 0;
             }
         }

@@ -28,6 +28,8 @@ use App\Repositories\CRM\Interactions\Facebook\ConversationRepository;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepository;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
+use App\Repositories\CRM\Leads\FacebookRepository;
+use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepository as TextBlastRepository;
 use App\Repositories\CRM\Text\BlastRepositoryInterface as TextBlastRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepository as TextCampaignRepository;
@@ -50,6 +52,10 @@ use App\Services\CRM\Text\CampaignService as TextCampaignService;
 use App\Services\CRM\Text\CampaignServiceInterface as TextCampaignServiceInterface;
 use App\Services\CRM\Text\TwilioService;
 use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Interactions\Facebook\MessageService;
+use App\Services\CRM\Interactions\Facebook\MessageServiceInterface;
+use App\Services\CRM\Interactions\Facebook\WebhookService;
+use App\Services\CRM\Interactions\Facebook\WebhookServiceInterface;
 use App\Services\CRM\Interactions\InteractionService;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailService;
@@ -82,6 +88,8 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(InteractionServiceInterface::class, InteractionService::class);
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
         $this->app->bind(NtlmEmailServiceInterface::class, NtlmEmailService::class);
+        $this->app->bind(MessageServiceInterface::class, MessageService::class);
+        $this->app->bind(WebhookServiceInterface::class, WebhookService::class);
 
 
         // Text Repositories
@@ -103,6 +111,7 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(InteractionMessageRepositoryInterface::class, InteractionMessageRepository::class);
         $this->app->bind(ConversationRepositoryInterface::class, ConversationRepository::class);
         $this->app->bind(MessageRepositoryInterface::class, MessageRepository::class);
+        $this->app->bind(FacebookRepositoryInterface::class, FacebookRepository::class);
     }
 
     public function boot()

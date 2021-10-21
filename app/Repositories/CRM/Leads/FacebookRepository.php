@@ -88,6 +88,47 @@ class FacebookRepository implements FacebookRepositoryInterface {
     }
 
     /**
+     * Find By ID or User ID
+     * 
+     * @param array $params
+     * @return null|User
+     */
+    public function find(array $params): ?User {
+        // Get User By ID
+        if(isset($params['id'])) {
+            $user = User::find($params['id']);
+        }
+
+        // Get User By User ID
+        if(empty($user->id) && isset($params['user_id'])) {
+            $user = User::where('user_id', $params['user_id'])->first();
+        }
+
+        // Return Full Details
+        return $user ?? null;
+    }
+
+    /**
+     * Create Or Update User
+     * 
+     * @param array $params
+     * @return User
+     */
+    public function createOrUpdate(array $params): User {
+        // Get User
+        $user = $this->find($params);
+
+        // If Exists, Then Update
+        if(!empty($user->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
+    }
+
+
+    /**
      * Create Facebook Lead
      * 
      * @param int $pageId
@@ -96,12 +137,27 @@ class FacebookRepository implements FacebookRepositoryInterface {
      * @param int $mergeId
      * @return FbLead
      */
-    public function convertLead(int $pageId, int $userId, int $leadId, int $mergeId) {
+    public function convertLead(int $pageId, int $userId, int $leadId, int $mergeId = 0): FBLead {
         return FbLead::create([
             'page_id' => $pageId,
             'user_id' => $userId,
             'lead_id' => $leadId,
             'merge_id' => $mergeId
         ]);
+    }
+
+    /**
+     * Lead Exists for Page/User?
+     * 
+     * @param int $pageId
+     * @param int $userId
+     * @return bool
+     */
+    public function leadExists(int $pageId, int $userId): bool {
+        // Find FbLead
+        $lead = FbLead::where('page_id', $pageId)->where('user_id', $userId)->first();
+
+        // Lead Exists?
+        return !empty($lead->id);
     }
 }

@@ -4,9 +4,10 @@ namespace App\Repositories\CRM\Interactions\Facebook;
 
 use App\Exceptions\NotImplementedException;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
-use App\Models\CRM\Interactions\Message;
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MessageRepository implements MessageRepositoryInterface {
 
@@ -76,7 +77,10 @@ class MessageRepository implements MessageRepositoryInterface {
 
     public function update($params) {
         // Get Lead
-        $message = Message::findOrFail($params['id']);
+        $message = $this->find($params);
+        if(empty($message->id)) {
+            throw new ModelNotFoundException;
+        }
 
         // Update Lead
         DB::transaction(function() use (&$message, $params) {
@@ -85,5 +89,45 @@ class MessageRepository implements MessageRepositoryInterface {
 
         // Return Full Details
         return $message;
+    }
+
+    /**
+     * Find By ID or Message ID
+     * 
+     * @param array $params
+     * @return null|Message
+     */
+    public function find(array $params): ?Message {
+        // Get Message By ID
+        if(isset($params['id'])) {
+            $message = Message::find($params['id']);
+        }
+
+        // Get Message By Message ID
+        if(empty($message->id) && isset($params['message_id'])) {
+            $message = Message::where('message_id', $params['message_id'])->first();
+        }
+
+        // Return Full Details
+        return $message ?? null;
+    }
+
+    /**
+     * Create Or Update Message
+     * 
+     * @param array $params
+     * @return Message
+     */
+    public function createOrUpdate(array $params): Message {
+        // Get Message
+        $message = $this->find($params);
+
+        // If Exists, Then Update
+        if(!empty($message->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
     }
 }
