@@ -112,6 +112,8 @@ class InventorySeeder extends Seeder
         $this->dealer = factory(User::class)->create();
 
         $this->dealerLocation = factory(DealerLocation::class)->create([
+            'latitude' => 11,
+            'longitude' => 11,
             'dealer_id' => $this->dealer->dealer_id
         ]);
 
@@ -144,7 +146,7 @@ class InventorySeeder extends Seeder
         $this->category = factory(Category::class)->create();
         $this->dealerLocationMileageFee = factory(DealerLocationMileageFee::class)->create([
             'dealer_location_id' => $this->dealerLocation->getKey(),
-            'inventory_category_id' => $this->category->getKey(),
+            'inventory_category_id' => $this->category->getKey()
         ]);
 
         if ($this->withInventory) {
@@ -153,9 +155,11 @@ class InventorySeeder extends Seeder
                 'dealer_location_id' => $this->dealerLocation->dealer_location_id,
                 'manufacturer' => $this->inventoryMfg,
                 'brand' => $this->brand,
-                'category' => $this->category,
+                'entity_type_id' => $this->category->entity_type_id,
+                'category' => $this->category->legacy_category,
+                'latitude' => 10,
+                'longitude' => 10,
             ];
-
             $this->inventory = factory(Inventory::class)->create($inventoryParams);
         }
     }

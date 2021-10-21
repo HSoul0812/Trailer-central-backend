@@ -382,6 +382,21 @@ class InventoryControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
+    public function testDeliveryPrice() {
+        $seeder = new InventorySeeder(['withInventory' => true]);
+        $seeder->seed();
+        $inventoryId = $seeder->inventory->getKey();
+        $response = $this->json('GET', "/api/inventory/$inventoryId/delivery_price", [], ['access-token' => $seeder->authToken->access_token]);
+        var_dump($seeder->dealerLocationMileageFee->fee_per_mile);
+        $response->assertJson([
+            'response' => [
+                'status' => 'success',
+                'fee' => $seeder->dealerLocationMileageFee->fee_per_mile * 96.893
+            ]
+        ]);
+        $seeder->cleanUp();
+    }
+
     /**
      * Examples of invalid query parameters with their respective expected exception class name and its messages
      *

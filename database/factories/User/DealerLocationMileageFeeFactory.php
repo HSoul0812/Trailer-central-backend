@@ -9,6 +9,6 @@ use Faker\Generator as Faker;
 $factory->define(DealerLocationMileageFee::class, function (Faker $faker, array $attributes): array {
     return [
         'inventory_category_id' => 1,
-        'fee_per_mile' => $faker->randomFloat()
+        'fee_per_mile' => $faker->randomFloat(2, 0, 99)
     ];
 });
