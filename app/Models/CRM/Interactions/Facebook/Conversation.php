@@ -106,22 +106,4 @@ class Conversation extends Model
     {
         return $this->fbLead->lead;
     }
-
-    /**
-     * Get Count of Messages
-     * 
-     * @return int
-     */
-    public function getMessageCountAttribute(): int {
-        return $this->messages()->count();
-    }
-
-    /**
-     * Get Newest Message Time
-     * 
-     * @return string
-     */
-    public function getNewestMessageTimeAttribute(): string {
-        return $this->messages()->max('created_at');
-    }
 }
