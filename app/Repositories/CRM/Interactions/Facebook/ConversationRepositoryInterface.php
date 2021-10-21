@@ -35,6 +35,7 @@ interface ConversationRepositoryInterface extends Repository {
      * Get Newest Conversation Update From Page
      * 
      * @param int $pageId
+     * @return null|string
      */
-    public function getNewestUpdate(int $pageId): string;
+    public function getNewestUpdate(int $pageId): ?string;
 }
