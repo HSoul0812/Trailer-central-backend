@@ -36,12 +36,13 @@ class MessageController extends RestfulController
      * Send Message
      * 
      * @mode POST
+     * @param int $leadId
      * @param Request $request
      * @return Response
      */
-    public function send(Request $request) {
+    public function send(int $leadId, Request $request) {
         // Convert to Request
-        $request = new SendMessageRequest($request->all());
+        $request = new SendMessageRequest(array_merge(['lead_id' => $leadId], $request->all()));
 
         if ($request->validate()) {
             return $this->response->collection($this->service->send($request), $this->transformer);
