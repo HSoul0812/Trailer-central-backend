@@ -155,8 +155,9 @@ class ConversationRepository implements ConversationRepositoryInterface {
      * Get Newest Conversation Update From Page
      * 
      * @param int $pageId
+     * @return null|string
      */
-    public function getNewestUpdate(int $pageId): string {
+    public function getNewestUpdate(int $pageId): ?string {
         return Conversation::where('page_id', $pageId)->max('newest_update');
     }
 }
