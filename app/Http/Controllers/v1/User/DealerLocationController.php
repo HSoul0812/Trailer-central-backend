@@ -114,6 +114,24 @@ class DealerLocationController extends RestfulControllerV2 {
     /**
      * @return Response|void
      *
+     * @throws ModelNotFoundException
+     * @throws ResourceException when there was a failed validation
+     * @throws HttpException when the provided resource id does not belongs to dealer who has made the request
+     */
+    public function show(int $id, Request $request): Response
+    {
+        $request = new CommonDealerLocationRequest(['id' => $id] + $request->all());
+
+        if ($request->validate()) {
+            return $this->sendResponseForSingleLocation($id, $request->getInclude());
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * @return Response|void
+     *
      * @throws ResourceException when there was a failed validation
      */
     public function check(string $name, Request $request): Response
