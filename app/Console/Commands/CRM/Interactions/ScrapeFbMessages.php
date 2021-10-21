@@ -109,11 +109,11 @@ class ScrapeFbMessages extends Command
             foreach($dealers as $dealer) {
                 // Get Pages for Dealer
                 $chats = $this->chats->getAll(['user_id' => $dealer->user_id]);
-                $this->info("{$this->command} found " . count($chats) . " facebook pages #{$dealer->id} to scrape messages for");
+                $this->info("{$this->command} found " . count($chats) . " facebook pages on dealer #{$dealer->id} to scrape messages for");
 
                 // Loop Chats
                 foreach($chats as $chat) {
-                    $this->dispatch(new MessageJob($chat->accessToken, $chat->page_id));
+                    $this->dispatch(new MessageJob($chat->page->accessToken, $chat->page_id));
                     $this->info("{$this->command} started message job for facebook page #{$chat->page_id} on dealer #{$dealer->id}");
                 }
             }
