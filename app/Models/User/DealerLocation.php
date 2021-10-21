@@ -2,7 +2,6 @@
 
 namespace App\Models\User;
 
-use App\DealerLocationMileageFee;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Region;

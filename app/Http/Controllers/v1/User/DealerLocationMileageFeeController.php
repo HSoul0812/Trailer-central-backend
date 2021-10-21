@@ -82,6 +82,7 @@ class DealerLocationMileageFeeController extends RestfulControllerV2
             );
             return $this->updatedResponse($feeId);
         }
+        $this->response->errorBadRequest();
     }
 
     public function delete(int $feeId, Request $request) {
