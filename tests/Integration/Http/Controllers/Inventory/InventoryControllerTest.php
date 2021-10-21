@@ -382,7 +382,6 @@ class InventoryControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
-
     /**
      * Examples of invalid query parameters with their respective expected exception class name and its messages
      *

@@ -8,6 +8,7 @@ use App\Models\Inventory\InventoryMfg;
 use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\User\AuthToken;
 use App\Models\User\DealerLocation;
+use App\Models\User\DealerLocationMileageFee;
 use App\Models\User\DealerUser;
 use App\Models\User\DealerUserPermission;
 use App\Models\User\User;
@@ -94,6 +95,11 @@ class InventorySeeder extends Seeder
      */
     private $inventory;
 
+    /**
+     * @var DealerLocationMileageFee|null
+     */
+    private $dealerLocationMileageFee;
+
     public function __construct(array $params = [])
     {
         $this->userType = $params['userType'] ?? AuthToken::USER_TYPE_DEALER;
@@ -136,6 +142,10 @@ class InventorySeeder extends Seeder
         $this->inventoryMfg = factory(InventoryMfg::class)->create();
         $this->brand = factory(Brand::class)->create();
         $this->category = factory(Category::class)->create();
+        $this->dealerLocationMileageFee = factory(DealerLocationMileageFee::class)->create([
+            'dealer_location_id' => $this->dealerLocation->getKey(),
+            'inventory_category_id' => $this->category->getKey(),
+        ]);
 
         if ($this->withInventory) {
             $inventoryParams = [
@@ -156,6 +166,7 @@ class InventorySeeder extends Seeder
         Brand::destroy($this->brand->brand_id);
         Category::destroy($this->category->inventory_category_id);
         Inventory::where(['dealer_id' => $this->dealer->dealer_id])->delete();
+        DealerLocationMileageFee::destroy(['id' => $this->dealerLocationMileageFee->getKey()]);
         DealerLocation::where(['dealer_id' => $this->dealer->dealer_id])->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => $this->userType])->delete();
 
