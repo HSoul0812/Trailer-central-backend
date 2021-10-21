@@ -79,6 +79,24 @@ class MessageService implements MessageServiceInterface
     }
 
     /**
+     * Send Facebook Message
+     * 
+     * @param int $leadId
+     * @param SendMessageRequest
+     * @return Message
+     */
+    public function send(int $leadId, SendMessageRequest $request): Message {
+        // Get Facebook Lead
+        $fbLead = $this->users->getFbLead($leadId);
+
+        // Send Message
+        $message = $this->sdk->sendMessage($fbLead->page->accessToken, $fbLead->conversation->conversation_id, $request->message);
+
+        // Save Message to DB
+        return $this->messages->createOrUpdate($message->getParams());
+    }
+
+    /**
      * Create User if Missing
      * 
      * @param ChatConversation $conversation

@@ -343,6 +343,13 @@ $api->version('v1', function ($route) {
     $route->post('leads/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\WebhookController@message');
 
     /**
+     * Facebook Endpoints
+     */
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('leads/{leadId}/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\MessageController@send')->where('leadId', '[0-9]+');
+    });
+
+    /**
      * Interaction Messages
      */
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {

@@ -485,9 +485,37 @@ class BusinessService implements BusinessServiceInterface
                 throw new FailedGetMessagesException;
             }
         }
+    }
 
-        // Return Empty Collection
-        return $collection;
+    /**
+     * Get Conversations for Page
+     * 
+     * @param AccessToken $accessToken
+     * @param string $conversationId
+     * @param string $message
+     * @return string Message ID of Sent Message
+     */
+    public function sendMessage(AccessToken $accessToken, string $conversationId, string $message): string {
+        // Configure Client
+        $this->initApi($accessToken);
+
+        // Get Page
+        try {
+            $sentMessage = $this->api->call("/{$conversationId}/messages", 'POST', ['message' => $message]);
+            $this->log->info("Successfully sent message: " . print_r($sentMessage, true));
+
+            // Return New Chat Message Entry
+            return $sentMessage;
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            $this->log->error("Exception returned trying to send message: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } else {
+                throw new FailedSendMessageException;
+            }
+        }
     }
 
 

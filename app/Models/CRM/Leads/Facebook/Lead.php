@@ -83,13 +83,13 @@ class Lead extends Model
     }
 
     /**
-     * Get all conversations
+     * Get conversation
      *
-     * @return HasMany
+     * @return HasOne
      */
-    public function conversations(): HasMany
+    public function conversation(): HasOne
     {
-        return $this->hasMany(Conversation::class, ['page_id', 'user_id'], ['page_id', 'user_id']);
+        return $this->hasOne(Conversation::class, ['page_id', 'user_id'], ['page_id', 'user_id']);
     }
 
     /**
