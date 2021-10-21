@@ -414,18 +414,18 @@ class BusinessService implements BusinessServiceInterface
         foreach($conversations as $conversation) {
             $convo = ChatConversation::getFromUnifiedThread($conversation, $page);
             if(Carbon::parse($convo->newestUpdate)->timestamp <= Carbon::parse($time)->timestamp) {
+                $skip = true;
                 break;
             }
 
             // Add Conversation to Collection
-            $more = true;
             $collection->push($convo);
         }
 
         // Get Next
-        if(!empty($conversations->getNext()) && !empty($more)) {
+        if(!empty($conversations->getNext()) && empty($skip)) {
             $this->log->debug("Retrieved " . $collection->count() . " conversations so far, getting next " . $limit . " conversations");
-            return $this->getConversations($pageId, $time, $conversations->getAfter(), $limit, $collection);
+            return $this->getConversations($pageId, $time, $collection, $conversations->getAfter(), $limit);
         }
 
         // Return Collection<ChatConversation>
