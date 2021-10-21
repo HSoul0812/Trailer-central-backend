@@ -7,14 +7,19 @@ use GuzzleHttp\Client as GuzzleHttpClient;
 use http\Exception\InvalidArgumentException;
 use Illuminate\Support\Facades\Config;
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
+use GuzzleHttp\Exception\ClientException;
 
-class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
+class TextrailMagento implements DataProviderInterface, TextrailGuestCheckoutInterface
 {
 
     private const TEXTRAIL_CATEGORY_URL = 'rest/V1/categories/';
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
     private const TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL = 'rest/V1/products/attributes/brand_name/options/';
     private const TEXTRAIL_ATTRIBUTES_MEDIA_URL = 'media/catalog/product';
+    const VIEW_ID = 'trailer_central_t1_sv';
+    const GUEST_CART_URL = 'rest/:view/V1/guest-carts';
+    const GUEST_CART_POPULATE_URL = 'rest/:view/V1/guest-carts/:cartId/items';
+    const GUEST_SHIPPING_COST_URL = 'rest/:view/V1/guest-carts/:cartId/estimate-shipping-methods';
 
     /** @var string */
     private $apiUrl;
@@ -25,6 +30,9 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
     /** @var string */
     private $token;
 
+    /** @var boolean */
+    private $isGuestCheckout;
+
     /**
      * TextrailMagento constructor.
      * @param string $apiUrl
@@ -33,6 +41,7 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
     {
         $this->apiUrl = env("TEXTRAIL_API_URL", 'https://mcstaging.textrail.com/');
         $this->httpClient = new GuzzleHttpClient(['base_uri' => $this->apiUrl]);
+        $this->isGuestCheckout = env('TEXTRAIL_GUEST_CHECKOUT', true);
     }
 
     public function createCustomer(array $params): array
@@ -79,39 +88,143 @@ class TextrailMagento implements DataProviderInterface, TextrailMagentoInterface
         }
     }
 
-    public function estimateShippingCost(array $params)
+    /**
+     * @param array $params
+     * @param string $quoteId
+     * @throws TextrailException if guzzle has failed during add item.
+     */
+    public function addItemToGuestCart(array $params, string $quoteId)
     {
-        $customer_details = $params['customer_details'];
-        $shipping_details = $params['shipping_details'];
-        $items = $params['items'];
+        try {
+            foreach ($params as $item) {
+                $this->httpClient->post($this->generateUrlWithCartAndView(self::GUEST_CART_POPULATE_URL, $quoteId), [
+                    'json' => [
+                        'cartItem' => [
+                            'sku' => $item['sku'],
+                            'qty' => $item['qty'],
+                            'quote_id' => $quoteId
+                        ]
+                    ]
+                ]);
+            }
+        } catch (ClientException $exception) {
+            throw new TextrailException("Method: addItemToGuestCart, Details: " . $exception->getMessage());
+        }
+    }
 
-        $credentials = $this->createCustomer($customer_details);
-        $this->token = $this->generateAccessToken($credentials);
-        $quoteId = $this->createQuote();
+    private function generateUrlWithCartAndView(string $url, string $cart = null): string
+    {
+        $url = str_replace(':view', self::VIEW_ID, $url);
+        $url = str_replace(':cartId', $cart, $url);
+        return $url;
+    }
 
-        $this->addItemToCart($items, $quoteId);
+    /**
+     * @return string
+     * @throws TextrailException wrong status or guzzle exceptions handling
+     */
+    public function createGuestCart(): string
+    {
+        try {
+            $response = $this->httpClient->post($this->generateUrlWithCartAndView(self::GUEST_CART_URL), []);
 
-        $response = $this->httpClient->post('rest/V1/carts/mine/estimate-shipping-methods', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->token,
-            ],
-            'json' => $shipping_details
-        ]);
+            $responseJson = json_decode($response->getBody()->getContents(), true);
+            if ($response->getStatusCode() === Response::HTTP_OK) {
+                return $responseJson;
+            }
 
-        $costs = json_decode($response->getBody()->getContents(), true);
+            throw new TextrailException("Method: crateGuestCart, Details: Api returns invalid status code for cart, Code: " . $response->getStatusCode() . ", Message: " . $responseJson);
+        } catch (ClientException $exception) {
+            throw new TextrailException("Method: createGuestCart, Details: " . $exception->getMessage());
+        }
+    }
 
-        $costs = array_filter($costs, function ($costItem) {
-             return strtolower($costItem['method_code']) === strtolower('shipping');
-        });
+    public function estimateShippingCost(array $params): array
+    {
+        return $this->isGuestCheckout ? $this->estimateGuestShipping($params) : $this->estimateCustomerShippingCost($params);
+    }
 
-        $costs = reset($costs);
+    /**
+     * @param array $params
+     * @throws TextrailException handles guzzle exception during estimation.
+     * @return array{"cost": float, "tax": float}
+     */
+    public function estimateGuestShipping(array $params): array
+    {
+        try {
+            $shipping_details = $params['shipping_details'];
+            $items = $params['items'];
 
-        $tax = ($costs['price_incl_tax'] - $costs['price_excl_tax'] < 0) ? 0 : $costs['price_incl_tax'] - $costs['price_excl_tax'];
+            // We are using cart_id as quote_id for guest checkouts.
+            $quoteId = $this->createGuestCart();
 
-        return [
-            'cost' => $costs['price_incl_tax'],
-            'tax' => $tax,
-        ];
+            $this->addItemToGuestCart($items, $quoteId);
+
+            $response = $this->httpClient->post($this->generateUrlWithCartAndView(self::GUEST_SHIPPING_COST_URL, $quoteId), [
+                'json' => $shipping_details
+            ]);
+
+            $costs = json_decode($response->getBody()->getContents(), true);
+
+            $costs = array_filter($costs, function ($costItem) {
+                return strtolower($costItem['method_code']) !== strtolower('freeshipping');
+            });
+
+            $costs = reset($costs);
+
+            $tax = ($costs['price_incl_tax'] - $costs['price_excl_tax'] < 0) ? 0 : $costs['price_incl_tax'] - $costs['price_excl_tax'];
+
+            return [
+                'cost' => $costs['price_incl_tax'],
+                'tax' => $tax,
+            ];
+        } catch (ClientException $exception) {
+            throw new TextrailException("Method: estimateGuestShipping, Details: " . $exception->getMessage());
+        }
+    }
+
+    /**
+     * @param array $params
+     * @throws TextrailException handles guzzle exception during estimation.
+     * @return array{"cost": float, "tax": float}
+     */
+    public function estimateCustomerShippingCost(array $params): array
+    {
+        try {
+            $customer_details = $params['customer_details'];
+            $shipping_details = $params['shipping_details'];
+            $items = $params['items'];
+
+            $credentials = $this->createCustomer($customer_details);
+            $this->token = $this->generateAccessToken($credentials);
+            $quoteId = $this->createQuote();
+
+            $this->addItemToCart($items, $quoteId);
+
+            $response = $this->httpClient->post('rest/V1/carts/mine/estimate-shipping-methods', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->token,
+                ],
+                'json' => $shipping_details
+            ]);
+
+            $costs = json_decode($response->getBody()->getContents(), true);
+
+            $costs = array_filter($costs, function ($costItem) {
+                return strtolower($costItem['method_code']) === strtolower('shipping');
+            });
+
+            $costs = reset($costs);
+
+            $tax = ($costs['price_incl_tax'] - $costs['price_excl_tax'] < 0) ? 0 : $costs['price_incl_tax'] - $costs['price_excl_tax'];
+
+            return [
+                'cost' => $costs['price_incl_tax'],
+                'tax' => $tax,
+            ];
+        } catch (ClientException $exception) {
+            throw new TextrailException("Method: estimateCustomerShippingCost, Details: " . $exception->getMessage());
+        }
     }
 
     public function createQuote(): int

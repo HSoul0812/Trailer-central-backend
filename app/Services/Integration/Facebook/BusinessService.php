@@ -157,7 +157,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            Log::error("Exception returned during validate product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
@@ -202,7 +202,7 @@ class BusinessService implements BusinessServiceInterface
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
-            Log::error("Exception returned during get product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            Log::error("Exception returned during delete product feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
