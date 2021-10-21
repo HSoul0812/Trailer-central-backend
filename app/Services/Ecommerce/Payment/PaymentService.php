@@ -162,14 +162,14 @@ class PaymentService implements PaymentServiceInterface
      * @throws RefundAmountException when the order is not refundable due it is unpaid
      * @throws RefundAmountException when the order is not refundable due it is refunded
      * @throws RefundAmountException when the amount is greater than its balance
-     * @throws RefundAmountException when a provided part was not a placed part
-     * @throws RefundAmountException when a provided part was already refunded
-     * @throws RefundAmountException when the order has not a related parts matching with the request
-     * @throws RefundAmountException when the order it has not a payment unique id
+     * @throws RefundException when a provided part was not a placed part
+     * @throws RefundException when a provided part was already refunded
+     * @throws RefundException when the order has not a related parts matching with the request
+     * @throws RefundException when the order it has not a payment unique id
      */
     private function ensureOrderCanBeRefunded(CompletedOrder $order, Money $amount, array $parts): void
     {
-        if (!$order->isPaid()) {
+        if ($order->isPaid()) {
             throw new RefundAmountException(sprintf('%d order is not refundable due it is unpaid', $order->id));
         }
 
@@ -178,7 +178,7 @@ class PaymentService implements PaymentServiceInterface
         }
 
         if (empty($order->payment_intent)) {
-            throw new RefundAmountException(
+            throw new RefundException(
                 sprintf('%d order is not refundable due it has not a payment unique id', $order->id)
             );
         }
@@ -206,7 +206,7 @@ class PaymentService implements PaymentServiceInterface
         })->toArray();
 
         if(empty($orderParts) && !empty($parts)){
-            throw new RefundAmountException(
+            throw new RefundException(
                 sprintf(
                     '%d order cannot be refunded due it has not a related parts matching with the request',
                     $order->id
@@ -216,9 +216,9 @@ class PaymentService implements PaymentServiceInterface
 
         collect($parts)->each(static function (int $partId) use ($orderParts, $order) {
             if (!empty($orderParts) && !in_array($partId, $orderParts)) {
-                throw new RefundAmountException(
+                throw new RefundException(
                     sprintf(
-                        '%d order cannot be refunded due the provided part {%d} is not a placed part',
+                        '%d order cannot be refunded due the provided part %d is not a placed part',
                         $order->id,
                         $partId
                     )
@@ -231,7 +231,7 @@ class PaymentService implements PaymentServiceInterface
         })->toArray();
 
         if (!empty(array_intersect($refundedParts, $parts))) {
-            throw new RefundAmountException(
+            throw new RefundException(
                 sprintf('%d order cannot be refunded due some provided part was already refunded', $order->id)
             );
         }
