@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\CRM\Interactions;
 
-use Illuminate\Console\Command;
 use App\Jobs\CRM\Interactions\Facebook\MessageJob;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\CRM\Interactions\Facebook\MessageServiceInterface;
+use Illuminate\Console\Command;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class ScrapeFbMessages extends Command
 {
+    use DispatchesJobs;
+
     /**
      * The name and signature of the console command.
      *
