@@ -642,7 +642,7 @@ class InventoryService implements InventoryServiceInterface
             'inventory_category_id' => $inventoryCategory->getKey()
         ]);
         $feePerMile = $mileageFee->fee_per_mile;
-        $distance = $this->calculateDistanceBetweenTwoPoints($dealerLocation->lat, $dealerLocation->lng, $inventory->lat, $inventory->lng, 'ML');
+        $distance = $this->calculateDistanceBetweenTwoPoints($dealerLocation->latitude, $dealerLocation->longitude, $inventory->latitude, $inventory->longitude, 'ML');
         return $feePerMile * $distance;
     }
 

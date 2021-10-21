@@ -9,5 +9,4 @@ use App\Repositories\Repository;
 
 interface DealerLocationMileageFeeRepositoryInterface extends Repository
 {
-    public function update($params): DealerLocationMileageFee;
 }

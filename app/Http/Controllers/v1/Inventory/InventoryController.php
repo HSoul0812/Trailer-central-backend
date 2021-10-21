@@ -355,7 +355,7 @@ class InventoryController extends RestfulControllerV2
     }
 
     public function delivery_price(int $inventoryId, Request $request):Response {
-        $this->response->array([
+        return $this->response->array([
             'response' => [
                 'status' => 'success',
                 'fee' => $this->inventoryService->deliveryPrice($inventoryId)

@@ -25,20 +25,11 @@ class DealerLocationMileageFeeRepository implements DealerLocationMileageFeeRepo
      */
     public function create($params): DealerLocationMileageFee
     {
-        return $this->locationMileageFee->create(
-            $params
+        $uniqueKeys = ['dealer_location_id', 'inventory_category_id'];
+        return $this->locationMileageFee->updateOrCreate(
+            array_intersect_key($params, array_flip($uniqueKeys)),
+            array_diff_key($params, array_flip($uniqueKeys))
         );
-    }
-
-    /**
-     * @param array $params
-     * @return DealerLocationMileageFee
-     */
-    public function update($params): DealerLocationMileageFee
-    {
-        $mileageFee = $this->locationMileageFee->findOrFail($params['id']);
-        $mileageFee->fill($params)->save();
-        return $mileageFee;
     }
 
     /**
@@ -68,5 +59,14 @@ class DealerLocationMileageFeeRepository implements DealerLocationMileageFeeRepo
             ->where('inventory_category_id', $params['inventory_category_id'])
             ->where('dealer_location_id', $params['dealer_location_id'])
             ->firstOrFail();
+    }
+
+    /**
+     * @param array $params
+     * @return bool|void
+     */
+    public function update($params)
+    {
+        throw new NotImplementedException();
     }
 }

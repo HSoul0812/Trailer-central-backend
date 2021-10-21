@@ -20,6 +20,7 @@ class CreateDealerLocationMileageFeeTable extends Migration
             $table->decimal('fee_per_mile', 9, 2);
             $table->foreign('dealer_location_id')->on('dealer_location')->references('dealer_location_id');
             $table->foreign('inventory_category_id')->on('inventory_category')->references('inventory_category_id');
+            $table->unique(['inventory_category_id', 'dealer_location_id'], 'unique_location_category_fee');
             $table->timestamps();
         });
     }

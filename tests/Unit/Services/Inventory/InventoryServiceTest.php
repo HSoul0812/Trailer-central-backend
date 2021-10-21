@@ -1092,12 +1092,12 @@ class InventoryServiceTest extends TestCase
     public function testDeliveryPrice() {
         $inventory = $this->getEloquentMock(Inventory::class);
         $inventory->id = 1;
-        $inventory->lat = 10;
-        $inventory->lng = 10;
+        $inventory->latitude = 10;
+        $inventory->longitude = 10;
 
         $dealerLocation = $this->getEloquentMock(DealerLocation::class);
-        $dealerLocation->lat = 11;
-        $dealerLocation->lng = 11;
+        $dealerLocation->latitude = 11;
+        $dealerLocation->longitude = 11;
         $dealerLocation->dealer_location_id = 1;
         $dealerLocation
             ->shouldReceive('getKey')

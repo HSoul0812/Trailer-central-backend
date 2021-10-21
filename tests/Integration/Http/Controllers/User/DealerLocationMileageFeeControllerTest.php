@@ -72,37 +72,6 @@ class DealerLocationMileageFeeControllerTest extends TestCase
     }
 
     /**
-     * @covers ::update
-     */
-    public function testUpdate() {
-        $this->seeder->seed();
-        $dealer = $this->seeder->dealers[0];
-        $location = $this->seeder->locations[$dealer->getKey()]->first();
-        $locationId = $location->getKey();
-        $feeId = $location->mileageFees[0]->getKey();
-
-        $params = [
-            'inventory_category_id' => 1,
-            'fee_per_mile' => 10
-        ];
-        $request = new Request($params);
-        $controller = app(DealerLocationMileageFeeController::class);
-        $response = $controller->update($locationId, $feeId, $request);
-        $this->assertEquals(
-            $response->getOriginalContent()['response']['data']['id'],
-            $feeId
-        );
-        $this->assertDatabaseHas(
-            DealerLocationMileageFee::getTableName(),
-            [
-                'id' => $feeId,
-                'inventory_category_id' => 1,
-                'fee_per_mile' => 10
-            ]
-        );
-    }
-
-    /**
      * @covers ::delete
      */
     public function testDelete() {

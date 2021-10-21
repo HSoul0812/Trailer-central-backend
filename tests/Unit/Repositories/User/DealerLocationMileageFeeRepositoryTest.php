@@ -43,42 +43,12 @@ class DealerLocationMileageFeeRepositoryTest extends TestCase
         ];
 
         $this->dealerLocationMileageFeeMock
-            ->shouldReceive('create')
+            ->shouldReceive('updateOrCreate')
             ->once()
             ->andReturn(new DealerLocationMileageFee($params));
         $model = $this->getConcreteRepository()->create($params);
         $this->assertEquals($model->dealer_location_id, $params['dealer_location_id']);
         $this->assertEquals($model->inventory_category_id, $params['inventory_category_id']);
-    }
-
-    /**
-     * @covers ::update
-     */
-    public function testUpdate() {
-        $params = [
-            'id' => 1,
-            'dealer_location_id' => 1,
-            'inventory_category_id' => 1,
-        ];
-        $this->dealerLocationMileageFeeMock->dealer_location_id = $params['dealer_location_id'];
-        $this->dealerLocationMileageFeeMock->inventory_category_id = $params['inventory_category_id'];
-
-        $this->dealerLocationMileageFeeMock
-            ->shouldReceive('findOrFail')
-            ->once()
-            ->andReturnSelf();
-        $this->dealerLocationMileageFeeMock
-            ->shouldReceive('fill')
-            ->once()
-            ->andReturnSelf();
-        $this->dealerLocationMileageFeeMock
-            ->shouldReceive('save')
-            ->once()
-            ->andReturnSelf();
-        $update = $this->getConcreteRepository()->update($params);
-
-        $this->assertEquals($update->dealer_location_id, $params['dealer_location_id']);
-        $this->assertEquals($update->inventory_category_id, $params['inventory_category_id']);
     }
 
     /**

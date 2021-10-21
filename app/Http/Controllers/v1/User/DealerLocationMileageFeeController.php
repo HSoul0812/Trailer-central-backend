@@ -73,27 +73,6 @@ class DealerLocationMileageFeeController extends RestfulControllerV2
     }
 
     /**
-     * @param int $locationId
-     * @param int $feeId
-     * @param Request $request
-     * @return Response
-     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
-     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
-     */
-    public function update(int $locationId, int $feeId, Request $request) {
-        $requestData = ['dealer_location_id' => $locationId] + $request->all();
-        $request = new CreateDealerLocationMileageFeeRequest($requestData);
-
-        if($request->validate()) {
-            $this->dealerLocationMileageFeeRepository->update(
-                ['id' => $feeId] + $requestData
-            );
-            return $this->updatedResponse($feeId);
-        }
-        $this->response->errorBadRequest();
-    }
-
-    /**
      * @param int $feeId
      * @param Request $request
      */

@@ -4,7 +4,7 @@
 namespace App\Transformers\User;
 
 
-use App\DealerLocationMileageFee;
+use App\Models\User\DealerLocationMileageFee;
 use League\Fractal\TransformerAbstract;
 
 class DealerLocationMileageFeeTransformer extends TransformerAbstract
