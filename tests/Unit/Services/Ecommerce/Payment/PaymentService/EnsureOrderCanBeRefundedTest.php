@@ -35,6 +35,9 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
         string $expectedException,
         string $expectedExceptionMessage
     ): void {
+        $amountToRefund = Money::of($amount, 'USD');
+        $order = $this->makeModel(CompletedOrder::class)($orderAttributes);
+
         $dependencies = new PaymentServiceDependencies();
 
         $service = $this->getMockBuilder(PaymentService::class)
@@ -44,15 +47,7 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $this->invokeMethod(
-            $service,
-            'ensureOrderCanBeRefunded',
-            [
-                $this->makeModel(CompletedOrder::class)($orderAttributes),
-                Money::of($amount, 'USD'),
-                $parts
-            ]
-        );
+        $this->invokeMethod($service, 'ensureOrderCanBeRefunded', [$order, $amountToRefund, $parts]);
     }
 
     /**
@@ -60,6 +55,8 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
      */
     public function testItWillThrowAnExceptionDueBalance(): void
     {
+        $amountToRefund = Money::of(200, 'USD');
+
         /** @var CompletedOrder $order */
         $order = $this->makeModel(CompletedOrder::class)([
             'id' => $this->faker->unique(true)->numberBetween(1, 100),
@@ -85,15 +82,7 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
             sprintf('%d order is not refundable due the amount is greater than its balance', $order->id)
         );
 
-        $this->invokeMethod(
-            $service,
-            'ensureOrderCanBeRefunded',
-            [
-                $order,
-                Money::of(200, 'USD'),
-                []
-            ]
-        );
+        $this->invokeMethod($service, 'ensureOrderCanBeRefunded', [$order, $amountToRefund, []]);
     }
 
     /**
@@ -101,6 +90,7 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
      */
     public function testItWillThrowAnExceptionDuePartsDontMatch(): void
     {
+        $amountToRefund = Money::of(200, 'USD');
         $partIdToRefund = 8;
 
         /** @var CompletedOrder $order */
@@ -133,15 +123,7 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
             )
         );
 
-        $this->invokeMethod(
-            $service,
-            'ensureOrderCanBeRefunded',
-            [
-                $order,
-                Money::of(200, 'USD'),
-                [$partIdToRefund]
-            ]
-        );
+        $this->invokeMethod($service, 'ensureOrderCanBeRefunded', [$order, $amountToRefund, [$partIdToRefund]]);
     }
 
     /**
@@ -149,6 +131,7 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
      */
     public function testItWillThrowAnExceptionDueThePartIsRefunded(): void
     {
+        $amountToRefund = Money::of(200, 'USD');
         $partIdToRefund = 4;
         /** @var Part $alreadyRefundedPart */
         $alreadyRefundedPart = $this->makeModel(Part::class)(['id' => $partIdToRefund]);
@@ -184,15 +167,7 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
             sprintf('%d order cannot be refunded due some provided part was already refunded', $order->id)
         );
 
-        $this->invokeMethod(
-            $service,
-            'ensureOrderCanBeRefunded',
-            [
-                $order,
-                Money::of(200, 'USD'),
-                [$partIdToRefund]
-            ]
-        );
+        $this->invokeMethod($service, 'ensureOrderCanBeRefunded', [$order, $amountToRefund, [$partIdToRefund]]);
     }
 
     /**

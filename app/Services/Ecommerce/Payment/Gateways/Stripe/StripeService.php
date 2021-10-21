@@ -32,7 +32,7 @@ class StripeService implements PaymentGatewayServiceInterface
     /**
      * @param  string  $objectId
      * @param  Money  $amount
-     * @param  array{sku:string, title:string}  $parts
+     * @param  array{sku:string, title:string, id: int}  $parts
      *
      * @param  string|null  $reason
      * @return StripeRefundResultInterface

@@ -74,28 +74,28 @@ class PaymentService implements PaymentServiceInterface
      */
     public function refund(int $id, Money $amount, array $parts, ?string $reason = null): Refund
     {
-        $order = $this->getOrderById($id);
+        $order = $this->orderRepository->get(['id' => $id]);
 
         $this->ensureOrderCanBeRefunded($order, $amount, $parts);
 
         $encodedParts = $this->encodePartsToBeRefunded($parts);
 
         // Some issuable context information
-        $logContext = ['id' => $id, 'amount' => $amount, 'parts' => $encodedParts];
+        $logContext = ['id' => $id, 'amount' => $amount->getAmount(), 'parts' => $encodedParts];
 
         // This logic must not be a transaction to be able recuperating from an error after the refund has been
         // successfully created in the payment gateway side
-        $refund = $this->createRefund($order, $amount, $parts, $logContext, $reason);
+        $refund = $this->createRefund($order, $amount, $parts, $reason);
 
         try {
             $gatewayRefundResponse = $this->paymentGatewayService->refund(
                 $order->payment_intent,
                 $amount,
-                $parts,
+                $encodedParts,
                 $reason
             );
 
-            $this->tryToFinishRefund($refund, $gatewayRefundResponse, $logContext);
+            $this->tryToFinishRefund($refund, $gatewayRefundResponse);
 
             return $refund;
         } catch (RefundPaymentGatewayException $exception) {
@@ -137,26 +137,9 @@ class PaymentService implements PaymentServiceInterface
     }
 
     /**
-     * @param  int  $id
-     * @return CompletedOrder
-     *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
-     */
-    private function getOrderById(int $id): CompletedOrder
-    {
-        $order = $this->orderRepository->get(['id' => $id]);
-
-        if (is_null($order)) {
-            throw new ModelNotFoundException(CompletedOrder::class, ['id' => $id]);
-        }
-
-        return $order;
-    }
-
-    /**
      * @param  CompletedOrder  $order
      * @param  Money  $amount
-     * @param  array<int>  $parts part's ids to be refunded
+     * @param  array<int>  $parts  part's ids to be refunded
      *
      * @throws \Brick\Money\Exception\MoneyMismatchException
      * @throws RefundAmountException when the order is not refundable due it is unpaid
@@ -205,7 +188,7 @@ class PaymentService implements PaymentServiceInterface
             return $part['id'];
         })->toArray();
 
-        if(empty($orderParts) && !empty($parts)){
+        if (empty($orderParts) && !empty($parts)) {
             throw new RefundException(
                 sprintf(
                     '%d order cannot be refunded due it has not a related parts matching with the request',
@@ -240,8 +223,7 @@ class PaymentService implements PaymentServiceInterface
     /**
      * @param  CompletedOrder  $order
      * @param  Money  $amount
-     * @param  array<int>  $parts part's ids to be refunded
-     * @param  array  $logContext
+     * @param  array<int>  $parts  part's ids to be refunded
      * @param  null|string  $reason
      *
      * @return Refund
@@ -251,7 +233,6 @@ class PaymentService implements PaymentServiceInterface
         CompletedOrder $order,
         Money $amount,
         array $parts,
-        array $logContext,
         ?string $reason = null
     ): Refund {
         $refund = $this->refundRepository->create([
@@ -263,24 +244,20 @@ class PaymentService implements PaymentServiceInterface
 
         $this->logger->info(
             sprintf('A refund process for {%d} order has begun', $order->id),
-            $logContext
+            ['id' => $order->id, 'amount' => $amount->getAmount(), 'parts' => $parts]
         );
 
         return $refund;
     }
 
     /**
-     * @param  StripeRefundResult  $gatewayRefundResponse
-     * @param  array  $logContext
      * @param  Refund  $refund
+     * @param  StripeRefundResult  $gatewayRefundResponse
      *
      * @throws AfterRemoteRefundException when there was some error after the refund was successfully done on payment gateway side
      */
-    private function tryToFinishRefund(
-        Refund $refund,
-        StripeRefundResult $gatewayRefundResponse,
-        array $logContext
-    ): void {
+    private function tryToFinishRefund(Refund $refund, StripeRefundResult $gatewayRefundResponse): void
+    {
         try {
             $this->orderRepository->beginTransaction();
 
@@ -289,7 +266,12 @@ class PaymentService implements PaymentServiceInterface
 
             $this->logger->info(
                 sprintf('The refund {%d} for {%d} order was successfully done', $refund->id, $refund->order_id),
-                $logContext
+                [
+                    'id' => $refund->order_id,
+                    'refund_id' => $refund->id,
+                    'amount' => $refund->amount,
+                    'parts' => $refund->parts
+                ]
             );
 
             $this->orderRepository->commitTransaction();
