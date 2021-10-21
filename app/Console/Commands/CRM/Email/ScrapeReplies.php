@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\CRM\Email;
 
-use Illuminate\Console\Command;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
+use Illuminate\Console\Command;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class ScrapeReplies extends Command
 {
+    use DispatchesJobs;
+
     /**
      * The name and signature of the console command.
      *
