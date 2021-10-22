@@ -137,7 +137,7 @@ class WebhookService implements WebhookServiceInterface
                 $userId = $message['sender']['id'] === $pageId ? $message['recipient']['id'] : $message['sender']['id'];
 
                 // Find Conversation ID
-                $conversation = $this->conversations->getByParticipants($pageId, $userId);
+                $conversation = $this->conversations->getByParticipants((int) $pageId, (int) $userId);
                 $this->log->info('Found conversation #' . $conversation->conversation_id . ' between user #' . $userId . ' and page #' . $pageId);
 
                 // Get ChatMessage From Webhook

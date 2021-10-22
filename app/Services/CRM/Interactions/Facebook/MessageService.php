@@ -123,8 +123,11 @@ class MessageService implements MessageServiceInterface
      * @return Collection<Conversation>
      */
     public function scrapeMessages(AccessToken $pageToken, int $pageId): Collection {
+        // Get Newest Conversation Update
+        $newestUpdate = $this->conversations->getNewestUpdate($pageId);
+
         // Get Conversations
-        $conversations = $this->sdk->getConversations($pageToken, $pageId);
+        $conversations = $this->sdk->filterConversations($pageToken, $pageId, $newestUpdate);
         $this->log->debug('Retrieved ' . $conversations->count() . ' conversations from Page #' . $pageId);
 
         // Loop Conversations

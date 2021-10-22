@@ -31,16 +31,30 @@ interface BusinessServiceInterface {
      */
     public function validate($accessToken);
 
+
     /**
-     * Get Conversations for Page
+     * Filter Conversations for Page
      * 
      * @param AccessToken $accessToken
      * @param int $pageId
-     * @param int $limit default: 0
-     * @param string $after default: ''
+     * @param null|string $time
+     * @throws ExpiredFacebookAccessTokenException
+     * @throws FailedGetConversationsException
      * @return Collection<ChatConversation>
      */
-    public function getConversations(AccessToken $accessToken, int $pageId, int $limit = 0, string $after = ''): Collection;
+    public function filterConversations(AccessToken $accessToken, int $pageId, ?string $time = null): Collection;
+
+    /**
+     * Get Conversations for Page
+     * 
+     * @param int $pageId
+     * @param string $time
+     * @param Collection $collection
+     * @param string $after default: ''
+     * @param int $limit default: 0
+     * @return Collection<ChatConversation>
+     */
+    public function getConversations(int $pageId, string $time, Collection $collection, string $after = '', int $limit = 0): Collection;
 
     /**
      * Get Conversations for Page

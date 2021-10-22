@@ -23,6 +23,7 @@ use FacebookAds\Object\ProductCatalog;
 use FacebookAds\Object\UnifiedThread;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 /**
  * Class BusinessService
@@ -59,6 +60,11 @@ class BusinessService implements BusinessServiceInterface
      * @const int
      */
     const PER_PAGE_LIMIT = 100;
+
+    /**
+     * @const int
+     */
+    const CONVO_MAX_MONTHS = 6;
 
 
     /**
@@ -347,46 +353,32 @@ class BusinessService implements BusinessServiceInterface
 
 
     /**
-     * Get Conversations for Page
+     * Filter Conversations for Page
      * 
      * @param AccessToken $accessToken
      * @param int $pageId
-     * @param int $limit default: 0
-     * @param string $after default: ''
+     * @param null|string $time
+     * @throws ExpiredFacebookAccessTokenException
+     * @throws FailedGetConversationsException
      * @return Collection<ChatConversation>
      */
-    public function getConversations(AccessToken $accessToken, int $pageId, int $limit = 0, string $after = '', Collection $collection = null): Collection {
-        // Initialize Collection of Conversations
-        if(empty($collection)) {
-            $collection = new Collection();
-        }
-
+    public function filterConversations(AccessToken $accessToken, int $pageId, ?string $time = null): Collection {
         // Configure Client
         $this->initApi($accessToken);
-        $page = $this->pages->getByPageId($pageId);
+
+        // Get Default Time
+        if(empty($time)) {
+            $time = Carbon::now()->subMonths(self::CONVO_MAX_MONTHS)->toDateTimeString();
+        }
 
         // Get Page
         try {
-            // Get Conversations
-            $fbPage = new Page($pageId);
-            $conversations = $fbPage->getConversations(
-                ['id', 'link', 'updated_time', 'snippet', 'message_count', 'participants'],
-                ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
-            );
-            foreach($conversations as $conversation) {
-                $collection->push(ChatConversation::getFromUnifiedThread($conversation, $page));
-            }
-
-            // Get Next
-            $next = $conversations->getNext();
-            if(!empty($next)) {
-                $this->log->debug("Retrieved " . $collection->count() . " conversations so far, getting next " . $limit . " conversations");
-                return $this->getConversations($accessToken, $pageId, $limit, $conversations->getAfter(), $collection);
-            }
+            // Get Conversations From FB
+            $conversations = $this->getConversations($pageId, $time, new Collection());
 
             // Return Collection<ChatConversation>
-            $this->log->debug("Returned " . $collection->count() . " conversations from the page #" . $pageId);
-            return $collection;
+            $this->log->debug("Returned " . $conversations->count() . " conversations from the page #" . $pageId);
+            return $conversations;
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
@@ -397,8 +389,47 @@ class BusinessService implements BusinessServiceInterface
                 throw new FailedGetConversationsException;
             }
         }
+    }
 
-        // Return Empty Collection
+    /**
+     * Get Conversations for Page
+     * 
+     * @param int $pageId
+     * @param string $time
+     * @param Collection $collection
+     * @param string $after default: ''
+     * @param int $limit default: 0
+     * @return Collection<ChatConversation>
+     */
+    public function getConversations(int $pageId, string $time, Collection $collection, string $after = '', int $limit = 0): Collection {
+        // Get Conversations
+        $fbPage = new Page($pageId);
+        $conversations = $fbPage->getConversations(
+            ['id', 'link', 'updated_time', 'snippet', 'message_count', 'participants'],
+            ['limit' => $limit ?: self::PER_PAGE_LIMIT, 'after' => $after]
+        );
+
+        // Loop Through Conversations Until We Reached Limit
+        $page = $this->pages->getByPageId($pageId);
+        foreach($conversations as $conversation) {
+            $convo = ChatConversation::getFromUnifiedThread($conversation, $page);
+            if(Carbon::parse($convo->newestUpdate)->timestamp <= Carbon::parse($time)->timestamp) {
+                $skip = true;
+                break;
+            }
+
+            // Add Conversation to Collection
+            $collection->push($convo);
+        }
+
+        // Get Next
+        if(!empty($conversations->getNext()) && empty($skip)) {
+            $this->log->debug("Retrieved " . $collection->count() . " conversations so far, getting next " . $limit . " conversations");
+            return $this->getConversations($pageId, $time, $collection, $conversations->getAfter(), $limit);
+        }
+
+        // Return Collection<ChatConversation>
+        $this->log->debug("Returned " . $collection->count() . " conversations from the page #" . $pageId);
         return $collection;
     }
 
