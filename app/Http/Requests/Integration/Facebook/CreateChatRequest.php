@@ -13,6 +13,7 @@ class CreateChatRequest extends Request {
 
     protected $rules = [
         'user_id' => 'required|integer',
+        'dealer_id' => 'required|integer',
         'sales_person_id' => 'integer',
         'account_id' => 'required|integer',
         'account_name' => 'required|string',
