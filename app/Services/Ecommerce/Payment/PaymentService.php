@@ -19,7 +19,6 @@ use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use App\Services\Ecommerce\Payment\Gateways\Stripe\StripeRefundResult;
 use Brick\Math\RoundingMode;
 use Brick\Money\Money;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PaymentService implements PaymentServiceInterface
 {
@@ -112,12 +111,15 @@ class PaymentService implements PaymentServiceInterface
 
             throw $exception;
         } catch (AfterRemoteRefundException $exception) {
-            $this->logger->critical($exception->getMessage(), $logContext);
+            $this->logger->critical(
+                $exception->getMessage(),
+                array_merge($exception->getContext(), ['response' => $exception->getResult()->asArray()])
+            );
 
-            // this is a naive approach due if it has failed when it tried to finish the refund, probably it will
-            // fail again here, but at least the critical log was recorded, and the subsequent refund attempt will be
-            // prevented
-            $this->refundRepository->markAsRecoverableFailure($refund, $gatewayRefundResponse);
+            // This is a naive approach given that if there was a failure when it tried to finish the refund (post-gateway),
+            // then, it probably will fail again here, but at least the critical log was recorded, and the subsequent
+            // refund attempt will be prevented
+            $this->refundRepository->markAsRecoverableFailure($refund, $exception->getResult());
 
             throw $exception;
         } catch (\Exception  $exception) {
@@ -258,6 +260,13 @@ class PaymentService implements PaymentServiceInterface
      */
     private function tryToFinishRefund(Refund $refund, StripeRefundResult $gatewayRefundResponse): void
     {
+        $logContext = [
+            'id' => $refund->order_id,
+            'refund_id' => $refund->id,
+            'amount' => $refund->amount,
+            'parts' => $refund->parts
+        ];
+
         try {
             $this->orderRepository->beginTransaction();
 
@@ -266,30 +275,25 @@ class PaymentService implements PaymentServiceInterface
 
             $this->logger->info(
                 sprintf('The refund {%d} for {%d} order was successfully done', $refund->id, $refund->order_id),
-                [
-                    'id' => $refund->order_id,
-                    'refund_id' => $refund->id,
-                    'amount' => $refund->amount,
-                    'parts' => $refund->parts
-                ]
+                $logContext
             );
 
             $this->orderRepository->commitTransaction();
         } catch (\Exception $exception) {
             $this->orderRepository->rollbackTransaction();
 
-            $errorMessage = sprintf(
+            $exception = new AfterRemoteRefundException(sprintf(
                 'The refund {%d} for {%d} order had a critical error after its remote process: %s',
                 $refund->id,
                 $refund->order_id,
                 $exception->getMessage()
-            );
+            ));
 
             // just in case any error has occurred after a successful gateway refund, we need to store that
             // response payload somewhere for monitoring purpose, or any refund issue
             // @todo: many payment gateways doesn't allow cancelling refunds, so this should be a charge to rollback the refund
 
-            throw (new AfterRemoteRefundException($errorMessage))->withContext($logContext);
+            throw $exception->withContext($logContext)->withResult($gatewayRefundResponse);
         }
     }
 

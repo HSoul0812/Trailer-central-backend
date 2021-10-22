@@ -34,7 +34,7 @@ interface RefundRepositoryInterface extends GenericRepository
      * it should be provided a result in order to make traceable
      *
      * @param  Refund  $refund
-     * @param  RefundResultInterface|null  $refundResult
+     * @param  RefundResultInterface  $refundResult
      * @return bool
      */
     public function markAsRecoverableFailure(Refund $refund, RefundResultInterface $refundResult): bool;

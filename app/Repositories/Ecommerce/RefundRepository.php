@@ -85,7 +85,10 @@ class RefundRepository implements RefundRepositoryInterface
     {
         return $this->update(
             $refund->id,
-            ['metadata' => ['error' => $errorMessage], 'status' => Refund::STATUS_FAILED]
+            [
+                'status' => Refund::STATUS_FAILED,
+                'metadata' => ['error' => $errorMessage]
+            ]
         );
     }
 
