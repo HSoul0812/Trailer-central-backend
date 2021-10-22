@@ -154,7 +154,7 @@ class PaymentService implements PaymentServiceInterface
      */
     private function ensureOrderCanBeRefunded(CompletedOrder $order, Money $amount, array $parts): void
     {
-        if ($order->isPaid()) {
+        if ($order->isUnpaid()) {
             throw new RefundAmountException(sprintf('%d order is not refundable due it is unpaid', $order->id));
         }
 

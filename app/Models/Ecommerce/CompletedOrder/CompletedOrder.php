@@ -82,6 +82,11 @@ class CompletedOrder extends Model
         return $this->payment_status === self::PAYMENT_STATUS_PAID;
     }
 
+    public function isUnpaid(): bool
+    {
+        return $this->payment_status === self::PAYMENT_STATUS_UNPAID;
+    }
+
     public function isRefundable(): bool
     {
         return in_array(
