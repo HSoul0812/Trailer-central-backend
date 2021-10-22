@@ -67,6 +67,11 @@ class BusinessService implements BusinessServiceInterface
      */
     const CONVO_MAX_MONTHS = 6;
 
+    /**
+     * @const string
+     */
+    const MESSAGING_TYPE = 'UPDATE';
+
 
     /**
      * @var string : marketing|chat
@@ -503,6 +508,7 @@ class BusinessService implements BusinessServiceInterface
         // Get Page
         try {
             $sentMessage = $this->api->call("/me/messages", 'POST', [
+                'messaging_type' => self::MESSAGING_TYPE,
                 'recipient' => [
                     'id' => $userId,
                 ],
