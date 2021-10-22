@@ -43,4 +43,12 @@ interface FacebookRepositoryInterface extends Repository {
      * @return bool
      */
     public function leadExists(int $pageId, int $userId): bool;
+
+    /**
+     * Get Facebook Lead
+     * 
+     * @param int $leadId
+     * @return FbLead
+     */
+    public function getFbLead(int $leadId): FbLead;
 }
