@@ -502,7 +502,7 @@ class BusinessService implements BusinessServiceInterface
 
         // Get Page
         try {
-            $sentMessage = $this->api->call("/messages", 'POST', [
+            $sentMessage = $this->api->call("/me/messages" . , 'POST', [
                 'recipient' => [
                     'id' => $userId,
                 ],
