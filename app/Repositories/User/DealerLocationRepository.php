@@ -130,11 +130,11 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         $query = DealerLocation::where('dealer_id', $params['dealer_id']);
 
         $select = '*';
-        if (!empty($params['select'])) {
-            if (is_array($params['select'])) {
-                $select = $params['select'];
-            } elseif (is_string($params['select'])) {
-                $select = explode(',', $params['select']);
+        if (!empty($params[self::SELECT])) {
+            if (is_array($params[self::SELECT])) {
+                $select = $params[self::SELECT];
+            } elseif (is_string($params[self::SELECT])) {
+                $select = explode(',', $params[self::SELECT]);
             }
         }
 
