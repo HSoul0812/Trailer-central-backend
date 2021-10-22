@@ -35,6 +35,8 @@ use App\Services\Export\Parts\BulkReportJobService;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Parts\PartServiceInterface;
+use App\Services\Parts\Textrail\TextrailPartService;
+use App\Services\Parts\Textrail\TextrailPartServiceInterface;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -106,6 +108,13 @@ class PartsServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Parts\PartOrderRepositoryInterface', 'App\Repositories\Parts\PartOrderRepository');
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind(PartServiceInterface::class, PartService::class);
+        $this->app->bind(TextrailPartServiceInterface::class, TextrailPartService::class);
+        $this->app->bind('App\Services\Parts\Textrail\TextrailPartImporterServiceInterface', 'App\Services\Parts\Textrail\TextrailPartImporterService');
+        $this->app->bind('App\Repositories\Parts\Textrail\BrandRepositoryInterface', 'App\Repositories\Parts\Textrail\BrandRepository');
+        $this->app->bind('App\Repositories\Parts\Textrail\CategoryRepositoryInterface', 'App\Repositories\Parts\Textrail\CategoryRepository');
+        $this->app->bind('App\Repositories\Parts\Textrail\ManufacturerRepositoryInterface', 'App\Repositories\Parts\Textrail\ManufacturerRepository');
+        $this->app->bind('App\Repositories\Parts\Textrail\TypeRepositoryInterface', 'App\Repositories\Parts\Textrail\TypeRepository');
+        $this->app->bind('App\Repositories\Parts\Textrail\ImageRepositoryInterface', 'App\Repositories\Parts\Textrail\ImageRepository');
         $this->app->bind(AuditLogRepositoryInterface::class, AuditLogRepository::class);
         $this->app->bind(CostHistoryRepositoryInterface::class, CostHistoryRepository::class);
         
