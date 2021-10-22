@@ -14,7 +14,7 @@ class AddInvoiceCompletedOrdersTable extends Migration
     public function up()
     {
         Schema::table('ecommerce_completed_orders', function (Blueprint $table) {
-            $table->string('invoice_id')->nullable();
+            $table->string('invoice_id')->index()->nullable();
             $table->string('invoice_url')->nullable();
         });
     }

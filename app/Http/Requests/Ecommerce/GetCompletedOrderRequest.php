@@ -9,8 +9,8 @@ class GetCompletedOrderRequest extends Request
         'status' => 'in:dropshipped,abandoned,unfulfilled,pending,fulfilled,manual',
         'search_term' => 'string',
         'customer_name' => 'string',
-        'date_from' => 'date',
-        'date_to' => 'date',
+        'date_from' => 'date_format:Y-m-d H:i:s',
+        'date_to' => 'date_format:Y-m-d H:i:s',
         'sort' => 'in:status,customer_email,created_at'
     ];
 }

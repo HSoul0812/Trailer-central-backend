@@ -50,4 +50,8 @@ class CompletedOrder extends Model
         'billing_zip',
         'parts'
     ];
+
+    protected $casts = [
+        'parts' => 'json'
+    ];
 }

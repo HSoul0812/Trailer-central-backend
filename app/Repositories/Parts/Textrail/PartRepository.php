@@ -19,7 +19,7 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
         $this->model = $model;
     }
 
-    public function getById(int $id) : Part
+    public function getById(int $id) : ?Part
     {
         return $this->model->find($id);
     }

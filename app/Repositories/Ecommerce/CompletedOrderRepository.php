@@ -4,6 +4,7 @@ namespace App\Repositories\Ecommerce;
 use App\Events\Ecommerce\QtyUpdated;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Traits\Repository\Transaction;
+use Illuminate\Database\Eloquent\Builder;
 
 class CompletedOrderRepository implements CompletedOrderRepositoryInterface
 {
@@ -36,7 +37,10 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         ],
     ];
 
-    public function getGrandTotals()
+    /**
+     * @return array{total_all: float,total_qty: int }
+     */
+    public function getGrandTotals(): array
     {
         return [
             'total_all' => $this->getTotalAmount(),
@@ -44,12 +48,12 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         ];
     }
 
-    private function getTotalAmount()
+    private function getTotalAmount(): float
     {
         return CompletedOrder::sum('total_amount');
     }
 
-    private function getTotalQty()
+    private function getTotalQty(): float
     {
         $completedOrders = CompletedOrder::select('parts')->get();
 
@@ -57,7 +61,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         foreach ($completedOrders as $completedOrder)
         {
             if (!empty($completedOrder['parts'])) {
-                $parts = json_decode($completedOrder['parts'], true);
+                $parts = $completedOrder['parts'];
                 if ($parts) {
                     array_map(function ($part) use (&$totalQty) { $totalQty += $part['qty']; }, $parts);
                 }
@@ -67,7 +71,11 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         return $totalQty;
     }
 
-    public function getAll($params)
+    /**
+     * @param array $params
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getAll($params): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         if (!isset($params['per_page'])) {
           $params['per_page'] = 100;
@@ -132,7 +140,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             $completedOrder->payment_method = $data['payment_method_types'][0];
             $completedOrder->stripe_customer = $data['customer'] ?? '';
 
-            $parts = json_decode($completedOrder->parts, true);
+            $parts = $completedOrder->parts;
 
             // Dispatch for handle quantity reducing.
             foreach ($parts as $part) {
@@ -150,7 +158,11 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         // TODO: Implement delete() method.
     }
 
-    public function get($params)
+    /**
+     * @param array $params
+     * @return CompletedOrder
+     */
+    public function get($params): CompletedOrder
     {
         if (isset($params['id'])) {
             return CompletedOrder::findOrFail($params['id']);
@@ -162,7 +174,8 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         // TODO: Implement delete() method.
     }
 
-    private function addFiltersToQuery($query, $filters, $noStatusJoin = false) {
+    private function addFiltersToQuery(Builder $query, array $filters, bool $noStatusJoin = false): Builder
+    {
         if (isset($filters['search_term'])) {
             $query = $this->addSearchToQuery($query, $filters['search_term']);
         }
@@ -182,15 +195,30 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         return $query;
     }
 
-    private function addDateToToQuery($query, $dateTo) {
+    /**
+     * @param Builder $query
+     * @param string $dateTo
+     * @return Builder
+     */
+    private function addDateToToQuery(Builder $query, string $dateTo): Builder {
         return $query->where(CompletedOrder::getTableName().'.created_at', '<=', $dateTo);
     }
 
-    private function addDateFromToQuery($query, $dateFrom) {
+    /**
+     * @param Builder $query
+     * @param string $dateFrom
+     * @return Builder
+     */
+    private function addDateFromToQuery(Builder $query, string $dateFrom): Builder {
         return $query->where(CompletedOrder::getTableName().'.created_at', '>=', $dateFrom);
     }
 
-    private function addSearchToQuery($query, $search) {;
+    /**
+     * @param Builder $query
+     * @param string $search
+     * @return Builder
+     */
+    private function addSearchToQuery(Builder $query, string $search): Builder {;
         return $query->where(function($q) use ($search) {
             $q->where(CompletedOrder::getTableName().'.customer_email', 'LIKE', '%' . $search . '%')
                 ->orWhere(CompletedOrder::getTableName().'.payment_method', 'LIKE', '%' . $search . '%')
@@ -201,7 +229,12 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         });
     }
 
-    private function addStatusToQuery($query, $status) {
+    /**
+     * @param Builder $query
+     * @param string $status
+     * @return Builder
+     */
+    private function addStatusToQuery(Builder  $query, string $status): Builder {
         return $query->where(CompletedOrder::getTableName(). '.status', '=', $status);
     }
 }

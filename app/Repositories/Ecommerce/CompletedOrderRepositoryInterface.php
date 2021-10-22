@@ -12,5 +12,5 @@ interface CompletedOrderRepositoryInterface extends Repository
 
     public function rollbackTransaction(): void;
 
-    public function getGrandTotals();
+    public function getGrandTotals(): array;
 }

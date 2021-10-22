@@ -21,7 +21,7 @@ class CompletedOrderTransformer extends TransformerAbstract
 
     public function transform(CompletedOrder $completedOrder)
     {
-        $parts = json_decode($completedOrder->parts, true);
+        $parts = $completedOrder->parts;
 
         $partCollection = [];
 
