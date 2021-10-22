@@ -456,10 +456,16 @@ class InventoryRepository implements InventoryRepositoryInterface
     private function buildInventoryQuery(array $params, bool $withDefault = true) : GrimzyBuilder
     {
         /** @var Builder $query */
-        $query = Inventory::where('inventory.inventory_id', '>', 0);
+        $query = Inventory::query()->select(['inventory.*'])->where('inventory.inventory_id', '>', 0);
+        $query->select(['inventory.*']);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
+        }
+
+        if (isset($params['attribute_ids'])) {
+            $query = $query->leftJoin('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id');
+            $query = $query->whereIn('eav_attribute_value.attribute_id', $params['attribute_ids']);
         }
 
         if ($withDefault) {
@@ -542,7 +548,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         } else if (isset($params['images_less_than'])) {
             $query->havingRaw('image_count <= '. $params['images_less_than']);
         } else {
-            $query->select('*');
+            $query->select(['inventory.*']);
         }
 
         if (isset($params['sort'])) {
@@ -568,6 +574,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
+        //$queryString = str_replace('*', 'inventory.*', $queryString);
         return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as inventory_count")))->row_count;
     }
 
