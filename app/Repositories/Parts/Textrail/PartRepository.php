@@ -10,11 +10,26 @@ use Illuminate\Database\Eloquent\Collection;
 class PartRepository extends BaseRepository implements PartRepositoryInterface
 {
     /**
-     * @param int $id
-     * @return Part
+     * @var App\Models\Parts\Textrail\Part
      */
-    public function getById($id) {
-        return Part::findOrFail($id);
+    protected $model;
+
+    public function __construct(Part $model) {
+        $this->model = $model;
+    }
+
+    public function getById(int $id) : Part
+    {
+        return $this->model->findOrFail($id);
+    }
+
+    public function createOrUpdateBySku(array $params) : Part
+    {
+        return $this->model->updateOrCreate(['sku' => $params['sku']], $params);
+    }
+
+    public function getBySku($sku) {
+        return $this->model->where('sku', $sku)->first();
     }
 
     /**
@@ -23,6 +38,6 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
      */
     public function getAllByIds(array $ids): Collection
     {
-        return Part::query()->whereIn('id', $ids)->get();
+        return $this->model->query()->whereIn('id', $ids)->get();
     }
 }
