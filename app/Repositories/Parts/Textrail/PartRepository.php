@@ -10,11 +10,13 @@ use Illuminate\Database\Eloquent\Collection;
 class PartRepository extends BaseRepository implements PartRepositoryInterface
 {
     /**
-     * @var App\Models\Parts\Textrail\Part
+     * @var \App\Models\Parts\Textrail\Part
      */
     protected $model;
 
     public function __construct(Part $model) {
+        parent::__construct($model);
+
         $this->model = $model;
     }
 
@@ -38,6 +40,6 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
      */
     public function getAllByIds(array $ids): Collection
     {
-        return $this->model->query()->whereIn('id', $ids)->get();
+        return $this->model->whereIn('id', $ids)->get();
     }
 }
