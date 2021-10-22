@@ -18,7 +18,7 @@ class MessageValidate extends ValidRoute {
     ];
 
     protected $appendParams = [
-        self::LEAD_ID_PARAM => self::LEAD_ID_PARAM
+        self::LEAD_ID_PARAM => 'lead_id'
     ];
 
     protected $validator = [];
