@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Interactions;
 
+use App\Helpers\SanitizeHelper;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -73,6 +74,8 @@ class InteractionMessage extends Model
 
         $message = $this->message;
 
+        $helper = new SanitizeHelper();
+
         if (!$message) {
             return $array;
         }
@@ -85,6 +88,7 @@ class InteractionMessage extends Model
             $array['text'] = $message->log_message;
             $array['from_number'] = $message->from_number;
             $array['to_number'] = $message->to_number;
+            $array['is_incoming'] = $helper->sanitizePhoneNumber($message->from_number) === $helper->sanitizePhoneNumber($lead->phone_number);
 
             $array['interaction_id'] = null;
             $array['parent_message_id'] = null;
@@ -111,6 +115,7 @@ class InteractionMessage extends Model
             $array['from_name'] = $message->from_name;
             $array['to_name'] = $message->to_name;
             $array['date_delivered'] = $message->date_delivered;
+            $array['is_incoming'] = strcasecmp($lead->email_address, $message->from_email) === 0;
 
             $array['from_number'] = null;
             $array['to_number'] = null;
@@ -126,6 +131,7 @@ class InteractionMessage extends Model
             $array['text'] = $message->message;
             $array['date_delivered'] = $message->created_at;
             $array['user_name'] = $message->conversation->fbUser->name;
+            $array['is_incoming'] = strcmp($message->from_id, $message->conversation->fbLead->user_id) === 0;
 
             $array['parent_message_id'] = null;
             $array['title'] = null;

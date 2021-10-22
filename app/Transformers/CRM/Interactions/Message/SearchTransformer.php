@@ -39,6 +39,7 @@ class SearchTransformer extends TransformerAbstract
             'date_sent' => $interactionMessage['date_sent'],
             'hidden' => $interactionMessage['hidden'],
             'is_read' => $interactionMessage['is_read'],
+            'is_incoming' => $interactionMessage['is_incoming'],
         ];
     }
 }
