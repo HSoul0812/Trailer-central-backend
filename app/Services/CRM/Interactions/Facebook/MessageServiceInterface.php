@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Interactions\Facebook;
 
+use App\Http\Requests\CRM\Interactions\Facebook\SendMessageRequest;
 use App\Models\CRM\Leads\Facebook\User as FbUser;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Interactions\Facebook\DTOs\ChatConversation;
