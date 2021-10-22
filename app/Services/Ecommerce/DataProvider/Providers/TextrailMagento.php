@@ -310,6 +310,7 @@ class TextrailMagento implements DataProviderInterface, TextrailGuestCheckoutInt
             'category_id' => isset($category_id) ? $category_id : '',
             'manufacturer_id' =>  isset($manufacturer_id) ? $manufacturer_id : '',
             'brand_id' => $brand_id,
+            'show_on_website' => 1,
             'images' => $images
           ]);
           array_push($Allparts, $dtoTextrail);
