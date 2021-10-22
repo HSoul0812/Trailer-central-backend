@@ -21,6 +21,8 @@ use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
 use App\Console\Commands\CRM\Dms\UnitSale\GetCompletedSaleWithNoFullInvoice;
 use App\Console\Commands\CRM\Dms\UnitSale\FixEmptyManufacturerUnitSale;
 use App\Console\Commands\Inventory\FixFloorplanBillStatus;
+use App\Console\Commands\CRM\Dms\FixEmptyManufacturerUnitSale;
+use App\Console\Commands\Parts\Import\GetTextrailParts;
 
 class Kernel extends ConsoleKernel
 {
@@ -46,7 +48,8 @@ class Kernel extends ConsoleKernel
         GenerateDealerSpecificSiteUrls::class,
         AutoArchiveSoldItems::class,
         FixFloorplanBillStatus::class,
-        FixEmptyManufacturerUnitSale::class
+        FixEmptyManufacturerUnitSale::class,
+        GetTextrailParts::class
     ];
 
     /**
@@ -174,6 +177,14 @@ class Kernel extends ConsoleKernel
 
         // $schedule->command('inspire')
         //          ->hourly();
+        
+        /**
+         * Import textrail parts
+         */
+         
+        $schedule->command('command:get-textrail-parts')
+           ->dailyAt('1:00')
+           ->runInBackground();
     }
 
     /**
