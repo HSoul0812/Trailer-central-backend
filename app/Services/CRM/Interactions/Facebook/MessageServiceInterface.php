@@ -9,6 +9,14 @@ use Illuminate\Support\Collection;
 
 interface MessageServiceInterface {
     /**
+     * Send Facebook Message
+     * 
+     * @param SendMessageRequest
+     * @return Message
+     */
+    public function send(SendMessageRequest $request): Message;
+
+    /**
      * Create User if Missing
      * 
      * @param ChatConversation $conversation
