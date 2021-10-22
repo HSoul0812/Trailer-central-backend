@@ -574,7 +574,6 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
-        //$queryString = str_replace('*', 'inventory.*', $queryString);
         return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as inventory_count")))->row_count;
     }
 
