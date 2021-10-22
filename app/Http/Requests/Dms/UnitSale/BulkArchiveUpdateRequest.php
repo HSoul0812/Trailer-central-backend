@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests\Dms\UnitSale;
 
-use App\Http\Requests\BaseFormRequest;
+use App\Http\Requests\User\DealerLocationRequestTrait;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
@@ -10,8 +11,10 @@ use Illuminate\Validation\Rule;
  *
  * @package App\Http\Requests\Dms\UnitSale
  */
-class BulkArchiveUpdateRequest extends BaseFormRequest
+class BulkArchiveUpdateRequest extends FormRequest
 {
+    use DealerLocationRequestTrait;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -19,9 +22,13 @@ class BulkArchiveUpdateRequest extends BaseFormRequest
      */
     public function rules(): array
     {
-        $authUser = $this->getAuthUser();
-
         return [
+            'dealer_id' => [
+                'integer',
+                'min:1',
+                'required',
+                Rule::exists('dealer', 'dealer_id'),
+            ],
             'quote_ids' => [
                 'required',
                 'array',
@@ -31,7 +38,7 @@ class BulkArchiveUpdateRequest extends BaseFormRequest
                 'integer',
                 'distinct',
                 Rule::exists('dms_unit_sale', 'id')
-                    ->where('dealer_id', $authUser->dealer_id),
+                    ->where('dealer_id', $this->getDealerId()),
             ],
         ];
     }

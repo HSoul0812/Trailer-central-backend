@@ -6,7 +6,7 @@ use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Dms\GetQuotesRequest;
 use App\Http\Requests\Dms\UnitSale\BulkArchiveUpdateRequest;
 use App\Repositories\Dms\QuoteRepositoryInterface;
-use App\Services\Dms\UnitSale\UnitSaleService;
+use App\Services\Dms\UnitSale\UnitSaleServiceInterface;
 use App\Transformers\Dms\QuoteTotalsTransformer;
 use App\Transformers\Dms\QuoteTransformer;
 use Dingo\Api\Http\Request;
@@ -19,7 +19,7 @@ class UnitSaleController extends RestfulController
     protected $quotes;
 
     /**
-     * @var UnitSaleService $service
+     * @var UnitSaleServiceInterface $service
      */
     private $service;
 
@@ -30,9 +30,9 @@ class UnitSaleController extends RestfulController
      */
     public function __construct(
         QuoteRepositoryInterface $quotes,
-        UnitSaleService $unitSaleService
+        UnitSaleServiceInterface $unitSaleService
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'bulkArchive']);
         $this->quotes = $quotes;
         $this->service = $unitSaleService;
     }
@@ -134,7 +134,7 @@ class UnitSaleController extends RestfulController
     {
         if ($this->service->bulkArchive(
             $request->only('quote_ids'),
-            auth()->user()
+            $request->getDealerId()
         )) {
             return $this->response->array(['message' => 'success']);
         }
