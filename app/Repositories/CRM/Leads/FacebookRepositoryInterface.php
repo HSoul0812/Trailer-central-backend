@@ -48,7 +48,7 @@ interface FacebookRepositoryInterface extends Repository {
      * Get Facebook Lead
      * 
      * @param int $leadId
-     * @return FbLead
+     * @return null|FbLead
      */
-    public function getFbLead(int $leadId): FbLead;
+    public function getFbLead(int $leadId): ?FbLead;
 }
