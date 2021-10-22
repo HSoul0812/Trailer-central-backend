@@ -360,7 +360,7 @@ class TextrailMagento implements DataProviderInterface, TextrailGuestCheckoutInt
 
     public function getTextrailImagesBaseUrl()
     {
-      return env('TEXTRAIL_API_URL') . self::TEXTRAIL_ATTRIBUTES_MEDIA_URL;
+      return $this->apiUrl . self::TEXTRAIL_ATTRIBUTES_MEDIA_URL;
     }
 
     public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int
