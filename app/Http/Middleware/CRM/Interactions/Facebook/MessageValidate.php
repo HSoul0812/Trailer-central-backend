@@ -31,7 +31,7 @@ class MessageValidate extends ValidRoute {
             }
 
             // Get Auth
-            if (Auth::user()->newDealerUser->id !== $lead->user_id) {
+            if (Auth::user()->newDealerUser->id !== $lead->dealer_id) {
                 return false;
             }
             
