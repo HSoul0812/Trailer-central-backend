@@ -16,6 +16,7 @@ use App\Http\Middleware\SetUserIdOnRequest;
 use App\Http\Middleware\SetSalesPersonIdOnRequest;
 use App\Http\Middleware\ValidAccessToken;
 use App\Http\Middleware\CRM\Interactions\InteractionValidate;
+use App\Http\Middleware\CRM\Interactions\Facebook\MessageValidate;
 use App\Http\Middleware\CRM\Email\TemplateValidate as EmailTemplateValidate;
 use App\Http\Middleware\CRM\Email\BlastValidate as EmailBlastValidate;
 use App\Http\Middleware\CRM\Email\CampaignValidate as EmailCampaignValidate;
@@ -111,6 +112,7 @@ class Kernel extends HttpKernel
         'integration.auth.validate' => AuthValidate::class,
         'facebook.catalog.validate' => CatalogValidate::class,
         'facebook.chat.validate' => ChatValidate::class,
+        'facebook.message.validate' => MessageValidate::class,
         'sales-person.validate' => SalesPersonValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
         'printer.form.validate' => PrinterFormValidate::class,

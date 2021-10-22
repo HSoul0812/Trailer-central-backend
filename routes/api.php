@@ -345,7 +345,7 @@ $api->version('v1', function ($route) {
     /**
      * Facebook Endpoints
      */
-    $route->group(['middleware' => 'fb.message.validate'], function ($route) {
+    $route->group(['middleware' => 'facebook.message.validate'], function ($route) {
         $route->post('leads/{leadId}/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\MessageController@send')->where('leadId', '[0-9]+');
     });
 
