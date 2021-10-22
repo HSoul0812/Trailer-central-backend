@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Facebook;
 
+use App\Exceptions\CRM\Interactions\Facebook\FailedSendFacebookMessagetException;
 use App\Exceptions\Integration\Facebook\FailedGetProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedGetConversationsException;
 use App\Exceptions\Integration\Facebook\FailedGetMessagesException;
@@ -491,21 +492,28 @@ class BusinessService implements BusinessServiceInterface
      * Get Conversations for Page
      * 
      * @param AccessToken $accessToken
-     * @param string $conversationId
+     * @param int $userId
      * @param string $message
      * @return string Message ID of Sent Message
      */
-    public function sendMessage(AccessToken $accessToken, string $conversationId, string $message): string {
+    public function sendMessage(AccessToken $accessToken, int $userId, string $message): string {
         // Configure Client
         $this->initApi($accessToken);
 
         // Get Page
         try {
-            $sentMessage = $this->api->call("/{$conversationId}/messages", 'POST', ['message' => $message]);
+            $sentMessage = $this->api->call("/messages", 'POST', [
+                'recipient' => [
+                    'id' => $userId,
+                ],
+                'message' => [
+                    'text' => $message
+                ]
+            ]);
             $this->log->info("Successfully sent message: " . print_r($sentMessage, true));
 
             // Return New Chat Message Entry
-            return $sentMessage;
+            return 'm_' . $sentMessage->message_id;
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
@@ -513,7 +521,7 @@ class BusinessService implements BusinessServiceInterface
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
             } else {
-                throw new FailedSendMessageException;
+                throw new FailedSendFacebookMessagetException;
             }
         }
     }

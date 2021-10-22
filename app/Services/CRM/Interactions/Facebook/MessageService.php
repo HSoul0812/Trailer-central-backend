@@ -95,10 +95,17 @@ class MessageService implements MessageServiceInterface
         }
 
         // Send Message
-        $message = $this->sdk->sendMessage($fbLead->page->accessToken, $fbLead->conversation->conversation_id, $request->message);
+        $messageId = $this->sdk->sendMessage($fbLead->page->accessToken, $fbLead->conversation->user_id, $request->message);
 
         // Save Message to DB
-        return $this->messages->createOrUpdate($message->getParams());
+        return $this->messages->createOrUpdate([
+            'message_id' => $messageId,
+            'conversation_id' => $fbLead->conversation->conversation_id,
+            'user_id' => $fbLead->conversation->user_id,
+            'from_id' => $this->conversation->page_id,
+            'to_id' => $this->conversation->user_id,
+            'message' => $request->message
+        ]);
     }
 
     /**
