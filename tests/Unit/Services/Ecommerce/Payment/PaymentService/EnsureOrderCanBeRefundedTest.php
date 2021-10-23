@@ -36,7 +36,7 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
         string $expectedExceptionMessage
     ): void {
         $amountToRefund = Money::of($amount, 'USD');
-        $order = $this->makeModel(CompletedOrder::class)($orderAttributes);
+        $order = factory(CompletedOrder::class)->make(array_merge($orderAttributes, ['parts' => []]));
 
         $dependencies = new PaymentServiceDependencies();
 
@@ -58,11 +58,13 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
         $amountToRefund = Money::of(200, 'USD');
 
         /** @var CompletedOrder $order */
-        $order = $this->makeModel(CompletedOrder::class)([
+        $order = factory(CompletedOrder::class)->make([
             'id' => $this->faker->unique(true)->numberBetween(1, 100),
             'total_amount' => $this->faker->numberBetween(100, 1000),
+            'payment_status' => CompletedOrder::PAYMENT_STATUS_PAID,
             'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED,
-            'payment_intent' => $this->faker->uuid
+            'payment_intent' => $this->faker->uuid,
+            'parts' => []
         ]);
 
         $dependencies = new PaymentServiceDependencies();
@@ -94,9 +96,10 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
         $partIdToRefund = 8;
 
         /** @var CompletedOrder $order */
-        $order = $this->makeModel(CompletedOrder::class)([
+        $order = factory(CompletedOrder::class)->make([
             'id' => $this->faker->unique(true)->numberBetween(1, 100),
             'total_amount' => $this->faker->numberBetween(200, 1000),
+            'payment_status' => CompletedOrder::PAYMENT_STATUS_PAID,
             'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED,
             'payment_intent' => $this->faker->uuid,
             'parts' => [['id' => 4, 'qty' => 3], ['id' => 6, 'qty' => 3]]
@@ -133,14 +136,17 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
     {
         $amountToRefund = Money::of(200, 'USD');
         $partIdToRefund = 4;
-        /** @var Part $alreadyRefundedPart */
-        $alreadyRefundedPart = $this->makeModel(Part::class)(['id' => $partIdToRefund]);
 
-        $order = $this->makeModel(CompletedOrder::class)([
+        /** @var Part $alreadyRefundedPart */
+        $alreadyRefundedPart = factory(Part::class)->make(['id' => $partIdToRefund]);
+
+        /** @var CompletedOrder $order */
+        $order = factory(CompletedOrder::class)->make([
             'id' => $this->faker->unique(true)->numberBetween(1, 100),
             'total_amount' => $this->faker->numberBetween(200, 1000),
             'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED,
             'payment_intent' => $this->faker->uuid,
+            'payment_status' => CompletedOrder::PAYMENT_STATUS_PAID,
             'parts' => [['id' => 4, 'qty' => 3], ['id' => 6, 'qty' => 3]]
         ]);
 
@@ -176,25 +182,37 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
     public function ordersNotRefundableProvider(): array
     {   // [array $orderAttributes, float $amount, array $parts, string $expectedException, string $expectedExceptionMessage]
         return [
-            'is paid' => [
-                ['id' => 2, 'payment_status' => CompletedOrder::PAYMENT_STATUS_PAID],
+            'is unpaid' => [
+                [
+                    'id' => 2,
+                    'payment_status' => CompletedOrder::PAYMENT_STATUS_UNPAID,
+                    'refunded_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED
+                ],
                 300,
                 [],
                 RefundAmountException::class,
                 '2 order is not refundable due it is unpaid'
             ],
             'is refunded' => [
-                ['id' => 2, 'refund_status' => CompletedOrder::REFUND_STATUS_REFUNDED],
+                [
+                    'id' => 2,
+                    'payment_status' => CompletedOrder::PAYMENT_STATUS_PAID,
+                    'refund_status' => CompletedOrder::REFUND_STATUS_REFUNDED
+                ],
                 300,
                 [],
                 RefundAmountException::class, '2 order is not refundable due it is refunded'
             ],
             'has not a payment unique id' => [
-                ['id' => 2, 'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED],
+                [
+                    'id' => 2,
+                    'payment_status' => CompletedOrder::PAYMENT_STATUS_PAID,
+                    'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED
+                ],
                 300,
                 [],
                 RefundException::class, '2 order is not refundable due it has not a payment unique id'
-            ],
+            ]
         ];
     }
 }

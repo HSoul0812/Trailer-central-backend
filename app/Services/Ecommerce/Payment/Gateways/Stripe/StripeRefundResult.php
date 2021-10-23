@@ -33,8 +33,6 @@ class StripeRefundResult implements StripeRefundResultInterface
     /** @var string */
     private $status;
 
-    /** @var string */
-
     public function getId(): string
     {
         return $this->id;

@@ -29,13 +29,14 @@ class CreateRefundTest extends PaymentServiceTestCase
         $parts = [];
 
         /** @var CompletedOrder $order */
-        $order = $this->makeModel(CompletedOrder::class)([
+        $order = factory(CompletedOrder::class)->make([
             'id' => $uniqueFaker->numberBetween(1, 100),
-            'total_amount' => $this->faker->numberBetween(100, 1000)
+            'total_amount' => $this->faker->numberBetween(100, 1000),
+            'parts' => []
         ]);
 
         /** @var Refund $expectedRefund */
-        $expectedRefund = $this->makeModel(Refund::class)([
+        $expectedRefund = factory(Refund::class)->make([
             'id' => $uniqueFaker->numberBetween(1, 100),
             'order_id' => $order->id,
             'reason' => $reason,
@@ -57,7 +58,6 @@ class CreateRefundTest extends PaymentServiceTestCase
 
         $dependencies->logger
             ->shouldReceive('info')
-            ->andReturn($parts)
             ->once()
             ->with(
                 sprintf('A refund process for {%d} order has begun', $order->id),

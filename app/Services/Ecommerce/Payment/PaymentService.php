@@ -62,10 +62,10 @@ class PaymentService implements PaymentServiceInterface
      * @throws RefundAmountException when the order is not refundable due it is unpaid
      * @throws RefundAmountException when the order is not refundable due it is refunded
      * @throws RefundAmountException when the amount is greater than its balance
-     * @throws RefundAmountException when a provided part was not a placed part
-     * @throws RefundAmountException when a provided part was already refunded
-     * @throws RefundAmountException when the order has not a related parts matching with the request
-     * @throws RefundAmountException when the order it has not a payment unique id
+     * @throws RefundException when a provided part was not a placed part
+     * @throws RefundException when a provided part was already refunded
+     * @throws RefundException when the order has not a related parts matching with the request
+     * @throws RefundException when the order it has not a payment unique id
      * @throws \Exception when some error has occurred on DB saving time
      * @throws RefundException when there was some error on payment gateway local process
      * @throws RefundPaymentGatewayException when there was some error on payment gateway remote process

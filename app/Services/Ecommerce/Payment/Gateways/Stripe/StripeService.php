@@ -7,8 +7,8 @@ namespace App\Services\Ecommerce\Payment\Gateways\Stripe;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use Brick\Money\Money;
-use Illuminate\Support\Facades\Config;
 use Stripe\StripeClient;
+use Stripe\StripeClientInterface;
 
 class StripeService implements PaymentGatewayServiceInterface
 {
@@ -24,9 +24,9 @@ class StripeService implements PaymentGatewayServiceInterface
         'requested_by_customer'
     ];
 
-    public function __construct()
+    public function __construct(StripeClientInterface $client)
     {
-        $this->client = $this->getClient();
+        $this->client = $client;
     }
 
     /**
@@ -65,15 +65,6 @@ class StripeService implements PaymentGatewayServiceInterface
         } catch (\Exception $exception) {
             throw new RefundPaymentGatewayException($exception->getMessage());
         }
-    }
-
-    protected function getClient(): StripeClient
-    {
-        if (!$this->client) {
-            $this->client = new StripeClient(Config::get('stripe_checkout.secret'));
-        }
-
-        return $this->client;
     }
 
     protected function isValidRefundReason(string $reason): bool

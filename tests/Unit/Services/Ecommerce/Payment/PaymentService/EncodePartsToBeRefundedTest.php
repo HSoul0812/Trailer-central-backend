@@ -23,18 +23,13 @@ class EncodePartsToBeRefundedTest extends PaymentServiceTestCase
     {
         $uniqueFaker = $this->faker->unique(true);
 
-        $partIds = [
-            $uniqueFaker->numberBetween(1, 1000),
-            $uniqueFaker->numberBetween(1, 1000),
-            $uniqueFaker->numberBetween(1, 1000)
-        ];
+        $partIdGenerator = static function () use ($uniqueFaker): int {
+            return $uniqueFaker->numberBetween(1, 1000);
+        };
 
-        /** @var array<Part> $parts */
-        $parts = new Collection([
-            factory(Part::class)->make(['id' => $partIds[0]]),
-            factory(Part::class)->make(['id' => $partIds[1]]),
-            factory(Part::class)->make(['id' => $partIds[2]]),
-        ]);
+        /** @var Collection|array<Part> $parts */
+        $parts = factory(Part::class, 3)->make(['id' => $partIdGenerator]);
+        $partIds = $parts->pluck('id')->toArray();
 
         $dependencies = new PaymentServiceDependencies();
 
