@@ -142,17 +142,18 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
-use App\Services\Export\DomPdfExporterService;
-use App\Services\Export\DomPdfExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Transformers\Ecommerce\CompletedOrderTransformer;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
+use Stripe\StripeClient;
+use Stripe\StripeClientInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -333,8 +334,6 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
 
-        $this->app->bind(DomPdfExporterServiceInterface::class, DomPdfExporterService::class);
-
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 
         $this->app->bind(ApiEntityReferenceRepositoryInterface::class, ApiEntityReferenceRepository::class);
@@ -356,6 +355,9 @@ class AppServiceProvider extends ServiceProvider
             });
         $this->app->bind(RefundRepositoryInterface::class, RefundRepository::class);
         $this->app->bind(EcommercePaymentServiceInterface::class, EcommercePaymentService::class);
+        $this->app->bind(StripeClientInterface::class, static function (): StripeClient {
+            return new StripeClient(Config::get('stripe_checkout.secret'));
+        });
         $this->app->bind(PaymentGatewayServiceInterface::class, StripeService::class);
 
         $this->app->bind(ShippingServiceInterface::class, ShippingService::class);
