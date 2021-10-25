@@ -225,6 +225,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
 
     /**
+     * Inventory distance
+     */
+    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@delivery_price')->where('inventory_id', '[0-9]+');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
@@ -511,13 +516,21 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
-        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
-        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
-        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
-        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
+
+        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
+        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
+
+        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
         $route->get('user/dealer-location-available-tax-categories', 'App\Http\Controllers\v1\User\DealerLocationController@availableTaxCategories');
+
+        $route->group(['prefix' => 'user/dealer-location/{locationId}'], function ($route) {
+            $route->get('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@index');
+            $route->post('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@create');
+            $route->delete('/mileage-fee/{feeId}', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@delete');
+        });
 
         /*
         |--------------------------------------------------------------------------

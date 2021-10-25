@@ -9,10 +9,13 @@ use App\Models\Inventory\Inventory;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
+use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
+use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
@@ -66,14 +69,32 @@ class InventoryService implements InventoryServiceInterface
     private $fileService;
 
     /**
+     * @var DealerLocationRepositoryInterface
+     */
+    private $dealerLocationRepository;
+    /**
+     * @var DealerLocationMileageFeeRepositoryInterface
+     */
+    private $dealerLocationMileageFeeRepository;
+
+    /**
+     * @var CategoryRepositoryInterface
+     */
+    private $categoryRepository;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
      * @param FileRepositoryInterface $fileRepository
      * @param BillRepositoryInterface $billRepository
      * @param QuickbookApprovalRepositoryInterface $quickbookApprovalRepository
+     * @param WebsiteConfigRepositoryInterface $websiteConfigRepository
      * @param ImageService $imageService
      * @param FileService $fileService
+     * @param DealerLocationRepositoryInterface $dealerLocationRepository
+     * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
+     * @param CategoryRepositoryInterface $categoryRepository
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
@@ -83,7 +104,10 @@ class InventoryService implements InventoryServiceInterface
         QuickbookApprovalRepositoryInterface $quickbookApprovalRepository,
         WebsiteConfigRepositoryInterface $websiteConfigRepository,
         ImageService $imageService,
-        FileService $fileService
+        FileService $fileService,
+        DealerLocationRepositoryInterface $dealerLocationRepository,
+        DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
+        CategoryRepositoryInterface $categoryRepository
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -91,9 +115,11 @@ class InventoryService implements InventoryServiceInterface
         $this->billRepository = $billRepository;
         $this->quickbookApprovalRepository = $quickbookApprovalRepository;
         $this->websiteConfigRepository = $websiteConfigRepository;
-
+        $this->dealerLocationRepository = $dealerLocationRepository;
+        $this->dealerLocationMileageFeeRepository = $dealerLocationMileageFeeRepository;
         $this->imageService = $imageService;
         $this->fileService = $fileService;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -166,7 +192,7 @@ class InventoryService implements InventoryServiceInterface
     {
         try {
             $this->inventoryRepository->beginTransaction();
-            
+
             $currentInventory = $this->inventoryRepository->get(['id' => $params['inventory_id']]);
 
             $newImages = $params['new_images'] ?? [];
@@ -186,7 +212,7 @@ class InventoryService implements InventoryServiceInterface
             if (!empty($newImages)) {
                 $currentInventory->images()->delete();
                 $params['new_images'] = $this->uploadImages($params, 'new_images');
-            } 
+            }
 
             $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
             unset($params['hidden_files']);
@@ -209,7 +235,7 @@ class InventoryService implements InventoryServiceInterface
 
                 throw new InventoryException('Inventory item update error');
             }
-            
+
 //            if (empty($newImages)) {
 //                $inventory->images()->delete();
 //            }
@@ -603,5 +629,67 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return $changedFields;
+    }
+
+    public function deliveryPrice(int $inventoryId): float
+    {
+        $inventory = $this->inventoryRepository->get(['id' => $inventoryId]);
+        $dealerLocation = $inventory->dealerLocation;
+        $inventoryCategory = $this->categoryRepository->get(['legacy_category' => $inventory->category]);
+
+        $mileageFee = $this->dealerLocationMileageFeeRepository->get([
+            'dealer_location_id' => $dealerLocation->getKey(),
+            'inventory_category_id' => $inventoryCategory->getKey()
+        ]);
+        $feePerMile = $mileageFee->fee_per_mile;
+        $distance = $this->calculateDistanceBetweenTwoPoints($dealerLocation->latitude, $dealerLocation->longitude, $inventory->latitude, $inventory->longitude, 'ML');
+        return $feePerMile * $distance;
+    }
+
+    private function calculateDistanceBetweenTwoPoints($latitudeOne='', $longitudeOne='', $latitudeTwo='', $longitudeTwo='', $distanceUnit ='', $round=false, $decimalPoints='')
+    {
+        if (empty($decimalPoints))
+        {
+            $decimalPoints = '3';
+        }
+        if (empty($distanceUnit)) {
+            $distanceUnit = 'KM';
+        }
+        $distanceUnit = strtolower($distanceUnit);
+        $pointDifference = $longitudeOne - $longitudeTwo;
+        $toSin = (sin(deg2rad($latitudeOne)) * sin(deg2rad($latitudeTwo))) + (cos(deg2rad($latitudeOne)) * cos(deg2rad($latitudeTwo)) * cos(deg2rad($pointDifference)));
+        $toAcos = acos($toSin);
+        $toRad2Deg = rad2deg($toAcos);
+
+        $toMiles  =  $toRad2Deg * 60 * 1.1515;
+        $toKilometers = $toMiles * 1.609344;
+        $toNauticalMiles = $toMiles * 0.8684;
+        $toMeters = $toKilometers * 1000;
+        $toFeets = $toMiles * 5280;
+        $toYards = $toFeets / 3;
+
+
+        switch (strtoupper($distanceUnit))
+        {
+            case 'ML'://miles
+                $toMiles  = ($round == true ? round($toMiles) : round($toMiles, $decimalPoints));
+                return $toMiles;
+            case 'KM'://Kilometers
+                $toKilometers  = ($round == true ? round($toKilometers) : round($toKilometers, $decimalPoints));
+                return $toKilometers;
+            case 'MT'://Meters
+                $toMeters  = ($round == true ? round($toMeters) : round($toMeters, $decimalPoints));
+                return $toMeters;
+            case 'FT'://feets
+                $toFeets  = ($round == true ? round($toFeets) : round($toFeets, $decimalPoints));
+                return $toFeets;
+            case 'YD'://yards
+                $toYards  = ($round == true ? round($toYards) : round($toYards, $decimalPoints));
+                return $toYards;
+            case 'NM'://Nautical miles
+                $toNauticalMiles  = ($round == true ? round($toNauticalMiles) : round($toNauticalMiles, $decimalPoints));
+                return $toNauticalMiles;
+        }
+
     }
 }
