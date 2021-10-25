@@ -2,12 +2,12 @@
 
 namespace App\Transformers\Inventory;
 
+use App\Models\Inventory\File;
 use App\Transformers\Dms\ServiceOrderTransformer;
 use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
-use App\Transformers\Inventory\ImageTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use App\Transformers\Website\WebsiteTransformer;
 
@@ -24,14 +24,18 @@ class InventoryTransformer extends TransformerAbstract
 
     protected $imageTransformer;
 
+    /** @var FileTransformer */
+    private $fileTransformer;
+
     public function __construct()
     {
         $this->userTransformer = new UserTransformer();
         $this->dealerLocationTransformer = new DealerLocationTransformer();
         $this->imageTransformer = new ImageTransformer();
+        $this->fileTransformer = new FileTransformer();
     }
 
-    public function transform(Inventory $inventory)
+    public function transform(Inventory $inventory): array
     {
         return [
              'id' => $inventory->inventory_id,
@@ -55,6 +59,7 @@ class InventoryTransformer extends TransformerAbstract
              'gvwr' => $inventory->gvwr,
              'height' => $inventory->height,
              'images' => $this->transformImages($inventory->images),
+             'files' => $this->transformFiles($inventory->files),
              'primary_image' => $inventory->images->count() > 0 ? $this->imageTransformer->transform($inventory->images->first()) : null,
              'is_archived' => $inventory->is_archived,
              'is_floorplan_bill' => $inventory->is_floorplan_bill,
@@ -89,7 +94,7 @@ class InventoryTransformer extends TransformerAbstract
              'times_viewed' => $inventory->times_viewed,
              'attribute' => $inventory->attributes
          ];
-    } 
+    }
 
     public function includeWebsite($inventory)
     {
@@ -111,5 +116,12 @@ class InventoryTransformer extends TransformerAbstract
             $ret[] = $this->imageTransformer->transform($img);
         }
         return $ret;
+    }
+
+    private function transformFiles(Collection $files): array
+    {
+        return $files->map(function (File $file) {
+            return $this->fileTransformer->transform($file);
+        })->toArray();
     }
 }
