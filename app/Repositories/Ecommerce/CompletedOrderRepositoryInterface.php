@@ -8,4 +8,6 @@ use App\Repositories\TransactionalRepository;
 interface CompletedOrderRepositoryInterface extends Repository, TransactionalRepository
 {
     public function getAll($params);
+
+    public function getGrandTotals(): array;
 }

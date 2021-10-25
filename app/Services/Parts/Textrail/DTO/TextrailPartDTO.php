@@ -46,6 +46,9 @@ class TextrailPartDTO implements DTO
     /** @var string */
     private $description;
 
+    /** @var int */
+    private $show_on_website;
+
     /** @var array */
     private $images = [];
 
@@ -67,6 +70,7 @@ class TextrailPartDTO implements DTO
           'price' => $this->price,
           'weight' => $this->weight ? $part->weight : '',
           'description' => $this->description,
+          'show_on_website' => $this->show_on_website,
           'images' => $this->images
         ];
     }

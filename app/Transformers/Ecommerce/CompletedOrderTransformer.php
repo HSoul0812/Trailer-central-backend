@@ -22,11 +22,18 @@ class CompletedOrderTransformer extends TransformerAbstract
 
     public function transform(CompletedOrder $completedOrder): array
     {
-        $partIds = collect($completedOrder->parts)->map(static function (array $part): int {
-            return $part['id'];
-        })->toArray();
+        $partCollection = [];
+        $totalQty = 0;
 
-        $partCollection = $this->textRailPartRepository->getAllByIds($partIds);
+        if (!empty($completedOrder->parts)) {
+            $partIds = collect($completedOrder->parts)->map(static function (array $part) use($totalQty) : int {
+                $totalQty += $part['qty'];
+
+                return $part['id'];
+            })->toArray();
+
+            $partCollection = $this->textRailPartRepository->getAllByIds($partIds);
+        }
 
         return [
             'id' => $completedOrder->id,
@@ -53,7 +60,10 @@ class CompletedOrderTransformer extends TransformerAbstract
             'billing_region' => $completedOrder->billing_region,
             'created_at' => $completedOrder->created_at,
             'status' => $completedOrder->status,
+            'invoice_id' => $completedOrder->invoice_id,
+            'invoice_url' => $completedOrder->invoice_url,
             'parts' => $partCollection,
+            'total_qty' => $totalQty,
         ];
     }
 }

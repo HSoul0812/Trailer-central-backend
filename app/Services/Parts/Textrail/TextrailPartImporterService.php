@@ -125,7 +125,7 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
              'part_id' => $newTextrailPart->id,
              'position' => $img['position']
            ];
-           $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['fileName']);
+           $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['imageData']);
          }
        }
      }
