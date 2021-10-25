@@ -21,11 +21,16 @@ class CompletedOrderTransformer extends TransformerAbstract
 
     public function transform(CompletedOrder $completedOrder)
     {
-        $parts = json_decode($completedOrder->parts, true);
+        $parts = $completedOrder->parts;
 
         $partCollection = [];
-        foreach ($parts as $part) {
-            $partCollection[] = $this->textRailPartRepository->getById($part['id']);
+
+        $totalQty = 0;
+        if (!empty($parts)) {
+            foreach ($parts as $part) {
+                $partCollection[] = $this->textRailPartRepository->getById($part['id']);
+                $totalQty += $part['qty'];
+            }
         }
 
         return [
@@ -49,7 +54,10 @@ class CompletedOrderTransformer extends TransformerAbstract
             'billing_region' => $completedOrder->billing_region,
             'created_at' => $completedOrder->created_at,
             'status' => $completedOrder->status,
+            'invoice_id' => $completedOrder->invoice_id,
+            'invoice_url' => $completedOrder->invoice_url,
             'parts' => $partCollection,
+            'total_qty' => $totalQty,
         ];
     }
 }
