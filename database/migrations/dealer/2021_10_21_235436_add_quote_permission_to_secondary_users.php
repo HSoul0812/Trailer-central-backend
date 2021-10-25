@@ -36,8 +36,8 @@ class AddQuotePermissionToSecondaryUsers extends Migration
      */
     public function down()
     {
-        Schema::table('dealer_users', function (Blueprint $table) {
-            //
-        });
+      DB::table('dealer_user_permissions')
+          ->where('feature', PermissionsInterface::QUOTES)
+          ->delete();
     }
 }
