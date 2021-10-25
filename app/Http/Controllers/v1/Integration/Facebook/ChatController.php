@@ -12,6 +12,7 @@ use App\Http\Requests\Integration\Facebook\DeleteChatRequest;
 use App\Repositories\Integration\Facebook\ChatRepositoryInterface;
 use App\Services\Integration\Facebook\ChatServiceInterface;
 use App\Transformers\Integration\Facebook\ChatTransformer;
+use App\Http\Requests\Integration\Facebook\AssignChatRequest;
 
 class ChatController extends RestfulControllerV2 {
     /**
@@ -129,6 +130,25 @@ class ChatController extends RestfulControllerV2 {
         $request = new DeleteChatRequest(['id' => $id]);
         if ($request->validate() && $this->service->delete($id)) {
             return $this->successResponse();
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Assign Sales Person to Facebook Chat
+     * 
+     * @param int $id
+     * @return type
+     */
+    public function assignSalespeople(int $id, Request $request)
+    {
+        // Handle Facebook Chat Request
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new AssignChatRequest($requestData);
+        if ($request->validate()) {
+            return $this->response->array($this->service->assignSalespeople($request->all()));
         }
         
         return $this->response->errorBadRequest();

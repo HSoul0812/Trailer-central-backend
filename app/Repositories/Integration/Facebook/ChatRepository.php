@@ -115,4 +115,16 @@ class ChatRepository implements ChatRepositoryInterface {
     protected function getSortOrders() {
         return $this->sortOrders;
     }
+
+    /**
+     * Assign Sales Person to Chat
+     * 
+     * @param int $id
+     * @param array $sales_person_ids
+     * @return array
+     */
+    public function assignSalespeople($id, $sales_person_ids) {
+        // Find Chat by ID then assign Sales Person
+        return Chat::findOrFail($id)->salesPersons()->sync($sales_person_ids);
+    }
 }
