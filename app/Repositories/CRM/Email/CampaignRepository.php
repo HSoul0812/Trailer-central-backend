@@ -127,7 +127,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
      */
     public function getSent(int $campaignId, int $leadId): ?CampaignSent {
         // Get Campaign Sent Entry
-        return CampaignSent::where('email_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
+        return CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
     }
 
     /**
@@ -142,6 +142,6 @@ class CampaignRepository implements CampaignRepositoryInterface {
         $sent = $this->getSent($campaignId, $leadId);
 
         // Successful?
-        return !empty($sent->email_campaigns_id);
+        return !empty($sent->drip_campaigns_id);
     }
 }
