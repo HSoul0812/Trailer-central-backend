@@ -43,7 +43,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
     public function sent(int $campaignId, int $leadId, ?string $messageId = null): CampaignSent {
         // Get Sent?
         $sent = $this->getSent($campaignId, $leadId);
-        if(!empty($sent->email_blasts_id)) {
+        if(!empty($sent->drip_campaigns_id)) {
             return $sent;
         }
 
